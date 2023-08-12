@@ -15,7 +15,6 @@ class CEnvCable : public CPointEntity
 public:
 	void Spawn( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	void ClearEffects( void );
 };
 
 LINK_ENTITY_TO_CLASS( env_cable, CEnvCable );
@@ -97,18 +96,6 @@ void CEnvCable::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 		pev->effects = 0;
 	}
 }
-
-void CEnvCable::ClearEffects( void )
-{
-	// delete ending point
-	CBaseEntity *pEnd = CBaseEntity::Instance( pev->enemy );
-	if( pEnd )
-	{
-		UTIL_Remove( pEnd );
-		pev->enemy = NULL;
-	}
-}
-
 
 //======================================================
 // affects cable with new sway values
