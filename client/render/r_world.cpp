@@ -2162,15 +2162,15 @@ void R_DrawLightForSurfList( plight_t *pl )
 			// diffusion - apply custom color to a specific texture
 			if( tr.materials[s->texinfo->texture->gl_texturenum].ApplyColor )
 			{
-				// hack
-				if( e->curstate.rendermode == kRenderTransAdd )
+				// hack     // dynlight doesn't affect additive brushes
+		/*		if( e->curstate.rendermode == kRenderTransAdd )
 				{
 					if( e->curstate.rendercolor.r == 0 && e->curstate.rendercolor.g == 0 && e->curstate.rendercolor.b == 0 )
-						pglUniform4fARB( RI->currentshader->u_RenderColor, 1.0f, 1.0f, 1.0f, tr.blend );
+						pglUniform4fARB( RI->currentshader->u_RenderColor, tr.blend, tr.blend, tr.blend, 1.0f );
 					else
-						pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
+						pglUniform4fARB( RI->currentshader->u_RenderColor, tr.blend * e->curstate.rendercolor.r / 255.0f, tr.blend * e->curstate.rendercolor.g / 255.0f, tr.blend * e->curstate.rendercolor.b / 255.0f, 1.0f );
 				}
-				else
+				else */
 					pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
 			}
 			else
@@ -2654,9 +2654,9 @@ void R_DrawBrushList( void )
 				if( e->curstate.rendermode == kRenderTransAdd )
 				{
 					if( e->curstate.rendercolor.r == 0 && e->curstate.rendercolor.g == 0 && e->curstate.rendercolor.b == 0 )
-						pglUniform4fARB( RI->currentshader->u_RenderColor, 1.0f, 1.0f, 1.0f, tr.blend );
+						pglUniform4fARB( RI->currentshader->u_RenderColor, tr.blend, tr.blend, tr.blend, 1.0f );
 					else
-						pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
+						pglUniform4fARB( RI->currentshader->u_RenderColor, tr.blend * (float)e->curstate.rendercolor.r / 255.0f, tr.blend *(float)e->curstate.rendercolor.g / 255.0f, tr.blend *(float)e->curstate.rendercolor.b / 255.0f, 1.0f );
 				}
 				else
 					pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
