@@ -173,9 +173,9 @@ void CEnvCableManager::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 		if( pCable->pev->iuser3 != -669 )
 			continue;
 
-		if( HasSpawnFlags( SF_CABLEMANAGER_USECABLEVALUE_ON ) && (m_iState == STATE_OFF) )
+		if( HasSpawnFlags( SF_CABLEMANAGER_USECABLEVALUE_ON ) && (m_iState == STATE_ON) )
 			pCable->pev->fuser3 = pCable->m_flGaitYaw;
-		else if( HasSpawnFlags( SF_CABLEMANAGER_USECABLEVALUE_OFF ) && (m_iState == STATE_ON) )
+		else if( HasSpawnFlags( SF_CABLEMANAGER_USECABLEVALUE_OFF ) && (m_iState == STATE_OFF) )
 			pCable->pev->fuser3 = pCable->m_flGaitYaw;
 		else
 			pCable->pev->fuser3 = NewValue;
