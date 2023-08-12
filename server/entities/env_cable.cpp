@@ -7,8 +7,6 @@
 // diffusion - cables
 // Thanks to Bacontsu for the cable rendering code!
 //==========================================================================
-//#define SF_CABLE_SWAY		BIT(0)
-
 // env_cable + env_cable_manager
 
 class CEnvCable : public CPointEntity
