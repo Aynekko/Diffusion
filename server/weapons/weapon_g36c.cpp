@@ -1,0 +1,355 @@
+/***
+*
+*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	
+*	This product contains software technology licensed from Id 
+*	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
+*	All Rights Reserved.
+*
+*   Use, distribution, and modification of this source code and/or resulting
+*   object code is restricted to non-commercial enhancements to products from
+*   Valve LLC.  All other use, distribution, or modification is prohibited
+*   without written permission from Valve LLC.
+*
+****/
+
+#include "extdll.h"
+#include "util.h"
+#include "cbase.h"
+#include "monsters.h"
+#include "weapons/weapons.h"
+#include "nodes.h"
+#include "player.h"
+#include "entities/soundent.h"
+#include "game/gamerules.h"
+
+#define G36C_MAX_ZOOM 45
+
+enum WeaponG36C_e
+{
+	IDLE = 0,
+	RELOAD,
+	DRAW,
+	SHOOT,
+};
+
+class CWeaponG36C : public CBasePlayerWeapon
+{
+	DECLARE_CLASS( CWeaponG36C, CBasePlayerWeapon );
+public:
+	void Spawn( void );
+	void Precache( void );
+	int iItemSlot( void ) { return 3; }
+	int GetItemInfo(ItemInfo *p);
+	int AddToPlayer( CBasePlayer *pPlayer );
+
+	void PrimaryAttack( void );
+	void SecondaryAttack( void );
+	BOOL Deploy( void );
+	void Holster( void );
+	void Reload( void );
+	void WeaponIdle( void );
+	float m_flNextAnimTime;
+
+	float m_iShotsFired;
+	bool m_bDelayFire;
+
+	int m_iShell;
+
+	void ResetZoom( void );
+	int m_fInZoom;
+	int m_fZoomInUse;
+
+	DECLARE_DATADESC();
+};
+
+LINK_ENTITY_TO_CLASS( weapon_g36c, CWeaponG36C );
+
+BEGIN_DATADESC( CWeaponG36C )
+	DEFINE_FIELD( m_fInZoom, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fZoomInUse, FIELD_BOOLEAN ),
+END_DATADESC()
+
+void CWeaponG36C::Spawn( void )
+{
+	Precache( );
+	SET_MODEL(ENT(pev), "models/w_g36c.mdl");
+	m_iId = WEAPON_G36C;
+
+	m_iDefaultAmmo = MP5_DEFAULT_GIVE; // two rounds
+
+	FallInit();// get ready to fall down.
+}
+
+void CWeaponG36C::Precache( void )
+{
+	PRECACHE_MODEL("models/v_g36c.mdl");
+	PRECACHE_MODEL("models/w_g36c.mdl");
+	PRECACHE_MODEL("models/p_g36c.mdl");
+
+	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shellTE_MODEL
+
+	PRECACHE_MODEL("models/w_9mmARclip.mdl");
+	PRECACHE_SOUND("items/9mmclip1.wav");              
+
+	PRECACHE_SOUND("weapons/g36c_cliprelease.wav");
+	PRECACHE_SOUND("weapons/g36c_clipinsert.wav");
+
+	PRECACHE_SOUND ("weapons/g36c_shoot.wav");
+
+	PRECACHE_SOUND ("weapons/357_cock1.wav");
+
+	PRECACHE_MODEL("sprites/muzzleflash1.spr");
+}
+
+int CWeaponG36C::GetItemInfo(ItemInfo *p)
+{
+	p->pszName = STRING(pev->classname);
+	p->pszAmmo1 = "g36cammo";
+	p->iMaxAmmo1 = _9MM_MAX_CARRY;
+	p->pszAmmo2 = NULL;
+	p->iMaxAmmo2 = -1;
+	p->iMaxClip = G36C_MAX_CLIP;
+	p->iSlot = 2;
+	p->iPosition = 6;
+	p->iFlags = 0;
+	p->iId = m_iId = WEAPON_G36C;
+	p->iWeight = MP5_WEIGHT;
+
+	return 1;
+}
+
+int CWeaponG36C::AddToPlayer( CBasePlayer *pPlayer )
+{
+	if ( CBasePlayerWeapon::AddToPlayer( pPlayer ) )
+	{
+		MESSAGE_BEGIN( MSG_ONE, gmsgWeapPickup, NULL, pPlayer->pev );
+			WRITE_BYTE( m_iId );
+		MESSAGE_END();
+		return TRUE;
+	}
+	return FALSE;
+}
+
+BOOL CWeaponG36C::Deploy( )
+{
+	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 0.25;
+	return DefaultDeploy( "models/v_g36c.mdl", "models/p_g36c.mdl", DRAW, "mp5" );
+}
+
+void CWeaponG36C::Holster( void )
+{
+	// cancel any zooming in progress
+	ResetZoom();
+
+	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
+
+	BaseClass::Holster();
+}
+
+void CWeaponG36C::ResetZoom( void )
+{
+	if( m_pPlayer->ZoomState > 0 )
+		UTIL_ScreenFade( m_pPlayer, g_vecZero, 0.5, 0, 255, 0x0000 );
+
+	m_fZoomInUse = 0;
+	m_fInZoom = 0;
+	m_pPlayer->ZoomState = 0;
+	m_pPlayer->m_flFOV = 0;
+
+	MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
+		WRITE_BYTE( m_pPlayer->ZoomState );
+		WRITE_BYTE( WEAPON_G36C );
+	MESSAGE_END();
+}
+
+void CWeaponG36C::PrimaryAttack()
+{
+	// don't fire underwater
+	if (m_pPlayer->pev->waterlevel == 3)
+	{
+		PlayEmptySound( );
+		m_flNextPrimaryAttack = gpGlobals->time + 0.15;
+		return;
+	}
+
+	if (m_iClip <= 0)
+	{
+		CLIENT_COMMAND(m_pPlayer->edict(), "-attack\n");
+		PlayEmptySound();
+		m_flNextPrimaryAttack = gpGlobals->time + 0.15;
+		return;
+	}
+
+	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
+
+	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
+
+	SendWeaponAnim( SHOOT );
+	m_flNextAnimTime = gpGlobals->time + 0.2;
+
+	// player "shoot" animation
+	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
+
+//	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/g36c_shoot.wav", 1, ATTN_NORM, 0, 95 + RANDOM_LONG(0,10));
+	PlayClientSound( m_pPlayer, WEAPON_G36C, 0, (m_iClip <= 12 ? m_iClip : 0) );
+
+	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
+
+	
+	Vector	vecShellVelocity = m_pPlayer->GetAbsVelocity() 
+							 + gpGlobals->v_right * RANDOM_FLOAT(50,70) 
+							 + gpGlobals->v_up * RANDOM_FLOAT(100,150) 
+							 + gpGlobals->v_forward * 25;
+
+	EjectBrass ( m_pPlayer->EyePosition()
+					+ gpGlobals->v_up * -12 
+					+ gpGlobals->v_forward * 20 
+					+ gpGlobals->v_right * 6, vecShellVelocity,
+					m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHELL); 
+	
+	Vector vecSrc = m_pPlayer->GetGunPosition( );
+	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
+
+	// diffusion - a bit of realism: precision changes at different walking speeds, + small shake :)
+	MakeWeaponShake( m_pPlayer, WEAPON_G36C, 0 );
+	
+	float Cone = m_pPlayer->pev->velocity.Length() * 0.0002;
+	
+	Cone = bound( 0.01, Cone, 0.06 );
+
+	if( Cone < 0.02 )
+	{
+		if( m_pPlayer->pev->flags & FL_DUCKING )
+			Cone = 0.01;
+		else
+			Cone = 0.02;
+	}
+
+	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, Vector(Cone,Cone,Cone), 8192, BULLET_PLAYER_MP5, 0 );
+	m_iClip--;
+
+	if( m_iClip <= 10 )
+		LowAmmoMsg( m_pPlayer );
+
+//	m_pPlayer->AchievementStats[ACH_BULLETSFIRED]++;
+	m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 1, 0 );
+
+	m_pPlayer->pev->punchangle.x += Cone * RANDOM_LONG(15,25);
+	m_pPlayer->pev->punchangle.y += -Cone * RANDOM_LONG(-15,25);
+
+	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+		// HEV suit - indicate out of ammo condition
+		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
+
+	m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+	if (m_flNextPrimaryAttack < gpGlobals->time)
+		m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+
+	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
+}
+
+void CWeaponG36C::SecondaryAttack( void )
+{
+	CLIENT_COMMAND( m_pPlayer->edict(), "-attack2\n" );
+
+	if( !IS_DEDICATED_SERVER() )
+	{
+		if( CVAR_GET_FLOAT( "default_fov" ) <= G36C_MAX_ZOOM )
+		{
+			ALERT( at_error, "weapon_g36c can't zoom, default_fov is too low!\n" );
+			return;
+		}
+	}
+
+	// do not switch zoom when player stay button is pressed
+	if( m_fZoomInUse )
+		return;
+
+	m_fZoomInUse = 1;
+
+	if( m_fInZoom )
+	{
+		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
+		m_fInZoom = 0;
+		m_pPlayer->ZoomState = 2; // zooming out
+		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
+			WRITE_BYTE( m_pPlayer->ZoomState );
+			WRITE_BYTE( WEAPON_G36C );
+		MESSAGE_END();
+		m_pPlayer->m_flFOV = 0;
+		m_pPlayer->ZoomState = 0; // zoomed out. reset the state
+		UTIL_ScreenFade( m_pPlayer, g_vecZero, 0.5, 0, 255, 0x0000 );
+	}
+	else
+	{
+		UTIL_ScreenFade( m_pPlayer, g_vecZero, 0.25, 0, 255, 0x0000 );
+		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
+		m_fInZoom = 1;
+		m_pPlayer->ZoomState = 1; // zooming in
+		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
+			WRITE_BYTE( m_pPlayer->ZoomState );
+			WRITE_BYTE( WEAPON_G36C );
+		MESSAGE_END();
+		m_pPlayer->m_flFOV = G36C_MAX_ZOOM;
+	}
+
+	m_flNextSecondaryAttack = gpGlobals->time + 0.2;
+	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
+}
+
+void CWeaponG36C::Reload( void )
+{
+	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
+
+	if( m_fInZoom )
+		ResetZoom();
+
+	DefaultReload( 30, RELOAD, 1.65 );
+}
+
+void CWeaponG36C::WeaponIdle( void )
+{
+	ResetEmptySound( );
+
+	m_fZoomInUse = 0;
+
+	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
+
+	if (m_flTimeWeaponIdle > gpGlobals->time)
+		return;
+
+	SendWeaponAnim( IDLE );
+
+	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );// how long till we do this again.
+}
+
+class CG36CAmmoClip : public CBasePlayerAmmo
+{
+	DECLARE_CLASS( CG36CAmmoClip, CBasePlayerAmmo );
+
+	void Spawn( void )
+	{ 
+		Precache( );
+		SET_MODEL(ENT(pev), "models/w_9mmARclip.mdl");
+		CBasePlayerAmmo::Spawn( );
+	}
+	void Precache( void )
+	{
+		PRECACHE_MODEL ("models/w_9mmARclip.mdl");
+		PRECACHE_SOUND("items/9mmclip1.wav");
+	}
+	BOOL AddAmmo( CBaseEntity *pOther ) 
+	{ 
+		int bResult = (pOther->GiveAmmo( AMMO_G36C_GIVE, "g36cammo", _9MM_MAX_CARRY) != -1);
+
+		if (bResult)
+		//	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
+			PlayPickupSound( pOther );
+
+		return bResult;
+	}
+};
+
+LINK_ENTITY_TO_CLASS( ammo_g36c, CG36CAmmoClip );

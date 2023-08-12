@@ -1,0 +1,522 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Template|Win32">
+      <Configuration>Template</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <SccProjectName>"$/GoldSrc/server", ELEBAAAA</SccProjectName>
+    <SccLocalPath>.</SccLocalPath>
+    <ProjectGuid>{98B17940-4298-4B12-BA7F-F6870DF5C042}</ProjectGuid>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <PlatformToolset>v142</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140_xp</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <PlatformToolset>v140_xp</PlatformToolset>
+    <UseOfMfc>false</UseOfMfc>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="$(VCTargetsPath)Microsoft.Cpp.UpgradeFromVC60.props" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <OutDir>.\..\temp\server\!debug\</OutDir>
+    <IntDir>.\..\temp\server\!debug\</IntDir>
+    <LinkIncremental>true</LinkIncremental>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <OutDir>.\..\temp\server\!release\</OutDir>
+    <IntDir>.\..\temp\server\!release\</IntDir>
+    <LinkIncremental>false</LinkIncremental>
+    <IgnoreImportLibrary>true</IgnoreImportLibrary>
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Template|Win32'">
+    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
+    <CodeAnalysisRules />
+    <CodeAnalysisRuleAssemblies />
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <Optimization>Disabled</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>Level3</WarningLevel>
+      <MinimalRebuild>true</MinimalRebuild>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\phys_shared;.\monsters;.\physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
+      <AssemblerListingLocation>.\..\temp\server\!debug\</AssemblerListingLocation>
+      <BrowseInformation>true</BrowseInformation>
+      <PrecompiledHeaderOutputFile>.\..\temp\server\!debug\server.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\..\temp\server\!debug\</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\temp\server\!debug\</ProgramDataBaseFileName>
+    </ClCompile>
+    <PostBuildEvent>
+      <Command>copy /Y "D:\!DIFFUSION 2020\source code\client-server-launcher\temp\server\!release\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server.dll"</Command>
+    </PostBuildEvent>
+    <Midl>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>.\..\temp\server\!debug\server.tlb</TypeLibraryName>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <TargetEnvironment>Win32</TargetEnvironment>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\..\temp\server\!debug\server.bsc</OutputFile>
+    </Bscmake>
+    <Link>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <LinkDLL>true</LinkDLL>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ModuleDefinitionFile>.\server.def</ModuleDefinitionFile>
+      <OutputFile>.\..\temp\server\!debug\server.dll</OutputFile>
+      <ImportLibrary>.\..\temp\server\!debug\server.lib</ImportLibrary>
+      <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <InlineFunctionExpansion>Default</InlineFunctionExpansion>
+      <StringPooling>
+      </StringPooling>
+      <FunctionLevelLinking>
+      </FunctionLevelLinking>
+      <Optimization>MaxSpeed</Optimization>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <WarningLevel>TurnOffAllWarnings</WarningLevel>
+      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\phys_shared;.\monsters;.\physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AssemblerListingLocation>.\..\temp\server\!release\</AssemblerListingLocation>
+      <PrecompiledHeaderOutputFile>.\..\temp\server\!release\server.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\..\temp\server\!release\</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\temp\server\!release\</ProgramDataBaseFileName>
+      <DebugInformationFormat />
+      <MinimalRebuild />
+      <BufferSecurityCheck>false</BufferSecurityCheck>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
+    </ClCompile>
+    <PostBuildEvent>
+      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\temp\server\!release\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server.dll"</Command>
+    </PostBuildEvent>
+    <Midl>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <TypeLibraryName>.\..\temp\server\!release\server.tlb</TypeLibraryName>
+      <MkTypLibCompatible>true</MkTypLibCompatible>
+      <TargetEnvironment>Win32</TargetEnvironment>
+    </Midl>
+    <ResourceCompile>
+      <Culture>0x0409</Culture>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
+    <Bscmake>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <OutputFile>.\..\temp\server\!release\server.bsc</OutputFile>
+    </Bscmake>
+    <Link>
+      <SuppressStartupBanner>true</SuppressStartupBanner>
+      <LinkDLL>true</LinkDLL>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ModuleDefinitionFile>.\server.def</ModuleDefinitionFile>
+      <OutputFile>.\..\temp\server\!release\server.dll</OutputFile>
+      <ImportLibrary>.\..\temp\server\!release\server.lib</ImportLibrary>
+      <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\common\virtualfs.cpp" />
+    <ClCompile Include="..\game_shared\bone_setup.cpp" />
+    <ClCompile Include="..\game_shared\common.cpp" />
+    <ClCompile Include="..\game_shared\ikcontext.cpp" />
+    <ClCompile Include="..\game_shared\mathlib.cpp" />
+    <ClCompile Include="..\game_shared\matrix.cpp" />
+    <ClCompile Include="..\game_shared\plane.cpp" />
+    <ClCompile Include="..\game_shared\playermove.cpp" />
+    <ClCompile Include="..\game_shared\stringlib.cpp" />
+    <ClCompile Include="..\game_shared\vector.cpp" />
+    <ClCompile Include="bot\bot.cpp" />
+    <ClCompile Include="bot\bot_combat.cpp" />
+    <ClCompile Include="entities\achievement_handler.cpp" />
+    <ClCompile Include="entities\ammocrate.cpp" />
+    <ClCompile Include="entities\ammoprinter.cpp" />
+    <ClCompile Include="entities\basetrigger.cpp" />
+    <ClCompile Include="entities\changelevel.cpp" />
+    <ClCompile Include="entities\conveyor_setspeed.cpp" />
+    <ClCompile Include="entities\env_angles.cpp" />
+    <ClCompile Include="entities\env_ball.cpp" />
+    <ClCompile Include="entities\env_bonus.cpp" />
+    <ClCompile Include="entities\env_cable.cpp" />
+    <ClCompile Include="entities\env_holdable.cpp" />
+    <ClCompile Include="entities\env_particle.cpp" />
+    <ClCompile Include="entities\env_rain.cpp" />
+    <ClCompile Include="entities\env_beverage.cpp" />
+    <ClCompile Include="entities\env_blood.cpp" />
+    <ClCompile Include="entities\env_bubbles.cpp" />
+    <ClCompile Include="entities\env_counter.cpp" />
+    <ClCompile Include="entities\env_customize.cpp" />
+    <ClCompile Include="entities\env_shockwave.cpp" />
+    <ClCompile Include="entities\func_boat.cpp" />
+    <ClCompile Include="entities\func_car.cpp" />
+    <ClCompile Include="entities\func_carblocker.cpp" />
+    <ClCompile Include="entities\func_effect_water.cpp" />
+    <ClCompile Include="entities\func_helicopter.cpp" />
+    <ClCompile Include="entities\func_smokevolume.cpp" />
+    <ClCompile Include="entities\loudness_restriction_relay.cpp" />
+    <ClCompile Include="entities\player_customize.cpp" />
+    <ClCompile Include="entities\env_dynlight.cpp" />
+    <ClCompile Include="entities\env_fade.cpp" />
+    <ClCompile Include="entities\env_funnel.cpp" />
+    <ClCompile Include="entities\env_glow.cpp" />
+    <ClCompile Include="entities\env_message.cpp" />
+    <ClCompile Include="entities\env_model.cpp" />
+    <ClCompile Include="entities\env_aurora.cpp" />
+    <ClCompile Include="entities\env_projector.cpp" />
+    <ClCompile Include="entities\env_render.cpp" />
+    <ClCompile Include="entities\env_shake.cpp" />
+    <ClCompile Include="entities\env_sky.cpp" />
+    <ClCompile Include="entities\env_spark.cpp" />
+    <ClCompile Include="entities\env_sprite.cpp" />
+    <ClCompile Include="entities\env_static.cpp" />
+    <ClCompile Include="entities\env_warpball.cpp" />
+    <ClCompile Include="entities\func_ball_catcher.cpp" />
+    <ClCompile Include="entities\func_clock.cpp" />
+    <ClCompile Include="entities\func_conveyor.cpp" />
+    <ClCompile Include="entities\func_friction.cpp" />
+    <ClCompile Include="entities\func_healthcharger.cpp" />
+    <ClCompile Include="entities\func_illusionary.cpp" />
+    <ClCompile Include="entities\func_ladder.cpp" />
+    <ClCompile Include="entities\func_light.cpp" />
+    <ClCompile Include="entities\func_monsterclip.cpp" />
+    <ClCompile Include="entities\func_pendulum.cpp" />
+    <ClCompile Include="entities\func_pushable.cpp" />
+    <ClCompile Include="entities\func_rotating.cpp" />
+    <ClCompile Include="entities\func_rotating_client.cpp" />
+    <ClCompile Include="entities\func_screenmovie.cpp" />
+    <ClCompile Include="entities\func_transporter.cpp" />
+    <ClCompile Include="entities\func_wall.cpp" />
+    <ClCompile Include="entities\generator.cpp" />
+    <ClCompile Include="entities\hud_sprite.cpp" />
+    <ClCompile Include="entities\hud_sprite_tutor.cpp" />
+    <ClCompile Include="entities\info_intermission.cpp" />
+    <ClCompile Include="entities\info_note_sprite.cpp" />
+    <ClCompile Include="entities\info_shader_params.cpp" />
+    <ClCompile Include="entities\info_target.cpp" />
+    <ClCompile Include="entities\player_counter.cpp" />
+    <ClCompile Include="entities\item_airtank.cpp" />
+    <ClCompile Include="entities\func_button.cpp" />
+    <ClCompile Include="cbase.cpp" />
+    <ClCompile Include="entities\item_sodacan.cpp" />
+    <ClCompile Include="entities\monster_flashlight.cpp" />
+    <ClCompile Include="entities\player_keycatcher.cpp" />
+    <ClCompile Include="entities\player_loadsaved.cpp" />
+    <ClCompile Include="entities\player_weaponstrip.cpp" />
+    <ClCompile Include="entities\shooters.cpp" />
+    <ClCompile Include="entities\test_effect.cpp" />
+    <ClCompile Include="entities\trains.cpp" />
+    <ClCompile Include="entities\trigger_codeinput.cpp" />
+    <ClCompile Include="game\client.cpp" />
+    <ClCompile Include="game\combat.cpp" />
+    <ClCompile Include="dll_int.cpp" />
+    <ClCompile Include="entities\func_door.cpp" />
+    <ClCompile Include="entities\beams.cpp" />
+    <ClCompile Include="explode.cpp" />
+    <ClCompile Include="entities\func_breakable.cpp" />
+    <ClCompile Include="entities\func_monitor.cpp" />
+    <ClCompile Include="entities\func_tank.cpp" />
+    <ClCompile Include="game\game.cpp" />
+    <ClCompile Include="game\gamerules.cpp" />
+    <ClCompile Include="monsters\entities\monster_hevsuit_dead.cpp" />
+    <ClCompile Include="weapons\ggrenade.cpp" />
+    <ClCompile Include="game\globals.cpp" />
+    <ClCompile Include="entities\item_flare.cpp" />
+    <ClCompile Include="entities\item_healthkit.cpp" />
+    <ClCompile Include="entities\multikiller.cpp" />
+    <ClCompile Include="entities\multi_manager.cpp" />
+    <ClCompile Include="entities\multi_switcher.cpp" />
+    <ClCompile Include="entities\multi_watcher.cpp" />
+    <ClCompile Include="entities\objective.cpp" />
+    <ClCompile Include="entities\prop_explosive_barrel.cpp" />
+    <ClCompile Include="entities\pushablemaker.cpp" />
+    <ClCompile Include="entities\train_setspeed.cpp" />
+    <ClCompile Include="entities\trigger_auto.cpp" />
+    <ClCompile Include="entities\trigger_autosave.cpp" />
+    <ClCompile Include="entities\trigger_bounce.cpp" />
+    <ClCompile Include="entities\trigger_camera.cpp" />
+    <ClCompile Include="entities\trigger_cdaudio.cpp" />
+    <ClCompile Include="entities\trigger_changeparent.cpp" />
+    <ClCompile Include="entities\trigger_changetarget.cpp" />
+    <ClCompile Include="entities\trigger_command.cpp" />
+    <ClCompile Include="entities\trigger_counter.cpp" />
+    <ClCompile Include="entities\trigger_dsp_zone.cpp" />
+    <ClCompile Include="entities\trigger_endsection.cpp" />
+    <ClCompile Include="entities\trigger_flashlight.cpp" />
+    <ClCompile Include="entities\trigger_fog.cpp" />
+    <ClCompile Include="entities\trigger_gravity.cpp" />
+    <ClCompile Include="entities\trigger_gravity_field.cpp" />
+    <ClCompile Include="entities\trigger_health.cpp" />
+    <ClCompile Include="entities\trigger_hurt.cpp" />
+    <ClCompile Include="entities\trigger_impulse.cpp" />
+    <ClCompile Include="entities\trigger_inout.cpp" />
+    <ClCompile Include="entities\trigger_monsterjump.cpp" />
+    <ClCompile Include="entities\trigger_multiple.cpp" />
+    <ClCompile Include="entities\trigger_onsight.cpp" />
+    <ClCompile Include="entities\trigger_playerfreeze.cpp" />
+    <ClCompile Include="entities\trigger_push.cpp" />
+    <ClCompile Include="entities\trigger_randomizer.cpp" />
+    <ClCompile Include="entities\trigger_relay.cpp" />
+    <ClCompile Include="entities\trigger_startpatrol.cpp" />
+    <ClCompile Include="entities\trigger_teleport.cpp" />
+    <ClCompile Include="entities\trigger_teleport_point.cpp" />
+    <ClCompile Include="weapons\weapon_g36c.cpp" />
+    <ClCompile Include="weapons\weapon_hornetgun.cpp" />
+    <ClCompile Include="entities\func_recharge.cpp" />
+    <ClCompile Include="entities\ents_cyclers.cpp" />
+    <ClCompile Include="entities\ents_items.cpp" />
+    <ClCompile Include="lights.cpp" />
+    <ClCompile Include="game\mapents.cpp" />
+    <ClCompile Include="entities\ents_game.cpp" />
+    <ClCompile Include="monsters\entities\monster_flyer_flock.cpp" />
+    <ClCompile Include="monsters\entities\monster_alien_grunt.cpp" />
+    <ClCompile Include="monsters\animating.cpp" />
+    <ClCompile Include="monsters\animation.cpp" />
+    <ClCompile Include="monsters\entities\monster_apache.cpp" />
+    <ClCompile Include="monsters\entities\monster_barnacle.cpp" />
+    <ClCompile Include="monsters\entities\monster_barney.cpp" />
+    <ClCompile Include="monsters\entities\monster_bigmomma.cpp" />
+    <ClCompile Include="monsters\entities\monster_bloater.cpp" />
+    <ClCompile Include="monsters\entities\monster_bullsquid.cpp" />
+    <ClCompile Include="monsters\entities\monster_alien_controller.cpp" />
+    <ClCompile Include="game\defaultai.cpp" />
+    <ClCompile Include="monsters\flyingmonster.cpp" />
+    <ClCompile Include="monsters\entities\monster_gargantua.cpp" />
+    <ClCompile Include="monsters\genericmonster.cpp" />
+    <ClCompile Include="monsters\entities\monster_gman.cpp" />
+    <ClCompile Include="monsters\entities\monster_human_assassin.cpp" />
+    <ClCompile Include="monsters\entities\monster_headcrab.cpp" />
+    <ClCompile Include="monsters\entities\monster_human_grunt.cpp" />
+    <ClCompile Include="monsters\entities\hornet.cpp" />
+    <ClCompile Include="monsters\entities\monster_houndeye.cpp" />
+    <ClCompile Include="monsters\h_ai.cpp" />
+    <ClCompile Include="monsters\entities\monster_ichthyosaur.cpp" />
+    <ClCompile Include="monsters\entities\monster_vortigaunt.cpp" />
+    <ClCompile Include="monsters\entities\monster_leech.cpp" />
+    <ClCompile Include="monsters\monstermaker.cpp" />
+    <ClCompile Include="monsters\monsters.cpp" />
+    <ClCompile Include="monsters\monsterstate.cpp" />
+    <ClCompile Include="monsters\entities\monster_nihilanth.cpp" />
+    <ClCompile Include="monsters\nodes.cpp" />
+    <ClCompile Include="monsters\entities\monster_osprey.cpp" />
+    <ClCompile Include="monsters\playermonster.cpp" />
+    <ClCompile Include="monsters\entities\monster_rat.cpp" />
+    <ClCompile Include="monsters\entities\monster_cockroach.cpp" />
+    <ClCompile Include="game\schedule.cpp" />
+    <ClCompile Include="monsters\entities\monster_scientist.cpp" />
+    <ClCompile Include="game\scripted.cpp" />
+    <ClCompile Include="entities\shock_beam.cpp" />
+    <ClCompile Include="entities\soundent.cpp" />
+    <ClCompile Include="entities\sporegrenade.cpp" />
+    <ClCompile Include="monsters\spritemonster.cpp" />
+    <ClCompile Include="monsters\squadmonster.cpp" />
+    <ClCompile Include="monsters\entities\monster_shocktrooper.cpp" />
+    <ClCompile Include="monsters\talkmonster.cpp" />
+    <ClCompile Include="monsters\tempmonster.cpp" />
+    <ClCompile Include="monsters\entities\monster_tentacle.cpp" />
+    <ClCompile Include="monsters\turret.cpp" />
+    <ClCompile Include="entities\ents_xen_flora.cpp" />
+    <ClCompile Include="monsters\entities\monster_zombie.cpp" />
+    <ClCompile Include="entities\mortar.cpp" />
+    <ClCompile Include="game\rules_multiplayer.cpp" />
+    <ClCompile Include="physics\novodex.cpp" />
+    <ClCompile Include="game\observer.cpp" />
+    <ClCompile Include="entities\path_track.cpp" />
+    <ClCompile Include="entities\func_physbox.cpp" />
+    <ClCompile Include="physics\physic.cpp" />
+    <ClCompile Include="physics\meshdesc.cpp" />
+    <ClCompile Include="physics\NxUserStream.cpp" />
+    <ClCompile Include="physics\tracemesh.cpp" />
+    <ClCompile Include="game\baseplayer.cpp" />
+    <ClCompile Include="entities\env_electrified_wire.cpp" />
+    <ClCompile Include="entities\env_rope.cpp" />
+    <ClCompile Include="weapons\weapon_rpg.cpp" />
+    <ClCompile Include="weapons\weapon_satchel.cpp" />
+    <ClCompile Include="game\saverestore.cpp" />
+    <ClCompile Include="game\rules_singleplayer.cpp" />
+    <ClCompile Include="game\skill.cpp" />
+    <ClCompile Include="sound.cpp" />
+    <ClCompile Include="game\spectator.cpp" />
+    <ClCompile Include="monsters\entities\monster_snark.cpp" />
+    <ClCompile Include="game\stats.cpp" />
+    <ClCompile Include="strings.cpp" />
+    <ClCompile Include="subs.cpp" />
+    <ClCompile Include="game\rules_teamplay.cpp" />
+    <ClCompile Include="weapons\tripmine.cpp" />
+    <ClCompile Include="util.cpp" />
+    <ClCompile Include="weapons\weapons.cpp" />
+    <ClCompile Include="weapons\weapon_ar2.cpp" />
+    <ClCompile Include="weapons\weapon_assaultrifle.cpp" />
+    <ClCompile Include="weapons\weapon_crossbow.cpp" />
+    <ClCompile Include="weapons\weapon_deagle.cpp" />
+    <ClCompile Include="weapons\weapon_drone.cpp" />
+    <ClCompile Include="weapons\weapon_egon.cpp" />
+    <ClCompile Include="weapons\weapon_fiveseven.cpp" />
+    <ClCompile Include="weapons\weapon_gausniper.cpp" />
+    <ClCompile Include="weapons\weapon_handgrenade.cpp" />
+    <ClCompile Include="weapons\weapon_hkmp5.cpp" />
+    <ClCompile Include="weapons\weapon_knife.cpp" />
+    <ClCompile Include="weapons\weapon_pistol.cpp" />
+    <ClCompile Include="weapons\weapon_sentry.cpp" />
+    <ClCompile Include="weapons\weapon_shotgun.cpp" />
+    <ClCompile Include="weapons\weapon_shotgun_xm.cpp" />
+    <ClCompile Include="weapons\weapon_snark.cpp" />
+    <ClCompile Include="weapons\weapon_sniper.cpp" />
+    <ClCompile Include="world.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\engine\alert.h" />
+    <ClInclude Include="..\engine\anorms.h" />
+    <ClInclude Include="..\engine\cdll_int.h" />
+    <ClInclude Include="..\engine\custom.h" />
+    <ClInclude Include="..\engine\customentity.h" />
+    <ClInclude Include="..\engine\edict.h" />
+    <ClInclude Include="..\engine\eiface.h" />
+    <ClInclude Include="..\engine\keydefs.h" />
+    <ClInclude Include="..\engine\menu_int.h" />
+    <ClInclude Include="..\engine\physint.h" />
+    <ClInclude Include="..\engine\progdefs.h" />
+    <ClInclude Include="..\engine\shake.h" />
+    <ClInclude Include="..\engine\sprite.h" />
+    <ClInclude Include="..\engine\warpsin.h" />
+    <ClInclude Include="..\game_shared\achievementdata.h" />
+    <ClInclude Include="..\game_shared\dmg_types.h" />
+    <ClInclude Include="..\game_shared\matrix.h" />
+    <ClInclude Include="..\game_shared\plane.h" />
+    <ClInclude Include="..\game_shared\randomrange.h" />
+    <ClInclude Include="..\game_shared\stringlib.h" />
+    <ClInclude Include="..\game_shared\utlarray.h" />
+    <ClInclude Include="..\game_shared\utllinkedlist.h" />
+    <ClInclude Include="..\game_shared\utlmemory.h" />
+    <ClInclude Include="areanode.h" />
+    <ClInclude Include="bot\bot.h" />
+    <ClInclude Include="cbase.h" />
+    <ClInclude Include="clipfile.h" />
+    <ClInclude Include="game\client.h" />
+    <ClInclude Include="decals.h" />
+    <ClInclude Include="doors.h" />
+    <ClInclude Include="effects.h" />
+    <ClInclude Include="ehandle.h" />
+    <ClInclude Include="enginecallback.h" />
+    <ClInclude Include="explode.h" />
+    <ClInclude Include="extdll.h" />
+    <ClInclude Include="entities\func_break.h" />
+    <ClInclude Include="game\game.h" />
+    <ClInclude Include="game\gamerules.h" />
+    <ClInclude Include="physics\NxErrorStream.h" />
+    <ClInclude Include="player.h" />
+    <ClInclude Include="game\saverestore.h" />
+    <ClInclude Include="items.h" />
+    <ClInclude Include="monsters\activity.h" />
+    <ClInclude Include="monsters\activitymap.h" />
+    <ClInclude Include="monsters\animation.h" />
+    <ClInclude Include="monsters\basemonster.h" />
+    <ClInclude Include="game\defaultai.h" />
+    <ClInclude Include="monsters\flyingmonster.h" />
+    <ClInclude Include="monsters\gearbox_weapons.h" />
+    <ClInclude Include="monsters\headcrab.h" />
+    <ClInclude Include="monsters\hgrunt.h" />
+    <ClInclude Include="monsters\entities\hornet.h" />
+    <ClInclude Include="monsters\monsterevent.h" />
+    <ClInclude Include="monsters\monsters.h" />
+    <ClInclude Include="monsters\nodes.h" />
+    <ClInclude Include="game\schedule.h" />
+    <ClInclude Include="game\scripted.h" />
+    <ClInclude Include="game\scriptevent.h" />
+    <ClInclude Include="monsters\shock.h" />
+    <ClInclude Include="entities\soundent.h" />
+    <ClInclude Include="entities\sporegrenade.h" />
+    <ClInclude Include="monsters\squad.h" />
+    <ClInclude Include="monsters\squadmonster.h" />
+    <ClInclude Include="monsters\talkmonster.h" />
+    <ClInclude Include="movelist.h" />
+    <ClInclude Include="physics\novodex.h" />
+    <ClInclude Include="physics\physcallback.h" />
+    <ClInclude Include="physics\physic.h" />
+    <ClInclude Include="physics\collision.h" />
+    <ClInclude Include="physics\meshdesc.h" />
+    <ClInclude Include="physics\NxUserStream.h" />
+    <ClInclude Include="physics\tracemesh.h" />
+    <ClInclude Include="entities\CElectrifiedWire.h" />
+    <ClInclude Include="entities\CRope.h" />
+    <ClInclude Include="ropes\CRopeSample.h" />
+    <ClInclude Include="entities\CRopeSegment.h" />
+    <ClInclude Include="game\skill.h" />
+    <ClInclude Include="game\spectator.h" />
+    <ClInclude Include="strings.h" />
+    <ClInclude Include="game\teamplay_gamerules.h" />
+    <ClInclude Include="entities\trains.h" />
+    <ClInclude Include="entities\triggers.h" />
+    <ClInclude Include="util.h" />
+    <ClInclude Include="weapons\weapons.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="cpp.hint" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>
