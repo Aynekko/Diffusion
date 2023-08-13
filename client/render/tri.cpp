@@ -96,6 +96,9 @@ void R_DrawCable( cl_entity_t *e )
 
 	if( r_drawentities->value == 7 )
 		DBG_DrawBBox( absmin, absmax );
+
+	if( (RI->params & RP_SHADOWPASS) && (e->curstate.renderfx == kRenderFxNoShadows) )
+		return;
 	
 	Vector vdroppoint;
 	Vector vposition1;
