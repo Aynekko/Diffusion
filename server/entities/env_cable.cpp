@@ -5,7 +5,7 @@
 
 //==========================================================================
 // diffusion - cables
-// Thanks to Bacontsu for the cable rendering code!
+// Thanks to Bacontsu for the cable rendering code (original code by Overfloater)!
 //==========================================================================
 // env_cable + env_cable_manager
 
@@ -41,7 +41,7 @@ void CEnvCable::Spawn( void )
 
 	// fall depth
 	if( !pev->fuser1 )
-		pev->fuser1 = 10.0f;
+		pev->fuser1 = 50.0f;
 
 	// width
 	if( !pev->fuser2 )
@@ -69,11 +69,13 @@ void CEnvCable::Spawn( void )
 
 void CEnvCable::CalcBox( void )
 {
-	// FIXME this is not completely correct yet
 	// find points
 	Vector vmidpoint{ 0,0,0 };
 	Vector mins{ 0,0,0 };
 	Vector maxs = pev->vuser1 - pev->origin;
+
+	// for slightly expanding bbox due to cable slacking
+	float accounted_difference = fabs( pev->origin.z - pev->vuser1.z ) * 0.2f;
 
 	// normalize
 	for( int i = 0; i < 3; i++ )
@@ -85,12 +87,18 @@ void CEnvCable::CalcBox( void )
 		}
 
 	// after normalizing, then find drop point
-	Vector vdirection;
-	VectorSubtract( pev->vuser1, pev->origin, vdirection );
-	VectorMA( pev->origin, 0.5, vdirection, vmidpoint );
-	mins.z = (vmidpoint.z - pev->fuser1) - pev->origin.z;
+	Vector diff = pev->vuser1 - pev->origin;
+	vmidpoint = pev->origin + (diff * 0.5f);
+	float lowest = (vmidpoint.z - (pev->fuser1 / 2.0f)) - pev->origin.z - accounted_difference;
 
-	UTIL_SetSize( pev, mins, maxs );
+	// check if mins is already lower than this
+	if( mins.z > lowest )
+		mins.z = lowest;
+
+	pev->mins = mins;
+	pev->maxs = maxs;
+
+	UTIL_SetSize( pev, pev->mins, pev->maxs );
 
 	SetAbsOrigin( pev->origin );
 }
