@@ -159,6 +159,7 @@ void R_DrawCable( cl_entity_t *e )
 	}
 	else
 	{
+		pglDisable( GL_BLEND );
 		pglEnable( GL_DEPTH_TEST );
 		GL_DepthMask( GL_TRUE );
 	}
