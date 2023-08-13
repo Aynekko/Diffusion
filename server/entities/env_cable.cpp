@@ -15,6 +15,8 @@ class CEnvCable : public CPointEntity
 public:
 	void Spawn( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void CalcBox( void );
+	void CalcBoxThink( void );
 };
 
 LINK_ENTITY_TO_CLASS( env_cable, CEnvCable );
@@ -55,6 +57,18 @@ void CEnvCable::Spawn( void )
 	if( !pev->rendercolor || (pev->rendercolor.x == 0.0f && pev->rendercolor.y == 0.0f && pev->rendercolor.z == 0.0f) )
 		pev->rendercolor = Vector( 1,1,1 ); // it becomes white if 0, Xash does this
 
+	CalcBox();
+
+	// this cable is attached to some moving object so we always need to recalculate its box
+	if( m_hParent )
+	{
+		SetThink( &CEnvCable::CalcBoxThink );
+		SetNextThink( RANDOM_FLOAT( 1.0f, 1.2f ) );
+	}
+}
+
+void CEnvCable::CalcBox( void )
+{
 	// FIXME this is not completely correct yet
 	// find points
 	Vector vmidpoint{ 0,0,0 };
@@ -75,8 +89,22 @@ void CEnvCable::Spawn( void )
 	VectorSubtract( pev->vuser1, pev->origin, vdirection );
 	VectorMA( pev->origin, 0.5, vdirection, vmidpoint );
 	mins.z = (vmidpoint.z - pev->fuser1) - pev->origin.z;
-		
+
 	UTIL_SetSize( pev, mins, maxs );
+
+	SetAbsOrigin( pev->origin );
+}
+
+void CEnvCable::CalcBoxThink( void )
+{
+	SetNextThink( 1.0f );
+
+	if( pev->origin == pev->oldorigin )
+		return;
+
+	CalcBox();
+
+	SetNextThink( 0.1f ); // think fast!
 }
 
 void CEnvCable::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
