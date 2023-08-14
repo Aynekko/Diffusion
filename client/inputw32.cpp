@@ -218,7 +218,7 @@ void IN_MouseMove( float frametime, usercmd_t *cmd )
 
 	// jjb - this disables normal mouse control if the user is trying to 
 	// move the camera, or if the mouse cursor is visible or if we're in intermission
-	if( !gHUD.m_iIntermission )
+	if( !gHUD.m_iIntermission && gHUD.CanMove )
 	{
 		GetCursorPos( &current_pos );
 		

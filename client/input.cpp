@@ -662,7 +662,7 @@ int CL_ButtonBits( int bResetState )
 		bits |= IN_ATTACK;
 	}
 	
-	if( (in_duck.state & (BUTTON_DOWN|IMPULSE_DOWN)) || g_bDuckToggled )
+	if( gHUD.CanMove && ((in_duck.state & (BUTTON_DOWN|IMPULSE_DOWN)) || g_bDuckToggled) )
 	{
 		bits |= IN_DUCK;
 	}
