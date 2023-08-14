@@ -21,18 +21,20 @@ GNU General Public License for more details.
 extern cl_enginefunc_t gEngfuncs;
 extern render_api_t gRenderfuncs;
 
-#define GET_CLIENT_TIME	(*gEngfuncs.GetClientTime)
+#define GET_CLIENT_TIME		(*gEngfuncs.GetClientTime)
 #define GET_CLIENT_OLDTIME	(*gEngfuncs.pfnGetClientOldTime)
-#define CVAR_REGISTER	(*gEngfuncs.pfnRegisterVariable)
-#define CVAR_GET_FLOAT	(*gEngfuncs.pfnGetCvarFloat)
-#define CVAR_GET_STRING	(*gEngfuncs.pfnGetCvarString)
-#define CVAR_SET_FLOAT	(*gEngfuncs.Cvar_SetValue)
+#define CVAR_REGISTER		(*gEngfuncs.pfnRegisterVariable)
+#define CVAR_GET_FLOAT		(*gEngfuncs.pfnGetCvarFloat)
+#define CVAR_GET_STRING		(*gEngfuncs.pfnGetCvarString)
+#define CVAR_SET_FLOAT		(*gEngfuncs.Cvar_SetValue)
 //#define CVAR_SET_STRING	(*gEngfuncs.pfnCVarSetString)		// not implemented
 #define CVAR_GET_POINTER	(*gEngfuncs.pfnGetCvarPointer)
-#define ADD_COMMAND		(*gEngfuncs.pfnAddCommand)
-#define CMD_ARGC		(*gEngfuncs.Cmd_Argc)
-#define CMD_ARGV		(*gEngfuncs.Cmd_Argv)
-#define Msg		(*gEngfuncs.Con_Printf)
+#define ADD_COMMAND			(*gEngfuncs.pfnAddCommand)
+#define CMD_ARGC			(*gEngfuncs.Cmd_Argc)
+#define CMD_ARGV			(*gEngfuncs.Cmd_Argv)
+#define Msg					(*gEngfuncs.Con_Printf)
+#define DrawString			(*gEngfuncs.pfnDrawString)
+#define DrawStringReverse	(*gEngfuncs.pfnDrawStringReverse)
 
 #define GET_LOCAL_PLAYER	(*gEngfuncs.GetLocalPlayer)
 #define GET_VIEWMODEL	(*gEngfuncs.GetViewModel)
