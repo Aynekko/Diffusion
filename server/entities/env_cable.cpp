@@ -17,9 +17,15 @@ public:
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void CalcBox( void );
 	void CalcBoxThink( void );
+
+	DECLARE_DATADESC();
 };
 
 LINK_ENTITY_TO_CLASS( env_cable, CEnvCable );
+
+BEGIN_DATADESC( CEnvCable )
+	DEFINE_FUNCTION( CalcBoxThink ),
+END_DATADESC()
 
 void CEnvCable::Spawn( void )
 {
