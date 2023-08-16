@@ -187,6 +187,7 @@
 #define CF_FLIPTEXTURE		BIT(11)	// mirror projection texture
 #define CF_NOGRASSLIGHTING	BIT(12) // do not light grass (diffusion - minor optimization for insignificant lights)
 #define CF_ONLYBRUSHSHADOWS BIT(13) // ignore studio models during shadow pass (minor optimization for particular cases)
+#define CF_ONLYFORCEDSHADOWS BIT(14) // only entities with kRenderFxForceShadow will cast shadows
 
 // entity flags
 #define EFLAG_SLERP			1	// do studio interpolation of this entity

@@ -285,6 +285,7 @@ public:
 #define SF_PROJECTOR_NOSHADOWS	BIT( 6 )	// ignore shadows for this light (perf)
 #define SF_PROJECTOR_FLIPTEXTURE	BIT( 7 )	// mirror image from right to left side
 #define SF_PROJECTOR_ONLYBRUSHSHADOWS BIT(8) // don't draw shadows from studiomodels
+#define SF_PROJECTOR_ONLYFORCEDSHADOWS BIT(9)
 
 class CSpiral : public CBaseEntity
 {

@@ -9,6 +9,7 @@
 #define SF_DYNLIGHT_NOSHADOWS			BIT(1)
 #define SF_DYNLIGHT_NOLIGHT_IN_SOLID	BIT(2)
 #define SF_DYNLIGHT_ONLYBRUSHSHADOWS	BIT(3)
+#define SF_DYNLIGHT_ONLYFORCEDSHADOWS	BIT(4)
 
 class CEnvDynamicLight : public CBaseDelay
 {
@@ -103,6 +104,9 @@ void CEnvDynamicLight::Spawn(void)
 
 	if( HasSpawnFlags(SF_DYNLIGHT_ONLYBRUSHSHADOWS) )
 		pev->iuser1 |= CF_ONLYBRUSHSHADOWS;
+
+	if( HasSpawnFlags( SF_DYNLIGHT_ONLYFORCEDSHADOWS ) )
+		pev->iuser1 |= CF_ONLYFORCEDSHADOWS;
 
 	// to prevent disappearing from PVS (scale is premultiplied by 0.125)
 	UTIL_SetSize(pev, Vector(-pev->scale, -pev->scale, -pev->scale), Vector(pev->scale, pev->scale, pev->scale));

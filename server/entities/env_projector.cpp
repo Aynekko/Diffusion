@@ -122,6 +122,9 @@ void CEnvProjector::Spawn(void)
 	if( HasSpawnFlags( SF_PROJECTOR_ONLYBRUSHSHADOWS ) )
 		pev->iuser1 |= CF_ONLYBRUSHSHADOWS;
 
+	if( HasSpawnFlags( SF_PROJECTOR_ONLYFORCEDSHADOWS ) )
+		pev->iuser1 |= CF_ONLYFORCEDSHADOWS;
+
 	// determine texture type by extension
 	if (!FStringNull(pev->message))
 	{

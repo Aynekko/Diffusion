@@ -409,6 +409,9 @@ void R_ShadowPassDrawSolidEntities( plight_t *pl )
 		if( (RI->currententity->curstate.renderfx == kRenderFxNoShadows) || (RI->currententity->curstate.renderfx == kRenderFxFullbrightNoShadows) )
 			continue;
 
+		if( (pl->flags & CF_ONLYFORCEDSHADOWS) && (RI->currententity->curstate.renderfx != kRenderFxForceShadow) )
+			continue;
+
 		// tell engine about current entity
 		SET_CURRENT_ENTITY( RI->currententity );
 
