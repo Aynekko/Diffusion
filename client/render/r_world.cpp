@@ -2879,6 +2879,9 @@ R_DrawBrushModel
 */
 void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 {
+	if( !(RI->params & RP_SHADOWPASS) && (e->curstate.renderfx == kRenderFxOnlyShadows) )
+		return;
+	
 	Vector		absmin, absmax;
 	msurface_t *psurf;
 	model_t *clmodel;

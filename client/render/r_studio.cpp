@@ -4613,6 +4613,9 @@ void CStudioModelRenderer::DrawStudioModelInternal( cl_entity_t *e )
 	if( (RI->params & RP_ENVVIEW) && !FBitSet( e->curstate.iuser1, CF_STATIC_ENTITY ) )
 		return;
 
+	if( !(RI->params & RP_SHADOWPASS) && (e->curstate.renderfx == kRenderFxOnlyShadows) )
+		return;
+
 	int flags = (STUDIO_RENDER | STUDIO_EVENTS);
 
 	if( e->player )

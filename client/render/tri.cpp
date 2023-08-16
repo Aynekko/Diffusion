@@ -105,6 +105,11 @@ void R_DrawCable( cl_entity_t *e )
 		if( RI->currentlight && (RI->currentlight->flags & CF_ONLYFORCEDSHADOWS) && (e->curstate.renderfx != kRenderFxForceShadow) )
 			return;
 	}
+	else
+	{
+		if( e->curstate.renderfx == kRenderFxOnlyShadows )
+			return;
+	}
 	
 	Vector vdroppoint;
 	Vector vposition1;

@@ -831,6 +831,7 @@ enum
 	kRenderFxTwoSide,			// diffusion - sprites only! force render sprite on its both sides (i.e. for oriented ones)
 	kRenderFxNoRefraction,		// diffusion - don't apply refraction (water only - it's always with refraction anyway)
 	kRenderFxParticle,			// diffusion - quakeparticle
+	kRenderFxOnlyShadows,		// diffusion - draw shadows only
 };
 
 typedef int		string_t;
