@@ -385,6 +385,9 @@ static void R_ShadowPassDrawWorld( plight_t *pl )
 	if( FBitSet( pl->flags, CF_NOWORLD_PROJECTION ))
 		return;	// no worldlight, no worldshadows
 
+	if( FBitSet( pl->flags, CF_ONLYFORCEDSHADOWS ) )
+		return;
+
 	R_DrawWorldShadowPass();
 }
 
