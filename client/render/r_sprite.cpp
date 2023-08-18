@@ -606,6 +606,11 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	
 	m_pCurrentEntity = IEngineStudio.GetCurrentEntity();
 	m_pRenderModel = m_pCurrentEntity->model;
+
+	// diffusion - don't draw dummy models
+	if( m_pCurrentEntity->model && strstr( m_pRenderModel->name, "null" ) )
+		return;
+
 	m_pSpriteHeader = (msprite_t *)Mod_Extradata( m_pRenderModel );
 
 	float scale = m_pCurrentEntity->curstate.scale;

@@ -4616,6 +4616,10 @@ void CStudioModelRenderer::DrawStudioModelInternal( cl_entity_t *e )
 	if( !(RI->params & RP_SHADOWPASS) && (e->curstate.renderfx == kRenderFxOnlyShadows) )
 		return;
 
+	// diffusion - don't draw dummy models
+	if( e->model && strstr( e->model->name, "null" ) )
+		return;
+
 	int flags = (STUDIO_RENDER | STUDIO_EVENTS);
 
 	if( e->player )

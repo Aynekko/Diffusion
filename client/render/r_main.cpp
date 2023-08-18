@@ -1350,10 +1350,6 @@ qboolean R_AddEntity( struct cl_entity_s *clent, int entityType )
 	if( !R_ModelOpaque( clent->curstate.rendermode, clent->curstate.renderamt ) && CL_FxBlend( clent ) <= 0 )
 		return true; // invisible
 
-	// diffusion - don't pass dummy models to render
-	if( strstr( clent->model->name, "null" ) )
-		return false;
-
 	if( entityType == ET_PLAYER && RP_LOCALCLIENT( clent ))
 	{
 		if( tr.local_client_added )
