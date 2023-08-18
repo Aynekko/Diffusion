@@ -126,7 +126,8 @@ void R_DrawCable( cl_entity_t *e )
 	// approach faster when shaking starts, but slower when coming to a halt
 	float ApproachSpeed = (e->curstate.fuser3 > tr.cableSwayIntensity[e->index]) ? g_fFrametime * (0.1f + 0.5f * fabs( tr.cableSwayIntensity[e->index] - e->curstate.fuser3 )) : (g_fFrametime * 0.1f);
 	tr.cableSwayIntensity[e->index] = CL_UTIL_Approach( TargetSway, tr.cableSwayIntensity[e->index], ApproachSpeed );
-	tr.cableSwayPhase[e->index] += g_fFrametime * tr.cableSwayIntensity[e->index];
+	if( tr.time != tr.oldtime ) // don't animate when paused
+		tr.cableSwayPhase[e->index] += g_fFrametime * tr.cableSwayIntensity[e->index];
 
 	float falldepth = e->curstate.fuser1;
 	if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
