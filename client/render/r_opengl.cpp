@@ -584,7 +584,7 @@ static void GL_InitExtensions( void )
 	GL_CheckExtension( "GL_ARB_multitexture", multitexturefuncs, "gl_arb_multitexture", R_ARB_MULTITEXTURE, true );
 
 	if( GL_Support( R_ARB_MULTITEXTURE ))
-		pglGetIntegerv( GL_MAX_TEXTURE_UNITS_ARB, &glConfig.max_texture_units );
+		pglGetIntegerv( GL_MAX_TEXTURE_UNITS, &glConfig.max_texture_units );
 
 	if( glConfig.max_texture_units == 1 )
 		GL_SetExtension( R_ARB_MULTITEXTURE, false );

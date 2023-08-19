@@ -22,25 +22,28 @@ uniform sampler2D	u_DeluxeMap;
 vec3 deluxemap2D( sampler2D tex, const vec2 uv )
 {
 	vec3 deluxmap = texture2D( tex, uv ).xyz;
-	return (( deluxmap - 0.5 ) * 2.0 );
+	return ((deluxmap - 0.5) * 2.0);
 }
 
 void ApplyLightStyle( const vec3 lminfo, const vec3 N, const vec3 V, const vec3 glossmap, float GlossSmoothness, float GlossScale, inout vec3 light, inout vec3 gloss )
 {
 	vec4 lmsrc = texture2D( u_LightMap, lminfo.xy );
 	vec3 lightmap = lmsrc.rgb;
-
+#if defined( BMODEL_WATER )
+	vec3 L = vec3( 1.0 );
+#else
 	vec3 deluxmap = deluxemap2D( u_DeluxeMap, lminfo.xy );
 	vec3 L = normalize( deluxmap );
+#endif
 
 #if defined( BMODEL_BUMP )
-        float NdotB = ComputeStaticBump( L, N );
+	float NdotB = ComputeStaticBump( L, N );
 	lightmap *= NdotB;
 #endif
-	light += ( lightmap ) * lminfo.z;
+	light += (lightmap)*lminfo.z;
 
 #if defined( BMODEL_SPECULAR )
-	float NdotLGloss = saturate( dot( N, L ));
+	float NdotLGloss = saturate( dot( N, L ) );
 	vec3 specular = ComputeSpecular( N, V, L, glossmap, GlossSmoothness, GlossScale ) * lightmap * lminfo.z * lmsrc.a * NdotLGloss;
 	gloss += specular;
 #endif

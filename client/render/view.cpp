@@ -90,7 +90,6 @@ cvar_t	*r_drawentities;
 cvar_t	*r_drawworld;
 cvar_t	*r_drawsprites;
 cvar_t *r_drawmodels;
-cvar_t	*r_detailtextures;
 cvar_t	*r_recursion_depth;
 cvar_t	*r_lighting_modulate;
 cvar_t	*r_lighting_extended;
@@ -389,7 +388,6 @@ void V_Init( void )
 
 	r_fullbright	= CVAR_GET_POINTER( "r_fullbright" );
 	r_drawentities	= CVAR_GET_POINTER( "r_drawentities" );
-	r_detailtextures	= CVAR_GET_POINTER( "r_detailtextures" );
 	r_lighting_modulate	= CVAR_GET_POINTER( "r_lighting_modulate" );
 	r_lightstyle_lerping= CVAR_GET_POINTER( "cl_lightstyle_lerping" );
 	r_lighting_extended	= CVAR_GET_POINTER( "r_lighting_extended" );

@@ -492,12 +492,6 @@ void R_CheckChanges( void )
 		settings_changed = true;
 	}
 
-	if( FBitSet( r_detailtextures->flags, FCVAR_CHANGED ))
-	{
-		ClearBits( r_detailtextures->flags, FCVAR_CHANGED );
-		settings_changed = true;
-	}
-
 	if( FBitSet( r_fullbright->flags, FCVAR_CHANGED ))
 	{
 		ClearBits( r_fullbright->flags, FCVAR_CHANGED );

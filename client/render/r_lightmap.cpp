@@ -128,6 +128,7 @@ void GL_BeginBuildingLightmaps( void )
 
 	memset( tr.lightmaps, 0, sizeof( tr.lightmaps ));
 	tr.current_lightmap_texture = 0;
+	LM_InitBlock();
 }
 
 /*
@@ -484,9 +485,8 @@ void R_UpdateSurfaceParams( msurface_t *surf )
 	{
 		if( land->terrain->layermap.gl_diffuse_id )
 			esrf->gl_texturenum = land->terrain->layermap.gl_diffuse_id;
-		else if( land->terrain->indexmap.gl_diffuse_id && CVAR_TO_BOOL( r_detailtextures ))
-			esrf->gl_texturenum = tr.grayTexture;
-		else esrf->gl_texturenum = tex->gl_texturenum;
+		else
+			esrf->gl_texturenum = tex->gl_texturenum;
 	}
 	else
 	{

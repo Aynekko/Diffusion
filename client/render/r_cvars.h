@@ -46,7 +46,6 @@ extern cvar_t	*r_allow_3dsky;
 extern cvar_t	*gl_allow_portals;
 extern cvar_t	*gl_allow_screens;
 extern cvar_t	*r_recursion_depth;
-extern cvar_t	*r_detailtextures;
 extern cvar_t	*r_lighting_modulate;
 extern cvar_t	*r_lightstyle_lerping;
 extern cvar_t	*r_lighting_extended;

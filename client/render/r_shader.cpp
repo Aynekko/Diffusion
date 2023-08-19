@@ -692,7 +692,7 @@ bool GL_FindShaderDirective( glsl_program_t *shader, const char *directive )
 		return true;
 	return false;
 }
-
+/*
 static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 {
 	ASSERT( shader != NULL );
@@ -754,26 +754,123 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
 	pglUniform1iARB( shader->u_DetailMap, GL_TEXTURE1 );
 	pglUniform1iARB( shader->u_LightMap, GL_TEXTURE2 );
-	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE3 );
+	pglUniform1iARB( shader->u_DeluxeMap, GL_TEXTURE3 );
+	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE4 );
 
 	if( GL_FindShaderDirective( shader, "BMODEL_MULTI_LAYERS" ))
-		pglUniform1iARB( shader->u_LayerMap, GL_TEXTURE4 );
+		pglUniform1iARB( shader->u_LayerMap, GL_TEXTURE5 );
 
-	pglUniform1iARB( shader->u_GlowMap, GL_TEXTURE5 );
 	pglUniform1iARB( shader->u_NormalMap, GL_TEXTURE6 );
-	pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE7 );
-	pglUniform1iARB( shader->u_DeluxeMap, GL_TEXTURE8 );
+
+	if( GL_FindShaderDirective( shader, "BMODEL_HAS_LUMA" ) )
+		pglUniform1iARB( shader->u_GlowMap, GL_TEXTURE7 );
+	else if( GL_FindShaderDirective( shader, "BMODEL_INTERIOR" ) )
+		pglUniform1iARB( shader->u_InteriorMap, GL_TEXTURE7 );
+	else if( GL_FindShaderDirective( shader, "BMODEL_WATER_PLANAR" ) )
+	{
+		pglUniform1iARB( shader->u_WaterTex, GL_TEXTURE8 );
+		pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE7 );
+	}
+	else
+		pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE7 );
 
 	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) )  // diffusioncubemaps
 	{
-		pglUniform1iARB( shader->u_EnvMap0, GL_TEXTURE9 );
-		pglUniform1iARB( shader->u_EnvMap1, GL_TEXTURE10 );
+		pglUniform1iARB( shader->u_EnvMap0, GL_TEXTURE10 );
+		pglUniform1iARB( shader->u_EnvMap1, GL_TEXTURE11 );
+	}
+
+	GL_BindShader( GL_NONE );
+
+	GL_ValidateProgram( shader );
+	GL_ShowProgramUniforms( shader );
+}*/
+static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
+{
+	ASSERT( shader != NULL );
+
+	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
+	shader->u_LightMap = pglGetUniformLocationARB( shader->handle, "u_LightMap" );
+	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
+	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
+
+	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) ) // diffusioncubemaps
+	{
+		shader->u_EnvMap0 = pglGetUniformLocationARB( shader->handle, "u_EnvMap0" );
+		shader->u_EnvMap1 = pglGetUniformLocationARB( shader->handle, "u_EnvMap1" );
+		shader->u_CubeMipCount = pglGetUniformLocationARB( shader->handle, "u_CubeMipCount" );
+		shader->u_CubeOrigin = pglGetUniformLocationARB( shader->handle, "u_CubeOrigin" );
+		shader->u_LerpFactor = pglGetUniformLocationARB( shader->handle, "u_LerpFactor" );
+		shader->u_BoxMins = pglGetUniformLocationARB( shader->handle, "u_BoxMins" );
+		shader->u_BoxMaxs = pglGetUniformLocationARB( shader->handle, "u_BoxMaxs" );
+		shader->u_ReflectScale = pglGetUniformLocationARB( shader->handle, "u_ReflectScale" );
 	}
 
 	if( GL_FindShaderDirective( shader, "BMODEL_INTERIOR" ) )
-		pglUniform1iARB( shader->u_InteriorMap, GL_TEXTURE11 );	
+	{
+		shader->u_InteriorMap = pglGetUniformLocationARB( shader->handle, "u_InteriorMap" );
+		shader->u_RealTime = pglGetUniformLocationARB( shader->handle, "u_RealTime" );
+		shader->u_InteriorGrid = pglGetUniformLocationARB( shader->handle, "u_InteriorGrid" );
+		shader->u_InteriorLightState = pglGetUniformLocationARB( shader->handle, "u_InteriorLightState" );
+	}
+	else if( GL_FindShaderDirective( shader, "BMODEL_REFLECTION_PLANAR" ) || GL_FindShaderDirective( shader, "BMODEL_WATER_PLANAR" ) )
+	{
+		shader->u_PlanarReflectScale = pglGetUniformLocationARB( shader->handle, "u_PlanarReflectScale" );
+		if( GL_FindShaderDirective( shader, "BMODEL_WATER_PLANAR" ) )
+			shader->u_WaterTex = pglGetUniformLocationARB( shader->handle, "u_WaterTex" );
+	}
+
+	shader->u_ViewOrigin = pglGetUniformLocationARB( shader->handle, "u_ViewOrigin" );
+	shader->u_DeluxeMap = pglGetUniformLocationARB( shader->handle, "u_DeluxeMap" );
+	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
+	shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
+	shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
+
+	if( GL_FindShaderDirective( shader, "BMODEL_MULTI_LAYERS" ) )
+		shader->u_LayerMap = pglGetUniformLocationARB( shader->handle, "u_LayerMap" );
+
+	shader->u_DepthMap = pglGetUniformLocationARB( shader->handle, "u_DepthMap" );
+
+	shader->u_LightStyleValues = pglGetUniformLocationARB( shader->handle, "u_LightStyleValues" );
+	shader->u_ModelMatrix = pglGetUniformLocationARB( shader->handle, "u_ModelMatrix" );
+	shader->u_DetailScale = pglGetUniformLocationARB( shader->handle, "u_DetailScale" );
+	shader->u_TexOffset = pglGetUniformLocationARB( shader->handle, "u_TexOffset" );
+	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
+	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
+	shader->u_RenderColor = pglGetUniformLocationARB( shader->handle, "u_RenderColor" );
+	shader->u_zFar = pglGetUniformLocationARB( shader->handle, "u_zFar" );
+
+	GL_BindShader( shader );
+	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
+	pglUniform1iARB( shader->u_LightMap, GL_TEXTURE1 );
+	if( !GL_FindShaderDirective( shader, "BMODEL_WATER" ) )
+		pglUniform1iARB( shader->u_DeluxeMap, GL_TEXTURE2 );
+	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE3 );
+	pglUniform1iARB( shader->u_NormalMap, GL_TEXTURE4 );
+
+	if( GL_FindShaderDirective( shader, "BMODEL_MULTI_LAYERS" ) )
+		pglUniform1iARB( shader->u_LayerMap, GL_TEXTURE5 );
+	else if( GL_FindShaderDirective( shader, "BMODEL_INTERIOR" ) )
+		pglUniform1iARB( shader->u_InteriorMap, GL_TEXTURE5 );
 	else if( GL_FindShaderDirective( shader, "BMODEL_WATER_PLANAR" ) )
-		pglUniform1iARB( shader->u_WaterTex, GL_TEXTURE11 );
+		pglUniform1iARB( shader->u_WaterTex, GL_TEXTURE5 );
+
+	if( GL_FindShaderDirective( shader, "BMODEL_WATER_REFRACTION" ) )
+		pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE6 );
+
+	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) )  // diffusioncubemaps
+	{
+		if( GL_FindShaderDirective( shader, "BMODEL_WATER" ) )
+		{
+			pglUniform1iARB( shader->u_EnvMap0, GL_TEXTURE2 ); // water won't use deluxmap so I'll use it here
+			pglUniform1iARB( shader->u_EnvMap1, GL_TEXTURE7 );
+		}
+		else
+		{
+			pglUniform1iARB( shader->u_EnvMap0, GL_TEXTURE6 ); // other brushes won't use depthmap so I'll use it here
+			pglUniform1iARB( shader->u_EnvMap1, GL_TEXTURE7 );
+		}
+	}
 
 	GL_BindShader( GL_NONE );
 
@@ -786,7 +883,7 @@ static void GL_InitBmodelDlightUniforms( glsl_program_t *shader )
 	ASSERT( shader != NULL );
 
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
-	shader->u_DetailMap = pglGetUniformLocationARB( shader->handle, "u_DetailMap" );
+//	shader->u_DetailMap = pglGetUniformLocationARB( shader->handle, "u_DetailMap" );
 	shader->u_ProjectMap = pglGetUniformLocationARB( shader->handle, "u_ProjectMap" );
 	shader->u_ShadowMap = pglGetUniformLocationARB( shader->handle, "u_ShadowMap" ); // shadow2D or shadowCube
 	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
@@ -823,7 +920,7 @@ static void GL_InitBmodelDlightUniforms( glsl_program_t *shader )
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
-	pglUniform1iARB( shader->u_DetailMap, GL_TEXTURE1 );
+//	pglUniform1iARB( shader->u_DetailMap, GL_TEXTURE1 );
 	pglUniform1iARB( shader->u_ProjectMap, GL_TEXTURE2 );	// projection lights only
 	pglUniform1iARB( shader->u_ShadowMap, GL_TEXTURE3 );	// shadowmap or cubemap
 	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE4 );
@@ -1636,14 +1733,6 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 			GL_AddShaderDirective( options, va( "TERRAIN_NUM_LAYERS %i", landscape->terrain->numLayers ));
 			GL_AddShaderDirective( options, "BMODEL_MULTI_LAYERS" );
 		}
-
-		if( landscape->terrain->indexmap.gl_diffuse_id != 0 && CVAR_TO_BOOL( r_detailtextures ))
-			GL_AddShaderDirective( options, "BMODEL_HAS_DETAIL" );
-	}
-	else
-	{
-		if( tx->dt_texturenum != 0 && CVAR_TO_BOOL( r_detailtextures ))
-			GL_AddShaderDirective( options, "BMODEL_HAS_DETAIL" );
 	}
 
 	if( FBitSet( s->flags, SURF_REFLECT ) && s->info->subtexture[glState.stack_position] > 0 )
@@ -1671,12 +1760,6 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	if( using_cubemaps )
 		SetBits( shader->status, SHADER_USE_CUBEMAPS );
 
-#if 0
-	// can't properly draw for beams particles through glass. g-cont
-	// disabled for now
-	if( translucent )
-		SetBits( shader->status, SHADER_USE_SCREENCOPY );
-#endif
 	es->glsl_sequence[mirror] = tr.glsl_valid_sequence;
 	ClearBits( s->flags, SURF_NODRAW );
 	es->shaderNum[mirror] = shaderNum;
@@ -1723,14 +1806,6 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 			GL_AddShaderDirective( options, va( "TERRAIN_NUM_LAYERS %i", landscape->terrain->numLayers ));
 			GL_AddShaderDirective( options, "BMODEL_MULTI_LAYERS" );
 		}
-
-		if( landscape->terrain->indexmap.gl_diffuse_id != 0 && CVAR_TO_BOOL( r_detailtextures ))
-			GL_AddShaderDirective( options, "BMODEL_HAS_DETAIL" );
-	}
-	else
-	{
-		if( tx->dt_texturenum != 0 && CVAR_TO_BOOL( r_detailtextures ))
-			GL_AddShaderDirective( options, "BMODEL_HAS_DETAIL" );
 	}
 
 	if( CVAR_TO_BOOL( gl_emboss ) )
@@ -1798,12 +1873,6 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 
 	word shaderNum = (shader - glsl_programs);
 
-#if 0
-	// can't properly draw for beams particles through glass. g-cont
-	// disabled for now
-	if( translucent )
-		SetBits( shader->status, SHADER_USE_SCREENCOPY );
-#endif
 	// done
 	ClearBits( s->flags, SURF_NODLIGHT );
 
