@@ -2157,7 +2157,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 
 			// diffusion - apply custom color to a specific texture
-			if( tr.materials[s->texinfo->texture->gl_texturenum].ApplyColor )
+			if( tr.materials[s->texinfo->texture->gl_texturenum].ApplyColor && (e->index > 0) )
 			{
 				// hack     // dynlight doesn't affect additive brushes
 		/*		if( e->curstate.rendermode == kRenderTransAdd )
@@ -2652,7 +2652,7 @@ void R_DrawBrushList( void )
 			}
 
 			// diffusion - apply custom color to a specific texture
-			if( tr.materials[s->texinfo->texture->gl_texturenum].ApplyColor )
+			if( tr.materials[s->texinfo->texture->gl_texturenum].ApplyColor && (e->index > 0) )
 			{
 				// hack
 				if( e->curstate.rendermode == kRenderTransAdd )
