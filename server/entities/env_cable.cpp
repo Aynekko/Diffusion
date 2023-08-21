@@ -33,23 +33,26 @@ END_DATADESC()
 
 void CEnvCable::Spawn( void )
 {
+	SetNullModel(); // needed to pass to client
+
 	if( !pev->vuser1 || pev->vuser1 == g_vecZero ) // user didn't specify 2nd point manually, so we need to find target
 	{
 		// get second point as self at first
 		pev->vuser1 = GetAbsOrigin();
 		SetThink( &CEnvCable::CollectTarget );
+		SetNextThink( RANDOM_FLOAT( 0.1f, 0.2f ) ); // let all entities spawn
 	}
 	else
 	{
 		CalcBox();
 		// this cable is attached to some moving object so we always need to recalculate its box
 		if( m_hParent )
+		{
 			SetThink( &CEnvCable::CalcBoxThink );
+			SetNextThink( RANDOM_FLOAT( 0.1f, 0.2f ) ); // let all entities spawn
+		}
 	}
 	
-	SetNextThink( RANDOM_FLOAT( 0.1f, 0.2f ) ); // let all entities spawn
-	
-	SetNullModel(); // needed to pass to client
 	pev->iuser3 = -669; // indicator for client that it's a cable
 
 	// segments
