@@ -17,6 +17,8 @@ public:
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void CalcBox( void );
 	void CalcBoxThink( void );
+	void CollectTarget( void );
+	EHANDLE m_hTarget; // 2nd point (optional)
 
 	DECLARE_DATADESC();
 };
@@ -25,16 +27,27 @@ LINK_ENTITY_TO_CLASS( env_cable, CEnvCable );
 
 BEGIN_DATADESC( CEnvCable )
 	DEFINE_FUNCTION( CalcBoxThink ),
+	DEFINE_FUNCTION( CollectTarget ),
+	DEFINE_FIELD( m_hTarget, FIELD_EHANDLE ),
 END_DATADESC()
 
 void CEnvCable::Spawn( void )
 {
-	if( !pev->vuser1 )
+	if( !pev->vuser1 || pev->vuser1 == g_vecZero ) // user didn't specify 2nd point manually, so we need to find target
 	{
-		ALERT( at_error, "env_cable at position (%f %f %f) without ending position! Removed.\n", pev->origin.x, pev->origin.y, pev->origin.z );
-		UTIL_Remove( this );
-		return;
+		// get second point as self at first
+		pev->vuser1 = GetAbsOrigin();
+		SetThink( &CEnvCable::CollectTarget );
 	}
+	else
+	{
+		CalcBox();
+		// this cable is attached to some moving object so we always need to recalculate its box
+		if( m_hParent )
+			SetThink( &CEnvCable::CalcBoxThink );
+	}
+	
+	SetNextThink( RANDOM_FLOAT( 0.1f, 0.2f ) ); // let all entities spawn
 	
 	SetNullModel(); // needed to pass to client
 	pev->iuser3 = -669; // indicator for client that it's a cable
@@ -62,19 +75,13 @@ void CEnvCable::Spawn( void )
 
 	if( !pev->rendercolor || (pev->rendercolor.x == 0.0f && pev->rendercolor.y == 0.0f && pev->rendercolor.z == 0.0f) )
 		pev->rendercolor = Vector( 1,1,1 ); // it becomes white if 0, Xash does this
-
-	CalcBox();
-
-	// this cable is attached to some moving object so we always need to recalculate its box
-	if( m_hParent )
-	{
-		SetThink( &CEnvCable::CalcBoxThink );
-		SetNextThink( RANDOM_FLOAT( 1.0f, 1.2f ) );
-	}
 }
 
 void CEnvCable::CalcBox( void )
 {
+	if( m_hTarget != NULL )
+		pev->vuser1 = m_hTarget->GetAbsOrigin();
+
 	// find points
 	Vector vmidpoint{ 0,0,0 };
 	Vector mins{ 0,0,0 };
@@ -113,12 +120,41 @@ void CEnvCable::CalcBoxThink( void )
 {
 	SetNextThink( 1.0f );
 
-	if( pev->origin == pev->oldorigin )
-		return;
+	if( m_hTarget != NULL )
+	{
+		if( pev->origin == pev->oldorigin && m_hTarget->GetAbsOrigin() == pev->vuser1 )
+			return;
+	}
+	else
+	{
+		if( pev->origin == pev->oldorigin )
+			return;
+	}
 
 	CalcBox();
 
-	SetNextThink( 0.1f ); // think fast!
+	SetNextThink( 0 ); // think fast!
+}
+
+void CEnvCable::CollectTarget(void)
+{
+	m_hTarget = UTIL_FindEntityByTargetname( NULL, GetTarget() );
+
+	if( m_hTarget == NULL )
+	{
+		ALERT( at_error, "env_cable at position (%f %f %f) without ending position! Removed.\n", pev->origin.x, pev->origin.y, pev->origin.z );
+		UTIL_Remove( this );
+		return;
+	}
+
+	CalcBox();
+	
+	// this cable is attached to some moving object so we always need to recalculate its box
+	if( m_hParent || (m_hTarget && m_hTarget->m_hParent) )
+	{
+		SetThink( &CEnvCable::CalcBoxThink );
+		SetNextThink( 0.1f );
+	}
 }
 
 void CEnvCable::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
