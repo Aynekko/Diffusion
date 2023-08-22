@@ -129,10 +129,10 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		pld->effect = 1;
 		pld->entitynum = pEnt->index;
 		pld->flags |= CF_NOSHADOWS | CF_NOGRASSLIGHTING;
-		R_SetupLightProjection( pld, v_origin, v_angles, FlashlightRadius * 0.5, 60 + 40 * gHUD.m_Flash.m_flTurnOn );
+		R_SetupLightProjection( pld, v_origin, v_angles, FlashlightRadius * 0.5, 60 + 50 * gHUD.m_Flash.m_flTurnOn );
 		R_SetupLightProjectionTexture( pld, pEnt );
 		R_SetupLightAttenuationTexture( pld );
-		pld->color.r = pld->color.g = pld->color.b = 30;
+		pld->color.r = pld->color.g = pld->color.b = 40;
 		pld->die = tr.time; // die at next frame
 
 		// mirror
