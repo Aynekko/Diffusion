@@ -7,7 +7,7 @@
 // =================== ENV_STATIC ==============================================
 #define SF_STATIC_SOLID			BIT( 0 )
 #define SF_STATIC_DROPTOFLOOR	BIT( 1 )
-#define SF_STATIC_NOSHADOW		BIT( 2 ) // hlrad // diffusion - also disables dynlight shadows now, too
+#define SF_STATIC_NOSHADOW		BIT( 2 ) // hlrad
 #define SF_STATIC_NOVLIGHT		BIT( 3 ) // hlrad
 #define SF_STATIC_IGNOREPVS		BIT( 4 ) // ignore PVS - always visible (fadedistance still works)
 
@@ -96,9 +96,6 @@ void CEnvStatic::Spawn(void)
 
 	// tell the client about static entity
 	SetBits(pev->iuser1, CF_STATIC_ENTITY);
-
-	if( HasSpawnFlags( SF_STATIC_NOSHADOW ) )
-		pev->renderfx = kRenderFxNoShadows;
 	
 	if (HasSpawnFlags(SF_STATIC_SOLID))
 	{
