@@ -553,6 +553,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 			pl->die = tr.time; // die at next frame
 			pl->flags = ent->curstate.iuser1;
 			pl->brightness = ent->curstate.fuser1;
+			pl->entitynum = ent->index;
 
 			Vector origin, angles;
 
@@ -599,6 +600,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 			pl->flags = ent->curstate.iuser1;
 			pl->projectionTexture = tr.whiteCubeTexture;
 			pl->pointlight = true;
+			pl->entitynum = ent->index;
 
 			Vector origin, angles;
 
