@@ -431,7 +431,7 @@ void R_ShadowPassDrawSolidEntities( plight_t *pl )
 			// diffusion - don't draw shadows for your own player/weapon model from your own flashlight
 			if( pl->effect == 1 )
 			{
-				if( RI->currententity->index != pl->entitynum )
+				if( RI->currententity->index != pl->entindex )
 					R_DrawStudioModel( RI->currententity );
 			}
 			else

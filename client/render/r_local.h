@@ -195,7 +195,7 @@ typedef struct plight_s
 	int		flags;
 	float		fov;
 	int effect; // diffusion - hackhack...
-	int entitynum;
+	int entindex;
 	int dlflag; // copy from dl->flag
 	float brightness;
 } plight_t;

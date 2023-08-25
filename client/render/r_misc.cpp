@@ -71,7 +71,7 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		dltest->pointlight = true;
 		dltest->projectionTexture = tr.whiteCubeTexture;
 		// this needs to disable self-shadow
-		dltest->entitynum = pEnt->index;
+		dltest->entindex = pEnt->index;
 		dltest->effect = 1;
 
 		v_origin = pEnt->origin + tr.viewparams.forward * 25;
@@ -127,7 +127,7 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		// kind of a diffuse light?..
 		plight_t *pld = CL_AllocPlight( FLASHLIGHT_DIFFUSE_KEY );
 		pld->effect = 1;
-		pld->entitynum = pEnt->index;
+		pld->entindex = pEnt->index;
 		pld->flags |= CF_NOSHADOWS | CF_NOGRASSLIGHTING;
 		R_SetupLightProjection( pld, v_origin, v_angles, FlashlightRadius * 0.5, 60 + 50 * gHUD.m_Flash.m_flTurnOn );
 		R_SetupLightProjectionTexture( pld, pEnt );
@@ -206,7 +206,7 @@ void SetupFlashlight( cl_entity_t *pEnt )
 
 	// copy the entity number - we don't need light and shadows
 	// for our own player model or weapon from our own flashlight
-	pl->entitynum = pEnt->index;
+	pl->entindex = pEnt->index;
 	pl->effect = 1; // diffusion - just a flag that this is a flashlight
 
 	pl->projectionTexture = FlashlightTexture;
@@ -553,7 +553,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 			pl->die = tr.time; // die at next frame
 			pl->flags = ent->curstate.iuser1;
 			pl->brightness = ent->curstate.fuser1;
-			pl->entitynum = ent->index;
+			pl->entindex = ent->index;
 
 			Vector origin, angles;
 
@@ -600,7 +600,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 			pl->flags = ent->curstate.iuser1;
 			pl->projectionTexture = tr.whiteCubeTexture;
 			pl->pointlight = true;
-			pl->entitynum = ent->index;
+			pl->entindex = ent->index;
 
 			Vector origin, angles;
 

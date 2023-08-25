@@ -4805,7 +4805,7 @@ void CStudioModelRenderer::AddStudioToLightList( plight_t *pl )
 	// diffusion - HACKHACK: don't light your own player/weapon model with your own flashlight
 	if( pl->effect == 1 )
 	{
-		if( m_pCurrentEntity->index == pl->entitynum )
+		if( m_pCurrentEntity->index == pl->entindex )
 			return;
 	}
 
