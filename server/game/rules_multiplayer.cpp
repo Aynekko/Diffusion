@@ -745,10 +745,18 @@ void CHalfLifeMultiplay :: UpdateGameMode( CBasePlayer *pPlayer )
 void CHalfLifeMultiplay :: InitHUD( CBasePlayer *pl )
 {
 	// notify other clients of player joining the game
-	UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs( "%s has joined the game\n", 
-		( pl->pev->netname && STRING(pl->pev->netname)[0] != 0 ) ? STRING(pl->pev->netname) : "unconnected" ) );
+	if( pl->pev->flags & FL_FAKECLIENT ) // bot
+	{
+		UTIL_ClientPrintAll( HUD_PRINTTALK, UTIL_VarArgs( "* ^5Server^7: Added bot %s\n", STRING( pl->pev->netname )) );
+	}
+	else
+	{
 
-	EMIT_SOUND( INDEXENT(0), CHAN_STATIC, SND_PLAYER_JOIN, 1, ATTN_NONE );
+		UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs( "%s has joined the game\n",
+			(pl->pev->netname && STRING( pl->pev->netname )[0] != 0) ? STRING( pl->pev->netname ) : "unconnected" ) );
+
+		EMIT_SOUND( INDEXENT( 0 ), CHAN_STATIC, SND_PLAYER_JOIN, 1, ATTN_NONE );
+	}
 
 	// team match?
 	if ( g_teamplay )

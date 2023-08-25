@@ -115,10 +115,11 @@ void ClientDisconnect( edict_t *pEdict )
 	CBaseEntity *pEntity = (CBaseEntity *)CBaseEntity::Instance( pEdict );
 
 	char text[256] = "";
-	if( pEntity->pev->netname )
+	if( pEntity->pev->netname && !(pEntity->pev->flags & FL_FAKECLIENT) )
+	{
 		snprintf( text, sizeof( text ), "- %s has left the game\n", STRING( pEntity->pev->netname ) );
-
-	EMIT_SOUND( INDEXENT( 0 ), CHAN_STATIC, SND_PLAYER_LEFT, 1, ATTN_NONE );
+		EMIT_SOUND( INDEXENT( 0 ), CHAN_STATIC, SND_PLAYER_LEFT, 1, ATTN_NONE );
+	}
 
 	MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL );
 		WRITE_BYTE( pEntity->entindex() );
