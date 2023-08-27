@@ -169,5 +169,23 @@ int CHudCodeInput::Draw( float flTime )
 		}
 	}
 
+	const char *buf;
+	char text[64];
+	if( num[0] == 255 ) // unknown code
+		_snprintf( text, sizeof( text ), "CODE: < unknown >" );
+	else
+		_snprintf( text, sizeof( text ), "CODE: %d %d %d %d", num[0], num[1], num[2], num[3] );
+
+	// calculate width to align center...
+	buf = text;
+	int width = 0;
+	while( *buf )
+	{
+		width += gHUD.m_scrinfo.charWidths[*buf];
+		buf++;
+	}
+
+	DrawString( (int)((ScreenWidth - width) * 0.5f), (int)(ScreenHeight * 0.8), text, 255, 255, 255 );
+
 	return 1;
 }

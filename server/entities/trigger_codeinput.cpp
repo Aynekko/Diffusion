@@ -32,6 +32,10 @@ void CTriggerCodeInput::Spawn(void)
 	Precache();
 	
 	pev->solid = SOLID_NOT;
+
+	// make a random code
+	if( !pev->iuser1 )
+		pev->iuser1 = RANDOM_LONG( 1258, 9697 );
 }
 
 void CTriggerCodeInput::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -42,7 +46,17 @@ void CTriggerCodeInput::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
 
 	if( IsLockedByMaster( pActivator ) )
+	{
+		// show code screen with "unknown code" (technically impossible to guess)
+		MESSAGE_BEGIN( MSG_ONE, gmsgCodeInput, NULL, pPlayer->pev );
+		WRITE_SHORT( entindex() );
+		WRITE_BYTE( 255 );
+		WRITE_BYTE( 0 );
+		WRITE_BYTE( 0 );
+		WRITE_BYTE( 0 );
+		MESSAGE_END();
 		return;
+	}
 	
 	// success
 	if( useType == USE_ON && (int)value == pev->iuser1 )
