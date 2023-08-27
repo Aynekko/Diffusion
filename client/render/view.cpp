@@ -2127,12 +2127,12 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	}
 	else
 	{
+#if 0
 		// turning roll like in first Mirror's Edge
-		/*
 		static float AddRoll = bound( -5.0f, gHUD.MxMy.x * 0.1, 5.0f );
 		if( !CVAR_TO_BOOL( ui_is_active ) && (tr.time != tr.oldtime) )
 			pparams->viewangles[ROLL] = gHUD.MxMy.x * 0.025;
-		*/
+#endif
 	}
 	//=================================================
 
@@ -2351,6 +2351,18 @@ void V_CalcRefdef( struct ref_params_s *pparams )
 
 	PlayWallSlideSound( pparams );
 	PlayFlingWhooshSound( pparams );
+
+	// roll camera when in car
+	static float car_roll_ang = 0.0f;
+	if( gHUD.InCar )
+	{
+		int roll_dir = (gHUD.m_iKeyBits & IN_MOVELEFT) ? -1 : 1;
+		if( !(gHUD.m_iKeyBits & IN_MOVELEFT) && !(gHUD.m_iKeyBits & IN_MOVERIGHT) )
+			roll_dir = 0;
+		static float car_roll_ang = 0.0f;
+		car_roll_ang = CL_UTIL_Approach( gHUD.CarSpeed * 0.05 * roll_dir, car_roll_ang, 2 * g_fFrametime );
+		pparams->viewangles[ROLL] = car_roll_ang;
+	}
 
 	// diffusion - play this sound when underwater
 	if( pparams->waterlevel == 3 )
