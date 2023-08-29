@@ -47,6 +47,11 @@ public:
 	void SetActivity(Activity NewActivity);
 	void StartTask(Task_t *pTask);
 	void RunTask(Task_t *pTask);
+
+	bool BodyTurn( const Vector &vecTarget );
+	bool RunningShooting; // if true, we are firing bullets while running
+	float body_yaw;
+
 	virtual void DeathSound(void);
 	virtual void PainSound(void);
 	virtual void IdleSound(void);

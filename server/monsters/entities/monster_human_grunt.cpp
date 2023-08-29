@@ -309,6 +309,33 @@ Schedule_t slGruntEstablishLineOfFire[] =
 	},
 };
 
+Task_t tlGruntRunAndFire[] =
+{
+	//		{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_FAIL				},
+			{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_GRUNT_ELOF_FAIL	},
+
+			{ TASK_GET_PATH_TO_ENEMY,	(float)0						},
+			{ TASK_GRUNT_SPEAK_SENTENCE,(float)0						},
+			{ TASK_RUN_PATH,			(float)0						},
+			{ TASK_WAIT_FOR_MOVEMENT,	(float)0						},
+		//	{ TASK_MOVE_TO_TARGET_RANGE,(float)150						},
+		//	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE				},
+};
+
+Schedule_t slGruntRunAndFire[] =
+{
+	{
+		tlGruntRunAndFire,
+		SIZEOFARRAY( tlGruntRunAndFire ),
+		bits_COND_NEW_ENEMY |
+		bits_COND_ENEMY_DEAD |
+		bits_COND_ENEMY_LOST,
+
+		bits_SOUND_DANGER,
+		"GruntRunAndFire"
+	},
+};
+
 //=========================================================
 // GruntFoundEnemy - grunt established sight with an enemy
 // that was hiding from the squad.
@@ -842,6 +869,8 @@ DEFINE_CUSTOM_SCHEDULES(CHGrunt)
 		slGruntRepel,
 		slGruntRepelAttack,
 		slGruntRepelLand,
+
+		slGruntRunAndFire,
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES(CHGrunt, CSquadMonster);
@@ -1250,6 +1279,9 @@ void CHGrunt :: RunAI( void )
 		else
 			FlashlightSpr->SetBrightness( 0 );
 	}
+
+//	if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
+//		ALERT( at_console, "sched=runandfire, runshoot=%3d\n", (int)RunningShooting );
 }
 
 //=========================================================
@@ -1310,7 +1342,7 @@ void CHGrunt :: SetYawSpeed ( void )
 		ys = 150;	
 		break;
 	case ACT_WALK:	
-		ys = 180;		
+		ys = 150;		
 		break;
 	case ACT_RANGE_ATTACK1:	
 		ys = 120;	
@@ -1614,6 +1646,25 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_BURST1:
 		{
+			if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
+			{
+				if( !RunningShooting )
+					break;
+				if( !HasConditions(bits_COND_CAN_RANGE_ATTACK1) )
+					break;
+				// force client event
+				MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
+				WRITE_BYTE( TE_CLIENTEVENT );
+				WRITE_BYTE( 1 );
+				WRITE_SHORT( entindex() );
+				MESSAGE_END();
+			}
+			else if( pev->sequence != 17 && pev->sequence != 18 && pev->sequence != 20 && pev->sequence != 21 )
+			{
+				if( !RunningShooting )
+					break;
+			}
+
 			Vector org = GetAbsOrigin();
 			org.z += 40;
 
@@ -1634,7 +1685,27 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		break;
 		case HGRUNT_AE_BURST2:
 		case HGRUNT_AE_BURST3:
+		{
+			if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
+			{
+				if( !RunningShooting )
+					break;
+				if( !HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+					break;
+				// force client event
+				MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
+				WRITE_BYTE( TE_CLIENTEVENT );
+				WRITE_BYTE( 1 );
+				WRITE_SHORT( entindex() );
+				MESSAGE_END();
+			}
+			else if( pev->sequence != 17 && pev->sequence != 18 && pev->sequence != 20 && pev->sequence != 21 )
+			{
+				if( !RunningShooting )
+					break;
+			}
 			Shoot();
+		}
 		break;
 		case HGRUNT_AE_KICK:
 		{
@@ -1876,6 +1947,41 @@ void CHGrunt :: StartTask ( Task_t *pTask )
 
 	switch ( pTask->iTask )
 	{
+	case TASK_GET_PATH_TO_ENEMY:
+	{
+		if( m_hEnemy == NULL )
+		{
+			TaskFail();
+			return;
+		}
+
+		if( BuildNearestRoute( m_hEnemy->GetAbsOrigin(), m_hEnemy->pev->view_ofs, 0, (m_hEnemy->GetAbsOrigin() - GetLocalOrigin()).Length() ) )
+		{
+			TaskComplete();
+		}
+		else
+		{
+			// no way to get there =(
+			ALERT( at_aiconsole, "HGRUNT: GetPathToEnemy failed!\n" );
+			TaskFail();
+		}
+		break;
+	}
+
+	case TASK_MOVE_TO_TARGET_RANGE:
+	{
+		if( !m_hEnemy )
+		{
+			TaskFail();
+		}
+		else
+		{
+			m_hTargetEnt = m_hEnemy;
+			CBaseMonster::StartTask( pTask );
+		}
+		break;
+	}
+
 	case TASK_GRUNT_CHECK_FIRE:
 		if ( !NoFriendlyFire() )
 		{
@@ -1916,33 +2022,64 @@ void CHGrunt :: StartTask ( Task_t *pTask )
 	}
 }
 
+bool CHGrunt::BodyTurn( const Vector &vecTarget )
+{
+	float yaw = VecToYaw( vecTarget - GetAbsOrigin() ) - GetAbsAngles().y;
+
+	if( yaw > 180 ) yaw -= 360;
+	if( yaw < -180 ) yaw += 360;
+
+	if( yaw < -65 || yaw > 65 )
+		return false;
+
+	body_yaw = UTIL_Approach( yaw, body_yaw, 4.0f );
+
+	// turn towards vector
+	SetBoneController( 1, body_yaw );
+
+	return true;
+}
+
 //=========================================================
 // RunTask
 //=========================================================
 void CHGrunt :: RunTask ( Task_t *pTask )
 {
+	// reset body and shooting, unless overridden by task
+	RunningShooting = false;
+	SetBoneController( 1, 0 );
+
 	switch ( pTask->iTask )
 	{
 	case TASK_GRUNT_FACE_TOSS_DIR:
+	{
+		// project a point along the toss vector and turn to face that point.
+		MakeIdealYaw( GetAbsOrigin() + m_vecTossVelocity * 64 );
+		ChangeYaw( pev->yaw_speed );
+
+		if ( FacingIdeal() )
 		{
-			// project a point along the toss vector and turn to face that point.
-			MakeIdealYaw( GetAbsOrigin() + m_vecTossVelocity * 64 );
-			ChangeYaw( pev->yaw_speed );
-
-			if ( FacingIdeal() )
-			{
-				m_iTaskStatus = TASKSTATUS_COMPLETE;
-			}
-			break;
+			m_iTaskStatus = TASKSTATUS_COMPLETE;
 		}
+		break;
+	}
 	case TASK_WAIT_FACE_ENEMY:
-		MakeIdealYaw ( m_vecEnemyLKP );
-		ChangeYaw( pev->yaw_speed ); 
+	{
+		MakeIdealYaw( m_vecEnemyLKP );
+		ChangeYaw( pev->yaw_speed );
 
-		if ( gpGlobals->time > AttackStartTime )
+		if( gpGlobals->time > AttackStartTime )
 			TaskComplete();
 
 		break;
+	}
+	case TASK_WAIT_FOR_MOVEMENT: // he is walking or running - can possibly shoot
+	{
+		if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) && m_hEnemy && BodyTurn( m_hEnemy->GetAbsOrigin() ) )
+			RunningShooting = true;
+		CSquadMonster::RunTask( pTask );
+		break;
+	}
 	default:
 		{
 			CSquadMonster :: RunTask( pTask );
@@ -2238,8 +2375,8 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 							JustSpoke();
 						}
 						
-						if ( HasConditions ( bits_COND_CAN_RANGE_ATTACK1 ) )
-							return GetScheduleOfType ( SCHED_GRUNT_SUPPRESS );
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+							return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );//return GetScheduleOfType ( SCHED_GRUNT_SUPPRESS );
 						else
 							return CBaseMonster::GetSchedule(); //return GetScheduleOfType ( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 				//	}
@@ -2441,7 +2578,8 @@ Schedule_t* CHGrunt :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE:
 		{
-			return &slGruntEstablishLineOfFire[ 0 ];
+			return &slGruntRunAndFire[0];
+			//return &slGruntEstablishLineOfFire[ 0 ];
 		}
 		break;
 	case SCHED_RANGE_ATTACK1:
@@ -3496,7 +3634,8 @@ Schedule_t* CHGruntAlien :: GetScheduleOfType ( int Type )
 		break;
 	case SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE:
 		{
-			return &slGruntEstablishLineOfFire[ 0 ];
+			return &slGruntRunAndFire[0];
+			//return &slGruntEstablishLineOfFire[ 0 ];
 		}
 		break;
 	case SCHED_RANGE_ATTACK1:
@@ -3719,6 +3858,27 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_BURST1:
 		{
+			//--------------------------
+			if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
+			{
+				if( !RunningShooting )
+					break;
+				if( !HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+					break;
+				// force client event
+				MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
+				WRITE_BYTE( TE_CLIENTEVENT );
+				WRITE_BYTE( 3 );
+				WRITE_SHORT( entindex() );
+				MESSAGE_END();
+			}
+			else if( pev->sequence != 17 && pev->sequence != 18 && pev->sequence != 20 && pev->sequence != 21 )
+			{
+				if( !RunningShooting )
+					break;
+			}
+			//--------------------------
+			
 			if ( HasWeapon( HGRUNT_9MMAR ))
 				Shoot();
 			else
@@ -3730,6 +3890,26 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_BURST2:
 		case HGRUNT_AE_BURST3:
+			//--------------------------
+			if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
+			{
+				if( !RunningShooting )
+					break;
+				if( !HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+					break;
+				// force client event
+				MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
+				WRITE_BYTE( TE_CLIENTEVENT );
+				WRITE_BYTE( 1 );
+				WRITE_SHORT( entindex() );
+				MESSAGE_END();
+			}
+			else if( pev->sequence != 17 && pev->sequence != 18 && pev->sequence != 20 && pev->sequence != 21 )
+			{
+				if( !RunningShooting )
+					break;
+			}
+			//--------------------------
 			Shoot();
 			break;
 

@@ -662,6 +662,7 @@
 #define TE_WEAPONSHAKE 135
 #define TE_ACHIEVEMENT 136 // pass an achievement stat
 #define TE_UNREALSOUND 137 // killing spree!
+#define TE_CLIENTEVENT 138 // force client studio event from server...
 
 #define MSG_BROADCAST		0	// unreliable to all
 #define MSG_ONE			1	// reliable to one (msg_entity)
