@@ -1481,6 +1481,8 @@ void CHGrunt :: Shoot ( void )
 
 	if (m_fStanding = 0)
 		FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_4DEGREES, 4096, BULLET_MONSTER_MP5 );
+	else if( RunningShooting )
+		FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 4096, BULLET_MONSTER_MP5 );
 	else
 		FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_6DEGREES, 4096, BULLET_MONSTER_MP5 );
 
@@ -1659,11 +1661,6 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				WRITE_SHORT( entindex() );
 				MESSAGE_END();
 			}
-			else if( pev->sequence != 17 && pev->sequence != 18 && pev->sequence != 20 && pev->sequence != 21 )
-			{
-				if( !RunningShooting )
-					break;
-			}
 
 			Vector org = GetAbsOrigin();
 			org.z += 40;
@@ -1698,11 +1695,6 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				WRITE_BYTE( 1 );
 				WRITE_SHORT( entindex() );
 				MESSAGE_END();
-			}
-			else if( pev->sequence != 17 && pev->sequence != 18 && pev->sequence != 20 && pev->sequence != 21 )
-			{
-				if( !RunningShooting )
-					break;
 			}
 			Shoot();
 		}
@@ -2196,8 +2188,15 @@ void CHGrunt :: SetActivity ( Activity NewActivity )
 		if ( pev->health <= HGRUNT_LIMP_HEALTH )
 			// limp!
 			iSequence = LookupActivity ( ACT_RUN_HURT );
+		else if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
+		{
+			if( HasWeapon(HGRUNT_9MMAR) )
+				iSequence = LookupSequence( "runshootmp5" );
+			else
+				iSequence = LookupSequence( "runshootshotgun" );
+		}
 		else
-			iSequence = LookupActivity ( NewActivity );
+			iSequence = LookupSequence( "run" );
 		break;
 	case ACT_WALK:
 		if ( pev->health <= HGRUNT_LIMP_HEALTH )
@@ -3858,7 +3857,6 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_BURST1:
 		{
-			//--------------------------
 			if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
 			{
 				if( !RunningShooting )
@@ -3872,12 +3870,6 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				WRITE_SHORT( entindex() );
 				MESSAGE_END();
 			}
-			else if( pev->sequence != 17 && pev->sequence != 18 && pev->sequence != 20 && pev->sequence != 21 )
-			{
-				if( !RunningShooting )
-					break;
-			}
-			//--------------------------
 			
 			if ( HasWeapon( HGRUNT_9MMAR ))
 				Shoot();
@@ -3890,7 +3882,6 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_BURST2:
 		case HGRUNT_AE_BURST3:
-			//--------------------------
 			if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
 			{
 				if( !RunningShooting )
@@ -3904,12 +3895,6 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				WRITE_SHORT( entindex() );
 				MESSAGE_END();
 			}
-			else if( pev->sequence != 17 && pev->sequence != 18 && pev->sequence != 20 && pev->sequence != 21 )
-			{
-				if( !RunningShooting )
-					break;
-			}
-			//--------------------------
 			Shoot();
 			break;
 
@@ -3983,9 +3968,17 @@ void CHGruntAlien :: Shoot ( void )
 			if( m_hEnemy != NULL )
 			{
 				if( g_iSkillLevel == SKILL_HARD )
-					AddVelocity = m_hEnemy->pev->velocity + m_hEnemy->pev->basevelocity;
+				{
+					AddVelocity = m_hEnemy->pev->velocity;
+					if( !RunningShooting )
+						AddVelocity += m_hEnemy->pev->basevelocity;
+				}
 				else if( g_iSkillLevel == SKILL_MEDIUM )
-					AddVelocity = m_hEnemy->pev->velocity.Normalize() * 150 + m_hEnemy->pev->basevelocity;
+				{
+					AddVelocity = m_hEnemy->pev->velocity.Normalize() * 150;
+					if( !RunningShooting )
+						AddVelocity += m_hEnemy->pev->basevelocity;
+				}
 			}
 			pShock->SetAbsVelocity( (ShootAtEnemy( vecStart ) * 2500) + AddVelocity );
 			pShock->SetNextThink( 0 );
