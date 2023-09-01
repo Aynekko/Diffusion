@@ -15,6 +15,7 @@ GNU General Public License for more details.
 
 #include "const.h"
 #include "mathlib.h"
+#include "alpha2coverage.h"
 
 uniform sampler2D		u_ColorMap;
 
@@ -26,6 +27,8 @@ varying vec3		var_VertexLight;
 void main( void )
 {
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+
+	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
 
 #if !defined( GRASS_FULLBRIGHT )
 	diffuse.rgb *= var_VertexLight;

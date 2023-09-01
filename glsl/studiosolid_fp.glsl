@@ -20,6 +20,7 @@ GNU General Public License for more details.
 #include "specular.h"
 #include "cubemap.h"
 #include "interior.h"
+#include "alpha2coverage.h"
 
 uniform sampler2D	u_ColorMap;
 uniform sampler2D	u_NormalMap;
@@ -99,6 +100,10 @@ void main( void )
 	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, u_RealTime, var_ViewVec, var_Position );
 #endif
 
+#if defined( ALPHA_RESCALING )
+	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
+#endif
+
 	if( diffuse.a < 0.5f )
 		discard;
 
@@ -113,7 +118,7 @@ void main( void )
 	diffuse.rgb += gloss * var_LightDiffuse;
 #endif
 
-        // apply cubemap reflection
+	// apply cubemap reflection
 #if defined( REFLECTION_CUBEMAP )
 	vec3 NW = N;
 	vec3 VW = V;
@@ -128,13 +133,12 @@ void main( void )
 	diffuse.rgb += cubemap_reflection * fresnel * var_LightDiffuse;
 #endif
 
-        // apply global fog
+	// apply global fog
 #if defined( STUDIO_FOG_EXP )
 	float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
 	diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 //	diffuse.a = Q_mix( 0.0, diffuse.a, fogFactor ); // comment out, this messes up models with alpha-channel textures
 #endif
-
 
 	// compute final color
 	gl_FragColor = vec4( diffuse.rgb, diffuse.a * u_RenderColor.a );

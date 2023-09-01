@@ -23,6 +23,7 @@ GNU General Public License for more details.
 #include "deluxemap.h"
 #include "cubemap.h"
 #include "interior.h"
+#include "alpha2coverage.h"
 
 #if defined( BMODEL_MULTI_LAYERS )
 uniform sampler2DArray	u_ColorMap;
@@ -173,6 +174,10 @@ void main( void )
 #endif
 
 	diffuse.rgb *= u_RenderColor.rgb; // kRenderTransColor
+
+#if defined( ALPHA_RESCALING )
+	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
+#endif
 
 #if !defined( BMODEL_INTERIOR )
 	if( diffuse.a < 0.5 ) discard;

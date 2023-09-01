@@ -1672,6 +1672,8 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 			GL_AddShaderDirective( options, "ALPHA_TO_COVERAGE" );
 		}
 	}*/
+	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransAlpha )
+		GL_AddShaderDirective( options, "ALPHA_RESCALING" );
 
 	if( FBitSet( s->flags, SURF_WATER ))
 	{
@@ -2060,6 +2062,9 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 		GL_EncodeNormal( options, tr.materials[mat->gl_diffuse_id].gl_normalmap_id );
 	}
 
+	if( flagMasked )
+		GL_AddShaderDirective( options, "ALPHA_RESCALING" );
+
 	/*
 	// mixed mode: solid & transparent controlled by alpha-channel
 	if( RI->currententity && texTransparent && RI->currententity->curstate.rendermode != kRenderGlow )
@@ -2184,24 +2189,6 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 
 	if( tr.fogEnabled )
 		GL_AddShaderDirective( options, "STUDIO_FOG_EXP" );
-
-	// mixed mode: solid & transparent controlled by alpha-channel
-	/*
-	if( RI->currententity && texTransparent && RI->currententity->curstate.rendermode != kRenderGlow )
-	{
-		if( usingAlphaBlend )
-		{
-			GL_AddShaderDirective( options, "ALPHA_BLENDING" );
-		}
-		else if( texAlphaToCoverage && GL_UsingAlphaToCoverage() )
-		{
-			if( GL_Support( R_A2C_DITHER_CONTROL ) )
-			{
-				// enable macro only when we're disabled dithering for A2C
-				GL_AddShaderDirective( options, "ALPHA_TO_COVERAGE" );
-			}
-		}
-	}*/
 
 	if( CVAR_TO_BOOL( r_shadows ) && !tr.shadows_notsupport )
 	{
