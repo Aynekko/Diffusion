@@ -37,6 +37,7 @@ uniform float           u_GlossSmoothness;
 uniform float           u_EmbossScale;
 uniform float           u_ReflectScale;
 uniform float           u_RealTime;
+uniform float			u_Fresnel;
 
 // shared variables
 varying vec3		var_LightDiffuse;
@@ -77,8 +78,9 @@ void main( void )
 
 	// compute the diffuse, emboss and specular term
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+	vec3 glossmap = vec3(1.0);
 	#if defined( STUDIO_SPECULAR )
-		vec3 glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
+		glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
 	#endif
         // apply emboss filter
 	#if defined( STUDIO_EMBOSS )
@@ -128,8 +130,8 @@ void main( void )
 		VW = normalize( tbnBasis * VW );
 	#endif
 	vec3 R = reflect( -VW, NW );
-        float fresnel = GetFresnel( VW, NW, FRESNEL_FACTOR, u_ReflectScale );
-        vec3 cubemap_reflection = CubemapReflectionProbe( var_Position, R, glossmap ) * u_ReflectScale;
+	float fresnel = GetFresnel( VW, NW, u_Fresnel, u_ReflectScale );
+	vec3 cubemap_reflection = CubemapReflectionProbe( var_Position, R, glossmap ) * u_ReflectScale;
 	diffuse.rgb += cubemap_reflection * fresnel * var_LightDiffuse;
 #endif
 

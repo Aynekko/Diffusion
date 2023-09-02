@@ -825,6 +825,7 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
 	shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
 	shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
+	shader->u_Fresnel = pglGetUniformLocationARB( shader->handle, "u_Fresnel" );
 
 	if( GL_FindShaderDirective( shader, "BMODEL_MULTI_LAYERS" ) )
 		shader->u_LayerMap = pglGetUniformLocationARB( shader->handle, "u_LayerMap" );
@@ -991,6 +992,7 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 	shader->u_MeshAngles = pglGetUniformLocationARB( shader->handle, "u_MeshAngles" );
 	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
 	shader->u_ColorMask = pglGetUniformLocationARB( shader->handle, "u_ColorMask" );
+	shader->u_Fresnel = pglGetUniformLocationARB( shader->handle, "u_Fresnel" );
 
 	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) ) // diffusioncubemaps
 	{
@@ -1073,7 +1075,6 @@ static void GL_InitStudioDlightUniforms( glsl_program_t *shader )
 	shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
 	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
 	shader->u_ColorMask = pglGetUniformLocationARB( shader->handle, "u_ColorMask" );
-
 	shader->u_LightDir = pglGetUniformLocationARB( shader->handle, "u_LightDir" );
 	shader->u_LightDiffuse = pglGetUniformLocationARB( shader->handle, "u_LightDiffuse" );
 	shader->u_ShadowParams = pglGetUniformLocationARB( shader->handle, "u_ShadowParams" );

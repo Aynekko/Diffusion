@@ -23,7 +23,6 @@ GNU General Public License for more details.
 #define Z_NEAR			4.0		// Quake const
 #define SHADOW_BIAS			0.001		// emperically determined
 #define DETAIL_SCALE		2.0		// ( src + dst ) * 2.0
-#define FRESNEL_FACTOR          4.0
 #define r_turbsin( x )		( sin( x ) * 4.0 )	// during the war sine values can reach 3.0!
 #define FOV_MULT			0.5		// FIXME: this should be 0.25
 #define Epsilon                 1e-10

@@ -37,7 +37,7 @@ uniform sampler2D	u_NormalMap;
 uniform float		u_GlossSmoothness;
 uniform float		u_GlossScale;
 uniform float		u_EmbossScale;
-uniform float           u_ReflectScale;
+uniform float       u_ReflectScale;
 #endif
 
 #if defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR )
@@ -54,6 +54,7 @@ uniform vec4		u_FogParams;
 uniform vec3		u_ViewOrigin;
 uniform float		u_RealTime;
 uniform float		u_zFar; 
+uniform float       u_Fresnel;
 
 // shared variables
 varying vec2		var_TexDiffuse;
@@ -274,18 +275,18 @@ void main( void )
 
 	#if defined( REFLECTION_CUBEMAP ) && (!defined( BMODEL_REFLECTION_PLANAR ) && !defined( BMODEL_WATER_PLANAR ))
 		cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, N, glossmap, 0.5 ) * u_ReflectScale; 
-                fresnel = GetFresnel( V, N, FRESNEL_FACTOR, u_ReflectScale );
+                fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale );
                 diffuse.rgb = mix( diffuse.rgb, cubemap_reflection, fresnel );
 
 	#elif (defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR )) && !defined( REFLECTION_CUBEMAP )
 		planar_reflection = reflectmap2D( u_ColorMap, var_TexMirror, N, gl_FragCoord.xyz, 0.15 ) * u_PlanarReflectScale;
-                fresnel = GetFresnel( V, N, FRESNEL_FACTOR, u_PlanarReflectScale );
+                fresnel = GetFresnel( V, N, u_Fresnel, u_PlanarReflectScale );
                 diffuse.rgb = mix( diffuse.rgb, planar_reflection.rgb, fresnel );
 
 	#elif (defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR )) && defined( REFLECTION_CUBEMAP )
 		cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, N, glossmap, 0.5 ) * u_ReflectScale; 
 		planar_reflection = reflectmap2D( u_ColorMap, var_TexMirror, N, gl_FragCoord.xyz, 0.15 ) * u_PlanarReflectScale;
-                fresnel = GetFresnel( V, N, FRESNEL_FACTOR, u_PlanarReflectScale );
+                fresnel = GetFresnel( V, N, u_Fresnel, u_PlanarReflectScale );
                 vec3 average_reflection = mix( cubemap_reflection, planar_reflection.rgb, 0.5 );
                 diffuse.rgb = mix( diffuse.rgb, average_reflection, fresnel );
 	#endif
@@ -318,7 +319,7 @@ void main( void )
 	#else
 		vec3 NW = var_WorldNormal;
 	#endif
-        fresnel = GetFresnel( V, N, FRESNEL_FACTOR, u_ReflectScale );
+        fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale );
 	cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, NW, glossmap, GlossSmoothness ) * u_ReflectScale;
 								//	gl_FragColor = vec4( cubemap_reflection, 1.0 );
 								//	return;

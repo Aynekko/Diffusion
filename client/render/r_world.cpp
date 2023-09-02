@@ -76,6 +76,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 	tr.materials[texnum].FoliageSwayHeight = 0;
 	tr.materials[texnum].ApplyColor = false;
 	tr.materials[texnum].gl_colormask_id = 0;
+	tr.materials[texnum].Fresnel = 4.0f;
 	strcpy_s( tr.materials[texnum].normalmap_name, "0" );
 
 	if( tr.materials[texnum].name[0] == '!' ) // water
@@ -205,6 +206,20 @@ void LoadMaterialSettingsForTexture( int texnum )
 			if( afile && token[0] > 0 )
 			{
 				tr.materials[texnum].FoliageSwayHeight = Q_atoi(token);
+			}
+			else
+			{
+				Error = true;
+				break;
+			}
+		}
+		else if( !Q_stricmp( token, "Fresnel" ) )
+		{
+			// parse value for this setting
+			afile = COM_ParseLine( afile, token );
+			if( afile && token[0] > 0 )
+			{
+				tr.materials[texnum].Fresnel = Q_atof( token );
 			}
 			else
 			{
@@ -2572,10 +2587,7 @@ void R_DrawBrushList( void )
 					GL_Bind( GL_TEXTURE4, tr.materials[es->gl_texturenum].gl_normalmap_id );
 			}
 
-		//	if( ScreenCopyRequired( RI->currentshader ) )
-		//		GL_Bind( GL_TEXTURE3, tr.screen_color );
-		//	else if( !FBitSet( s->flags, SURF_WATER ) )
-		//		GL_Bind( GL_TEXTURE3, tr.whiteTexture );
+			pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[s->texinfo->texture->gl_texturenum].Fresnel );
 
 			// diffusion - refracted water!!!
 			if( FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )

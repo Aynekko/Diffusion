@@ -147,6 +147,7 @@ typedef struct glsl_prog_s
 	GLint		u_GlossSmoothness;
 	GLint		u_EmbossScale;
 	GLint		u_FoliageSwayHeight;
+	GLint		u_Fresnel;
 
 	// motion blur
 	GLint		u_Accum;

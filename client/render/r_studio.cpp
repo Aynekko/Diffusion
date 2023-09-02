@@ -5292,6 +5292,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
 			pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
 			pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
+			pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[mat->gl_diffuse_id].Fresnel );
 			if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
 			{
 				pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );

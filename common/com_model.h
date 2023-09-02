@@ -69,6 +69,7 @@ typedef struct material_s
 	int FoliageSwayHeight;
 	bool ApplyColor;
 	unsigned short gl_colormask_id;
+	float Fresnel;
 
 	// parallax interiors
 	unsigned short	gl_interiormap_id;
