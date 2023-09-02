@@ -50,6 +50,12 @@ void CEnvRainModify::Spawn(void)
 {
 	if( FStringNull(pev->targetname) )
 		SetBits(pev->spawnflags, SF_RAIN_CONSTANT);
+
+	if( HasSpawnFlags(SF_RAIN_CONSTANT) )
+	{
+		SetThink( &CBaseEntity::SUB_CallUseToggle );
+		SetNextThink( 0.2 );
+	}
 }
 
 void CEnvRainModify::KeyValue(KeyValueData* pkvd)
@@ -92,11 +98,7 @@ void CEnvRainModify::KeyValue(KeyValueData* pkvd)
 
 void CEnvRainModify::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	if( HasSpawnFlags(SF_RAIN_CONSTANT) )
-		return; // constant
-
-//	CBasePlayer* pPlayer = (CBasePlayer*)UTIL_PlayerByIndex(1);
-	// diffusion - fixed: send to all players
+	// diffusion - send to all players
 	CBasePlayer *pPlayer = NULL;
 
 	for( int i = 1; i <= gpGlobals->maxClients; i++ )

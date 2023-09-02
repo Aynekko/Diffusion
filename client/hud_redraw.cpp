@@ -117,6 +117,7 @@ void CHud::Think( void )
 		breath.m_vecColor = Vector(1,1,1);
 		breath.m_vecColorVelocity = g_vecZero;
 		breath.m_flAlpha = 0.25;
+		breath.m_flStartAlpha = 0;
 		breath.m_flAlphaVelocity = -0.25;
 		breath.m_flRadius = 25;
 		breath.m_flRadiusVelocity = 0.1;
