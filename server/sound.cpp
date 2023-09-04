@@ -204,7 +204,10 @@ void CAmbientGeneric :: Spawn( void )
 
 	// if we have a parent...
 	if( m_hParent != NULL )
+	{
 		SetNullModel(); // set the model to send entity to the client
+		pev->effects |= EF_SKIPPVS;
+	}
 	
 	// Set up think function for dynamic modification 
 	// of ambient sound's pitch or volume. Don't
@@ -299,7 +302,7 @@ void CAmbientGeneric :: RampThink( void )
 	int fChanged = 0;		// FALSE if pitch and vol remain unchanged this round
 	int	prev;
 	
-	if (!m_dpv.spinup && !m_dpv.spindown && !m_dpv.fadein && !m_dpv.fadeout && !m_dpv.lfotype)
+	if( !m_dpv.spinup && !m_dpv.spindown && !m_dpv.fadein && !m_dpv.fadeout && !m_dpv.lfotype )
 		return;						// no ramps or lfo, stop thinking
 
 	// ==============
@@ -474,7 +477,7 @@ void CAmbientGeneric :: RampThink( void )
 	// Send update to playing sound only if we actually changed
 	// pitch or volume in this routine.
 
-	if (flags && fChanged) 
+	if ( flags && fChanged )
 	{
 		if (pitch == PITCH_NORM)
 			pitch = PITCH_NORM + 1; // don't send 'no pitch' !
@@ -491,7 +494,6 @@ void CAmbientGeneric :: RampThink( void )
 
 	// update ramps at 5hz
 	SetNextThink(0.2);
-	return;
 }
 
 // Init all ramp params in preparation to 
@@ -661,7 +663,7 @@ void CAmbientGeneric :: ToggleUse ( CBaseEntity *pActivator, CBaseEntity *pCalle
 
 				m_dpv.fadeout = m_dpv.fadeoutsav;
 				m_dpv.fadein = 0;
-				pev->nextthink = gpGlobals->time + 0.1;
+				SetNextThink( 0.1 );
 			}
 			else
 			{
@@ -670,6 +672,8 @@ void CAmbientGeneric :: ToggleUse ( CBaseEntity *pActivator, CBaseEntity *pCalle
 				else
 					// shut sound off
 					UTIL_EmitAmbientSound( edict(), GetAbsOrigin(), szSoundFile, 0, 0, SND_STOP, 0 );
+
+				DontThink();
 			}
 		}
 	}
