@@ -1842,8 +1842,8 @@ void CStudioModelRenderer::LoadStudioMaterials( void )
 		// precache as many shaders as possible
 		GL_UberShaderForSolidStudio( pmaterial, false, bone_weights, false, m_pStudioHeader->numbones );
 		// diffusion - precache lights too to minimize stutters
-		GL_UberShaderForDlightStudio( &tr.defSpotlight, pmaterial, bone_weights, m_pStudioHeader->numbones );
-		GL_UberShaderForDlightStudio( &tr.defOmnilight, pmaterial, bone_weights, m_pStudioHeader->numbones );
+	//	GL_UberShaderForDlightStudio( &tr.defSpotlight, pmaterial, bone_weights, m_pStudioHeader->numbones );
+	//	GL_UberShaderForDlightStudio( &tr.defOmnilight, pmaterial, bone_weights, m_pStudioHeader->numbones );
 	}
 }
 

@@ -825,8 +825,8 @@ static void Mod_PrecacheShaders( void )
 		{
 			GL_UberShaderForSolidBmodel( surf );
 			// diffusion - precache lights too to minimize stutters
-			GL_UberShaderForBmodelDlight( &tr.defSpotlight, surf );
-			GL_UberShaderForBmodelDlight( &tr.defOmnilight, surf );
+		//	GL_UberShaderForBmodelDlight( &tr.defSpotlight, surf );
+		//	GL_UberShaderForBmodelDlight( &tr.defOmnilight, surf );
 		}
 	}
 
