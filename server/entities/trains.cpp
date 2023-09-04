@@ -906,6 +906,13 @@ void CFuncTrain :: Next( void )
 	}
 	else
 	{
+		if( pev->target == pTarg->pev->target ) // thanks to Casper for report
+		{
+			ALERT( at_error, "Path entity %s have the target set as itself! Train stopped.\n", pTarg->GetTargetname() );
+			Stop();
+			return;
+		}
+		
 		pev->target = pTarg->pev->target;
 	}
 
