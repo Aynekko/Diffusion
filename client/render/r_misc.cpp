@@ -33,6 +33,7 @@ GNU General Public License for more details.
 used iuser3 "flags":
 -660 func_smokevolume
 -661 prop_explosive_barrel
+-663 env_bubbles
 -666 item_flare
 -667 monster on fire
 -668 dust particles from car wheel
@@ -473,6 +474,44 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				}
 
 				tr.ParticleTime[ParticleEntIndex] = tr.time + ent->curstate.fuser3;
+
+				return 0; // don't draw this entity
+			}
+			else if( ent->model->type == mod_brush && ent->curstate.iuser3 == -663 ) // env_bubbles!
+			{
+				if( ent->curstate.fuser2 <= 0.0f )
+					return 0; // something bad happened with the timing (check delta.lst?)
+
+				int ParticleEntIndex = ent->index;
+				if( tr.time < tr.ParticleTime[ParticleEntIndex] )
+					return 0;
+
+				int B_Distance = ent->curstate.iuser4;
+				int Count = (int)ent->curstate.fuser1 + 1;
+				int Density = Count * 3 + 6;
+				float maxHeight = ent->curstate.maxs.z - ent->curstate.mins.z;
+				int width = ent->curstate.maxs.x - ent->curstate.mins.x;
+				int depth = ent->curstate.maxs.y - ent->curstate.mins.y;
+
+				Vector B_Org;
+				for( int i = 0; i < Count; i++ )
+				{
+					B_Org.x = ent->curstate.mins.x + RANDOM_LONG( 0, width - 1 );
+					B_Org.y = ent->curstate.mins.y + RANDOM_LONG( 0, depth - 1 );
+					B_Org.z = ent->curstate.mins.z;
+					float vertical_speed = RANDOM_LONG( 80, 140 );
+
+					g_pParticles.Bubble( ParticleEntIndex, B_Org, vertical_speed, B_Distance, tr.time + (maxHeight / vertical_speed) - 0.1f, ent->curstate.fuser3 );
+				}
+
+				// set next time for the bubbles to appear
+				float m_bubble_frequency = ent->curstate.fuser2;
+				if( m_bubble_frequency > 19.0f )
+					m_bubble_frequency = 0.5f;
+				else
+					m_bubble_frequency = 2.5f - (0.1f * m_bubble_frequency);
+
+				tr.ParticleTime[ParticleEntIndex] = tr.time + m_bubble_frequency;
 
 				return 0; // don't draw this entity
 			}

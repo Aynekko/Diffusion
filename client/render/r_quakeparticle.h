@@ -38,7 +38,8 @@ GNU General Public License for more details.
 #define FPART_SKYBOX		BIT(10) // diffusion - only in 3d sky
 #define FPART_FLOATING		BIT(11) // diffusion - float on water
 #define FPART_FLOATING_ORIENTED		BIT(12) // diffusion - float on water, but oriented to the top and two-side
-#define FPART_AFLOAT BIT(13) // she is ready to settle down
+#define FPART_AFLOAT		BIT(13) // she is ready to settle down
+#define FPART_SINEWAVE		BIT(14) // for the bubbles...
 
 typedef enum
 {
@@ -52,6 +53,7 @@ typedef enum
 	TYPE_DIRT,
 	TYPE_FIREBALL,
 	TYPE_BLOOD,
+	TYPE_BUBBLES,
 	TYPE_CUSTOM,
 };
 
@@ -76,6 +78,8 @@ public:
 	float		m_flDistance; // don't allow particle over a certain distance
 	float		m_flStartAlpha;
 	Vector		m_vecAddedVelocity;
+	float		m_flDieTime;
+	float		m_flSinSpeed;
 
 	// only used with flag FPART_DISTANCESCALE
 	float m_flMinScale;
@@ -158,11 +162,9 @@ public:
 	int m_hDirt;
 	int m_hDustMote;
 	int m_hExplosion;
+	int m_hBubble;
 
 	CQuakePart *m_pActiveParticles;
-
-//	cvar_t *m_pAllowParticles;
-//	cvar_t *m_pParticleLod;
 
 	void		Clear( void );
 	void		Update( void );
@@ -180,7 +182,7 @@ public:
 	// example presets
 	void ExplosionParticles( int EntIndex, const Vector &pos );
 	void BulletParticles( int EntIndex, const Vector &org, const Vector &dir );
-	void BubbleParticles( int EntIndex, const Vector &org, int count, float magnitude );
+	void Bubble( int EntIndex, const Vector &pos, float Speed, int Distance, float DieTime, float SinSpeed );
 	void SparkParticles( int EntIndex, const Vector &org, const Vector &dir );
 	void RicochetSparks( int EntIndex, const Vector &org, float scale );
 	void SmokeParticles( int EntIndex, const Vector &pos, int count, float speed = 0, float scale = 0 );

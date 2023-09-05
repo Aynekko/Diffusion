@@ -201,6 +201,7 @@
     <ClCompile Include="entities\env_angles.cpp" />
     <ClCompile Include="entities\env_ball.cpp" />
     <ClCompile Include="entities\env_bonus.cpp" />
+    <ClCompile Include="entities\env_bubbles_new.cpp" />
     <ClCompile Include="entities\env_cable.cpp" />
     <ClCompile Include="entities\env_holdable.cpp" />
     <ClCompile Include="entities\env_particle.cpp" />

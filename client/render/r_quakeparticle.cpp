@@ -49,6 +49,7 @@ MemBlock<CQuakePart>ParticleArray_Sand( MAX_PARTICLES ); // TYPE_SAND
 MemBlock<CQuakePart>ParticleArray_Dirt( MAX_PARTICLES ); // TYPE_DIRT
 MemBlock<CQuakePart>ParticleArray_Fireball( MAX_PARTICLES ); // TYPE_FIREBALL
 MemBlock<CQuakePart>ParticleArray_Blood( MAX_PARTICLES ); // TYPE_BLOOD
+MemBlock<CQuakePart>ParticleArray_Bubbles( MAX_PARTICLES ); // TYPE_BUBBLES
 int partcounter = 0;
 
 void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
@@ -152,7 +153,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		else
 		{
 			curAlpha = curParticle->m_flAlpha + curParticle->m_flAlphaVelocity * time;
-			if( curAlpha <= 0.0f || curRadius <= 0.0f || curLength <= 0.0f )
+			if( curAlpha <= 0.0f || curRadius <= 0.0f || curLength <= 0.0f || (curParticle->m_flDieTime > 0.0f && tr.time > curParticle->m_flDieTime) )
 			{
 				if( curParticle->EntIndex > 0 )
 					ParticleCountPerEnt[curParticle->EntIndex]--;
@@ -181,6 +182,13 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 				ClearBits( curParticle->m_iFlags, FPART_FADEIN );
 				curParticle->m_flTime = tr.time;
 			}
+		}
+
+		if( FBitSet( curParticle->m_iFlags, FPART_SINEWAVE ) )
+		{
+			float spd = curParticle->m_vecVelocity.Length() * 0.0005f;
+			org.x += sin( spd * curParticle->m_flSinSpeed + tr.time ) * curParticle->m_flSinSpeed;
+			org.y += sin( spd * curParticle->m_flSinSpeed + (tr.time * 5.5f) + 0.7f ) * curParticle->m_flSinSpeed * 0.8f;
 		}
 
 		int contents = POINT_CONTENTS( org );
@@ -454,28 +462,16 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		}
 		else
 		{
-			if( curParticle->m_flRotation || curParticle->m_flRotationVelocity )
-			{
-				// Rotate it around its normal
-				RotatePointAroundVector( axis[1], Forward, Right, curRotation );
-				axis[2] = CrossProduct( Forward, axis[1] );
+			// Rotate it around its normal
+			RotatePointAroundVector( axis[1], Forward, Right, curRotation );
+			axis[2] = CrossProduct( Forward, axis[1] );
 
-				// the normal should point at the viewer
-				axis[0] = -Forward;
+			// the normal should point at the viewer
+			axis[0] = -Forward;
 
-				// Scale the axes by radius
-				axis[1] *= curRadius;
-				axis[2] *= curRadius;
-			}
-			else
-			{
-				// the normal should point at the viewer
-				axis[0] = -Forward;
-
-				// scale the axes by radius
-				axis[1] = Right * curRadius;
-				axis[2] = Up * curRadius;
-			}
+			// Scale the axes by radius
+			axis[1] *= curRadius;
+			axis[2] *= curRadius;
 
 			verts[0] = org + axis[1] - axis[2];
 			verts[1] = org + axis[1] + axis[2];
@@ -527,9 +523,6 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 
 	GL_Blend( GL_TRUE );
 
-	//	if( FBitSet( curParticle->m_iFlags, FPART_ADDITIVE ) )
-	//		pglBlendFunc( GL_SRC_ALPHA, GL_ONE );
-	//	else
 	pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
@@ -605,7 +598,7 @@ bool CQuakePart::Evaluate( float gravity )
 	{
 		curAlpha = m_flAlpha + m_flAlphaVelocity * time;
 
-		if( curAlpha <= 0.0f || curRadius <= 0.0f || curLength <= 0.0f )
+		if( curAlpha <= 0.0f || curRadius <= 0.0f || curLength <= 0.0f || (m_flDieTime > 0.0f && tr.time > m_flDieTime) )
 		{
 			// faded out
 			return false;
@@ -633,6 +626,13 @@ bool CQuakePart::Evaluate( float gravity )
 			ClearBits( m_iFlags, FPART_FADEIN );
 			m_flTime = tr.time;
 		}
+	}
+
+	if( FBitSet( m_iFlags, FPART_SINEWAVE ) )
+	{
+		float spd = m_vecVelocity.Length() * 0.0005f;
+		org.x += sin( spd * m_flSinSpeed + tr.time ) * m_flSinSpeed;
+		org.y += sin( spd * m_flSinSpeed + (tr.time * 5.5f) + 0.7f ) * m_flSinSpeed * 0.8f;
 	}
 
 	int contents = POINT_CONTENTS( org );
@@ -892,28 +892,16 @@ bool CQuakePart::Evaluate( float gravity )
 	}
 	else
 	{
-		if( m_flRotation || m_flRotationVelocity )
-		{
-			// Rotate it around its normal
-			RotatePointAroundVector( axis[1], Forward, Right, curRotation );
-			axis[2] = CrossProduct( Forward, axis[1] );
+		// Rotate it around its normal
+		RotatePointAroundVector( axis[1], Forward, Right, curRotation );
+		axis[2] = CrossProduct( Forward, axis[1] );
 
-			// the normal should point at the viewer
-			axis[0] = -Forward;
+		// the normal should point at the viewer
+		axis[0] = -Forward;
 
-			// Scale the axes by radius
-			axis[1] *= curRadius;
-			axis[2] *= curRadius;
-		}
-		else
-		{
-			// the normal should point at the viewer
-			axis[0] = -Forward;
-
-			// scale the axes by radius
-			axis[1] = Right * curRadius;
-			axis[2] = Up * curRadius;
-		}
+		// Scale the axes by radius
+		axis[1] *= curRadius;
+		axis[2] *= curRadius;
 
 		verts[0] = org + axis[1] - axis[2];
 		verts[1] = org + axis[1] + axis[2];
@@ -981,6 +969,7 @@ CQuakePartSystem :: CQuakePartSystem( void )
 	ParticleArray_Dirt.Clear();
 	ParticleArray_Fireball.Clear();
 	ParticleArray_Blood.Clear();
+	ParticleArray_Bubbles.Clear();
 
 	partcounter = 0;
 
@@ -1017,6 +1006,7 @@ void CQuakePartSystem :: Clear( void )
 	m_hDirt = LOAD_TEXTURE( "gfx/particles/dirtparticle", NULL, 0, TF_CLAMP );
 	m_hDustMote = LOAD_TEXTURE( "gfx/particles/dustmote", NULL, 0, TF_CLAMP );
 	m_hExplosion = LOAD_TEXTURE( "gfx/particles/explosion", NULL, 0, TF_CLAMP );
+	m_hBubble = LOAD_TEXTURE( "gfx/particles/bubble", NULL, 0, TF_CLAMP );
 
 	ParsePartInfos( "data/particles.txt" );
 
@@ -1030,6 +1020,7 @@ void CQuakePartSystem :: Clear( void )
 	ParticleArray_Dirt.Clear();
 	ParticleArray_Fireball.Clear();
 	ParticleArray_Blood.Clear();
+	ParticleArray_Bubbles.Clear();
 
 	partcounter = 0;
 
@@ -1542,6 +1533,7 @@ void CQuakePartSystem :: Update( void )
 	DrawParticles( ParticleArray_Dirt );
 	DrawParticles( ParticleArray_Fireball );
 	DrawParticles( ParticleArray_Blood );
+	DrawParticles( ParticleArray_Bubbles );
 
 	// draw particles from txt-file (through glbegin-end...)
 	CQuakePart *pCur, *pNext;
@@ -1611,6 +1603,9 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 			return false;
 	}
 
+	if( !src->m_flDieTime || src->m_flDieTime <= 0 )
+		src->m_flDieTime = 0.0f;
+
 	CQuakePart *dst = NULL;
 	
 	switch( src->ParticleType )
@@ -1645,6 +1640,9 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 		break;
 	case TYPE_BLOOD:
 		dst = ParticleArray_Blood.Allocate();
+		break;
+	case TYPE_BUBBLES:
+		dst = ParticleArray_Bubbles.Allocate();
 		break;
 	case TYPE_CUSTOM:
 		dst = AllocParticle();
@@ -1691,6 +1689,8 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 	dst->ParticleType = src->ParticleType;
 	dst->m_vecAddedVelocity = src->m_vecAddedVelocity;
 	dst->EntIndex = src->EntIndex;
+	dst->m_flDieTime = src->m_flDieTime;
+	dst->m_flSinSpeed = src->m_flSinSpeed;
 //	dst->AlphaDownScale = 1.0f;
 
 	// needs to save old origin
@@ -2038,7 +2038,6 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 		return;
 
 	int flags = FPART_VERTEXLIGHT | FPART_FADEIN;
-	int count = 1;
 	float posRand = 20.0f;
 	float ScaleRand = 0.0f;
 
@@ -2055,40 +2054,36 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 
 	if( Particle == m_hSmoke )
 	{
-		for( int i = 0; i < count; i++ )
+		if( !Scale )
+			Scale = RANDOM_FLOAT( 30, 40 );
+		else
 		{
-			if( !Scale )
-				Scale = RANDOM_FLOAT( 30, 40 );
-			else
-			{
-				ScaleRand = Scale * 0.1;
-				Scale = RANDOM_FLOAT( Scale - ScaleRand, Scale + ScaleRand );
-			}
-			src.m_vecOrigin.x = pos.x + RANDOM_FLOAT( -posRand, posRand );
-			src.m_vecOrigin.y = pos.y + RANDOM_FLOAT( -posRand, posRand );
-			src.m_vecOrigin.z = pos.z + RANDOM_FLOAT( -posRand, posRand );
-			src.m_vecVelocity.x = 0;
-			src.m_vecVelocity.y = 0;
-			src.m_vecVelocity.z = 0;
-			src.m_vecAccel = g_vecZero;
-			src.m_vecColor = Vector( 1, 1, 1 );
-			src.m_vecColorVelocity = g_vecZero;
-			src.m_flAlpha = Alpha;
-			src.m_flStartAlpha = 0.0f;
-			src.m_flAlphaVelocity = -0.5 * Alpha;
-			src.m_flRadius = Scale;
-			src.m_flRadiusVelocity = 0.0f;
-			src.m_flLength = 1;
-			src.m_flLengthVelocity = 0;
-			src.m_flRotation = RANDOM_LONG( 1, 360 );
-			src.m_flRotationVelocity = 0;
-			src.m_flDistance = Distance;
-			src.ParticleType = TYPE_SMOKE;
-			src.EntIndex = EntIndex;
-
-			if( !AddParticle( &src, Particle, flags ) )
-				break;
+			ScaleRand = Scale * 0.1;
+			Scale = RANDOM_FLOAT( Scale - ScaleRand, Scale + ScaleRand );
 		}
+		src.m_vecOrigin.x = pos.x + RANDOM_FLOAT( -posRand, posRand );
+		src.m_vecOrigin.y = pos.y + RANDOM_FLOAT( -posRand, posRand );
+		src.m_vecOrigin.z = pos.z + RANDOM_FLOAT( -posRand, posRand );
+		src.m_vecVelocity.x = 0;
+		src.m_vecVelocity.y = 0;
+		src.m_vecVelocity.z = 0;
+		src.m_vecAccel = g_vecZero;
+		src.m_vecColor = Vector( 1, 1, 1 );
+		src.m_vecColorVelocity = g_vecZero;
+		src.m_flAlpha = Alpha;
+		src.m_flStartAlpha = 0.0f;
+		src.m_flAlphaVelocity = -0.5 * Alpha;
+		src.m_flRadius = Scale;
+		src.m_flRadiusVelocity = 0.0f;
+		src.m_flLength = 1;
+		src.m_flLengthVelocity = 0;
+		src.m_flRotation = RANDOM_LONG( 1, 360 );
+		src.m_flRotationVelocity = 0;
+		src.m_flDistance = Distance;
+		src.ParticleType = TYPE_SMOKE;
+		src.EntIndex = EntIndex;
+
+		AddParticle( &src, Particle, flags );
 	}
 	else if( Particle == m_hDustMote )
 	{
@@ -2096,42 +2091,38 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 
 		flags |= FPART_DISTANCESCALE;
 
-		for( int i = 0; i < count; i++ )
+		if( !Scale )
+			Scale = RANDOM_FLOAT( 0.15, 0.40 );
+		else
 		{
-			if( !Scale )
-				Scale = RANDOM_FLOAT( 0.15, 0.40 );
-			else
-			{
-				ScaleRand = Scale * 0.1;
-				Scale = RANDOM_FLOAT( Scale - ScaleRand, Scale + ScaleRand );
-			}
-			src.m_vecOrigin.x = pos.x + RANDOM_FLOAT( -posRand, posRand );
-			src.m_vecOrigin.y = pos.y + RANDOM_FLOAT( -posRand, posRand );
-			src.m_vecOrigin.z = pos.z + RANDOM_FLOAT( -posRand, posRand );
-			src.m_vecVelocity.x = 0;
-			src.m_vecVelocity.y = 0;
-			src.m_vecVelocity.z = RANDOM_FLOAT(-5, 5);
-			src.m_vecAccel = g_vecZero;
-			src.m_vecColor = Vector( 1, 1, 1 );
-			src.m_vecColorVelocity = g_vecZero;
-			src.m_flAlpha = Alpha;
-			src.m_flStartAlpha = 0.0f;
-			src.m_flAlphaVelocity = -0.5 * Alpha;
-			src.m_flRadius = Scale;
-			src.m_flMinScale = Scale * 0.25;
-			src.m_flMaxScale = Scale * 2.0;
-			src.m_flRadiusVelocity = 0.0f;
-			src.m_flLength = 1;
-			src.m_flLengthVelocity = 0;
-			src.m_flRotation = RANDOM_LONG( 1, 360 );
-			src.m_flRotationVelocity = 0;
-			src.m_flDistance = Distance;
-			src.ParticleType = TYPE_DUSTMOTE;
-			src.EntIndex = EntIndex;
-
-			if( !AddParticle( &src, Particle, flags ) )
-				break;
+			ScaleRand = Scale * 0.1;
+			Scale = RANDOM_FLOAT( Scale - ScaleRand, Scale + ScaleRand );
 		}
+		src.m_vecOrigin.x = pos.x + RANDOM_FLOAT( -posRand, posRand );
+		src.m_vecOrigin.y = pos.y + RANDOM_FLOAT( -posRand, posRand );
+		src.m_vecOrigin.z = pos.z + RANDOM_FLOAT( -posRand, posRand );
+		src.m_vecVelocity.x = 0;
+		src.m_vecVelocity.y = 0;
+		src.m_vecVelocity.z = RANDOM_FLOAT(-5, 5);
+		src.m_vecAccel = g_vecZero;
+		src.m_vecColor = Vector( 1, 1, 1 );
+		src.m_vecColorVelocity = g_vecZero;
+		src.m_flAlpha = Alpha;
+		src.m_flStartAlpha = 0.0f;
+		src.m_flAlphaVelocity = -0.5 * Alpha;
+		src.m_flRadius = Scale;
+		src.m_flMinScale = Scale * 0.25;
+		src.m_flMaxScale = Scale * 2.0;
+		src.m_flRadiusVelocity = 0.0f;
+		src.m_flLength = 1;
+		src.m_flLengthVelocity = 0;
+		src.m_flRotation = RANDOM_LONG( 1, 360 );
+		src.m_flRotationVelocity = 0;
+		src.m_flDistance = Distance;
+		src.ParticleType = TYPE_DUSTMOTE;
+		src.EntIndex = EntIndex;
+
+		AddParticle( &src, Particle, flags );
 	}
 }
 
@@ -2376,4 +2367,39 @@ void CQuakePartSystem::BloodParticle( int EntIndex, const Vector &pos, float Sca
 	src.m_flMaxScale = Scale * 5;
 
 	AddParticle( &src, m_hBloodSplat, flags );
+}
+
+void CQuakePartSystem::Bubble( int EntIndex, const Vector &pos, float Speed, int Distance, float DieTime, float SinSpeed )
+{
+	CQuakePart src;
+
+	if( !g_fRenderInitialized )
+		return;
+
+	int flags = FPART_SINEWAVE;
+
+	float Scale = 7.5f / RANDOM_FLOAT( 2.0f, 5.0f );
+
+	src.m_vecOrigin = pos;
+	src.m_vecVelocity = Vector( 0, 0, 0 );
+	src.m_vecVelocity.z = Speed;
+	src.m_vecAccel = Vector( 0, 0, 0 );
+	src.m_vecColor = Vector( 1, 1, 1 );
+	src.m_vecColorVelocity = Vector( 0, 0, 0 );
+	src.m_flAlpha = 1.0;
+	src.m_flStartAlpha = 0.0f;
+	src.m_flAlphaVelocity = 0.0;
+	src.m_flRadius = Scale;
+	src.m_flRadiusVelocity = 0;
+	src.m_flLength = 1;
+	src.m_flLengthVelocity = 0;
+	src.m_flRotation = 0;
+	src.m_flRotationVelocity = 0;
+	src.m_flDistance = Distance;
+	src.ParticleType = TYPE_BUBBLES;
+	src.EntIndex = EntIndex;
+	src.m_flDieTime = DieTime;
+	src.m_flSinSpeed = SinSpeed * RANDOM_FLOAT(0.05f, 0.15f);
+
+	AddParticle( &src, m_hBubble, flags );
 }

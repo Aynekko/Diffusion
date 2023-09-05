@@ -23,7 +23,7 @@ public:
 	int	m_state;
 };
 
-LINK_ENTITY_TO_CLASS(env_bubbles, CBubbling);
+LINK_ENTITY_TO_CLASS(env_bubbles_old, CBubbling);
 
 BEGIN_DATADESC(CBubbling)
 	DEFINE_KEYFIELD(m_density, FIELD_INTEGER, "density"),
@@ -49,7 +49,6 @@ void CBubbling::Spawn(void)
 	pev->rendercolor.x = speed >> 8;
 	pev->rendercolor.y = speed & 255;
 	pev->rendercolor.z = (pev->speed < 0) ? 1 : 0;
-
 
 	if (!HasSpawnFlags(SF_BUBBLES_STARTOFF))
 	{

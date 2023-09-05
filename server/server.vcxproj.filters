@@ -770,6 +770,9 @@
     <ClCompile Include="entities\env_cable.cpp">
       <Filter>Source Files\entities</Filter>
     </ClCompile>
+    <ClCompile Include="entities\env_bubbles_new.cpp">
+      <Filter>Source Files\entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="monsters\activity.h">
