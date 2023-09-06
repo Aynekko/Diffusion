@@ -66,6 +66,11 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 	if( ParticleArray.IsClear() )
 		return; // no objects to draw
 
+	if( glState.drawTrans && FBitSet( curParticle->m_iFlags, FPART_SOLID ) )
+		return;
+	else if( !glState.drawTrans && !FBitSet( curParticle->m_iFlags, FPART_SOLID ) )
+		return;
+
 	if( FBitSet( curParticle->m_iFlags, FPART_SKYBOX ) && !(RI->params & RP_SKYPORTALVIEW) )
 		return;
 	else if( (RI->params & RP_SKYPORTALVIEW) && !FBitSet( curParticle->m_iFlags, FPART_SKYBOX ) )
@@ -547,6 +552,11 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 
 bool CQuakePart::Evaluate( float gravity )
 {
+	if( glState.drawTrans && FBitSet( m_iFlags, FPART_SOLID ) )
+		return true;
+	else if( !glState.drawTrans && !FBitSet( m_iFlags, FPART_SOLID ) )
+		return true;
+	
 	if( FBitSet( m_iFlags, FPART_SKYBOX ) && !(RI->params & RP_SKYPORTALVIEW) )
 		return true;
 	else if( (RI->params & RP_SKYPORTALVIEW) && !FBitSet( m_iFlags, FPART_SKYBOX ) )
@@ -1521,7 +1531,8 @@ void CQuakePartSystem :: Update( void )
 	if( (RI->params & RP_ENVVIEW) || (RI->params & RP_SHADOWPASS) || (RI->params & RP_MIRRORVIEW) )
 		return;
 
-	GL_DepthMask( GL_FALSE );
+	if( glState.drawTrans )
+		GL_DepthMask( GL_FALSE );
 
 	DrawParticles( ParticleArray_Default );
 	DrawParticles( ParticleArray_Dustmote );
@@ -2392,7 +2403,7 @@ void CQuakePartSystem::Bubble( int EntIndex, const Vector &pos, float Speed, int
 	if( !g_fRenderInitialized )
 		return;
 
-	int flags = FPART_SINEWAVE;
+	int flags = FPART_SINEWAVE | FPART_SOLID;
 
 	float Scale = 7.5f / RANDOM_FLOAT( 2.0f, 5.0f );
 

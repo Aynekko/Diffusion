@@ -39,6 +39,8 @@ void HUD_DrawNormalTriangles( void )
 
 		R_DrawCable( RI->currententity );
 	}
+
+	g_pParticles.Update();
 }
 
 void HUD_DrawTransparentTriangles( void )

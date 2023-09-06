@@ -1998,7 +1998,6 @@ void R_Sprite_Smoke( TEMPENTITY *pTemp, float scale, int mode )
 	pTemp->entity.curstate.scale = scale;
 }
 
-// bugbug - drawn on top of the water, not refracted.
 void R_BubbleTrail( const Vector start, const Vector end, float height, int count, float speed )
 {
 	float sine, cosine, zspeed;

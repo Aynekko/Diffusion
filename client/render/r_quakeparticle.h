@@ -40,6 +40,7 @@ GNU General Public License for more details.
 #define FPART_FLOATING_ORIENTED		BIT(12) // diffusion - float on water, but oriented to the top and two-side
 #define FPART_AFLOAT		BIT(13) // she is ready to settle down
 #define FPART_SINEWAVE		BIT(14) // for the bubbles...
+#define FPART_SOLID			BIT(15) // goes through solid render pass
 
 typedef enum
 {
