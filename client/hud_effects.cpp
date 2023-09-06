@@ -63,8 +63,8 @@ void CScreenEffects::DrawGameSaved(void)
 	if( !ShouldDrawGameSaved )
 		return;
 
-	if( tr.time == tr.oldtime ) // not in paused
-		return;
+//	if( tr.time == tr.oldtime ) // not in paused
+//		return;
 
 	const model_s *pSaveIcon = gEngfuncs.GetSpritePointer( SaveIcon );
 	int total_frames = SPR_Frames( SaveIcon );
