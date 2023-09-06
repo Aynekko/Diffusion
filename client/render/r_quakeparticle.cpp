@@ -549,7 +549,10 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 	pglDisableClientState( GL_COLOR_ARRAY );
 
 	if( !glState.drawTrans )
+	{
 		GL_AlphaTest( GL_FALSE );
+		pglAlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
+	}
 
 //	gEngfuncs.pTriAPI->CullFace( TRI_FRONT );
 }
@@ -967,7 +970,10 @@ bool CQuakePart::Evaluate( float gravity )
 	pglEnd();
 
 	if( !glState.drawTrans )
+	{
 		GL_AlphaTest( GL_FALSE );
+		pglAlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
+	}
 
 	return true;
 }
