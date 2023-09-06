@@ -15,6 +15,7 @@ GNU General Public License for more details.
 
 #include "const.h"
 #include "mathlib.h"
+#include "alpha2coverage.h"
 
 #if defined( GRASS_LIGHT_PROJECTION )
 uniform sampler2D		u_ProjectMap;
@@ -71,6 +72,8 @@ void main( void )
 
 	// compute the diffuse term
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+
+	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
 
 	vec3 light = vec3( 1.0 );
 	float shadow = 1.0;
