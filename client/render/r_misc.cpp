@@ -2000,10 +2000,8 @@ void R_Sprite_Smoke( TEMPENTITY *pTemp, float scale, int mode )
 
 void R_BubbleTrail( const Vector start, const Vector end, float height, int count, float speed )
 {
-	float sine, cosine, zspeed;
-	float dist, angle;
+	float dist;
 	Vector origin;
-	model_t *mod;
 	int	i;
 
 	for( i = 0; i < count; i++ )
@@ -2013,6 +2011,23 @@ void R_BubbleTrail( const Vector start, const Vector end, float height, int coun
 		float vertical_speed = RANDOM_LONG( 80, 140 );
 
 		g_pParticles.Bubble( 0, origin, vertical_speed, 1000, tr.time + ((height - (origin.z - start.z)) / vertical_speed) - 0.1f, 0 );
+	}
+}
+
+void R_Bubbles( const Vector mins, const Vector maxs, float height, int count, float speed )
+{
+	Vector origin;
+	int i;
+
+	for( i = 0; i < count; i++ )
+	{
+		origin.x = RANDOM_LONG( mins.x, maxs.x );
+		origin.y = RANDOM_LONG( mins.y, maxs.y );
+		origin.z = RANDOM_LONG( mins.z, maxs.z );
+
+		float vertical_speed = RANDOM_LONG( 80, 140 );
+
+		g_pParticles.Bubble( 0, origin, vertical_speed, 1000, tr.time + ((height - (origin.z - mins.z)) / vertical_speed) - 0.1f, 0 );
 	}
 }
 

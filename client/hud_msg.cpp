@@ -782,7 +782,7 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		Count = READ_BYTE();
 		float vel = READ_COORD();
 		if( Message == TE_BUBBLES )
-		{}//R_Bubbles( pos, pos2, scale, modelIndex, count, vel );
+			R_Bubbles( pos, pos2, Scale, Count, vel );
 		else 
 			R_BubbleTrail( pos, pos2, Scale, Count, vel );
 	}

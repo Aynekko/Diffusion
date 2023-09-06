@@ -2395,7 +2395,7 @@ void UTIL_Bubbles( Vector mins, Vector maxs, int count )
 	float flHeight = UTIL_WaterLevel( mid,  mid.z, mid.z + 1024 );
 	flHeight = flHeight - mins.z;
 
-	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, mid );
+	MESSAGE_BEGIN( MSG_PAS, gmsgTempEnt, mid );
 		WRITE_BYTE( TE_BUBBLES );
 		WRITE_COORD( mins.x );	// mins
 		WRITE_COORD( mins.y );
@@ -2404,7 +2404,7 @@ void UTIL_Bubbles( Vector mins, Vector maxs, int count )
 		WRITE_COORD( maxs.y );
 		WRITE_COORD( maxs.z );
 		WRITE_COORD( flHeight );			// height
-		WRITE_SHORT( g_sModelIndexBubbles );
+	//	WRITE_SHORT( g_sModelIndexBubbles );
 		WRITE_BYTE( count ); // count
 		WRITE_COORD( 8 ); // speed
 	MESSAGE_END();

@@ -532,6 +532,12 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
+	if( !glState.drawTrans )
+	{
+		GL_AlphaTest( GL_TRUE );
+		pglAlphaFunc( GL_GREATER, 0.25f );
+	}
+
 	if( m_iNumVerts && m_iNumIndex )
 	{
 		// flush any remaining verts
@@ -546,6 +552,9 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 	pglDisableClientState( GL_TEXTURE_COORD_ARRAY );
 	pglDisableClientState( GL_VERTEX_ARRAY );
 	pglDisableClientState( GL_COLOR_ARRAY );
+
+	if( !glState.drawTrans )
+		GL_AlphaTest( GL_FALSE );
 
 //	gEngfuncs.pTriAPI->CullFace( TRI_FRONT );
 }

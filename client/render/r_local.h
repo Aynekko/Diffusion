@@ -791,6 +791,7 @@ void R_MakeWeaponShake( int Weapon, int Mode, bool Override = false );
 bool LocalWeaponAnims( void );
 void PlayLowAmmoSound( int entindex, Vector origin, int Volume );
 void R_BubbleTrail( const Vector start, const Vector end, float height, int count, float speed );
+void R_Bubbles( const Vector mins, const Vector maxs, float height, int count, float speed );
 
 //
 // r_movie.cpp
