@@ -50,7 +50,6 @@ public:
 
 	bool BodyTurn( const Vector &vecTarget );
 	bool RunningShooting; // if true, we are firing bullets while running
-	float body_yaw;
 
 	virtual void DeathSound(void);
 	virtual void PainSound(void);

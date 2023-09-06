@@ -190,8 +190,6 @@ END_DATADESC()
 
 IMPLEMENT_SAVERESTORE(CHGrunt, CSquadMonster);
 
-
-
 //=========================================================
 // AI Schedules Specific to this monster
 //=========================================================
@@ -311,15 +309,12 @@ Schedule_t slGruntEstablishLineOfFire[] =
 
 Task_t tlGruntRunAndFire[] =
 {
-	//		{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_FAIL				},
 			{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_GRUNT_ELOF_FAIL	},
 
 			{ TASK_GET_PATH_TO_ENEMY,	(float)0						},
 			{ TASK_GRUNT_SPEAK_SENTENCE,(float)0						},
 			{ TASK_RUN_PATH,			(float)0						},
 			{ TASK_WAIT_FOR_MOVEMENT,	(float)0						},
-		//	{ TASK_MOVE_TO_TARGET_RANGE,(float)150						},
-		//	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE				},
 };
 
 Schedule_t slGruntRunAndFire[] =
@@ -1947,7 +1942,12 @@ void CHGrunt :: StartTask ( Task_t *pTask )
 			return;
 		}
 
+		// it's the same, but in reverse. Try nodes first.
 		if( BuildNearestRoute( m_hEnemy->GetAbsOrigin(), m_hEnemy->pev->view_ofs, 0, (m_hEnemy->GetAbsOrigin() - GetLocalOrigin()).Length() ) )
+		{
+			TaskComplete();
+		}
+		else if( BuildRoute( m_hEnemy->GetAbsOrigin(), bits_MF_TO_ENEMY, m_hEnemy ) )
 		{
 			TaskComplete();
 		}
@@ -2024,10 +2024,8 @@ bool CHGrunt::BodyTurn( const Vector &vecTarget )
 	if( yaw < -65 || yaw > 65 )
 		return false;
 
-	body_yaw = UTIL_Approach( yaw, body_yaw, 4.0f );
-
 	// turn towards vector
-	SetBoneController( 1, body_yaw );
+	SetBoneController( 1, yaw );
 
 	return true;
 }
