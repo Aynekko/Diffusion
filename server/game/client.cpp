@@ -747,6 +747,9 @@ void ClientCommand( edict_t *pEntity )
 				pTarget = UTIL_FindEntityByClassname( pTarget, CMD_ARGV( 1 ) );
 				while( pTarget != NULL )
 				{
+					// diffusion - hack for ambient generic - stop sound if we are deleting this entity
+					if( FClassnameIs( pTarget, "ambient_generic" ) )
+						pTarget->Use( pPlayer, pPlayer, USE_OFF, 0 );
 					UTIL_Remove( pTarget );
 					DeleteCount++;
 					pTarget = UTIL_FindEntityByClassname( pTarget, CMD_ARGV( 1 ) );
