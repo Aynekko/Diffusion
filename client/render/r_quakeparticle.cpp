@@ -1259,6 +1259,8 @@ int CQuakePartSystem :: ParseParticleFlags( char *pfile )
 			iFlags |= FPART_FLOATING;
 		else if( !Q_stricmp( token, "FloatingOriented" ) )
 			iFlags |= FPART_FLOATING_ORIENTED;
+		else if( !Q_stricmp( token, "Solid" ) )
+			iFlags |= FPART_SOLID;
 		else if( pfile && token[0] != '|' )
 			ALERT( at_warning, "unknown value %s for 'flags'\n", token );
 	}
