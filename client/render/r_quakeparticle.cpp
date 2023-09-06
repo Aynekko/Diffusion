@@ -378,11 +378,6 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			}
 		}
 
-		if( FBitSet( curParticle->m_iFlags, FPART_AFLOAT ) )
-		{
-			org.z += sin( tr.time );
-		}
-
 		if( curRadius == 1.0f )
 		{
 			float scale = 0.0f;
@@ -528,7 +523,10 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 
 	GL_Blend( GL_TRUE );
 
-	pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	if( glState.drawTrans )
+		pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	else
+		pglBlendFunc( GL_SRC_ALPHA, GL_ONE );
 
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
@@ -822,11 +820,6 @@ bool CQuakePart::Evaluate( float gravity )
 		}
 	}
 
-	if( FBitSet(m_iFlags, FPART_AFLOAT) )
-	{
-		org.z += sin( tr.time );
-	}
-
 	if( curRadius == 1.0f )
 	{
 		float scale = 0.0f;
@@ -939,10 +932,19 @@ bool CQuakePart::Evaluate( float gravity )
 	else
 		GL_Cull( GL_FRONT );
 
-	if( FBitSet( m_iFlags, FPART_ADDITIVE ) )
-		pglBlendFunc( GL_SRC_ALPHA, GL_ONE );
+	if( glState.drawTrans )
+	{
+		if( FBitSet( m_iFlags, FPART_ADDITIVE ) )
+			pglBlendFunc( GL_SRC_ALPHA, GL_ONE );
+		else
+			pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	}
 	else
+	{
 		pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		GL_AlphaTest( GL_TRUE );
+		pglAlphaFunc( GL_GREATER, 0.25f );
+	}
 
 	// draw the particle
 	GL_Bind( GL_TEXTURE0, m_hTexture );
@@ -966,6 +968,9 @@ bool CQuakePart::Evaluate( float gravity )
 	pglTexCoord2f( 1.0f, 1.0f );
 	pglVertex3fv( verts[3] );
 	pglEnd();
+
+	if( !glState.drawTrans )
+		GL_AlphaTest( GL_FALSE );
 
 	return true;
 }
