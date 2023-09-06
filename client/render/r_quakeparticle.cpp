@@ -66,9 +66,9 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 	if( ParticleArray.IsClear() )
 		return; // no objects to draw
 
-	if( glState.drawTrans && FBitSet( curParticle->m_iFlags, FPART_SOLID ) )
+	if( glState.drawTrans && FBitSet( curParticle->m_iFlags, FPART_OPAQUE ) )
 		return;
-	else if( !glState.drawTrans && !FBitSet( curParticle->m_iFlags, FPART_SOLID ) )
+	else if( !glState.drawTrans && !FBitSet( curParticle->m_iFlags, FPART_OPAQUE ) )
 		return;
 
 	if( FBitSet( curParticle->m_iFlags, FPART_SKYBOX ) && !(RI->params & RP_SKYPORTALVIEW) )
@@ -198,7 +198,16 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 
 		int contents = POINT_CONTENTS( org );
 
-		if( FBitSet( curParticle->m_iFlags, FPART_UNDERWATER ) )
+		if( FBitSet( curParticle->m_iFlags, FPART_NOTINSOLID ) && contents == CONTENTS_SOLID )
+		{
+			// can't have particles in solids
+			if( curParticle->EntIndex > 0 )
+				ParticleCountPerEnt[curParticle->EntIndex]--;
+			ParticleArray.DeleteCurrent();
+			partcounter--;
+			goto skip_particle;
+		}
+		else if( FBitSet( curParticle->m_iFlags, FPART_UNDERWATER ) )
 		{
 			// underwater particle
 			org2 = Vector( org.x, org.y, org.z + curRadius );
@@ -559,9 +568,9 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 
 bool CQuakePart::Evaluate( float gravity )
 {
-	if( glState.drawTrans && FBitSet( m_iFlags, FPART_SOLID ) )
+	if( glState.drawTrans && FBitSet( m_iFlags, FPART_OPAQUE ) )
 		return true;
-	else if( !glState.drawTrans && !FBitSet( m_iFlags, FPART_SOLID ) )
+	else if( !glState.drawTrans && !FBitSet( m_iFlags, FPART_OPAQUE ) )
 		return true;
 	
 	if( FBitSet( m_iFlags, FPART_SKYBOX ) && !(RI->params & RP_SKYPORTALVIEW) )
@@ -654,7 +663,12 @@ bool CQuakePart::Evaluate( float gravity )
 
 	int contents = POINT_CONTENTS( org );
 
-	if( FBitSet( m_iFlags, FPART_UNDERWATER ) )
+	if( FBitSet( m_iFlags, FPART_NOTINSOLID ) && contents == CONTENTS_SOLID )
+	{
+		// can't have particles in solids
+		return false;
+	}
+	else if( FBitSet( m_iFlags, FPART_UNDERWATER ) )
 	{
 		// underwater particle
 		org2 = Vector( org.x, org.y, org.z + curRadius );
@@ -1267,8 +1281,10 @@ int CQuakePartSystem :: ParseParticleFlags( char *pfile )
 			iFlags |= FPART_FLOATING;
 		else if( !Q_stricmp( token, "FloatingOriented" ) )
 			iFlags |= FPART_FLOATING_ORIENTED;
-		else if( !Q_stricmp( token, "Solid" ) )
-			iFlags |= FPART_SOLID;
+		else if( !Q_stricmp( token, "Opaque" ) )
+			iFlags |= FPART_OPAQUE;
+		else if( !Q_stricmp( token, "NotInSolid" ) )
+			iFlags |= FPART_NOTINSOLID;
 		else if( pfile && token[0] != '|' )
 			ALERT( at_warning, "unknown value %s for 'flags'\n", token );
 	}
@@ -2422,7 +2438,7 @@ void CQuakePartSystem::Bubble( int EntIndex, const Vector &pos, float Speed, int
 	if( !g_fRenderInitialized )
 		return;
 
-	int flags = FPART_SINEWAVE | FPART_SOLID;
+	int flags = FPART_SINEWAVE | FPART_OPAQUE;
 
 	float Scale = 7.5f / RANDOM_FLOAT( 2.0f, 5.0f );
 
