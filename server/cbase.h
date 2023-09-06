@@ -518,7 +518,7 @@ public:
 	// allow engine to allocate instance data
 	void *operator new( size_t stAllocateBlock, entvars_t *pev )
 	{
-		return (void *)ALLOC_PRIVATE(ENT(pev), stAllocateBlock);
+		return (void *)ALLOC_PRIVATE( ENT( pev ), static_cast<int>(stAllocateBlock) );
 	};
 
 	// don't use this.
@@ -583,8 +583,8 @@ public:
 #ifdef _DEBUG
 	void FunctionCheck( void *pFunction, char *name ) 
 	{ 
-		if (pFunction && !UTIL_FunctionToName( GetDataDescMap(), pFunction ) )
-			ALERT( at_warning, "FUNCTION NOT IN TABLE!: %s:%s (%08lx)\n", GetClassname(), name, (unsigned long)pFunction );
+		if( pFunction && !UTIL_FunctionToName( GetDataDescMap(), pFunction ) )
+			ALERT( at_warning, "No EXPORT: %s:%s (%08lx)\n", GetClassname(), name, (size_t)pFunction );
 	}
 
 	BASEPTR ThinkSet( BASEPTR func, char *name ) 
