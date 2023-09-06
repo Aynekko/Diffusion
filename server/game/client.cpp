@@ -1400,6 +1400,7 @@ void ClientPrecache( void )
 	PRECACHE_SOUND("hits/wood4.wav");
 
 	PRECACHE_SOUND("player/dash.wav");
+	PRECACHE_SOUND( "player/dash_underwater.wav" );
 	PRECACHE_SOUND("player/stamina_low.wav");
 	PRECACHE_SOUND("player/wallslide.wav");
 	PRECACHE_SOUND("player/electroblast.wav");

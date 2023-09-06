@@ -4811,7 +4811,13 @@ void CBasePlayer::Dash(void)
 
 		m_flStaminaValue -= 30;
 		UTIL_ScreenShakeLocal( this, GetAbsOrigin(), 2.0, 1000.0, 0.5, 100, true );
-		EMIT_SOUND(ENT(pev), CHAN_STATIC, "player/dash.wav", 1, 1.5f );
+		if( pev->waterlevel == 3 )
+		{
+			EMIT_SOUND( ENT( pev ), CHAN_STATIC, "player/dash_underwater.wav", 1, 1.5f );
+			UTIL_Bubbles( GetAbsOrigin() - Vector( 64, 64, 64 ), GetAbsOrigin() + Vector( 64, 64, 64 ), 50 );
+		}
+		else
+			EMIT_SOUND(ENT(pev), CHAN_STATIC, "player/dash.wav", 1, 1.5f );
 		LastDashTime = gpGlobals->time;
 		Dashed = true;
 		
