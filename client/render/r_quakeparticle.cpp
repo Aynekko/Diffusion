@@ -1603,7 +1603,7 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 			return false;
 	}
 
-	if( !src->m_flDieTime || src->m_flDieTime <= 0 )
+	if( !src->m_flDieTime || src->m_flDieTime <= 0.0f )
 		src->m_flDieTime = 0.0f;
 
 	CQuakePart *dst = NULL;
@@ -1739,6 +1739,7 @@ void CQuakePartSystem :: ExplosionParticles( int EntIndex, const Vector &pos )
 		src.m_flDistance = 1500;
 		src.ParticleType = TYPE_SPARKS;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSparks, flags ))
 			break;
@@ -1770,6 +1771,7 @@ void CQuakePartSystem :: ExplosionParticles( int EntIndex, const Vector &pos )
 		src.m_flDistance = 0;
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSmoke, flags ))
 			break;
@@ -1801,6 +1803,7 @@ void CQuakePartSystem :: ExplosionParticles( int EntIndex, const Vector &pos )
 		src.m_flDistance = 1500;
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSmoke, flags ) )
 			break;
@@ -1832,6 +1835,7 @@ void CQuakePartSystem :: ExplosionParticles( int EntIndex, const Vector &pos )
 		src.m_flDistance = 0;
 		src.ParticleType = TYPE_FIREBALL;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hExplosion, flags ) )
 			break;
@@ -1873,6 +1877,7 @@ void CQuakePartSystem :: SparkParticles( int EntIndex, const Vector &org, const 
 		src.m_flDistance = 0;
 		src.ParticleType = TYPE_SPARKS;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSparks, flags ))
 			break;
@@ -1919,6 +1924,7 @@ void CQuakePartSystem :: RicochetSparks( int EntIndex, const Vector &org, float 
 		src.m_flDistance = 0;
 		src.ParticleType = TYPE_SPARKS;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSparks, flags ))
 			break;
@@ -1964,6 +1970,7 @@ void CQuakePartSystem :: SmokeParticles( int EntIndex, const Vector &pos, int co
 		src.m_flDistance = 0;
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSmoke, flags ))
 			break;
@@ -2018,6 +2025,7 @@ void CQuakePartSystem::Smoke( int EntIndex, int Particle, const Vector &pos, con
 		src.m_flRotationVelocity = 0;
 		src.m_flDistance = Distance;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 		if( Particle == m_hSmoke )
 			src.ParticleType = TYPE_SMOKE;
 		else if( Particle == m_hSand )
@@ -2082,6 +2090,7 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 		src.m_flDistance = Distance;
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		AddParticle( &src, Particle, flags );
 	}
@@ -2121,6 +2130,7 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 		src.m_flDistance = Distance;
 		src.ParticleType = TYPE_DUSTMOTE;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		AddParticle( &src, Particle, flags );
 	}
@@ -2193,6 +2203,7 @@ void CQuakePartSystem :: GunSmoke( int EntIndex, const Vector &pos, Vector vel, 
 		src.m_flRotationVelocity = RANDOM_LONG(-50,50);
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSmoke, flags ))
 			break;
@@ -2246,6 +2257,7 @@ void CQuakePartSystem :: BulletParticles( int EntIndex, const Vector &org, const
 		src.m_flDistance = 2000;
 		src.ParticleType = TYPE_SPARKS;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSparks, flags ))
 			break;
@@ -2277,6 +2289,7 @@ void CQuakePartSystem :: BulletParticles( int EntIndex, const Vector &org, const
 		src.m_flDistance = 1500;
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
+		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSmoke, flags ))
 			break;
@@ -2310,6 +2323,7 @@ void CQuakePartSystem::WaterSplashParticle( int EntIndex, const Vector &pos )
 	src.m_flDistance = 0;
 	src.ParticleType = TYPE_WATERSPLASH;
 	src.EntIndex = EntIndex;
+	src.m_flDieTime = 0;
 
 	AddParticle( &src, m_hWaterSplash, flags );
 }
@@ -2341,6 +2355,7 @@ void CQuakePartSystem::BloodParticle( int EntIndex, const Vector &pos, float Sca
 	src.m_flDistance = 0;
 	src.ParticleType = TYPE_BLOOD;
 	src.EntIndex = EntIndex;
+	src.m_flDieTime = 0;
 
 	AddParticle( &src, m_hBlood, flags );
 
@@ -2365,6 +2380,7 @@ void CQuakePartSystem::BloodParticle( int EntIndex, const Vector &pos, float Sca
 	src.EntIndex = EntIndex;
 	src.m_flMinScale = Scale;
 	src.m_flMaxScale = Scale * 5;
+	src.m_flDieTime = 0;
 
 	AddParticle( &src, m_hBloodSplat, flags );
 }

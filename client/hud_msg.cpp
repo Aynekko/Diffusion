@@ -699,7 +699,7 @@ void DCL( int index )
 int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 {
 	Vector pos, pos2, pos3;
-	int Message, Model, Color, Value;
+	int Message, Model, Color, Value, Count;
 	int entityIndex, decalIndex;
 	TEMPENTITY *pTemp;
 	int Mode, Flags, Weapon;
@@ -765,6 +765,26 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 	case TE_CARPARAMS:
 	{
 		gHUD.m_ScreenEffects.Gear = READ_BYTE();
+	}
+	break;
+
+	case TE_BUBBLES:
+	case TE_BUBBLETRAIL:
+	{
+		pos.x = READ_COORD();
+		pos.y = READ_COORD();
+		pos.z = READ_COORD();
+		pos2.x = READ_COORD();
+		pos2.y = READ_COORD();
+		pos2.z = READ_COORD();
+		Scale = READ_COORD();	// water height
+	//	modelIndex = MSG_ReadShort( &buf );
+		Count = READ_BYTE();
+		float vel = READ_COORD();
+		if( Message == TE_BUBBLES )
+		{}//R_Bubbles( pos, pos2, scale, modelIndex, count, vel );
+		else 
+			R_BubbleTrail( pos, pos2, Scale, Count, vel );
 	}
 	break;
 

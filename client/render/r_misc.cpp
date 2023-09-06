@@ -1998,6 +1998,25 @@ void R_Sprite_Smoke( TEMPENTITY *pTemp, float scale, int mode )
 	pTemp->entity.curstate.scale = scale;
 }
 
+// bugbug - drawn on top of the water, not refracted.
+void R_BubbleTrail( const Vector start, const Vector end, float height, int count, float speed )
+{
+	float sine, cosine, zspeed;
+	float dist, angle;
+	Vector origin;
+	model_t *mod;
+	int	i;
+
+	for( i = 0; i < count; i++ )
+	{
+		dist = RANDOM_FLOAT( 0, 1.0 );
+		VectorLerp( start, dist, end, origin );
+		float vertical_speed = RANDOM_LONG( 80, 140 );
+
+		g_pParticles.Bubble( 0, origin, vertical_speed, 1000, tr.time + ((height - (origin.z - start.z)) / vertical_speed) - 0.1f, 0 );
+	}
+}
+
 void R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 {
 	if( !(POINT_CONTENTS( vecEnd ) == CONTENTS_WATER && POINT_CONTENTS( vecSrc ) != CONTENTS_WATER) )

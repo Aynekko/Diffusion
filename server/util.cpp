@@ -2429,7 +2429,7 @@ void UTIL_BubbleTrail( Vector from, Vector to, int count )
 	if (count > 255) 
 		count = 255;
 
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt );
 		WRITE_BYTE( TE_BUBBLETRAIL );
 		WRITE_COORD( from.x );	// mins
 		WRITE_COORD( from.y );
@@ -2438,7 +2438,7 @@ void UTIL_BubbleTrail( Vector from, Vector to, int count )
 		WRITE_COORD( to.y );
 		WRITE_COORD( to.z );
 		WRITE_COORD( flHeight );			// height
-		WRITE_SHORT( g_sModelIndexBubbles );
+	//	WRITE_SHORT( g_sModelIndexBubbles );
 		WRITE_BYTE( count ); // count
 		WRITE_COORD( 8 ); // speed
 	MESSAGE_END();

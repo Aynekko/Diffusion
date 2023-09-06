@@ -790,6 +790,7 @@ void FuncRotatingClient( cl_entity_t *e );
 void R_MakeWeaponShake( int Weapon, int Mode, bool Override = false );
 bool LocalWeaponAnims( void );
 void PlayLowAmmoSound( int entindex, Vector origin, int Volume );
+void R_BubbleTrail( const Vector start, const Vector end, float height, int count, float speed );
 
 //
 // r_movie.cpp
