@@ -41,7 +41,7 @@ class CKnife : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 1; }
+	int iItemSlot( void ) { return WPN_SLOT_KNIFE + 1; }
 	int GetItemInfo(ItemInfo *p);
 
 	void PrimaryAttack( void );
@@ -81,8 +81,8 @@ int CKnife::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
-	p->iSlot = 0;
-	p->iPosition = 0;
+	p->iSlot = WPN_SLOT_KNIFE;
+	p->iPosition = WPN_POS_KNIFE;
 	p->iId = WEAPON_KNIFE;
 	p->iWeight = CROWBAR_WEIGHT;
 	return 1;

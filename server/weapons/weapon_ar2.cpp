@@ -38,7 +38,7 @@ class C_AR2 : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 4; }
+	int iItemSlot( void ) { return WPN_SLOT_AR2 + 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -110,8 +110,8 @@ int C_AR2::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = "ar2balls";
 	p->iMaxAmmo2 = M203_GRENADE_MAX_CARRY;
 	p->iMaxClip = WEAPON_NOCLIP;
-	p->iSlot = 2;
-	p->iPosition = 5;
+	p->iSlot = WPN_SLOT_AR2;
+	p->iPosition = WPN_POS_AR2;
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_AR2;
 	p->iWeight = MP5_WEIGHT;

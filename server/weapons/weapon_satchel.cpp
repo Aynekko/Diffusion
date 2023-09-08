@@ -207,7 +207,7 @@ public:
 
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 5; }
+	int iItemSlot( void ) { return WPN_SLOT_SATCHEL + 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 	void PrimaryAttack( void );
@@ -297,8 +297,8 @@ int CSatchel::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
-	p->iSlot = 4;
-	p->iPosition = 2;
+	p->iSlot = WPN_SLOT_SATCHEL;
+	p->iPosition = WPN_POS_SATCHEL;
 	p->iFlags = ITEM_FLAG_SELECTONEMPTY | ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;
 	p->iId = m_iId = WEAPON_SATCHEL;
 	p->iWeight = SATCHEL_WEIGHT;

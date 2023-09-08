@@ -45,7 +45,7 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void Reload( void );
-	int iItemSlot( void ) { return 4; }
+	int iItemSlot( void ) { return WPN_SLOT_RPG + 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -864,8 +864,8 @@ int CRpg::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = RPG_MAX_CLIP;
-	p->iSlot = 3;
-	p->iPosition = 0;
+	p->iSlot = WPN_SLOT_RPG;
+	p->iPosition = WPN_POS_RPG;
 	p->iId = m_iId = WEAPON_RPG;
 	p->iFlags = 0;
 	p->iWeight = RPG_WEIGHT;

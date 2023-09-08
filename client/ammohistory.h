@@ -16,9 +16,6 @@
 #ifndef AMMOHISTORY_H
 #define AMMOHISTORY_H
 
-// this is the max number of items in each bucket
-#define MAX_WEAPON_POSITIONS		7//MAX_WEAPON_SLOTS
-
 class WeaponsResource
 {
 private:

@@ -51,7 +51,7 @@ class CGauss : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 4; }
+	int iItemSlot( void ) { return WPN_SLOT_GAUSS + 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -163,8 +163,8 @@ int CGauss::GetItemInfo(ItemInfo *p)
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
-	p->iSlot = 3;
-	p->iPosition = 1;
+	p->iSlot = WPN_SLOT_GAUSS;
+	p->iPosition = WPN_POS_GAUSS;
 	p->iId = m_iId = WEAPON_GAUSS;
 	p->iFlags = 0;
 	p->iWeight = GAUSS_WEIGHT;

@@ -17,7 +17,6 @@
 #define AMMO_H
 
 #define MAX_WEAPON_NAME		128
-#define MAX_WEAPON_SLOTS		6 // hud item selection slots
 #define WEAPON_FLAGS_SELECTONEMPTY	1
 
 #define WEAPON_IS_ONTARGET		0x40

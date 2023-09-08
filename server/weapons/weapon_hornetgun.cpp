@@ -62,7 +62,7 @@ public:
 	int m_iFirePhase;// don't save me.
 };
 
-LINK_ENTITY_TO_CLASS( weapon_hornetgun, CHgun );
+//LINK_ENTITY_TO_CLASS( weapon_hornetgun, CHgun ); // not used
 
 void CHgun::Spawn( void )
 {

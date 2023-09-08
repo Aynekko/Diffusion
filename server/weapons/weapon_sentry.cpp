@@ -37,7 +37,7 @@ class CWpnSentry : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 5; }
+	int iItemSlot( void ) { return WPN_SLOT_SENTRY + 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -114,8 +114,8 @@ int CWpnSentry::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
-	p->iSlot = 4;
-	p->iPosition = 6;
+	p->iSlot = WPN_SLOT_SENTRY;
+	p->iPosition = WPN_POS_SENTRY;
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_SENTRY;
 	p->iWeight = MP5_WEIGHT;

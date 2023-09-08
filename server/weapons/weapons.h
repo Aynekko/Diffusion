@@ -223,6 +223,59 @@ public:
 #define DMG_WPN_KNIFE			27
 #define DMG_WPN_SNIPER			150
 
+// weapon menu positions
+// slot 0 -----------------------------------
+#define WPN_SLOT_KNIFE			0
+
+#define WPN_POS_KNIFE			0
+// slot 1 -----------------------------------
+#define WPN_SLOT_GLOCK			1
+#define WPN_SLOT_DEAGLE			1
+#define WPN_SLOT_57				1
+
+#define WPN_POS_GLOCK			0
+#define WPN_POS_DEAGLE			1
+#define WPN_POS_57				2
+// slot 2 -----------------------------------
+#define WPN_SLOT_AR2			2
+#define WPN_SLOT_MRC			2
+#define WPN_SLOT_G36C			2
+#define WPN_SLOT_HKMP5			2
+#define WPN_SLOT_SHOTGUN		2
+#define WPN_SLOT_SHOTGUN_XM		2
+
+#define WPN_POS_MRC				0
+#define WPN_POS_HKMP5			1
+#define WPN_POS_SHOTGUN_XM		2
+#define WPN_POS_SHOTGUN			4
+#define WPN_POS_AR2				5
+#define WPN_POS_G36C			6
+// slot 3 -----------------------------------
+#define WPN_SLOT_GAUSS			3
+#define WPN_SLOT_RPG			3
+#define WPN_SLOT_SNIPER			3
+#define WPN_SLOT_CROSSBOW		3
+
+#define WPN_POS_RPG				0
+#define WPN_POS_GAUSS			1
+#define WPN_POS_SNIPER			2
+#define WPN_POS_CROSSBOW		3
+// slot 4 -----------------------------------
+#define WPN_SLOT_TRIPMINE		4
+#define WPN_SLOT_HANDGRENADE	4
+#define WPN_SLOT_SATCHEL		4
+#define WPN_SLOT_SMOKEGRENADE	4
+
+#define WPN_POS_HANDGRENADE		0
+#define WPN_POS_SMOKEGRENADE	1
+#define WPN_POS_SATCHEL			2
+#define WPN_POS_TRIPMINE		3
+// slot 5 -----------------------------------
+#define WPN_SLOT_DRONE			5
+#define WPN_SLOT_SENTRY			5
+
+#define WPN_POS_DRONE			0
+#define WPN_POS_SENTRY			1
 
 // bullet types
 typedef	enum

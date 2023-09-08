@@ -41,7 +41,7 @@ class CSniperRifle : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 4; }
+	int iItemSlot( void ) { return WPN_SLOT_SNIPER + 1; }
 	int GetItemInfo( ItemInfo *p );
 	int AddToPlayer( CBasePlayer *pPlayer );
 	void Holster( void );
@@ -133,8 +133,8 @@ int CSniperRifle::GetItemInfo( ItemInfo *p )
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = SNIPER_MAX_CLIP;
-	p->iSlot = 3;
-	p->iPosition = 4;
+	p->iSlot = WPN_SLOT_SNIPER;
+	p->iPosition = WPN_POS_SNIPER;
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_SNIPER;
 	p->iWeight = RPG_WEIGHT;

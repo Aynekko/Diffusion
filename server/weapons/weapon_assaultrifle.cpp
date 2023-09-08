@@ -41,7 +41,7 @@ class CMP5 : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 3; }
+	int iItemSlot( void ) { return WPN_SLOT_MRC + 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -121,8 +121,8 @@ int CMP5::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = "ARgrenades";
 	p->iMaxAmmo2 = M203_GRENADE_MAX_CARRY;
 	p->iMaxClip = MRC_MAX_CLIP;
-	p->iSlot = 2;
-	p->iPosition = 0;
+	p->iSlot = WPN_SLOT_MRC;
+	p->iPosition = WPN_POS_MRC;
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_MRC;
 	p->iWeight = MP5_WEIGHT;

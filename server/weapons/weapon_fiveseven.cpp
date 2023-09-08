@@ -38,7 +38,7 @@ class CWpnFiveSeven : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 2; }
+	int iItemSlot( void ) { return WPN_SLOT_57 + 1; }
 	int GetItemInfo(ItemInfo *p);
 
 	void PrimaryAttack( void );
@@ -87,8 +87,8 @@ int CWpnFiveSeven::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = FIVESEVEN_MAX_CLIP;
-	p->iSlot = 1;
-	p->iPosition = 2;
+	p->iSlot = WPN_SLOT_57;
+	p->iPosition = WPN_POS_57;
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_FIVESEVEN;
 	p->iWeight = GLOCK_WEIGHT;

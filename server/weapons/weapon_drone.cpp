@@ -45,7 +45,7 @@ class CWpnDrone : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 4; }
+	int iItemSlot( void ) { return WPN_SLOT_DRONE + 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -204,8 +204,8 @@ int CWpnDrone::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
-	p->iSlot = 4;
-	p->iPosition = 5;
+	p->iSlot = WPN_SLOT_DRONE;
+	p->iPosition = WPN_POS_DRONE;
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_DRONE;
 	p->iWeight = MP5_WEIGHT;

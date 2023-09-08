@@ -40,7 +40,7 @@ class CPython : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 2; }
+	int iItemSlot( void ) { return WPN_SLOT_DEAGLE + 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 	void PrimaryAttack( void );
@@ -64,8 +64,8 @@ int CPython::GetItemInfo(ItemInfo *p)
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = DEAGLE_MAX_CLIP;
 	p->iFlags = 0;
-	p->iSlot = 1;
-	p->iPosition = 1;
+	p->iSlot = WPN_SLOT_DEAGLE;
+	p->iPosition = WPN_POS_DEAGLE;
 	p->iId = m_iId = WEAPON_DEAGLE;
 	p->iWeight = PYTHON_WEIGHT;
 

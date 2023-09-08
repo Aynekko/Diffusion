@@ -46,7 +46,7 @@ class CShotgun : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( ) { return 3; }
+	int iItemSlot( ) { return WPN_SLOT_SHOTGUN + 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -130,8 +130,8 @@ int CShotgun::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = SHOTGUN_MAX_CLIP;
-	p->iSlot = 2;
-	p->iPosition = 4;
+	p->iSlot = WPN_SLOT_SHOTGUN;
+	p->iPosition = WPN_POS_SHOTGUN;
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_SHOTGUN;
 	p->iWeight = SHOTGUN_WEIGHT;

@@ -537,7 +537,7 @@ class CTripmine : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 5; }
+	int iItemSlot( void ) { return WPN_SLOT_TRIPMINE + 1; }
 	int GetItemInfo(ItemInfo *p);
 	void SetObjectCollisionBox( void )
 	{
@@ -590,8 +590,8 @@ int CTripmine::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = WEAPON_NOCLIP;
-	p->iSlot = 4;
-	p->iPosition = 3;
+	p->iSlot = WPN_SLOT_TRIPMINE;
+	p->iPosition = WPN_POS_TRIPMINE;
 	p->iId = m_iId = WEAPON_TRIPMINE;
 	p->iWeight = TRIPMINE_WEIGHT;
 	p->iFlags = ITEM_FLAG_LIMITINWORLD | ITEM_FLAG_EXHAUSTIBLE;

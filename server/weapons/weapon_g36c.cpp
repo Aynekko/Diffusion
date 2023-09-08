@@ -39,7 +39,7 @@ class CWeaponG36C : public CBasePlayerWeapon
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return 3; }
+	int iItemSlot( void ) { return WPN_SLOT_G36C + 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
 
@@ -110,8 +110,8 @@ int CWeaponG36C::GetItemInfo(ItemInfo *p)
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = G36C_MAX_CLIP;
-	p->iSlot = 2;
-	p->iPosition = 6;
+	p->iSlot = WPN_SLOT_G36C;
+	p->iPosition = WPN_POS_G36C;
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_G36C;
 	p->iWeight = MP5_WEIGHT;
