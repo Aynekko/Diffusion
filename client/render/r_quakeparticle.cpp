@@ -1224,6 +1224,7 @@ void CQuakePartSystem :: CreateEffect( int EntIndex, const char *name, const Vec
 		src.m_flDistance = 0; // UNDONE
 		src.m_flStartAlpha = 0;
 		src.ParticleType = TYPE_CUSTOM;
+		src.m_flDieTime = 0;
 		src.EntIndex = EntIndex;
 		
 		if( !AddParticle( &src, m_hTexture, flags ))
