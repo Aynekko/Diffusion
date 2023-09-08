@@ -2360,8 +2360,8 @@ void V_CalcRefdef( struct ref_params_s *pparams )
 		if( !(gHUD.m_iKeyBits & IN_MOVELEFT) && !(gHUD.m_iKeyBits & IN_MOVERIGHT) )
 			roll_dir = 0;
 		static float car_roll_ang = 0.0f;
-		car_roll_ang = CL_UTIL_Approach( gHUD.CarSpeed * 0.05 * roll_dir, car_roll_ang, 2 * g_fFrametime );
-		pparams->viewangles[ROLL] = car_roll_ang;
+		car_roll_ang = CL_UTIL_Approach( gHUD.CarSpeed * 0.05 * roll_dir, car_roll_ang, 3 * g_fFrametime );
+		pparams->viewangles[ROLL] += car_roll_ang;
 	}
 
 	// diffusion - play this sound when underwater
