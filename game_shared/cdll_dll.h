@@ -24,7 +24,7 @@
 #define MAX_WEAPON_BYTES		(( MAX_WEAPONS + 7 ) / 8 )
 #define WEAPON_SUIT			(MAX_WEAPONS - 1)
 
-#define MAX_WEAPON_SLOTS		6	// hud item selection buckets (actual number is: MAX_WEAPON_SLOTS - 1)
+#define MAX_WEAPON_SLOTS		6	// hud item selection buckets
 #define MAX_WEAPON_POSITIONS		7 // this is the max number of items in each bucket
 
 #define MAX_ITEM_TYPES		MAX_WEAPON_POSITIONS	// hud item selection slots

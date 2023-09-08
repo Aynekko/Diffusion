@@ -413,7 +413,7 @@ void WeaponsResource :: SelectSlot( int iSlot, int fAdvance, int iDirection )
 		return;
 	}
 
-	if( iSlot > MAX_WEAPON_SLOTS )
+	if( iSlot >= MAX_WEAPON_SLOTS )
 		return;
 
 	if( gHUD.m_fPlayerDead || gHUD.m_iHideHUDDisplay & ( HIDEHUD_WPNS | HIDEHUD_ALL | HIDEHUD_WPNS_HOLDABLEITEM | HIDEHUD_WPNS_CUSTOM))
