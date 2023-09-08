@@ -96,6 +96,10 @@ void CRenderFxFader::FadeThink(void)
 			m_hTarget->pev->skin = 0;
 		if( HasSpawnFlags( SF_RENDER_RESETBODY ) )
 			m_hTarget->pev->body = 0;
+		if( pev->iuser1 == 2 ) // set_nodraw
+			m_hTarget->pev->effects |= EF_NODRAW;
+		else if( pev->iuser1 == 1 )
+			m_hTarget->pev->effects &= ~EF_NODRAW;
 
 		SUB_UseTargets(m_hTarget, USE_TOGGLE, 0);
 
@@ -144,6 +148,11 @@ void CRenderFxManager::KeyValue(KeyValueData* pkvd)
 		pev->scale = atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "set_nodraw" ) )
+	{
+		pev->iuser1 = atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CPointEntity::KeyValue(pkvd);
 }
@@ -173,10 +182,10 @@ void CRenderFxManager::Affect(CBaseEntity* pTarget, BOOL bIsFirst, CBaseEntity* 
 {
 	entvars_t* pevTarget = pTarget->pev;
 
-	if (!FBitSet(pev->spawnflags, SF_RENDER_MASKFX))
+	if (!HasSpawnFlags(SF_RENDER_MASKFX))
 		pevTarget->renderfx = pev->renderfx;
 
-	if (!FBitSet(pev->spawnflags, SF_RENDER_MASKMODE))
+	if (!HasSpawnFlags(SF_RENDER_MASKMODE))
 	{
 		//LRC - amt is often 0 when mode is normal. Set it to be fully visible, for fade purposes.
 		if (pev->frags && pevTarget->renderamt == 0 && pevTarget->rendermode == kRenderNormal)
@@ -186,9 +195,9 @@ void CRenderFxManager::Affect(CBaseEntity* pTarget, BOOL bIsFirst, CBaseEntity* 
 
 	if (pev->frags == 0) // not fading?
 	{
-		if (!FBitSet(pev->spawnflags, SF_RENDER_MASKAMT))
+		if (!HasSpawnFlags(SF_RENDER_MASKAMT))
 			pevTarget->renderamt = pev->renderamt;
-		if (!FBitSet(pev->spawnflags, SF_RENDER_MASKCOLOR))
+		if (!HasSpawnFlags(SF_RENDER_MASKCOLOR))
 			pevTarget->rendercolor = pev->rendercolor;
 		if (pev->scale)
 			pevTarget->scale = pev->scale;
@@ -202,6 +211,10 @@ void CRenderFxManager::Affect(CBaseEntity* pTarget, BOOL bIsFirst, CBaseEntity* 
 			pevTarget->skin = 0;
 		if( HasSpawnFlags( SF_RENDER_RESETBODY ) )
 			pevTarget->body = 0;
+		if( pev->iuser1 == 2 ) // set_nodraw
+			pevTarget->effects |= EF_NODRAW;
+		else if( pev->iuser1 == 1 )
+			pevTarget->effects &= ~EF_NODRAW;
 
 		if (bIsFirst)
 			UTIL_FireTargets(STRING(pev->netname), pTarget, this, USE_TOGGLE, 0);
@@ -221,6 +234,7 @@ void CRenderFxManager::Affect(CBaseEntity* pTarget, BOOL bIsFirst, CBaseEntity* 
 		pFader->pev->spawnflags = pev->spawnflags;
 		pFader->pev->skin = pev->skin;
 		pFader->pev->body = pev->body;
+		pFader->pev->iuser1 = pev->iuser1; // set_nodraw
 
 		if (bIsFirst)
 			pFader->pev->target = pev->netname;
