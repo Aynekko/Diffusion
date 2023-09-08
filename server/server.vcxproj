@@ -425,6 +425,7 @@
     <ClCompile Include="weapons\weapon_sentry.cpp" />
     <ClCompile Include="weapons\weapon_shotgun.cpp" />
     <ClCompile Include="weapons\weapon_shotgun_xm.cpp" />
+    <ClCompile Include="weapons\weapon_smokegrenade.cpp" />
     <ClCompile Include="weapons\weapon_snark.cpp" />
     <ClCompile Include="weapons\weapon_sniper.cpp" />
     <ClCompile Include="world.cpp" />

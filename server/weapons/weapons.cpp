@@ -470,6 +470,8 @@ void W_Precache(void)
 
 	UTIL_PrecacheOtherWeapon( "weapon_g36c" );
 
+	UTIL_PrecacheOtherWeapon( "weapon_smokegrenade" );
+
 	if ( g_pGameRules->IsDeathmatch() )
 		UTIL_PrecacheOther( "weaponbox" );// container for dropped deathmatch weapons
 

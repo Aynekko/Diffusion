@@ -39,6 +39,7 @@ public:
 
 	static CGrenade *ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time );
 	static CGrenade *ShootContact( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
+	static CGrenade *ShootSmoke( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
 	static CGrenade *ShootSatchelCharge( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
 	static void UseSatchelCharges( entvars_t *pevOwner, SATCHELCODE code );
 
@@ -50,8 +51,10 @@ public:
 	void SlideTouch( CBaseEntity *pOther );
 	void ExplodeTouch( CBaseEntity *pOther );
 	void DangerSoundThink( void );
+	void SmokeGrenadeThink( void );
 	void PreDetonate( void );
 	void Detonate( void );
+	void SmokeGrenadeExplode( void );
 	void DetonateUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void TumbleThink( void );
 	void ClearEffects( void );
@@ -102,8 +105,9 @@ public:
 #define WEAPON_SNIPER			21
 #define WEAPON_SHOTGUN_XM		22
 #define WEAPON_G36C				23
+#define WEAPON_SMOKEGRENADE		24
 
-#define TOTAL_WEAPONS 24
+#define TOTAL_WEAPONS 25
 
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
 
@@ -136,6 +140,7 @@ public:
 #define BOLT_MAX_CARRY			15
 #define ROCKET_MAX_CARRY		5
 #define HANDGRENADE_MAX_CARRY	10
+#define SMOKEGRENADE_MAX_CARRY	3
 #define SATCHEL_MAX_CARRY		5
 #define TRIPMINE_MAX_CARRY		5
 #define SNARK_MAX_CARRY			15

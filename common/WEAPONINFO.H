@@ -41,8 +41,9 @@
 #define WEAPON_SNIPER			21
 #define WEAPON_SHOTGUN_XM		22
 #define WEAPON_G36C				23
+#define WEAPON_SMOKEGRENADE		24
 
-#define TOTAL_WEAPONS 24
+#define TOTAL_WEAPONS 25
 
 // Info about weapons player might have in his/her possession
 typedef struct weapon_data_s

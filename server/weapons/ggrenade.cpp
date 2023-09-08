@@ -47,6 +47,7 @@ BEGIN_DATADESC( CGrenade )
 	DEFINE_FUNCTION( Detonate ),
 	DEFINE_FUNCTION( DetonateUse ),
 	DEFINE_FUNCTION( TumbleThink ),
+	DEFINE_FUNCTION( SmokeGrenadeThink ),
 	DEFINE_FIELD( LastBounceSoundTime, FIELD_TIME ),
 	DEFINE_FIELD( SendWaterSplash, FIELD_BOOLEAN ),
 END_DATADESC()
@@ -508,6 +509,74 @@ CGrenade *CGrenade::ShootContact( entvars_t *pevOwner, Vector vecStart, Vector v
 	return pGrenade;
 }
 
+CGrenade *CGrenade::ShootSmoke( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity )
+{
+	CGrenade *pGrenade = GetClassPtr( (CGrenade *)NULL );
+	pGrenade->Spawn();
+	// contact grenades arc lower
+	pGrenade->pev->gravity = 0.5;// lower gravity since grenade is aerodynamic and engine doesn't know it.
+	pGrenade->pev->friction = 0.8;
+	UTIL_SetOrigin( pGrenade, vecStart );
+	pGrenade->SetAbsVelocity( vecVelocity );
+	pGrenade->SetLocalAngles( UTIL_VecToAngles( pGrenade->GetAbsVelocity() ) );
+	if( pevOwner )
+		pGrenade->pev->owner = ENT( pevOwner );
+
+	pGrenade->SetTouch( &CGrenade::BounceTouch );	// Bounce if touched
+
+	// perform "on ground" checks
+	pGrenade->SetThink( &CGrenade::SmokeGrenadeThink );
+	pGrenade->SetNextThink( 0 );
+
+	SET_MODEL( pGrenade->edict(), "models/w_smoke.mdl" );
+
+	pGrenade->pev->sequence = RANDOM_LONG( 3, 5 );
+	pGrenade->pev->body = 1;
+
+	return pGrenade;
+}
+
+void CGrenade::SmokeGrenadeThink( void )
+{
+	if( pev->flags & FL_ONGROUND )
+	{
+		pev->framerate = 1.0f;
+		SetThink( &CGrenade::SmokeGrenadeExplode );
+		SetNextThink( 1.0 );
+		return;
+	}
+
+	pev->framerate = GetAbsVelocity().Length() / 150.0;
+
+	if( pev->framerate > 1.5f )
+		pev->framerate = 1.5f;
+	else if( pev->framerate < 0.75f )
+		pev->framerate = 0.75f;
+
+	SetNextThink( 0 );
+}
+
+void CGrenade::SmokeGrenadeExplode( void )
+{
+	Vector org = GetAbsOrigin() + Vector( 0, 0, 32 );
+	MESSAGE_BEGIN( MSG_PAS, gmsgTempEnt, org );
+		WRITE_BYTE( TE_SMOKEGRENADE );
+		WRITE_COORD( org.x );
+		WRITE_COORD( org.y );
+		WRITE_COORD( org.z );
+		WRITE_BYTE( 50 ); // num of sprites
+		WRITE_BYTE( 2 ); // speed of decay (*0.01)
+		WRITE_BYTE( 50 ); // scale
+		WRITE_BYTE( 50 ); // randomize position offset of each sprite (+/- 50 here)
+	MESSAGE_END();
+
+	pev->sequence = 0;
+
+	SetAbsVelocity( Vector(RANDOM_FLOAT(-50,50), RANDOM_FLOAT(-50,50), 250) );
+
+	SetThink( &CBaseEntity::SUB_Remove );
+	SetNextThink( 30 );
+}
 
 CGrenade * CGrenade:: ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time )
 {
