@@ -2425,8 +2425,8 @@ void CQuakePartSystem::BloodParticle( int EntIndex, const Vector &pos, float Sca
 	src.m_flDistance = 0;
 	src.ParticleType = TYPE_CUSTOM;
 	src.EntIndex = EntIndex;
-	src.m_flMinScale = Scale;
-	src.m_flMaxScale = Scale * 5;
+	src.m_flMinScale = Scale * 0.25f;
+	src.m_flMaxScale = Scale * 2.0f;
 	src.m_flDieTime = 0;
 
 	AddParticle( &src, m_hBloodSplat, flags );
