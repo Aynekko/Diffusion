@@ -264,11 +264,16 @@ void CHandGrenade::WeaponIdle( void )
 			SendWeaponAnim( HANDGRENADE_THROW2 );
 		else
 			SendWeaponAnim( HANDGRENADE_THROW3 );
+
+		CBaseEntity *pGrenade = NULL;
 		
 		if( SecondaryAttackPressed )
-			CGrenade::ShootTimed( m_pPlayer->pev, vecSrc, vecThrow, 3 );
+			pGrenade = CGrenade::ShootTimed( m_pPlayer->pev, vecSrc, vecThrow, 3 );
 		else
-			CGrenade::ShootTimed( m_pPlayer->pev, vecSrc, vecThrow, time );
+			pGrenade = CGrenade::ShootTimed( m_pPlayer->pev, vecSrc, vecThrow, time );
+
+		if( pGrenade )
+			pGrenade->pev->body = 1; // change to body without pin
 
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
