@@ -1234,28 +1234,29 @@ static void Mod_MappingLandscapes( msurface_t *surf, mextrasurf_t *esrf )
 Mod_SubdividePolygon
 =================
 */
-static void Mod_SubdividePolygon_r( msurface_t *warpface, int numverts, Vector verts[], bool firstpass )
+static void Mod_SubdividePolygon_r( msurface_t *warpface, int numverts, Vector verts[], bool firstpass, int SubdivideSize )
 {
-	Vector		front[SUBDIVIDE_SIZE];
-	Vector		back[SUBDIVIDE_SIZE];
-	float		dist[SUBDIVIDE_SIZE];
 	mextrasurf_t *es = warpface->info;
-	int		i, j, k, f, b;
-	Vector		mins, maxs;
-	float		m, frac;
+	int i, j, k, f, b;
+	Vector mins, maxs;
+	float m, frac;
 	bvert_t *mv;
 
-	if( numverts > (SUBDIVIDE_SIZE - 4) )
+	if( numverts > (SubdivideSize - 4) )
 		HOST_ERROR( "Mod_SubdividePolygon: too many vertexes on face ( %i )\n", numverts );
 
 	ClearBounds( mins, maxs );
 	for( i = 0; i < numverts; i++ )
 		AddPointToBounds( verts[i], mins, maxs );
 
+	Vector *front = new Vector[SubdivideSize];
+	Vector *back = new Vector[SubdivideSize];
+	float *dist = new float[SubdivideSize];
+
 	for( i = 0; i < 3; i++ )
 	{
 		m = (mins[i] + maxs[i]) * 0.5f;
-		m = SUBDIVIDE_SIZE * floor( m / SUBDIVIDE_SIZE + 0.5f );
+		m = SubdivideSize * floor( m / SubdivideSize + 0.5f );
 		if( maxs[i] - m < 8.0f ) continue;
 		if( m - mins[i] < 8.0f ) continue;
 
@@ -1296,8 +1297,11 @@ static void Mod_SubdividePolygon_r( msurface_t *warpface, int numverts, Vector v
 			}
 		}
 
-		Mod_SubdividePolygon_r( warpface, f, front, firstpass );
-		Mod_SubdividePolygon_r( warpface, b, back, firstpass );
+		Mod_SubdividePolygon_r( warpface, f, front, firstpass, SubdivideSize );
+		Mod_SubdividePolygon_r( warpface, b, back, firstpass, SubdivideSize );
+		delete[] front;
+		delete[] back;
+		delete[] dist;
 		return;
 	}
 
@@ -1305,6 +1309,9 @@ static void Mod_SubdividePolygon_r( msurface_t *warpface, int numverts, Vector v
 	{
 		es->numindexes += (numverts - 2) * 3;
 		es->numverts += numverts;
+		delete[] front;
+		delete[] back;
+		delete[] dist;
 		return;
 	}
 
@@ -1330,6 +1337,10 @@ static void Mod_SubdividePolygon_r( msurface_t *warpface, int numverts, Vector v
 
 	es->numindexes += (numverts - 2) * 3;
 	es->numverts += numverts;
+
+	delete[] front;
+	delete[] back;
+	delete[] dist;
 }
 
 /*
@@ -1343,9 +1354,22 @@ can be done reasonably.
 */
 static int Mod_SubdivideSurface( msurface_t *fa, bool firstpass )
 {
-	Vector		verts[SUBDIVIDE_SIZE];
 	mextrasurf_t *es = fa->info;
-	int		numVerts = 0;
+
+	float Surfsize = (es->mins - es->maxs).Length();
+	int SubdivideSize = 64;
+	if( Surfsize > 16000.0f )
+		SubdivideSize = 1024;
+	else if( Surfsize > 10000.0f )
+		SubdivideSize = 512;
+	else if( Surfsize > 5000.0f )
+		SubdivideSize = 256;
+	else if( Surfsize > 2000.0f )
+		SubdivideSize = 128;
+
+	Vector *verts = new Vector[SubdivideSize];
+
+	int	numVerts = 0;
 
 	// convert edges back to a normal polygon
 	for( int i = 0; i < fa->numedges; i++ )
@@ -1357,7 +1381,7 @@ static int Mod_SubdivideSurface( msurface_t *fa, bool firstpass )
 	}
 
 	// do subdivide
-	Mod_SubdividePolygon_r( fa, fa->numedges, verts, firstpass );
+	Mod_SubdividePolygon_r( fa, fa->numedges, verts, firstpass, (int)SubdivideSize );
 
 	if( firstpass )
 	{
@@ -1367,9 +1391,11 @@ static int Mod_SubdivideSurface( msurface_t *fa, bool firstpass )
 		es->numindexes = 0;
 		es->numverts = 0;
 
+		delete[] verts;
 		return numVerts;
 	}
 
+	delete[] verts;
 	return es->numverts;
 }
 

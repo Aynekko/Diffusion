@@ -32,7 +32,6 @@ GNU General Public License for more details.
 #define MAX_LIGHTSTYLES 64
 #define MAX_LIGHTMAPS	512//256	// 8 bits
 #define MAX_CLIP_VERTS	64	// skybox clipping vertexes
-#define SUBDIVIDE_SIZE	128//64 // diffusion - to allow huge func_water brushes, otherwise it crashes the game
 #define MAX_LANDSCAPE_LAYERS	16	// fundamental limit, don't modify
 #define MAX_SUBVIEWS	256	// per one frame!
 #define MAX_SUBVIEW_TEXTURES	64	// total depth
