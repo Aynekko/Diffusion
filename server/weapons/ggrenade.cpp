@@ -553,6 +553,27 @@ void CGrenade::SmokeGrenadeThink( void )
 	else if( pev->framerate < 0.75f )
 		pev->framerate = 0.75f;
 
+	// watersplash upon contact with water surface
+	if( pev->waterlevel != 0 )
+	{
+		if( !SendWaterSplash )
+		{
+			SendWaterSplash = true;
+			Vector org = GetAbsOrigin();
+			MakeWaterSplash( org + Vector( 0, 0, 512 ), org, 1 );
+
+			Vector vecVelocity = GetAbsVelocity();
+			vecVelocity *= 0.5f;
+			SetAbsVelocity( vecVelocity );
+			pev->gravity *= 0.35f;
+		}
+	}
+	else
+	{
+		if( SendWaterSplash )
+			SendWaterSplash = false;
+	}
+
 	SetNextThink( 0 );
 }
 
@@ -571,8 +592,15 @@ void CGrenade::SmokeGrenadeExplode( void )
 	MESSAGE_END();
 
 	pev->sequence = 0;
+	pev->gravity = 0.5f;
 
-	SetAbsVelocity( Vector(RANDOM_FLOAT(-50,50), RANDOM_FLOAT(-50,50), 250) );
+	if( pev->waterlevel == 0 )
+		SetAbsVelocity( Vector(RANDOM_FLOAT(-50,50), RANDOM_FLOAT(-50,50), 250) );
+
+	Vector absOrigin = GetAbsOrigin();
+
+	if( UTIL_PointContents( absOrigin ) == CONTENTS_WATER )
+		UTIL_Bubbles( absOrigin - Vector( 64, 64, 64 ), absOrigin + Vector( 64, 64, 64 ), 100 );
 
 	SetThink( &CBaseEntity::SUB_Remove );
 	SetNextThink( 30 );
