@@ -25,7 +25,7 @@ float CalcMipLevel(sampler2D tex, in vec2 texCoords)
     vec2 dx = dFdx(texCoords);
     vec2 dy = dFdy(texCoords);
     float deltaMaxSqr = max(dot(dx, dx), dot(dy, dy));
-    return max(0.0, 0.5 * log2(deltaMaxSqr));
+    return max(0.0, 0.2 * log2(deltaMaxSqr));
 //#endif
 }
 
