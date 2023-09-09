@@ -371,7 +371,7 @@ void LinkUserMessages( void )
 	gmsgTempEnt = REG_USER_MSG( "TempEnt", -1 );
 	gmsgWaterSplash = REG_USER_MSG( "WaterSplash", 7 );
 	gmsgBlastIcons = REG_USER_MSG( "BlastIcons", 3 );
-	gmsgGaussHUD = REG_USER_MSG( "GaussHUD", -1 );
+	gmsgGaussHUD = REG_USER_MSG( "GaussHUD", 2 );
 }
 
 LINK_ENTITY_TO_CLASS( player, CBasePlayer );

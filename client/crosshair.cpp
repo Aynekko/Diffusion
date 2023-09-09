@@ -99,7 +99,6 @@ int CHudCrosshairStatic::MsgFunc_GaussHUD( const char *pszName, int iSize, void 
 	BEGIN_READ( pszName, pbuf, iSize );
 	GaussAmmo = READ_BYTE();
 	GaussCharge = READ_BYTE();
-	GaussWarning = (READ_BYTE() > 0);
 	END_READ();
 
 	return 1;
@@ -270,19 +269,13 @@ void CHudCrosshairStatic::LoadCrosshairForWeapon( int WeaponID )
 void CHudCrosshairStatic::DrawGaussZoomedHUD(void)
 {
 	// change weapon skin while charging
-	GET_VIEWMODEL()->curstate.skin = 9 - GaussCharge;
+	int skin = bound( 0, 9 - GaussCharge, 9 );
+	GET_VIEWMODEL()->curstate.skin = skin;
 
-	// throw smokes when overcharged
-	static float GaussParticleTime = 0;
-	if( GaussWarning )
+	if( skin < 9 && GaussSound != skin )
 	{
-		if( GaussParticleTime > gHUD.m_flTime )
-			GaussParticleTime = 0;
-		if( gHUD.m_flTime > GaussParticleTime + 0.1 )
-		{
-			g_pParticles.SmokeParticles( 0, (float *)&GET_VIEWMODEL()->attachment[0], 1, 0.5, 10 );
-			GaussParticleTime = gHUD.m_flTime;
-		}
+		gEngfuncs.pEventAPI->EV_PlaySound( 0, Vector( 0, 0, 0 ), CHAN_STATIC, "weapons/gauss_charge.wav", 1.0, 0, 0, 100 + (150/(skin + 1)) );
+		GaussSound = skin;
 	}
 
 	if( !gHUD.IsZoomed )
@@ -303,7 +296,7 @@ void CHudCrosshairStatic::DrawGaussZoomedHUD(void)
 	x = (ScreenWidth / 2) - (m_prc_Gammo->right / 2);
 	y = ScreenHeight - 103;
 	wrect_t rcammo = *m_prc_Gammo;
-	int offss = 100 - GaussAmmo; // 100 is maximum gauss ammo!!!
+	int offss = 100 - GaussAmmo * 10;
 	rcammo.top += offss;
 	SPR_Set( m_hGAmmo, r, g, b );
 	SPR_DrawAdditive( 0, x, y + offss, &rcammo );
@@ -316,8 +309,6 @@ void CHudCrosshairStatic::DrawGaussZoomedHUD(void)
 	int offs = 200 - GaussCharge * 20; // GaussCharge is locked at 9 max
 	rc.right -= offs;
 	rc.left += offs;
-	if( GaussWarning )
-		UnpackRGB( r, g, b, 0x00FF1919 ); // 255 25 25
 	SPR_Set( m_hGCharge, r, g, b );
 	SPR_DrawAdditive( 0, x + offs, y, &rc );
 }

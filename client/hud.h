@@ -711,7 +711,7 @@ public:
 	wrect_t *m_prc_Gframe;
 	int GaussAmmo;
 	int GaussCharge;
-	bool GaussWarning;
+	int GaussSound;
 
 	void Reset( void );
 	void LoadCrosshairForWeapon( int WeaponID );

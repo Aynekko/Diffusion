@@ -132,7 +132,7 @@ public:
 
 
 // weapon clip/carry ammo capacities
-#define URANIUM_MAX_CARRY		100
+#define URANIUM_MAX_CARRY		10
 #define AR2_MAX_CARRY			250
 #define	_9MM_MAX_CARRY			200
 #define _357_MAX_CARRY			21
@@ -194,7 +194,7 @@ public:
 #define G36C_DEFAULT_GIVE			G36C_MAX_CLIP * 2
 
 // The amount of ammo given to a player by an ammo item.
-#define AMMO_URANIUMBOX_GIVE	50
+#define AMMO_URANIUMBOX_GIVE	5
 #define AMMO_GLOCKCLIP_GIVE		GLOCK_MAX_CLIP
 #define AMMO_357BOX_GIVE		DEAGLE_MAX_CLIP
 #define AMMO_MRCCLIP_GIVE		MRC_MAX_CLIP

@@ -54,6 +54,7 @@ public:
 	int iItemSlot( void ) { return WPN_SLOT_GAUSS + 1; }
 	int GetItemInfo(ItemInfo *p);
 	int AddToPlayer( CBasePlayer *pPlayer );
+	void ItemPostFrame( void );
 
 	DECLARE_DATADESC();
 
@@ -66,42 +67,44 @@ public:
 	void Reload( void );
 	void WeaponIdle( void );
 	void ResetZoom( void );
-	void UpdateHUD( bool Warning = false );
+	void UpdateHUD( void );
 	bool ReflectMirror( TraceResult &tr, CBaseEntity *e );
-
-	int m_fInAttack;	
-	float m_flStartCharge;
-	float m_flPlayAftershock;
 	void StartFire( void );
 	void Fire( Vector vecOrigSrc, Vector vecDirShooting, float flDamage );
-	float GetFullChargeTime( void );
+
 	int m_iBalls;
 	int m_iGlow;
 	int m_iBeam;
 	int m_iSoundState; // don't save this
-	bool WarningSoundPlayed;
-
-	float m_flNextAmmoBurn;// while charging, when to absorb another unit of player's ammo?
-
-	int AmmoTaken; // the ammo taken for the charge is counted here, then released while shot
+	float Charge; // 0.0 - 1.0
+	int CL_Charge;
 
 	float nReflect; // reflection degree - 0.5 default, 0.1 for mirrors
 };
 
 BEGIN_DATADESC( CGauss )
-	DEFINE_FIELD( m_fInAttack, FIELD_INTEGER ),
-	DEFINE_FIELD( m_flStartCharge, FIELD_TIME ),
-	DEFINE_FIELD( m_flPlayAftershock, FIELD_TIME ),
-	DEFINE_FIELD( m_flNextAmmoBurn, FIELD_TIME ),
-	DEFINE_FIELD( WarningSoundPlayed, FIELD_BOOLEAN ),
-	DEFINE_FIELD( AmmoTaken, FIELD_INTEGER ),
+	DEFINE_FIELD( Charge, FIELD_FLOAT ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( weapon_gausniper, CGauss );
 
-float CGauss::GetFullChargeTime( void )
+void CGauss::ItemPostFrame( void )
 {
-	return 1.5;
+	// manage the charge in this constantly active function
+	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
+		Charge = 0.0f;
+	else
+	{
+		// charge weapon
+		if( Charge < 1.0f && (gpGlobals->time > m_pPlayer->m_flNextAttack) )
+			Charge += gpGlobals->frametime;
+	}
+
+	Charge = bound( 0.0f, Charge, 1.0f );
+
+	UpdateHUD();
+
+	BaseClass::ItemPostFrame();
 }
 
 void CGauss::Spawn( void )
@@ -112,9 +115,7 @@ void CGauss::Spawn( void )
 
 	m_iDefaultAmmo = GAUSS_DEFAULT_GIVE;
 
-	WarningSoundPlayed = false;
-
-	AmmoTaken = 0;
+	Charge = 0.0f;
 
 	FallInit();// get ready to fall down.
 }
@@ -130,17 +131,13 @@ void CGauss::Precache( void )
 
 	PRECACHE_SOUND("weapons/gausniper.wav");
 	PRECACHE_SOUND("weapons/crystal_empty.wav"); // New dry sound
-	PRECACHE_SOUND("weapons/gauss_loop.wav");
-	PRECACHE_SOUND("weapons/gauss_overcharge.wav");
-	PRECACHE_SOUND( "weapons/gauss_zap1.wav" );
-	PRECACHE_SOUND( "weapons/gauss_zap2.wav" );
-	PRECACHE_SOUND( "weapons/gauss_zap3.wav" );
-	PRECACHE_SOUND( "weapons/gauss_zap4.wav" );
-	PRECACHE_SOUND( "weapons/gauss_cancel.wav" );
+	PRECACHE_SOUND( "weapons/gauss_charge.wav" );
 	
 	m_iGlow = PRECACHE_MODEL( "sprites/hotglow.spr" );
 	m_iBalls = PRECACHE_MODEL( "sprites/hotglow.spr" );
 	m_iBeam = PRECACHE_MODEL( "sprites/smoke.spr" );
+
+	CL_Charge = -1;
 }
 
 int CGauss::AddToPlayer( CBasePlayer *pPlayer )
@@ -188,8 +185,13 @@ void CGauss::ResetZoom( void )
 
 BOOL CGauss::Deploy( void )
 {
-	m_flPlayAftershock = 0.0;
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
+
+	if( Charge < 1.0f )
+		Charge = 0.0f;
+
+	UpdateHUD();
+
 	return DefaultDeploy( "models/v_gausniper.mdl", "models/p_gausniper.mdl", GAUSS_DRAW, "gauss" );
 }
 
@@ -197,12 +199,11 @@ void CGauss::Holster( void )
 {
 	// cancel any zooming in progress
 	ResetZoom();
-	
-	AmmoTaken = 0;
+
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
 
 	SendWeaponAnim( GAUSS_HOLSTER );
-	m_fInAttack = 0;
+
 	EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "common/null.wav", 0, ATTN_NORM);
 
 	// need to send "charge" to reset weapon skin on client
@@ -213,77 +214,38 @@ void CGauss::Holster( void )
 
 void CGauss::PrimaryAttack( void )
 {
+	if( Charge < 1.0f )
+		return;
+	
 	Attack();
-	/*
-	// don't fire underwater
-	if (m_pPlayer->pev->waterlevel == 3)
-	{
-		EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/crystal_empty.wav", 1.0, ATTN_NORM);
-		m_flNextSecondaryAttack = m_flNextPrimaryAttack = gpGlobals->time + 0.5;
-		return;
-	}
-
-	if (m_iClip <= 0)
-	{
-		EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/crystal_empty.wav", 1.0, ATTN_NORM);
-		CLIENT_COMMAND(m_pPlayer->edict(), "-attack\n");
-		m_flNextPrimaryAttack = gpGlobals->time + 0.5;
-		return;
-	}
-
-	if( m_iClip <= 15)
-		LowAmmoMsg(m_pPlayer);
-
-	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
-
-	m_fPrimaryFire = TRUE;
-
-	m_iClip--;
-
-	StartFire();
-	m_fInAttack = 0;
-	m_flTimeWeaponIdle = gpGlobals->time + 1.0;
-	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.25;  //diffusion - was 0.2
-	*/
 }
 
-void CGauss::UpdateHUD( bool Warning )
+void CGauss::UpdateHUD( void )
 {
-	int Charge = AmmoTaken;
-	if( Charge > 9 )
-		Charge = 9; // HACKHACK!!! the full charge depends from fps and varies from 9 to 11. Assume it's always 9...
-
+	int NewCharge = (int)(Charge * 10);
+	if( CL_Charge == NewCharge )
+		return;
+	
 	MESSAGE_BEGIN( MSG_ONE, gmsgGaussHUD, NULL, m_pPlayer->pev );
 		WRITE_BYTE( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] ); // current ammo count
-		WRITE_BYTE( Charge );
-		WRITE_BYTE( Warning );
+		WRITE_BYTE( NewCharge );
 	MESSAGE_END();
+
+	CL_Charge = NewCharge;
 }
 
 void CGauss::Attack( void )
 {
 	// don't fire underwater
-	if ((m_pPlayer->pev->waterlevel == 3) || (m_pPlayer->m_afButtonPressed & IN_RELOAD) )
+	if( m_pPlayer->pev->waterlevel == 3 )
 	{
-		if ( (m_fInAttack != 0) || (m_pPlayer->m_afButtonPressed & IN_RELOAD) )
-		{
-			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/gauss_cancel.wav", 1.0, ATTN_NORM, 0, PITCH_NORM);
-			SendWeaponAnim( GAUSS_IDLE );
-			m_fInAttack = 0;
-			AmmoTaken = 0;
-			WarningSoundPlayed = false;
-			CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
-			// send HUD update to disable charge
-			UpdateHUD();
-		}
-		else
-			EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/crystal_empty.wav", 1.0, ATTN_NORM);
+		EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/crystal_empty.wav", 1.0, ATTN_NORM);
 
 		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 0.5;
 		return;
 	}
 
-	if ( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
+	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
 	{
 		CLIENT_COMMAND(m_pPlayer->edict(), "-attack\n");
 		EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/crystal_empty.wav", 1.0, ATTN_NORM);
@@ -293,110 +255,12 @@ void CGauss::Attack( void )
 	}
 
 	// do not show when zoomed, to not obstruct the hud
-	if( (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 15) && (m_pPlayer->ZoomState == 0))
+	if( (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 3) && (m_pPlayer->ZoomState == 0))
 		LowAmmoMsg(m_pPlayer);
 	
-	if (m_fInAttack == 0)
-	{
-		// take one ammo just to start the spin
-		// diffusion - we take ammo silently, it will be subtracted only after firing
-		AmmoTaken++;
-		m_flNextAmmoBurn = gpGlobals->time;
+	StartFire();
 
-		// spin up
-		m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_CHARGE_VOLUME;
-		
-	//	SendWeaponAnim( GAUSS_SPINUP );
-		m_fInAttack = 1;
-		m_flTimeWeaponIdle = gpGlobals->time + 0.5;
-		m_flStartCharge = gpGlobals->time;
-		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/gauss_loop.wav",1.0 , ATTN_NORM, 0, 100 );
-		m_iSoundState = SND_CHANGE_PITCH;
-		UpdateHUD();
-	}
-	else if (m_fInAttack == 1)
-	{
-		if (m_flTimeWeaponIdle < gpGlobals->time)
-			m_fInAttack = 2;
-	}
-	else
-	{
-		if( AmmoTaken == m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
-		{
-			// out of ammo! force the gun to fire
-			StartFire();
-			m_fInAttack = 0;
-			m_flTimeWeaponIdle = gpGlobals->time + 1.0;
-			m_pPlayer->m_flNextAttack = gpGlobals->time + 1;
-			return;
-		}
-
-		// during the charging process, eat one bit of ammo every once in a while
-		if ( gpGlobals->time > m_flNextAmmoBurn && m_flNextAmmoBurn != -1 )
-		{
-			AmmoTaken++;
-			m_flNextAmmoBurn = gpGlobals->time + 0.1;
-			UpdateHUD();
-		}
-		
-		if ( gpGlobals->time - m_flStartCharge >= GetFullChargeTime() )
-			m_flNextAmmoBurn = -1; // don't eat any more ammo after gun is fully charged.
-
-	//	int pitch = (gpGlobals->time - m_flStartCharge) * (150 / GetFullChargeTime()) + 100;
-		int pitch = (gpGlobals->time - m_flStartCharge) * (150 / GetFullChargeTime() * 2);
-		if (pitch > 250) 
-			pitch = 250;
-
-		if (m_iSoundState == 0)
-			ALERT( at_console, "sound state %d\n", m_iSoundState );
-
-		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/gauss_loop.wav", 0.65, ATTN_NORM, m_iSoundState, pitch);
-		
-		m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
-
-		m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_CHARGE_VOLUME;
-		
-		// m_flTimeWeaponIdle = gpGlobals->time + 0.1;
-
-		if ((m_flStartCharge < gpGlobals->time - 7) && (WarningSoundPlayed == false) )
-		{
-			EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/gauss_overcharge.wav", 1.0, ATTN_NORM, 0, 100);
-			WarningSoundPlayed = true;
-			UpdateHUD( WarningSoundPlayed ); // make it flash with red
-		}
-
-		if (m_flStartCharge < gpGlobals->time - 10)
-		{
-			// Player charged up too long. Zap him.
-			switch( RANDOM_LONG( 0, 3 ) )
-			{
-			case 0: EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/gauss_zap1.wav", 1.0, ATTN_NORM, 0, 85 + RANDOM_LONG( 0, 25 ) ); break;
-			case 1: EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/gauss_zap2.wav", 1.0, ATTN_NORM, 0, 85 + RANDOM_LONG( 0, 25 ) ); break;
-			case 2: EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/gauss_zap3.wav", 1.0, ATTN_NORM, 0, 85 + RANDOM_LONG( 0, 25 ) ); break;
-			case 3: EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/gauss_zap4.wav", 1.0, ATTN_NORM, 0, 85 + RANDOM_LONG( 0, 25 ) ); break;
-			}
-			
-			m_fInAttack = 0;
-			m_flTimeWeaponIdle = gpGlobals->time + 1.0;
-			m_pPlayer->m_flNextAttack = gpGlobals->time + 2.0;
-			m_pPlayer->TakeDamage( VARS(eoNullEntity), VARS(eoNullEntity), 50, DMG_SHOCK );
-			CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
-	
-			SendWeaponAnim( GAUSS_IDLE );
-
-			WarningSoundPlayed = false;
-			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= AmmoTaken;
-			AmmoTaken = 0;
-			UpdateHUD();
-			ResetZoom();
-			// HACKHACK - do this fade here to override previous fade in ResetZoom...
-			UTIL_ScreenFade( m_pPlayer, Vector( 70, 169, 255 ), 2, 0.5, 128, FFADE_IN );
-			UTIL_ScreenShakeLocal( m_pPlayer, m_pPlayer->GetAbsOrigin(), 6, 100.0, 2, 0, true );
-
-			// Player may have been killed and this weapon dropped, don't execute any more code after this!
-			return;
-		}
-	}
+	m_flTimeWeaponIdle = gpGlobals->time + 1.0;
 }
 
 void CGauss::SecondaryAttack(void)
@@ -446,7 +310,7 @@ void CGauss::SecondaryAttack(void)
 		UTIL_ScreenFade( m_pPlayer, g_vecZero, 0.5, 0, 255, 0x0000 );
 	}
 
-	UpdateHUD( WarningSoundPlayed );
+	UpdateHUD();
 
 	m_flNextSecondaryAttack = gpGlobals->time + 0.2;
 }
@@ -473,23 +337,14 @@ void CGauss::Reload( void )
 //=========================================================
 void CGauss::StartFire( void )
 {
-	UTIL_ScreenShakeLocal( m_pPlayer, m_pPlayer->GetAbsOrigin(), AmmoTaken, 100.0, 0.2, 0, true );
+	UTIL_ScreenShakeLocal( m_pPlayer, m_pPlayer->GetAbsOrigin(), 10, 100.0, 0.2, 0, true );
 //	MakeWeaponShake( m_pPlayer, WEAPON_GAUSS, 0 ); // I didn't finish the "predicting" on this weapon
-	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= AmmoTaken;
-	AmmoTaken = 0;
-	WarningSoundPlayed = false;
-	UpdateHUD( WarningSoundPlayed ); // update after the values changed
-	
-	float flDamage;
+
+	float flDamage = DMG_WPN_GAUSS_FULL;
 	
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 	Vector vecAiming = gpGlobals->v_forward;
 	Vector vecSrc = m_pPlayer->GetGunPosition( ); // + gpGlobals->v_up * -8 + gpGlobals->v_right * 8;
-	
-	if (gpGlobals->time - m_flStartCharge > GetFullChargeTime())
-		flDamage = DMG_WPN_GAUSS_FULL;
-	else
-		flDamage = DMG_WPN_GAUSS_FULL * ((gpGlobals->time - m_flStartCharge) / GetFullChargeTime() );
 
 	//ALERT ( at_console, "Time:%f Damage:%f\n", gpGlobals->time - m_flStartCharge, flDamage );
 
@@ -497,25 +352,12 @@ void CGauss::StartFire( void )
 
 	m_pPlayer->SetAbsVelocity( m_pPlayer->GetAbsVelocity() - gpGlobals->v_forward * flDamage * 1 );
 
-/*		if ( !g_pGameRules->IsDeathmatch() )
-	{
-		// in deathmatch, gauss can pop you up into the air. Not in single play.
-		Vector vecVelocity = m_pPlayer->GetAbsVelocity();
-		vecVelocity.z = flZVel;
-		m_pPlayer->SetAbsVelocity( vecVelocity );
-	}
-*/
 	SendWeaponAnim( GAUSS_FIRE );
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-	STOP_SOUND( ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/gauss_loop.wav" );
-	// diffusion - use different channel to not interrupt it while charging
-//	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/gauss2.wav", 0.5 + flDamage * (1.0 / 400.0), ATTN_NORM, 0, 85 + RANDOM_LONG(0,0x1f)); 
 	PlayClientSound( m_pPlayer, WEAPON_GAUSS );
-	// time until aftershock 'static discharge' sound
-	m_flPlayAftershock = gpGlobals->time + RANDOM_FLOAT(0.3, 0.8);
 
 	Fire( vecSrc, vecAiming, flDamage );
 
@@ -549,13 +391,21 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 {
 	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
 
+	// take ammo
+	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= 1;
+
+	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
+
+	Charge = 0.0f; // set to recharge
+	UpdateHUD(); // update weapon skin
+
 	Vector vecDeviate = g_vecZero;
 	if( m_pPlayer->ZoomState == 0 ) // non-zoomed player can't have a straight shot
 		vecDeviate = Vector( RANDOM_LONG( -200, 200 ), RANDOM_LONG( -200, 200 ), RANDOM_LONG( -200, 200 ) );
 
 	Vector vecSrc = vecOrigSrc;
 	Vector vecDest = vecSrc + vecDir * 8192 + vecDeviate;
-	edict_t		*pentIgnore;
+	edict_t	*pentIgnore;
 	TraceResult tr, beam_tr;
 	float flMaxFrac = 1.0;
 	int	nTotal = 0;
@@ -582,8 +432,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 		if (pEntity == NULL)
 			break;
 
-		int Brightness = flDamage;
-		Brightness = bound( 100, Brightness, 255 );
+		int Brightness = 255;
 
 		if (fFirstBeam)
 		{
@@ -703,25 +552,6 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 				MESSAGE_END();
 
 				nTotal += 13;
-/*
-				// balls
-				MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, tr.vecEndPos );
-					WRITE_BYTE( TE_SPRITETRAIL );// TE_RAILTRAIL);
-					WRITE_COORD( tr.vecEndPos.x );
-					WRITE_COORD( tr.vecEndPos.y );
-					WRITE_COORD( tr.vecEndPos.z );
-					WRITE_COORD( tr.vecEndPos.x + tr.vecPlaneNormal.x );
-					WRITE_COORD( tr.vecEndPos.y + tr.vecPlaneNormal.y );
-					WRITE_COORD( tr.vecEndPos.z + tr.vecPlaneNormal.z );
-					WRITE_SHORT( m_iBalls );		// model
-					WRITE_BYTE( n * flDamage * 0.3 );				// count
-					WRITE_BYTE( 10 );				// life * 10
-					WRITE_BYTE( RANDOM_LONG( 1, 2 ) );				// size * 10
-					WRITE_BYTE( 10 );				// amplitude * 0.1
-					WRITE_BYTE( 20 );				// speed * 100
-				MESSAGE_END();
-*/
-				nTotal += 21;
 
 				// lose energy
 				if (n == 0) n = 0.1;
@@ -748,132 +578,23 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 				// limit it to one hole punch
 				if (fHasPunched)
 					break;
+
 				fHasPunched = 1;
 
-// DIFFUSION - I have removed the ability for gauss to punch through the wall with the secondary attack. 
+				// slug doesn't punch through ever with primary 
+				// fire, so leave a little glowy bit and make some balls
+				MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, tr.vecEndPos );
+					WRITE_BYTE( TE_GLOWSPRITE );
+					WRITE_COORD( tr.vecEndPos.x);	// pos
+					WRITE_COORD( tr.vecEndPos.y);
+					WRITE_COORD( tr.vecEndPos.z);
+					WRITE_SHORT( m_iGlow );		// model
+					WRITE_BYTE( 20 );				// life * 10
+					WRITE_BYTE( 3 );				// size * 10
+					WRITE_BYTE( 200 );			// brightness
+				MESSAGE_END();
 
-
-				// try punching through wall if secondary attack (primary is incapable of breaking through)
-//				if ( !m_fPrimaryFire )
-//				{
-//					UTIL_TraceLine( tr.vecEndPos + vecDir * 8, vecDest, dont_ignore_monsters, pentIgnore, &beam_tr);
-//					if (!beam_tr.fAllSolid)
-//					{
-//						// trace backwards to find exit point
-//						UTIL_TraceLine( beam_tr.vecEndPos, tr.vecEndPos, dont_ignore_monsters, pentIgnore, &beam_tr);
-//
-//						float n = (beam_tr.vecEndPos - tr.vecEndPos).Length( );
-//
-//						if (n < flDamage)
-//						{
-//							if (n == 0) n = 1;
-//							flDamage -= n;
-//
-//							// ALERT( at_console, "punch %f\n", n );
-//
-//							// absorption balls
-//							MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, tr.vecEndPos );
-//								WRITE_BYTE( TE_SPRITETRAIL );// TE_RAILTRAIL);
-//								WRITE_COORD( tr.vecEndPos.x );
-//								WRITE_COORD( tr.vecEndPos.y );
-//								WRITE_COORD( tr.vecEndPos.z );
-//								WRITE_COORD( tr.vecEndPos.x - vecDir.x );
-//								WRITE_COORD( tr.vecEndPos.y - vecDir.y );
-//								WRITE_COORD( tr.vecEndPos.z - vecDir.z );
-//								WRITE_SHORT( m_iBalls );		// model
-//								WRITE_BYTE( 3 );				// count
-//								WRITE_BYTE( 10 );				// life * 10
-//								WRITE_BYTE( RANDOM_LONG( 1, 2 ) );				// size * 10
-//								WRITE_BYTE( 10 );				// amplitude * 0.1
-//								WRITE_BYTE( 1 );				// speed * 100
-//							MESSAGE_END();
-//							nTotal += 21;
-//
-//							// exit blast damage
-//							m_pPlayer->RadiusDamage( beam_tr.vecEndPos + vecDir * 8, pev, m_pPlayer->pev, flDamage, CLASS_NONE, DMG_BLAST );
-//							CSoundEnt::InsertSound ( bits_SOUND_COMBAT, GetAbsOrigin(), NORMAL_EXPLOSION_VOLUME, 3.0 );
-//
-//							DecalGunshot( &beam_tr, BULLET_MONSTER_12MM );
-//							nTotal += 19;
-//
-//							// exit wall glow
-//							MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, beam_tr.vecEndPos );
-//								WRITE_BYTE( TE_GLOWSPRITE );
-//								WRITE_COORD( beam_tr.vecEndPos.x);	// pos
-//								WRITE_COORD( beam_tr.vecEndPos.y);
-//								WRITE_COORD( beam_tr.vecEndPos.z);
-//								WRITE_SHORT( m_iGlow );		// model
-//								WRITE_BYTE( 60 );				// life * 10
-//								WRITE_BYTE( 10 );				// size * 10
-//								WRITE_BYTE( flDamage );			// brightness
-//							MESSAGE_END();
-//							nTotal += 13;
-//
-//							// balls
-//							MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, beam_tr.vecEndPos );
-//								WRITE_BYTE( TE_SPRITETRAIL );// TE_RAILTRAIL);
-//								WRITE_COORD( beam_tr.vecEndPos.x );
-//								WRITE_COORD( beam_tr.vecEndPos.y );
-//								WRITE_COORD( beam_tr.vecEndPos.z );
-//								WRITE_COORD( beam_tr.vecEndPos.x + vecDir.x );
-//								WRITE_COORD( beam_tr.vecEndPos.y + vecDir.y );
-//								WRITE_COORD( beam_tr.vecEndPos.z + vecDir.z );
-//								WRITE_SHORT( m_iBalls );		// model
-//								WRITE_BYTE( flDamage * 0.3 );				// count
-//								WRITE_BYTE( 10 );				// life * 10
-//								WRITE_BYTE( RANDOM_LONG( 1, 2 ) );				// size * 10
-//								WRITE_BYTE( 20 );				// amplitude * 0.1
-//								WRITE_BYTE( 40 );				// speed * 100
-//							MESSAGE_END();
-//							nTotal += 21;
-//
-//							vecSrc = beam_tr.vecEndPos + vecDir;
-//						}
-//					}
-//					else      
-//					{
-//						 //ALERT( at_console, "blocked %f\n", n );
-//						flDamage = 0;
-//					} 
-//				}    
-//				else
-//				{
-//					//ALERT( at_console, "blocked solid\n" );
-//				
-
-						// slug doesn't punch through ever with primary 
-						// fire, so leave a little glowy bit and make some balls
-						MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, tr.vecEndPos );
-							WRITE_BYTE( TE_GLOWSPRITE );
-							WRITE_COORD( tr.vecEndPos.x);	// pos
-							WRITE_COORD( tr.vecEndPos.y);
-							WRITE_COORD( tr.vecEndPos.z);
-							WRITE_SHORT( m_iGlow );		// model
-							WRITE_BYTE( 20 );				// life * 10
-							WRITE_BYTE( 3 );				// size * 10
-							WRITE_BYTE( 200 );			// brightness
-						MESSAGE_END();
-
-/*
-						MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, tr.vecEndPos );
-							WRITE_BYTE( TE_SPRITETRAIL );// TE_RAILTRAIL);
-							WRITE_COORD( tr.vecEndPos.x );
-							WRITE_COORD( tr.vecEndPos.y );
-							WRITE_COORD( tr.vecEndPos.z );
-							WRITE_COORD( tr.vecEndPos.x + tr.vecPlaneNormal.x );
-							WRITE_COORD( tr.vecEndPos.y + tr.vecPlaneNormal.y );
-							WRITE_COORD( tr.vecEndPos.z + tr.vecPlaneNormal.z );
-							WRITE_SHORT( m_iBalls );		// model
-							WRITE_BYTE( 8 );				// count
-							WRITE_BYTE( 6 );				// life * 10
-							WRITE_BYTE( RANDOM_LONG( 1, 2 ) );	// size * 10
-							WRITE_BYTE( 10 );				// amplitude * 0.1
-							WRITE_BYTE( 20 );				// speed * 100
-						MESSAGE_END();
-						*/
-					flDamage = 0;
-//				}
-
+				flDamage = 0;
 			}
 		}
 		else
@@ -888,49 +609,10 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 
 void CGauss::WeaponIdle( void )
 {
-	ResetEmptySound( );
+	ResetEmptySound();
 
-//	pev->skin = RANDOM_LONG(0,8);
-//	ALERT( at_console, "%i\n", pev->skin );
-
-	// play aftershock static discharge (no aftershock sounds in Diffusion)
-/*	if (m_flPlayAftershock && m_flPlayAftershock < gpGlobals->time)
-	{
-		switch (RANDOM_LONG(0,3))
-		{
-		case 0:	EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/crystalidle1.wav", RANDOM_FLOAT(0.7, 0.8), ATTN_NORM); break;
-		case 1:	EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/crystalidle2.wav", RANDOM_FLOAT(0.7, 0.8), ATTN_NORM); break;
-		case 2:	EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/crystalidle3.wav", RANDOM_FLOAT(0.7, 0.8), ATTN_NORM); break;
-		case 3:	break; // no sound
-		}
-		m_flPlayAftershock = 0.0;
-	}
-*/
 	if (m_flTimeWeaponIdle > gpGlobals->time)
 		return;
-
-	if (m_fInAttack != 0)
-	{
-		StartFire();
-		m_fInAttack = 0;
-		m_flTimeWeaponIdle = gpGlobals->time + 2.0;
-	}
-/*	else
-	{
-		int iAnim;
-		float flRand = RANDOM_FLOAT(0, 1);
-		if (flRand <= 0.5)
-		{
-			iAnim = GAUSS_IDLE;
-			m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT( 10, 15 );
-		}
-		else if (flRand <= 0.75)
-		{
-			iAnim = GAUSS_IDLE;
-			m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT( 10, 15 );
-		}
-	}
-*/
 }
 
 class CGaussAmmo : public CBasePlayerAmmo
