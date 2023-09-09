@@ -1275,6 +1275,14 @@ void CHGrunt :: RunAI( void )
 			FlashlightSpr->SetBrightness( 0 );
 	}
 
+	if( m_pSchedule && FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) && m_hEnemy && BodyTurn( m_hEnemy->GetAbsOrigin() ) )
+		RunningShooting = true;
+	else
+	{
+		RunningShooting = false;
+		SetBoneController( 1, 0 );
+	}
+
 //	if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
 //		ALERT( at_console, "sched=runandfire, runshoot=%3d\n", (int)RunningShooting );
 }
@@ -1474,7 +1482,7 @@ void CHGrunt :: Shoot ( void )
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass ( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, m_iBrassShell, TE_BOUNCE_SHELL);
 
-	if (m_fStanding = 0)
+	if( !m_fStanding )
 		FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_4DEGREES, 4096, BULLET_MONSTER_MP5 );
 	else if( RunningShooting )
 		FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 4096, BULLET_MONSTER_MP5 );
@@ -1643,11 +1651,13 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_BURST1:
 		{
-			if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
+			if( pev->sequence == LookupSequence( "runshootmp5" ) || pev->sequence == LookupSequence( "runshootshotgun" ) )
 			{
 				if( !RunningShooting )
 					break;
 				if( !HasConditions(bits_COND_CAN_RANGE_ATTACK1) )
+					break;
+				if( m_hEnemy == NULL )
 					break;
 				// force client event
 				MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
@@ -1678,11 +1688,13 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		case HGRUNT_AE_BURST2:
 		case HGRUNT_AE_BURST3:
 		{
-			if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
+			if( pev->sequence == LookupSequence( "runshootmp5" ) || pev->sequence == LookupSequence( "runshootshotgun" ) )
 			{
 				if( !RunningShooting )
 					break;
 				if( !HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+					break;
+				if( m_hEnemy == NULL )
 					break;
 				// force client event
 				MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
@@ -1960,20 +1972,6 @@ void CHGrunt :: StartTask ( Task_t *pTask )
 		break;
 	}
 
-	case TASK_MOVE_TO_TARGET_RANGE:
-	{
-		if( !m_hEnemy )
-		{
-			TaskFail();
-		}
-		else
-		{
-			m_hTargetEnt = m_hEnemy;
-			CBaseMonster::StartTask( pTask );
-		}
-		break;
-	}
-
 	case TASK_GRUNT_CHECK_FIRE:
 		if ( !NoFriendlyFire() )
 		{
@@ -2035,9 +2033,9 @@ bool CHGrunt::BodyTurn( const Vector &vecTarget )
 //=========================================================
 void CHGrunt :: RunTask ( Task_t *pTask )
 {
-	// reset body and shooting, unless overridden by task
-	RunningShooting = false;
-	SetBoneController( 1, 0 );
+//	// reset body and shooting, unless overridden by task
+//	RunningShooting = false;
+//	SetBoneController( 1, 0 );
 
 	switch ( pTask->iTask )
 	{
@@ -2061,13 +2059,6 @@ void CHGrunt :: RunTask ( Task_t *pTask )
 		if( gpGlobals->time > AttackStartTime )
 			TaskComplete();
 
-		break;
-	}
-	case TASK_WAIT_FOR_MOVEMENT: // he is walking or running - can possibly shoot
-	{
-		if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) && m_hEnemy && BodyTurn( m_hEnemy->GetAbsOrigin() ) )
-			RunningShooting = true;
-		CSquadMonster::RunTask( pTask );
 		break;
 	}
 	default:
@@ -3855,11 +3846,13 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_BURST1:
 		{
-			if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
+			if( pev->sequence == LookupSequence( "runshootmp5" ) || pev->sequence == LookupSequence( "runshootshotgun" ) )
 			{
 				if( !RunningShooting )
 					break;
 				if( !HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+					break;
+				if( m_hEnemy == NULL )
 					break;
 				// force client event
 				MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
@@ -3880,11 +3873,13 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_BURST2:
 		case HGRUNT_AE_BURST3:
-			if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
+			if( pev->sequence == LookupSequence( "runshootmp5" ) || pev->sequence == LookupSequence( "runshootshotgun" ) )
 			{
 				if( !RunningShooting )
 					break;
 				if( !HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+					break;
+				if( m_hEnemy == NULL )
 					break;
 				// force client event
 				MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
