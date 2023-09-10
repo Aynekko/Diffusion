@@ -444,7 +444,7 @@ void CTripmineGrenade :: BeamBreakThink( void  )
 		return;
 	}
 
-	SetNextThink( 0.1 );
+	SetNextThink( 0 ); // diffusion - think every frame to make sure it will be tripped
 }
 
 int CTripmineGrenade :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
