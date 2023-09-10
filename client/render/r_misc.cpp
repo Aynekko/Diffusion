@@ -470,7 +470,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 							break; // valid spot
 					}
 
-					g_pParticles.SmokeVolume( ParticleEntIndex, ent->curstate.iuser1, vecSpot, SmV_Scale, SmV_Alpha, SmV_Distance );
+					g_pParticles.SmokeVolume( ParticleEntIndex, ent->curstate.iuser1, vecSpot, ent->curstate.vuser1, ent->curstate.vuser2, SmV_Scale, SmV_Alpha, SmV_Distance );
 				}
 
 				tr.ParticleTime[ParticleEntIndex] = tr.time + ent->curstate.fuser3;

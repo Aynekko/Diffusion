@@ -12,6 +12,8 @@ fuser1 = particle size
 fuser2 = density
 fuser3 = delay between emissions
 renderamt = transparency
+vuser1 = add velocity on spawn
+vuser2 = randomize velocity direction (+/-)
 */
 
 class CFuncSmokeVolume : public CBaseEntity
@@ -34,6 +36,17 @@ void CFuncSmokeVolume::Spawn( void )
 
 	if( !pev->fuser3 || pev->fuser3 <= 0.0f )
 		pev->fuser3 = 2.0f;
+
+	// keep them above zero
+	if( !pev->vuser2.IsNull() )
+	{
+		if( pev->vuser2.x < 0.0f )
+			pev->vuser2.x = -pev->vuser2.x;
+		if( pev->vuser2.y < 0.0f )
+			pev->vuser2.y = -pev->vuser2.x;
+		if( pev->vuser2.z < 0.0f )
+			pev->vuser2.z = -pev->vuser2.x;
+	}
 
 	SET_MODEL( edict(), GetModel() );
 }

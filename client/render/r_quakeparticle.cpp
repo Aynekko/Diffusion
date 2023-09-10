@@ -2085,7 +2085,7 @@ void CQuakePartSystem::Smoke( int EntIndex, int Particle, const Vector &pos, con
 	}
 }
 
-void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &pos, float Scale, float Alpha, int Distance )
+void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, float Scale, float Alpha, int Distance )
 {
 	CQuakePart src;
 
@@ -2119,9 +2119,13 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 		src.m_vecOrigin.x = pos.x + RANDOM_FLOAT( -posRand, posRand );
 		src.m_vecOrigin.y = pos.y + RANDOM_FLOAT( -posRand, posRand );
 		src.m_vecOrigin.z = pos.z + RANDOM_FLOAT( -posRand, posRand );
-		src.m_vecVelocity.x = 0;
-		src.m_vecVelocity.y = 0;
-		src.m_vecVelocity.z = 0;
+		src.m_vecVelocity = PushVelocity;
+		if( PushVelocityRand.x != 0.0f )
+			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.x, PushVelocityRand.x );
+		if( PushVelocityRand.y != 0.0f )
+			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.y, PushVelocityRand.y );
+		if( PushVelocityRand.z != 0.0f )
+			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.z, PushVelocityRand.z );
 		src.m_vecAccel = g_vecZero;
 		src.m_vecColor = Vector( 1, 1, 1 );
 		src.m_vecColorVelocity = g_vecZero;
@@ -2157,9 +2161,15 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 		src.m_vecOrigin.x = pos.x + RANDOM_FLOAT( -posRand, posRand );
 		src.m_vecOrigin.y = pos.y + RANDOM_FLOAT( -posRand, posRand );
 		src.m_vecOrigin.z = pos.z + RANDOM_FLOAT( -posRand, posRand );
-		src.m_vecVelocity.x = 0;
-		src.m_vecVelocity.y = 0;
-		src.m_vecVelocity.z = RANDOM_FLOAT(-5, 5);
+		src.m_vecVelocity.x = PushVelocity.x;
+		src.m_vecVelocity.y = PushVelocity.y;
+		src.m_vecVelocity.z = PushVelocity.z + RANDOM_FLOAT(-5, 5);
+		if( PushVelocityRand.x != 0.0f )
+			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.x, PushVelocityRand.x );
+		if( PushVelocityRand.y != 0.0f )
+			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.y, PushVelocityRand.y );
+		if( PushVelocityRand.z != 0.0f )
+			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.z, PushVelocityRand.z );
 		src.m_vecAccel = g_vecZero;
 		src.m_vecColor = Vector( 1, 1, 1 );
 		src.m_vecColorVelocity = g_vecZero;
