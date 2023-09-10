@@ -36,13 +36,13 @@ GNU General Public License for more details.
 
 ref_globals_t	tr;
 ref_stats_t	r_stats;
-char		r_speeds_msg[2048];
-char		r_depth_msg[2048];
+char r_speeds_msg[2048];
+char r_depth_msg[2048];
 ref_instance_t	*RI = &glState.stack[0];
-float		gldepthmin, gldepthmax;
-model_t		*worldmodel = NULL;	// must be set at begin each frame
-BOOL		g_fRenderInitialized = FALSE;
-int		r_currentMessageNum = 0;
+float gldepthmin, gldepthmax;
+model_t *worldmodel = NULL;	// must be set at begin each frame
+BOOL g_fRenderInitialized = FALSE;
+int r_currentMessageNum = 0;
 Vector PrevViewAngles = g_vecZero;
 Vector PrevViewOrg = g_vecZero;
 
@@ -1887,19 +1887,34 @@ void R_Speeds_Printf( const char *msg, ... )
 
 void HUD_PrintStats( void )
 {
-	if( !CVAR_TO_BOOL( r_speeds ))
+	if( !CVAR_TO_BOOL( r_speeds ) )
 		return;
 
 	msurface_t *surf = r_stats.debug_surface;
 	mleaf_t *curleaf = RI->viewleaf;
 
-	R_Speeds_Printf( "Renderer: ^2XashXT^7\n\n" );
+	R_Speeds_Printf( "Renderer: ^2XashXT | Diffusion^7\n\n" );
 
 	switch( (int)r_speeds->value )
 	{
 	case 1:
 		R_Speeds_Printf( "%3i wpoly %3i epoly\n", r_stats.c_world_polys, r_stats.c_studio_polys );
-		R_Speeds_Printf( "%3i spoly %3i grass\n", r_stats.c_sprite_polys, r_stats.c_grass_polys );
+		R_Speeds_Printf( "%3i spoly %3i grass\n\n", r_stats.c_sprite_polys, r_stats.c_grass_polys );
+		R_Speeds_Printf( "%3i studio models\n", r_stats.c_studio_models_drawn );
+		R_Speeds_Printf( "%3i sprite models\n", r_stats.c_sprite_models_drawn );
+		R_Speeds_Printf( "%3i temp entities\n", r_stats.c_active_tents_count );
+		R_Speeds_Printf( "%3i particles (%i total)\n", r_stats.c_particles_total - r_stats.c_particles_culled, r_stats.c_particles_total );
+		R_Speeds_Printf( "%3i cables\n\n", r_stats.c_cables );
+		R_Speeds_Printf( "%3i mirrors\n", r_stats.c_mirror_passes );
+		R_Speeds_Printf( "%3i portals\n", r_stats.c_portal_passes );
+		R_Speeds_Printf( "%3i screens\n", r_stats.c_screen_passes );
+		R_Speeds_Printf( "%3i shadows\n", r_stats.c_shadow_passes );
+		R_Speeds_Printf( "%3i 3d sky\n", r_stats.c_sky_passes );
+		R_Speeds_Printf( "%3i total\n\n", r_stats.num_passes );
+		R_Speeds_Printf( "Dynamic lights:\n\n" );
+		R_Speeds_Printf( "%3i total\n", r_stats.c_plights );
+		R_Speeds_Printf( "%3i studio models affected\n", r_stats.c_plights_meshes );
+		R_Speeds_Printf( "%3i world surfaces affected\n", r_stats.num_light_surfaces );
 		break;		
 	case 2:
 		if( !curleaf ) curleaf = worldmodel->leafs;
@@ -1912,30 +1927,15 @@ void HUD_PrintStats( void )
 		R_Speeds_Printf( "%3i static entities\n%3i normal entities\n%3i fading entities\n%3i faded entities\n", r_numStatics, r_numEntities - r_numStatics, r_stats.num_fading_ents, r_stats.num_faded_ents );
 		break;
 	case 4:
-		R_Speeds_Printf( "%3i studio models\n", r_stats.c_studio_models_drawn );
-		R_Speeds_Printf( "%3i sprite models\n", r_stats.c_sprite_models_drawn );
-		R_Speeds_Printf( "%3i temp entities\n", r_stats.c_active_tents_count );
-		R_Speeds_Printf( "%3i particles (%i total)\n", r_stats.c_particles_total - r_stats.c_particles_culled, r_stats.c_particles_total );
-		R_Speeds_Printf( "%3i cables\n", r_stats.c_cables );
-		break;
-	case 5:
-		R_Speeds_Printf( "%3i mirrors\n", r_stats.c_mirror_passes );
-		R_Speeds_Printf( "%3i portals\n", r_stats.c_portal_passes );
-		R_Speeds_Printf( "%3i screens\n", r_stats.c_screen_passes );
-		R_Speeds_Printf( "%3i shadows\n", r_stats.c_shadow_passes );
-		R_Speeds_Printf( "%3i 3d sky\n", r_stats.c_sky_passes );
-		R_Speeds_Printf( "%3i total\n", r_stats.num_passes );
-		break;
-	case 6:
 		R_Speeds_Printf( "DIP count %3i\nShader bind %3i\n", r_stats.num_flushes, r_stats.num_shader_binds );
 		R_Speeds_Printf( "Total GLSL shaders %3i\n", Q_max( num_glsl_programs - 1, 0 ));
 		R_Speeds_Printf( "frame total tris %3i\n", r_stats.c_total_tris );
 		break;
-	case 7:
+	case 5:
 		// draw hierarchy map of recursion calls
 		Q_strncpy( r_speeds_msg, r_depth_msg, sizeof( r_speeds_msg ));
 		break;
-	case 8:
+	case 6:
 		if( surf && surf->texinfo && surf->texinfo->texture )
 		{
 			glsl_program_t *cur = &glsl_programs[surf->info->shaderNum[0]];
@@ -1945,10 +1945,10 @@ void HUD_PrintStats( void )
 			R_Speeds_Printf( "%s\n", GL_PretifyListOptions( cur->options, true ));
 		}
 		break;
-	case 9:
+	case 7:
 		R_Speeds_Printf( "%s grass total size\n", Q_memprint( tr.grass_total_size ));
 		break;
-	case 10:
+	case 8:
 		R_Speeds_Printf( "Active shaders:\n\n" );
 		R_Speeds_Printf( "%3ix sunshaft\n", r_stats.sh_sunshafts_pass );
 		R_Speeds_Printf( "%3ix motion blur\n", r_stats.sh_motionblur_pass );
@@ -1959,12 +1959,6 @@ void HUD_PrintStats( void )
 		R_Speeds_Printf( "%3ix monochrome\n", r_stats.sh_monochrome_pass );
 		R_Speeds_Printf( "%3ix SSAO\n", r_stats.sh_ssao_pass );
 		R_Speeds_Printf( "%3ix waterdrops\n", r_stats.sh_waterdrops_pass );
-		break;
-	case 11:
-		R_Speeds_Printf( "Dynamic lights:\n\n" );
-		R_Speeds_Printf( "%3i total\n", r_stats.c_plights );
-		R_Speeds_Printf( "%3i studio models affected\n", r_stats.c_plights_meshes );
-		R_Speeds_Printf( "%3i world surfaces affected\n", r_stats.num_light_surfaces );
 		break;
 	}
 
