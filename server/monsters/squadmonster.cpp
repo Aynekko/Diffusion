@@ -520,7 +520,7 @@ BOOL CSquadMonster :: NoFriendlyFire( void )
 BOOL CSquadMonster::NoFriendlyFire( void )  // freeslave
 {
 	//!!!BUGBUG - to fix this, the planes must be aligned to where the monster will be firing its gun, not the direction it is facing!!!
-	if( m_hEnemy != 0 )
+	if( m_hEnemy )
 	{
 		UTIL_MakeVectors( UTIL_VecToAngles( m_hEnemy->Center() - pev->origin ) );
 	}
@@ -569,9 +569,9 @@ BOOL CSquadMonster::NoFriendlyFire( void )  // freeslave
 
 	v_dir = gpGlobals->v_right * ( pev->size.x * 1.5f );
 	vecLeftSide = pev->origin - v_dir;
-		vecRightSide = pev->origin + v_dir;
+	vecRightSide = pev->origin + v_dir;
 
-	v_left = gpGlobals->v_right * -1.0f;
+	v_left = -gpGlobals->v_right;
 
 	leftPlane.InitializePlane( gpGlobals->v_right, vecLeftSide );
 	rightPlane.InitializePlane( v_left, vecRightSide );
@@ -588,7 +588,7 @@ BOOL CSquadMonster::NoFriendlyFire( void )  // freeslave
 		for( int i = 0; i < MAX_SQUAD_MEMBERS; i++ )
 		{
 			CSquadMonster *pMember = pSquadLeader->MySquadMember( i );
-			if( pMember && pMember != this )
+			if( pMember && pMember != this && pMember->IsAlive() )
 			{
 				if( backPlane.PointInFront( pMember->pev->origin ) &&
 					leftPlane.PointInFront( pMember->pev->origin ) &&
@@ -596,6 +596,7 @@ BOOL CSquadMonster::NoFriendlyFire( void )  // freeslave
 					frontPlane.PointInFront( pMember->pev->origin ) )
 				{
 					// this guy is in the check volume! Don't shoot!
+				//	ALERT( at_aiconsole, "%s: Ally squad member at fire plane!\n", STRING( pev->classname ) );
 					return FALSE;
 				}
 			}
@@ -604,7 +605,7 @@ BOOL CSquadMonster::NoFriendlyFire( void )  // freeslave
 	for( int k = 1; k <= gpGlobals->maxClients; k++ )
 	{
 		CBaseEntity* pPlayer = UTIL_PlayerByIndex(k);
-		if (pPlayer && pPlayer->IsPlayer() && IRelationship(pPlayer) == R_AL)
+		if (pPlayer && pPlayer->IsPlayer() && pPlayer->IsAlive() && IRelationship(pPlayer) == R_AL)
 		{
 			if( backPlane.PointInFront( pPlayer->pev->origin ) &&
 				leftPlane.PointInFront( pPlayer->pev->origin ) &&

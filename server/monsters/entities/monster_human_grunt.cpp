@@ -59,6 +59,7 @@ enum
 	SCHED_GRUNT_WAIT_FACE_ENEMY,
 	SCHED_GRUNT_TAKECOVER_FAILED,// special schedule type that forces analysis of conditions and picks the best possible schedule to recover from this type of failure.
 	SCHED_GRUNT_ELOF_FAIL,
+	SCHED_GRUNT_RUN_AND_FIRE,
 };
 
 //=========================================================
@@ -279,7 +280,6 @@ Schedule_t	slGruntVictoryDance[] =
 //=========================================================
 Task_t tlGruntEstablishLineOfFire[] =
 {
-//		{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_FAIL				},
 		{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_GRUNT_ELOF_FAIL	},
 
 		{ TASK_GET_PATH_TO_ENEMY,	(float)0						},
@@ -844,28 +844,27 @@ Schedule_t	slGruntRepelLand[] =
 DEFINE_CUSTOM_SCHEDULES(CHGrunt)
 {
 	slGruntFail,
-		slGruntCombatFail,
-		slGruntVictoryDance,
-		slGruntEstablishLineOfFire,
-		slGruntFoundEnemy,
-		slGruntCombatFace,
-		slGruntSignalSuppress,
-		slGruntSuppress,
-		slGruntWaitInCover,
-		slGruntTakeCover,
-		slGruntGrenadeCover, // not used
-		slGruntTossGrenadeCover,
-		slGruntTakeCoverFromBestSound,
-		slGruntHideReload,
-		slGruntSweep,
-		slGruntRangeAttack1A,
-		slGruntRangeAttack1B,
-		slGruntRangeAttack2,
-		slGruntRepel,
-		slGruntRepelAttack,
-		slGruntRepelLand,
-
-		slGruntRunAndFire,
+	slGruntCombatFail,
+	slGruntVictoryDance,
+	slGruntEstablishLineOfFire,
+	slGruntFoundEnemy,
+	slGruntCombatFace,
+	slGruntSignalSuppress,
+	slGruntSuppress,
+	slGruntWaitInCover,
+	slGruntTakeCover,
+	slGruntGrenadeCover, // not used
+	slGruntTossGrenadeCover,
+	slGruntTakeCoverFromBestSound,
+	slGruntHideReload,
+	slGruntSweep,
+	slGruntRangeAttack1A,
+	slGruntRangeAttack1B,
+	slGruntRangeAttack2,
+	slGruntRepel,
+	slGruntRepelAttack,
+	slGruntRepelLand,
+	slGruntRunAndFire,
 };
 
 IMPLEMENT_CUSTOM_SCHEDULES(CHGrunt, CSquadMonster);
@@ -1954,21 +1953,27 @@ void CHGrunt :: StartTask ( Task_t *pTask )
 			return;
 		}
 
-		// it's the same, but in reverse. Try nodes first.
-		if( BuildNearestRoute( m_hEnemy->GetAbsOrigin(), m_hEnemy->pev->view_ofs, 0, (m_hEnemy->GetAbsOrigin() - GetLocalOrigin()).Length() ) )
+		if( m_pSchedule && FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
 		{
-			TaskComplete();
-		}
-		else if( BuildRoute( m_hEnemy->GetAbsOrigin(), bits_MF_TO_ENEMY, m_hEnemy ) )
-		{
-			TaskComplete();
+
+			// it's the same, but in reverse. Try nodes first.
+			if( BuildNearestRoute( m_hEnemy->GetAbsOrigin(), m_hEnemy->pev->view_ofs, 0, (m_hEnemy->GetAbsOrigin() - GetLocalOrigin()).Length() ) )
+			{
+				TaskComplete();
+			}
+			//	else if( BuildRoute( m_hEnemy->GetAbsOrigin(), bits_MF_TO_ENEMY, m_hEnemy ) )
+			//	{
+			//		TaskComplete();
+			//	}
+			else
+			{
+				// no way to get there =(
+				ALERT( at_aiconsole, "HGRUNT: GetPathToEnemy failed!\n" );
+				TaskFail();
+			}
 		}
 		else
-		{
-			// no way to get there =(
-			ALERT( at_aiconsole, "HGRUNT: GetPathToEnemy failed!\n" );
-			TaskFail();
-		}
+			CSquadMonster::StartTask( pTask );
 		break;
 	}
 
@@ -2033,10 +2038,6 @@ bool CHGrunt::BodyTurn( const Vector &vecTarget )
 //=========================================================
 void CHGrunt :: RunTask ( Task_t *pTask )
 {
-//	// reset body and shooting, unless overridden by task
-//	RunningShooting = false;
-//	SetBoneController( 1, 0 );
-
 	switch ( pTask->iTask )
 	{
 	case TASK_GRUNT_FACE_TOSS_DIR:
@@ -2177,7 +2178,7 @@ void CHGrunt :: SetActivity ( Activity NewActivity )
 		if ( pev->health <= HGRUNT_LIMP_HEALTH )
 			// limp!
 			iSequence = LookupActivity ( ACT_RUN_HURT );
-		else if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
+		else if( RunningShooting )
 		{
 			if( HasWeapon(HGRUNT_9MMAR) )
 				iSequence = LookupSequence( "runshootmp5" );
@@ -2331,47 +2332,36 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 				{
 					MySquadLeader()->m_fEnemyEluded = FALSE;
 
-				//	if ( !IsLeader() )
-				//		return GetScheduleOfType ( SCHED_TAKE_COVER_FROM_ENEMY );
-				//	else 
-				//	{
-						//!!!KELLY - the leader of a squad of grunts has just seen the player or a 
-						// monster and has made it the squad's enemy. You
-						// can check pev->flags for FL_CLIENT to determine whether this is the player
-						// or a monster. He's going to immediately start
-						// firing, though. If you'd like, we can make an alternate "first sight" 
-						// schedule where the leader plays a handsign anim
-						// that gives us enough time to hear a short sentence or spoken command
-						// before he starts pluggin away.
-						if (FOkToSpeak() && (m_hEnemy != NULL) )// && RANDOM_LONG(0,1))
+					if (FOkToSpeak() && (m_hEnemy != NULL) )// && RANDOM_LONG(0,1))
+					{
+						if( m_hEnemy->IsPlayer() ) // player
 						{
-							if( m_hEnemy->IsPlayer() ) // player
-							{
-								if( HasConditions(bits_COND_SEE_FLASHLIGHT) )
-									SENTENCEG_PlayRndSz( ENT( pev ), "HG_FLASHLIGHT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
-								else
-									SENTENCEG_PlayRndSz( ENT( pev ), "HG_ALERT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
-							}
-							else if (
-									(m_hEnemy->Classify() != CLASS_PLAYER_ALLY) && 
-									(m_hEnemy->Classify() != CLASS_HUMAN_PASSIVE) && 
-									(m_hEnemy->Classify() != CLASS_MACHINE)
-								)
-								// monster
-								SENTENCEG_PlayRndSz( ENT(pev), "HG_MONST", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
-
-							JustSpoke();
+							if( HasConditions(bits_COND_SEE_FLASHLIGHT) )
+								SENTENCEG_PlayRndSz( ENT( pev ), "HG_FLASHLIGHT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
+							else
+								SENTENCEG_PlayRndSz( ENT( pev ), "HG_ALERT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
 						}
-						
-						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
-							return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );//return GetScheduleOfType ( SCHED_GRUNT_SUPPRESS );
-						else
-							return CBaseMonster::GetSchedule(); //return GetScheduleOfType ( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
-				//	}
+						else if (
+								(m_hEnemy->Classify() != CLASS_PLAYER_ALLY) && 
+								(m_hEnemy->Classify() != CLASS_HUMAN_PASSIVE) && 
+								(m_hEnemy->Classify() != CLASS_MACHINE)
+							)
+							// monster
+							SENTENCEG_PlayRndSz( ENT(pev), "HG_MONST", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+
+						JustSpoke();
+					}
 				}
 
-				if ( OccupySlot( bits_SLOTS_HGRUNT_GRENADE ) && (CanSpawnDrone == true) && (DroneSpawned == 0)) // && HasConditions ( bits_COND_CAN_RANGE_ATTACK2 )
-					return GetScheduleOfType( SCHED_RANGE_ATTACK2 ); // spawn a drone if able to and if the guy didn't spawn any drones before
+				if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+				{
+					if( m_hEnemy && (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 400 )
+						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
+
+					return GetScheduleOfType( SCHED_GRUNT_SUPPRESS );
+				}
+				else
+					return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 			}
 		// no ammo
 			else if ( HasConditions ( bits_COND_NO_AMMO_LOADED ) )
@@ -2387,22 +2377,24 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 			{	
 				switch(RANDOM_LONG(0,3))
 				{
-				default: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
 				case 0: return GetScheduleOfType( SCHED_SMALL_FLINCH ); break;
 				case 3:
-						if( pev->health < pev->max_health / 5 )
+				{
+					if( pev->health < pev->max_health * 0.2f )
+					{
+						if( FOkToSpeak() ) // && RANDOM_LONG(0,1))
 						{
-							if (FOkToSpeak()) // && RANDOM_LONG(0,1))
-							{
-								//SENTENCEG_PlayRndSz( ENT(pev), "HG_COVER", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
-								m_iSentence = HGRUNT_SENT_COVER;
-								//JustSpoke();
-							}
-							return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+							//SENTENCEG_PlayRndSz( ENT(pev), "HG_COVER", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+							m_iSentence = HGRUNT_SENT_COVER;
+							//JustSpoke();
 						}
-						else
-							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+					}
+					else
+						return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+				}
 				break;
+				default: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
 				}
 			}
 // can kick
@@ -2455,7 +2447,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 					//!!!KELLY - this grunt is about to throw or fire a grenade at the player. Great place for "fire in the hole"  "frag out" etc
 					if (FOkToSpeak())
 					{
-						if( (CanSpawnDrone == true) && (DroneSpawned == 0) )
+						if( CanSpawnDrone && (DroneSpawned == 0) )
 							SENTENCEG_PlayRndSz( ENT(pev), "HG_DRONE", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
 						else
 							SENTENCEG_PlayRndSz( ENT(pev), "HG_THROW", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
@@ -2474,7 +2466,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 						//JustSpoke();
 					}
 					
-					return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
+					return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );// GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 				}
 				else
 				{
@@ -2561,13 +2553,19 @@ Schedule_t* CHGrunt :: GetScheduleOfType ( int Type )
 		//			return GetScheduleOfType ( SCHED_RANGE_ATTACK1 ); // or just try to attack the enemy from the current position
 		//	}
 		//	else
+			if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+				return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
 			return GetScheduleOfType( SCHED_MOVE_TO_ENEMY_LKPRUN ); // can't see enemy. try to reposition
 		}
 		break;
 	case SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE:
 		{
+			return &slGruntEstablishLineOfFire[ 0 ];
+		}
+		break;
+	case SCHED_GRUNT_RUN_AND_FIRE:
+		{
 			return &slGruntRunAndFire[0];
-			//return &slGruntEstablishLineOfFire[ 0 ];
 		}
 		break;
 	case SCHED_RANGE_ATTACK1:
@@ -3409,34 +3407,24 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 				{
 					MySquadLeader()->m_fEnemyEluded = FALSE;
 
-					if ( !IsLeader() )
+					if (FOkToSpeak())// && RANDOM_LONG(0,1))
 					{
-						return GetScheduleOfType ( SCHED_TAKE_COVER_FROM_ENEMY );
-					}
-					else 
-					{
-						//!!!KELLY - the leader of a squad of grunts has just seen the player or a 
-						// monster and has made it the squad's enemy. You
-						// can check pev->flags for FL_CLIENT to determine whether this is the player
-						// or a monster. He's going to immediately start
-						// firing, though. If you'd like, we can make an alternate "first sight" 
-						// schedule where the leader plays a handsign anim
-						// that gives us enough time to hear a short sentence or spoken command
-						// before he starts pluggin away.
-						if (FOkToSpeak())// && RANDOM_LONG(0,1))
-						{
-							if (m_hEnemy != NULL)
-								SENTENCEG_PlayRndSz( ENT(pev), "AG_ALERT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+						if (m_hEnemy != NULL)
+							SENTENCEG_PlayRndSz( ENT(pev), "AG_ALERT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
 
-							JustSpoke();
-						}
-						
-						if ( HasConditions ( bits_COND_CAN_RANGE_ATTACK1 ) )
-							return GetScheduleOfType ( SCHED_GRUNT_SUPPRESS );
-						else
-							return CBaseMonster::GetSchedule(); //return GetScheduleOfType ( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
+						JustSpoke();
 					}
 				}
+
+				if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+				{
+					if( m_hEnemy && (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 400 )
+						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
+
+					return GetScheduleOfType( SCHED_GRUNT_SUPPRESS );
+				}
+				else
+					return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 			}
 // no ammo
 			else if ( HasConditions ( bits_COND_NO_AMMO_LOADED ) )
@@ -3448,26 +3436,28 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 			}
 			
 // damaged just a little
-			else if ( HasConditions( bits_COND_LIGHT_DAMAGE ) )
+			else if( HasConditions( bits_COND_LIGHT_DAMAGE ) )
 			{
-				switch(RANDOM_LONG(0,3))
+				switch( RANDOM_LONG( 0, 3 ) )
 				{
-				default: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
 				case 0: return GetScheduleOfType( SCHED_SMALL_FLINCH ); break;
 				case 3:
-						if( pev->health < pev->max_health / 5 )
+				{
+					if( pev->health < pev->max_health * 0.2f )
+					{
+						if( FOkToSpeak() ) // && RANDOM_LONG(0,1))
 						{
-							if (FOkToSpeak()) // && RANDOM_LONG(0,1))
-							{
-								//SENTENCEG_PlayRndSz( ENT(pev), "HG_COVER", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
-								m_iSentence = HGRUNT_SENT_COVER;
-								//JustSpoke();
-							}
-							return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+							//SENTENCEG_PlayRndSz( ENT(pev), "HG_COVER", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+							m_iSentence = HGRUNT_SENT_COVER;
+							//JustSpoke();
 						}
-						else
-							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+					}
+					else
+						return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+				}
 				break;
+				default: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
 				}
 			}
 // can kick
@@ -3535,7 +3525,7 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 						//JustSpoke();
 					}
 					
-					return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
+					return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );// GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 				}
 				else
 				{
@@ -3617,13 +3607,19 @@ Schedule_t* CHGruntAlien :: GetScheduleOfType ( int Type )
 	//				return GetScheduleOfType ( SCHED_RANGE_ATTACK1 ); // or just try to attack the enemy from the current position
 	//		}
 	//		else
-				return GetScheduleOfType( SCHED_MOVE_TO_ENEMY_LKPRUN ); // can't see enemy. try to reposition
+		if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+			return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+		return GetScheduleOfType( SCHED_MOVE_TO_ENEMY_LKPRUN ); // can't see enemy. try to reposition
 		}
 		break;
 	case SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE:
 		{
+			return &slGruntEstablishLineOfFire[ 0 ];
+		}
+		break;
+	case SCHED_GRUNT_RUN_AND_FIRE:
+		{
 			return &slGruntRunAndFire[0];
-			//return &slGruntEstablishLineOfFire[ 0 ];
 		}
 		break;
 	case SCHED_RANGE_ATTACK1:
