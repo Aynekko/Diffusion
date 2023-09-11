@@ -324,7 +324,9 @@ Schedule_t slGruntRunAndFire[] =
 		SIZEOFARRAY( tlGruntRunAndFire ),
 		bits_COND_NEW_ENEMY |
 		bits_COND_ENEMY_DEAD |
-		bits_COND_ENEMY_LOST,
+		bits_COND_ENEMY_LOST |
+		bits_COND_CAN_MELEE_ATTACK1 |
+		bits_COND_CAN_MELEE_ATTACK2,
 
 		bits_SOUND_DANGER,
 		"GruntRunAndFire"
@@ -1274,16 +1276,13 @@ void CHGrunt :: RunAI( void )
 			FlashlightSpr->SetBrightness( 0 );
 	}
 
-	if( m_pSchedule && FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) && m_hEnemy && BodyTurn( m_hEnemy->GetAbsOrigin() ) )
+	if( m_hEnemy && ( pev->sequence == LookupSequence( "runshootmp5" ) || pev->sequence == LookupSequence( "runshootshotgun" ) ) && BodyTurn( m_hEnemy->GetAbsOrigin() ) )
 		RunningShooting = true;
 	else
 	{
 		RunningShooting = false;
 		SetBoneController( 1, 0 );
 	}
-
-//	if( FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
-//		ALERT( at_console, "sched=runandfire, runshoot=%3d\n", (int)RunningShooting );
 }
 
 //=========================================================
@@ -1945,7 +1944,7 @@ void CHGrunt :: StartTask ( Task_t *pTask )
 
 	switch ( pTask->iTask )
 	{
-	case TASK_GET_PATH_TO_ENEMY:
+/*	case TASK_GET_PATH_TO_ENEMY:
 	{
 		if( m_hEnemy == NULL )
 		{
@@ -1975,7 +1974,7 @@ void CHGrunt :: StartTask ( Task_t *pTask )
 		else
 			CSquadMonster::StartTask( pTask );
 		break;
-	}
+	}*/
 
 	case TASK_GRUNT_CHECK_FIRE:
 		if ( !NoFriendlyFire() )
@@ -2178,7 +2177,7 @@ void CHGrunt :: SetActivity ( Activity NewActivity )
 		if ( pev->health <= HGRUNT_LIMP_HEALTH )
 			// limp!
 			iSequence = LookupActivity ( ACT_RUN_HURT );
-		else if( RunningShooting )
+		else if( m_pSchedule && FStrEq( m_pSchedule->pName, "GruntRunAndFire" ) )
 		{
 			if( HasWeapon(HGRUNT_9MMAR) )
 				iSequence = LookupSequence( "runshootmp5" );
@@ -2298,15 +2297,10 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 
 	if( HasConditions( bits_COND_ENEMY_LOST ) )
 	{
-		switch(RANDOM_LONG(0,2))
+		if( FOkToSpeak() )
 		{
-		case 0:
-			if( FOkToSpeak() )
-			{
-				SENTENCEG_PlayRndSz( ENT( pev ), "HG_LOST", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch );
-				JustSpoke();
-			}
-		break;
+			SENTENCEG_PlayRndSz( ENT( pev ), "HG_LOST", HGRUNT_SENTENCE_VOLUME, ATTN_NORM, 0, m_voicePitch );
+			JustSpoke();
 		}
 		return CBaseMonster :: GetSchedule();
 	}
@@ -2332,7 +2326,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 				{
 					MySquadLeader()->m_fEnemyEluded = FALSE;
 
-					if (FOkToSpeak() && (m_hEnemy != NULL) )// && RANDOM_LONG(0,1))
+					if (FOkToSpeak() && (m_hEnemy != NULL) )
 					{
 						if( m_hEnemy->IsPlayer() ) // player
 						{
@@ -2465,8 +2459,8 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 						m_iSentence = HGRUNT_SENT_CHARGE;
 						//JustSpoke();
 					}
-					
-					return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );// GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
+
+					return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
 				}
 				else
 				{
@@ -3525,7 +3519,7 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 						//JustSpoke();
 					}
 					
-					return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );// GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
+					return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
 				}
 				else
 				{

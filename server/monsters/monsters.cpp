@@ -1468,26 +1468,6 @@ int CBaseMonster :: CheckLocalMove ( const Vector &vecStart, const Vector &vecEn
 			}
 			else
 			{
-				// diffusion - experiment: push away friendlies blocking the path
-				if( FClassnameIs( gpGlobals->trace_ent, GetClassname() ) )
-				{
-					// found my own kind
-					CBaseMonster *pMonsterObstacle = GetMonsterPointer( gpGlobals->trace_ent );
-					if( pMonsterObstacle )
-					{
-						float dist = (pMonsterObstacle->GetAbsOrigin() - GetAbsOrigin()).Length();
-						if( dist < 300 && pMonsterObstacle->m_flNextPushTime < gpGlobals->time && (IRelationship( pMonsterObstacle ) == R_AL || IRelationship( pMonsterObstacle ) == R_NO) )
-						{
-							if( pMonsterObstacle->m_hEnemy == NULL || pMonsterObstacle->m_MonsterState == MONSTERSTATE_IDLE )
-								pMonsterObstacle->ChangeSchedule( GetScheduleOfType( SCHED_TAKE_COVER_FROM_ORIGIN ) );
-							else if( pMonsterObstacle->m_hEnemy != NULL )
-								pMonsterObstacle->ChangeSchedule( GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY ) );
-
-							pMonsterObstacle->m_flNextPushTime = gpGlobals->time + RANDOM_FLOAT( 7, 15 );
-						}
-					}
-				}
-
 				iReturn = LOCALMOVE_INVALID;
 				break;
 			}

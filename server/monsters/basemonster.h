@@ -348,7 +348,6 @@ public:
 	float m_flLastTimeObservedEnemy; // freeslave
 
 	float m_flOcclusionTime;
-	float m_flNextPushTime;
 	
 	virtual void DeathSound ( void ) { return; };
 	virtual void AlertSound ( void ) { return; };
