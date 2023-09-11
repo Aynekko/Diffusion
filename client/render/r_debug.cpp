@@ -229,7 +229,7 @@ void R_DrawScissorRectangle( float x, float y, float w, float h )
 	GL_Setup3D();
 }
 
-void DBG_DrawBBox( const Vector &mins, const Vector &maxs )
+void DBG_DrawBBox( const Vector &mins, const Vector &maxs, Vector color )
 {	
 	Vector bbox[8];
 	int i;
@@ -241,7 +241,7 @@ void DBG_DrawBBox( const Vector &mins, const Vector &maxs )
   		bbox[i][2] = ( i & 4 ) ? mins[2] : maxs[2];
 	}
 
-	pglColor4f( 1.0f, 0.0f, 1.0f, 1.0f );	// yellow bboxes for frustum
+	pglColor4f( color.x / 255.0f, color.y / 255.0f, color.z / 255.0f, 1.0f );
 	pglDisable( GL_TEXTURE_2D );
 	pglBegin( GL_LINES );
 
@@ -286,7 +286,6 @@ void R_DrawLightScissors( void )
 		if( !UTIL_IsLocal( pl->key ) || FBitSet( RI->params, RP_THIRDPERSON ))
 			pl->frustum.DrawFrustumDebug();
 
-//		DBG_DrawBBox( pl->absmin, pl->absmax );
 		R_DrawScissorRectangle( pl->x, pl->y, pl->w, pl->h );
 	}
 

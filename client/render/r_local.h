@@ -699,7 +699,7 @@ bool R_CullNodeTopView( const struct mworldnode_s *node );
 // r_debug.cpp
 //
 void R_DrawScissorRectangle( float x, float y, float w, float h );
-void DBG_DrawBBox( const Vector &mins, const Vector &maxs );
+void DBG_DrawBBox( const Vector &mins, const Vector &maxs, Vector color = Vector(40,40,255) );
 void R_DrawRenderPasses( int passnum );
 void R_DrawLightScissors( void );
 void DrawLightProbes( void );
