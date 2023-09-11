@@ -148,7 +148,7 @@ int KB_ConvertString( char *in, char **ppout )
 			*pEnd =  '\0';
 
 			pBinding = NULL;
-			if( Q_strlen( binding + 1 ) > 0 )
+			if( binding[1] != '\0' )
 			{
 				// See if there is a binding for binding?
 				pBinding = gEngfuncs.Key_LookupBinding( binding + 1 );

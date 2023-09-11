@@ -886,7 +886,7 @@ int CRestore::ReadField( const void *pBaseData, DATAMAP *pMap, TYPEDESCRIPTION *
 							pString++;
 						}
 						pInputData = pString;
-						if ( strlen( (char *)pInputData ) == 0 )
+						if( ((char *)pInputData)[0] == '\0' )
 							*((int *)pOutputData) = 0;
 						else
 						{

@@ -277,7 +277,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 //
 void CChangeLevel::TouchChangeLevel(CBaseEntity* pOther)
 {
-	if (!FClassnameIs(pOther->pev, "player"))
+	if( !pOther->IsPlayer() )
 		return;
 
 	ChangeLevelNow(pOther);

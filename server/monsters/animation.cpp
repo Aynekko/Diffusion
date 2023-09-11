@@ -357,7 +357,7 @@ void SequencePrecache( void *pmodel, const char *pSequenceName )
 
 			if( IsSoundEvent( pevent[i].event ))
 			{
-				if( !Q_strlen(pevent[i].options ))
+				if( pevent[i].options[0] == '\0' )
 				{
 					ALERT( at_error, "Bad sound event %d in sequence %s :: %s (sound is \"%s\")\n",
 					pevent[i].event, pstudiohdr->name, pSequenceName, pevent[i].options );

@@ -1739,7 +1739,7 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 			memset( szBuffer, 0, MAX_RULE_BUFFER );
 
 			pFileList = COM_ParseFile( pFileList, szToken );
-			if ( strlen( szToken ) <= 0 )
+			if( szToken[0] == '\0' )
 				break;
 
 			strcpy( szMap, szToken );
@@ -1748,7 +1748,7 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 			if ( COM_TokenWaiting( pFileList ) )
 			{
 				pFileList = COM_ParseFile( pFileList, szToken );
-				if ( strlen( szToken ) > 0 )
+				if( szToken[0] != '\0' )
 				{
 					hasbuffer = 1;
 					strcpy( szBuffer, szToken );
@@ -1866,10 +1866,10 @@ Parse commands/key value pairs to issue right after map xxx command is issued on
 void ExtractCommandString( char *s, char *szCommand )
 {
 	// Now make rules happen
-	char	pkey[512];
-	char	value[512];	// use two buffers so compares
+	char pkey[512];
+	char value[512];	// use two buffers so compares
 								// work without stomping on each other
-	char	*o;
+	char *o;
 	
 	if ( *s == '\\' )
 		s++;
@@ -1897,7 +1897,7 @@ void ExtractCommandString( char *s, char *szCommand )
 		*o = 0;
 
 		strcat( szCommand, pkey );
-		if ( strlen( value ) > 0 )
+		if( value[0] != '\0' )
 		{
 			strcat( szCommand, " " );
 			strcat( szCommand, value );
@@ -2023,11 +2023,13 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 
 	if ( minplayers || maxplayers )
 		ALERT( at_console, "PLAYER COUNT:  min %i max %i current %i\n", minplayers, maxplayers, curplayers );
-	if ( strlen( szRules ) > 0 )
+
+	if( szRules != '\0' )
 		ALERT( at_console, "RULES:  %s\n", szRules );
 	
 	CHANGE_LEVEL( szNextMap, NULL );
-	if ( strlen( szCommands ) > 0 )
+
+	if( szCommands[0] != '\0' )
 		SERVER_COMMAND( szCommands );
 }
 
