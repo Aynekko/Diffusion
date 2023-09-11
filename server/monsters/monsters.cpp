@@ -1454,13 +1454,13 @@ int CBaseMonster :: CheckLocalMove ( const Vector &vecStart, const Vector &vecEn
 		
 	//	UTIL_ParticleEffect ( GetAbsOrigin(), g_vecZero, 255, 25 );
 
-		if ( !WALK_MOVE( ENT(pev), flYaw, stepSize, WALKMOVE_CHECKONLY ) )
+		if( !WALK_MOVE( ENT( pev ), flYaw, stepSize, WALKMOVE_CHECKONLY ) )
 		{// can't take the next step, fail!
 
-			if ( pflDist != NULL )
+			if( pflDist != NULL )
 				*pflDist = flStep;
 
-			if ( pTarget && pTarget->edict() == gpGlobals->trace_ent )
+			if( pTarget && pTarget->edict() == gpGlobals->trace_ent )
 			{
 				// if this step hits target ent, the move is legal.
 				iReturn = LOCALMOVE_VALID;
@@ -1468,14 +1468,29 @@ int CBaseMonster :: CheckLocalMove ( const Vector &vecStart, const Vector &vecEn
 			}
 			else
 			{
-				// If we're going toward an entity, and we're almost getting there, it's OK.
-//				if ( pTarget && fabs( flDist - iStep ) < LOCAL_STEP_SIZE )
-//					fReturn = TRUE;
-//				else
+				// diffusion - experiment: push away friendlies blocking the path
+				if( FClassnameIs( gpGlobals->trace_ent, GetClassname() ) )
+				{
+					// found my own kind
+					CBaseMonster *pMonsterObstacle = GetMonsterPointer( gpGlobals->trace_ent );
+					if( pMonsterObstacle )
+					{
+						float dist = (pMonsterObstacle->GetAbsOrigin() - GetAbsOrigin()).Length();
+						if( dist < 300 && pMonsterObstacle->m_flNextPushTime < gpGlobals->time && (IRelationship( pMonsterObstacle ) == R_AL || IRelationship( pMonsterObstacle ) == R_NO) )
+						{
+							if( pMonsterObstacle->m_hEnemy == NULL || pMonsterObstacle->m_MonsterState == MONSTERSTATE_IDLE )
+								pMonsterObstacle->ChangeSchedule( GetScheduleOfType( SCHED_TAKE_COVER_FROM_ORIGIN ) );
+							else if( pMonsterObstacle->m_hEnemy != NULL )
+								pMonsterObstacle->ChangeSchedule( GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY ) );
+
+							pMonsterObstacle->m_flNextPushTime = gpGlobals->time + RANDOM_FLOAT( 7, 15 );
+						}
+					}
+				}
+
 				iReturn = LOCALMOVE_INVALID;
 				break;
 			}
-
 		}
 	}
 
@@ -2324,13 +2339,13 @@ int CBaseMonster::IRelationship ( CBaseEntity *pTarget )
 	static int iEnemy[17][17] =
 	{			 //   NONE	MACH	PLYR	HPASS	HMIL	AMIL	APASS	AMONST	APREY	APRED	INSECT	PLRALY	PBWPN	ABWPN	FACT_A	FACT_B	FACT_C
 	/*NONE*/		{ R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO },
-	/*MACHINE*/		{ R_NO,	R_NO,	R_DL,	R_DL,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL },
+	/*MACHINE*/		{ R_NO,	R_AL,	R_DL,	R_DL,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL },
 	/*PLAYER*/		{ R_NO,	R_DL,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_DL },
 	/*HUMANPASSIVE*/{ R_NO,	R_NO,	R_AL,	R_AL,	R_HT,	R_FR,	R_NO,	R_HT,	R_DL,	R_FR,	R_NO,	R_AL,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL },
-	/*HUMANMILITAR*/{ R_NO,	R_NO,	R_HT,	R_DL,	R_NO,	R_HT,	R_DL,	R_DL,	R_DL,	R_DL,	R_NO,	R_HT,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL },
-	/*ALIENMILITAR*/{ R_NO,	R_DL,	R_HT,	R_DL,	R_HT,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_DL,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL },
+	/*HUMANMILITAR*/{ R_NO,	R_NO,	R_HT,	R_DL,	R_AL,	R_HT,	R_DL,	R_DL,	R_DL,	R_DL,	R_NO,	R_HT,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL },
+	/*ALIENMILITAR*/{ R_NO,	R_DL,	R_HT,	R_DL,	R_HT,	R_AL,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_DL,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL },
 	/*ALIENPASSIVE*/{ R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL },
-	/*ALIENMONSTER*/{ R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_NO,	R_DL,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL },
+	/*ALIENMONSTER*/{ R_NO,	R_DL,	R_DL,	R_DL,	R_DL,	R_NO,	R_NO,	R_AL,	R_NO,	R_NO,	R_NO,	R_DL,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL },
 	/*ALIENPREY   */{ R_NO,	R_NO,	R_DL,	R_DL,	R_DL,	R_NO,	R_NO,	R_NO,	R_NO,	R_FR,	R_NO,	R_DL,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL },
 	/*ALIENPREDATO*/{ R_NO,	R_NO,	R_DL,	R_DL,	R_DL,	R_NO,	R_NO,	R_NO,	R_HT,	R_DL,	R_NO,	R_DL,	R_NO,	R_NO,	R_DL,	R_DL,	R_DL },
 	/*INSECT*/		{ R_FR,	R_FR,	R_FR,	R_FR,	R_FR,	R_NO,	R_FR,	R_FR,	R_FR,	R_FR,	R_NO,	R_FR,	R_NO,	R_NO,	R_FR,	R_FR,	R_FR },
