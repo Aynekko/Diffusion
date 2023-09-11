@@ -486,7 +486,7 @@ int CHudMessage::MsgFunc_HudText( const char *pszName, int iSize, void *pbuf )
 	char *pString = READ_STRING();
 
 	// diffusion - hack
-	if( !stricmp(pString, "GAMESAVED") )
+	if( !_stricmp(pString, "GAMESAVED") )
 	{
 		gHUD.m_ScreenEffects.SaveIcon_Reset = true;
 		gHUD.m_ScreenEffects.ShouldDrawGameSaved = true;

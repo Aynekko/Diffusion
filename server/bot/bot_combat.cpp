@@ -153,8 +153,7 @@ char scientist_taunt[][30] = { SC_TNT1, SC_TNT2, SC_TNT3, SC_TNT4, SC_TNT5 };
 CBaseEntity * CBot::BotFindEnemy( void )
 {
    Vector vecEnd;
-   static BOOL flag=TRUE;
-   char sound[40];  // for taunting sounds
+   static bool flag = true;
 
    if (pBotEnemy != NULL)  // does the bot already have an enemy?
    {
@@ -165,10 +164,6 @@ CBaseEntity * CBot::BotFindEnemy( void )
 	  {
 		 if (!pBotEnemy->IsAlive())  // is the enemy dead?, assume bot killed it
 		 {
-			// the enemy is dead, jump for joy about 10% of the time
-		 //   if (RANDOM_LONG(1, 100) <= 10)
-		 //      pev->button |= IN_JUMP;
-
 			// check if this player is not a bot (i.e. not fake client)...
 			if (pBotEnemy->IsNetClient() && !IS_DEDICATED_SERVER())
 			{

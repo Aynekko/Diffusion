@@ -152,9 +152,9 @@ cvar_t *r_testdlight;
 cvar_t	v_iyaw_cycle	= { "v_iyaw_cycle", "2", 0, 2 };
 cvar_t	v_iroll_cycle	= { "v_iroll_cycle", "0.5", 0, 0.5 };
 cvar_t	v_ipitch_cycle	= { "v_ipitch_cycle", "1", 0, 1 };
-cvar_t	v_iyaw_level  	= { "v_iyaw_level", "0.3", 0.0f, 0.3f };
-cvar_t	v_iroll_level 	= { "v_iroll_level", "0.1", 0.0f, 0.1f };
-cvar_t	v_ipitch_level	= { "v_ipitch_level", "0.3", 0.0f, 0.3f };
+cvar_t	v_iyaw_level  	= { "v_iyaw_level", "0.3", 0, 0.3f };
+cvar_t	v_iroll_level 	= { "v_iroll_level", "0.1", 0, 0.1f };
+cvar_t	v_ipitch_level	= { "v_ipitch_level", "0.3", 0, 0.3f };
 
 cvar_t *ui_is_active;
 cvar_t *ui_backgroundmap_active;

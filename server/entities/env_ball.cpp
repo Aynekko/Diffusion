@@ -1020,7 +1020,10 @@ void CEnvBallEntityPlayer::BounceTouch(CBaseEntity* pOther)
 		WRITE_BYTE( 0 ); // shadows
 	MESSAGE_END();
 
-	entvars_t* pevOwner;
+	entvars_t* pevOwner = NULL;
+
+	if( pev->owner )
+		pevOwner = VARS( pev->owner );
 
 	if (pOther->IsMonster())
 	{
@@ -1031,14 +1034,6 @@ void CEnvBallEntityPlayer::BounceTouch(CBaseEntity* pOther)
 		}
 		else
 		{
-			if (pev->owner)
-				pevOwner = VARS(pev->owner);
-			else
-				pevOwner = NULL;
-
-		//			pev->owner = NULL; // can't traceline attack owner if this is set
-
-		//	RadiusDamage( GetAbsOrigin(), pev, pevOwner, pev->fuser2, pev->fuser2 * 2.5, CLASS_NONE, DMG_SHOCK );
 			pOther->TakeDamage(pev, pevOwner, pev->fuser2, DMG_SHOCK);
 			Bounced += 2;
 
@@ -1057,19 +1052,15 @@ void CEnvBallEntityPlayer::BounceTouch(CBaseEntity* pOther)
 	}
 	else if (pOther->IsPlayer()) // multiplayer stuff
 	{
-		if (pev->owner)
+		if( pevOwner )
 		{
-			pevOwner = VARS(pev->owner);
-			if (pOther->edict() != pev->owner)
+			if( pOther->edict() != pev->owner )
 			{
-//				Explode();
 				pOther->TakeDamage(pev, pevOwner, pev->fuser2, DMG_SHOCK);
 				EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/bounce_hit.wav", 1, 0.4, 0, RANDOM_LONG( 90, 110 ) );
 				return;
 			}
 		}
-		else
-			pevOwner = NULL;
 	}
 
 	UTIL_ScreenShake(pev->origin, 5.0, 150.0, 0.5, 500, true);

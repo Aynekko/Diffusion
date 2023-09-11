@@ -2545,7 +2545,7 @@ void R_DrawBrushList( void )
 		{
 			mtexinfo_t *tx = s->texinfo;
 			mfaceinfo_t *land = tx->faceinfo;
-			float xScale, yScale, waveHeight;
+			float waveHeight;
 
 			// set the current waveheight
 			if( s->polys->verts[0][2] >= RI->vieworg[2] )
@@ -2568,9 +2568,6 @@ void R_DrawBrushList( void )
 				GL_LoadIdentityTexMatrix();
 			}
 
-		//	GL_Bind( GL_TEXTURE1, es->dt_texturenum ); // u_DetailScale - not used
-		//	GET_DETAIL_SCALE( es->gl_texturenum, &xScale, &yScale );
-		//	pglUniform3fARB( RI->currentshader->u_DetailScale, xScale, yScale, waveHeight );
 			pglUniform3fARB( RI->currentshader->u_DetailScale, 0.0f, 0.0f, waveHeight );
 
 			pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );

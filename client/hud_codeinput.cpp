@@ -172,9 +172,9 @@ int CHudCodeInput::Draw( float flTime )
 	const char *buf;
 	char text[64];
 	if( num[0] == 255 ) // unknown code
-		_snprintf( text, sizeof( text ), "CODE: < unknown >" );
+		_snprintf_s( text, sizeof( text ), "CODE: < unknown >" );
 	else
-		_snprintf( text, sizeof( text ), "CODE: %d %d %d %d", num[0], num[1], num[2], num[3] );
+		_snprintf_s( text, sizeof( text ), "CODE: %d %d %d %d", num[0], num[1], num[2], num[3] );
 
 	// calculate width to align center...
 	buf = text;
