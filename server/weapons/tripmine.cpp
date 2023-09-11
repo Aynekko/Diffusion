@@ -513,6 +513,8 @@ void CTripmineGrenade::DelayDeathThink( void )
 	UTIL_MakeVectors( GetAbsAngles() );
 	Vector vecDir = gpGlobals->v_forward;
 
+	EMIT_SOUND( ENT( pev ), CHAN_BODY, "common/null.wav", 0, ATTN_NORM ); // shut off chargeup
+
 	UTIL_TraceLine ( GetAbsOrigin() + vecDir * 8, GetAbsOrigin() - vecDir * 64, dont_ignore_monsters, edict(), &tr );
 	Explode( &tr, DMG_BLAST );
 }
