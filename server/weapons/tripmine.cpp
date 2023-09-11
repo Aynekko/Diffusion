@@ -84,6 +84,9 @@ class CTripmineGrenade : public CGrenade
 	edict_t	*m_pRealOwner; // tracelines don't hit pev->owner, which means a player couldn't detonate his own trip mine, so we store the owner here.
 
 	CSprite *m_pSprite; // diffusion - glow sprite at the end of laser
+
+	float skin_change_time; // not saved
+	bool IsTripped; // do not the beam!
 };
 
 LINK_ENTITY_TO_CLASS( monster_tripmine, CTripmineGrenade );
@@ -179,6 +182,7 @@ void CTripmineGrenade :: Precache( void )
 	PRECACHE_SOUND("weapons/mine_activate.wav");
 	PRECACHE_SOUND("weapons/mine_charge.wav");
 	PRECACHE_SOUND("weapons/mine_disarm.wav");
+	PRECACHE_SOUND("weapons/mine_tripped.wav");
 	PRECACHE_MODEL( "sprites/glow01.spr" );
 }
 
@@ -357,16 +361,17 @@ void CTripmineGrenade :: MakeBeam( void )
 	m_flBeamLength = tr.flFraction;
 
 	Vector vecTmpEnd = GetAbsOrigin() + m_vecDir * 2048 * m_flBeamLength;
+	Vector vecStart = GetAbsOrigin() - m_vecDir * 5;
 
 	m_pBeam = CBeam::BeamCreate( g_pModelNameLaser, 10 );
 
 	if( m_pBeam )
 	{
-		m_pBeam->PointEntInit( vecTmpEnd, entindex() );
+		m_pBeam->PointsInit( vecStart, vecTmpEnd ); //m_pBeam->PointEntInit( vecTmpEnd, entindex() );
 		m_pBeam->SetColor( 255, 255, 255 ); //  0, 214, 198
 		m_pBeam->SetScrollRate( 255 );
 		m_pBeam->SetBrightness( 20 ); // 64
-		m_pBeam->SetParent( this );
+	//	m_pBeam->SetParent( this ); // this doesn't work with BEAM_POINTS beam!!!
 		m_pBeam->SetWidth( 2 );
 	}
 
@@ -389,6 +394,8 @@ void CTripmineGrenade :: MakeBeam( void )
 
 	// set to follow laser spot
 	SetThink( &CTripmineGrenade::BeamBreakThink );
+
+	pev->skin = 1;
 
 	// Delay first think slightly so beam has time
 	// to appear if person right in front of it
@@ -440,8 +447,17 @@ void CTripmineGrenade :: BeamBreakThink( void  )
 		// CGrenade code knows who the explosive really belongs to.
 		pev->owner = m_pRealOwner;
 		pev->health = 0;
+		IsTripped = true;
+		EMIT_SOUND( ENT( pev ), CHAN_BODY, "weapons/mine_tripped.wav", 1.0, ATTN_NORM );
 		Killed( VARS( pev->owner ), GIB_NORMAL );
 		return;
+	}
+
+	// blink
+	if( gpGlobals->time > skin_change_time )
+	{
+		pev->skin == 1 ? pev->skin = 2 : pev->skin = 1;
+		skin_change_time = gpGlobals->time + 0.5f;
 	}
 
 	SetNextThink( 0 ); // diffusion - think every frame to make sure it will be tripped
@@ -452,7 +468,7 @@ int CTripmineGrenade :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttac
 	if (gpGlobals->time < m_flPowerUp && flDamage < pev->health)
 	{
 		SetThink( &CBaseEntity::SUB_Remove );
-		pev->nextthink = gpGlobals->time + 0.1;
+		SetNextThink( 0.1 );
 		ClearEffects();
 		return FALSE;
 	}
@@ -469,7 +485,7 @@ void CTripmineGrenade::Killed( entvars_t *pevAttacker, int iGib )
 		pev->owner = ENT( pevAttacker );
 	}
 
-	EMIT_SOUND( ENT(pev), CHAN_BODY, "common/null.wav", 0, ATTN_NORM ); // shut off chargeup
+//	EMIT_SOUND( ENT(pev), CHAN_BODY, "common/null.wav", 0, ATTN_NORM ); // shut off chargeup
 
 	// diffusion - activate targets
 	CBaseEntity *pActivator = NULL;
@@ -478,45 +494,15 @@ void CTripmineGrenade::Killed( entvars_t *pevAttacker, int iGib )
 	if( pActivator )
 		UTIL_FireTargets( GetTarget(), pActivator, pActivator, USE_TOGGLE, 0 );
 
-//	if( !Disarmed )
-//	{
-		SetThink(&CTripmineGrenade::DelayDeathThink );
-		SetNextThink( RANDOM_FLOAT( 0.1, 0.3 ) );
-/*	}
+	float Delay;
+
+	if( IsTripped )
+		Delay = 0.5f;
 	else
-	{
-		Vector vecOrigin = GetAbsOrigin();
-			
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecOrigin );
-			WRITE_BYTE( TE_BREAKMODEL);
-			// position
-			WRITE_COORD( vecOrigin.x );
-			WRITE_COORD( vecOrigin.y );
-			WRITE_COORD( vecOrigin.z );
-			// size
-			WRITE_COORD( 0.01 );
-			WRITE_COORD( 0.01 );
-			WRITE_COORD( 0.01 );
-			// velocity
-			WRITE_COORD( 0 ); 
-			WRITE_COORD( 0 );
-			WRITE_COORD( 0 );
-			// randomization of the velocity
-			WRITE_BYTE( 10 ); 
-			// Model
-			WRITE_SHORT( MetalGibModel );	//model id#
-			// # of shards
-			WRITE_BYTE( 20 );
-			// duration
-			WRITE_BYTE( 20 );// 3.0 seconds
+		Delay = RANDOM_FLOAT( 0.1, 0.3 );
 
-			// flags
-
-			WRITE_BYTE( BREAK_METAL );
-		MESSAGE_END();
-
-		UTIL_Remove(this);
-	}*/
+	SetThink(&CTripmineGrenade::DelayDeathThink );
+	SetNextThink( Delay );
 }
 
 void CTripmineGrenade::DelayDeathThink( void )
