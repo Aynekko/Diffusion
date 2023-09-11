@@ -1176,9 +1176,8 @@ void USENTENCEG_InitLRU(unsigned char *plru, int count)
 
 int USENTENCEG_PickSequential(int isentenceg, char *szfound, int ipick, int freset)
 {
-	char *szgroupname;
+	const char *szgroupname;
 	unsigned char count;
-	char sznum[8];
 	
 	if (!fSentencesInit)
 		return -1;
@@ -1195,10 +1194,7 @@ int USENTENCEG_PickSequential(int isentenceg, char *szfound, int ipick, int fres
 	if (ipick >= count)
 		ipick = count-1;
 
-	strcpy(szfound, "!");
-	strcat(szfound, szgroupname);
-	sprintf(sznum, "%d", ipick);
-	strcat(szfound, sznum);
+	sprintf( szfound, "!%s%d", szgroupname, ipick );
 	
 	if (ipick >= count)
 	{
@@ -1224,11 +1220,10 @@ int USENTENCEG_PickSequential(int isentenceg, char *szfound, int ipick, int fres
 
 int USENTENCEG_Pick(int isentenceg, char *szfound)
 {
-	char *szgroupname;
+	const char *szgroupname;
 	unsigned char *plru;
 	unsigned char i;
 	unsigned char count;
-	char sznum[8];
 	unsigned char ipick;
 	int ffound = FALSE;
 	
@@ -1257,10 +1252,7 @@ int USENTENCEG_Pick(int isentenceg, char *szfound)
 			USENTENCEG_InitLRU(plru, count);
 		else
 		{
-			strcpy(szfound, "!");
-			strcat(szfound, szgroupname);
-			sprintf(sznum, "%d", ipick);
-			strcat(szfound, sznum);
+			sprintf( szfound, "!%s%d", szgroupname, ipick );
 			return ipick;
 		}
 	}
@@ -1373,7 +1365,6 @@ int SENTENCEG_PlaySequentialSz(edict_t *entity, const char *szgroupname,
 void SENTENCEG_Stop(edict_t *entity, int isentenceg, int ipick)
 {
 	char buffer[64];
-	char sznum[8];
 	
 	if (!fSentencesInit)
 		return;
@@ -1381,10 +1372,7 @@ void SENTENCEG_Stop(edict_t *entity, int isentenceg, int ipick)
 	if (isentenceg < 0 || ipick < 0)
 		return;
 	
-	strcpy(buffer, "!");
-	strcat(buffer, rgsentenceg[isentenceg].szgroupname);
-	sprintf(sznum, "%d", ipick);
-	strcat(buffer, sznum);
+	sprintf( buffer, "!%s%d", rgsentenceg[isentenceg].szgroupname, ipick );
 
 	STOP_SOUND(entity, CHAN_VOICE, buffer);
 }
@@ -1517,8 +1505,6 @@ void SENTENCEG_Init()
 
 int SENTENCEG_Lookup(const char *sample, char *sentencenum)
 {
-	char sznum[8];
-
 	int i;
 	// this is a sentence name; lookup sentence number
 	// and give to engine as string.
@@ -1526,11 +1512,8 @@ int SENTENCEG_Lookup(const char *sample, char *sentencenum)
 		if (!stricmp(gszallsentencenames[i], sample+1))
 		{
 			if (sentencenum)
-			{
-				strcpy(sentencenum, "!");
-				sprintf(sznum, "%d", i);
-				strcat(sentencenum, sznum);
-			}
+				sprintf( sentencenum, "!%d", i );
+
 			return i;
 		}
 	// sentence name not found!
