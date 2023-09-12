@@ -243,8 +243,8 @@ void CSniperRifle::PrimaryAttack()
 //	m_pPlayer->AchievementStats[ACH_BULLETSFIRED]++;
 	m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 1, 0 );
 
-	m_pPlayer->pev->punchangle.x = Cone * RANDOM_LONG( 25,30 ) + AddNonZoomedPunch;
-	m_pPlayer->pev->punchangle.y = -Cone * RANDOM_LONG( 25,30 ) + AddNonZoomedPunch;
+	m_pPlayer->pev->punchangle.x = Cone * RANDOM_LONG( 25,30 ) + AddNonZoomedPunch + RANDOM_FLOAT( 1.5f, 2.0f );
+	m_pPlayer->pev->punchangle.y = -Cone * RANDOM_LONG( 25,30 ) + AddNonZoomedPunch + RANDOM_FLOAT( 0.5f, 1.0f );
 
 	if( !m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
 		// HEV suit - indicate out of ammo condition
