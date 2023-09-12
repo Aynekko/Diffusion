@@ -147,7 +147,8 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		{
 			float DistanceToParticle = (tr.viewparams.vieworg - curParticle->m_vecOrigin).Length();
 			DistanceToParticle = bound( 0.1, DistanceToParticle, 1000 ) / 1000;
-			curRadius = curParticle->m_flRadius * DistanceToParticle * 10;
+			float FOVfactor = bound( 15, RI->fov_x, 70 ) / 70; // for FOV above 70 scale isn't affected
+			curRadius = curParticle->m_flRadius * DistanceToParticle * 10 * FOVfactor;
 			curRadius = bound( curParticle->m_flMinScale, curRadius, curParticle->m_flMaxScale );
 		}
 		
@@ -612,7 +613,8 @@ bool CQuakePart::Evaluate( float gravity )
 	{
 		float DistanceToParticle = (tr.viewparams.vieworg - m_vecOrigin).Length();
 		DistanceToParticle = bound( 0.1, DistanceToParticle, 1000 ) / 1000;
-		curRadius = m_flRadius * DistanceToParticle * 10;
+		float FOVfactor = bound( 15, RI->fov_x, 70 ) / 70; // for FOV above 70 scale isn't affected
+		curRadius = m_flRadius * DistanceToParticle * 10 * FOVfactor;
 		curRadius = bound( m_flMinScale, curRadius, m_flMaxScale );
 	}
 
@@ -2177,7 +2179,7 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = -0.5 * Alpha;
 		src.m_flRadius = Scale;
-		src.m_flMinScale = Scale * 0.25;
+		src.m_flMinScale = Scale * 0.1;
 		src.m_flMaxScale = Scale * 2.0;
 		src.m_flRadiusVelocity = 0.0f;
 		src.m_flLength = 1;
@@ -2426,7 +2428,7 @@ void CQuakePartSystem::BloodParticle( int EntIndex, const Vector &pos, float Sca
 	src.m_flAlpha = 1.0;
 	src.m_flStartAlpha = 0.0f;
 	src.m_flAlphaVelocity = -2.0;
-	src.m_flRadius = Scale + RANDOM_FLOAT( -Scale * 0.25f, Scale * 0.25f );
+	src.m_flRadius = Scale + RANDOM_FLOAT( -Scale * 0.1f, Scale * 0.1f );
 	src.m_flRadiusVelocity = 0;
 	src.m_flLength = 1;
 	src.m_flLengthVelocity = 0;
@@ -2435,8 +2437,8 @@ void CQuakePartSystem::BloodParticle( int EntIndex, const Vector &pos, float Sca
 	src.m_flDistance = 0;
 	src.ParticleType = TYPE_CUSTOM;
 	src.EntIndex = EntIndex;
-	src.m_flMinScale = Scale * 0.25f;
-	src.m_flMaxScale = Scale * 2.0f;
+	src.m_flMinScale = Scale * 0.01f;
+	src.m_flMaxScale = Scale * 1.2f;
 	src.m_flDieTime = 0;
 
 	AddParticle( &src, m_hBloodSplat, flags );
