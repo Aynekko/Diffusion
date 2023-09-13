@@ -139,7 +139,7 @@ static bool Mod_LoadCubemap( mcubemap_t *m )
 		else SetBits( flags, TF_CLAMP ); // default method
 		m->texture = LOAD_TEXTURE( m->name, NULL, 0, flags );
 
-		// make sure what is really cubemap
+		// make sure it's really a cubemap
 		if( RENDER_GET_PARM( PARM_TEX_TARGET, m->texture ) == GL_TEXTURE_CUBE_MAP_ARB )
 			m->valid = true;
 		else m->valid = false;
@@ -161,6 +161,8 @@ void Mod_LoadCubemaps( const byte *base, const dlump_t *l )
 	dcubemap_t *in;
 	mcubemap_t *out;
 	int	i, count;
+
+	world->rebuilding_cubemaps = CMREBUILD_INACTIVE;
 
 	in = (dcubemap_t *)(base + l->fileofs);
 	if( l->filelen % sizeof( *in ) )
@@ -189,7 +191,7 @@ void Mod_LoadCubemaps( const byte *base, const dlump_t *l )
 
 		if( !cm->valid )
 		{
-			world->rebuilding_cubemaps = CMREBUILD_CHECKING;
+			world->rebuilding_cubemaps = CMREBUILD_INACTIVE_NEEDSREBUILD;
 			world->build_default_cubemap = true;
 		}
 	}
@@ -209,7 +211,7 @@ void Mod_LoadCubemaps( const byte *base, const dlump_t *l )
 		// build a cubemap name like enum
 		Q_snprintf( out->name, sizeof( out->name ), "maps/env/%s/cube#%i", world->name, i );
 		out->valid = Mod_CheckCubemap( va( "cube#%i", i ) ); // need for rebuild?
-		if( !out->valid ) world->rebuilding_cubemaps = CMREBUILD_CHECKING;
+		if( !out->valid ) world->rebuilding_cubemaps = CMREBUILD_INACTIVE_NEEDSREBUILD;
 		VectorCopy( in->origin, out->origin );
 		ClearBounds( out->mins, out->maxs );
 		out->size = in->size;
@@ -220,10 +222,10 @@ void Mod_LoadCubemaps( const byte *base, const dlump_t *l )
 		out->size = bound( 1, out->size, 512 );
 	}
 
-	// user request for disable autorebuild
-	if( 1 )//gEngfuncs.CheckParm( "-noautorebuildcubemaps", NULL ) )
+	// do not autorebuild
+	if( world->rebuilding_cubemaps == CMREBUILD_INACTIVE_NEEDSREBUILD )
 	{
-		world->rebuilding_cubemaps = CMREBUILD_INACTIVE;
+		ConPrintf( "^3Warning:^7 Map has %i cubemaps which require rebuilding. Run 'buildcubemaps' to build them.\n", world->num_cubemaps );
 		world->build_default_cubemap = false;
 	}
 }
@@ -449,14 +451,14 @@ loading actual cubemaps into videomemory
 */
 void GL_LoadAndRebuildCubemaps( int refParams )
 {
-	if( !world->loading_cubemaps && world->rebuilding_cubemaps == CMREBUILD_INACTIVE )
+	if( !world->loading_cubemaps && world->rebuilding_cubemaps < CMREBUILD_CHECKING )
 		return; // job is done
 
 	// we are in cubemap-rendering mode
 	if( FBitSet( refParams, RP_ENVVIEW ) )
 		return;
 
-	if( world->rebuilding_cubemaps != CMREBUILD_INACTIVE )
+	if( world->rebuilding_cubemaps > CMREBUILD_INACTIVE_NEEDSREBUILD )
 	{
 		if( world->build_default_cubemap )
 		{

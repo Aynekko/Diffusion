@@ -37,9 +37,10 @@ GNU General Public License for more details.
 #define SHADOW_ZBUF_RES	8		// 6 * 8 * 8 * 2 * 4 = 3k bytes per light
 
 // rebuilding cubemap states
-#define CMREBUILD_INACTIVE	0
-#define CMREBUILD_CHECKING	1
-#define CMREBUILD_WAITING	2
+#define CMREBUILD_INACTIVE				0
+#define CMREBUILD_INACTIVE_NEEDSREBUILD 1
+#define CMREBUILD_CHECKING				2
+#define CMREBUILD_WAITING				3
 
 typedef struct
 {
