@@ -636,8 +636,9 @@ void CGamePlayerHurt::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TY
 // Flag: Fire once
 // Flag: Reset on Fire
 
-#define SF_GAMECOUNT_FIREONCE			0x0001
-#define SF_GAMECOUNT_RESET				0x0002
+#define SF_GAMECOUNT_FIREONCE			BIT(0)
+#define SF_GAMECOUNT_RESET				BIT(1)
+#define SF_GAMECOUNT_FIREOVERLIMIT		BIT(2)
 
 class CGameCounter : public CRulePointEntity
 {
@@ -645,15 +646,23 @@ class CGameCounter : public CRulePointEntity
 public:
 	void Spawn( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	inline BOOL RemoveOnFire( void ) { return (pev->spawnflags & SF_GAMECOUNT_FIREONCE) ? TRUE : FALSE; }
-	inline BOOL ResetOnFire( void ) { return (pev->spawnflags & SF_GAMECOUNT_RESET) ? TRUE : FALSE; }
+	inline bool RemoveOnFire( void ) { return HasSpawnFlags(SF_GAMECOUNT_FIREONCE) ? true : false; }
+	inline bool ResetOnFire( void ) { return HasSpawnFlags(SF_GAMECOUNT_RESET) ? true : false; }
 
 	inline void CountUp( void ) { pev->frags++; }
 	inline void CountDown( void ) { pev->frags--; }
 	inline void ResetCount( void ) { pev->frags = pev->dmg; }
 	inline int CountValue( void ) { return pev->frags; }
 	inline int LimitValue( void ) { return pev->health; }
-	inline BOOL HitLimit( void ) { return CountValue() == LimitValue(); }
+	inline bool HitLimit( void )
+	{
+		const int countValue = CountValue();
+		const int limitValue = LimitValue();
+		if( HasSpawnFlags( SF_GAMECOUNT_FIREOVERLIMIT ) )
+			return countValue >= limitValue;
+		else
+			return countValue == limitValue;
+	}
 private:
 	inline void SetCountValue( int value ) { pev->frags = value; }
 	inline void SetInitialValue( int value ) { pev->dmg = value; }
