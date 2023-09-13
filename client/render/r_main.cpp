@@ -1969,7 +1969,7 @@ void R_RenderDebugSurface( void )
 {
 	r_stats.debug_surface = NULL;
 
-	if( r_speeds->value != 8 )
+	if( r_speeds->value != 6 )
 		return;
 
 	Vector vecSrc = RI->vieworg;
