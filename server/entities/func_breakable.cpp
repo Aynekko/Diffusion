@@ -26,6 +26,7 @@
 #include "entities/func_break.h"
 #include "decals.h"
 #include "explode.h"
+#include "player.h"
 
 extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern int gmsgKillDecals;
@@ -554,7 +555,16 @@ void CBreakable::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 //=========================================================
 int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
-	Vector	vecTemp;
+	Vector vecTemp;
+	CBaseEntity *pAttacker = NULL;
+	CBasePlayer *pPlayer = NULL;
+
+	if( pevAttacker )
+		pAttacker = CBaseEntity::Instance( pevAttacker );
+	if( pAttacker )
+		pPlayer = (CBasePlayer *)pAttacker;
+	if( pPlayer && pPlayer->BlastDMGOverride && HasSpawnFlags( SF_BREAK_NOELECTROBLAST ) )
+		return 0;
 
 	// if Attacker == Inflictor, the attack was a melee or other instant-hit attack.
 	// (that is, no actual entity projectile was involved in the attack so use the shooter's origin). 
@@ -575,16 +585,6 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 	if( !IsBreakable() )
 		return 0;
-
-	// Breakables take double damage from the crowbar
-	// diffusion - comment out
-//	if ( bitsDamageType & DMG_CLUB )
-//		flDamage *= 2;
-
-	// Boxes / glass / etc. don't take much poison damage, just the impact of the dart - consider that 10%
-	// diffusion - comment out
-//	if ( bitsDamageType & DMG_POISON )
-//		flDamage *= 0.1;
 
 // this global is still used for glass and other non-monster killables, along with decals.
 	g_vecAttackDir = vecTemp.Normalize();

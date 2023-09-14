@@ -16,16 +16,17 @@
 #define FUNC_BREAK_H
 
 // func breakable
-#define SF_BREAK_TRIGGER_ONLY		BIT(0)	// may only be broken by trigger
-#define SF_BREAK_TOUCH		BIT(1)	// can be 'crashed through' by running player (plate glass)
+#define SF_BREAK_TRIGGER_ONLY	BIT(0)	// may only be broken by trigger
+#define SF_BREAK_TOUCH			BIT(1)	// can be 'crashed through' by running player (plate glass)
 #define SF_BREAK_PRESSURE		BIT(2)	// can be broken by a player standing on it
+#define SF_BREAK_NOELECTROBLAST BIT(3)	// no damage from player's electroblast
 #define SF_BREAK_CROWBAR		BIT(8)	// instant break if hit with crowbar
 
 // func_pushable (it's also func_breakable, so don't collide with those flags)
-#define SF_PUSH_BREAKABLE		128
-#define SF_PUSH_HOLDABLE		512	// item can be picked up by player
-#define SF_PUSH_BSPCOLLISION	1024	// use BSP tree instead of bbox
-#define SF_PUSH_NOTSOLID		2048 // not solid
+#define SF_PUSH_BREAKABLE		BIT(7)
+#define SF_PUSH_HOLDABLE		BIT(9)	// item can be picked up by player
+#define SF_PUSH_BSPCOLLISION	BIT(10)	// use BSP tree instead of bbox
+#define SF_PUSH_NOTSOLID		BIT(11) // not solid
 
 typedef enum { expRandom, expDirected } ExplType;
 typedef enum { matGlass = 0, matWood, matMetal, matFlesh, matCinderBlock, matCeilingTile, matComputer, matUnbreakableGlass, matRocks, matNone, matLastMaterial } Materials;
