@@ -90,6 +90,7 @@ void TraceMesh :: SetupTrace( const Vector &start, const Vector &mins, const Vec
 	memset( trace, 0, sizeof( *trace ));
 	trace->fraction = m_flRealFraction = 1.0f;
 	Vector lmins = mins, lmaxs = maxs, offset;
+	Vector adjustedStart, adjustedEnd;
 	float t, halfwidth, halfheight;
 	int i, total_signbits = 0;
 
@@ -104,8 +105,8 @@ void TraceMesh :: SetupTrace( const Vector &start, const Vector &mins, const Vec
 		offset[i] = ( mins[i] + maxs[i] ) * 0.5f;
 		lmins[i] = mins[i] - offset[i];
 		lmaxs[i] = maxs[i] - offset[i];
-		m_vecSrcStart[i] = start[i] + offset[i];
-		m_vecSrcEnd[i] = end[i] + offset[i];
+		adjustedStart[i] = start[i] + offset[i];
+		adjustedEnd[i] = end[i] + offset[i];
 	}
 
 	// diffusion - https://github.com/SNMetamorph/PrimeXT/commit/2543c68ca1f21eabdac94b93d6d99d195902a7d0
@@ -130,8 +131,8 @@ void TraceMesh :: SetupTrace( const Vector &start, const Vector &mins, const Vec
 	CheckAngles( m_vecAngles );
 
 	m_transform = matrix4x4( m_vecOrigin, Vector( m_vecAngles.x, m_vecAngles.y, m_vecAngles.z ), m_vecScale ).InvertFull();
-	m_vecStart = m_transform.VectorTransform( m_vecSrcStart );
-	m_vecEnd = m_transform.VectorTransform( m_vecSrcEnd );
+	m_vecStart = m_transform.VectorTransform( adjustedStart );
+	m_vecEnd = m_transform.VectorTransform( adjustedEnd );
 
 	if( mins != maxs )
 	{
