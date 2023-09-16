@@ -458,6 +458,7 @@
     <ClInclude Include="bot\bot.h" />
     <ClInclude Include="cbase.h" />
     <ClInclude Include="clipfile.h" />
+    <ClInclude Include="entities\func_car.h" />
     <ClInclude Include="game\client.h" />
     <ClInclude Include="decals.h" />
     <ClInclude Include="doors.h" />

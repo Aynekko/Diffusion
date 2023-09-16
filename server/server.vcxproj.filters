@@ -1030,6 +1030,9 @@
     <ClInclude Include="bot\bot.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="entities\func_car.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />
