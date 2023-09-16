@@ -1673,7 +1673,7 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 			GL_AddShaderDirective( options, "ALPHA_TO_COVERAGE" );
 		}
 	}*/
-	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransAlpha )
+	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransAlpha && !FBitSet( s->flags, SURF_LANDSCAPE ) )
 		GL_AddShaderDirective( options, "ALPHA_RESCALING" );
 
 	if( FBitSet( s->flags, SURF_WATER ))
