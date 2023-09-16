@@ -195,6 +195,8 @@ public:
 	float ShiftingTime; // full time of the shifting sequence (usually second or less etc.)
 	float ShiftStartTime;
 
+	float AddTurnWheelShake;
+
 	DECLARE_DATADESC();
 };
 

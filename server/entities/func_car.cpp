@@ -1329,6 +1329,10 @@ void CCar::Drive( void )
 	ChassisShake = (ChassisShake1 + ChassisShake2 + ChassisShake3 + ChassisShake4) * 0.25f;
 	surf_CurrentMult = (surf_Mult1 + surf_Mult2 + surf_Mult3 + surf_Mult4) * 0.25f;
 
+	// add turnwheel wobbling :)
+	float NewTurnWheelShake = RANDOM_FLOAT( -ChassisShake, ChassisShake ) * AbsCarSpeed * 0.01f;
+	AddTurnWheelShake = UTIL_Approach( NewTurnWheelShake, AddTurnWheelShake, 50 * gpGlobals->frametime );
+
 	//----------------------------
 	// engine sound and gear
 	//----------------------------
@@ -1990,7 +1994,7 @@ void CCar::Drive( void )
 	{
 		int f = 1;
 		if( CarSpeed < -10 ) f = -1; // ¯\_(ツ)_/¯
-		pDriverMdl->SetBlending( 0, f * -FrontWheelAng.y * 2);
+		pDriverMdl->SetBlending( 0, (f * -FrontWheelAng.y * 2) + AddTurnWheelShake);
 		
 		bool SpecialAnim = false;
 
@@ -2050,7 +2054,7 @@ void CCar::Drive( void )
 		if( pChassisMdl->pev->sequence != 0 )
 			pChassisMdl->pev->sequence = 0;
 
-		pChassisMdl->SetBlending( 0, -FrontWheelAng.y * 2 );
+		pChassisMdl->SetBlending( 0, (-FrontWheelAng.y * 2) + AddTurnWheelShake );
 	}
 	
 	SetLocalAngles( CarAng ); // car direction is now set
