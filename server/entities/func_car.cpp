@@ -88,10 +88,10 @@ BEGIN_DATADESC( CCar )
 	DEFINE_FIELD( GearStep, FIELD_INTEGER ),
 	DEFINE_FIELD( LastGear, FIELD_INTEGER ),
 	DEFINE_KEYFIELD( MaxGears, FIELD_INTEGER, "maxgears" ),
-	DEFINE_FIELD( LastGearChangeTime, FIELD_TIME ),
 	DEFINE_FIELD( DriftAngles, FIELD_VECTOR ),
 	DEFINE_FIELD( DriftMode, FIELD_BOOLEAN ),
 	DEFINE_FIELD( DriftAmount, FIELD_FLOAT ),
+	DEFINE_KEYFIELD( ShiftingTime, FIELD_FLOAT, "shiftingtime" ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( func_car, CCar );
@@ -385,6 +385,11 @@ void CCar::KeyValue( KeyValueData *pkvd )
 		tank_tower = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "shiftingtime" ) )
+	{
+		ShiftingTime = Q_atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		BaseClass::KeyValue( pkvd );
 }
@@ -482,6 +487,11 @@ void CCar::Spawn( void )
 		MaxGears = 5;
 	else if( MaxGears > 7 )
 		MaxGears = 7;
+	if( !ShiftingTime )
+		ShiftingTime = 0.2f;
+
+	ShiftStartTime = 0;
+	IsShifting = false;
 
 	// convert km/h to units
 	MaxCarSpeed = MaxCarSpeed * 15;
@@ -602,6 +612,9 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			pWheel3->pev->fuser1 = 0;
 			pWheel4->pev->fuser1 = 0;
 
+			IsShifting = false;
+			ShiftStartTime = 0;
+
 			SetNextThink( 0 );
 		}
 	}
@@ -664,6 +677,8 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			DriverMdlSequence = -1;
 			CameraBrakeOffsetX = 0;
 			TurboAccum = 0;
+			IsShifting = false;
+			ShiftStartTime = 0;
 
 			SetNextThink( 0 );
 		}
@@ -1333,34 +1348,70 @@ void CCar::Drive( void )
 	//	ALERT( at_console, "turbo %f\n", TurboAccum );
 	}
 
-	// change gear only each 0.5s, don't spam it
-	if( !HasSpawnFlags( SF_CAR_ELECTRIC ) )
+	bool GearUpdate = false;
+	bool Upshifting = false;
+
+	if( CarSpeed <= 0 || (CarSpeed > 0 && !bBack() && !bUp()) ) // do not mess with gears during braking
 	{
-		Gear = LastGear;
-		if( gpGlobals->time > LastGearChangeTime + 0.5 )
+		if( !HasSpawnFlags( SF_CAR_ELECTRIC ) )
 		{
-			Gear = 1 + (float)(AbsCarSpeed / GearStep); // FIXME - gear goes back and forth on some surfaces when speed is limited
-			if( CarSpeed < 0 )
-				Gear = 8; // R
-			LastGearChangeTime = gpGlobals->time;
+			if( !IsShifting )
+			{
+				if( CarSpeed < 0 )
+					Gear = 8; // R
+				else if( CarSpeed > 0 )
+					Gear = 1 + (float)(AbsCarSpeed / GearStep);
+
+				if( Gear == 0 || AbsCarSpeed > 5.0f ) // make HUD update only during valuable speed, to prevent 'back-n-forth' spam
+				{
+					if( (Gear == 8 && LastGear != Gear) || (Gear == 1 && LastGear == 8) || (Gear > LastGear && Gear == 1) ) // upshifting to first gear from zero speed, or from reverse?
+					{
+						// skip shifting sequence, just update the HUD
+						LastGear = Gear;
+						GearUpdate = true;
+					}
+				}
+			}
+		}
+		else // electric cars only have first gear and reverse
+		{
+			if( Gear == 0 || AbsCarSpeed > 5.0f )
+				Gear = (CarSpeed > 0) ? 1 : 8;
+			if( Gear != LastGear )
+			{
+				LastGear = Gear;
+				GearUpdate = true;
+			}
 		}
 	}
 
 	if( Gear > MaxGears && Gear != 8 )
 		Gear = MaxGears;
 
-	bool GearUpdate = false;
-	bool Upshifting = false;
 	if( LastGear != Gear )
 	{
-		if( Gear > LastGear )
+		// start the shifting
+		if( !IsShifting )
 		{
-			Upshifting = true;
-			CanPlayTurboSound = true;
+			ShiftStartTime = gpGlobals->time;
+			IsShifting = true;
 		}
-		
-		LastGear = Gear;
-		GearUpdate = true;
+		else
+		{
+			// shifting finished, update the gear and HUD
+			if( gpGlobals->time > ShiftStartTime + ShiftingTime )
+			{
+				IsShifting = false;
+				if( Gear > LastGear )
+				{
+					Upshifting = true;
+					CanPlayTurboSound = true;
+				}
+
+				LastGear = Gear;
+				GearUpdate = true;
+			}
+		}
 	}
 
 	if( GearUpdate ) // send to HUD
@@ -1369,6 +1420,16 @@ void CCar::Drive( void )
 			WRITE_BYTE( TE_CARPARAMS );
 			WRITE_BYTE( Gear );
 		MESSAGE_END();
+
+		switch( RANDOM_LONG( 1, 3 ) )
+		{
+		case 1: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear1.wav", 0.35, ATTN_NORM ); break;
+		case 2: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear2.wav", 0.35, ATTN_NORM ); break;
+		case 3: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear3.wav", 0.35, ATTN_NORM ); break;
+		}
+
+		if( Upshifting && bForward() ) // shake body only when upshifting and gas pressed
+			AccelAddX -= 1;
 	}
 	
 	if( AbsCarSpeed < 15.0f && bBack() && bForward() ) // heating up the tires
@@ -1407,9 +1468,12 @@ void CCar::Drive( void )
 			else
 				EngPitch -= 150 * gpGlobals->frametime;
 		}
-		else if( ((CarSpeed < 0) || (bBack()) || (bUp())) && !HasSpawnFlags( SF_CAR_ELECTRIC ) ) // going backwards or braking
+		else if( ((CarSpeed < 0) || bBack() || bUp()) && !HasSpawnFlags( SF_CAR_ELECTRIC ) ) // going backwards or braking
 		{
-			EngPitch = 80 + 150 * (AbsCarSpeed / MaxCarSpeed) + (5 * HeatingMult);
+			if( CarSpeed < 0 )
+				EngPitch = 80 + 150 * (AbsCarSpeed / MaxCarSpeedBackwards) + (5 * HeatingMult);
+			else
+				EngPitch = 80 + 150 * (AbsCarSpeed / MaxCarSpeed) + (5 * HeatingMult);
 		}
 		else if( !(bForward()) && !HasSpawnFlags( SF_CAR_ELECTRIC ) ) // no gas pressed
 		{
@@ -1417,20 +1481,14 @@ void CCar::Drive( void )
 		}
 		else if( (bForward()) || HasSpawnFlags( SF_CAR_ELECTRIC ) ) // stepping on the gas
 		{
-			EngPitch = 80 + 150.0f * ((AbsCarSpeed / (float)(GearStep * (Gear < 1 ? 1 : Gear)))) - (Gear * 2) + (5 * HeatingMult);
-			if( AbsCarSpeed > GearStep * 0.5f && GearUpdate )
+			if( IsShifting )
 			{
-				switch( RANDOM_LONG( 1, 3 ) )
-				{
-				case 1: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear1.wav", 0.35, ATTN_NORM ); break;
-				case 2: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear2.wav", 0.35, ATTN_NORM ); break;
-				case 3: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear3.wav", 0.35, ATTN_NORM ); break;
-				}
-
-				if( Upshifting ) // shake body only when upshifting
-				{
-					AccelAddX -= 1;
-				}
+				// during the shift, drop the engine pitch down
+				EngPitch = UTIL_Approach( 80, EngPitch, 200 * gpGlobals->frametime );
+			}
+			else
+			{
+				EngPitch = 80 + 150.0f * ((AbsCarSpeed / (float)(GearStep * (Gear < 1 ? 1 : Gear)))) - (Gear * 2) + (5 * HeatingMult);
 			}
 		}
 	}
@@ -1460,7 +1518,7 @@ void CCar::Drive( void )
 		WhinePitch = bound( 90, WhinePitch, 120 );
 		float WhineVolume = AbsCarSpeed / (MaxCarSpeed * 0.35f);
 		WhineVolume = bound( 0, WhineVolume, 1 );
-		if( (WhineVolume > 0.01f) && (bForward()) )
+		if( (WhineVolume > 0.01f) && bForward() && !IsShifting )
 			EMIT_SOUND_DYN( edict(), CHAN_VOICE, "func_car/gear_whine.wav", WhineVolume, ATTN_NORM, SND_CHANGE_VOL | SND_CHANGE_PITCH, (int)WhinePitch );
 		else
 			STOP_SOUND( edict(), CHAN_VOICE, "func_car/gear_whine.wav" );
@@ -1652,7 +1710,7 @@ void CCar::Drive( void )
 	// lean car when accelerating
 	if( HeatingTires )
 		AccelAddX = UTIL_Approach( 0, AccelAddX, 2 * gpGlobals->frametime );
-	else if( CarSpeed > 0 && CarSpeed < 250 && (bForward()) && (CarSpeed < (MaxCarSpeed * 0.5)) )
+	else if( CarSpeed > 0 && CarSpeed < 250 && (bForward()) && (CarSpeed < (MaxCarSpeed * 0.5)) && !IsShifting )
 		AccelAddX -= AccelRate * 0.01 * gpGlobals->frametime * (1 + HeatingMult);
 	else if( CarSpeed < 0 && CarSpeed > -150 && !(bForward()) && (bBack()) )
 		AccelAddX += BackAccelRate * 0.01 * gpGlobals->frametime * (1 + HeatingMult);
@@ -1763,7 +1821,7 @@ void CCar::Drive( void )
 		{
 			if( CarSpeed > 0 && CarSpeed > ActualMaxCarSpeed && ActualMaxCarSpeed != MaxCarSpeed )
 				CarSpeed -= 300 * gpGlobals->frametime;
-			else
+			else if( !IsShifting )
 				CarSpeed += ActualAccelRate * (1 - fabs( Turning ) * 0.5) * WaterVelocityMult * surf_CurrentMult * gpGlobals->frametime;
 		}
 		else if( bBack() )

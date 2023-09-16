@@ -167,7 +167,6 @@ public:
 	float EngPitch; // engine sound pitch - not saved
 	int Gear; // not saved
 	int LastGear; // to track the gear change, for sound, or maybe some effects
-	float LastGearChangeTime; // don't change gears too often
 
 	float LastShootTime; // not saved
 	float TurboAccum; // not saved, ranged 0-1
@@ -191,6 +190,10 @@ public:
 
 	bool HeatingTires; // not saved
 	float HeatingMult; // not saved
+
+	bool IsShifting;
+	float ShiftingTime; // full time of the shifting sequence (usually second or less etc.)
+	float ShiftStartTime;
 
 	DECLARE_DATADESC();
 };
