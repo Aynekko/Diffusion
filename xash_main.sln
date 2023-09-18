@@ -74,12 +74,12 @@ Global
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Debug|x86.ActiveCfg = Debug|Win32
-		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Debug|x86.Build.0 = Debug|Win32
+		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Debug|x86.ActiveCfg = Release|Win32
+		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Debug|x86.Build.0 = Release|Win32
 		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Release|x86.ActiveCfg = Release|Win32
 		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Release|x86.Build.0 = Release|Win32
-		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Debug|x86.ActiveCfg = Debug|Win32
-		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Debug|x86.Build.0 = Debug|Win32
+		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Debug|x86.ActiveCfg = Template|Win32
+		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Debug|x86.Build.0 = Template|Win32
 		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Release|x86.ActiveCfg = Release|Win32
 		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
