@@ -177,7 +177,7 @@ extern void HUD_DrawTransparentTriangles( void );
 
 extern void PM_Init( struct playermove_s *ppmove );
 extern void PM_Move( struct playermove_s *ppmove, int server );
-extern char PM_FindTextureType( char *name );
+extern char PM_FindTextureType( const char *name );
 extern void V_CalcRefdef( struct ref_params_s *pparams );
 
 void UTIL_CreateAurora( cl_entity_t *ent, const char *file, int attachment, float lifetime = 0.0f );

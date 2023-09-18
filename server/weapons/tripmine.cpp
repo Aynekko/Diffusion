@@ -264,7 +264,7 @@ void CTripmineGrenade :: OnChangeLevel( void )
 	ClearEffects();
 
 	// NOTE: clear parent. We can't moving it properly for non-global entities
-	SetParent( NULL );
+	SetParent( 0 );
 
 	m_hOwner = NULL;	// i lost my star in Krasnodar :-)
 }

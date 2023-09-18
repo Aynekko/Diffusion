@@ -136,7 +136,7 @@ void CTriggerChangeParent::ChangeParent( string_t TargetEnt, string_t NewParent,
 			if( NewParent != NULL_STRING )
 				pTarget->SetParent( NewParent );
 			else
-				pTarget->SetParent( NULL );
+				pTarget->SetParent( 0 );
 		}
 	}
 }

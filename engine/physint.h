@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 #define SV_PHYSICS_INTERFACE_VERSION	6
 
-#define STRUCT_FROM_LINK( l, t, m )	((t *)((byte *)l - (int)&(((t *)0)->m)))
+#define STRUCT_FROM_LINK( l, t, m )	((t *)((byte *)l - (size_t)&(((t *)0)->m)))
 #define EDICT_FROM_AREA( l )		STRUCT_FROM_LINK( l, edict_t, area )
 #define FACET_FROM_AREA( l )		STRUCT_FROM_LINK( l, mfacet_t, area )
 
@@ -76,8 +76,8 @@ typedef struct server_physics_api_s
 	int		( *pfnDrawConsoleString )( int x, int y, char *string );
 	void		( *pfnDrawSetTextColor )( float r, float g, float b );
 	void		( *pfnDrawConsoleStringLen )( const char *string, int *length, int *height );
-	void		( *Con_NPrintf )( int pos, char *fmt, ... );
-	void		( *Con_NXPrintf )( struct con_nprint_s *info, char *fmt, ... );
+	void		(*Con_NPrintf)(int pos, const char *fmt, ...);
+	void		(*Con_NXPrintf)(struct con_nprint_s *info, const char *fmt, ...);
 	const char	*( *pfnGetLightStyle )( int style ); // read custom appreance for selected lightstyle
 	void		( *pfnUpdateFogSettings )( unsigned int packed_fog );
 	char		**(*pfnGetFilesList)( const char *pattern, int *numFiles, int gamedironly );
@@ -95,7 +95,7 @@ typedef struct server_physics_api_s
 	int		(*pfnBoxInPVS)( const float *org, const float *boxmins, const float *boxmaxs );
 
 	// message handler (missed function to write raw bytes)
-	void		(*pfnWriteBytes)( byte *bytes, int count );
+	void (*pfnWriteBytes)(const byte *bytes, int count);
 
 	// BSP lump management
 	int		(*pfnCheckLump)( const char *filename, const int lump, int *lumpsize );
@@ -103,7 +103,7 @@ typedef struct server_physics_api_s
 	int		(*pfnSaveLump)( const char *filename, const int lump, void *lumpdata, int lumpsize );
 
 	// FS tools
-	int		(*pfnSaveFile)( const char *filename, const void *data, long len );
+	int (*pfnSaveFile)(const char *filename, const void *data, int len);
 	const byte	*(*pfnLoadImagePixels)( const char *filename, int *width, int *height );
 
 	const char*	(*pfnGetModelName)( int modelindex );

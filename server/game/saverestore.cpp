@@ -965,7 +965,7 @@ int CRestore::ReadField( const void *pBaseData, DATAMAP *pMap, TYPEDESCRIPTION *
 						*((char *)pOutputData) = *( char *)pInputData;
 						break;
 					case FIELD_POINTER:
-						*((int *)pOutputData) = *( int *)pInputData;
+						*((void **)pOutputData) = *(void **)pInputData;
 						break;
 					case FIELD_FUNCTION:
 						ReadFunction( pMap, (void **)pOutputData, (const char *)pInputData );

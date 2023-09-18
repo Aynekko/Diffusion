@@ -52,7 +52,7 @@ extern CGraph WorldGraph;// the world node graph
 
 extern int    gmsgWaterSplash;
 
-extern char PM_FindTextureType( char *name );
+extern char PM_FindTextureType( const char *name );
 
 // Global Savedata for monster
 // UNDONE: Save schedule data?  Can this be done?  We may

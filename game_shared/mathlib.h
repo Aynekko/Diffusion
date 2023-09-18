@@ -25,8 +25,8 @@ typedef float vec_t;
 #define Q_min( a, b )		(((a) < (b)) ? (a) : (b))
 #define Q_max( a, b )		(((a) > (b)) ? (a) : (b))
 #define Q_recip( a )		((float)(1.0f / (float)(a)))
-#define Q_floor( a )		((float)(long)(a))
-#define Q_ceil( a )			((float)(long)((a) + 1))
+#define Q_floor( a )		((float)(int)(a))
+#define Q_ceil( a )			((float)(int)((a) + 1))
 #define Q_round( x, y )		(floor( x / y + 0.5 ) * y )
 #define Q_square( a )		((a) * (a))
 #define Q_sign( x )			( x >= 0 ? 1.0 : -1.0 )
@@ -266,37 +266,6 @@ Vector VectorYawRotate( const Vector &in, float flYaw );
 	(n)[1] = ((a)[2] - (b)[2]) * ((c)[0] - (b)[0]) - ((a)[0] - (b)[0]) * ((c)[2] - (b)[2]), \
 	(n)[2] = ((a)[0] - (b)[0]) * ((c)[1] - (b)[1]) - ((a)[1] - (b)[1]) * ((c)[0] - (b)[0])  \
 )
-
-inline void VectorMASSE( const float *veca, float scale, const float *vecb, float *vecc )
-{
-	_asm {
-		mov		eax, veca;
-		mov		ebx, vecb;
-		mov		ecx, vecc;
-		movss	xmm7, scale;
-
-		; scale *vecb
-			movss	xmm0, [ebx];
-		movss	xmm1, [ebx + 4];
-		movss	xmm2, [ebx + 8];
-		mulss	xmm0, xmm7;
-		mulss	xmm1, xmm7;
-		mulss	xmm2, xmm7;
-
-		; (scale * vecb) + veca
-			movss	xmm3, [eax];
-		movss	xmm4, [eax + 4];
-		movss	xmm5, [eax + 8];
-		addss	xmm0, xmm3;
-		addss	xmm1, xmm4;
-		addss	xmm2, xmm5;
-
-		; return_it
-			movss[ecx], xmm0;
-		movss[ecx + 4], xmm1;
-		movss[ecx + 8], xmm2;
-	}
-}
 
 /*
 =================

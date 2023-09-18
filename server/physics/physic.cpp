@@ -2566,7 +2566,7 @@ int RunPhysicsFrame( CBaseEntity *pEntity )
 	if( pEntity->pev->movetype == MOVETYPE_COMPOUND && !pEntity->pev->aiment )
 	{
 		if( pEntity->m_hParent )
-			pEntity->SetParent(( CBaseEntity *)NULL );
+			pEntity->SetParent(( CBaseEntity *)0 );
 		SV_Physics_None( pEntity );
 		return 1;
 	}

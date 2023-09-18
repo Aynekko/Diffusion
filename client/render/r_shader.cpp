@@ -259,7 +259,7 @@ static void GL_LoadGPUShader( glsl_program_t *shader, const char *name, GLenum s
 		return;
 
 	GLcharARB *buffer = (GLcharARB *)source.GetBuffer();
-	int bufferSize = source.GetSize();
+	int bufferSize = (int)source.GetSize();
 
 	ALERT( at_aiconsole, "\nloading '%s'\n", filename );
 	object = pglCreateShaderObjectARB( shaderType );

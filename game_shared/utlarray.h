@@ -176,7 +176,7 @@ public:
 // The CUtlArrayFixed class:
 // A array class with a fixed allocation scheme
 //-----------------------------------------------------------------------------
-
+#if 0
 template< class BASE_UTLVECTOR, class MUTEX_TYPE = CThreadFastMutex >
 class CUtlArrayMT : public BASE_UTLVECTOR, public MUTEX_TYPE
 {
@@ -188,7 +188,7 @@ public:
 	CUtlArrayMT( int growSize = 0, int initSize = 0 ) : BaseClass( growSize, initSize ) {}
 	CUtlArrayMT( typename BaseClass::ElemType_t* pMemory, int numElements ) : BaseClass( pMemory, numElements ) {}
 };
-
+#endif
 
 //-----------------------------------------------------------------------------
 // The CUtlArrayFixed class:
@@ -410,7 +410,7 @@ void CUtlArray<T, A>::Sort( int (__cdecl *pfnCompare)(const T *, const T *) )
 			{
 				if ( pfnCompare( &Element( j - 1 ), &Element( j ) ) < 0 )
 				{
-					swap( Element( j - 1 ), Element( j ) );
+					SWAP( Element( j - 1 ), Element( j ) );
 				}
 			}
 		}
@@ -599,8 +599,8 @@ template< typename T, class A >
 void CUtlArray<T, A>::Swap( CUtlArray< T, A > &vec )
 {
 	m_Memory.Swap( vec.m_Memory );
-	swap( m_Size, vec.m_Size );
-	swap( m_pElements, vec.m_pElements );
+	SWAP( m_Size, vec.m_Size );
+	SWAP( m_pElements, vec.m_pElements );
 }
 
 template< typename T, class A >

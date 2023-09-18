@@ -17,6 +17,11 @@ GNU General Public License for more details.
 #define COM_MODEL_H
 
 #include "bspfile.h"	// we need some declarations from it
+#include "stdint.h"
+
+//typedef unsigned __int32 uint32;
+//typedef uint32_t uint32;
+typedef uint32_t poolhandle_t;
 
 /*
 ==============================================================================
@@ -347,7 +352,7 @@ typedef struct model_s
 	// shared modelinfo
 	modtype_t		type;		// model type
 	int		numframes;	// sprite's framecount
-	byte		*mempool;		// private mempool (was synctype)
+	poolhandle_t mempool;		// private mempool (was synctype)
 	int		flags;		// hl compatibility
 
 //
@@ -359,8 +364,8 @@ typedef struct model_s
 	// brush model
 	union
 	{
-	int		firstmodelsurface;
-	int		modelCRC;
+		int firstmodelsurface;
+		uint32_t modelCRC;
 	};
 	int		nummodelsurfaces;
 
