@@ -17,9 +17,7 @@ GNU General Public License for more details.
 #define UTILS_H
 
 #include "cvardef.h"
-
-#define EXPORT	_declspec( dllexport )
-#define DLLEXPORT	__declspec( dllexport )
+#include "exportdef.h"
 
 typedef unsigned char byte;
 typedef unsigned short word;
