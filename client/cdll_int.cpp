@@ -148,7 +148,7 @@ so the HUD can reinitialize itself.
 */
 int HUD_VidInit(void)
 {
-	IN_ResetMouse(); // diffusion - don't mess with the spawn angles the first frame
+//	IN_ResetMouse(); // diffusion - don't mess with the spawn angles the first frame
 	
 	gHUD.VidInit();
 

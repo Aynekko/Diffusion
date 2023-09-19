@@ -2129,9 +2129,9 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	{
 #if 0
 		// turning roll like in first Mirror's Edge
-		static float AddRoll = bound( -5.0f, gHUD.MxMy.x * 0.1, 5.0f );
+		float AddRoll = bound( -5.0f, gHUD.MxMy.x, 5.0f );
 		if( !CVAR_TO_BOOL( ui_is_active ) && (tr.time != tr.oldtime) )
-			pparams->viewangles[ROLL] = gHUD.MxMy.x * 0.025;
+			pparams->viewangles[ROLL] -= AddRoll;
 #endif
 	}
 	//=================================================

@@ -230,9 +230,6 @@
     <ClCompile Include="render\r_quakeparticle.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
-    <ClCompile Include="inputw32.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="lensflare.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -247,6 +244,12 @@
     </ClCompile>
     <ClCompile Include="render\r_cubemaps.cpp">
       <Filter>Source Files\render</Filter>
+    </ClCompile>
+    <ClCompile Include="input_mouse.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="input_xash3d.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -334,13 +337,13 @@
     <ClInclude Include="render\r_quakeparticle.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="input_mouse.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\game_shared\achievementdata.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="render\tbnfile.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="input_mouse.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

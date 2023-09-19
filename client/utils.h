@@ -156,7 +156,7 @@ extern int KB_ConvertString( char *in, char **ppout );
 extern void IN_Init( void );
 extern void IN_Move( float frametime, struct usercmd_s *cmd );
 extern void IN_Shutdown( void );
-extern void IN_ResetMouse( void );
+//extern void IN_ResetMouse( void );
 
 extern void IN_ActivateMouse( void );
 extern void IN_DeactivateMouse( void );
