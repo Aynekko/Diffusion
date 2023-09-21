@@ -67,16 +67,29 @@ void LoadMaterialSettingsForTexture( int texnum )
 	tr.materials[texnum].GlossScale = 0.5f;
 	tr.materials[texnum].GlossSmoothness = 0.5f;
 	tr.materials[texnum].EmbossScale = 0.0f;
-	tr.materials[texnum].gl_normalmap_id = 0;
-	tr.materials[texnum].gl_interiormap_id = 0;
 	tr.materials[texnum].InteriorGrid = Vector2D( 1.0f, 1.0f );
 	tr.materials[texnum].InteriorLightState = 0;
 	tr.materials[texnum].ReflectScale = 0.0f;
 	tr.materials[texnum].PlanarReflectScale = 0.0f;
 	tr.materials[texnum].FoliageSwayHeight = 0;
 	tr.materials[texnum].ApplyColor = false;
-	tr.materials[texnum].gl_colormask_id = 0;
 	tr.materials[texnum].Fresnel = 4.0f;
+
+	// free textures, if present
+	if( tr.materials[texnum].gl_normalmap_id > 0 )
+		FREE_TEXTURE( tr.materials[texnum].gl_normalmap_id );
+	tr.materials[texnum].gl_normalmap_id = 0;
+
+	if( tr.materials[texnum].gl_interiormap_id > 0 )
+		FREE_TEXTURE( tr.materials[texnum].gl_interiormap_id );
+	tr.materials[texnum].gl_interiormap_id = 0;
+
+	if( tr.materials[texnum].gl_colormask_id > 0 )
+		FREE_TEXTURE( tr.materials[texnum].gl_colormask_id );
+	tr.materials[texnum].gl_colormask_id = 0;
+
+	tr.materials[texnum].gl_fallbacktex_id = 0; // this doesn't need to be freed, it can something else's texture
+
 	strcpy_s( tr.materials[texnum].normalmap_name, "0" );
 
 	if( tr.materials[texnum].name[0] == '!' ) // water
