@@ -540,6 +540,7 @@ void CStudioModelRenderer::ProcessUserData( model_t *mod, qboolean create, const
 	}
 	else
 	{
+		FreeStudioMaterials();
 		DestroyMeshCache();
 	}
 }
@@ -1759,8 +1760,6 @@ void CStudioModelRenderer::ReleaseVBOCache( mvbocache_t **ppvbocache )
 
 void CStudioModelRenderer::DestroyMeshCache( void )
 {
-	FreeStudioMaterials();
-
 	ReleaseVBOCache( &m_pRenderModel->studiocache );
 
 	if( m_pRenderModel->poseToBone != NULL )

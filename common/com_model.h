@@ -84,9 +84,7 @@ typedef struct material_s
 	struct matdef_s *effects;			// hit, impact, particle effects etc
 
 	unsigned short	gl_diffuse_id;		// diffuse texture
-	unsigned short	gl_detailmap_id;		// detail texture
 	unsigned short	gl_normalmap_id;		// normalmap
-	unsigned short	gl_specular_id;		// specular
 	unsigned short	gl_heightmap_id;		// parallax bumpmap
 	unsigned short gl_fallbacktex_id;
 
