@@ -321,6 +321,22 @@ void LoadMaterialSettingsForTexture( int texnum )
 				break;
 			}
 		}
+		else if( !Q_stricmp( token, "FallbackTexture" ) ) // replace texture with another
+		{
+			// parse value for this setting
+			afile = COM_ParseLine( afile, token );
+			if( afile && token[0] > 0 )
+			{
+				tr.materials[texnum].gl_fallbacktex_id = LOAD_TEXTURE( token, NULL, 0, 0 );
+				if( tr.materials[texnum].gl_fallbacktex_id == 0 )
+					ConPrintf( "^1Error:^7 FallbackTexture for texture \"%s\" couldn't be loaded.\n", tr.materials[texnum].name );
+			}
+			else
+			{
+				Error = true;
+				break;
+			}
+		}
 		else
 		{
 			ConPrintf( "Unknown parameter for texture \"%s\", check txt file.\n", tr.materials[texnum].name );
@@ -2138,7 +2154,10 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 			else
 			{
-				GL_Bind( GL_TEXTURE0, tex->gl_texturenum );
+				if( tr.materials[tex->gl_texturenum].gl_fallbacktex_id > 0 )
+					GL_Bind( GL_TEXTURE0, tr.materials[tex->gl_texturenum].gl_fallbacktex_id );
+				else
+					GL_Bind( GL_TEXTURE0, tex->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
 			}
 
@@ -2176,10 +2195,10 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 			else
 			{
-				pglUniform1fARB( RI->currentshader->u_DynLightBrightness, pl->brightness * tr.materials[s->texinfo->texture->gl_texturenum].DynlightScale );
-				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[s->texinfo->texture->gl_texturenum].GlossSmoothness );
-				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[s->texinfo->texture->gl_texturenum].GlossScale );
-				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[s->texinfo->texture->gl_texturenum].EmbossScale );
+				pglUniform1fARB( RI->currentshader->u_DynLightBrightness, pl->brightness * tr.materials[tex->gl_texturenum].DynlightScale );
+				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[tex->gl_texturenum].GlossSmoothness );
+				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[tex->gl_texturenum].GlossScale );
+				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[tex->gl_texturenum].EmbossScale );
 
 				if( tr.materials[tex->gl_texturenum].gl_normalmap_id > 0 )
 					GL_Bind( GL_TEXTURE6, tr.materials[tex->gl_texturenum].gl_normalmap_id );
@@ -2189,16 +2208,16 @@ void R_DrawLightForSurfList( plight_t *pl )
 				GL_Bind( GL_TEXTURE6, tr.waterTextures[(int)(tr.time * 20.0f) % WATER_TEXTURES] ); // u_NormalMap
 
 			// diffusion - interior mapping
-			if( tr.materials[s->texinfo->texture->gl_texturenum].gl_interiormap_id > 0 )
+			if( tr.materials[tex->gl_texturenum].gl_interiormap_id > 0 )
 			{
 				pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform2fARB( RI->currentshader->u_InteriorGrid, tr.materials[s->texinfo->texture->gl_texturenum].InteriorGrid.x, tr.materials[s->texinfo->texture->gl_texturenum].InteriorGrid.y );
-				pglUniform1fARB( RI->currentshader->u_InteriorLightState, (float)tr.materials[s->texinfo->texture->gl_texturenum].InteriorLightState );
-				GL_Bind( GL_TEXTURE7, tr.materials[s->texinfo->texture->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
+				pglUniform2fARB( RI->currentshader->u_InteriorGrid, tr.materials[tex->gl_texturenum].InteriorGrid.x, tr.materials[tex->gl_texturenum].InteriorGrid.y );
+				pglUniform1fARB( RI->currentshader->u_InteriorLightState, (float)tr.materials[tex->gl_texturenum].InteriorLightState );
+				GL_Bind( GL_TEXTURE7, tr.materials[tex->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
 			}
 
 			// diffusion - apply custom color to a specific texture
-			if( tr.materials[s->texinfo->texture->gl_texturenum].ApplyColor && (e->index > 0) )
+			if( tr.materials[tex->gl_texturenum].ApplyColor && (e->index > 0) )
 			{
 				// hack     // dynlight doesn't affect additive brushes
 		/*		if( e->curstate.rendermode == kRenderTransAdd )
@@ -2564,7 +2583,10 @@ void R_DrawBrushList( void )
 			}
 			else
 			{
-				GL_Bind( GL_TEXTURE0, es->gl_texturenum );
+				if( tr.materials[es->gl_texturenum].gl_fallbacktex_id > 0 )
+					GL_Bind( GL_TEXTURE0, tr.materials[es->gl_texturenum].gl_fallbacktex_id );
+				else
+					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
 			}
 
@@ -2602,15 +2624,15 @@ void R_DrawBrushList( void )
 			}
 			else
 			{
-				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[s->texinfo->texture->gl_texturenum].GlossSmoothness );
-				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[s->texinfo->texture->gl_texturenum].GlossScale );
-				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[s->texinfo->texture->gl_texturenum].EmbossScale );
+				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[es->gl_texturenum].GlossSmoothness );
+				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[es->gl_texturenum].GlossScale );
+				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[es->gl_texturenum].EmbossScale );
 
 				if( tr.materials[es->gl_texturenum].gl_normalmap_id > 0 )
 					GL_Bind( GL_TEXTURE4, tr.materials[es->gl_texturenum].gl_normalmap_id );
 			}
 
-			pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[s->texinfo->texture->gl_texturenum].Fresnel );
+			pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[es->gl_texturenum].Fresnel );
 
 			// diffusion - refracted water!!!
 			if( FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
@@ -2630,12 +2652,12 @@ void R_DrawBrushList( void )
 			}
 
 			// diffusion - interior mapping
-			if( tr.materials[s->texinfo->texture->gl_texturenum].gl_interiormap_id > 0 )
+			if( tr.materials[es->gl_texturenum].gl_interiormap_id > 0 )
 			{
 				pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform2fARB( RI->currentshader->u_InteriorGrid, tr.materials[s->texinfo->texture->gl_texturenum].InteriorGrid.x, tr.materials[s->texinfo->texture->gl_texturenum].InteriorGrid.y );
-				pglUniform1fARB( RI->currentshader->u_InteriorLightState, (float)tr.materials[s->texinfo->texture->gl_texturenum].InteriorLightState );
-				GL_Bind( GL_TEXTURE5, tr.materials[s->texinfo->texture->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
+				pglUniform2fARB( RI->currentshader->u_InteriorGrid, tr.materials[es->gl_texturenum].InteriorGrid.x, tr.materials[es->gl_texturenum].InteriorGrid.y );
+				pglUniform1fARB( RI->currentshader->u_InteriorLightState, (float)tr.materials[es->gl_texturenum].InteriorLightState );
+				GL_Bind( GL_TEXTURE5, tr.materials[es->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
 			}
 			else if( FBitSet( s->flags, SURF_WATER ) && (gl_water_planar->value > 0) )
 				GL_Bind( GL_TEXTURE5, es->gl_texturenum ); // u_WaterTex - mix turbulency texture and reflection
@@ -2687,7 +2709,7 @@ void R_DrawBrushList( void )
 			}
 
 			// diffusion - apply custom color to a specific texture
-			if( tr.materials[s->texinfo->texture->gl_texturenum].ApplyColor && (e->index > 0) )
+			if( tr.materials[es->gl_texturenum].ApplyColor && (e->index > 0) )
 			{
 				// hack
 				if( e->curstate.rendermode == kRenderTransAdd )

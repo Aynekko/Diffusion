@@ -4962,7 +4962,10 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 		{
 			if( CVAR_TO_BOOL( r_lightmap ) && !CVAR_TO_BOOL( r_fullbright ) )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
-			else GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
+			else if( tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id > 0 )
+				GL_Bind( GL_TEXTURE0, tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id );
+			else
+				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
 
 			if( tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 ) // u_NormalMap
 				GL_Bind( GL_TEXTURE3, tr.materials[mat->gl_diffuse_id].gl_normalmap_id );
@@ -5204,7 +5207,10 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 			else if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
 				IEngineStudio.StudioSetupSkin( m_pStudioHeader, pskinref[pMesh->skinref] );
-			else GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
+			else if( tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id > 0 )
+				GL_Bind( GL_TEXTURE0, tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id );
+			else 
+				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
 
 			if( mat->flags & STUDIO_NF_TWOSIDE || (m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide) )
 				GL_Cull( GL_NONE );

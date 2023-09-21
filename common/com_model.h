@@ -88,6 +88,7 @@ typedef struct material_s
 	unsigned short	gl_normalmap_id;		// normalmap
 	unsigned short	gl_specular_id;		// specular
 	unsigned short	gl_heightmap_id;		// parallax bumpmap
+	unsigned short gl_fallbacktex_id;
 
 	char normalmap_name[64]; // to remember, for landscape arrays
 
