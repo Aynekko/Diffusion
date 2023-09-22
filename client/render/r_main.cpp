@@ -1911,10 +1911,11 @@ void HUD_PrintStats( void )
 		R_Speeds_Printf( "%3i shadows\n", r_stats.c_shadow_passes );
 		R_Speeds_Printf( "%3i 3d sky\n", r_stats.c_sky_passes );
 		R_Speeds_Printf( "%3i total\n\n", r_stats.num_passes );
-		R_Speeds_Printf( "Dynamic lights:\n\n" );
+		R_Speeds_Printf( "Dynamic lights:\n" );
 		R_Speeds_Printf( "%3i total\n", r_stats.c_plights );
 		R_Speeds_Printf( "%3i studio models affected\n", r_stats.c_plights_meshes );
-		R_Speeds_Printf( "%3i world surfaces affected\n", r_stats.num_light_surfaces );
+		R_Speeds_Printf( "%3i world surfaces affected\n\n", r_stats.num_light_surfaces );
+		R_Speeds_Printf( "GLSL shaders: %3i\n", Q_max( num_glsl_programs - 1, 0 ) );
 		break;		
 	case 2:
 		if( !curleaf ) curleaf = worldmodel->leafs;
