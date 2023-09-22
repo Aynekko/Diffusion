@@ -38,6 +38,9 @@
 #include "ammo.h"
 #include "achievementdata.h"
 
+#define EXPORT	_declspec( dllexport )
+#define DLLEXPORT	__declspec( dllexport )
+
 typedef struct cvar_s	cvar_t;
 
 #define DHN_DRAWZERO 		1

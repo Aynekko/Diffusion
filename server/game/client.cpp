@@ -117,7 +117,8 @@ void ClientDisconnect( edict_t *pEdict )
 	char text[256] = "";
 	if( pEntity->pev->netname && !(pEntity->pev->flags & FL_FAKECLIENT) )
 	{
-		snprintf( text, sizeof( text ), "- %s has left the game\n", STRING( pEntity->pev->netname ) );
+		_snprintf( text, sizeof( text ) - 1, "- %s has left the game\n", STRING( pEntity->pev->netname ) );
+		text[sizeof( text ) - 1] = '\0';
 		EMIT_SOUND( INDEXENT( 0 ), CHAN_STATIC, SND_PLAYER_LEFT, 1, ATTN_NONE );
 	}
 
@@ -1038,7 +1039,8 @@ void ClientUserInfoChanged( edict_t *pEntity, char *infobuffer )
 		g_engfuncs.pfnSetClientKeyValue( ENTINDEX(pEntity), infobuffer, "name", sName );
 
 		char text[256];
-		sprintf( text, "* %s changed name to %s\n", STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue( infobuffer, "name" ) );
+		_snprintf( text, sizeof( text ) - 1, "* %s changed name to %s\n", STRING( pEntity->v.netname ), g_engfuncs.pfnInfoKeyValue( infobuffer, "name" ) );
+		text[sizeof( text ) - 1] = '\0';
 		MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL );
 			WRITE_BYTE( ENTINDEX(pEntity) );
 			WRITE_STRING( text );

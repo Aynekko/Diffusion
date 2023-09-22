@@ -35,7 +35,11 @@
 // This is conveniently done for them in extdll.h
 //
 
-#include "exportdef.h"
+#ifdef _WIN32
+#define DLLEXPORT __stdcall
+#else
+#define DLLEXPORT /* */
+#endif
 
 #ifndef offsetof
 #define offsetof(s,m)	(size_t)&(((s *)0)->m)

@@ -17,7 +17,6 @@ GNU General Public License for more details.
 #define UTILS_H
 
 #include "cvardef.h"
-#include "exportdef.h"
 
 typedef unsigned char byte;
 typedef unsigned short word;

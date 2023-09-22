@@ -1,5 +1,4 @@
 #include "input_mouse.h"
-#include "exportdef.h"
 #include "hud.h"
 
 // shared between backends
