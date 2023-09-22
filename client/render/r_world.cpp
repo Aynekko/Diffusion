@@ -88,7 +88,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 		FREE_TEXTURE( tr.materials[texnum].gl_colormask_id );
 	tr.materials[texnum].gl_colormask_id = 0;
 
-	tr.materials[texnum].gl_fallbacktex_id = 0; // this doesn't need to be freed, it can something else's texture
+	tr.materials[texnum].gl_fallbacktex_id = 0; // this doesn't need to be freed, it can be something else's texture
 
 	strcpy_s( tr.materials[texnum].normalmap_name, "0" );
 
