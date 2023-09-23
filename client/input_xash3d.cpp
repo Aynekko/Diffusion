@@ -162,10 +162,7 @@ void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
 		V_StopPitchDrift();
 	}
 #endif
-	if( CL_IsDead() )
-		viewangles = dead_viewangles; // HACKHACK: see below
-	else
-		gEngfuncs.GetViewAngles( viewangles );
+	gEngfuncs.GetViewAngles( viewangles );
 
 	if( gHUD.GetSensitivity() != 0 )
 	{
@@ -200,10 +197,7 @@ void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
 
 	viewangles[PITCH] = bound( -(cl_pitchup->value + upside_down_pitch), viewangles[PITCH], cl_pitchdown->value - upside_down_pitch );
 
-	// HACKHACK: change viewangles directly in viewcode, 
-	// so viewangles when player is dead will not be changed on server
-	if( !CL_IsDead() )
-		gEngfuncs.SetViewAngles( viewangles );
+	gEngfuncs.SetViewAngles( viewangles );
 
 	dead_viewangles = viewangles; // keep them actual
 
