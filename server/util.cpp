@@ -2728,6 +2728,7 @@ void UTIL_GetModelBounds( int modelIndex, Vector &mins, Vector &maxs )
 	}
 }
 
+// must be called AFTER SET_MODEL!
 void UTIL_SetSize( CBaseEntity *pEntity, const Vector &min, const Vector &max )
 {
 	// check bounds

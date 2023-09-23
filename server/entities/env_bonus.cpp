@@ -38,15 +38,18 @@ void CEnvBonus::Spawn( void )
 		return;
 	}
 
-	pev->solid = SOLID_TRIGGER;
-	UTIL_SetSize( this, Vector( -2, -2, 0 ), Vector( 2, 2, 4 ) );
 	SET_MODEL( edict(), "models/bonus.mdl" );
+	UTIL_SetSize( this, Vector( -4, -4, -4 ), Vector( 4, 4, 4 ) );
+	pev->solid = SOLID_TRIGGER;
+	pev->movetype = MOVETYPE_NONE;
 	pev->framerate = 1.0;
 	SetTouch( &CEnvBonus::BonusTouch );
 	UTIL_DropToFloor( this );
 	EquipmentRandom = RANDOM_LONG( 0, 8 );
 	EMIT_SOUND( edict(), CHAN_STATIC, "items/bonus_spawn.wav", 1.0, ATTN_IDLE );
 	SetFadeDistance( 800 );
+
+	UTIL_SetOrigin( this, GetAbsOrigin() );
 }
 
 void CEnvBonus::BonusTouch( CBaseEntity *pOther )
