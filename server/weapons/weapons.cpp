@@ -533,6 +533,7 @@ BEGIN_DATADESC( CBasePlayerItem )
 	DEFINE_FUNCTION( FallThink ),
 	DEFINE_FUNCTION( Materialize ),
 	DEFINE_FUNCTION( AttemptToMaterialize ),
+	DEFINE_FUNCTION( Kill ),
 END_DATADESC()
 
 BEGIN_DATADESC( CBasePlayerWeapon )
