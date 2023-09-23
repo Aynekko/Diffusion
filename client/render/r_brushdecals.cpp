@@ -128,7 +128,7 @@ bool DrawSingleDecal(decal_t* decal, word& hLastShader, bool project)
 	Vector normal = FBitSet(surf->flags, SURF_PLANEBACK) ? -surf->plane->normal : surf->plane->normal;
 	int decalFlags = 0;
 
-	pglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
 	pglUniform1fvARB(RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0]);
 	pglUniform4fARB(RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity);
@@ -214,7 +214,7 @@ void DrawDecalsBatch(void)
 //	if ( (e->curstate.rendermode != kRenderTransTexture) && (e->curstate.rendermode != kRenderFade) ) // diffusion - why?
 //	{
 		GL_Blend( GL_TRUE );
-		pglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+		GL_BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 		GL_DepthMask(GL_FALSE);
 //	}
 

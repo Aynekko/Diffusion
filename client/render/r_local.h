@@ -674,7 +674,9 @@ void GL_BindFrameBuffer( int buffer, int texture );
 void R_FreeFrameBuffer( int buffer );
 void GL_DepthMask( GLint enable );
 void GL_AlphaTest( GLint enable );
+void GL_AlphaFunc( GLenum func, GLclampf ref );
 void GL_Blend( GLint enable );
+void GL_BlendFunc( GLenum sfactor, GLenum dfactor );
 void GL_BindFBO( GLint buffer );
 void GL_Setup2D( void );
 void GL_Setup3D( void );
@@ -685,6 +687,7 @@ bool GL_UsingAlphaToCoverage( void );
 void GL_DepthRange( GLfloat depthmin, GLfloat depthmax );
 void GL_DepthTest( GLint enable );
 void GL_Texture2D( GLint enable );
+void GL_Color4f( GLfloat r, GLfloat g, GLfloat b, GLfloat a );
 
 //
 // r_cull.cpp

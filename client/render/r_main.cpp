@@ -1111,7 +1111,7 @@ static void R_SetupGL( void )
 
 	GL_Blend( GL_FALSE );
 	GL_AlphaTest( GL_FALSE );
-	pglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+	GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 }
 
 /*
@@ -1993,9 +1993,9 @@ void R_RenderDebugSurface( void )
 	else R_TranslateForEntity( ent );
 
 	GL_Blend( GL_TRUE );
-	pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	pglPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
-	pglColor4f( 0.5f, 1.0f, 0.36f, 0.99f ); 
+	GL_Color4f( 0.5f, 1.0f, 0.36f, 0.99f );
 	GL_Texture2D( GL_FALSE );
 	pglLineWidth( 2.0f );
 

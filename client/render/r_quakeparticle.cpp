@@ -533,14 +533,14 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 
 	GL_Blend( GL_TRUE );
 
-	pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
 	if( !glState.drawTrans )
 	{
 		GL_AlphaTest( GL_TRUE );
-		pglAlphaFunc( GL_GREATER, 0.25f );
+		GL_AlphaFunc( GL_GREATER, 0.25f );
 	}
 
 	if( m_iNumVerts && m_iNumIndex )
@@ -561,7 +561,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 	if( !glState.drawTrans )
 	{
 		GL_AlphaTest( GL_FALSE );
-		pglAlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
+		GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	}
 
 //	gEngfuncs.pTriAPI->CullFace( TRI_FRONT );
@@ -951,15 +951,15 @@ bool CQuakePart::Evaluate( float gravity )
 	if( glState.drawTrans )
 	{
 		if( FBitSet( m_iFlags, FPART_ADDITIVE ) )
-			pglBlendFunc( GL_SRC_ALPHA, GL_ONE );
+			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 		else
-			pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	}
 	else
 	{
-		pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		GL_AlphaTest( GL_TRUE );
-		pglAlphaFunc( GL_GREATER, 0.25f );
+		GL_AlphaFunc( GL_GREATER, 0.25f );
 	}
 
 	// draw the particle
@@ -968,8 +968,8 @@ bool CQuakePart::Evaluate( float gravity )
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
 	if( FBitSet( m_iFlags, FPART_ADDITIVE ) )
-		pglColor4f( 1.0f, 1.0f, 1.0f, curAlpha );
-	else pglColor4f( curColor.x, curColor.y, curColor.z, curAlpha );
+		GL_Color4f( 1.0f, 1.0f, 1.0f, curAlpha );
+	else GL_Color4f( curColor.x, curColor.y, curColor.z, curAlpha );
 
 	pglBegin( GL_QUADS );
 	pglTexCoord2f( 0.0f, 1.0f );
@@ -988,7 +988,7 @@ bool CQuakePart::Evaluate( float gravity )
 	if( !glState.drawTrans )
 	{
 		GL_AlphaTest( GL_FALSE );
-		pglAlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
+		GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	}
 
 	return true;

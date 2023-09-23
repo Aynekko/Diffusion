@@ -177,7 +177,7 @@ void R_DrawCable( cl_entity_t *e )
 	{
 		GL_DepthMask( GL_FALSE );
 		GL_Blend( GL_TRUE );
-		pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	}
 	else
 	{
@@ -197,7 +197,7 @@ void R_DrawCable( cl_entity_t *e )
 		VectorSubtract( vpoints[j], tr.viewparams.vieworg, vDir );
 		vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
 
-		pglColor4f( Color.x, Color.y, Color.z, RenderAmt );
+		GL_Color4f( Color.x, Color.y, Color.z, RenderAmt );
 
 		VectorMA( vpoints[j], fwidth, vRight, vVertex );
 		if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity

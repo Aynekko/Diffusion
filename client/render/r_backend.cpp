@@ -44,6 +44,11 @@ void GL_DepthTest( GLint enable )
 		pglDisable( GL_DEPTH_TEST );
 }
 
+void GL_Color4f( GLfloat r, GLfloat g, GLfloat b, GLfloat a )
+{
+	pglColor4f( r, g, b, a );
+}
+
 /*
 ==============
 GL_DepthMask
@@ -71,6 +76,11 @@ void GL_AlphaTest( GLint enable )
 #endif
 }
 
+void GL_AlphaFunc( GLenum func, GLclampf ref )
+{
+	pglAlphaFunc( func, ref );
+}
+
 /*
 ==============
 GL_Blend
@@ -82,6 +92,11 @@ void GL_Blend( GLint enable )
 		pglEnable( GL_BLEND );
 	else
 		pglDisable( GL_BLEND );
+}
+
+void GL_BlendFunc( GLenum sfactor, GLenum dfactor )
+{
+	pglBlendFunc( sfactor, dfactor );
 }
 
 /*
@@ -114,9 +129,6 @@ GL_FrontFace
 */
 void GL_FrontFace( GLenum front )
 {
-//	if( glState.frontFace == front )
-//		return;
-
 	pglFrontFace( front ? GL_CW : GL_CCW );
 	glState.frontFace = front;
 }
@@ -143,7 +155,7 @@ void GL_Setup2D( void )
 	GL_Blend( GL_FALSE );
 
 	GL_Cull( GL_FRONT );
-	pglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+	GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	pglViewport( 0, 0, glState.width, glState.height );
 }
 

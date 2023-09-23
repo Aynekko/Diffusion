@@ -3901,22 +3901,22 @@ void CStudioModelRenderer::StudioSetRenderMode( const int rendermode )
 	case kRenderTransColor:
 		if( RI->currententity->curstate.renderamt != 255 || tr.fadeblend[RI->currententity->index] < 1.0f ) // diffusion - fix, otherwise it was possible to look through them
 		{
-			pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 			pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 			GL_Blend( GL_TRUE );
 		}
 		break;
 	case kRenderTransAdd:
 		pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-		pglColor4f( tr.blend, tr.blend, tr.blend, 1.0f );
-		pglBlendFunc( GL_ONE, GL_ONE );
+		GL_Color4f( tr.blend, tr.blend, tr.blend, 1.0f );
+		GL_BlendFunc( GL_ONE, GL_ONE );
 		GL_DepthMask( GL_FALSE );
 		GL_Blend( GL_TRUE );
 		break;
 	default:
 		pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-		pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-		pglColor4f( 1.0f, 1.0f, 1.0f, tr.blend );
+		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		GL_Color4f( 1.0f, 1.0f, 1.0f, tr.blend );
 		GL_DepthMask( GL_TRUE );
 		GL_Blend( GL_TRUE );
 		break;
@@ -5036,7 +5036,7 @@ void CStudioModelRenderer::RenderDynLightList( void )
 	GL_Blend( GL_TRUE );
 	GL_AlphaTest( GL_FALSE );
 	GL_DepthMask( GL_FALSE );
-	pglBlendFunc( GL_ONE, GL_ONE );
+	GL_BlendFunc( GL_ONE, GL_ONE );
 	pglEnable( GL_SCISSOR_TEST );
 	plight_t *pl = cl_plights;
 
@@ -5221,7 +5221,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 			if( FBitSet( mat->flags, STUDIO_NF_MASKED ) || FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) )
 			{
-				pglAlphaFunc( GL_GREATER, 0.5f );
+				GL_AlphaFunc( GL_GREATER, 0.5f );
 				GL_AlphaTest( GL_TRUE );
 				GL_DepthMask( GL_TRUE );
 				GL_Blend( GL_FALSE );
@@ -5230,11 +5230,11 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			{
 				if( R_ModelOpaque( m_pCurrentEntity->curstate.rendermode, m_pCurrentEntity->curstate.renderamt ) )
 				{
-					pglBlendFunc( GL_SRC_ALPHA, GL_ONE );
+					GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 					GL_DepthMask( GL_FALSE );
 					GL_Blend( GL_TRUE );
 				}
-				else pglBlendFunc( GL_SRC_ALPHA, GL_ONE );
+				else GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 
 			}
 			else
@@ -5341,7 +5341,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	if( GL_Support( R_SEAMLESS_CUBEMAP ) )
 		pglDisable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 
-	pglAlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
+	GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	GL_DepthMask( GL_TRUE );
 	GL_Blend( GL_FALSE );
 	GL_AlphaTest( GL_FALSE );
@@ -5445,18 +5445,18 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 
 			if( FBitSet( mat->flags, STUDIO_NF_MASKED ) || FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) )
 			{
-				pglAlphaFunc( GL_GREATER, 0.5f );
+				GL_AlphaFunc( GL_GREATER, 0.5f );
 				GL_AlphaTest( GL_TRUE );
 			}
 			else if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) ) // diffusion - fixed shadows from additive textures from projected light...
 			{
 				if( R_ModelOpaque( RI->currententity->curstate.rendermode, RI->currententity->curstate.renderamt ) )
 				{
-					pglBlendFunc( GL_SRC_ALPHA, GL_ONE );
+					GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 					GL_DepthMask( GL_FALSE );
 					GL_Blend( GL_TRUE );
 				}
-				else pglBlendFunc( GL_SRC_ALPHA, GL_ONE );
+				else GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 			}
 			else
 				GL_AlphaTest( GL_FALSE );

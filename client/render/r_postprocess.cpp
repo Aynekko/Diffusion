@@ -952,7 +952,7 @@ void Bloom( void )
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
 	GL_BindShader( NULL );
 	GL_Blend( GL_TRUE );
-	pglBlendFunc( GL_ONE, GL_ONE );
+	GL_BlendFunc( GL_ONE, GL_ONE );
 	pglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 1.0 );
 	RenderFSQ( glState.width, glState.height );
 	pglTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_LOD, 0.0 );

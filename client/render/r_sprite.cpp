@@ -515,28 +515,28 @@ void CSpriteModelRenderer :: DrawLighting( mspriteframe_t *frame, const Vector &
 		point = org + up * (frame->down * scale);
 		point = point + right * (frame->left * scale);
 		color2 = color + R_LightsForPoint( point, lightscale ) * 0.5f;
-		pglColor4f( color2[0], color2[1], color2[2], flAlpha );
+		GL_Color4f( color2[0], color2[1], color2[2], flAlpha );
 		pglVertex3fv( point );
 
 		pglTexCoord2f( 0.0f, 0.0f );
 		point = org + up * (frame->up * scale);
 		point = point + right * (frame->left * scale);
 		color2 = color + R_LightsForPoint( point, lightscale ) * 0.5f;
-		pglColor4f( color2[0], color2[1], color2[2], flAlpha );
+		GL_Color4f( color2[0], color2[1], color2[2], flAlpha );
 		pglVertex3fv( point );
 
 		pglTexCoord2f( 1.0f, 0.0f );
 		point = org + up * (frame->up * scale);
 		point = point + right * (frame->right * scale);
 		color2 = color + R_LightsForPoint( point, lightscale ) * 0.5f;
-		pglColor4f( color2[0], color2[1], color2[2], flAlpha );
+		GL_Color4f( color2[0], color2[1], color2[2], flAlpha );
 		pglVertex3fv( point );
 
 		pglTexCoord2f( 1.0f, 1.0f );
 		point = org + up * (frame->down * scale);
 		point = point + right * (frame->right * scale);
 		color2 = color + R_LightsForPoint( point, lightscale ) * 0.5f;
-		pglColor4f( color2[0], color2[1], color2[2], flAlpha );
+		GL_Color4f( color2[0], color2[1], color2[2], flAlpha );
 		pglVertex3fv( point );
 	pglEnd();
 
@@ -624,7 +624,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	if( m_pSpriteHeader->texFormat == SPR_ALPHTEST && m_pCurrentEntity->curstate.rendermode != kRenderTransAdd )
 	{
 		GL_AlphaTest( GL_TRUE );
-		pglAlphaFunc( GL_GREATER, 0.0f );
+		GL_AlphaFunc( GL_GREATER, 0.0f );
 	}
 
 	// select proper rendermode
@@ -636,14 +636,14 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	case kRenderTransTexture:
 	case kRenderFade:
 		GL_Blend( GL_TRUE );
-		pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		break;
 	case kRenderGlow:
 	case kRenderConstantGlow:
 		GL_DepthTest( GL_FALSE );
 	case kRenderTransAdd:
 		GL_Blend( GL_TRUE );
-		pglBlendFunc( GL_SRC_ALPHA, GL_ONE );
+		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 		GL_DepthMask( GL_FALSE );
 		break;
 	case kRenderNormal:
@@ -691,7 +691,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 			GL_DepthMask( GL_TRUE );
 
 		// NOTE: sprites with 'lightmap' looks ugly when alpha func is GL_GREATER 0.0
-		pglAlphaFunc( GL_GEQUAL, 0.5f );
+		GL_AlphaFunc( GL_GEQUAL, 0.5f );
 	}
 
 	float lerp = 1.0f, ilerp;
@@ -778,7 +778,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	if( oldframe == frame )
 	{
 		// draw the single non-lerped frame
-		pglColor4f( color[0], color[1], color[2], tr.blend );
+		GL_Color4f( color[0], color[1], color[2], tr.blend );
 		GL_Bind( GL_TEXTURE0, frame->gl_texturenum );
 		DrawSpriteQuad( frame, sprite_origin, v_right, v_up, scale );
 	}
@@ -790,14 +790,14 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 
 		if( ilerp != 0 )
 		{
-			pglColor4f( color[0], color[1], color[2], tr.blend * ilerp );
+			GL_Color4f( color[0], color[1], color[2], tr.blend * ilerp );
 			GL_Bind( GL_TEXTURE0, oldframe->gl_texturenum );
 			DrawSpriteQuad( oldframe, sprite_origin, v_right, v_up, scale );
 		}
 
 		if( lerp != 0 )
 		{
-			pglColor4f( color[0], color[1], color[2], tr.blend * lerp );
+			GL_Color4f( color[0], color[1], color[2], tr.blend * lerp );
 			GL_Bind( GL_TEXTURE0, frame->gl_texturenum );
 			DrawSpriteQuad( frame, sprite_origin, v_right, v_up, scale );
 		}
@@ -811,14 +811,14 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 		else GL_Blend( GL_FALSE );
 		pglDepthFunc( GL_EQUAL );
 		GL_AlphaTest( GL_FALSE );
-		pglBlendFunc( GL_ZERO, GL_SRC_COLOR );
+		GL_BlendFunc( GL_ZERO, GL_SRC_COLOR );
 		pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 		pglShadeModel( GL_SMOOTH );
 
 		GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 		DrawLighting( frame, sprite_origin, v_right, v_up, color2, scale, tr.blend );
 
-		pglAlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
+		GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 		if( glState.drawTrans ) 
 			GL_DepthMask( GL_FALSE );
 		pglShadeModel( GL_FLAT );
@@ -857,7 +857,7 @@ void CSpriteModelRenderer::SpriteDrawModelShadowPass( void )
 
 	if( m_pSpriteHeader->texFormat == SPR_ALPHTEST )
 	{
-		pglAlphaFunc( GL_GREATER, 0.0f );
+		GL_AlphaFunc( GL_GREATER, 0.0f );
 		GL_AlphaTest( GL_TRUE );
 	}
 

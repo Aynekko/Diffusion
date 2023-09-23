@@ -232,7 +232,7 @@ void CFrustum :: DrawFrustumDebug( void )
 	ComputeFrustumCorners( bbox );
 
 	// g-cont. frustum must be yellow :-)
-	pglColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
+	GL_Color4f( 1.0f, 1.0f, 0.0f, 1.0f );
 	GL_Texture2D( GL_FALSE );
 	pglBegin( GL_LINES );
 

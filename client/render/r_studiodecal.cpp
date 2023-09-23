@@ -1307,7 +1307,7 @@ void CStudioModelRenderer :: DrawDecal( cl_entity_t *e )
 	}
 
 	GL_Blend( GL_TRUE );
-	pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
 	if( CVAR_TO_BOOL( r_polyoffset ))
 	{

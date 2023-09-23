@@ -350,7 +350,7 @@ static void R_ShadowPassSetupGL( const plight_t *pl, int split = 0 )
 
 	GL_Cull( GL_FRONT );
 
-	pglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+	GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	pglColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
 	pglEnable( GL_POLYGON_OFFSET_FILL );
 	GL_Texture2D( GL_FALSE );

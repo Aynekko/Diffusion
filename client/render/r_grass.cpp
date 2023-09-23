@@ -505,7 +505,7 @@ void R_RenderGrassOnList( void )
 		return; // don't waste time
 
 	GL_AlphaTest( GL_TRUE );
-	pglAlphaFunc( GL_GREATER, r_grass_alpha->value );
+	GL_AlphaFunc( GL_GREATER, r_grass_alpha->value );
 	
 	GL_Cull( GL_NONE );	// grass is double-sided poly
 	
@@ -598,7 +598,7 @@ void R_DrawLightForGrass( plight_t *pl )
 	if( !tr.num_light_grass ) return; // don't waste time
 
 	GL_AlphaTest( GL_TRUE );
-	pglAlphaFunc( GL_GREATER, r_grass_alpha->value );
+	GL_AlphaFunc( GL_GREATER, r_grass_alpha->value );
 	
 	GL_Cull( GL_NONE );
 
@@ -632,7 +632,7 @@ void R_RenderShadowGrassOnList( void )
 		return; // don't waste time
 
 	GL_AlphaTest( GL_TRUE );
-	pglAlphaFunc( GL_GREATER, r_grass_alpha->value );
+	GL_AlphaFunc( GL_GREATER, r_grass_alpha->value );
 	
 	GL_Cull( GL_NONE );	// grass is double-sided poly
 	GL_BindShader( glsl.grassDepthFill );
@@ -1538,10 +1538,10 @@ void R_DrawGrass( qboolean lightpass )
 
 	GL_Cull( GL_NONE );
 	GL_AlphaTest( GL_TRUE );
-	pglAlphaFunc( GL_GREATER, bound( 0.0f, r_grass_alpha->value, 1.0f ));
+	GL_AlphaFunc( GL_GREATER, bound( 0.0f, r_grass_alpha->value, 1.0f ));
 //	GL_Cull( GL_NONE );
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-	pglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
+	GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 
 	for( int i = 0; i < GRASS_TEXTURES; i++ )
 	{
