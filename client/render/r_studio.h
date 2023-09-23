@@ -76,14 +76,16 @@ typedef struct
 
 typedef struct
 {
-	float		frame;
-	int		sequence;
-	float		gaitframe;
-	int		gaitsequence;
+	float frame;
+	int sequence;
+	float gaitframe;
+	int gaitsequence;
+	float lastgaitframe;
+	float prevgaitframe;
 
 	// for smooth stair climbing
-	float		stairtime;
-	float		stairoldz;
+	float stairtime;
+	float stairoldz;
 } mstudiolerp_t;
 
 typedef struct

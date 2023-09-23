@@ -209,13 +209,13 @@ void DrawDecalsBatch(void)
 
 	e = RI->currententity;
 	ASSERT(e != NULL);
-	pglDisable(GL_ALPHA_TEST);
+	GL_AlphaTest( GL_FALSE );
 
 //	if ( (e->curstate.rendermode != kRenderTransTexture) && (e->curstate.rendermode != kRenderFade) ) // diffusion - why?
 //	{
-		pglEnable(GL_BLEND);
+		GL_Blend( GL_TRUE );
 		pglBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		pglDepthMask(GL_FALSE);
+		GL_DepthMask(GL_FALSE);
 //	}
 
 	if ((e->curstate.rendermode == kRenderTransTexture) || (e->curstate.rendermode == kRenderTransAdd) || (e->curstate.rendermode == kRenderFade))
@@ -253,9 +253,9 @@ void DrawDecalsBatch(void)
 
 //	if ((e->curstate.rendermode != kRenderTransTexture) && (e->curstate.rendermode != kRenderFade))
 //	{
-		pglDepthMask(GL_TRUE);
-		pglDisable(GL_BLEND);
-		pglDisable(GL_ALPHA_TEST);
+		GL_DepthMask(GL_TRUE);
+		GL_Blend( GL_FALSE );
+		GL_AlphaTest( GL_FALSE );
 //	}
 
 	if (CVAR_TO_BOOL(r_polyoffset))

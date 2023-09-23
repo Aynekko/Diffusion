@@ -623,7 +623,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 
 	if( m_pSpriteHeader->texFormat == SPR_ALPHTEST && m_pCurrentEntity->curstate.rendermode != kRenderTransAdd )
 	{
-		pglEnable( GL_ALPHA_TEST );
+		GL_AlphaTest( GL_TRUE );
 		pglAlphaFunc( GL_GREATER, 0.0f );
 	}
 
@@ -631,24 +631,24 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	switch( m_pCurrentEntity->curstate.rendermode )
 	{
 	case kRenderTransAlpha:
-		pglDepthMask( GL_FALSE );
+		GL_DepthMask( GL_FALSE );
 	case kRenderTransColor:
 	case kRenderTransTexture:
 	case kRenderFade:
-		pglEnable( GL_BLEND );
+		GL_Blend( GL_TRUE );
 		pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		break;
 	case kRenderGlow:
 	case kRenderConstantGlow:
-		pglDisable( GL_DEPTH_TEST );
+		GL_DepthTest( GL_FALSE );
 	case kRenderTransAdd:
-		pglEnable( GL_BLEND );
+		GL_Blend( GL_TRUE );
 		pglBlendFunc( GL_SRC_ALPHA, GL_ONE );
-		pglDepthMask( GL_FALSE );
+		GL_DepthMask( GL_FALSE );
 		break;
 	case kRenderNormal:
 	default:
-		pglDisable( GL_BLEND );
+		GL_Blend( GL_FALSE );
 		break;
 	}
 	
@@ -688,7 +688,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 		color2 = lightColor * ( 1.0f / 255.0f );
 
 		if( glState.drawTrans )
-			pglDepthMask( GL_TRUE );
+			GL_DepthMask( GL_TRUE );
 
 		// NOTE: sprites with 'lightmap' looks ugly when alpha func is GL_GREATER 0.0
 		pglAlphaFunc( GL_GEQUAL, 0.5f );
@@ -807,10 +807,10 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	if( SpriteHasLightmap( m_pSpriteHeader->texFormat ))
 	{
 		if( !r_lightmap->value )
-			pglEnable( GL_BLEND );
-		else pglDisable( GL_BLEND );
+			GL_Blend( GL_TRUE );
+		else GL_Blend( GL_FALSE );
 		pglDepthFunc( GL_EQUAL );
-		pglDisable( GL_ALPHA_TEST );
+		GL_AlphaTest( GL_FALSE );
 		pglBlendFunc( GL_ZERO, GL_SRC_COLOR );
 		pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 		pglShadeModel( GL_SMOOTH );
@@ -820,7 +820,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 
 		pglAlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 		if( glState.drawTrans ) 
-			pglDepthMask( GL_FALSE );
+			GL_DepthMask( GL_FALSE );
 		pglShadeModel( GL_FLAT );
 	}
 
@@ -828,12 +828,12 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 		GL_Cull( GL_NONE );
 
 	if( (m_pCurrentEntity->curstate.rendermode == kRenderGlow) || (m_pCurrentEntity->curstate.rendermode == kRenderConstantGlow) )
-		pglEnable( GL_DEPTH_TEST );
+		GL_DepthTest( GL_TRUE );
 
 	if( m_pSpriteHeader->texFormat == SPR_ALPHTEST && m_pCurrentEntity->curstate.rendermode != kRenderTransAdd )
-		pglDisable( GL_ALPHA_TEST );
+		GL_AlphaTest( GL_FALSE );
 
-	pglDisable( GL_BLEND );
+	GL_Blend( GL_FALSE );
 	pglDepthFunc( GL_LEQUAL );
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 	pglColor4ub( 255, 255, 255, 255 );
@@ -858,7 +858,7 @@ void CSpriteModelRenderer::SpriteDrawModelShadowPass( void )
 	if( m_pSpriteHeader->texFormat == SPR_ALPHTEST )
 	{
 		pglAlphaFunc( GL_GREATER, 0.0f );
-		pglEnable( GL_ALPHA_TEST );
+		GL_AlphaTest( GL_TRUE );
 	}
 
 	mspriteframe_t *frame = GetSpriteFrame( m_pCurrentEntity->curstate.frame, m_pCurrentEntity->angles[YAW] );
@@ -922,16 +922,16 @@ void CSpriteModelRenderer::SpriteDrawModelShadowPass( void )
 	}
 
 	GL_Cull( GL_NONE );
-	pglEnable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_TRUE );
 
 	GL_Bind( GL_TEXTURE0, frame->gl_texturenum );
 	DrawSpriteQuad( frame, sprite_origin, v_right, v_up, scale );
 
-	pglDisable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_FALSE );
 	GL_Cull( GL_FRONT );
 
 	if( m_pSpriteHeader->texFormat == SPR_ALPHTEST )
-		pglDisable( GL_ALPHA_TEST );
+		GL_AlphaTest( GL_FALSE );
 }
 
 void CSpriteModelRenderer::DrawSpriteModelInternal( cl_entity_t *e )

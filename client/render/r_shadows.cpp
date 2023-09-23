@@ -353,12 +353,12 @@ static void R_ShadowPassSetupGL( const plight_t *pl, int split = 0 )
 	pglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	pglColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
 	pglEnable( GL_POLYGON_OFFSET_FILL );
-	pglDisable( GL_TEXTURE_2D );
-	pglDepthMask( GL_TRUE );
+	GL_Texture2D( GL_FALSE );
+	GL_DepthMask( GL_TRUE );
 	pglPolygonOffset( 1.0f, 2.0f );
-	pglEnable( GL_DEPTH_TEST );
-	pglDisable( GL_ALPHA_TEST );
-	pglDisable( GL_BLEND );
+	GL_DepthTest( GL_TRUE );
+	GL_AlphaTest( GL_FALSE );
+	GL_Blend( GL_FALSE );
 }
 
 /*
@@ -370,7 +370,7 @@ static void R_ShadowPassEndGL( void )
 {
 	pglColorMask( GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE );
 	pglDisable( GL_POLYGON_OFFSET_FILL );
-	pglEnable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_TRUE );
 	pglPolygonOffset( -1, -2 );
 	GL_BindShader( GL_FALSE );
 }

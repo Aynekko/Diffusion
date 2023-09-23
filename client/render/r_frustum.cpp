@@ -233,7 +233,7 @@ void CFrustum :: DrawFrustumDebug( void )
 
 	// g-cont. frustum must be yellow :-)
 	pglColor4f( 1.0f, 1.0f, 0.0f, 1.0f );
-	pglDisable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_FALSE );
 	pglBegin( GL_LINES );
 
 	for( int i = 0; i < 2; i += 1 )
@@ -253,7 +253,7 @@ void CFrustum :: DrawFrustumDebug( void )
 	}
 
 	pglEnd();
-	pglEnable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_TRUE );
 }
 
 bool CFrustum :: CullBox( const Vector &mins, const Vector &maxs, int userClipFlags )

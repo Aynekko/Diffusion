@@ -92,7 +92,7 @@ mstudioanim_t *CBaseBoneSetup::GetAnimSourceData( mstudioseqdesc_t *pseqdesc )
 void CBaseBoneSetup::debugLine( const Vector &origin, const Vector &dest, int r, int g, int b, bool noDepthTest, float duration )
 {
 	if( noDepthTest )
-		pglDisable( GL_DEPTH_TEST );
+		GL_DepthTest( GL_FALSE );
 
 	pglColor3ub( r, g, b );
 
@@ -2500,25 +2500,25 @@ float CStudioModelRenderer::StudioEstimateGaitFrame( mstudioseqdesc_t *pseqdesc 
 	return f;
 }
 /*
-float CStudioModelRenderer::StudioEstimateGaitFrame( mstudioseqdesc_t *pseqdesc )
+float CStudioModelRenderer :: StudioEstimateGaitFrame( mstudioseqdesc_t *pseqdesc )
 {
 	double f;
 	cl_entity_t *e = RI->currententity;
 	int numframes = m_boneSetup.LocalMaxFrame( e->curstate.gaitsequence );
 	float t = StudioEstimateInterpolant();
 	float currGaitFrame = e->curstate.fuser1;
-	static float lastGaitFrame = 0.0f;
-	static float prevGaitFrame = 0.0f;
+	float &lastGaitFrame = m_pModelInstance->lerp.lastgaitframe;
+	float &prevGaitFrame = m_pModelInstance->lerp.prevgaitframe;
 
-	if( numframes > 1 )
+	if (numframes > 1)
 	{
-		if( fabsf( currGaitFrame - lastGaitFrame ) > 0.001 ) {
+		if (fabsf(currGaitFrame - lastGaitFrame) > 0.001) {
 			prevGaitFrame = lastGaitFrame;
 		}
 
 		float normCurrFrame = currGaitFrame / (float)numframes;
 		float normPrevFrame = prevGaitFrame / (float)numframes;
-		f = LoopingLerp( t, normPrevFrame, normCurrFrame ) * numframes;
+		f = LoopingLerp(t, normPrevFrame, normCurrFrame) * numframes;
 		lastGaitFrame = currGaitFrame;
 	}
 	else {
@@ -2531,6 +2531,7 @@ float CStudioModelRenderer::StudioEstimateGaitFrame( mstudioseqdesc_t *pseqdesc 
 		{
 			f -= (int)(f / numframes) * numframes;
 		}
+
 		if( f < 0.0 )
 		{
 			f += numframes;
@@ -2542,11 +2543,13 @@ float CStudioModelRenderer::StudioEstimateGaitFrame( mstudioseqdesc_t *pseqdesc 
 		{
 			f = numframes - 1.001;
 		}
+
 		if( f < 0.0 )
 		{
 			f = 0.0;
 		}
 	}
+
 	return f;
 }*/
 
@@ -3889,7 +3892,7 @@ StudioSetRenderMode
 */
 void CStudioModelRenderer::StudioSetRenderMode( const int rendermode )
 {
-	pglDisable( GL_ALPHA_TEST );
+	GL_AlphaTest( GL_FALSE );
 
 	switch( rendermode )
 	{
@@ -3900,7 +3903,7 @@ void CStudioModelRenderer::StudioSetRenderMode( const int rendermode )
 		{
 			pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 			pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-			pglEnable( GL_BLEND );
+			GL_Blend( GL_TRUE );
 		}
 		break;
 	case kRenderTransAdd:
@@ -3908,14 +3911,14 @@ void CStudioModelRenderer::StudioSetRenderMode( const int rendermode )
 		pglColor4f( tr.blend, tr.blend, tr.blend, 1.0f );
 		pglBlendFunc( GL_ONE, GL_ONE );
 		GL_DepthMask( GL_FALSE );
-		pglEnable( GL_BLEND );
+		GL_Blend( GL_TRUE );
 		break;
 	default:
 		pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 		pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		pglColor4f( 1.0f, 1.0f, 1.0f, tr.blend );
 		GL_DepthMask( GL_TRUE );
-		pglEnable( GL_BLEND );
+		GL_Blend( GL_TRUE );
 		break;
 	}
 }
@@ -4198,7 +4201,7 @@ void CStudioModelRenderer::StudioDrawBones( void )
 	Vector		point;
 
 	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
-	pglDisable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_FALSE );
 
 	for( int i = 0; i < m_pStudioHeader->numbones; i++ )
 	{
@@ -4243,13 +4246,13 @@ void CStudioModelRenderer::StudioDrawBones( void )
 	}
 
 	pglPointSize( 1.0f );
-	pglEnable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_TRUE );
 }
 
 void CStudioModelRenderer::StudioDrawAttachments( void )
 {
-	pglDisable( GL_TEXTURE_2D );
-	pglDisable( GL_DEPTH_TEST );
+	GL_Texture2D( GL_FALSE );
+	GL_DepthTest( GL_FALSE );
 
 	for( int i = 0; i < m_pStudioHeader->numattachments; i++ )
 	{
@@ -4285,8 +4288,8 @@ void CStudioModelRenderer::StudioDrawAttachments( void )
 		pglPointSize( 1.0f );
 	}
 
-	pglEnable( GL_TEXTURE_2D );
-	pglEnable( GL_DEPTH_TEST );
+	GL_Texture2D( GL_TRUE );
+	GL_DepthTest( GL_TRUE );
 }
 
 /*
@@ -4298,7 +4301,7 @@ StudioSetupRenderer
 void CStudioModelRenderer::StudioSetupRenderer( int rendermode )
 {
 	pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-	pglDisable( GL_ALPHA_TEST );
+	GL_AlphaTest( GL_FALSE );
 	pglShadeModel( GL_SMOOTH );
 }
 
@@ -5542,7 +5545,7 @@ void CStudioModelRenderer::DrawViewModel( void )
 		return; // invisible ?
 
 	// hack the depth range to prevent view model from poking into walls
-	pglDepthRange( gldepthmin, gldepthmin + 0.3f * (gldepthmax - gldepthmin) );
+	GL_DepthRange( gldepthmin, gldepthmin + 0.3f * (gldepthmax - gldepthmin) );
 
 	// backface culling for left-handed weapons
 	if( CVAR_TO_BOOL( m_pCvarHand ) )
@@ -5588,7 +5591,7 @@ void CStudioModelRenderer::DrawViewModel( void )
 		StudioDrawModel( STUDIO_RENDER );
 
 	// restore depth range
-	pglDepthRange( gldepthmin, gldepthmax );
+	GL_DepthRange( gldepthmin, gldepthmax );
 
 	// backface culling for left-handed weapons
 	if( CVAR_TO_BOOL( m_pCvarHand ) )

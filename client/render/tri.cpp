@@ -176,16 +176,16 @@ void R_DrawCable( cl_entity_t *e )
 	if( RenderAmt < 1.0f )
 	{
 		GL_DepthMask( GL_FALSE );
-		pglEnable( GL_BLEND );
+		GL_Blend( GL_TRUE );
 		pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	}
 	else
 	{
-		pglDisable( GL_BLEND );
-		pglEnable( GL_DEPTH_TEST );
+		GL_Blend( GL_FALSE );
+		GL_DepthTest( GL_TRUE );
 		GL_DepthMask( GL_TRUE );
 	}
-	pglDisable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_FALSE );
 	pglDisable( GL_CULL_FACE );
 
 	pglBegin( GL_TRIANGLE_STRIP );
@@ -217,9 +217,9 @@ void R_DrawCable( cl_entity_t *e )
 	}
 	pglEnd();
 	pglEnable( GL_CULL_FACE );
-	pglEnable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_TRUE );
 	GL_DepthMask( GL_TRUE );
-	pglDisable( GL_BLEND );
+	GL_Blend( GL_FALSE );
 
 	r_stats.c_cables++;
 }

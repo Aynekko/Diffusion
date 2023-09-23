@@ -23,6 +23,27 @@ int R_GetSpriteTexture( const model_t *m_pSpriteModel, int frame )
 	return R_GetSpriteFrame( m_pSpriteModel, frame )->gl_texturenum;
 }
 
+void GL_DepthRange( GLfloat depthmin, GLfloat depthmax )
+{
+	pglDepthRange( depthmin, depthmax );
+}
+
+void GL_Texture2D( GLint enable )
+{
+	if( enable )
+		pglEnable( GL_TEXTURE_2D );
+	else
+		pglDisable( GL_TEXTURE_2D );
+}
+
+void GL_DepthTest( GLint enable )
+{
+	if( enable ) 
+		pglEnable( GL_DEPTH_TEST );
+	else 
+		pglDisable( GL_DEPTH_TEST );
+}
+
 /*
 ==============
 GL_DepthMask
@@ -30,10 +51,6 @@ GL_DepthMask
 */
 void GL_DepthMask( GLint enable )
 {
-	if( glState.depthmask == enable )
-		return;
-
-	glState.depthmask = enable;
 	pglDepthMask( enable );
 }
 
@@ -44,11 +61,10 @@ GL_AlphaTest
 */
 void GL_AlphaTest( GLint enable )
 {
-	if( pglIsEnabled( GL_ALPHA_TEST ) == enable )
-		return;
-
-	if( enable ) pglEnable( GL_ALPHA_TEST );
-	else pglDisable( GL_ALPHA_TEST );
+	if( enable )
+		pglEnable( GL_ALPHA_TEST );
+	else
+		pglDisable( GL_ALPHA_TEST );
 #if 0
 	if( enable ) pglEnable( GL_SAMPLE_ALPHA_TO_COVERAGE_ARB );
 	else pglDisable( GL_SAMPLE_ALPHA_TO_COVERAGE_ARB );
@@ -62,11 +78,10 @@ GL_Blend
 */
 void GL_Blend( GLint enable )
 {
-	if( pglIsEnabled( GL_BLEND ) == enable )
-		return;
-
-	if( enable ) pglEnable( GL_BLEND );
-	else pglDisable( GL_BLEND );
+	if( enable )
+		pglEnable( GL_BLEND );
+	else
+		pglDisable( GL_BLEND );
 }
 
 /*
@@ -77,7 +92,7 @@ GL_Cull
 void GL_Cull( GLenum cull )
 {
 	// to avoid useless OpenGL API calls
-	if (glState.faceCull == cull)
+	if( glState.faceCull == cull )
 		return;
 	
 	if( !cull )
@@ -99,6 +114,9 @@ GL_FrontFace
 */
 void GL_FrontFace( GLenum front )
 {
+//	if( glState.frontFace == front )
+//		return;
+
 	pglFrontFace( front ? GL_CW : GL_CCW );
 	glState.frontFace = front;
 }
@@ -119,7 +137,7 @@ void GL_Setup2D( void )
 	pglMatrixMode( GL_MODELVIEW );
 	pglLoadIdentity();
 
-	pglDisable( GL_DEPTH_TEST );
+	GL_DepthTest( GL_FALSE );
 	GL_AlphaTest( GL_FALSE );
 	GL_DepthMask( GL_FALSE );
 	GL_Blend( GL_FALSE );
@@ -142,7 +160,7 @@ void GL_Setup3D( void )
 	pglMatrixMode( GL_MODELVIEW );
 	GL_LoadMatrix( RI->worldviewMatrix );
 
-	pglEnable( GL_DEPTH_TEST );
+	GL_DepthTest( GL_TRUE );
 	GL_AlphaTest( GL_TRUE );
 	GL_Blend( GL_TRUE );
 	GL_DepthMask( GL_TRUE );

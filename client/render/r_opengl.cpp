@@ -790,7 +790,6 @@ static void GL_SetDefaultState( void )
 	else glState.stencilEnabled = false;
 
 	glState.frameBuffer = FBO_MAIN;
-	glState.depthmask = -1;
 }
 
 void R_CreateSpotLightTexture( void )

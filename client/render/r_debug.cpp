@@ -83,7 +83,7 @@ void DrawLightProbes( void )
 
 	GL_Blend( GL_FALSE );
 
-	pglDisable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_FALSE );
 
 	// draw the all visible probes
 	for( i = 1; i < world->numleafs; i++ )
@@ -101,7 +101,7 @@ void DrawLightProbes( void )
 	}
 
 	pglColor3f( 1.0f, 1.0f, 1.0f );
-	pglEnable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_TRUE );
 }
 
 /*
@@ -116,8 +116,8 @@ void DrawNormals( void )
 	Vector	temp;
 	float	vecLen = 4.0f;
 
-	pglDisable( GL_TEXTURE_2D );
-	pglDisable( GL_DEPTH_TEST );
+	GL_Texture2D( GL_FALSE );
+	GL_DepthTest( GL_FALSE );
 	GL_Blend( GL_FALSE );
 	pglBegin( GL_LINES );
 
@@ -144,8 +144,8 @@ void DrawNormals( void )
 	}
 
 	pglEnd();
-	pglEnable( GL_DEPTH_TEST );
-	pglEnable( GL_TEXTURE_2D );
+	GL_DepthTest( GL_TRUE );
+	GL_Texture2D( GL_TRUE );
 }
 
 void DrawWireFrame( void )
@@ -153,14 +153,14 @@ void DrawWireFrame( void )
 	if( !CVAR_TO_BOOL( r_wireframe ))
 		return;
 
-	pglEnable( GL_BLEND );
+	GL_Blend( GL_TRUE );
 	pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	pglPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 	pglColor4f( 1.0f, 1.0f, 1.0f, 0.99f ); 
 
-	pglDisable( GL_DEPTH_TEST );
+	GL_DepthTest( GL_FALSE );
 	pglEnable( GL_LINE_SMOOTH );
-	pglDisable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_FALSE );
 	pglEnable( GL_POLYGON_SMOOTH );
 	pglHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
 	pglHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
@@ -201,15 +201,15 @@ void DrawWireFrame( void )
 	pglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 	pglDisable( GL_POLYGON_SMOOTH );
 	pglDisable( GL_LINE_SMOOTH );
-	pglEnable( GL_TEXTURE_2D );
-	pglEnable( GL_DEPTH_TEST );
-	pglDisable( GL_BLEND );
+	GL_Texture2D( GL_TRUE );
+	GL_DepthTest( GL_TRUE );
+	GL_Blend( GL_FALSE );
 }
 
 // debug thing
 void R_DrawScissorRectangle( float x, float y, float w, float h )
 {
-	pglDisable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_FALSE );
 	GL_Setup2D();
 
 	pglColor3f( 1, 0.5, 0 );
@@ -225,7 +225,7 @@ void R_DrawScissorRectangle( float x, float y, float w, float h )
 		pglVertex2f( x + w, y + h );
 	pglEnd();
 
-	pglEnable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_TRUE );
 	GL_Setup3D();
 }
 
@@ -242,7 +242,7 @@ void DBG_DrawBBox( const Vector &mins, const Vector &maxs, Vector color )
 	}
 
 	pglColor4f( color.x / 255.0f, color.y / 255.0f, color.z / 255.0f, 1.0f );
-	pglDisable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_FALSE );
 	pglBegin( GL_LINES );
 
 	for( i = 0; i < 2; i += 1 )
@@ -263,7 +263,7 @@ void DBG_DrawBBox( const Vector &mins, const Vector &maxs, Vector color )
 
 	pglEnd();
 
-	pglEnable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_TRUE );
 }
 
 void R_DrawLightScissors( void )

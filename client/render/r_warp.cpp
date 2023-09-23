@@ -434,8 +434,8 @@ void R_DrawSkyBox( void )
 	if( FBitSet( RI->params, RP_SKYBOXRENDERED ) )
 		return;
 
-	pglDisable( GL_BLEND );
-	pglDisable( GL_ALPHA_TEST );
+	GL_Blend( GL_FALSE );
+	GL_AlphaTest( GL_FALSE );
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
 	// make sure that light_environment is present

@@ -1537,7 +1537,7 @@ void R_DrawGrass( qboolean lightpass )
 	}
 
 	GL_Cull( GL_NONE );
-	pglEnable( GL_ALPHA_TEST );
+	GL_AlphaTest( GL_TRUE );
 	pglAlphaFunc( GL_GREATER, bound( 0.0f, r_grass_alpha->value, 1.0f ));
 //	GL_Cull( GL_NONE );
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
@@ -1592,7 +1592,7 @@ void R_DrawGrass( qboolean lightpass )
 	pglDisableClientState( GL_VERTEX_ARRAY );
 	tr.num_draw_grass = tr.num_light_grass = 0;
 
-	pglDisable( GL_ALPHA_TEST );
+	GL_AlphaTest( GL_FALSE );
 	GL_Cull( GL_FRONT );
 }
 

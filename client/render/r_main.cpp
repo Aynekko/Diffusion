@@ -110,7 +110,7 @@ void R_DrawCubeMaps(void)
 	if (!CVAR_TO_BOOL(r_show_cubemaps))
 		return;
 
-	GL_Blend(GL_FALSE);
+	GL_Blend( GL_FALSE );
 	GL_Bind(GL_TEXTURE0, tr.whiteTexture);
 	pglTexEnvf(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
 
@@ -831,7 +831,7 @@ static void R_Clear( int bitMask )
 		gldepthmax = 1.0f;
 	}
 
-	pglDepthRange( gldepthmin, gldepthmax );
+	GL_DepthRange( gldepthmin, gldepthmax );
 }
 
 
@@ -845,9 +845,9 @@ void R_RestoreGLState( void )
 	pglMatrixMode( GL_MODELVIEW );
 	GL_LoadMatrix( RI->worldviewMatrix );
 
-	pglEnable( GL_DEPTH_TEST );
-	pglDepthMask( GL_TRUE );
-	pglDisable( GL_BLEND );
+	GL_DepthTest( GL_TRUE );
+	GL_DepthMask( GL_TRUE );
+	GL_Blend( GL_FALSE );
 	GL_Cull( GL_FRONT );
 }
 
@@ -1109,8 +1109,8 @@ static void R_SetupGL( void )
 
 	GL_Cull( GL_FRONT );
 
-	pglDisable( GL_BLEND );
-	pglDisable( GL_ALPHA_TEST );
+	GL_Blend( GL_FALSE );
+	GL_AlphaTest( GL_FALSE );
 	pglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
 }
 
@@ -1992,14 +1992,14 @@ void R_RenderDebugSurface( void )
 		R_RotateForEntity( ent );
 	else R_TranslateForEntity( ent );
 
-	pglEnable( GL_BLEND );
+	GL_Blend( GL_TRUE );
 	pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	pglPolygonMode( GL_FRONT_AND_BACK, GL_LINE );
 	pglColor4f( 0.5f, 1.0f, 0.36f, 0.99f ); 
-	pglDisable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_FALSE );
 	pglLineWidth( 2.0f );
 
-	pglDisable( GL_DEPTH_TEST );
+	GL_DepthTest( GL_FALSE );
 	pglEnable( GL_LINE_SMOOTH );
 	pglEnable( GL_POLYGON_SMOOTH );
 	pglHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
@@ -2015,12 +2015,12 @@ void R_RenderDebugSurface( void )
 	}
 	pglEnd();
 
-	pglEnable( GL_TEXTURE_2D );
+	GL_Texture2D( GL_TRUE );
 	pglPolygonMode( GL_FRONT_AND_BACK, GL_FILL );
 	pglDisable( GL_POLYGON_SMOOTH );
 	pglDisable( GL_LINE_SMOOTH );
-	pglEnable( GL_DEPTH_TEST );
-	pglDisable( GL_BLEND );
+	GL_DepthTest( GL_TRUE );
+	GL_Blend( GL_FALSE );
 	pglLineWidth( 1.0f );
 	R_LoadIdentity ();
 }

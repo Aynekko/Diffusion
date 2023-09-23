@@ -597,20 +597,19 @@ typedef enum
 
 typedef struct
 {
-	int		width, height;
-	qboolean		fullScreen;
-	qboolean		wideScreen;
+	int width, height;
+	qboolean fullScreen;
+	qboolean wideScreen;
 
-	int		faceCull;
-	int		frontFace;
-	int		frameBuffer;
-	GLint		depthmask;
+	int	faceCull;
+	int	frontFace;
+	int	frameBuffer;
 
-	qboolean		drawTrans;		// FIXME: get rid of this
-	qboolean		stencilEnabled;
+	qboolean drawTrans;		// FIXME: get rid of this
+	qboolean stencilEnabled;
 
-	ref_instance_t	stack[MAX_REF_STACK];
-	GLuint		stack_position;
+	ref_instance_t stack[MAX_REF_STACK];
+	GLuint stack_position;
 } glState_t;
 
 typedef struct
@@ -683,6 +682,9 @@ void GL_CleanupDrawState( void );
 void GL_CleanupAllTextureUnits( void );
 void GL_AlphaToCoverage( bool enable );
 bool GL_UsingAlphaToCoverage( void );
+void GL_DepthRange( GLfloat depthmin, GLfloat depthmax );
+void GL_DepthTest( GLint enable );
+void GL_Texture2D( GLint enable );
 
 //
 // r_cull.cpp

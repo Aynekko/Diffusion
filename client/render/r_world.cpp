@@ -75,20 +75,10 @@ void LoadMaterialSettingsForTexture( int texnum )
 	tr.materials[texnum].ApplyColor = false;
 	tr.materials[texnum].Fresnel = 4.0f;
 
-	// free textures, if present
-	if( tr.materials[texnum].gl_normalmap_id > 0 )
-		FREE_TEXTURE( tr.materials[texnum].gl_normalmap_id );
 	tr.materials[texnum].gl_normalmap_id = 0;
-
-	if( tr.materials[texnum].gl_interiormap_id > 0 )
-		FREE_TEXTURE( tr.materials[texnum].gl_interiormap_id );
 	tr.materials[texnum].gl_interiormap_id = 0;
-
-	if( tr.materials[texnum].gl_colormask_id > 0 )
-		FREE_TEXTURE( tr.materials[texnum].gl_colormask_id );
 	tr.materials[texnum].gl_colormask_id = 0;
-
-	tr.materials[texnum].gl_fallbacktex_id = 0; // this doesn't need to be freed, it can be something else's texture
+	tr.materials[texnum].gl_fallbacktex_id = 0;
 
 	strcpy_s( tr.materials[texnum].normalmap_name, "0" );
 
@@ -2064,7 +2054,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 	int	startv, endv;
 
 	if( e->curstate.rendermode == kRenderTransAlpha )
-		pglEnable( GL_ALPHA_TEST );
+		GL_AlphaTest( GL_TRUE );
 	pglBlendFunc( GL_ONE, GL_ONE );
 	startv = MAX_MAP_ELEMS;
 	numTempElems = 0;
@@ -2880,51 +2870,51 @@ static int R_TransSurfaceCompare( const gl_bmodelface_t *a, const gl_bmodelface_
 
 void R_SetRenderMode( cl_entity_t *e )
 {
-	pglDisable( GL_ALPHA_TEST );
-	pglDepthMask( GL_TRUE );
+	GL_AlphaTest( GL_FALSE );
+	GL_DepthMask( GL_TRUE );
 
 	switch( e->curstate.rendermode )
 	{
 	case kRenderNormal:
 		pglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-		pglDisable( GL_BLEND );
+		GL_Blend( GL_FALSE );
 		break;
 	case kRenderTransColor:
 		pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		pglColor4ub( e->curstate.rendercolor.r, e->curstate.rendercolor.g, e->curstate.rendercolor.b, e->curstate.renderamt );
 		pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-		pglDisable( GL_TEXTURE_2D );
-		pglEnable( GL_BLEND );
+		GL_Texture2D( GL_FALSE );
+		GL_Blend( GL_TRUE );
 		break;
 	case kRenderTransAdd:
 		pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 		pglColor4f( tr.blend, tr.blend, tr.blend, 1.0f );
 		pglBlendFunc( GL_ONE, GL_ONE );
-		pglDepthMask( GL_FALSE );
-		pglEnable( GL_BLEND );
+		GL_DepthMask( GL_FALSE );
+		GL_Blend( GL_TRUE );
 		break;
 	case kRenderTransAlpha:
-		pglEnable( GL_ALPHA_TEST );
+		GL_AlphaTest( GL_TRUE );
 		pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 		pglColor4f( 1.0f, 1.0f, 1.0f, 1.0f );
-		pglDisable( GL_BLEND );
+		GL_Blend( GL_FALSE );
 		pglAlphaFunc( GL_GREATER, 0.25f );
 		break;
 	default:
 		pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 		pglBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		pglColor4f( 1.0f, 1.0f, 1.0f, tr.blend );
-		pglDepthMask( GL_FALSE );
+		GL_DepthMask( GL_FALSE );
 
 		if( e->curstate.skin == CONTENTS_WATER )
 		{
 			if( e->curstate.renderfx == kRenderFxNoRefraction || (gl_water_refraction->value == 0) )
-				pglEnable( GL_BLEND ); // default half-life water
+				GL_Blend( GL_TRUE ); // default half-life water
 			else
-				pglDisable( GL_BLEND );
+				GL_Blend( GL_FALSE );
 		}
 		else
-			pglEnable( GL_BLEND );
+			GL_Blend( GL_TRUE );
 		break;
 	}
 }
@@ -3024,9 +3014,9 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 	if( e->curstate.rendermode == kRenderTransAlpha ) // diffusion - some fixes. Must be re-checked. FIXME
 		pglAlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	else if( e->curstate.rendermode == kRenderTransAdd )
-		pglDepthMask( GL_TRUE );
+		GL_DepthMask( GL_TRUE );
 	else if( e->curstate.rendermode == kRenderTransTexture || e->curstate.rendermode == kRenderFade )
-		pglDepthMask( GL_TRUE );
+		GL_DepthMask( GL_TRUE );
 
 	R_LoadIdentity();	// restore worldmatrix
 }
