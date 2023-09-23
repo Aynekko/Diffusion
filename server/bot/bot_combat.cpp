@@ -266,11 +266,11 @@ CBaseEntity * CBot::BotFindEnemy( void )
 		{
 			if( !pTurret->IsAlive() )
 				continue;
-			
+
 			// bot's turret
 			if( pTurretOwner == this )
 				continue;
-			
+
 			if( g_pGameRules->IsTeamplay() )
 			{
 				// don't target your teammates if team names match...
@@ -293,6 +293,8 @@ CBaseEntity * CBot::BotFindEnemy( void )
 				pBotUser = NULL;  // don't follow user when enemy found
 			}
 		}
+		else
+			continue;
 	}
 
 	if (pNewEnemy)

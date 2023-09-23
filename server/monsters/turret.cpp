@@ -96,6 +96,7 @@ public:
 	virtual void Shoot(Vector &vecSrc, Vector &vecDirToEnemy) { };
 
 	void SetEnemy( CBaseEntity *enemy );
+	CBaseEntity *AcquireTarget(void);
 
 	float m_flMaxSpin;		// Max time to spin the barrel w/o a target
 	int m_iSpin;
@@ -534,6 +535,101 @@ void CBaseTurret::EyeOff( )
 	}
 }
 
+CBaseEntity *CBaseTurret::AcquireTarget(void)
+{
+	Look( TURRET_RANGE );
+	CBaseEntity *pEnemy = BestVisibleEnemy();
+	if( !pEnemy )
+	{
+		// special case for player's turret and deathmatch mode
+		if( FClassnameIs( this, "_playersentry" ) && g_pGameRules->IsMultiplayer() )
+		{
+			int iDist = 0;
+			int iNearest = 8192;
+			CBaseEntity *pOwner = NULL;
+			if( pev->owner != NULL )
+				pOwner = CBaseEntity::Instance( pev->owner );
+			if( pOwner )
+			{
+				for( int i = 1; i <= gpGlobals->maxClients; i++ )
+				{
+					CBaseEntity *pEnt = UTIL_PlayerByIndex( i );
+					if( !pEnt || !pEnt->IsPlayer() )
+						continue;
+
+					if( pOwner == pEnt )
+						continue;
+
+					if( !pEnt->IsAlive() )
+						continue;
+
+					if( g_pGameRules->IsTeamplay() )
+					{
+						// don't target your teammates
+						if( UTIL_TeamsMatch( g_pGameRules->GetTeamID( pOwner ), g_pGameRules->GetTeamID( pEnt ) ) )
+							continue;
+					}
+
+					if( !FVisible( pEnt->GetAbsOrigin() ) )
+						continue;
+
+					iDist = (pEnt->GetAbsOrigin() - GetAbsOrigin()).Length();
+					if( iDist <= iNearest )
+					{
+						iNearest = iDist;
+						pEnemy = pEnt;
+					}
+				}
+			}
+
+			// still no enemy? now perform search for turrets.
+			if( !pEnemy )
+			{
+				CBaseEntity *pTurret = NULL;
+				while( (pTurret = UTIL_FindEntityByClassname( pTurret, "_playersentry" )) != NULL )
+				{
+					if( pTurret == this )
+						continue;
+
+					// get the owner - player
+					CBaseEntity *pTurretOwner = CBaseEntity::Instance( pTurret->pev->owner );
+					if( pTurretOwner )
+					{
+						if( !pTurret->IsAlive() )
+							continue;
+
+						// my turret
+						if( pOwner && pTurretOwner == pOwner )
+							continue;
+
+						if( g_pGameRules->IsTeamplay() )
+						{
+							// don't target your teammates if team names match...
+							if( UTIL_TeamsMatch( g_pGameRules->GetTeamID( this ), g_pGameRules->GetTeamID( pTurretOwner ) ) )
+								continue;
+						}
+
+						// it's an enemy turret
+						if( FInViewCone( &pTurret->EyePosition() ) && FVisible( pTurret->EyePosition() ) )
+						{
+							float turret_distance = (pTurret->pev->origin - pev->origin).Length();
+							// this turret is farther then current enemy player
+							if( turret_distance > iNearest )
+								continue;
+
+							iNearest = turret_distance;
+							pEnemy = pTurret;
+						}
+					}
+					else
+						continue;
+				}
+			}
+		}
+	}
+
+	return pEnemy;
+}
 
 void CBaseTurret::ActiveThink(void)
 {
@@ -688,21 +784,21 @@ void CBaseTurret::ActiveThink(void)
 
 void CTurret::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
 {
-	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_12MM, 1 );
-	EMIT_SOUND(ENT(pev), CHAN_WEAPON, "turret/tu_fire1.wav", 1, 0.6);
+	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_12MM, 1, 0, VARS(pev->owner) );
+	EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "turret/tu_fire1.wav", 1, 0.6, 0, RANDOM_LONG( 95, 105 ) );
 	pev->effects |= EF_MUZZLEFLASH;
 }
 
 
 void CMiniTurret::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
 {
-	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_9MM, 1 );
+	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_9MM, 1, 0, VARS( pev->owner ) );
 
 	switch(RANDOM_LONG(0,2))
 	{
-	case 0: EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/hks1.wav", 1, ATTN_NORM); break;
-	case 1: EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/hks2.wav", 1, ATTN_NORM); break;
-	case 2: EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/hks3.wav", 1, ATTN_NORM); break;
+	case 0: EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/hks1.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+	case 1: EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/hks2.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+	case 2: EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/hks3.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
 	}
 	pev->effects |= EF_MUZZLEFLASH;
 }
@@ -710,7 +806,7 @@ void CMiniTurret::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
 
 void CBaseTurret::Deploy(void)
 {
-	pev->nextthink = gpGlobals->time + 0.1;
+	SetNextThink( 0.1 );
 	StudioFrameAdvance( );
 
 	if (pev->sequence != TURRET_ANIM_DEPLOY)
@@ -752,7 +848,7 @@ void CBaseTurret::Retire(void)
 	m_vecGoalAngles.x = 0;
 	m_vecGoalAngles.y = m_flStartYaw;
 
-	pev->nextthink = gpGlobals->time + 0.1;
+	SetNextThink( 0.1 );
 
 	StudioFrameAdvance( );
 
@@ -806,7 +902,7 @@ void CTurret::SpinUpCall(void)
 		// for the first pass, spin up the the barrel
 		if (!m_iStartSpin)
 		{
-			pev->nextthink = gpGlobals->time + 1.0; // spinup delay
+			SetNextThink( 1.0 ); // spinup delay
 			EMIT_SOUND(ENT(pev), CHAN_BODY, "turret/tu_spinup.wav", TURRET_MACHINE_VOLUME, ATTN_NORM);
 			m_iStartSpin = 1;
 			pev->framerate = 0.1;
@@ -814,7 +910,7 @@ void CTurret::SpinUpCall(void)
 		// after the barrel is spun up, turn on the hum
 		else if (pev->framerate >= 1.0)
 		{
-			pev->nextthink = gpGlobals->time + 0.1; // retarget delay
+			SetNextThink( 0.1 ); // retarget delay
 			EMIT_SOUND(ENT(pev), CHAN_STATIC, "turret/tu_active2.wav", TURRET_MACHINE_VOLUME, ATTN_NORM);
 			SetThink(&CBaseTurret::ActiveThink);
 			m_iStartSpin = 0;
@@ -916,97 +1012,8 @@ void CBaseTurret::SearchThink(void)
 
 	// Acquire Target
 	if (m_hEnemy == NULL)
-	{
-		Look(TURRET_RANGE);
-		CBaseEntity *pEnemy = BestVisibleEnemy();
-		if( !pEnemy )
-		{
-			// special case for player's turret and deathmatch mode
-			if( FClassnameIs( this, "_playersentry" ) && g_pGameRules->IsMultiplayer() )
-			{
-				int iDist = 0;
-				int iNearest = 8192;
-				CBaseEntity *pOwner = NULL;
-				if( pev->owner != NULL )
-					pOwner = CBaseEntity::Instance( pev->owner );
-				if( pOwner )
-				{
-					for( int i = 1; i <= gpGlobals->maxClients; i++ )
-					{
-						CBaseEntity *pEnt = UTIL_PlayerByIndex( i );
-						if( !pEnt || !pEnt->IsPlayer() )
-							continue;
-
-						if( pOwner == pEnt )
-							continue;
-
-						if( !pEnt->IsAlive() )
-							continue;
-
-						if( g_pGameRules->IsTeamplay() )
-						{
-							// don't target your teammates
-							if( UTIL_TeamsMatch( g_pGameRules->GetTeamID( pOwner ), g_pGameRules->GetTeamID( pEnt ) ) )
-								continue;
-						}
-
-						if( !FVisible( pEnt->GetAbsOrigin() ) )
-							continue;
-
-						iDist = (pEnt->GetAbsOrigin() - GetAbsOrigin()).Length();
-						if( iDist <= iNearest )
-						{
-							iNearest = iDist;
-							pEnemy = pEnt;
-						}
-					}
-				}
-
-				// still no enemy? now perform search for turrets.
-				if( !pEnemy )
-				{
-					CBaseEntity *pTurret = NULL;
-					while( (pTurret = UTIL_FindEntityByClassname( pTurret, "_playersentry" )) != NULL )
-					{
-						if( pTurret == this )
-							continue;
-						
-						// get the owner - player
-						CBaseEntity *pTurretOwner = CBaseEntity::Instance( pTurret->pev->owner );
-						if( pTurretOwner )
-						{
-							if( !pTurret->IsAlive() )
-								continue;
-
-							// my turret
-							if( pTurretOwner == this )
-								continue;
-
-							if( g_pGameRules->IsTeamplay() )
-							{
-								// don't target your teammates if team names match...
-								if( UTIL_TeamsMatch( g_pGameRules->GetTeamID( this ), g_pGameRules->GetTeamID( pTurretOwner ) ) )
-									continue;
-							}
-
-							// it's an enemy turret
-							if( FInViewCone( &pTurret->EyePosition() ) && FVisible( pTurret->EyePosition() ) )
-							{
-								float turret_distance = (pTurret->pev->origin - pev->origin).Length();
-								// this turret is farther then current enemy player
-								if( turret_distance > iNearest )
-									continue;
-
-								iNearest = turret_distance;
-								pEnemy = pTurret;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		SetEnemy( pEnemy );
+	{	
+		SetEnemy( AcquireTarget() );
 	}
 
 	// If we've found a target, spin up the barrel and start to attack
@@ -1061,96 +1068,7 @@ void CBaseTurret::AutoSearchThink(void)
 	// Acquire Target
 	if( m_hEnemy == NULL )
 	{
-		Look( TURRET_RANGE );
-		CBaseEntity *pEnemy = BestVisibleEnemy();
-		if( !pEnemy )
-		{
-			// special case for player's turret and deathmatch mode
-			if( FClassnameIs( this, "_playersentry" ) && g_pGameRules->IsMultiplayer() )
-			{
-				int iDist = 0;
-				int iNearest = 8192;
-				CBaseEntity *pOwner = NULL;
-				if( pev->owner != NULL )
-					pOwner = CBaseEntity::Instance( pev->owner );
-				if( pOwner )
-				{
-					for( int i = 1; i <= gpGlobals->maxClients; i++ )
-					{
-						CBaseEntity *pEnt = UTIL_PlayerByIndex( i );
-						if( !pEnt || !pEnt->IsPlayer() )
-							continue;
-
-						if( pOwner == pEnt )
-							continue;
-
-						if( !pEnt->IsAlive() )
-							continue;
-
-						if( g_pGameRules->IsTeamplay() )
-						{
-							// don't target your teammates
-							if( UTIL_TeamsMatch( g_pGameRules->GetTeamID( pOwner ), g_pGameRules->GetTeamID( pEnt ) ) )
-								continue;
-						}
-
-						if( !FVisible( pEnt->GetAbsOrigin() ) )
-							continue;
-
-						iDist = (pEnt->GetAbsOrigin() - GetAbsOrigin()).Length();
-						if( iDist <= iNearest )
-						{
-							iNearest = iDist;
-							pEnemy = pEnt;
-						}
-					}
-				}
-
-				// still no enemy? now perform search for turrets.
-				if( !pEnemy )
-				{
-					CBaseEntity *pTurret = NULL;
-					while( (pTurret = UTIL_FindEntityByClassname( pTurret, "_playersentry" )) != NULL )
-					{
-						if( pTurret == this )
-							continue;
-						
-						// get the owner - player
-						CBaseEntity *pTurretOwner = CBaseEntity::Instance( pTurret->pev->owner );
-						if( pTurretOwner )
-						{
-							if( !pTurret->IsAlive() )
-								continue;
-
-							// my turret
-							if( pTurretOwner == this )
-								continue;
-
-							if( g_pGameRules->IsTeamplay() )
-							{
-								// don't target your teammates if team names match...
-								if( UTIL_TeamsMatch( g_pGameRules->GetTeamID( this ), g_pGameRules->GetTeamID( pTurretOwner ) ) )
-									continue;
-							}
-
-							// it's an enemy turret
-							if( FInViewCone( &pTurret->EyePosition() ) && FVisible( pTurret->EyePosition() ) )
-							{
-								float turret_distance = (pTurret->pev->origin - pev->origin).Length();
-								// this turret is farther then current enemy player
-								if( turret_distance > iNearest )
-									continue;
-
-								iNearest = turret_distance;
-								pEnemy = pTurret;
-							}
-						}
-					}
-				}
-			}
-		}
-
-		SetEnemy( pEnemy );
+		SetEnemy( AcquireTarget() );
 	}
 
 	if (m_hEnemy != NULL)
@@ -1536,16 +1454,16 @@ void CSentry::Spawn()
 
 void CSentry::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
 {
-	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_MP5, 1 );
+	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_MP5, 1, 0, VARS( pev->owner ) );
 	CSoundEnt::InsertSound ( bits_SOUND_COMBAT, GetAbsOrigin(), 768, 0.3, ENTINDEX(edict()) );
 
 //	ALERT(at_console, "SentryAmmoClip %3d\n", SentryAmmoClip);
 	
 	switch(RANDOM_LONG(0,2))
 	{
-	case 0: EMIT_SOUND(ENT(pev), CHAN_WEAPON, "turret/shoot1.wav", 1, ATTN_NORM); break;
-	case 1: EMIT_SOUND(ENT(pev), CHAN_WEAPON, "turret/shoot2.wav", 1, ATTN_NORM); break;
-	case 2: EMIT_SOUND(ENT(pev), CHAN_WEAPON, "turret/shoot3.wav", 1, ATTN_NORM); break;
+	case 0: EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "turret/shoot1.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+	case 1: EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "turret/shoot2.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+	case 2: EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "turret/shoot3.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
 	}
 
 	pev->effects |= EF_MUZZLEFLASH;

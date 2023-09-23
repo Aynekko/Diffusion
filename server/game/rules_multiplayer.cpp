@@ -1087,7 +1087,7 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 	// add hp bonus
 	if( mp_healthbonus.value > 0 )
 	{
-		if( pTheKiller->IsAlive() )
+		if( pTheKiller && pTheKiller->IsAlive() )
 			pTheKiller->pev->health += mp_healthbonus.value;
 	}
 
