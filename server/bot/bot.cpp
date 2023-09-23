@@ -2274,11 +2274,38 @@ void CBot::BotThink( void )
 				// look for enemies
 				if( camping_turn_time < gpGlobals->time )
 				{
+					Vector LookVector = pev->v_angle;
 					if( RANDOM_LONG( 0, 1 ) == 1 )
-						pev->ideal_yaw += RANDOM_LONG( 20, 50 );
+						LookVector[YAW] += RANDOM_LONG( 20, 50 );
 					else
-						pev->ideal_yaw -= RANDOM_LONG( 20, 50 );
+						LookVector[YAW] -= RANDOM_LONG( 20, 50 );
+					
+					// do not look at wall
+					TraceResult tr;
+					int degrees = 0;
+					while( degrees < 360 )
+					{
+						UTIL_MakeVectors( LookVector );
+						const Vector start = pev->origin + pev->view_ofs;
+						const Vector end = start + gpGlobals->v_forward * 1000;
+						UTIL_TraceLine( start, end, dont_ignore_monsters, ENT( pev ), &tr );
+						float view_distance = (start - tr.vecEndPos).Length();
+						if( view_distance > 900 )
+							break;
 
+						degrees += 15;
+						LookVector[YAW] += 15;
+						if( degrees >= 360 )
+						{
+							IsCamping = false;
+							f_duck_release_time = 0;
+							next_camping_time = gpGlobals->time + RANDOM_LONG( 10, 20 );
+							ALERT( at_console, "Bad bot camping spot at %i %i %i, check waypoint\n", (int)pev->origin.x, (int)pev->origin.y, (int)pev->origin.z );
+						}
+					}
+					//ALERT( at_console, "bot camping turn attempts: %i\n", degrees / 15 );
+
+					pev->ideal_yaw = LookVector[YAW];
 					BotFixIdealYaw();
 					camping_turn_time = gpGlobals->time + RANDOM_FLOAT( 1.5f, 4.0f );
 				}
