@@ -2180,7 +2180,8 @@ void R_DrawLightForSurfList( plight_t *pl )
 			if( FBitSet( s->flags, SURF_LANDSCAPE ) && land && land->terrain )
 			{
 				GL_Bind( GL_TEXTURE5, land->terrain->indexmap.gl_heightmap_id );
-				GL_Bind( GL_TEXTURE6, land->terrain->layermap.gl_normalmap_id );
+				if( land->terrain->layermap.gl_normalmap_id > 0 )
+					GL_Bind( GL_TEXTURE6, land->terrain->layermap.gl_normalmap_id );
 			}
 
 			if( FBitSet( s->flags, SURF_LANDSCAPE ) && land && land->terrain )

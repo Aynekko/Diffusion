@@ -1701,10 +1701,13 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 
 	if( CVAR_TO_BOOL(gl_bump) )
 	{
-		if( FBitSet( s->flags, SURF_LANDSCAPE ) && landscape && landscape->terrain && landscape->terrain->layermap.gl_normalmap_id != 0 )
+		if( FBitSet( s->flags, SURF_LANDSCAPE ) )
 		{
-			GL_AddShaderDirective( options, "BMODEL_BUMP" );
-			GL_EncodeNormal( options, landscape->terrain->layermap.gl_normalmap_id );
+			if( landscape && landscape->terrain && landscape->terrain->layermap.gl_normalmap_id > 0 )
+			{
+				GL_AddShaderDirective( options, "BMODEL_BUMP" );
+				GL_EncodeNormal( options, landscape->terrain->layermap.gl_normalmap_id );
+			}
 		}
 		else if( tr.materials[tx->gl_texturenum].gl_normalmap_id > 0 )
 		{
@@ -1819,10 +1822,13 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 
 	if( CVAR_TO_BOOL( gl_bump ) )
 	{
-		if( FBitSet( s->flags, SURF_LANDSCAPE ) && landscape && landscape->terrain && landscape->terrain->layermap.gl_normalmap_id != 0 )
+		if( FBitSet( s->flags, SURF_LANDSCAPE ) )
 		{
-			GL_AddShaderDirective( options, "BMODEL_BUMP" );
-			GL_EncodeNormal( options, landscape->terrain->layermap.gl_normalmap_id );
+			if( landscape && landscape->terrain && landscape->terrain->layermap.gl_normalmap_id > 0 )
+			{
+				GL_AddShaderDirective( options, "BMODEL_BUMP" );
+				GL_EncodeNormal( options, landscape->terrain->layermap.gl_normalmap_id );
+			}
 		}
 		else if( tr.materials[tx->gl_texturenum].gl_normalmap_id > 0 )
 		{
