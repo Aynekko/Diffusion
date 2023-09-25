@@ -194,7 +194,7 @@ void R_DrawCable( cl_entity_t *e )
 		if( j == 0 ){ VectorSubtract( vpoints[0], vpoints[1], vTangent ); }
 		else { VectorSubtract( vpoints[0], vpoints[j], vTangent ); }
 
-		VectorSubtract( vpoints[j], tr.viewparams.vieworg, vDir );
+		VectorSubtract( vpoints[j], RI->vieworg, vDir );
 		vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
 
 		GL_Color4f( Color.x, Color.y, Color.z, RenderAmt );
