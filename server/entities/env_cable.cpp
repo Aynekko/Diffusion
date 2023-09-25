@@ -9,6 +9,8 @@
 //==========================================================================
 // env_cable + env_cable_manager
 
+// pev->message = cable group
+
 class CEnvCable : public CPointEntity
 {
 	DECLARE_CLASS( CEnvCable, CPointEntity );
@@ -179,7 +181,7 @@ void CEnvCable::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 }
 
 //======================================================
-// affects cable with new sway values
+// affects cable group with new sway values
 // fuser1 - off value
 // fuser2 - on value
 // overrides fuser3 value in the cables
@@ -201,6 +203,12 @@ LINK_ENTITY_TO_CLASS( env_cable_manager, CEnvCableManager );
 void CEnvCableManager::Spawn( void )
 {
 	m_iState = STATE_OFF;
+
+	if( FStringNull( pev->message ) )
+	{
+		ALERT( at_warning, "env_cable_manager doesn't have cable group set. Removed.\n" );
+		UTIL_Remove( this );
+	}
 }
 
 void CEnvCableManager::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -236,11 +244,12 @@ void CEnvCableManager::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 		}
 	}
 
-	while( (pCable = UTIL_FindEntityByTargetname( pCable, STRING( pev->target ), pActivator )) != NULL )
+	while( (pCable = UTIL_FindEntityByClassname( pCable, "env_cable" )) != NULL )
 	{
-		if( pCable->pev->iuser3 != -669 )
+		// this cable doesn't belong to the cable group we need
+		if( pCable->pev->message != pev->message )
 			continue;
-
+			
 		if( HasSpawnFlags( SF_CABLEMANAGER_USECABLEVALUE_ON ) && (m_iState == STATE_ON) )
 			pCable->pev->fuser3 = pCable->m_flGaitYaw;
 		else if( HasSpawnFlags( SF_CABLEMANAGER_USECABLEVALUE_OFF ) && (m_iState == STATE_OFF) )
@@ -248,4 +257,6 @@ void CEnvCableManager::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 		else
 			pCable->pev->fuser3 = NewValue;
 	}
+
+	UTIL_FireTargets( GetTarget(), pActivator, pCaller, useType, value );
 }
