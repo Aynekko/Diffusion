@@ -144,7 +144,7 @@ void ProcessRain( void )
 			}
 
 			// diffusion - add steam/smoke particle
-			bool SmokeParticle = (RANDOM_LONG(0,10) == 3);
+			bool SmokeParticle = (RANDOM_LONG(0,8) == 3);
 			if( SmokeParticle && (Rain.weatherMode == MODE_RAIN ) )
 			{
 				CQuakePart rainsmoke;
@@ -154,7 +154,7 @@ void ProcessRain( void )
 				rainsmoke.m_vecAccel = g_vecZero;
 				rainsmoke.m_vecColor = Vector( 1, 1, 1 );
 				rainsmoke.m_vecColorVelocity = g_vecZero;
-				rainsmoke.m_flAlpha = 0.15;
+				rainsmoke.m_flAlpha = 0.25;
 				rainsmoke.m_flStartAlpha = 0;
 				rainsmoke.m_flAlphaVelocity = -0.1;
 				rainsmoke.m_flRadius = RANDOM_LONG( 20, 50 );
@@ -162,7 +162,7 @@ void ProcessRain( void )
 				rainsmoke.m_flLength = 1;
 				rainsmoke.m_flLengthVelocity = 0;
 				rainsmoke.m_flRotation = RANDOM_LONG( 0, 359 );
-				rainsmoke.m_flRotationVelocity = RANDOM_LONG( -25, 25 );
+				rainsmoke.m_flRotationVelocity = RANDOM_LONG( -20, 20 );
 				rainsmoke.m_flDistance = 700;
 				rainsmoke.ParticleType = TYPE_SMOKE;
 				rainsmoke.EntIndex = 0;
