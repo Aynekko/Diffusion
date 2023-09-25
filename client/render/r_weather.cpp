@@ -166,6 +166,7 @@ void ProcessRain( void )
 				rainsmoke.m_flDistance = 700;
 				rainsmoke.ParticleType = TYPE_SMOKE;
 				rainsmoke.EntIndex = 0;
+				rainsmoke.m_flDieTime = 0;
 				g_pParticles.AddParticle( &rainsmoke, g_pParticles.m_hSmoke, FPART_FADEIN | FPART_VERTEXLIGHT );
 			}
 			

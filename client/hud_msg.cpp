@@ -979,6 +979,7 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 					bullet_p.m_flDistance = 1000;
 					bullet_p.ParticleType = TYPE_SMOKE_NOTINWATER;
 					bullet_p.EntIndex = 0;
+					bullet_p.m_flDieTime = 0;
 					g_pParticles.AddParticle( &bullet_p, g_pParticles.m_hSmoke, FPART_NOTWATER | FPART_VERTEXLIGHT );
 				}
 				else if( gunshot_particle == 2 )

@@ -128,6 +128,7 @@ void CHud::Think( void )
 		breath.m_flDistance = 0;
 		breath.ParticleType = TYPE_SMOKE;
 		breath.EntIndex = 0;
+		breath.m_flDieTime = 0;
 		g_pParticles.AddParticle( &breath, g_pParticles.m_hSmoke, FPART_NOTWATER );
 
 		lastbreathtime = tr.time;
