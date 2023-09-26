@@ -213,7 +213,7 @@ CBaseEntity * CBot::BotFindEnemy( void )
    // search the world for players...
    for (i = 1; i <= gpGlobals->maxClients; i++)
    {
-	  CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
+	  CBasePlayer *pPlayer = (CBasePlayer*)UTIL_PlayerByIndex( i );
 
 	  // skip invalid players and skip self (i.e. this bot)
 	  if ((!pPlayer) || (pPlayer == this))
@@ -230,6 +230,10 @@ CBaseEntity * CBot::BotFindEnemy( void )
 	  // skip players that are in botcam mode...
 	  if (pPlayer->pev->effects & EF_NODRAW)
 		 continue;
+
+	  // don't waste time on spawn-protected or godmode players
+	  if( pPlayer->IsSpawnProtected || (pPlayer->pev->flags & FL_GODMODE) )
+		  continue;
 
 	  // is team play enabled?
 	  if (g_pGameRules->IsTeamplay())
