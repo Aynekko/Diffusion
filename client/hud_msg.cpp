@@ -764,7 +764,14 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 
 	case TE_CARPARAMS:
 	{
+		static int oldgear = 0;
 		gHUD.m_ScreenEffects.Gear = READ_BYTE();
+
+		// don't jerk fov when downshifting
+		if( gHUD.m_ScreenEffects.Gear != 8 && gHUD.m_ScreenEffects.Gear > oldgear )
+			gHUD.CarAddFovMult = 0.5f;
+
+		oldgear = gHUD.m_ScreenEffects.Gear;
 	}
 	break;
 

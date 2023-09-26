@@ -907,6 +907,7 @@ public:
 	bool HUDSuitOffline; // draw "OFFLINE" on health and stamina
 	bool CanSelectEmptyWeapon;
 	bool InCar;
+	float CarAddFovMult;
 	bool PlayingDrums;
 	bool WeaponLowered;
 	int DrunkLevel;
