@@ -380,9 +380,9 @@ bool CheckForLocalWeaponShootAnimation( int seq )
 	break;
 	case WEAPON_G36C:
 		if( seq == 1 ) // caught reload anim!
-			localanim_NextPAttackTime = tr.time + 1.65;
+			localanim_NextPAttackTime = tr.time + 3.0;
 		else if( seq == 2 ) // caught deploy anim!
-			localanim_NextPAttackTime = tr.time + 0.25;
+			localanim_NextPAttackTime = tr.time + 1.3;
 
 		if( seq != 3 ) // only interested in FIRE animations
 			return false;

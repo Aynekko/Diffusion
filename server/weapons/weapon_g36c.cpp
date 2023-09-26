@@ -134,7 +134,7 @@ int CWeaponG36C::AddToPlayer( CBasePlayer *pPlayer )
 BOOL CWeaponG36C::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 0.25;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1.3;
 	return DefaultDeploy( "models/v_g36c.mdl", "models/p_g36c.mdl", DRAW, "mp5" );
 }
 
@@ -306,7 +306,7 @@ void CWeaponG36C::Reload( void )
 	if( m_fInZoom )
 		ResetZoom();
 
-	DefaultReload( 30, RELOAD, 1.65 );
+	DefaultReload( 30, RELOAD, 3.0 );
 }
 
 void CWeaponG36C::WeaponIdle( void )
@@ -316,13 +316,6 @@ void CWeaponG36C::WeaponIdle( void )
 	m_fZoomInUse = 0;
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
-
-	if (m_flTimeWeaponIdle > gpGlobals->time)
-		return;
-
-	SendWeaponAnim( IDLE );
-
-	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );// how long till we do this again.
 }
 
 class CG36CAmmoClip : public CBasePlayerAmmo
