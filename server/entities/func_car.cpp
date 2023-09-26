@@ -1475,7 +1475,12 @@ void CCar::Drive( void )
 		else if( ((CarSpeed < 0) || bBack() || bUp()) && !HasSpawnFlags( SF_CAR_ELECTRIC ) ) // going backwards or braking
 		{
 			if( CarSpeed < 0 )
+			{
 				EngPitch = 80 + 150 * (AbsCarSpeed / MaxCarSpeedBackwards) + (5 * HeatingMult);
+				// close to max speed?
+				if( AbsCarSpeed > ( MaxCarSpeedBackwards - 10) )
+					EngPitch = 220 + sin( gpGlobals->time * 50 ) * 15.0f;
+			}
 			else
 				EngPitch = 80 + 150 * (AbsCarSpeed / MaxCarSpeed) + (5 * HeatingMult);
 		}
