@@ -201,4 +201,6 @@ public:
 
 extern CQuakePartSystem	g_pParticles;
 
+CQuakePart InitializeParticle( void );
+
 #endif//GL_RPART_H

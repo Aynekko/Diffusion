@@ -960,26 +960,19 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 
 			if( gunshot_particle > 0 )
 			{
-				CQuakePart bullet_p;
+				CQuakePart bullet_p = InitializeParticle();
 				if( gunshot_particle == 1 )
 				{
 					bullet_p.m_vecOrigin = pos;
 					bullet_p.m_vecVelocity = trace.plane.normal * 40;
-					bullet_p.m_vecAccel = g_vecZero;
 					bullet_p.m_vecColor = Vector( 0.5, 0.5, 0.5 );
-					bullet_p.m_vecColorVelocity = g_vecZero;
-					bullet_p.m_flAlpha = 1.0;
 					bullet_p.m_flAlphaVelocity = RANDOM_FLOAT( -1.5f, -0.75f );
 					bullet_p.m_flRadius = 2;
 					bullet_p.m_flRadiusVelocity = 30;
-					bullet_p.m_flLength = 1;
-					bullet_p.m_flLengthVelocity = 0;
 					bullet_p.m_flRotation = RANDOM_LONG( 0, 360 );
 					bullet_p.m_flRotationVelocity = 25;
 					bullet_p.m_flDistance = 1000;
 					bullet_p.ParticleType = TYPE_SMOKE_NOTINWATER;
-					bullet_p.EntIndex = 0;
-					bullet_p.m_flDieTime = 0;
 					g_pParticles.AddParticle( &bullet_p, g_pParticles.m_hSmoke, FPART_NOTWATER | FPART_VERTEXLIGHT );
 				}
 				else if( gunshot_particle == 2 )

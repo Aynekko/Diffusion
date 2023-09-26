@@ -110,25 +110,16 @@ void CHud::Think( void )
 		gEngfuncs.pfnAngleVectors( PlayerAng, forw, NULL, NULL );
 		Vector BreathOrg = gEngfuncs.GetLocalPlayer()->origin + Vector(0,0,20) + forw * 20;
 
-		CQuakePart breath;
+		CQuakePart breath = InitializeParticle();
 		breath.m_vecOrigin = BreathOrg;
 		breath.m_vecVelocity = gEngfuncs.GetLocalPlayer()->curstate.basevelocity * 0.75 + gEngfuncs.GetLocalPlayer()->curstate.velocity * 0.75 + Vector(0,0,5);
-		breath.m_vecAccel = g_vecZero;
-		breath.m_vecColor = Vector(1,1,1);
-		breath.m_vecColorVelocity = g_vecZero;
 		breath.m_flAlpha = 0.25;
-		breath.m_flStartAlpha = 0;
 		breath.m_flAlphaVelocity = -0.25;
 		breath.m_flRadius = 25;
 		breath.m_flRadiusVelocity = 0.1;
-		breath.m_flLength = 1;
-		breath.m_flLengthVelocity = 0;
 		breath.m_flRotation = RANDOM_LONG( 0, 360 );
 		breath.m_flRotationVelocity = RANDOM_LONG(-50,50);
-		breath.m_flDistance = 0;
 		breath.ParticleType = TYPE_SMOKE;
-		breath.EntIndex = 0;
-		breath.m_flDieTime = 0;
 		g_pParticles.AddParticle( &breath, g_pParticles.m_hSmoke, FPART_NOTWATER );
 
 		lastbreathtime = tr.time;

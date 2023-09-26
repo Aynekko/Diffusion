@@ -52,6 +52,47 @@ MemBlock<CQuakePart>ParticleArray_Blood( MAX_PARTICLES ); // TYPE_BLOOD
 MemBlock<CQuakePart>ParticleArray_Bubbles( MAX_PARTICLES ); // TYPE_BUBBLES
 int partcounter = 0;
 
+//===============================================================================
+// InitializeParticle: set default parameters for a single particle
+//===============================================================================
+CQuakePart InitializeParticle( void )
+{
+	CQuakePart dst;
+
+	dst.m_vecOrigin = g_vecZero; // position for current frame
+	dst.m_vecLastOrg = g_vecZero; // position from previous frame
+	dst.m_vecVelocity = g_vecZero;	// linear velocity
+	dst.m_vecAccel = g_vecZero;
+	dst.m_vecColor = Vector( 1, 1, 1 );
+	dst.m_vecColorVelocity = g_vecZero;
+	dst.m_flAlpha = 1.0f;
+	dst.m_flAlphaVelocity = 0;
+	dst.m_flRadius = 1.0f;
+	dst.m_flRadiusVelocity = 0;
+	dst.m_flLength = 1.0f;
+	dst.m_flLengthVelocity = 0;
+	dst.m_flRotation = 0; // texture ROLL angle
+	dst.m_flRotationVelocity = 0;
+	dst.m_flBounceFactor = 0;
+	dst.m_flDistance = 0; // don't allow particle over a certain distance
+	dst.m_flStartAlpha = 0;
+	dst.m_vecAddedVelocity = g_vecZero;
+	dst.m_flDieTime = 0;
+	dst.m_flSinSpeed = 0;
+
+	// only used with flag FPART_DISTANCESCALE
+	dst.m_flMinScale = 1.0f;
+	dst.m_flMaxScale = 1.0f;
+
+	dst.m_hTexture = 0;
+	dst.ParticleType = TYPE_CUSTOM;
+	dst.m_iFlags = 0;
+	dst.newLight = g_vecZero;
+	dst.EntIndex = 0; // pointer to entity which emitted this particle
+
+	return dst;
+}
+
 void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 {				
 	if( !ParticleArray.StartPass() )
@@ -1151,8 +1192,6 @@ void CQuakePartSystem :: CreateEffect( int EntIndex, const char *name, const Vec
 		return;
 	
 	CQuakePartInfo *pInfo = FindPartInfo( name );
-	int m_hTexture = m_hDefaultParticle;
-	CQuakePart src;
 
 	if( !pInfo )
 	{
@@ -1167,6 +1206,9 @@ void CQuakePartSystem :: CreateEffect( int EntIndex, const char *name, const Vec
 		return;
 
 	int count = bound( 1, pInfo->count.Random(), 1024 ); // don't alloc too many particles
+
+	int m_hTexture = m_hDefaultParticle;
+	CQuakePart src = InitializeParticle();
 
 	for( int i = 0; i < count; i++ )
 	{
@@ -1223,10 +1265,6 @@ void CQuakePartSystem :: CreateEffect( int EntIndex, const char *name, const Vec
 		src.m_flRotation = pInfo->rotation.Random();
 		src.m_flRotationVelocity = pInfo->rotationVel.Random();
 		src.m_flBounceFactor = pInfo->bounce.Random();
-		src.m_flDistance = 0; // UNDONE
-		src.m_flStartAlpha = 0;
-		src.ParticleType = TYPE_CUSTOM;
-		src.m_flDieTime = 0;
 		src.EntIndex = EntIndex;
 		
 		if( !AddParticle( &src, m_hTexture, flags ))
@@ -1643,17 +1681,11 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 		return false;
 	}
 
-	if( !src->EntIndex || src->EntIndex <= 0 )
-		src->EntIndex = 0;
-
 	if( src->EntIndex > 0 )
 	{
 		if( ParticleCountPerEnt[src->EntIndex] >= MAX_PARTICLES_PER_ENTITY )
 			return false;
 	}
-
-	if( !src->m_flDieTime || src->m_flDieTime <= 0.0f )
-		src->m_flDieTime = 0.0f;
 
 	CQuakePart *dst = NULL;
 	
@@ -1700,11 +1732,6 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 
 	if( !dst )
 		return false;
-
-	src->m_vecAddedVelocity = g_vecZero;
-
-	if( !src->EntIndex )
-		src->EntIndex = 0;
 
 	if( texture )
 		dst->m_hTexture = texture;
@@ -1754,12 +1781,12 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 
 void CQuakePartSystem :: ExplosionParticles( int EntIndex, const Vector &pos )
 {
-	CQuakePart src;
-	int flags;
-	int i;
-
 	if( !g_fRenderInitialized )
 		return;
+	
+	CQuakePart src = InitializeParticle();
+	int flags;
+	int i;
 
 	flags = (FPART_STRETCH|FPART_BOUNCE|FPART_FRICTION|FPART_NOTWATER);
 
@@ -1775,26 +1802,22 @@ void CQuakePartSystem :: ExplosionParticles( int EntIndex, const Vector &pos )
 		src.m_vecAccel.z = -60 + RANDOM_FLOAT( -30, 30 );
 		src.m_vecColor = Vector( 1, 1, 1 );
 		src.m_vecColorVelocity = Vector( 0, 0, 0 );
-		src.m_flAlpha = 1.0;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = -1.0;
 		src.m_flRadius = 0.5 + RANDOM_FLOAT( -0.2, 0.2 );
-		src.m_flRadiusVelocity = 0;
 		src.m_flLength = 8 + RANDOM_FLOAT( -4, 4 );
 		src.m_flLengthVelocity = 8 + RANDOM_FLOAT( -4, 4 );
-		src.m_flRotation = 0;
-		src.m_flRotationVelocity = 0;
 		src.m_flBounceFactor = 0.2;
 		src.m_flDistance = 1500;
 		src.ParticleType = TYPE_SPARKS;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSparks, flags ))
 			break;
 	}
 
 	// smoke
+	src = InitializeParticle();
+
 	flags = (FPART_VERTEXLIGHT | FPART_NOTWATER);
 
 	for( i = 0; i < 5; i++ )
@@ -1805,28 +1828,22 @@ void CQuakePartSystem :: ExplosionParticles( int EntIndex, const Vector &pos )
 		src.m_vecVelocity.x = RANDOM_FLOAT( -10, 10 );
 		src.m_vecVelocity.y = RANDOM_FLOAT( -10, 10 );
 		src.m_vecVelocity.z = RANDOM_FLOAT( -10, 10 ) + RANDOM_FLOAT( -5, 5 ) + 25;
-		src.m_vecAccel = Vector( 0, 0, 0 );
-		src.m_vecColor = Vector( 0, 0, 0 );
 		src.m_vecColorVelocity = Vector( 0.75, 0.75, 0.75 );
 		src.m_flAlpha = 0.5;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = RANDOM_FLOAT( -0.1, -0.2 );
 		src.m_flRadius = 30 + RANDOM_FLOAT( -15, 15 );
 		src.m_flRadiusVelocity = 15 + RANDOM_FLOAT( -7.5, 7.5 );
-		src.m_flLength = 1;
-		src.m_flLengthVelocity = 0;
 		src.m_flRotation = RANDOM_LONG( 0, 360 );
-		src.m_flRotationVelocity = 0;
-		src.m_flDistance = 0;
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSmoke, flags ))
 			break;
 	}
 
 	// smoke ring
+	src = InitializeParticle();
+
 	flags = (FPART_VERTEXLIGHT | FPART_NOTWATER);
 
 	for( i = 0; i < 50; i++ )
@@ -1841,24 +1858,21 @@ void CQuakePartSystem :: ExplosionParticles( int EntIndex, const Vector &pos )
 		src.m_vecColor = Vector( 0.2, 0.2, 0.2 );
 		src.m_vecColorVelocity = Vector( 0, 0, 0 );
 		src.m_flAlpha = 0.5;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = RANDOM_FLOAT( -0.1, -0.2 );
 		src.m_flRadius = 20 + RANDOM_FLOAT( -7, 7 );
-		src.m_flRadiusVelocity = 0;
-		src.m_flLength = 1;
-		src.m_flLengthVelocity = 0;
 		src.m_flRotation = RANDOM_LONG( 0, 360 );
 		src.m_flRotationVelocity = RANDOM_LONG( -15, 15);
 		src.m_flDistance = 1500;
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSmoke, flags ) )
 			break;
 	}
 
 	// explosion fireballs
+	src = InitializeParticle();
+
 	flags = FPART_NOTWATER;
 
 	for( i = 0; i < 30; i++ )
@@ -1869,22 +1883,14 @@ void CQuakePartSystem :: ExplosionParticles( int EntIndex, const Vector &pos )
 		src.m_vecVelocity.x = RANDOM_FLOAT( -25, 25 );
 		src.m_vecVelocity.y = RANDOM_FLOAT( -25, 25 );
 		src.m_vecVelocity.z = RANDOM_FLOAT( 30, 60 );
-		src.m_vecAccel = Vector( 0, 0, 0 );
-		src.m_vecColor = Vector( 1, 1, 1 );
-		src.m_vecColorVelocity = Vector( 0, 0, 0 );
 		src.m_flAlpha = 0.5;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = RANDOM_FLOAT( -1.25, -0.85 );
 		src.m_flRadius = 15 + RANDOM_FLOAT( 0, 25 );
 		src.m_flRadiusVelocity = RANDOM_FLOAT( 1, 4 );
-		src.m_flLength = 1;
-		src.m_flLengthVelocity = 0;
 		src.m_flRotation = RANDOM_LONG( 0, 359 );
 		src.m_flRotationVelocity = RANDOM_LONG( -15, 15 );
-		src.m_flDistance = 0;
 		src.ParticleType = TYPE_FIREBALL;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hExplosion, flags ) )
 			break;
@@ -1893,10 +1899,10 @@ void CQuakePartSystem :: ExplosionParticles( int EntIndex, const Vector &pos )
 
 void CQuakePartSystem :: SparkParticles( int EntIndex, const Vector &org, const Vector &dir )
 {
-	CQuakePart src;
-
 	if( !g_fRenderInitialized )
 		return;
+	
+	CQuakePart src = InitializeParticle();
 
 	// sparks
 	int flags = (FPART_STRETCH|FPART_BOUNCE|FPART_FRICTION);
@@ -1911,22 +1917,13 @@ void CQuakePartSystem :: SparkParticles( int EntIndex, const Vector &org, const 
 		src.m_vecVelocity.z = dir[2] * 180 + RANDOM_FLOAT( -60, 60 );
 		src.m_vecAccel.x = src.m_vecAccel.y = 0;
 		src.m_vecAccel.z = -120 + RANDOM_FLOAT( -60, 60 );
-		src.m_vecColor = Vector( 1.0, 1.0f, 1.0f );
-		src.m_vecColorVelocity = Vector( 0, 0, 0 );
-		src.m_flAlpha = 1.0;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = -8.0;
 		src.m_flRadius = 0.4 + RANDOM_FLOAT( -0.2, 0.2 );
-		src.m_flRadiusVelocity = 0;
 		src.m_flLength = 8 + RANDOM_FLOAT( -4, 4 );
 		src.m_flLengthVelocity = 8 + RANDOM_FLOAT( -4, 4 );
-		src.m_flRotation = 0;
-		src.m_flRotationVelocity = 0;
 		src.m_flBounceFactor = 0.2;
-		src.m_flDistance = 0;
 		src.ParticleType = TYPE_SPARKS;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSparks, flags ))
 			break;
@@ -1940,10 +1937,10 @@ CL_RicochetSparks
 */
 void CQuakePartSystem :: RicochetSparks( int EntIndex, const Vector &org, float scale )
 {
-	CQuakePart src;
-
 	if( !g_fRenderInitialized )
 		return;
+	
+	CQuakePart src = InitializeParticle();
 
 	// sparks
 	int flags = (FPART_STRETCH|FPART_BOUNCE|FPART_FRICTION);
@@ -1958,22 +1955,13 @@ void CQuakePartSystem :: RicochetSparks( int EntIndex, const Vector &org, float 
 		src.m_vecVelocity.z = RANDOM_FLOAT( -60, 60 );
 		src.m_vecAccel.x = src.m_vecAccel.y = 0;
 		src.m_vecAccel.z = -120 + RANDOM_FLOAT( -60, 60 );
-		src.m_vecColor = Vector( 1.0, 1.0f, 1.0f );
-		src.m_vecColorVelocity = Vector( 0, 0, 0 );
-		src.m_flAlpha = 1.0;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = -8.0;
 		src.m_flRadius = scale + RANDOM_FLOAT( -0.2, 0.2 );
-		src.m_flRadiusVelocity = 0;
 		src.m_flLength = scale + RANDOM_FLOAT( -0.2, 0.2 );
 		src.m_flLengthVelocity = scale + RANDOM_FLOAT( -0.2, 0.2 );
-		src.m_flRotation = 0;
-		src.m_flRotationVelocity = 0;
 		src.m_flBounceFactor = 0.2;
-		src.m_flDistance = 0;
 		src.ParticleType = TYPE_SPARKS;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSparks, flags ))
 			break;
@@ -1982,10 +1970,10 @@ void CQuakePartSystem :: RicochetSparks( int EntIndex, const Vector &org, float 
 
 void CQuakePartSystem :: SmokeParticles( int EntIndex, const Vector &pos, int count, float speed, float scale )
 {
-	CQuakePart src;
-
 	if( !g_fRenderInitialized )
 		return;
+	
+	CQuakePart src = InitializeParticle();
 
 	// smoke
 	int flags = FPART_VERTEXLIGHT;
@@ -2004,22 +1992,15 @@ void CQuakePartSystem :: SmokeParticles( int EntIndex, const Vector &pos, int co
 		src.m_vecVelocity.x = RANDOM_FLOAT( -10, 10 );
 		src.m_vecVelocity.y = RANDOM_FLOAT( -10, 10 );
 		src.m_vecVelocity.z = RANDOM_FLOAT( -10, 10 ) + RANDOM_FLOAT( -5, 5 ) + 25;
-		src.m_vecAccel = Vector( 0, 0, 0 );
 		src.m_vecColor = Vector( 0, 0, 0 );
 		src.m_vecColorVelocity = Vector( 0.75, 0.75, 0.75 );
 		src.m_flAlpha = 0.5;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = -speed;
 		src.m_flRadius = scale + RANDOM_FLOAT( -scale/2, scale/2 );
 		src.m_flRadiusVelocity = 15 + RANDOM_FLOAT( -7.5, 7.5 );
-		src.m_flLength = 1;
-		src.m_flLengthVelocity = 0;
 		src.m_flRotation = RANDOM_LONG( 0, 360 );
-		src.m_flRotationVelocity = 0;
-		src.m_flDistance = 0;
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSmoke, flags ))
 			break;
@@ -2028,10 +2009,10 @@ void CQuakePartSystem :: SmokeParticles( int EntIndex, const Vector &pos, int co
 
 void CQuakePartSystem::Smoke( int EntIndex, int Particle, const Vector &pos, const Vector &vel, int count, float speed, float scale, float posRand, float velRand, Vector Color, float Distance, float Alpha )
 {
-	CQuakePart src;
-
 	if( !g_fRenderInitialized )
 		return;
+	
+	CQuakePart src = InitializeParticle();
 
 	// smoke
 	int flags = FPART_VERTEXLIGHT;
@@ -2058,23 +2039,16 @@ void CQuakePartSystem::Smoke( int EntIndex, int Particle, const Vector &pos, con
 		src.m_vecVelocity.x = vel.x + RANDOM_FLOAT( -velRand, velRand );
 		src.m_vecVelocity.y = vel.y + RANDOM_FLOAT( -velRand, velRand );
 		src.m_vecVelocity.z = vel.z + RANDOM_FLOAT( -velRand, velRand );
-		src.m_vecAccel = g_vecZero;
 		src.m_vecColor = Color;
-		src.m_vecColorVelocity = g_vecZero;
 		src.m_flAlpha = Alpha;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = -speed;
 		if( Particle == m_hDirt )
 			src.m_flAlphaVelocity *= 0.5f;
 		src.m_flRadius = scale;
 		src.m_flRadiusVelocity = 7.0f;
-		src.m_flLength = 1;
-		src.m_flLengthVelocity = 0;
 		src.m_flRotation = RANDOM_LONG( 0, 360 );
-		src.m_flRotationVelocity = 0;
 		src.m_flDistance = Distance;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 		if( Particle == m_hSmoke )
 			src.ParticleType = TYPE_SMOKE;
 		else if( Particle == m_hSand )
@@ -2089,10 +2063,10 @@ void CQuakePartSystem::Smoke( int EntIndex, int Particle, const Vector &pos, con
 
 void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, float Scale, float Alpha, int Distance )
 {
-	CQuakePart src;
-
 	if( !g_fRenderInitialized )
 		return;
+	
+	CQuakePart src = InitializeParticle();
 
 	int flags = FPART_VERTEXLIGHT | FPART_FADEIN;
 	float posRand = 20.0f;
@@ -2128,22 +2102,13 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.y, PushVelocityRand.y );
 		if( PushVelocityRand.z != 0.0f )
 			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.z, PushVelocityRand.z );
-		src.m_vecAccel = g_vecZero;
-		src.m_vecColor = Vector( 1, 1, 1 );
-		src.m_vecColorVelocity = g_vecZero;
 		src.m_flAlpha = Alpha;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = -0.5 * Alpha;
 		src.m_flRadius = Scale;
-		src.m_flRadiusVelocity = 0.0f;
-		src.m_flLength = 1;
-		src.m_flLengthVelocity = 0;
 		src.m_flRotation = RANDOM_LONG( 1, 360 );
-		src.m_flRotationVelocity = 0;
 		src.m_flDistance = Distance;
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		AddParticle( &src, Particle, flags );
 	}
@@ -2172,24 +2137,15 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.y, PushVelocityRand.y );
 		if( PushVelocityRand.z != 0.0f )
 			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.z, PushVelocityRand.z );
-		src.m_vecAccel = g_vecZero;
-		src.m_vecColor = Vector( 1, 1, 1 );
-		src.m_vecColorVelocity = g_vecZero;
 		src.m_flAlpha = Alpha;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = -0.5 * Alpha;
 		src.m_flRadius = Scale;
 		src.m_flMinScale = Scale * 0.1;
 		src.m_flMaxScale = Scale * 2.0;
-		src.m_flRadiusVelocity = 0.0f;
-		src.m_flLength = 1;
-		src.m_flLengthVelocity = 0;
 		src.m_flRotation = RANDOM_LONG( 1, 360 );
-		src.m_flRotationVelocity = 0;
 		src.m_flDistance = Distance;
 		src.ParticleType = TYPE_DUSTMOTE;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		AddParticle( &src, Particle, flags );
 	}
@@ -2197,13 +2153,13 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 
 void CQuakePartSystem :: GunSmoke( int EntIndex, const Vector &pos, Vector vel, int WeaponID )
 {
-	CQuakePart src;
+	if( !g_fRenderInitialized )
+		return;
+	
+	CQuakePart src = InitializeParticle();
 
 	// defaults
 	int count = 2;
-
-	if( !g_fRenderInitialized )
-		return;
 
 	if( !vel )
 		vel = g_vecZero;
@@ -2248,21 +2204,14 @@ void CQuakePartSystem :: GunSmoke( int EntIndex, const Vector &pos, Vector vel, 
 		src.m_vecVelocity.x = vel.x * RANDOM_FLOAT( 0.85f, 1.15f ) + RANDOM_FLOAT( -5.1f, 5.1f );
 		src.m_vecVelocity.y = vel.y * RANDOM_FLOAT( 0.85f, 1.15f ) + RANDOM_FLOAT( -5.1f, 5.1f );
 		src.m_vecVelocity.z = vel.z * RANDOM_FLOAT( 0.85f, 1.15f ) + RANDOM_FLOAT( -5.1f, 5.1f );
-		src.m_vecAccel = g_vecZero;
-		src.m_vecColor = Vector( 1.0f, 1.0f, 1.0f );
-		src.m_vecColorVelocity = g_vecZero;
 		src.m_flAlpha = 0.5;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = RANDOM_FLOAT( -0.2f, -0.4f );
 		src.m_flDistance = 1000;
 		src.m_flRadiusVelocity = 2.0f + RANDOM_FLOAT( -0.5, 0.5 );
-		src.m_flLength = 1;
-		src.m_flLengthVelocity = 0;
 		src.m_flRotation = RANDOM_LONG( 0, 360 );
 		src.m_flRotationVelocity = RANDOM_LONG(-50,50);
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSmoke, flags ))
 			break;
@@ -2276,11 +2225,11 @@ CL_BulletParticles
 */
 void CQuakePartSystem :: BulletParticles( int EntIndex, const Vector &org, const Vector &dir )
 {
-	CQuakePart src;
-	int cnt, count, i;
-
 	if( !g_fRenderInitialized )
 		return;
+	
+	CQuakePart src = InitializeParticle();
+	int cnt, count, i;
 
 	count = RANDOM_LONG( 4, 10 );
 	cnt = POINT_CONTENTS( (float *)&org );
@@ -2301,28 +2250,22 @@ void CQuakePartSystem :: BulletParticles( int EntIndex, const Vector &org, const
 		src.m_vecVelocity.z = dir[2] * 180 + RANDOM_FLOAT( -60, 60 );
 		src.m_vecAccel.x = src.m_vecAccel.y = 0;
 		src.m_vecAccel.z = -120 + RANDOM_FLOAT( -60, 60 );
-		src.m_vecColor = Vector( 1.0, 1.0f, 1.0f );
-		src.m_vecColorVelocity = Vector( 0, 0, 0 );
-		src.m_flAlpha = 1.0;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = -3.0;
 		src.m_flRadius = 0.8 + RANDOM_FLOAT( -0.3, 0.3 );
-		src.m_flRadiusVelocity = 0;
 		src.m_flLength = 8 + RANDOM_FLOAT( -4, 4 );
 		src.m_flLengthVelocity = 8 + RANDOM_FLOAT( -4, 4 );
-		src.m_flRotation = 0;
-		src.m_flRotationVelocity = 0;
 		src.m_flBounceFactor = 0.2;
 		src.m_flDistance = 2000;
 		src.ParticleType = TYPE_SPARKS;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSparks, flags ))
 			break;
 	}
 
 	// smoke
+	src = InitializeParticle();
+
 	flags = FPART_VERTEXLIGHT;
 
 	for( i = 0; i < 3; i++ )
@@ -2333,22 +2276,16 @@ void CQuakePartSystem :: BulletParticles( int EntIndex, const Vector &org, const
 		src.m_vecVelocity.x = RANDOM_FLOAT( -2.5, 2.5 );
 		src.m_vecVelocity.y = RANDOM_FLOAT( -2.5, 2.5 );
 		src.m_vecVelocity.z = RANDOM_FLOAT( -2.5, 2.5 ) + (25 + RANDOM_FLOAT( -5, 5 ));
-		src.m_vecAccel = Vector( 0, 0, 0 );
 		src.m_vecColor = Vector( 0.4, 0.4, 0.4 );
 		src.m_vecColorVelocity = Vector( 0.2, 0.2, 0.2 );
 		src.m_flAlpha = 0.5;
-		src.m_flStartAlpha = 0.0f;
 		src.m_flAlphaVelocity = -(0.4 + RANDOM_FLOAT( 0, 0.2 ));
 		src.m_flRadius = 3 + RANDOM_FLOAT( -1.5, 1.5 );
 		src.m_flRadiusVelocity = 5 + RANDOM_FLOAT( -2.5, 2.5 );
-		src.m_flLength = 1;
-		src.m_flLengthVelocity = 0;
 		src.m_flRotation = RANDOM_LONG( 0, 360 );
-		src.m_flRotationVelocity = 0;
 		src.m_flDistance = 1500;
 		src.ParticleType = TYPE_SMOKE;
 		src.EntIndex = EntIndex;
-		src.m_flDieTime = 0;
 
 		if( !AddParticle( &src, m_hSmoke, flags ))
 			break;
@@ -2357,42 +2294,32 @@ void CQuakePartSystem :: BulletParticles( int EntIndex, const Vector &org, const
 
 void CQuakePartSystem::WaterSplashParticle( int EntIndex, const Vector &pos )
 {
-	CQuakePart src;
-
 	if( !g_fRenderInitialized )
 		return;
+
+	CQuakePart src = InitializeParticle();
 
 	// water ring
 	int flags = FPART_VERTEXLIGHT | FPART_FLOATING_ORIENTED | FPART_AFLOAT;
 
 	src.m_vecOrigin = pos;
-	src.m_vecVelocity = Vector( 0, 0, 0 );
-	src.m_vecAccel = Vector( 0, 0, 0 );
-	src.m_vecColor = Vector( 1, 1, 1 );
-	src.m_vecColorVelocity = Vector( 0, 0, 0 );
-	src.m_flAlpha = 1.0;
-	src.m_flStartAlpha = 0.0f;
 	src.m_flAlphaVelocity = -0.75;
 	src.m_flRadius = RANDOM_FLOAT(10,20);
 	src.m_flRadiusVelocity = 25 + RANDOM_FLOAT( 0, 10 );
-	src.m_flLength = 1;
-	src.m_flLengthVelocity = 0;
 	src.m_flRotation = RANDOM_LONG( 0, 359 );
 	src.m_flRotationVelocity = RANDOM_FLOAT(-25.0,25.0);
-	src.m_flDistance = 0;
 	src.ParticleType = TYPE_WATERSPLASH;
 	src.EntIndex = EntIndex;
-	src.m_flDieTime = 0;
 
 	AddParticle( &src, m_hWaterSplash, flags );
 }
 
 void CQuakePartSystem::BloodParticle( int EntIndex, const Vector &pos, float Scale, Vector Color, Vector Direction )
 {
-	CQuakePart src;
-
 	if( !g_fRenderInitialized )
 		return;
+
+	CQuakePart src = InitializeParticle();
 
 	int flags = FPART_FLOATING_ORIENTED | FPART_VERTEXLIGHT;
 
@@ -2401,75 +2328,47 @@ void CQuakePartSystem::BloodParticle( int EntIndex, const Vector &pos, float Sca
 	src.m_vecVelocity.z = RANDOM_FLOAT( 40 + Scale * 10, 80 + Scale * 10 );
 	src.m_vecAccel = Vector( 0, 0, -30 );
 	src.m_vecColor = Color / 255;
-	src.m_vecColorVelocity = Vector( 0, 0, 0 );
-	src.m_flAlpha = 1.0;
-	src.m_flStartAlpha = 0.0f;
 	src.m_flAlphaVelocity = -1.0;
 	src.m_flRadius = 0.01;
 	src.m_flRadiusVelocity = 20 + Scale * 5;
-	src.m_flLength = 1;
-	src.m_flLengthVelocity = 0;
 	src.m_flRotation = RANDOM_LONG( 0, 359 );
 	src.m_flRotationVelocity = RANDOM_FLOAT( -100.0, 100.0 );
-	src.m_flDistance = 0;
 	src.ParticleType = TYPE_BLOOD;
 	src.EntIndex = EntIndex;
-	src.m_flDieTime = 0;
 
 	AddParticle( &src, m_hBlood, flags );
+
+	src = InitializeParticle();
 
 	flags = FPART_VERTEXLIGHT | FPART_DISTANCESCALE;
 
 	src.m_vecOrigin = pos;
-	src.m_vecVelocity = Vector( 0, 0, 0 );
-	src.m_vecAccel = Vector( 0, 0, 0 );
 	src.m_vecColor = Color / 255;
-	src.m_vecColorVelocity = Vector( 0, 0, 0 );
-	src.m_flAlpha = 1.0;
-	src.m_flStartAlpha = 0.0f;
 	src.m_flAlphaVelocity = -2.0;
 	src.m_flRadius = Scale + RANDOM_FLOAT( -Scale * 0.1f, Scale * 0.1f );
-	src.m_flRadiusVelocity = 0;
-	src.m_flLength = 1;
-	src.m_flLengthVelocity = 0;
 	src.m_flRotation = RANDOM_LONG( 0, 359 );
-	src.m_flRotationVelocity = 0;
-	src.m_flDistance = 0;
 	src.ParticleType = TYPE_CUSTOM;
 	src.EntIndex = EntIndex;
 	src.m_flMinScale = Scale * 0.01f;
 	src.m_flMaxScale = Scale * 1.2f;
-	src.m_flDieTime = 0;
 
 	AddParticle( &src, m_hBloodSplat, flags );
 }
 
 void CQuakePartSystem::Bubble( int EntIndex, const Vector &pos, float Speed, int Distance, float DieTime, float SinSpeed )
 {
-	CQuakePart src;
-
 	if( !g_fRenderInitialized )
 		return;
+	
+	CQuakePart src = InitializeParticle();
 
 	int flags = FPART_SINEWAVE | FPART_OPAQUE;
 
 	float Scale = 7.5f / RANDOM_FLOAT( 2.0f, 5.0f );
 
 	src.m_vecOrigin = pos;
-	src.m_vecVelocity = Vector( 0, 0, 0 );
 	src.m_vecVelocity.z = Speed;
-	src.m_vecAccel = Vector( 0, 0, 0 );
-	src.m_vecColor = Vector( 1, 1, 1 );
-	src.m_vecColorVelocity = Vector( 0, 0, 0 );
-	src.m_flAlpha = 1.0;
-	src.m_flStartAlpha = 0.0f;
-	src.m_flAlphaVelocity = 0.0;
 	src.m_flRadius = Scale;
-	src.m_flRadiusVelocity = 0;
-	src.m_flLength = 1;
-	src.m_flLengthVelocity = 0;
-	src.m_flRotation = 0;
-	src.m_flRotationVelocity = 0;
 	src.m_flDistance = Distance;
 	src.ParticleType = TYPE_BUBBLES;
 	src.EntIndex = EntIndex;
