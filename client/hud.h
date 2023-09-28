@@ -212,7 +212,7 @@ private:
 		int red[10];
 		int green[10];
 		int blue[10];
-		char text[10];
+		SpriteHandle tex[10];
 		float Lensx[10];
 		float Lensy[10];
 		float Suncoordx;
