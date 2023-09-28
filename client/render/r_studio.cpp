@@ -3897,6 +3897,7 @@ void CStudioModelRenderer::StudioSetRenderMode( const int rendermode )
 	switch( rendermode )
 	{
 	case kRenderNormal:
+	case kRenderTransTexture:
 		break;
 	case kRenderTransColor:
 		if( RI->currententity->curstate.renderamt != 255 || tr.fadeblend[RI->currententity->index] < 1.0f ) // diffusion - fix, otherwise it was possible to look through them
@@ -5221,29 +5222,29 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 			if( FBitSet( mat->flags, STUDIO_NF_MASKED ) || FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) )
 			{
-				GL_AlphaFunc( GL_GREATER, 0.5f );
-				GL_AlphaTest( GL_TRUE );
-				GL_DepthMask( GL_TRUE );
-				GL_Blend( GL_FALSE );
+			//	GL_AlphaFunc( GL_GREATER, 0.5f );
+			//	GL_AlphaTest( GL_TRUE );
+			//	GL_DepthMask( GL_TRUE );
+			//	GL_Blend( GL_FALSE );
 			}
 			else if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) )
 			{
-				if( R_ModelOpaque( m_pCurrentEntity->curstate.rendermode, m_pCurrentEntity->curstate.renderamt ) )
-				{
-					GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
-					GL_DepthMask( GL_FALSE );
-					GL_Blend( GL_TRUE );
-				}
-				else GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
-
+			//	if( R_ModelOpaque( m_pCurrentEntity->curstate.rendermode, m_pCurrentEntity->curstate.renderamt ) )
+			//	{
+			//		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+			//		GL_DepthMask( GL_FALSE );
+			//		GL_Blend( GL_TRUE );
+			//	}
+			//	else GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+				GL_DepthMask( GL_FALSE );
 			}
 			else
 			{
-				if( R_ModelOpaque( m_pCurrentEntity->curstate.rendermode, m_pCurrentEntity->curstate.renderamt ) )
-				{
-					GL_DepthMask( GL_TRUE );
-					GL_Blend( GL_FALSE );
-				}
+			//	if( R_ModelOpaque( m_pCurrentEntity->curstate.rendermode, m_pCurrentEntity->curstate.renderamt ) )
+			//	{
+			//		GL_DepthMask( GL_TRUE );
+			//		GL_Blend( GL_FALSE );
+			//	}
 
 				StudioSetRenderMode( m_pCurrentEntity->curstate.rendermode );
 			}
