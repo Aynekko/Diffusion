@@ -5237,6 +5237,8 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			//	}
 			//	else GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 				GL_DepthMask( GL_FALSE );
+				GL_Blend( GL_TRUE );
+				GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 			}
 			else
 			{
@@ -5451,13 +5453,16 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 			}
 			else if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) ) // diffusion - fixed shadows from additive textures from projected light...
 			{
-				if( R_ModelOpaque( RI->currententity->curstate.rendermode, RI->currententity->curstate.renderamt ) )
-				{
-					GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
-					GL_DepthMask( GL_FALSE );
-					GL_Blend( GL_TRUE );
-				}
-				else GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+			//	if( R_ModelOpaque( RI->currententity->curstate.rendermode, RI->currententity->curstate.renderamt ) )
+			//	{
+			//		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+			//		GL_DepthMask( GL_FALSE );
+			//		GL_Blend( GL_TRUE );
+			//	}
+			//	else GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+				GL_DepthMask( GL_FALSE );
+				GL_Blend( GL_TRUE );
+				GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 			}
 			else
 				GL_AlphaTest( GL_FALSE );
@@ -5472,6 +5477,7 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 	GL_CleanUpTextureUnits( 0 );
 	GL_DepthMask( GL_TRUE );
 	GL_AlphaTest( GL_FALSE );
+	GL_Blend( GL_FALSE );
 	GL_Cull( GL_FRONT );
 
 	pglBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );

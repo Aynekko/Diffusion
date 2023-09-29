@@ -2053,8 +2053,6 @@ void R_DrawLightForSurfList( plight_t *pl )
 	GLfloat	gl_lightViewProjMatrix[16];
 	int	startv, endv;
 
-	if( e->curstate.rendermode == kRenderTransAlpha )
-		GL_AlphaTest( GL_TRUE );
 	GL_BlendFunc( GL_ONE, GL_ONE );
 	startv = MAX_MAP_ELEMS;
 	numTempElems = 0;
@@ -2223,16 +2221,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			// diffusion - apply custom color to a specific texture
 			if( tr.materials[tex->gl_texturenum].ApplyColor && (e->index > 0) )
 			{
-				// hack     // dynlight doesn't affect additive brushes
-		/*		if( e->curstate.rendermode == kRenderTransAdd )
-				{
-					if( e->curstate.rendercolor.r == 0 && e->curstate.rendercolor.g == 0 && e->curstate.rendercolor.b == 0 )
-						pglUniform4fARB( RI->currentshader->u_RenderColor, tr.blend, tr.blend, tr.blend, 1.0f );
-					else
-						pglUniform4fARB( RI->currentshader->u_RenderColor, tr.blend * e->curstate.rendercolor.r / 255.0f, tr.blend * e->curstate.rendercolor.g / 255.0f, tr.blend * e->curstate.rendercolor.b / 255.0f, 1.0f );
-				}
-				else */
-					pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
+				pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
 			}
 			else
 				R_SetRenderColor( RI->currententity );
@@ -2291,7 +2280,7 @@ void R_RenderDynLightList( void )
 
 	GL_Blend( GL_TRUE );
 	GL_AlphaTest( GL_FALSE );
-	GL_DepthMask( GL_FALSE ); // diffusion - this caused sunshafts to brighten when flashlight is on, but re-enabling depthmask at the bottom seems to fix it
+	GL_DepthMask( GL_FALSE );
 	pglEnable( GL_SCISSOR_TEST );
 	pglBindVertexArray( world->vertex_array_object );
 
@@ -2325,6 +2314,7 @@ void R_RenderDynLightList( void )
 	GL_CleanUpTextureUnits( 0 );
 	RI->currentlight = NULL;
 
+	GL_Blend( GL_FALSE );
 	GL_DepthMask( GL_TRUE );
 }
 
@@ -2351,7 +2341,6 @@ void R_DrawShadowBrushList( void )
 	numTempElems = 0;
 	endv = 0;
 	pglBindVertexArray( world->vertex_array_object );
-	GL_AlphaFunc( GL_GREATER, 0.25f );
 	GL_TextureTarget( GL_NONE );
 
 	for( int i = 0; i < tr.num_draw_surfaces; i++ )
@@ -2407,12 +2396,15 @@ void R_DrawShadowBrushList( void )
 		// begin draw the sorted list
 		if( cached_texture != curtex )
 		{
-			if( curtex != tr.whiteTexture )
-				GL_AlphaTest( GL_TRUE );
-			else GL_AlphaTest( GL_FALSE );
-
 			GL_Bind( GL_TEXTURE0, curtex );
 			cached_texture = curtex;
+			if( RENDER_GET_PARM( PARM_TEX_FLAGS, curtex ) & TF_HAS_ALPHA )
+			{
+				GL_AlphaFunc( GL_GREATER, 0.25f );
+				GL_AlphaTest( GL_TRUE );
+			}
+			else
+				GL_AlphaTest( GL_FALSE );
 		}
 
 		if( es->firstvertex < startv )
@@ -2447,7 +2439,6 @@ void R_DrawShadowBrushList( void )
 	pglBindVertexArray( GL_FALSE );
 	GL_BindShader( GL_FALSE );
 	tr.num_draw_surfaces = 0;
-	//	GL_Cull( GL_FRONT );
 
 	if( R_GrassUseBufferObject() )
 		R_RenderShadowGrassOnList();
@@ -2455,6 +2446,7 @@ void R_DrawShadowBrushList( void )
 		R_DrawGrass();
 
 	GL_Cull( GL_FRONT );
+	GL_AlphaTest( GL_FALSE );
 }
 
 /*
@@ -3012,12 +3004,9 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 
 	R_DrawBrushList();
 
-	if( e->curstate.rendermode == kRenderTransAlpha ) // diffusion - some fixes. Must be re-checked. FIXME
-		GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
-	else if( e->curstate.rendermode == kRenderTransAdd )
-		GL_DepthMask( GL_TRUE );
-	else if( e->curstate.rendermode == kRenderTransTexture || e->curstate.rendermode == kRenderFade )
-		GL_DepthMask( GL_TRUE );
+	GL_AlphaTest( GL_FALSE );
+	GL_DepthMask( GL_TRUE );
+	GL_Blend( GL_FALSE );
 
 	R_LoadIdentity();	// restore worldmatrix
 }
@@ -3419,7 +3408,7 @@ void R_DrawWorld( void )
 	memset( RI->visfaces, 0x00, (world->numsortedfaces + 7) >> 3 );
 
 	tr.modelorg = RI->vieworg;
-	R_SetRenderMode( RI->currententity );
+//	R_SetRenderMode( RI->currententity );
 	R_GrassPrepareFrame();
 	R_LoadIdentity();
 
@@ -3438,6 +3427,10 @@ void R_DrawWorld( void )
 	r_stats.t_world_node = end - start;
 
 	start = Sys_DoubleTime();
+
+	GL_DepthMask( GL_TRUE );
+	GL_AlphaTest( GL_FALSE );
+	GL_Blend( GL_FALSE );
 
 	R_DrawBrushList();
 
