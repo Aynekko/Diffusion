@@ -1172,12 +1172,12 @@ void CCar::Drive( void )
 	if( bRight() )
 	{
 		Turning -= TurnRate * gpGlobals->frametime;
-		CameraMoving -= CameraSwayRate * gpGlobals->frametime;
+		CameraMoving -= (CameraMoving > 0 ? 2 : 1) * CameraSwayRate * gpGlobals->frametime;
 	}
 	else if( bLeft() )
 	{
 		Turning += TurnRate * gpGlobals->frametime;
-		CameraMoving += CameraSwayRate * gpGlobals->frametime;
+		CameraMoving += (CameraMoving < 0 ? 2 : 1) * CameraSwayRate * gpGlobals->frametime;
 	}
 
 	// no turning buttons pressed, go to zero slowly
@@ -2196,7 +2196,7 @@ void CCar::Camera(void)
 			{
 				// pev->iuser2 - hacked default camera height offset
 				// iuser1 for freecam is hardcoded, just tune it if needed - it's the distance
-				UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 80, GetAbsOrigin() + gpGlobals->v_up * (80 + pev->iuser2) - gpGlobals->v_forward * (250 + pFreeCam->pev->iuser1) - gpGlobals->v_right * CameraMoving, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+				UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 80, GetAbsOrigin() + gpGlobals->v_up * (80 + pev->iuser2) - gpGlobals->v_forward * (200 + pFreeCam->pev->iuser1) - gpGlobals->v_right * CameraMoving, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 				CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 				pFreeCam->SetAbsOrigin( CamOrg );
 			//	pFreeCam->SetAbsAngles( GetAbsAngles() );
@@ -2205,7 +2205,7 @@ void CCar::Camera(void)
 			}
 			else if( CarSpeed < -100 )
 			{
-				UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 80, GetAbsOrigin() + gpGlobals->v_up * 80 + gpGlobals->v_forward * (250 + pFreeCam->pev->iuser1) - gpGlobals->v_right * CameraMoving, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+				UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 80, GetAbsOrigin() + gpGlobals->v_up * 80 + gpGlobals->v_forward * (200 + pFreeCam->pev->iuser1) - gpGlobals->v_right * CameraMoving, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 				CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 				pFreeCam->SetAbsOrigin( CamOrg );
 				pFreeCam->SetAbsAngles( GetAbsAngles() + Vector( 0, 180, 0 ) );
@@ -2214,7 +2214,7 @@ void CCar::Camera(void)
 		else
 		{
 			UTIL_MakeVectors( DriverAngles );
-			UTIL_TraceLine( hDriver->GetAbsOrigin(), hDriver->GetAbsOrigin() - gpGlobals->v_forward * (250 + pFreeCam->pev->iuser1) + gpGlobals->v_up * pev->iuser2, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+			UTIL_TraceLine( hDriver->GetAbsOrigin(), hDriver->GetAbsOrigin() - gpGlobals->v_forward * (200 + pFreeCam->pev->iuser1) + gpGlobals->v_up * pev->iuser2, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 			CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 			pFreeCam->SetAbsOrigin( CamOrg );
 			pFreeCam->SetAbsAngles( DriverAngles );
