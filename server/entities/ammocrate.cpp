@@ -25,6 +25,7 @@ public:
 	virtual int ObjectCaps(void) { return BaseClass::ObjectCaps() | FCAP_IMPULSE_USE; }
 	void CrateEquip(void);
 	void SimpleWait(void); // delay before crate can be opened again
+	void ClearEffects( void );
 	int Equipped;
 	float EquipStartTime;
 	int MaxOpen; // crate can be opened only # times
@@ -582,5 +583,14 @@ void CAmmoCrate::GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float Curr
 	case WEAPON_RPG:
 		pPlayer->GiveAmmo( (int)((ROCKET_MAX_CARRY - (ROCKET_MAX_CARRY * CurrentRatio)) * 0.5), "rockets", ROCKET_MAX_CARRY );
 		break;
+	}
+}
+
+void CAmmoCrate::ClearEffects( void )
+{
+	if( AmmoIcon )
+	{
+		UTIL_Remove( AmmoIcon );
+		AmmoIcon = NULL;
 	}
 }
