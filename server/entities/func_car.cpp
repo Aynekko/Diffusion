@@ -818,6 +818,14 @@ void CCar::Setup( void )
 		pFreeCam->SetNullModel();
 		pFreeCam->SetParent( this );
 		pFreeCam->pev->iuser1 = 0;
+		if( pChassisMdl )
+		{
+			// get camera distance according to model bounds
+			Vector mins = g_vecZero;
+			Vector maxs = g_vecZero;
+			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+			pFreeCam->pev->iuser1 = (int)( (mins - maxs).Length() * 0.5f * pChassisMdl->pev->scale );
+		}
 		if( !pCamera1 )
 			Camera1LocalAngles = pFreeCam->GetLocalAngles();
 	}
