@@ -534,7 +534,7 @@ void CEnvBallEntity::ClearEffects(void)
 	STOP_SOUND(ENT(pev), CHAN_BODY, "comball/fly_loop.wav");
 	
 	// notify our owner env_ball that we died
-	if( m_hOwner != NULL )
+	if( m_hOwner != NULL && FClassnameIs( m_hOwner, "env_ball" ) )
 		m_hOwner->m_iCounter--;
 }
 
