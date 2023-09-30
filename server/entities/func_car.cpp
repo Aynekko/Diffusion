@@ -519,6 +519,7 @@ void CCar::Spawn( void )
 		DriftMode = true;
 
 	SafeSpawnPos = g_vecZero;
+	SafeCarPos = g_vecZero;
 
 	SetThink( &CCar::Setup );
 	SetNextThink( RANDOM_FLOAT( 0.1f, 0.2f ) );
@@ -843,6 +844,136 @@ void CCar::Setup( void )
 	SetNextThink( RANDOM_FLOAT( 0.2f, 0.5f ) );
 }
 
+void CCar::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Collision, float *ColDotProduct, Vector *ColPoint )
+{
+	TraceResult trCol;
+
+	*Collision = g_vecZero;
+	*ColPoint = g_vecZero; // place for sparks
+	*ColDotProduct = 1.0f;
+
+	Vector ColPointLeft = g_vecZero;
+	Vector ColPointRight = g_vecZero;
+
+	// make chassis vectors
+	UTIL_MakeVectors( pChassis->GetAbsAngles() );
+	Vector ChassisForw = gpGlobals->v_forward;
+	Vector ChassisUp = gpGlobals->v_up;
+	Vector ChassisRight = gpGlobals->v_right;
+
+	// bring back the car vectors
+	UTIL_MakeVectors( GetAbsAngles() );
+
+	// 4 collision points from wheels.
+	Vector ColPointWFR = g_vecZero;
+	Vector ColPointWFL = g_vecZero;
+	Vector ColPointWRR = g_vecZero;
+	Vector ColPointWRL = g_vecZero;
+
+	bool hit_carblocker = false;
+
+	if( Forward == 1 )
+	{
+		// front right wheel
+		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 + ChassisRight * FrontSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 + ChassisRight * FrontSuspWidth * 0.5 + ChassisForw * (FrontSuspDist + FrontBumperLength), ignore_monsters, edict(), &trCol );
+		ColPointWFR = trCol.vecEndPos;
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f )
+		{
+			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct); // slide along the plane
+			*ColPoint = ColPointWFR;
+			if( *ColDotProduct < 0.6 )
+				*ColDotProduct *= -1;
+		}
+		else if( hit_carblocker )
+		{
+			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*ColPoint = ColPointWFR;
+		}
+		hit_carblocker = false;
+
+		// front left wheel
+		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 - ChassisRight * FrontSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 - ChassisRight * FrontSuspWidth * 0.5 + ChassisForw * (FrontSuspDist + FrontBumperLength), ignore_monsters, edict(), &trCol );
+		ColPointWFL = trCol.vecEndPos;
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f )
+		{
+			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
+			*ColPoint = ColPointWFL;
+			if( *ColDotProduct < 0.6 )
+				*ColDotProduct *= -1;
+		}
+		else if( hit_carblocker )
+		{
+			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*ColPoint = ColPointWFL;
+		}
+		hit_carblocker = false;
+	}
+
+	if( Forward == -1 )
+	{
+		// rear right wheel
+		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 + ChassisRight * RearSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 + ChassisRight * RearSuspWidth * 0.5 - ChassisForw * (RearSuspDist + RearBumperLength), ignore_monsters, edict(), &trCol );
+		ColPointWRR = trCol.vecEndPos;
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f )
+		{
+			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
+			*ColPoint = ColPointWRR;
+		}
+		else if( hit_carblocker )
+		{
+			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*ColPoint = ColPointWRR;
+		}
+		hit_carblocker = false;
+
+		// rear left wheel
+		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 - ChassisRight * RearSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 - ChassisRight * RearSuspWidth * 0.5 - ChassisForw * (RearSuspDist + RearBumperLength), ignore_monsters, edict(), &trCol );
+		ColPointWRL = trCol.vecEndPos;
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f )
+		{
+			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
+			*ColPoint = ColPointWRL;
+		}
+		else if( hit_carblocker )
+		{
+			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*ColPoint = ColPointWRL;
+		}
+		hit_carblocker = false;
+	}
+
+	// sides!
+	// left
+	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 30, GetAbsOrigin() + gpGlobals->v_up * 30 - gpGlobals->v_right * (FrontSuspWidth + RearSuspWidth) * 0.3, ignore_monsters, edict(), &trCol );
+	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+		hit_carblocker = true;
+	if( trCol.flFraction < 1.0f || hit_carblocker )
+		ColPointLeft = gpGlobals->v_right * 100;
+	hit_carblocker = false;
+	// right
+	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 30, GetAbsOrigin() + gpGlobals->v_up * 30 + gpGlobals->v_right * (FrontSuspWidth + RearSuspWidth) * 0.3, ignore_monsters, edict(), &trCol );
+	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+		hit_carblocker = true;
+	if( trCol.flFraction < 1.0f || hit_carblocker )
+		ColPointRight = -gpGlobals->v_right * 100;
+
+	Vector SideCollision = ColPointLeft + ColPointRight;
+
+	*Collision += SideCollision;
+}
+
 void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *ChassisShake, float *surf_Mult )
 {
 	TraceResult TexTr;
@@ -1008,6 +1139,13 @@ void CCar::Drive( void )
 	if( (hDriver->pev->button & IN_RELOAD) && (gpGlobals->time > StuckTime + 5) )
 	{
 		TryUnstick();
+
+		if( !SafeCarPos.IsNull() )
+		{
+			SetAbsOrigin( SafeCarPos );
+			CarSpeed = 0;
+		}
+
 		StuckTime = gpGlobals->time;
 	}
 
@@ -1085,69 +1223,13 @@ void CCar::Drive( void )
 	// wheels' origin (aka "suspension"...)
 	// 1-2 front wheels, 3-4 rear wheels
 	//----------------------------
-	TraceResult tr;
-
-	pWheel1Org = GetAbsOrigin() + ChassisForw * FrontSuspDist + gpGlobals->v_right * (FrontSuspWidth * 0.5);
-	pWheel2Org = GetAbsOrigin() + ChassisForw * FrontSuspDist- gpGlobals->v_right * (FrontSuspWidth * 0.5);
-	pWheel3Org = GetAbsOrigin() - ChassisForw * RearSuspDist + gpGlobals->v_right * (RearSuspWidth * 0.5);
-	pWheel4Org = GetAbsOrigin() - ChassisForw * RearSuspDist - gpGlobals->v_right * (RearSuspWidth * 0.5);
-	Vector pWheel1NewOrg = g_vecZero;
-	Vector pWheel2NewOrg = g_vecZero;
-	Vector pWheel3NewOrg = g_vecZero;
-	Vector pWheel4NewOrg = g_vecZero;
-	Vector pWheelOrgSet = g_vecZero;
-
-	int FRW_InAir = 0;
-	int FLW_InAir = 0;
-	int RRW_InAir = 0;
-	int RLW_InAir = 0;
-
-	// front right wheel
-	// ChassisUp * 40: need to make tracing start high to work properly on slopes !!!
-	float SlopeAdjust = 40.0f;
-	UTIL_TraceLine( pWheel1Org + ChassisUp * SlopeAdjust, pWheel1Org - ChassisUp * FrontWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel1->edict(), &tr );
-	pWheel1NewOrg = tr.vecEndPos + ChassisUp * FrontWheelRadius;
-
-	if( tr.flFraction == 1.0f && (int)(pWheel1NewOrg - pWheel1Org).Length() >= FrontWheelRadius - 1 )
-	{
-		pWheel1NewOrg = pWheel1Org - ChassisUp * FrontWheelRadius;
-		FRW_InAir = 1;
-	}
-
-	// front left wheel
-	UTIL_TraceLine( pWheel2Org + ChassisUp * SlopeAdjust, pWheel2Org - ChassisUp * FrontWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel2->edict(), &tr );
-	pWheel2NewOrg = tr.vecEndPos + ChassisUp * FrontWheelRadius;
-	if( tr.flFraction == 1.0f && (int)(pWheel2NewOrg - pWheel2Org).Length() >= FrontWheelRadius - 1 )
-	{
-		pWheel2NewOrg = pWheel2Org - ChassisUp * FrontWheelRadius;
-		FLW_InAir = 1;
-	}
-
-	// rear right wheel
-	UTIL_TraceLine( pWheel3Org + ChassisUp * SlopeAdjust, pWheel3Org - ChassisUp * RearWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel3->edict(), &tr );
-	pWheel3NewOrg = tr.vecEndPos + ChassisUp * RearWheelRadius;
-	if( tr.flFraction == 1.0f && (int)(pWheel3NewOrg - pWheel3Org).Length() >= RearWheelRadius - 1 )
-	{
-		pWheel3NewOrg = pWheel3Org - ChassisUp * RearWheelRadius;
-		RRW_InAir = 1;
-	}
-
-	// rear left wheel
-	UTIL_TraceLine( pWheel4Org + ChassisUp * SlopeAdjust, pWheel4Org - ChassisUp * RearWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel4->edict(), &tr );
-	pWheel4NewOrg = tr.vecEndPos + ChassisUp * RearWheelRadius;
-	if( tr.flFraction == 1.0f && (int)(pWheel4NewOrg - pWheel4Org).Length() >= RearWheelRadius - 1 )
-	{
-		pWheel4NewOrg = pWheel4Org - ChassisUp * RearWheelRadius;
-		RLW_InAir = 1;
-	}
-
+	int FRW_InAir;
+	int FLW_InAir;
+	int RRW_InAir;
+	int RLW_InAir;
+	Wheels( &FRW_InAir, &FLW_InAir, &RRW_InAir, &RLW_InAir );
 	int FrontWheelsInAir = FRW_InAir + FLW_InAir; // can't turn if 2
 	int RearWheelsInAir = RRW_InAir + RLW_InAir; // can't accelerate if 2 // TODO: 4x4? Front drive?
-
-	pWheel1->SetAbsOrigin( pWheel1NewOrg );
-	pWheel2->SetAbsOrigin( pWheel2NewOrg );
-	pWheel3->SetAbsOrigin( pWheel3NewOrg );
-	pWheel4->SetAbsOrigin( pWheel4NewOrg );
 
 	//----------------------------
 	// turn
@@ -1190,7 +1272,8 @@ void CCar::Drive( void )
 			Turning = 0;
 	}
 
-	float max_turn_val = 1.0f / (0.1f + AbsCarSpeed * 0.0075f); // magic
+	const float empirical = AbsCarSpeed * 0.00625f;
+	float max_turn_val = 1.0f / (0.1f + empirical); // magic
 	if( max_turn_val > 1.0f )
 		max_turn_val = 1.0f;
 	Turning = bound( -max_turn_val, Turning, max_turn_val );
@@ -1201,7 +1284,7 @@ void CCar::Drive( void )
 
 	CameraMoving = bound( -CameraMovingBound, CameraMoving, CameraMovingBound );
 
-	float CarTurnRate = (AbsCarSpeed * 0.00075) + (0.005f * HeatingMult);
+	float CarTurnRate = (empirical * 0.1) + (0.005f * HeatingMult);
 	if( 0 )//DriftMode && AbsCarSpeed > 10 )
 	{
 		CarTurnRate *= DriftAmount;
@@ -1218,16 +1301,11 @@ void CCar::Drive( void )
 
 	Vector CarAng = GetLocalAngles();
 	
-	//	Y - turn left and right
+	// YAW - turn left and right
 	float trn = (10 * MaxTurn) * (Turning * CarTurnRate) * gpGlobals->frametime;
 	if( FrontWheelsInAir == 2 )
 		trn = 0;
 	CarAng.y += trn;
-
-	CollisionAddTurn = bound( -5.0f, CollisionAddTurn, 5.0f );
-	if( CollisionAddTurn != 0.0f )
-		CollisionAddTurn = UTIL_Approach( 0.0f, CollisionAddTurn, 20 * gpGlobals->frametime );
-	CarAng.y += CollisionAddTurn;
 
 	//----------------------------
 	// wheels' turning (visual effect)
@@ -1309,8 +1387,8 @@ void CCar::Drive( void )
 		RearWheelAng.x += Forward * AbsCarSpeed * (M_PI * 0.5) * gpGlobals->frametime * (1 + HeatingMult);
 	}
 
-	if( FrontWheelAng.x > 359 || FrontWheelAng.x < -359 )
-		FrontWheelAng.x = 0;
+	if( FrontWheelAng.x > 359.9f || FrontWheelAng.x < -359.9f )
+		FrontWheelAng.x = 0.0f;
 
 	pWheel1->SetLocalAngles( FrontWheelAng );
 	pWheel2->SetLocalAngles( FrontWheelAng );
@@ -1544,140 +1622,13 @@ void CCar::Drive( void )
 	//----------------------------
 	// collision
 	//----------------------------
-	TraceResult trCol;
-	Vector Collision = g_vecZero;
-	Vector ColPoint = g_vecZero; // place for sparks
-	Vector ColPointLeft = g_vecZero;
-	Vector ColPointRight = g_vecZero;
 
-	// 4 collision points from wheels.
-	Vector ColPointWFR = g_vecZero;
-	Vector ColPointWFL = g_vecZero;
-	Vector ColPointWRR = g_vecZero;
-	Vector ColPointWRL = g_vecZero;
-
-	float ColDotProduct = 1.0f;
-
-	bool hit_carblocker = false;
-
-	if( Forward == 1 || (FrontWheelsInAir + RearWheelsInAir < 3 && Forward == -1) )
-	{
-		// front right wheel
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 + ChassisRight * FrontSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 + ChassisRight * FrontSuspWidth * 0.5 + ChassisForw * (FrontSuspDist + FrontBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWFR = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * ColDotProduct;
-			ColPoint = ColPointWFR;
-			if( ColDotProduct < 0.6 )
-				ColDotProduct *= -1;
-		}
-		else if( hit_carblocker )
-		{
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWFR;
-		}
-		hit_carblocker = false;
-
-		// front left wheel
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 - ChassisRight * FrontSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 - ChassisRight * FrontSuspWidth * 0.5 + ChassisForw * (FrontSuspDist + FrontBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWFL = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * ColDotProduct;
-			ColPoint = ColPointWFL;
-			if( ColDotProduct < 0.6 )
-				ColDotProduct *= -1;
-		}
-		else if( hit_carblocker )
-		{
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWFL;
-		}
-		hit_carblocker = false;
-	}
-
-	if( Forward == -1 || (FrontWheelsInAir + RearWheelsInAir < 3 && Forward == 1) )
-	{
-		// rear right wheel
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 + ChassisRight * RearSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 + ChassisRight * RearSuspWidth * 0.5 - ChassisForw * (RearSuspDist + RearBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWRR = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * Forward;
-			ColPoint = ColPointWRR;
-			if( Forward == -1 )
-			{
-				if( ColDotProduct < 0.6 )
-					ColDotProduct *= -1;
-			}
-			else if( Forward == 1 )
-			{
-				if( ColDotProduct > 0.4 )
-					ColDotProduct *= -1;
-			}
-		}
-		else if( hit_carblocker )
-		{
-			Collision += gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWRR;
-		}
-		hit_carblocker = false;
-
-		// rear left wheel
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 - ChassisRight * RearSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 - ChassisRight * RearSuspWidth * 0.5 - ChassisForw * (RearSuspDist + RearBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWRL = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * Forward;
-			ColPoint = ColPointWRL;
-			if( Forward == -1 )
-			{
-				if( ColDotProduct < 0.6 )
-					ColDotProduct *= -1;
-			}
-		}
-		else if( hit_carblocker )
-		{
-			Collision += gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWRL;
-		}
-		hit_carblocker = false;
-	}
-
-	// sides!
-	// left
-	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 30, GetAbsOrigin() + gpGlobals->v_up * 30 - gpGlobals->v_right * (FrontSuspWidth + RearSuspWidth) * 0.3, ignore_monsters, edict(), &trCol );
-	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-		hit_carblocker = true;
-	if( trCol.flFraction < 1.0f || hit_carblocker )
-		ColPointLeft = gpGlobals->v_right * 100;
-	hit_carblocker = false;
-	// right
-	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 30, GetAbsOrigin() + gpGlobals->v_up * 30 + gpGlobals->v_right * (FrontSuspWidth + RearSuspWidth) * 0.3, ignore_monsters, edict(), &trCol );
-	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-		hit_carblocker = true;
-	if( trCol.flFraction < 1.0f || hit_carblocker )
-		ColPointRight = -gpGlobals->v_right * 100;
-
-	Vector SideCollision = ColPointLeft + ColPointRight;
-	
-	// adjust velocity according to collision...
-	pev->velocity += Collision * 2 + SideCollision; // * 2 - bump into opposite direction
-	
-	hit_carblocker = false;
+	Vector Collision;
+	float ColDotProduct;
+	Vector ColPoint;
+	GetCollision( AbsCarSpeed, Forward, &Collision, &ColDotProduct, &ColPoint );
+	if( Collision.IsNull() && (FrontWheelsInAir + RearWheelsInAir == 0) )
+		SafeCarPos = GetAbsOrigin();
 
 	//----------------------------
 	// chassis inclination
@@ -1793,17 +1744,38 @@ void CCar::Drive( void )
 		}
 	}
 
-	if( (FrontWheelsInAir + RearWheelsInAir == 4) )
+	if( !Collision.IsNull() )
+	{
+		// can't accelerate if we are colliding
+		float AbsDot = fabs( ColDotProduct );
+		if( CarSpeed > 0 )
+		{
+			CarSpeed -= 5000 * AbsDot * gpGlobals->frametime;
+			if( CarSpeed < 25 && bForward() ) // in case if stuck...
+				CarSpeed = 25;
+			else if( CarSpeed < 0 )
+				CarSpeed = 0;
+		}
+		else if( CarSpeed < 0 )
+		{
+			CarSpeed += 5000 * AbsDot * gpGlobals->frametime;
+			if( CarSpeed > -25 && bBack() ) // in case if stuck...
+				CarSpeed = -25;
+			else if( CarSpeed > 0 )
+				CarSpeed = 0;
+		}
+	}
+	else if( (FrontWheelsInAir + RearWheelsInAir == 4) )
 	{
 		// don't add speed
 	}
 	else if( FrontWheelsInAir == 2 )
 	{
-		CarSpeed += 300 * gpGlobals->frametime;
+		CarSpeed += 300 * gpGlobals->frametime; // push the car off cliff
 	}
 	else if( RearWheelsInAir == 2 )
 	{
-		CarSpeed -= 300 * gpGlobals->frametime;
+		CarSpeed -= 300 * gpGlobals->frametime; // push the car off cliff
 	}
 	else if( (!(bForward()) && !(bBack()) && !(bUp())) || BrokenCar || IsLockedByMaster() )
 	{
@@ -1872,7 +1844,11 @@ void CCar::Drive( void )
 	// -------- apply main movement  --------
 	float AngleDiff = pWheel1->GetLocalAngles().y - pChassis->GetLocalAngles().y;
 	float Percentage = Forward * (AngleDiff / (90 - MaxTurn));
-	if( bUp() ) // handbrake
+	if( !Collision.IsNull() )
+	{
+		pev->velocity = Collision;
+	}
+	else if( bUp() ) // handbrake
 	{
 		pev->velocity += gpGlobals->v_forward * CarSpeed * (1 - fabs(Percentage)) + gpGlobals->v_right * CarSpeed * Percentage;
 	}
@@ -1882,19 +1858,19 @@ void CCar::Drive( void )
 			pev->velocity += DriftForw * CarSpeed;
 		else
 			pev->velocity += gpGlobals->v_forward * CarSpeed;
-	}
 
-	// check wheels - if one side is fully in air, push car in that direction
-	if( FrontWheelsInAir + RearWheelsInAir < 4 )
-	{
-		if( FLW_InAir + RLW_InAir == 2 )
-			pev->velocity += -gpGlobals->v_right * 200;
-		else if( FRW_InAir + RRW_InAir == 2 )
-			pev->velocity += gpGlobals->v_right * 200;
+		// check wheels - if one side is fully in air, push car in that direction
+		if( FrontWheelsInAir + RearWheelsInAir < 4 )
+		{
+			if( FLW_InAir + RLW_InAir == 2 )
+				pev->velocity += -gpGlobals->v_right * 200;
+			else if( FRW_InAir + RRW_InAir == 2 )
+				pev->velocity += gpGlobals->v_right * 200;
 
-		// add small drift
-	//	if( (AbsCarSpeed > 500) && !(bUp) )
-	//		pev->velocity += gpGlobals->v_right * Turning * CarSpeed * 0.25;
+			// add small drift
+		//	if( (AbsCarSpeed > 500) && !(bUp) )
+		//		pev->velocity += gpGlobals->v_right * Turning * CarSpeed * 0.25;
+		}
 	}
 
 	//----------------------------
@@ -1954,21 +1930,18 @@ void CCar::Drive( void )
 
 	bool TookDamage = false;
 	float DriverDamage = 0.0f;
-	bool Collided = false;
 
 	if( CarTouch )
 		CarSpeed *= 0.5;
 	
 	// do timing stuff each 0.5 seconds
-	if( (Collision.Length() > 0.001f) && (gpGlobals->time > time) || CarTouch )
+	if( !Collision.IsNull() && (gpGlobals->time > time) || CarTouch )
 	{
 		if( ColDotProduct < 0 && ColDotProduct > -0.18 )
 			ColDotProduct = -0.18;
 		else if( ColDotProduct > 0 && ColDotProduct < 0.18 )
 			ColDotProduct = 0.18;
 		// 0.18 so the multiplier would be less than 1 always
-	//	CarSpeed *= -0.15 / ColDotProduct; // moved to bottom
-		Collided = true;
 
 		if( AbsCarSpeed > 500 )
 		{
@@ -1979,7 +1952,7 @@ void CCar::Drive( void )
 		if( AbsCarSpeed > 100 )
 		{
 			// apply collision effects
-			if( ColPoint.Length() > 0 )
+			if( !ColPoint.IsNull() )
 				UTIL_Sparks( ColPoint );
 
 			switch( RANDOM_LONG( 0, 3 ) )
@@ -2050,7 +2023,7 @@ void CCar::Drive( void )
 	// stupid hack just to keep things playable because it can truly stick in a brush and it looks terrible
 	float ExpectedDist = (pev->velocity * gpGlobals->frametime).Length() * 0.01905f; // predicted velocity next frame in meters
 	// we didn't make even a half of expected distance, likely stuck
-	if( (AbsCarSpeed > 100.0f) && (ExpectedDist > 0.01f) && (Distance < ExpectedDist * 0.5f) && (gpGlobals->time > StuckTime + 1) && !Collided )
+	if( (AbsCarSpeed > 100.0f) && (ExpectedDist > 0.01f) && (Distance < ExpectedDist * 0.5f) && (gpGlobals->time > StuckTime + 1) && Collision.IsNull() )
 	{
 	//	ALERT( at_console, "this frame %f, next frame %f\n", Distance, ExpectedDist );
 		ALERT( at_aiconsole, "Car unstick\n" );
@@ -2071,9 +2044,6 @@ void CCar::Drive( void )
 	}
 	
 	SetLocalAngles( CarAng ); // car direction is now set
-
-	if( Collided )
-		CarSpeed *= -0.1 / ColDotProduct;
 
 	//----------------------------
 	// shoot!
@@ -2162,6 +2132,78 @@ void CCar::Drive( void )
 	SetNextThink( 0 );
 }
 
+void CCar::Wheels( int *FRW_InAir, int *FLW_InAir, int *RRW_InAir, int *RLW_InAir )
+{
+	TraceResult tr;
+
+	*FRW_InAir = 0;
+	*FLW_InAir = 0;
+	*RRW_InAir = 0;
+	*RLW_InAir = 0;
+
+	// make chassis vectors
+	UTIL_MakeVectors( pChassis->GetAbsAngles() );
+	Vector ChassisForw = gpGlobals->v_forward;
+	Vector ChassisUp = gpGlobals->v_up;
+	Vector ChassisRight = gpGlobals->v_right;
+
+	// bring back the car vectors
+	UTIL_MakeVectors( GetAbsAngles() );
+
+	pWheel1Org = GetAbsOrigin() + ChassisForw * FrontSuspDist + gpGlobals->v_right * (FrontSuspWidth * 0.5);
+	pWheel2Org = GetAbsOrigin() + ChassisForw * FrontSuspDist - gpGlobals->v_right * (FrontSuspWidth * 0.5);
+	pWheel3Org = GetAbsOrigin() - ChassisForw * RearSuspDist + gpGlobals->v_right * (RearSuspWidth * 0.5);
+	pWheel4Org = GetAbsOrigin() - ChassisForw * RearSuspDist - gpGlobals->v_right * (RearSuspWidth * 0.5);
+	Vector pWheel1NewOrg = pWheel1Org;
+	Vector pWheel2NewOrg = pWheel2Org;
+	Vector pWheel3NewOrg = pWheel3Org;
+	Vector pWheel4NewOrg = pWheel4Org;
+
+	// front right wheel
+	// ChassisUp * 40: need to make tracing start high to work properly on slopes !!!
+	float SlopeAdjust = 40.0f;
+	UTIL_TraceLine( pWheel1Org + ChassisUp * SlopeAdjust, pWheel1Org - ChassisUp * FrontWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel1->edict(), &tr );
+	pWheel1NewOrg = tr.vecEndPos + ChassisUp * FrontWheelRadius;
+
+	if( tr.flFraction == 1.0f && (int)(pWheel1NewOrg - pWheel1Org).Length() >= FrontWheelRadius - 1 )
+	{
+		pWheel1NewOrg = pWheel1Org - ChassisUp * FrontWheelRadius;
+		*FRW_InAir = 1;
+	}
+
+	// front left wheel
+	UTIL_TraceLine( pWheel2Org + ChassisUp * SlopeAdjust, pWheel2Org - ChassisUp * FrontWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel2->edict(), &tr );
+	pWheel2NewOrg = tr.vecEndPos + ChassisUp * FrontWheelRadius;
+	if( tr.flFraction == 1.0f && (int)(pWheel2NewOrg - pWheel2Org).Length() >= FrontWheelRadius - 1 )
+	{
+		pWheel2NewOrg = pWheel2Org - ChassisUp * FrontWheelRadius;
+		*FLW_InAir = 1;
+	}
+
+	// rear right wheel
+	UTIL_TraceLine( pWheel3Org + ChassisUp * SlopeAdjust, pWheel3Org - ChassisUp * RearWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel3->edict(), &tr );
+	pWheel3NewOrg = tr.vecEndPos + ChassisUp * RearWheelRadius;
+	if( tr.flFraction == 1.0f && (int)(pWheel3NewOrg - pWheel3Org).Length() >= RearWheelRadius - 1 )
+	{
+		pWheel3NewOrg = pWheel3Org - ChassisUp * RearWheelRadius;
+		*RRW_InAir = 1;
+	}
+
+	// rear left wheel
+	UTIL_TraceLine( pWheel4Org + ChassisUp * SlopeAdjust, pWheel4Org - ChassisUp * RearWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel4->edict(), &tr );
+	pWheel4NewOrg = tr.vecEndPos + ChassisUp * RearWheelRadius;
+	if( tr.flFraction == 1.0f && (int)(pWheel4NewOrg - pWheel4Org).Length() >= RearWheelRadius - 1 )
+	{
+		pWheel4NewOrg = pWheel4Org - ChassisUp * RearWheelRadius;
+		*RLW_InAir = 1;
+	}
+
+	pWheel1->SetAbsOrigin( pWheel1NewOrg );
+	pWheel2->SetAbsOrigin( pWheel2NewOrg );
+	pWheel3->SetAbsOrigin( pWheel3NewOrg );
+	pWheel4->SetAbsOrigin( pWheel4NewOrg );
+}
+
 //===============================================================================
 // camera view
 //===============================================================================
@@ -2174,7 +2216,12 @@ void CCar::Camera(void)
 		return;
 
 	if( CarSpeed > 0.01f && (bBack() || bUp()) ) // braking
-		CameraBrakeOffsetX = UTIL_Approach( 25, CameraBrakeOffsetX, 5 * gpGlobals->frametime );
+	{
+		if( bUp() && FClassnameIs( this, "func_boat") ) // boats don't have handbrake
+			CameraBrakeOffsetX = UTIL_Approach( 0, CameraBrakeOffsetX, 9 * gpGlobals->frametime );
+		else
+			CameraBrakeOffsetX = UTIL_Approach( 25, CameraBrakeOffsetX, 5 * gpGlobals->frametime );
+	}
 	else
 		CameraBrakeOffsetX = UTIL_Approach( 0, CameraBrakeOffsetX, 9 * gpGlobals->frametime );
 
@@ -2271,69 +2318,17 @@ void CCar::Idle( void )
 	// wheels' origin (aka "suspension"...)
 	// 1-2 front wheels, 3-4 rear wheels
 	//----------------------------
-	TraceResult tr;
-
-	pWheel1Org = GetAbsOrigin() + ChassisForw * FrontSuspDist + gpGlobals->v_right * (FrontSuspWidth * 0.5);
-	pWheel2Org = GetAbsOrigin() + ChassisForw * FrontSuspDist - gpGlobals->v_right * (FrontSuspWidth * 0.5);
-	pWheel3Org = GetAbsOrigin() - ChassisForw * RearSuspDist + gpGlobals->v_right * (RearSuspWidth * 0.5);
-	pWheel4Org = GetAbsOrigin() - ChassisForw * RearSuspDist - gpGlobals->v_right * (RearSuspWidth * 0.5);
-	Vector pWheel1NewOrg = g_vecZero;
-	Vector pWheel2NewOrg = g_vecZero;
-	Vector pWheel3NewOrg = g_vecZero;
-	Vector pWheel4NewOrg = g_vecZero;
-	Vector pWheelOrgSet = g_vecZero;
-
-	int FRW_InAir = 0;
-	int FLW_InAir = 0;
-	int RRW_InAir = 0;
-	int RLW_InAir = 0;
-
-	// front right wheel
-	// ChassisUp * 40: need to make tracing start high to work properly on slopes !!!
-	float SlopeAdjust = 40.0f;
-	UTIL_TraceLine( pWheel1Org + ChassisUp * SlopeAdjust, pWheel1Org - ChassisUp * FrontWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel1->edict(), &tr );
-	pWheel1NewOrg = tr.vecEndPos + ChassisUp * FrontWheelRadius;
-
-	if( tr.flFraction == 1.0f && (int)(pWheel1NewOrg - pWheel1Org).Length() >= FrontWheelRadius - 1 )
-	{
-		pWheel1NewOrg = pWheel1Org - ChassisUp * FrontWheelRadius;
-		FRW_InAir = 1;
-	}
-
-	// front left wheel
-	UTIL_TraceLine( pWheel2Org + ChassisUp * SlopeAdjust, pWheel2Org - ChassisUp * FrontWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel2->edict(), &tr );
-	pWheel2NewOrg = tr.vecEndPos + ChassisUp * FrontWheelRadius;
-	if( tr.flFraction == 1.0f && (int)(pWheel2NewOrg - pWheel2Org).Length() >= FrontWheelRadius - 1 )
-	{
-		pWheel2NewOrg = pWheel2Org - ChassisUp * FrontWheelRadius;
-		FLW_InAir = 1;
-	}
-
-	// rear right wheel
-	UTIL_TraceLine( pWheel3Org + ChassisUp * SlopeAdjust, pWheel3Org - ChassisUp * RearWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel3->edict(), &tr );
-	pWheel3NewOrg = tr.vecEndPos + ChassisUp * RearWheelRadius;
-	if( tr.flFraction == 1.0f && (int)(pWheel3NewOrg - pWheel3Org).Length() >= RearWheelRadius - 1 )
-	{
-		pWheel3NewOrg = pWheel3Org - ChassisUp * RearWheelRadius;
-		RRW_InAir = 1;
-	}
-
-	// rear left wheel
-	UTIL_TraceLine( pWheel4Org + ChassisUp * SlopeAdjust, pWheel4Org - ChassisUp * RearWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel4->edict(), &tr );
-	pWheel4NewOrg = tr.vecEndPos + ChassisUp * RearWheelRadius;
-	if( tr.flFraction == 1.0f && (int)(pWheel4NewOrg - pWheel4Org).Length() >= RearWheelRadius - 1 )
-	{
-		pWheel4NewOrg = pWheel4Org - ChassisUp * RearWheelRadius;
-		RLW_InAir = 1;
-	}
-
+	//----------------------------
+	// wheels' origin (aka "suspension"...)
+	// 1-2 front wheels, 3-4 rear wheels
+	//----------------------------
+	int FRW_InAir;
+	int FLW_InAir;
+	int RRW_InAir;
+	int RLW_InAir;
+	Wheels( &FRW_InAir, &FLW_InAir, &RRW_InAir, &RLW_InAir );
 	int FrontWheelsInAir = FRW_InAir + FLW_InAir; // can't turn if 2
 	int RearWheelsInAir = RRW_InAir + RLW_InAir; // can't accelerate if 2 // TODO: 4x4? Front drive?
-
-	pWheel1->SetAbsOrigin( pWheel1NewOrg );
-	pWheel2->SetAbsOrigin( pWheel2NewOrg );
-	pWheel3->SetAbsOrigin( pWheel3NewOrg );
-	pWheel4->SetAbsOrigin( pWheel4NewOrg );
 
 	//----------------------------
 	// turn
@@ -2392,9 +2387,35 @@ void CCar::Idle( void )
 	pChassis->SetAbsOrigin( ChassisOrg );
 
 	//----------------------------
+	// collision
+	//----------------------------
+	Vector Collision;
+	Vector ColPoint;
+	float ColDotProduct;
+
+	GetCollision( AbsCarSpeed, Forward, &Collision, &ColDotProduct, &ColPoint );
+
+	//----------------------------
 	// accelerate/brake
 	//----------------------------
-	if( (FrontWheelsInAir + RearWheelsInAir == 4) || (FrontWheelsInAir == 2) )
+	if( !Collision.IsNull() )
+	{
+		// can't accelerate if we are colliding
+		float AbsDot = fabs( ColDotProduct );
+		if( CarSpeed > 0 )
+		{
+			CarSpeed -= 5000 * AbsDot * gpGlobals->frametime;
+			if( CarSpeed < 0 )
+				CarSpeed = 0;
+		}
+		else if( CarSpeed < 0 )
+		{
+			CarSpeed += 5000 * AbsDot * gpGlobals->frametime;
+			if( CarSpeed > 0 )
+				CarSpeed = 0;
+		}
+	}
+	else if( (FrontWheelsInAir + RearWheelsInAir == 4) || (FrontWheelsInAir == 2) )
 	{
 		CarSpeed += Forward * 200 * gpGlobals->frametime;
 	}
@@ -2421,144 +2442,6 @@ void CCar::Idle( void )
 		else if( FRW_InAir + RRW_InAir == 2 )
 			pev->velocity += gpGlobals->v_right * 200;
 	}
-
-	//----------------------------
-	// collision
-	//----------------------------
-	TraceResult trCol;
-	Vector Collision = g_vecZero;
-	Vector ColPoint = g_vecZero; // place for sparks
-	Vector ColPointLeft = g_vecZero;
-	Vector ColPointRight = g_vecZero;
-
-	// 4 collision points from wheels.
-	Vector ColPointWFR = g_vecZero;
-	Vector ColPointWFL = g_vecZero;
-	Vector ColPointWRR = g_vecZero;
-	Vector ColPointWRL = g_vecZero;
-
-	float ColDotProduct = 1.0f;
-
-	bool hit_carblocker = false;
-
-	if( Forward == 1 || (FrontWheelsInAir + RearWheelsInAir < 3 && Forward == -1) )
-	{
-		// front right wheel
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 + ChassisRight * FrontSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 + ChassisRight * FrontSuspWidth * 0.5 + ChassisForw * (FrontSuspDist + FrontBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWFR = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * ColDotProduct;
-			ColPoint = ColPointWFR;
-			if( ColDotProduct < 0.6 )
-				ColDotProduct *= -1;
-		}
-		else if( hit_carblocker )
-		{
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWFR;
-		}
-		hit_carblocker = false;
-
-		// front left wheel
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 - ChassisRight * FrontSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 - ChassisRight * FrontSuspWidth * 0.5 + ChassisForw * (FrontSuspDist + FrontBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWFL = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * ColDotProduct;
-			ColPoint = ColPointWFL;
-			if( ColDotProduct < 0.6 )
-				ColDotProduct *= -1;
-		}
-		else if( hit_carblocker )
-		{
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWFL;
-		}
-		hit_carblocker = false;
-	}
-
-	if( Forward == -1 || (FrontWheelsInAir + RearWheelsInAir < 3 && Forward == 1) )
-	{
-		// rear right wheel
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 + ChassisRight * RearSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 + ChassisRight * RearSuspWidth * 0.5 - ChassisForw * (RearSuspDist + RearBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWRR = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * Forward;
-			ColPoint = ColPointWRR;
-			if( Forward == -1 )
-			{
-				if( ColDotProduct < 0.6 )
-					ColDotProduct *= -1;
-			}
-			else if( Forward == 1 )
-			{
-				if( ColDotProduct > 0.4 )
-					ColDotProduct *= -1;
-			}
-		}
-		else if( hit_carblocker )
-		{
-			Collision += gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWRR;
-		}
-		hit_carblocker = false;
-
-		// rear left wheel
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 - ChassisRight * RearSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 - ChassisRight * RearSuspWidth * 0.5 - ChassisForw * (RearSuspDist + RearBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWRL = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * Forward;
-			ColPoint = ColPointWRL;
-			if( Forward == -1 )
-			{
-				if( ColDotProduct < 0.6 )
-					ColDotProduct *= -1;
-			}
-		}
-		else if( hit_carblocker )
-		{
-			Collision += gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWRL;
-		}
-		hit_carblocker = false;
-	}
-
-	// sides!
-	// left
-	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 30, GetAbsOrigin() + gpGlobals->v_up * 30 - gpGlobals->v_right * (FrontSuspWidth + RearSuspWidth) * 0.3, ignore_monsters, edict(), &trCol );
-	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-		hit_carblocker = true;
-	if( trCol.flFraction < 1.0f || hit_carblocker )
-		ColPointLeft = gpGlobals->v_right * 100;
-	hit_carblocker = false;
-	// right
-	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 30, GetAbsOrigin() + gpGlobals->v_up * 30 + gpGlobals->v_right * (FrontSuspWidth + RearSuspWidth) * 0.3, ignore_monsters, edict(), &trCol );
-	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
-		hit_carblocker = true;
-	if( trCol.flFraction < 1.0f || hit_carblocker )
-		ColPointRight = -gpGlobals->v_right * 100;
-
-	Vector SideCollision = ColPointLeft + ColPointRight;
-
-	// adjust velocity according to collision...
-	pev->velocity += Collision * 2 + SideCollision; // * 2 - bump into opposite direction
-
-	hit_carblocker = false;
 
 	//----------------------------
 	// weight...?
@@ -2608,10 +2491,10 @@ void CCar::Idle( void )
 	//----------------------------
 
 	// do timing stuff each 0.5 seconds
-	if( (gpGlobals->time > time) && (Collision.Length() > 0.01f) )
+	if( (gpGlobals->time > time) && !Collision.IsNull() )
 	{
 		// apply collision effects
-		if( ColPoint.Length() > 0 )
+		if( !ColPoint.IsNull() )
 		{
 			UTIL_Sparks( ColPoint );
 		}
@@ -2623,8 +2506,6 @@ void CCar::Idle( void )
 		case 2: EMIT_SOUND( edict(), CHAN_ITEM, "func_car/car_impact3.wav", 1, ATTN_NORM ); break;
 		case 3: EMIT_SOUND( edict(), CHAN_ITEM, "func_car/car_impact4.wav", 1, ATTN_NORM ); break;
 		}
-
-		CarSpeed *= -0.2;
 
 		time = gpGlobals->time + 0.5;
 	}
@@ -2638,7 +2519,7 @@ void CCar::Idle( void )
 	SetLocalAngles( CarAng ); // car direction is now set
 
 	float thinktime = 0.0f;
-	if( !g_pGameRules->IsMultiplayer() && (CarSpeed == 0.0f) && (pev->velocity == g_vecZero) && (pev->flags & FL_ONGROUND) )
+	if( !g_pGameRules->IsMultiplayer() && (CarSpeed == 0.0f) && (pev->velocity.IsNull()) && (pev->flags & FL_ONGROUND) )
 	{
 		// don't think too often if player is far from the car, and it is idle
 		CBaseEntity *pPlayer = CBaseEntity::Instance( INDEXENT( 1 ) );
@@ -2743,14 +2624,11 @@ bool CCar::ExitCar( CBaseEntity *pPlayer )
 	}
 
 	// can't spawn anywhere.
-//	UTIL_ShowMessage( "Can't exit the vehicle here!", pPlayer );
 	ALERT( at_error, "Can't exit the vehicle here!\n" );
 
 	// last try...
 	pPlayer->SetAbsOrigin( SafeSpawnPos );
 	return true;
-
-	return false;
 }
 
 //========================================================================

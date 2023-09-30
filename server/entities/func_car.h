@@ -12,6 +12,8 @@ public:
 	void Setup( void );
 	void Drive( void );
 	void Idle( void );
+	void GetCollision( const float AbsCarSpeed, const int Forward, Vector *Collision, float *ColDotProduct, Vector *ColPoint );
+	void Wheels( int *FRW_InAir, int *FLW_InAir, int *RRW_InAir, int *RLW_InAir );
 	void Camera( void );
 	int ObjectCaps( void );
 	void ClearEffects( void );
@@ -24,6 +26,7 @@ public:
 	Vector SafeSpawnPosition( void );
 	float LastSafeSpawnCollectTime; // not saved
 	Vector SafeSpawnPos;
+	Vector SafeCarPos;
 
 	EHANDLE hDriver;
 
@@ -83,7 +86,6 @@ public:
 	float time; // not saved
 	float dmgtime; // not saved
 	float driveranimtime; // not saved
-	float CollisionAddTurn; // not saved
 	float SuspHardness;
 	int FrontBumperLength;
 	int RearBumperLength;
@@ -166,6 +168,7 @@ public:
 	void ClearEffects( void );
 	bool ExitCar( CBaseEntity *pPlayer );
 	Vector SafeSpawnPosition( void );
+	void GetCollision( const float AbsCarSpeed, const int Forward, Vector *Collision, float *ColDotProduct, Vector *ColPoint );
 
 	int BoatLength;
 	int BoatWidth;

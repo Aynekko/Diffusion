@@ -385,6 +385,137 @@ void CBoat::Setup( void )
 	SetNextThink( RANDOM_FLOAT( 0.2f, 0.5f ) );
 }
 
+void CBoat::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Collision, float *ColDotProduct, Vector *ColPoint )
+{
+	TraceResult trCol;
+
+	*Collision = g_vecZero;
+	*ColPoint = g_vecZero; // place for sparks
+	*ColDotProduct = 1.0f;
+
+	Vector ColPointLeft = g_vecZero;
+	Vector ColPointRight = g_vecZero;
+
+	// 4 collision points from corners.
+	Vector ColPointWFR = g_vecZero;
+	Vector ColPointWFL = g_vecZero;
+	Vector ColPointWRR = g_vecZero;
+	Vector ColPointWRL = g_vecZero;
+
+	// make chassis vectors
+	UTIL_MakeVectors( pChassis->GetAbsAngles() );
+	Vector ChassisForw = gpGlobals->v_forward;
+	Vector ChassisUp = gpGlobals->v_up;
+	Vector ChassisRight = gpGlobals->v_right;
+
+	// bring back the boat vectors
+	UTIL_MakeVectors( GetAbsAngles() );
+
+	bool hit_carblocker = false;
+
+	int magic = 10;
+	if( Forward == 1 )
+	{
+		// front right corner
+		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5 + ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
+		ColPointWFR = trCol.vecEndPos;
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f )
+		{
+			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * ColDotProduct;
+			*ColPoint = ColPointWFR;
+			if( *ColDotProduct < 0.6 )
+				*ColDotProduct *= -1;
+		}
+		else if( hit_carblocker )
+		{
+			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*ColPoint = ColPointWFR;
+		}
+		hit_carblocker = false;
+
+		// front left corner
+		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5 + ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
+		ColPointWFL = trCol.vecEndPos;
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f )
+		{
+			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * ColDotProduct;
+			*ColPoint = ColPointWFL;
+			if( *ColDotProduct < 0.6 )
+				*ColDotProduct *= -1;
+		}
+		else if( hit_carblocker )
+		{
+			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*ColPoint = ColPointWFL;
+		}
+		hit_carblocker = false;
+	}
+
+	if( Forward == -1 )
+	{
+		// rear right corner
+		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5 - ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
+		ColPointWRR = trCol.vecEndPos;
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f )
+		{
+			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * Forward;
+			*ColPoint = ColPointWRR;
+		}
+		else if( hit_carblocker )
+		{
+			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*ColPoint = ColPointWRR;
+		}
+		hit_carblocker = false;
+
+		// rear left corner
+		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5 - ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
+		ColPointWRL = trCol.vecEndPos;
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f )
+		{
+			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * Forward;
+			*ColPoint = ColPointWRL;
+		}
+		else if( hit_carblocker )
+		{
+			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*ColPoint = ColPointWRL;
+		}
+		hit_carblocker = false;
+	}
+
+	// sides!
+	// left
+	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * magic, GetAbsOrigin() + gpGlobals->v_up * magic - gpGlobals->v_right * BoatWidth * 0.5, ignore_monsters, edict(), &trCol );
+	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
+		hit_carblocker = true;
+	if( trCol.flFraction < 1.0f || hit_carblocker )
+		ColPointLeft = gpGlobals->v_right * 100;
+	hit_carblocker = false;
+	// right
+	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * magic, GetAbsOrigin() + gpGlobals->v_up * magic + gpGlobals->v_right * BoatWidth * 0.5, ignore_monsters, edict(), &trCol );
+	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
+		hit_carblocker = true;
+	if( trCol.flFraction < 1.0f || hit_carblocker )
+		ColPointRight = -gpGlobals->v_right * 100;
+
+	Vector SideCollision = ColPointLeft + ColPointRight;
+
+	*Collision += SideCollision;
+}
+
 void CBoat::Drive( void )
 {
 	if( hDriver == NULL )
@@ -515,11 +646,6 @@ void CBoat::Drive( void )
 	float trn = (10 * MaxTurn) * (Turning * BoatTurnRate) * gpGlobals->frametime;
 	BoatAng.y += trn;
 
-	CollisionAddTurn = bound( -5.0f, CollisionAddTurn, 5.0f );
-	if( CollisionAddTurn != 0.0f )
-		CollisionAddTurn = UTIL_Approach( 0.0f, CollisionAddTurn, 20 * gpGlobals->frametime );
-	BoatAng.y += CollisionAddTurn;
-
 	//----------------------------
 	// engine sound
 	//----------------------------
@@ -557,141 +683,11 @@ void CBoat::Drive( void )
 	//----------------------------
 	// collision
 	//----------------------------
-	TraceResult trCol;
-	Vector Collision = g_vecZero;
-	Vector ColPoint = g_vecZero; // place for sparks
-	Vector ColPointLeft = g_vecZero;
-	Vector ColPointRight = g_vecZero;
-
-	// 4 collision points from corners.
-	Vector ColPointWFR = g_vecZero;
-	Vector ColPointWFL = g_vecZero;
-	Vector ColPointWRR = g_vecZero;
-	Vector ColPointWRL = g_vecZero;
-
-	float ColDotProduct = 1.0f;
-
-	bool hit_carblocker = false;
-
-	int magic = 10;
-	if( Forward == 1 || (!InAir && Forward == -1) )
-	{
-		// front right corner
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5 + ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
-		ColPointWFR = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * ColDotProduct;
-			ColPoint = ColPointWFR;
-			if( ColDotProduct < 0.6 )
-				ColDotProduct *= -1;
-		}
-		else if( hit_carblocker )
-		{
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWFR;
-		}
-		hit_carblocker = false;
-
-		// front left corner
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5 + ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
-		ColPointWFL = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * ColDotProduct;
-			ColPoint = ColPointWFL;
-			if( ColDotProduct < 0.6 )
-				ColDotProduct *= -1;
-		}
-		else if( hit_carblocker )
-		{
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWFL;
-		}
-		hit_carblocker = false;
-	}
-
-	if( Forward == -1 || (!InAir && Forward == 1) )
-	{
-		// rear right corner
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5 - ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
-		ColPointWRR = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * Forward;
-			ColPoint = ColPointWRR;
-			if( Forward == -1 )
-			{
-				if( ColDotProduct < 0.6 )
-					ColDotProduct *= -1;
-			}
-			else if( Forward == 1 )
-			{
-				if( ColDotProduct > 0.4 )
-					ColDotProduct *= -1;
-			}
-		}
-		else if( hit_carblocker )
-		{
-			Collision += gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWRR;
-		}
-		hit_carblocker = false;
-
-		// rear left corner
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5 - ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
-		ColPointWRL = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * Forward;
-			ColPoint = ColPointWRL;
-			if( Forward == -1 )
-			{
-				if( ColDotProduct < 0.6 )
-					ColDotProduct *= -1;
-			}
-		}
-		else if( hit_carblocker )
-		{
-			Collision += gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWRL;
-		}
-		hit_carblocker = false;
-	}
-
-	// sides!
-	// left
-	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * magic, GetAbsOrigin() + gpGlobals->v_up * magic - gpGlobals->v_right * BoatWidth * 0.5, ignore_monsters, edict(), &trCol );
-	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-		hit_carblocker = true;
-	if( trCol.flFraction < 1.0f || hit_carblocker )
-		ColPointLeft = gpGlobals->v_right * 100;
-	hit_carblocker = false;
-	// right
-	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * magic, GetAbsOrigin() + gpGlobals->v_up * magic + gpGlobals->v_right * BoatWidth * 0.5, ignore_monsters, edict(), &trCol );
-	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-		hit_carblocker = true;
-	if( trCol.flFraction < 1.0f || hit_carblocker )
-		ColPointRight = -gpGlobals->v_right * 100;
-
-	Vector SideCollision = ColPointLeft + ColPointRight;
-
-	// adjust velocity according to collision...
-	pev->velocity += Collision * 2 + SideCollision;
-
-	hit_carblocker = false;
+	
+	Vector Collision;
+	float ColDotProduct;
+	Vector ColPoint;
+	GetCollision( AbsCarSpeed, Forward, &Collision, &ColDotProduct, &ColPoint );
 
 	//----------------------------
 	// chassis inclination
@@ -724,7 +720,7 @@ void CBoat::Drive( void )
 	UTIL_TraceLine( RearCheck + ChassisUp * 50, RearCheck - ChassisUp * (BoatDepth * 4), ignore_monsters, dont_ignore_glass, edict(), &TrCross );
 	if( TrCross.flFraction < 1.0f && !Afloat )
 		RearPoint = TrCross.vecEndPos.z;
-	float CrossPoint = RearPoint - FrontPoint;
+	const float CrossPoint = (RearPoint - FrontPoint) * 0.5f;
 	if( CrossPoint != 0.0f || !Afloat )
 	{
 		AccelAddX = 0;
@@ -769,7 +765,28 @@ void CBoat::Drive( void )
 	float ActualAccelRate = AccelRate / (1 + (AbsCarSpeed / MaxCarSpeed));
 	float ActualBackAccelRate = BackAccelRate / (1 + (AbsCarSpeed / MaxCarSpeed));
 
-	if( (!(bForward()) && !(bBack())) || BrokenCar || IsLockedByMaster() || ( pev->flags & FL_ONGROUND ) )
+	if( !Collision.IsNull() )
+	{
+		// can't accelerate if we are colliding
+		float AbsDot = fabs( ColDotProduct );
+		if( CarSpeed > 0 )
+		{
+			CarSpeed -= 5000 * AbsDot * gpGlobals->frametime;
+			if( CarSpeed < 25 && bForward() ) // in case if stuck...
+				CarSpeed = 25;
+			else if( CarSpeed < 0 )
+				CarSpeed = 0;
+		}
+		else if( CarSpeed < 0 )
+		{
+			CarSpeed += 5000 * AbsDot * gpGlobals->frametime;
+			if( CarSpeed > -25 && bBack() ) // in case if stuck...
+				CarSpeed = -25;
+			else if( CarSpeed > 0 )
+				CarSpeed = 0;
+		}
+	}
+	else if( (!(bForward()) && !(bBack())) || BrokenCar || IsLockedByMaster() || ( pev->flags & FL_ONGROUND ) )
 	{
 		// no accelerate/brake buttons pressed or all wheels in air
 		// boat slows down (aka friction...)
@@ -785,7 +802,7 @@ void CBoat::Drive( void )
 		if( CarSpeed > -20 && CarSpeed < 20 )
 			CarSpeed = 0.0f;
 	}
-	else if( bForward() || bBack() )
+	else if( !InAir && (bForward() || bBack()) )
 	{
 		if( bForward() )
 		{
@@ -796,16 +813,17 @@ void CBoat::Drive( void )
 			if( CarSpeed > 0 )
 				CarSpeed -= BrakeRate * gpGlobals->frametime;
 			else
-			{
 				CarSpeed -= ActualBackAccelRate * (1 - fabs( Turning ) * 0.5) * gpGlobals->frametime;
-			}
 		}
 	}
 
 	CarSpeed = bound( -MaxCarSpeedBackwards + (MaxCarSpeedBackwards * fabs( Turning ) * 0.25), CarSpeed, MaxCarSpeed - (MaxCarSpeed * fabs( Turning ) * 0.25) );
 
 	// apply main movement
-	pev->velocity += gpGlobals->v_forward * CarSpeed;
+	if( !Collision.IsNull() )
+		pev->velocity = Collision;
+	else
+		pev->velocity += gpGlobals->v_forward * CarSpeed;
 
 	//----------------------------
 	// weight...?
@@ -881,7 +899,7 @@ void CBoat::Drive( void )
 	bool Collided = false;
 
 	// do timing stuff each 0.5 seconds
-	if( (Collision.Length() > 0.01f) && (gpGlobals->time > time) )
+	if( !Collision.IsNull() && (gpGlobals->time > time) )
 	{
 		if( ColDotProduct < 0 && ColDotProduct > -0.18 )
 			ColDotProduct = -0.18;
@@ -1109,11 +1127,6 @@ void CBoat::Idle( void )
 	float trn = (10 * MaxTurn) * (Turning * BoatTurnRate) * gpGlobals->frametime;
 	BoatAng.y += trn;
 
-	CollisionAddTurn = bound( -5.0f, CollisionAddTurn, 5.0f );
-	if( CollisionAddTurn != 0.0f )
-		CollisionAddTurn = UTIL_Approach( 0.0f, CollisionAddTurn, 20 * gpGlobals->frametime );
-	BoatAng.y += CollisionAddTurn;
-
 	//----------------------------
 	// texture sound (tires) and chassis shaking (from dirt etc.)
 	//----------------------------
@@ -1141,141 +1154,11 @@ void CBoat::Idle( void )
 	//----------------------------
 	// collision
 	//----------------------------
-	TraceResult trCol;
-	Vector Collision = g_vecZero;
-	Vector ColPoint = g_vecZero; // place for sparks
-	Vector ColPointLeft = g_vecZero;
-	Vector ColPointRight = g_vecZero;
 
-	// 4 collision points from wheels.
-	Vector ColPointWFR = g_vecZero;
-	Vector ColPointWFL = g_vecZero;
-	Vector ColPointWRR = g_vecZero;
-	Vector ColPointWRL = g_vecZero;
-
-	float ColDotProduct = 1.0f;
-
-	bool hit_carblocker = false;
-
-	int magic = 15; // height
-	if( Forward == 1 || (!InAir && Forward == -1) )
-	{
-		// front right corner
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5 + ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
-		ColPointWFR = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * ColDotProduct;
-			ColPoint = ColPointWFR;
-			if( ColDotProduct < 0.6 )
-				ColDotProduct *= -1;
-		}
-		else if( hit_carblocker )
-		{
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWFR;
-		}
-		hit_carblocker = false;
-
-		// front left corner
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5 + ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
-		ColPointWFL = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * ColDotProduct;
-			ColPoint = ColPointWFL;
-			if( ColDotProduct < 0.6 )
-				ColDotProduct *= -1;
-		}
-		else if( hit_carblocker )
-		{
-			Collision += -gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWFL;
-		}
-		hit_carblocker = false;
-	}
-
-	if( Forward == -1 || (!InAir && Forward == 1) )
-	{
-		// rear right corner
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic + ChassisRight * BoatWidth * 0.5 - ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
-		ColPointWRR = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * Forward;
-			ColPoint = ColPointWRR;
-			if( Forward == -1 )
-			{
-				if( ColDotProduct < 0.6 )
-					ColDotProduct *= -1;
-			}
-			else if( Forward == 1 )
-			{
-				if( ColDotProduct > 0.4 )
-					ColDotProduct *= -1;
-			}
-		}
-		else if( hit_carblocker )
-		{
-			Collision += gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWRR;
-		}
-		hit_carblocker = false;
-
-		// rear left corner
-		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5, GetAbsOrigin() + ChassisUp * magic - ChassisRight * BoatWidth * 0.5 - ChassisForw * BoatLength * 0.5, ignore_monsters, edict(), &trCol );
-		ColPointWRL = trCol.vecEndPos;
-		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-			hit_carblocker = true;
-		if( trCol.flFraction < 1.0f )
-		{
-			ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			Collision += gpGlobals->v_forward * CarSpeed * Forward + trCol.vecPlaneNormal * CarSpeed * Forward;
-			ColPoint = ColPointWRL;
-			if( Forward == -1 )
-			{
-				if( ColDotProduct < 0.6 )
-					ColDotProduct *= -1;
-			}
-		}
-		else if( hit_carblocker )
-		{
-			Collision += gpGlobals->v_forward * CarSpeed * Forward;
-			ColPoint = ColPointWRL;
-		}
-		hit_carblocker = false;
-	}
-
-	// sides!
-	// left
-	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * magic, GetAbsOrigin() + gpGlobals->v_up * magic - gpGlobals->v_right * BoatWidth * 0.5, ignore_monsters, edict(), &trCol );
-	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-		hit_carblocker = true;
-	if( trCol.flFraction < 1.0f || hit_carblocker )
-		ColPointLeft = gpGlobals->v_right * 100;
-	hit_carblocker = false;
-	// right
-	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * magic, GetAbsOrigin() + gpGlobals->v_up * magic + gpGlobals->v_right * BoatWidth * 0.5, ignore_monsters, edict(), &trCol );
-	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_BOATBLOCKER )
-		hit_carblocker = true;
-	if( trCol.flFraction < 1.0f || hit_carblocker )
-		ColPointRight = -gpGlobals->v_right * 100;
-
-	Vector SideCollision = ColPointLeft + ColPointRight;
-
-	// adjust velocity according to collision...
-	pev->velocity += Collision * 2 + SideCollision;
-
-	hit_carblocker = false;
+	Vector Collision;
+	float ColDotProduct;
+	Vector ColPoint;
+	GetCollision( AbsCarSpeed, Forward, &Collision, &ColDotProduct, &ColPoint );
 
 	//----------------------------
 	// chassis inclination
@@ -1283,7 +1166,8 @@ void CBoat::Idle( void )
 	Vector ChassisAng = pChassis->GetLocalAngles();
 
 	// X - transversal rotation
-	AccelAddX = UTIL_Approach( 0, AccelAddX, AccelRate * (1 / (10 + AbsCarSpeed * 0.1)) * gpGlobals->frametime );
+	AccelAddX = 0;
+	BrakeAddX = 0;
 
 	TraceResult TrCross;
 	float FrontPoint = pChassis->GetAbsOrigin().z;
@@ -1296,14 +1180,9 @@ void CBoat::Idle( void )
 	UTIL_TraceLine( RearCheck + ChassisUp * 50, RearCheck - ChassisUp * (BoatDepth * 4), ignore_monsters, dont_ignore_glass, edict(), &TrCross );
 	if( TrCross.flFraction < 1.0f && !Afloat )
 		RearPoint = TrCross.vecEndPos.z;
-	float CrossPoint = RearPoint - FrontPoint;
-	if( CrossPoint != 0.0f || !Afloat )
-	{
-		AccelAddX = 0;
-		BrakeAddX = 0;
-	}
+	const float CrossPoint = (RearPoint - FrontPoint) * 0.5f;
 
-	float NewChassisAngX = BrakeAddX + AccelAddX + CrossPoint;
+	float NewChassisAngX = CrossPoint;
 	ChassisAng.x = UTIL_Approach( NewChassisAngX, ChassisAng.x, 100 * gpGlobals->frametime );
 
 	// Z - lateral rotation
@@ -1478,7 +1357,7 @@ void CBoat::Idle( void )
 		CarSpeed *= -0.15 / ColDotProduct;
 
 	// push the boat
-	if( PushVelocity.Length() > 0.01 )
+	if( !PushVelocity.IsNull() )
 	{
 		pev->velocity += PushVelocity;
 		PushVelocity.x = UTIL_Approach( 0, PushVelocity.x, 100 * gpGlobals->frametime );

@@ -521,11 +521,6 @@ void CHelicopter::Drive( void )
 	float trn = (10 * MaxTurn) * (Turning * HeliTurnRate) * gpGlobals->frametime;
 	HeliAng.y += trn;
 
-	CollisionAddTurn = bound( -5.0f, CollisionAddTurn, 5.0f );
-	if( CollisionAddTurn != 0.0f )
-		CollisionAddTurn = UTIL_Approach( 0.0f, CollisionAddTurn, 20 * gpGlobals->frametime );
-	HeliAng.y += CollisionAddTurn;
-
 	//----------------------------
 	// the blade
 	//----------------------------
@@ -1000,11 +995,6 @@ void CHelicopter::Idle( void )
 	//	Y - turn left and right
 	float trn = (10 * MaxTurn) * (Turning * HeliTurnRate) * gpGlobals->frametime;
 	HeliAng.y += trn;
-
-	CollisionAddTurn = bound( -5.0f, CollisionAddTurn, 5.0f );
-	if( CollisionAddTurn != 0.0f )
-		CollisionAddTurn = UTIL_Approach( 0.0f, CollisionAddTurn, 20 * gpGlobals->frametime );
-	HeliAng.y += CollisionAddTurn;
 
 	//----------------------------
 	// the blade
