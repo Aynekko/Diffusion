@@ -531,7 +531,12 @@ void CHelicopter::Drive( void )
 	//----------------------------
 	// add blade speed if player presses gas
 	if( ((bForward()) || (bBack()) || (bUp())) && InAir )
+	{
 		BladeAddVel += 100 * gpGlobals->frametime;
+		// special case when going up, add more boost
+		if( bUp() )
+			BladeAddVel += 100 * gpGlobals->frametime;
+	}
 	else
 		BladeAddVel = UTIL_Approach( 0, BladeAddVel, 100 * gpGlobals->frametime );
 
@@ -695,7 +700,7 @@ void CHelicopter::Drive( void )
 	Vector SideCollision = ColPointLeft + ColPointRight;
 
 	// adjust velocity according to collision...
-	pev->velocity += Collision * 2 + SideCollision;
+	pev->velocity += Collision + SideCollision;
 
 	hit_carblocker = false;
 
@@ -787,10 +792,7 @@ void CHelicopter::Drive( void )
 		}
 		else if( bDown() )
 		{
-			if( VerticalVelocity > 0 )
-				VerticalVelocity -= 500 * (1 - fabs( Turning ) * 0.5) * gpGlobals->frametime;
-			else
-				VerticalVelocity -= 500 * (1 - fabs( Turning ) * 0.5) * gpGlobals->frametime;
+			VerticalVelocity -= 500 * (1 - fabs( Turning ) * 0.5) * gpGlobals->frametime;
 		}
 		else
 			VerticalVelocity = UTIL_Approach( 0, VerticalVelocity, 150 * gpGlobals->frametime );
@@ -855,6 +857,9 @@ void CHelicopter::Drive( void )
 		time = gpGlobals->time + 0.5;
 	}
 
+	if( pev->flags & FL_ONGROUND )
+		VerticalVelocity = 0.0f;
+
 	Camera();
 
 	//----------------------------
@@ -902,7 +907,6 @@ void CHelicopter::Drive( void )
 		}
 	}
 
-	//
 	if( (gpGlobals->time > LastShootTime + 0.5) && (hDriver->pev->button & IN_ATTACK) )
 	{
 		Vector RocketOrg = GetAbsOrigin() + gpGlobals->v_forward * 200 - gpGlobals->v_up * 30;
