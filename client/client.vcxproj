@@ -65,7 +65,7 @@
       </StringPooling>
       <FunctionLevelLinking>
       </FunctionLevelLinking>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>Full</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;.\render;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
