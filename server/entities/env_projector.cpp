@@ -168,11 +168,27 @@ void CEnvProjector::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 		return;
 	}
 
-	if (FBitSet(pev->effects, EF_NODRAW))
-		pev->effects &= ~EF_NODRAW;
-	else pev->effects |= EF_NODRAW;
+	if( useType == USE_ON )
+	{
+		// turn projector on
+		if( pev->effects & EF_NODRAW )
+			pev->effects &= ~EF_NODRAW;
+	}
+	else if( useType == USE_OFF )
+	{
+		// turn projector off
+		if( !(pev->effects & EF_NODRAW) )
+			pev->effects |= EF_NODRAW;
+	}
+	else // toggle
+	{
+		if( pev->effects & EF_NODRAW )
+			pev->effects &= ~EF_NODRAW;
+		else
+			pev->effects |= EF_NODRAW;
+	}
 
-	if (pev->effects & EF_NODRAW)
+	if( pev->effects & EF_NODRAW )
 	{
 		DontThink();
 		return;
