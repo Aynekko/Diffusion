@@ -220,7 +220,10 @@ void CTripmineGrenade::DisarmThink(void)
 	else
 	{
 		if( m_pBeam )
-			m_pBeam->pev->renderamt -= 1;
+		{
+			if( m_pBeam->pev->renderamt > 2 )
+				m_pBeam->pev->renderamt -= 1;
+		}
 		if( m_pSprite )
 			m_pSprite->pev->renderamt *= 0.9;
 		SetThink(&CTripmineGrenade::DisarmThink );
