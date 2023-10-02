@@ -150,7 +150,7 @@ void CPhysEntity::KeyValue( KeyValueData* pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "material"))
 	{
-		int i = atoi( pkvd->szValue);
+		int i = Q_atoi( pkvd->szValue);
 
 		// 0:glass, 1:metal, 2:flesh, 3:wood
 
@@ -625,7 +625,7 @@ void CPhysBoxMaker :: KeyValue( KeyValueData *pkvd )
 {
 	if ( FStrEq(pkvd->szKeyName, "boxcount") )
 	{
-		m_cNumBoxes = atoi(pkvd->szValue);
+		m_cNumBoxes = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "m_imaxliveboxes") )

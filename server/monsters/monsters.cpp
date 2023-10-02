@@ -3381,17 +3381,17 @@ void CBaseMonster :: KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "TriggerCondition") )
 	{
-		m_iTriggerCondition = atoi( pkvd->szValue );
+		m_iTriggerCondition = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "TriggerCondition2") )
 	{
-		m_iTriggerCondition2 = atoi( pkvd->szValue );
+		m_iTriggerCondition2 = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "TriggerCondition3") )
 	{
-		m_iTriggerCondition3 = atoi( pkvd->szValue );
+		m_iTriggerCondition3 = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iClass") ) //LRC
@@ -3426,7 +3426,7 @@ void CBaseMonster :: KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "weapons") )
 	{
-		int	weapons = atoi( pkvd->szValue );
+		int	weapons = Q_atoi( pkvd->szValue );
 
 		if( weapons ) m_bHaveWeapons = TRUE;
 

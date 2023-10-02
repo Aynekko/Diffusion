@@ -17,7 +17,7 @@ void CTriggerDSPZone::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "roomtype"))
 	{
-		pev->impulse = atoi(pkvd->szValue);
+		pev->impulse = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 }

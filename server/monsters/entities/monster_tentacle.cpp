@@ -332,12 +332,12 @@ void CTentacle::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "sweeparc"))
 	{
-		m_flMaxYaw = atof(pkvd->szValue) / 2.0;
+		m_flMaxYaw = Q_atof(pkvd->szValue) * 0.5f;
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "sound"))
 	{
-		m_iTapSound = atoi(pkvd->szValue);
+		m_iTapSound = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 
 	}

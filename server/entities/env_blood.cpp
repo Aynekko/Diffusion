@@ -40,7 +40,7 @@ void CBlood::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "color"))
 	{
-		int color = atoi(pkvd->szValue);
+		int color = Q_atoi(pkvd->szValue);
 		switch (color)
 		{
 		case 1:
@@ -55,7 +55,7 @@ void CBlood::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "amount"))
 	{
-		SetBloodAmount(atof(pkvd->szValue));
+		SetBloodAmount( Q_atof(pkvd->szValue));
 		pkvd->fHandled = TRUE;
 	}
 	else

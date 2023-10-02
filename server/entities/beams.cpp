@@ -443,27 +443,27 @@ void CLightning::KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "life"))
 	{
-		m_life = atof(pkvd->szValue);
+		m_life = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "BoltWidth"))
 	{
-		m_boltWidth = atoi(pkvd->szValue);
+		m_boltWidth = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "NoiseAmplitude"))
 	{
-		m_noiseAmplitude = atoi(pkvd->szValue);
+		m_noiseAmplitude = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "TextureScroll"))
 	{
-		m_speed = atoi(pkvd->szValue);
+		m_speed = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "StrikeTime"))
 	{
-		m_restrike = atof(pkvd->szValue);
+		m_restrike = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "texture"))
@@ -473,17 +473,17 @@ void CLightning::KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "framestart"))
 	{
-		m_frameStart = atoi(pkvd->szValue);
+		m_frameStart = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "Radius"))
 	{
-		m_radius = atof( pkvd->szValue );
+		m_radius = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "damage"))
 	{
-		pev->dmg = atof(pkvd->szValue);
+		pev->dmg = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -960,17 +960,17 @@ void CLaser::KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "width"))
 	{
-		SetWidth( atof(pkvd->szValue) );
+		SetWidth( Q_atof(pkvd->szValue) );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "NoiseAmplitude"))
 	{
-		SetNoise( atoi(pkvd->szValue) );
+		SetNoise( Q_atoi(pkvd->szValue) );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "TextureScroll"))
 	{
-		SetScrollRate( atoi(pkvd->szValue) );
+		SetScrollRate( Q_atoi(pkvd->szValue) );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "texture"))
@@ -985,22 +985,22 @@ void CLaser::KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "framestart"))
 	{
-		pev->frame = atoi(pkvd->szValue);
+		pev->frame = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "damage"))
 	{
-		pev->dmg = atof(pkvd->szValue);
+		pev->dmg = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iProjection"))
 	{
-		m_iProjection = atoi(pkvd->szValue);
+		m_iProjection = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iStoppedBy"))
 	{
-		m_iStoppedBy = atoi(pkvd->szValue);
+		m_iStoppedBy = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

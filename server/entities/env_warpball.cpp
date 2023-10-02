@@ -25,7 +25,7 @@ void CEnvWarpBall::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "radius"))
 	{
-		pev->button = atoi(pkvd->szValue);
+		pev->button = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	if (FStrEq(pkvd->szKeyName, "warp_target"))
@@ -35,7 +35,7 @@ void CEnvWarpBall::KeyValue(KeyValueData* pkvd)
 	}
 	if (FStrEq(pkvd->szKeyName, "damage_delay"))
 	{
-		pev->frags = atof(pkvd->szValue);
+		pev->frags = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

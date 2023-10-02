@@ -1285,9 +1285,7 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 	cl_entity_t *view = GET_ENTITY( pparams->viewentity );
 
  	if( view )
-	{		 
-		int vstate = atoi( gEngfuncs.PhysInfo_ValueForKey( "incar" ));
-
+	{
 		pparams->vieworg = view->origin;
 		pparams->viewangles = view->angles;
 

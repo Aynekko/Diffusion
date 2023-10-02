@@ -368,7 +368,7 @@ public:
 		}
 		else if( FStrEq(pkvd->szKeyName, "vlight_cache"))
 		{
-			pev->iuser3 = atoi( pkvd->szValue );
+			pev->iuser3 = Q_atoi( pkvd->szValue );
 			pkvd->fHandled = TRUE;
 		}
 		else if( FStrEq( pkvd->szKeyName, "customname" ) )

@@ -73,7 +73,7 @@ void CGenerator::KeyValue(KeyValueData* pkvd)
 	}
 	if (FStrEq(pkvd->szKeyName, "mode"))
 	{
-		pev->button = atoi(pkvd->szValue);
+		pev->button = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else CBaseDelay::KeyValue(pkvd);

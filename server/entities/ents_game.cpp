@@ -154,7 +154,7 @@ void CGameScore::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "points"))
 	{
-		SetPoints( atoi(pkvd->szValue) );
+		SetPoints( Q_atoi(pkvd->szValue) );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -241,22 +241,22 @@ void CGameText::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "channel"))
 	{
-		m_textParms.channel = atoi( pkvd->szValue );
+		m_textParms.channel = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "x"))
 	{
-		m_textParms.x = atof( pkvd->szValue );
+		m_textParms.x = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "y"))
 	{
-		m_textParms.y = atof( pkvd->szValue );
+		m_textParms.y = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "effect"))
 	{
-		m_textParms.effect = atoi( pkvd->szValue );
+		m_textParms.effect = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "color"))
@@ -281,24 +281,24 @@ void CGameText::KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "fadein"))
 	{
-		m_textParms.fadeinTime = atof( pkvd->szValue );
+		m_textParms.fadeinTime = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "fadeout"))
 	{
-		m_textParms.fadeoutTime = atof( pkvd->szValue );
+		m_textParms.fadeoutTime = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "holdtime"))
 	{
-		m_textParms.holdTime = atof( pkvd->szValue );
+		m_textParms.holdTime = Q_atof( pkvd->szValue );
 		// diffusion - it seems 2 mins is the limit. anything above just doesn't go through (text disappears fast or doesn't appear at all)
 		m_textParms.holdTime = bound(0, m_textParms.holdTime, 120);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "fxtime"))
 	{
-		m_textParms.fxTime = atof( pkvd->szValue );
+		m_textParms.fxTime = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -361,12 +361,12 @@ void CGameTeamMaster::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "teamindex"))
 	{
-		m_teamIndex = atoi( pkvd->szValue );
+		m_teamIndex = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "triggerstate"))
 	{
-		int type = atoi( pkvd->szValue );
+		int type = Q_atoi( pkvd->szValue );
 		switch( type )
 		{
 		case 0:
@@ -795,7 +795,7 @@ void CGamePlayerEquip::KeyValue( KeyValueData *pkvd )
 				UTIL_StripToken( pkvd->szKeyName, tmp );
 
 				m_weaponNames[i] = ALLOC_STRING(tmp);
-				m_weaponCount[i] = atoi(pkvd->szValue);
+				m_weaponCount[i] = Q_atoi(pkvd->szValue);
 				m_weaponCount[i] = Q_max(1,m_weaponCount[i]);
 				pkvd->fHandled = TRUE;
 				break;

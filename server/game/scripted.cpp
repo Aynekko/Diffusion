@@ -75,24 +75,24 @@ void CCineMonster :: KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_fMoveTo"))
 	{
-		m_fMoveTo = atoi( pkvd->szValue );
+		m_fMoveTo = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_flRepeat"))
 	{
-		m_flRepeat = atof( pkvd->szValue );
+		m_flRepeat = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_flRadius"))
 	{
-		float radius = atof( pkvd->szValue ); // diffusion
+		float radius = Q_atof( pkvd->szValue ); // diffusion
 		if( radius > 0.0f )
 			m_flRadius = radius;
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iFinishSchedule"))
 	{
-		m_iFinishSchedule = atoi( pkvd->szValue );
+		m_iFinishSchedule = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszFireOnBegin"))
@@ -993,17 +993,17 @@ void CScriptedSentence :: KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "duration"))
 	{
-		m_flDuration = atof( pkvd->szValue );
+		m_flDuration = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "radius"))
 	{
-		m_flRadius = atof( pkvd->szValue );
+		m_flRadius = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "refire"))
 	{
-		m_flRepeat = atof( pkvd->szValue );
+		m_flRepeat = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if(FStrEq(pkvd->szKeyName, "attenuation"))
@@ -1013,7 +1013,7 @@ void CScriptedSentence :: KeyValue( KeyValueData *pkvd )
 	}
 	else if(FStrEq(pkvd->szKeyName, "volume"))
 	{
-		m_flVolume = atof( pkvd->szValue ) * 0.1;
+		m_flVolume = Q_atof( pkvd->szValue ) * 0.1;
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "listener"))

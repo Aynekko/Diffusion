@@ -721,14 +721,14 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// preset
 	if (FStrEq(pkvd->szKeyName, "preset"))
 	{
-		m_dpv.preset = atoi(pkvd->szValue);
+		m_dpv.preset = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 
 	// pitchrun
 	else if (FStrEq(pkvd->szKeyName, "pitch"))
 	{
-		m_dpv.pitchrun = atoi(pkvd->szValue);
+		m_dpv.pitchrun = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 		
 		if (m_dpv.pitchrun > 255) m_dpv.pitchrun = 255;
@@ -738,7 +738,7 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// pitchstart
 	else if (FStrEq(pkvd->szKeyName, "pitchstart"))
 	{
-		m_dpv.pitchstart = atoi(pkvd->szValue);
+		m_dpv.pitchstart = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;		
 		
 		if (m_dpv.pitchstart > 255) m_dpv.pitchstart = 255;
@@ -748,7 +748,7 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// spinup
 	else if (FStrEq(pkvd->szKeyName, "spinup"))
 	{
-		m_dpv.spinup = atoi(pkvd->szValue);
+		m_dpv.spinup = Q_atoi(pkvd->szValue);
 		
 		if (m_dpv.spinup > 100) m_dpv.spinup = 100;
 		if (m_dpv.spinup < 0) m_dpv.spinup = 0;
@@ -762,7 +762,7 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// spindown
 	else if (FStrEq(pkvd->szKeyName, "spindown"))
 	{
-		m_dpv.spindown = atoi(pkvd->szValue);
+		m_dpv.spindown = Q_atoi(pkvd->szValue);
 		
 		if (m_dpv.spindown > 100) m_dpv.spindown = 100;
 		if (m_dpv.spindown < 0) m_dpv.spindown = 0;
@@ -776,7 +776,7 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// volstart
 	else if (FStrEq(pkvd->szKeyName, "volstart"))
 	{
-		m_dpv.volstart = atoi(pkvd->szValue);
+		m_dpv.volstart = Q_atoi(pkvd->szValue);
 
 		if (m_dpv.volstart > 10) m_dpv.volstart = 10;
 		if (m_dpv.volstart < 0) m_dpv.volstart = 0;
@@ -789,7 +789,7 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// fadein
 	else if (FStrEq(pkvd->szKeyName, "fadein"))
 	{
-		m_dpv.fadein = atoi(pkvd->szValue);
+		m_dpv.fadein = Q_atoi(pkvd->szValue);
 		
 		if (m_dpv.fadein > 100) m_dpv.fadein = 100;
 		if (m_dpv.fadein < 0) m_dpv.fadein = 0;
@@ -803,7 +803,7 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// fadeout
 	else if (FStrEq(pkvd->szKeyName, "fadeout"))
 	{
-		m_dpv.fadeout = atoi(pkvd->szValue);
+		m_dpv.fadeout = Q_atoi(pkvd->szValue);
 		
 		if (m_dpv.fadeout > 100) m_dpv.fadeout = 100;
 		if (m_dpv.fadeout < 0) m_dpv.fadeout = 0;
@@ -817,7 +817,7 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// lfotype
 	else if (FStrEq(pkvd->szKeyName, "lfotype"))
 	{
-		m_dpv.lfotype = atoi(pkvd->szValue);
+		m_dpv.lfotype = Q_atoi(pkvd->szValue);
 		if (m_dpv.lfotype > 4) m_dpv.lfotype = LFO_TRIANGLE;
 		pkvd->fHandled = TRUE;
 	}
@@ -825,7 +825,7 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// lforate
 	else if (FStrEq(pkvd->szKeyName, "lforate"))
 	{
-		m_dpv.lforate = atoi(pkvd->szValue);
+		m_dpv.lforate = Q_atoi(pkvd->szValue);
 		
 		if (m_dpv.lforate > 1000) m_dpv.lforate = 1000;
 		if (m_dpv.lforate < 0) m_dpv.lforate = 0;
@@ -837,7 +837,7 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// lfomodpitch
 	else if (FStrEq(pkvd->szKeyName, "lfomodpitch"))
 	{
-		m_dpv.lfomodpitch = atoi(pkvd->szValue);
+		m_dpv.lfomodpitch = Q_atoi(pkvd->szValue);
 		if (m_dpv.lfomodpitch > 100) m_dpv.lfomodpitch = 100;
 		if (m_dpv.lfomodpitch < 0) m_dpv.lfomodpitch = 0;
 		
@@ -848,7 +848,7 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// lfomodvol
 	else if (FStrEq(pkvd->szKeyName, "lfomodvol"))
 	{
-		m_dpv.lfomodvol = atoi(pkvd->szValue);
+		m_dpv.lfomodvol = Q_atoi(pkvd->szValue);
 		if (m_dpv.lfomodvol > 100) m_dpv.lfomodvol = 100;
 		if (m_dpv.lfomodvol < 0) m_dpv.lfomodvol = 0;
 
@@ -858,7 +858,7 @@ void CAmbientGeneric :: KeyValue( KeyValueData *pkvd )
 	// cspinup
 	else if (FStrEq(pkvd->szKeyName, "cspinup"))
 	{
-		m_dpv.cspinup = atoi(pkvd->szValue);
+		m_dpv.cspinup = Q_atoi(pkvd->szValue);
 		if (m_dpv.cspinup > 100) m_dpv.cspinup = 100;
 		if (m_dpv.cspinup < 0) m_dpv.cspinup = 0;
 
@@ -905,12 +905,12 @@ void CEnvSound :: KeyValue( KeyValueData *pkvd )
 	
 	if (FStrEq(pkvd->szKeyName, "radius"))
 	{
-		m_flRadius = atof(pkvd->szValue);
+		m_flRadius = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	if (FStrEq(pkvd->szKeyName, "roomtype"))
 	{
-		m_flRoomtype = atof(pkvd->szValue);
+		m_flRoomtype = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 }
@@ -1083,7 +1083,7 @@ void CTriggerSound :: KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "roomtype"))
 	{
-		pev->frags = atof(pkvd->szValue);
+		pev->frags = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -2294,7 +2294,7 @@ void CSpeaker :: KeyValue( KeyValueData *pkvd )
 	// preset
 	if (FStrEq(pkvd->szKeyName, "preset"))
 	{
-		m_preset = atoi(pkvd->szValue);
+		m_preset = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -2333,7 +2333,7 @@ void CAmbientMusic :: KeyValue( KeyValueData *pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "fadetime"))
 	{
-		pev->frags = atoi(pkvd->szValue);
+		pev->frags = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

@@ -1782,7 +1782,7 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 					s = g_engfuncs.pfnInfoKeyValue( szBuffer, "maxplayers" );
 					if ( s && s[0] )
 					{
-						item->maxplayers = atoi( s );
+						item->maxplayers = Q_atoi( s );
 						item->maxplayers = Q_max( item->maxplayers, 0 );
 						item->maxplayers = Q_min( item->maxplayers, gpGlobals->maxClients );
 					}

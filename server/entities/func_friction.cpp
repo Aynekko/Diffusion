@@ -62,7 +62,7 @@ void CFrictionModifier::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "modifier"))
 	{
-		m_frictionFraction = atof(pkvd->szValue) / 100.0;
+		m_frictionFraction = Q_atof(pkvd->szValue) / 100.0;
 		pkvd->fHandled = TRUE;
 	}
 	else

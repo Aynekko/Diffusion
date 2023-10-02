@@ -553,10 +553,10 @@ void ClientCommand( edict_t *pEntity )
 				{
 					if( CMD_ARGC() > 2 )
 					{
-						pEnt->pev->rendercolor.x = atoi( CMD_ARGV( 3 ) );
-						pEnt->pev->rendercolor.y = atoi( CMD_ARGV( 4 ) );
-						pEnt->pev->rendercolor.z = atoi( CMD_ARGV( 5 ) );
-						pEnt->pev->scale = atoi( CMD_ARGV( 6 ) ) * (1.0f / 8.0f);
+						pEnt->pev->rendercolor.x = Q_atoi( CMD_ARGV( 3 ) );
+						pEnt->pev->rendercolor.y = Q_atoi( CMD_ARGV( 4 ) );
+						pEnt->pev->rendercolor.z = Q_atoi( CMD_ARGV( 5 ) );
+						pEnt->pev->scale = Q_atoi( CMD_ARGV( 6 ) ) * (1.0f / 8.0f);
 					}
 				}
 				else if( FStrEq( STRING( iszItem ), "prop_explosive_barrel" ) )
@@ -644,7 +644,7 @@ void ClientCommand( edict_t *pEntity )
 				int use_type = USE_TOGGLE;
 				if( CMD_ARGC() > 2 )
 				{
-					switch( atoi(CMD_ARGV(2)) )
+					switch( Q_atoi(CMD_ARGV(2)) )
 					{
 					case 1: use_type = USE_ON; break;
 					case 2: use_type = USE_OFF; break;
@@ -779,7 +779,7 @@ void ClientCommand( edict_t *pEntity )
 	else if ( FIStrEq(pcmd, "fov" ) )
 	{
 		if ( Cheats && CMD_ARGC() > 1)
-			pPlayer->m_flFOV = atoi( CMD_ARGV(1) );
+			pPlayer->m_flFOV = (float)Q_atoi( CMD_ARGV(1) );
 		else
 			CLIENT_PRINTF( pEntity, print_console, UTIL_VarArgs( "\"fov\" is \"%d\"\n", (int)pPlayer->m_flFOV ) );
 	}
@@ -819,8 +819,8 @@ void ClientCommand( edict_t *pEntity )
 	{
 		if( CMD_ARGC() > 2 ) // we have entindex and a code
 		{
-			int EntIndex = atoi( CMD_ARGV( 1 ) );
-			int Code = atoi( CMD_ARGV( 2 ) );
+			int EntIndex = Q_atoi( CMD_ARGV( 1 ) );
+			int Code = Q_atoi( CMD_ARGV( 2 ) );
 			CBaseEntity *pCodeEnt = CBaseEntity::Instance( INDEXENT( EntIndex ) );
 			if( pCodeEnt && FClassnameIs(pCodeEnt,"trigger_codeinput") )
 				pCodeEnt->Use( pPlayer, pPlayer, USE_ON, (float)Code );
@@ -909,7 +909,7 @@ void ClientCommand( edict_t *pEntity )
 	else if ( FIStrEq(pcmd, "specmode"))
 	{
 		if (pPlayer->IsObserver())
-			pPlayer->Observer_SetMode(atoi(CMD_ARGV(1)));
+			pPlayer->Observer_SetMode( Q_atoi(CMD_ARGV(1)));
 	}
 	else if ( FIStrEq(pcmd, "follownext"))
 	{
@@ -919,9 +919,9 @@ void ClientCommand( edict_t *pEntity )
 		if (pPlayer->IsObserver())
 		{
 			if (pev->iuser1 == OBS_ROAMING)
-				pPlayer->Observer_FindNextSpot(atoi(CMD_ARGV(1)) != 0);
+				pPlayer->Observer_FindNextSpot( Q_atoi(CMD_ARGV(1)) != 0);
 			else
-				pPlayer->Observer_FindNextPlayer(atoi(CMD_ARGV(1)) != 0);
+				pPlayer->Observer_FindNextPlayer( Q_atoi(CMD_ARGV(1)) != 0);
 		}
 	}
 	else if( FIStrEq( pcmd, "test" ) )
@@ -934,7 +934,7 @@ void ClientCommand( edict_t *pEntity )
 	{
 		if( CMD_ARGC() > 1 )  // is there an argument to the command?
 		{
-			f_Observer = atoi( CMD_ARGV( 1 ) );  // set observer flag
+			f_Observer = Q_atoi( CMD_ARGV( 1 ) );  // set observer flag
 			CLIENT_PRINTF( pEntity, print_console, UTIL_VarArgs( "\"observer\" set to %d\n", (int)f_Observer ) );
 		}
 		else
@@ -949,7 +949,7 @@ void ClientCommand( edict_t *pEntity )
 		{
 			if( CMD_ARGC() > 1 )
 			{
-				f_botskill = atoi( CMD_ARGV( 1 ) );  // set default bot skill level
+				f_botskill = Q_atoi( CMD_ARGV( 1 ) );  // set default bot skill level
 				CLIENT_PRINTF( pEntity, print_console, UTIL_VarArgs( "\"botskill\" set to %d\n", (int)f_botskill ) );
 			}
 			else
@@ -964,7 +964,7 @@ void ClientCommand( edict_t *pEntity )
 		{
 			if( CMD_ARGC() > 1 )  // is there an argument to the command?
 			{
-				f_botdontshoot = atoi( CMD_ARGV( 1 ) );  // set bot shoot flag
+				f_botdontshoot = Q_atoi( CMD_ARGV( 1 ) );  // set bot shoot flag
 				CLIENT_PRINTF( pEntity, print_console, UTIL_VarArgs( "\"botdontshoot\" set to %d\n", (int)f_botdontshoot ) );
 			}
 			else
@@ -976,7 +976,7 @@ void ClientCommand( edict_t *pEntity )
 	else if( FIStrEq( pcmd, "bot_generatewp" ))
 	{
 		if( CMD_ARGC() > 1 )
-			BotGenerateWaypointFile( atoi(CMD_ARGV(1)) );
+			BotGenerateWaypointFile( Q_atoi(CMD_ARGV(1)) );
 		else
 			BotGenerateWaypointFile( 600 );
 	}

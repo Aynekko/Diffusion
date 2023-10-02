@@ -69,7 +69,7 @@ void CRope :: KeyValue( KeyValueData* pkvd )
 {
 	if( FStrEq( pkvd->szKeyName, "segments" ))
 	{
-		m_iSegments = atoi( pkvd->szValue );
+		m_iSegments = Q_atoi( pkvd->szValue );
 
 		if( m_iSegments >= MAX_SEGMENTS )
 			m_iSegments = MAX_SEGMENTS - 1;
@@ -87,7 +87,7 @@ void CRope :: KeyValue( KeyValueData* pkvd )
 	}
 	else if( FStrEq( pkvd->szKeyName, "disable" ))
 	{
-		m_bDisallowPlayerAttachment = atoi( pkvd->szValue ) != 0;
+		m_bDisallowPlayerAttachment = Q_atoi( pkvd->szValue ) != 0;
 		pkvd->fHandled = true;
 	}
 	else

@@ -48,7 +48,7 @@ void CGenericMonster::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "m_bloodColor"))
 	{
-		m_bloodColor = atoi(pkvd->szValue);
+		m_bloodColor = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

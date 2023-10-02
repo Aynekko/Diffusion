@@ -145,12 +145,12 @@ void CRenderFxManager::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "m_fScale"))
 	{
-		pev->scale = atof(pkvd->szValue);
+		pev->scale = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "set_nodraw" ) )
 	{
-		pev->iuser1 = atoi( pkvd->szValue );
+		pev->iuser1 = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else

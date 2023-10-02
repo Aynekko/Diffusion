@@ -283,12 +283,12 @@ void CBaseToggle::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "lip"))
 	{
-		m_flLip = atof(pkvd->szValue);
+		m_flLip = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "distance"))
 	{
-		m_flMoveDistance = atof(pkvd->szValue);
+		m_flMoveDistance = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

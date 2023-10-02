@@ -837,18 +837,18 @@ void CWorld :: KeyValue( KeyValueData *pkvd )
 	}
 	else if ( FStrEq(pkvd->szKeyName, "sounds") )
 	{
-		gpGlobals->cdAudioTrack = atoi(pkvd->szValue);
+		gpGlobals->cdAudioTrack = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "WaveHeight") )
 	{
 		// Sent over net now.
-		pev->scale = atof(pkvd->szValue) * (1.0/8.0);
+		pev->scale = Q_atof(pkvd->szValue) * (1.0/8.0);
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "MaxRange") )
 	{
-		pev->speed = atof(pkvd->szValue);
+		pev->speed = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "chaptertitle") )
@@ -867,7 +867,7 @@ void CWorld :: KeyValue( KeyValueData *pkvd )
 	{
 		// UNDONE: This is a gross hack!!! The CVAR is NOT sent over the client/sever link
 		// but it will work for single player
-		int flag = atoi(pkvd->szValue);
+		int flag = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 		if ( flag )
 			pev->spawnflags |= SF_WORLD_DARK;
@@ -875,13 +875,13 @@ void CWorld :: KeyValue( KeyValueData *pkvd )
 	else if ( FStrEq(pkvd->szKeyName, "newunit") )
 	{
 		// Single player only.  Clear save directory if set
-		if ( atoi(pkvd->szValue) )
+		if ( Q_atoi(pkvd->szValue) )
 			CVAR_SET_FLOAT( "sv_newunit", 1 );
 		pkvd->fHandled = TRUE;
 	}
 	else if ( FStrEq(pkvd->szKeyName, "gametitle") )
 	{
-		if ( atoi(pkvd->szValue) )
+		if ( Q_atoi(pkvd->szValue) )
 			pev->spawnflags |= SF_WORLD_TITLE;
 
 		pkvd->fHandled = TRUE;
@@ -893,7 +893,7 @@ void CWorld :: KeyValue( KeyValueData *pkvd )
 	}
 	else if ( FStrEq(pkvd->szKeyName, "defaultteam") )
 	{
-		if ( atoi(pkvd->szValue) )
+		if ( Q_atoi(pkvd->szValue) )
 		{
 			pev->spawnflags |= SF_WORLD_FORCETEAM;
 		}

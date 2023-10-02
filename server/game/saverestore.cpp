@@ -590,11 +590,11 @@ void EntvarsKeyvalue( entvars_t *pev, KeyValueData *pkvd )
 
 			case FIELD_TIME:
 			case FIELD_FLOAT:
-				(*(float *)((char *)pev + pField->fieldOffset)) = atof( pkvd->szValue );
+				(*(float *)((char *)pev + pField->fieldOffset)) = Q_atof( pkvd->szValue );
 				break;
 
 			case FIELD_INTEGER:
-				(*(int *)((char *)pev + pField->fieldOffset)) = atoi( pkvd->szValue );
+				(*(int *)((char *)pev + pField->fieldOffset)) = Q_atoi( pkvd->szValue );
 				break;
 
 			case FIELD_POSITION_VECTOR:

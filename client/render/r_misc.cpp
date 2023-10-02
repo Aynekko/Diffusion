@@ -1251,7 +1251,7 @@ void HUD_StudioEvent( const struct mstudioevent_s* event, const struct cl_entity
 	switch( event->event )
 	{
 	case 5001:
-		R_MuzzleFlash( entity, 0, atoi( event->options ));
+		R_MuzzleFlash( entity, 0, Q_atoi( event->options ));
 		R_MuzzleDynLight( entity, (float *)&entity->attachment[0], WeaponID );
 		g_pParticles.GunSmoke( 0, (float *)&entity->attachment[0], velocity, WeaponID );
 		break;
@@ -1260,7 +1260,7 @@ void HUD_StudioEvent( const struct mstudioevent_s* event, const struct cl_entity
 			gEngfuncs.pEfxAPI->R_SparkEffect( (float *)&entity->attachment[0], Q_atoi( event->options ), -100, 100 );
 		break;
 	case 5003: // muzzleflash with no light
-		R_MuzzleFlash( entity, 0, atoi( event->options ) );
+		R_MuzzleFlash( entity, 0, Q_atoi( event->options ) );
 		g_pParticles.GunSmoke( 0, (float *)&entity->attachment[0], velocity, WeaponID );
 		break;
 	case 5004: // client side sound		
@@ -1274,17 +1274,17 @@ void HUD_StudioEvent( const struct mstudioevent_s* event, const struct cl_entity
 		g_pParticles.GunSmoke( 0, (float *)&entity->attachment[0], velocity, WeaponID );
 		break;
 	case 5011:
-		R_MuzzleFlash( entity, 1, atoi( event->options ) );
+		R_MuzzleFlash( entity, 1, Q_atoi( event->options ) );
 		R_MuzzleDynLight( entity, (float *)&entity->attachment[1], WeaponID );
 		g_pParticles.GunSmoke( 0, (float *)&entity->attachment[1], velocity, WeaponID );
 		break;
 	case 5021:
-		R_MuzzleFlash( entity, 2, atoi( event->options ) );
+		R_MuzzleFlash( entity, 2, Q_atoi( event->options ) );
 		R_MuzzleDynLight( entity, (float *)&entity->attachment[2], WeaponID );
 		g_pParticles.GunSmoke( 0, (float *)&entity->attachment[2], velocity, WeaponID );
 		break;
 	case 5031:
-		R_MuzzleFlash( entity, 3, atoi( event->options ) );
+		R_MuzzleFlash( entity, 3, Q_atoi( event->options ) );
 		R_MuzzleDynLight( entity, (float *)&entity->attachment[3], WeaponID );
 		g_pParticles.GunSmoke( 0, (float *)&entity->attachment[3], velocity, WeaponID );
 		break;
@@ -1786,7 +1786,7 @@ void ED_ParseEdict( char** pfile )
 			Q_strncpy( modelname, token, sizeof( modelname ) );
 
 		if( !Q_strcmp( keyname, "vlight_cache" ) )
-			vertex_light_cache = atoi( token );
+			vertex_light_cache = Q_atoi( token );
 	}
 
 	if( vertex_light_cache <= 0 || vertex_light_cache >= MAX_LIGHTCACHE )

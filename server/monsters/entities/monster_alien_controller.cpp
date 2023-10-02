@@ -324,9 +324,9 @@ void CController :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			MESSAGE_END();
 
 			m_iBall[0] = 192;
-			m_iBallTime[0] = gpGlobals->time + atoi( pEvent->options ) / 15.0;
+			m_iBallTime[0] = gpGlobals->time + Q_atoi( pEvent->options ) / 15.0;
 			m_iBall[1] = 255;
-			m_iBallTime[1] = gpGlobals->time + atoi( pEvent->options ) / 15.0;
+			m_iBallTime[1] = gpGlobals->time + Q_atoi( pEvent->options ) / 15.0;
 
 		}
 		break;
@@ -365,23 +365,23 @@ void CController :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 			AttackSound( );
 			m_flShootTime = gpGlobals->time;
-			m_flShootEnd = m_flShootTime + atoi( pEvent->options ) / 15.0;
+			m_flShootEnd = m_flShootTime + Q_atoi( pEvent->options ) / 15.0;
 		}
 		break;
 		case CONTROLLER_AE_POWERUP_FULL:
 		{
 			m_iBall[0] = 255;
-			m_iBallTime[0] = gpGlobals->time + atoi( pEvent->options ) / 15.0;
+			m_iBallTime[0] = gpGlobals->time + Q_atoi( pEvent->options ) / 15.0;
 			m_iBall[1] = 255;
-			m_iBallTime[1] = gpGlobals->time + atoi( pEvent->options ) / 15.0;
+			m_iBallTime[1] = gpGlobals->time + Q_atoi( pEvent->options ) / 15.0;
 		}
 		break;
 		case CONTROLLER_AE_POWERUP_HALF:
 		{
 			m_iBall[0] = 192;
-			m_iBallTime[0] = gpGlobals->time + atoi( pEvent->options ) / 15.0;
+			m_iBallTime[0] = gpGlobals->time + Q_atoi( pEvent->options ) / 15.0;
 			m_iBall[1] = 192;
-			m_iBallTime[1] = gpGlobals->time + atoi( pEvent->options ) / 15.0;
+			m_iBallTime[1] = gpGlobals->time + Q_atoi( pEvent->options ) / 15.0;
 		}
 		break;
 		default:
@@ -3317,7 +3317,7 @@ void CDroneAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 //			AttackSound( );
 			m_flShootTime = gpGlobals->time;
-			m_flShootEnd = m_flShootTime + atoi( pEvent->options ) / 15.0;
+			m_flShootEnd = m_flShootTime + Q_atoi( pEvent->options ) / 15.0;
 		}
 		break;
 		default:

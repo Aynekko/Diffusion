@@ -2279,7 +2279,7 @@ void UTIL_StringToVector( float *pVector, const char *pString )
 
 	for ( j = 0; j < 3; j++ )			// lifted from pr_edict.c
 	{
-		pVector[j] = atof( pfront );
+		pVector[j] = Q_atof( pfront );
 
 		while ( *pstr && *pstr != ' ' )
 			pstr++;
@@ -2310,7 +2310,7 @@ void UTIL_StringToIntArray( int *pVector, int count, const char *pString )
 
 	for ( j = 0; j < count; j++ )			// lifted from pr_edict.c
 	{
-		pVector[j] = atoi( pfront );
+		pVector[j] = Q_atoi( pfront );
 
 		while ( *pstr && *pstr != ' ' )
 			pstr++;

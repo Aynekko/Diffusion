@@ -2583,7 +2583,7 @@ float CStudioModelRenderer::StudioEstimateInterpolant( void )
 
 	if( e->player )
 	{
-		float updateRate = atof( gEngfuncs.PlayerInfo_ValueForKey( e->index, "cl_updaterate" ) );
+		float updateRate = Q_atof( gEngfuncs.PlayerInfo_ValueForKey( e->index, "cl_updaterate" ) );
 		if( updateRate > 0.0f )
 			interval = 1.0f / updateRate;
 

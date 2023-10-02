@@ -31,17 +31,17 @@ void CBubbles::KeyValue( KeyValueData *pkvd )
 {
 	if( FStrEq( pkvd->szKeyName, "density" ) )
 	{
-		pev->fuser1 = atof( pkvd->szValue );
+		pev->fuser1 = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "frequency" ) )
 	{
-		pev->fuser2 = atof( pkvd->szValue );
+		pev->fuser2 = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "current" ) )
 	{
-		pev->fuser3 = atoi( pkvd->szValue );
+		pev->fuser3 = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else

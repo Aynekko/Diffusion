@@ -53,12 +53,12 @@ void CFade::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "duration"))
 	{
-		SetDuration(atof(pkvd->szValue));
+		SetDuration( Q_atof(pkvd->szValue));
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "holdtime"))
 	{
-		SetHoldTime(atof(pkvd->szValue));
+		SetHoldTime( Q_atof(pkvd->szValue));
 		pkvd->fHandled = TRUE;
 	}
 	else

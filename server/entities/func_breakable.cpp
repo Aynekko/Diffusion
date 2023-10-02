@@ -79,7 +79,7 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "material"))
 	{
-		int i = atoi( pkvd->szValue);
+		int i = Q_atoi( pkvd->szValue);
 
 		// 0:glass, 1:metal, 2:flesh, 3:wood
 
@@ -115,7 +115,7 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 	}
 	else if (FStrEq(pkvd->szKeyName, "explodemagnitude") )
 	{
-		ExplosionSetMagnitude( atoi( pkvd->szValue ) );
+		ExplosionSetMagnitude( Q_atoi( pkvd->szValue ) );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "respawntime" ) )

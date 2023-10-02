@@ -360,22 +360,22 @@ void CWeaponCycler::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "deploy"))
 	{
-		pev->impulse = atoi(pkvd->szValue);
+		pev->impulse = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "holster"))
 	{
-		pev->button = atoi(pkvd->szValue);
+		pev->button = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "primary"))
 	{
-		pev->sequence = atoi(pkvd->szValue);
+		pev->sequence = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "secondary"))
 	{
-		pev->team = atoi(pkvd->szValue);
+		pev->team = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else CBasePlayerWeapon::KeyValue( pkvd );

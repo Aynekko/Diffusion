@@ -50,7 +50,7 @@ void CPushableMaker::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "boxcount"))
 	{
-		m_cNumBoxes = atoi(pkvd->szValue);
+		m_cNumBoxes = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_imaxliveboxes"))

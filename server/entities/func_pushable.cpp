@@ -64,7 +64,7 @@ void CPushable::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "size"))
 	{
-		int bbox = atoi(pkvd->szValue);
+		int bbox = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 
 		switch (bbox)
@@ -91,7 +91,7 @@ void CPushable::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "buoyancy"))
 	{
-		pev->skin = atof(pkvd->szValue);
+		pev->skin = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

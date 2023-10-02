@@ -88,17 +88,17 @@ void CBubbling::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "density"))
 	{
-		m_density = atoi(pkvd->szValue);
+		m_density = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "frequency"))
 	{
-		m_frequency = atoi(pkvd->szValue);
+		m_frequency = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "current"))
 	{
-		pev->speed = atoi(pkvd->szValue);
+		pev->speed = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

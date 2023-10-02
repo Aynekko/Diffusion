@@ -78,22 +78,22 @@ void CShake::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "amplitude"))
 	{
-		SetAmplitude(atof(pkvd->szValue));
+		SetAmplitude( Q_atof(pkvd->szValue));
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "frequency"))
 	{
-		SetFrequency(atof(pkvd->szValue));
+		SetFrequency( Q_atof(pkvd->szValue));
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "duration"))
 	{
-		SetDuration(atof(pkvd->szValue));
+		SetDuration( Q_atof(pkvd->szValue));
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "radius"))
 	{
-		SetRadius(atof(pkvd->szValue));
+		SetRadius( Q_atof(pkvd->szValue));
 		pkvd->fHandled = TRUE;
 	}
 	else

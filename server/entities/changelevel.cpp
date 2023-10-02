@@ -124,7 +124,7 @@ void CChangeLevel::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "changedelay"))
 	{
-		m_changeTargetDelay = atof(pkvd->szValue);
+		m_changeTargetDelay = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

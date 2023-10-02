@@ -1352,7 +1352,7 @@ void CWeaponBox :: KeyValue( KeyValueData *pkvd )
 	}
 	else if ( m_cAmmoTypes < MAX_AMMO_SLOTS )
 	{
-		PackAmmo( ALLOC_STRING(pkvd->szKeyName), atoi(pkvd->szValue) );
+		PackAmmo( ALLOC_STRING(pkvd->szKeyName), Q_atoi(pkvd->szValue) );
 		m_cAmmoTypes++;// count this new ammo type.
 
 		pkvd->fHandled = TRUE;

@@ -56,37 +56,37 @@ void CElectrifiedWire::KeyValue( KeyValueData* pkvd )
 {
 	if( FStrEq( pkvd->szKeyName, "sparkfrequency" ))
 	{
-		m_iTipSparkFrequency = atoi( pkvd->szValue );
+		m_iTipSparkFrequency = Q_atoi( pkvd->szValue );
 
 		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "bodysparkfrequency" ))
 	{
-		m_iBodySparkFrequency = atoi( pkvd->szValue );
+		m_iBodySparkFrequency = Q_atoi( pkvd->szValue );
 
 		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "lightningfrequency" ))
 	{
-		m_iLightningFrequency = atoi( pkvd->szValue );
+		m_iLightningFrequency = Q_atoi( pkvd->szValue );
 
 		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "xforce" ))
 	{
-		m_iXJoltForce = atoi( pkvd->szValue );
+		m_iXJoltForce = Q_atoi( pkvd->szValue );
 
 		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "yforce" ))
 	{
-		m_iYJoltForce = atoi( pkvd->szValue );
+		m_iYJoltForce = Q_atoi( pkvd->szValue );
 
 		pkvd->fHandled = true;
 	}
 	else if( FStrEq( pkvd->szKeyName, "zforce" ))
 	{
-		m_iZJoltForce = atoi( pkvd->szValue );
+		m_iZJoltForce = Q_atoi( pkvd->szValue );
 
 		pkvd->fHandled = true;
 	}

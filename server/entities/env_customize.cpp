@@ -92,12 +92,12 @@ void CEnvCustomize::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "m_iVisible"))
 	{
-		m_iVisible = atoi(pkvd->szValue);
+		m_iVisible = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iSolid"))
 	{
-		m_iSolid = atoi(pkvd->szValue);
+		m_iSolid = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iszModel"))
@@ -107,97 +107,97 @@ void CEnvCustomize::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_voicePitch"))
 	{
-		m_voicePitch = atoi(pkvd->szValue);
+		m_voicePitch = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iPrisoner"))
 	{
-		m_iPrisoner = atoi(pkvd->szValue);
+		m_iPrisoner = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iMonsterClip"))
 	{
-		m_iMonsterClip = atoi(pkvd->szValue);
+		m_iMonsterClip = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iGag"))
 	{
-		m_iGag = atoi(pkvd->szValue);
+		m_iGag = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iClass"))
 	{
-		m_iClass = atoi(pkvd->szValue);
+		m_iClass = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iPlayerReact"))
 	{
-		m_iPlayerReact = atoi(pkvd->szValue);
+		m_iPlayerReact = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iProvoked"))
 	{
-		m_iProvoked = atoi(pkvd->szValue);
+		m_iProvoked = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_bloodColor") || FStrEq(pkvd->szKeyName, "m_iBloodColor"))
 	{
-		m_iBloodColor = atoi(pkvd->szValue);
+		m_iBloodColor = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_fFramerate"))
 	{
-		m_fFramerate = atof(pkvd->szValue);
+		m_fFramerate = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_fController0"))
 	{
-		m_fController0 = atof(pkvd->szValue);
+		m_fController0 = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_fController1"))
 	{
-		m_fController1 = atof(pkvd->szValue);
+		m_fController1 = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_fController2"))
 	{
-		m_fController2 = atof(pkvd->szValue);
+		m_fController2 = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_fController3"))
 	{
-		m_fController3 = atof(pkvd->szValue);
+		m_fController3 = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iReflection"))
 	{
-		m_iReflection = atoi(pkvd->szValue);
+		m_iReflection = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "newhealth"))
 	{
-		newhealth = atoi(pkvd->szValue);
+		newhealth = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iEnemy"))
 	{
-		m_iEnemy = atoi(pkvd->szValue);
+		m_iEnemy = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "newhealth" ) )
 	{
-		newhealth = atoi( pkvd->szValue );
+		newhealth = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "m_HealthBar" ) )
 	{
-		m_HealthBar = atoi( pkvd->szValue );
+		m_HealthBar = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "m_HealthBarType" ) )
 	{
-		m_HealthBarType = atoi( pkvd->szValue );
+		m_HealthBarType = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else

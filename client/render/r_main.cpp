@@ -426,12 +426,12 @@ void R_CheckChanges( void )
 			char filename[32];
 			Vector cube_origin = g_vecZero;
 			int cubesize = 512;
-			cube_origin.x = atoi( CMD_ARGV( 1 ) );
-			cube_origin.y = atoi( CMD_ARGV( 2 ) );
-			cube_origin.z = atoi( CMD_ARGV( 3 ) );
+			cube_origin.x = Q_atoi( CMD_ARGV( 1 ) );
+			cube_origin.y = Q_atoi( CMD_ARGV( 2 ) );
+			cube_origin.z = Q_atoi( CMD_ARGV( 3 ) );
 			sprintf_s( filename, (char *)CMD_ARGV( 4 ) );
 			if( CMD_ARGC() > 5 )
-				cubesize = atoi( CMD_ARGV( 5 ) );
+				cubesize = Q_atoi( CMD_ARGV( 5 ) );
 
 			ConPrintf( "Making a cubeshot at origin (%i %i %i), \"%s\", size = %i...\n", (int)cube_origin.x, (int)cube_origin.y, (int)cube_origin.z, filename, cubesize );
 			ENV_SHOT( cube_origin, filename, false, cubesize );

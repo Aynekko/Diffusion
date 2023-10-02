@@ -43,7 +43,7 @@ void CAutoTrigger::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "triggerstate"))
 	{
-		int type = atoi(pkvd->szValue);
+		int type = Q_atoi(pkvd->szValue);
 		switch (type)
 		{
 		case 0:

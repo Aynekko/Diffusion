@@ -222,7 +222,7 @@ void BotLoadWaypointFile(void)
 		afile = COM_ParseLine( afile, token );
 		if( afile && token[0] > 0 ) // found the first connection
 		{
-			ConnectedPoints[WaypointsLoaded][0] = atoi( token );
+			ConnectedPoints[WaypointsLoaded][0] = Q_atoi( token );
 
 			if( ConnectedPoints[WaypointsLoaded][0] > -1 )
 				ConnectionsForPoint[WaypointsLoaded] = 1;
@@ -239,7 +239,7 @@ void BotLoadWaypointFile(void)
 					continue;
 				}
 				
-				ConnectedPoints[WaypointsLoaded][1] = atoi( token );
+				ConnectedPoints[WaypointsLoaded][1] = Q_atoi( token );
 				ConnectionsForPoint[WaypointsLoaded] = 2;
 
 				// third connected point
@@ -252,7 +252,7 @@ void BotLoadWaypointFile(void)
 						continue;
 					}
 					
-					ConnectedPoints[WaypointsLoaded][2] = atoi( token );
+					ConnectedPoints[WaypointsLoaded][2] = Q_atoi( token );
 					ConnectionsForPoint[WaypointsLoaded] = 3;
 
 					// 4th
@@ -265,7 +265,7 @@ void BotLoadWaypointFile(void)
 							continue;
 						}
 						
-						ConnectedPoints[WaypointsLoaded][3] = atoi( token );
+						ConnectedPoints[WaypointsLoaded][3] = Q_atoi( token );
 						ConnectionsForPoint[WaypointsLoaded] = 4;
 
 						// 5th and last
@@ -278,7 +278,7 @@ void BotLoadWaypointFile(void)
 								continue;
 							}
 							
-							ConnectedPoints[WaypointsLoaded][4] = atoi( token );
+							ConnectedPoints[WaypointsLoaded][4] = Q_atoi( token );
 							ConnectionsForPoint[WaypointsLoaded] = 5;
 
 							// now, flags

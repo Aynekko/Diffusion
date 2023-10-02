@@ -1525,13 +1525,13 @@ void CNodeEnt :: KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "hinttype"))
 	{
-		m_sHintType = (short)atoi( pkvd->szValue );
+		m_sHintType = (short)Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 
 	if (FStrEq(pkvd->szKeyName, "activity"))
 	{
-		m_sHintActivity = (short)atoi( pkvd->szValue );
+		m_sHintActivity = (short)Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else

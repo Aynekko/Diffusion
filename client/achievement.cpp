@@ -185,7 +185,7 @@ void CHudAchievement::LoadAchievementFile( void )
 			bAchievements = false;
 			return;
 		}
-		AchievementStats[i] = atoi( token );
+		AchievementStats[i] = Q_atoi( token );
 		//	gEngfuncs.Con_Printf( "s %i %i\n", i, AchievementStats[i] );
 	}
 
@@ -202,7 +202,7 @@ void CHudAchievement::LoadAchievementFile( void )
 			bAchievements = false;
 			return;
 		}
-		AchievementGoal[i] = atoi( token );
+		AchievementGoal[i] = Q_atoi( token );
 		//	gEngfuncs.Con_Printf( "g %i %i\n", i, AchievementGoal[i] );
 	}
 
@@ -219,7 +219,7 @@ void CHudAchievement::LoadAchievementFile( void )
 			bAchievements = false;
 			return;
 		}
-		AchievementComplete[i] = (atoi( token ) > 0);
+		AchievementComplete[i] = (Q_atoi( token ) > 0);
 		//	gEngfuncs.Con_Printf( "c %i %i\n", i, AchievementComplete[i] );
 	}
 

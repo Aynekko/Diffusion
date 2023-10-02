@@ -85,17 +85,17 @@ void CBaseTrigger::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "damage"))
 	{
-		pev->dmg = atof(pkvd->szValue);
+		pev->dmg = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "count"))
 	{
-		m_cTriggersLeft = (int)atof(pkvd->szValue);
+		m_cTriggersLeft = (int)Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "damagetype"))
 	{
-		m_bitsDamageInflict = atoi(pkvd->szValue);
+		m_bitsDamageInflict = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

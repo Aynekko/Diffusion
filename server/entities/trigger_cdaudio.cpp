@@ -101,7 +101,7 @@ void CTargetCDAudio::KeyValue(KeyValueData* pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "radius"))
 	{
-		pev->scale = atof(pkvd->szValue);
+		pev->scale = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

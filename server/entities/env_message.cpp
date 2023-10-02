@@ -65,12 +65,12 @@ void CMessage::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "messagevolume"))
 	{
-		pev->scale = atof(pkvd->szValue) * 0.1;
+		pev->scale = Q_atof(pkvd->szValue) * 0.1;
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "messageattenuation"))
 	{
-		pev->impulse = atoi(pkvd->szValue);
+		pev->impulse = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else

@@ -2947,7 +2947,7 @@ void PM_Jump (void)
 		return;
 	}
 
-	tfc = atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "tfc" ) ) == 1 ? true : false;
+	tfc = Q_atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "tfc" ) ) == 1 ? true : false;
 
 	// Spy that's feigning death cannot jump
 	if ( tfc && ( pmove->deadflag == ( DEAD_DISCARDBODY + 1 ) ) )
@@ -3020,7 +3020,7 @@ void PM_Jump (void)
 	PM_PlayStepSound( PM_MapTextureTypeStepType( pmove->chtexturetype ), 1.0 );
 
 	// See if user can super long jump?
-	cansuperjump = atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "slj" ) ) == 1 ? true : false;
+	cansuperjump = Q_atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "slj" ) ) == 1 ? true : false;
 
 	// Acclerate upward
 	// If we are ducking...
@@ -3198,7 +3198,7 @@ void PM_CheckFalling( void )
 		else if ( pmove->flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED / 2 )
 		{
 			qboolean tfc = false;
-			tfc = atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "tfc" ) ) == 1 ? true : false;
+			tfc = Q_atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "tfc" ) ) == 1 ? true : false;
 
 			if ( tfc )
 			{
