@@ -79,7 +79,7 @@ void CCrossbowBolt::Spawn( void )
 
 	SET_MODEL( edict(), "models/crossbow_bolt.mdl");
 
-	UTIL_SetSize(pev, Vector(0, 0, 0), Vector(0, 0, 0));
+	UTIL_SetSize( this, Vector( -2, -2, -2 ), Vector( 2, 2, 2 ) );
 	RelinkEntity( TRUE );
 
 	SetFadeDistance(1500);
@@ -153,7 +153,7 @@ void CCrossbowBolt::PlayTouchSound( CBaseEntity *pOther )
 		return;
 	
 	// FIXME this is not looking good
-	if (FClassnameIs(pOther->pev, "monster_alice") || FClassnameIs(pOther->pev, "_playerdrone") || FClassnameIs( pOther->pev, "_playersentry" ) )
+	if( !pOther->pev->takedamage || FClassnameIs(pOther->pev, "monster_alice") || FClassnameIs(pOther->pev, "_playerdrone") || FClassnameIs( pOther->pev, "_playersentry" ) )
 		return;
 
 	if ( pOther->HasFlag(F_NOT_A_MONSTER) || pOther->HasFlag(F_METAL_MONSTER) )
@@ -182,15 +182,15 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 	SetTouch( NULL );
 	SetThink( NULL );
 
-	if (pOther->pev->takedamage)
+	if( pOther->pev->takedamage )
 	{
 		TraceResult tr = UTIL_GetGlobalTrace( );
-		entvars_t	*pevOwner;
+		entvars_t *pevOwner;
 
 		pevOwner = VARS( pev->owner );
 
 		// UNDONE: this needs to call TraceAttack instead
-		ClearMultiDamage( );
+		ClearMultiDamage();
 
 		if ( pOther->IsPlayer() )
 			pOther->TraceAttack(pevOwner, DMG_WPN_CROSSBOW, GetAbsVelocity().Normalize(), &tr, DMG_NEVERGIB ); 
@@ -203,32 +203,29 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 		// diffusion - moved here
 		PlayTouchSound( pOther );
 
-	//	if ( !g_pGameRules->IsMultiplayer() )
-	//	{
-			if( pOther->IsRigidBody( ))
-			{
-				Vector vecDir = GetAbsVelocity().Normalize( );
-				UTIL_SetOrigin( this, GetAbsOrigin() - vecDir * 12 );
-				SetLocalAngles( UTIL_VecToAngles( vecDir ));
-				pev->solid = SOLID_NOT;
-				pev->movetype = MOVETYPE_NONE;
-				SetLocalVelocity( g_vecZero );
-				SetLocalAvelocity( g_vecZero );
-				Vector angles = GetLocalAngles();
-				angles.z = RANDOM_LONG( 0, 360 );
-				SetLocalAngles( angles );
-				SetThink( &CBaseEntity::SUB_Remove );
-				SetNextThink( 240.0 );
+		if( pOther->IsRigidBody( ))
+		{
+			Vector vecDir = GetAbsVelocity().Normalize( );
+			UTIL_SetOrigin( this, GetAbsOrigin() - vecDir * 12 );
+			SetLocalAngles( UTIL_VecToAngles( vecDir ));
+			pev->solid = SOLID_NOT;
+			pev->movetype = MOVETYPE_NONE;
+			SetLocalVelocity( g_vecZero );
+			SetLocalAvelocity( g_vecZero );
+			Vector angles = GetLocalAngles();
+			angles.z = RANDOM_LONG( 0, 360 );
+			SetLocalAngles( angles );
+			SetThink( &CBaseEntity::SUB_Remove );
+			SetNextThink( 240.0 );
 
-				// g-cont. Setup movewith feature
-				SetParent( pOther );
-			}
-			else
-			{
-				SetLocalVelocity( g_vecZero );
-				Killed( pev, GIB_NEVER );
-			}
-	//	}
+			// g-cont. Setup movewith feature
+			SetParent( pOther );
+		}
+		else
+		{
+			SetLocalVelocity( g_vecZero );
+			Killed( pev, GIB_NEVER );
+		}
 	}
 	else
 	{	
@@ -262,12 +259,6 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 		if( UTIL_PointContents( GetAbsOrigin() ) != CONTENTS_WATER )
 			UTIL_Sparks( GetAbsOrigin() );
 	}
-
-//	if ( g_pGameRules->IsMultiplayer() )
-//	{
-//		SetThink(&CCrossbowBolt::ExplodeThink );
-//		SetNextThink(0.1);
-//	}
 }
 
 void CCrossbowBolt :: OnTeleport( void )
