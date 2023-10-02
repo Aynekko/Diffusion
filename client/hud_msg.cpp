@@ -979,7 +979,7 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 					bullet_p.m_flRotation = RANDOM_LONG( 0, 360 );
 					bullet_p.m_flRotationVelocity = 25;
 					bullet_p.m_flDistance = 1000;
-					bullet_p.ParticleType = TYPE_SMOKE_NOTINWATER;
+					bullet_p.ParticleType = TYPE_SMOKE;
 					g_pParticles.AddParticle( &bullet_p, g_pParticles.m_hSmoke, FPART_NOTWATER | FPART_VERTEXLIGHT );
 				}
 				else if( gunshot_particle == 2 )

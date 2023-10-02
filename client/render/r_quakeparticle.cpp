@@ -43,7 +43,6 @@ MemBlock<CQuakePart>ParticleArray_Default( MAX_PARTICLES ); // TYPE_DEFAULT
 MemBlock<CQuakePart>ParticleArray_Dustmote( MAX_PARTICLES ); // TYPE_DUSTMOTE
 MemBlock<CQuakePart>ParticleArray_Sparks( MAX_PARTICLES ); // TYPE_SPARKS
 MemBlock<CQuakePart>ParticleArray_Smoke( MAX_PARTICLES ); // TYPE_SMOKE
-MemBlock<CQuakePart>ParticleArray_Smoke_NotInWater( MAX_PARTICLES ); // TYPE_SMOKE_NOTINWATER
 MemBlock<CQuakePart>ParticleArray_Watersplash( MAX_PARTICLES ); // TYPE_WATERSPLASH
 MemBlock<CQuakePart>ParticleArray_Sand( MAX_PARTICLES ); // TYPE_SAND
 MemBlock<CQuakePart>ParticleArray_Dirt( MAX_PARTICLES ); // TYPE_DIRT
@@ -452,7 +451,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 
 		// experimental stuff
 		/*
-		if( curParticle->ParticleType == TYPE_SMOKE || curParticle->ParticleType == TYPE_SMOKE_NOTINWATER )
+		if( curParticle->ParticleType == TYPE_SMOKE )
 		{
 			if( g_pParticles.ExplosionOrg != g_vecZero )
 			{
@@ -905,7 +904,7 @@ bool CQuakePart::Evaluate( float gravity )
 		return true;
 	}
 	/*
-	if( ParticleType == TYPE_SMOKE || ParticleType == TYPE_SMOKE_NOTINWATER )
+	if( ParticleType == TYPE_SMOKE )
 	{
 		if( g_pParticles.ExplosionOrg != g_vecZero )
 		{
@@ -1047,7 +1046,6 @@ CQuakePartSystem :: CQuakePartSystem( void )
 	ParticleArray_Dustmote.Clear();
 	ParticleArray_Sparks.Clear();
 	ParticleArray_Smoke.Clear();
-	ParticleArray_Smoke_NotInWater.Clear();
 	ParticleArray_Watersplash.Clear();
 	ParticleArray_Sand.Clear();
 	ParticleArray_Dirt.Clear();
@@ -1098,7 +1096,6 @@ void CQuakePartSystem :: Clear( void )
 	ParticleArray_Dustmote.Clear();
 	ParticleArray_Sparks.Clear();
 	ParticleArray_Smoke.Clear();
-	ParticleArray_Smoke_NotInWater.Clear();
 	ParticleArray_Watersplash.Clear();
 	ParticleArray_Sand.Clear();
 	ParticleArray_Dirt.Clear();
@@ -1614,7 +1611,6 @@ void CQuakePartSystem :: Update( void )
 	DrawParticles( ParticleArray_Dustmote );
 	DrawParticles( ParticleArray_Sparks );
 	DrawParticles( ParticleArray_Smoke );
-	DrawParticles( ParticleArray_Smoke_NotInWater );
 	DrawParticles( ParticleArray_Watersplash );
 	DrawParticles( ParticleArray_Sand );
 	DrawParticles( ParticleArray_Dirt );
@@ -1697,9 +1693,6 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 		break;
 	case TYPE_SMOKE:
 		dst = ParticleArray_Smoke.Allocate();
-		break;
-	case TYPE_SMOKE_NOTINWATER:
-		dst = ParticleArray_Smoke_NotInWater.Allocate();
 		break;
 	case TYPE_DUSTMOTE:
 		dst = ParticleArray_Dustmote.Allocate();
