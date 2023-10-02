@@ -1694,7 +1694,10 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	}
 
 	if( CVAR_TO_BOOL( gl_emboss ) )
-		GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+	{
+		if( tr.materials[tx->gl_texturenum].EmbossScale > 0.01f )
+			GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+	}
 
 	if( CVAR_TO_BOOL( gl_specular ) )
 		GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
@@ -1815,7 +1818,10 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 	}
 
 	if( CVAR_TO_BOOL( gl_emboss ) )
-		GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+	{
+		if( tr.materials[tx->gl_texturenum].EmbossScale > 0.01f )
+			GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+	}
 
 	if( CVAR_TO_BOOL( gl_specular ) )
 		GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
@@ -2058,7 +2064,10 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 	}
 
 	if( CVAR_TO_BOOL( gl_emboss ) )
-		GL_AddShaderDirective( options, "STUDIO_EMBOSS" );
+	{
+		if( tr.materials[mat->gl_diffuse_id].EmbossScale > 0.01f )
+			GL_AddShaderDirective( options, "STUDIO_EMBOSS" );
+	}
 
 	if( CVAR_TO_BOOL( gl_specular ) )
 		GL_AddShaderDirective( options, "STUDIO_SPECULAR" );
@@ -2173,8 +2182,11 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 	if( FBitSet( mat->flags, STUDIO_NF_CHROME ))
 		GL_AddShaderDirective( options, "STUDIO_HAS_CHROME" );
 
-	if( CVAR_TO_BOOL(gl_emboss) )
-		GL_AddShaderDirective( options, "STUDIO_EMBOSS" );
+	if( CVAR_TO_BOOL( gl_emboss ) )
+	{
+		if( tr.materials[mat->gl_diffuse_id].EmbossScale > 0.01f )
+			GL_AddShaderDirective( options, "STUDIO_EMBOSS" );
+	}
 
 	if( CVAR_TO_BOOL( gl_specular ) )
 		GL_AddShaderDirective( options, "STUDIO_SPECULAR" );
