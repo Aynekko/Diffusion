@@ -2474,10 +2474,6 @@ void R_DrawBrushList( void )
 	numTempElems = 0;
 	endv = 0;
 
-	// diffusioncubemaps
-	if( GL_Support( R_SEAMLESS_CUBEMAP ) )
-		pglEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
-
 	pglBindVertexArray( world->vertex_array_object );
 	r_stats.c_world_polys += tr.num_draw_surfaces;
 
@@ -2757,10 +2753,6 @@ void R_DrawBrushList( void )
 		r_stats.num_flushes++;
 		numTempElems = 0;
 	}
-
-	// diffusioncubemaps
-	if( GL_Support( R_SEAMLESS_CUBEMAP ) )
-		pglDisable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 
 	GL_SelectTexture( glConfig.max_texture_units - 1 ); // force to cleanup all the units
 	GL_CleanUpTextureUnits( 0 );

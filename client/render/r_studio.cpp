@@ -5106,9 +5106,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	GL_AlphaTest( GL_FALSE );
 	GL_DepthMask( GL_TRUE );
 
-	if( GL_Support( R_SEAMLESS_CUBEMAP ) )
-		pglEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
-
 	// sorting list to reduce shader switches
 	if( !CVAR_TO_BOOL( r_nosort ) ) QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
 
@@ -5340,9 +5337,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 	GL_SelectTexture( glConfig.max_texture_units - 1 ); // force to cleanup all the units
 	GL_CleanUpTextureUnits( 0 );
-
-	if( GL_Support( R_SEAMLESS_CUBEMAP ) )
-		pglDisable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 
 	GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	GL_DepthMask( GL_TRUE );

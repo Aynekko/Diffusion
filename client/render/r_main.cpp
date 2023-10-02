@@ -1623,10 +1623,6 @@ void R_DrawTranslucentEntities(void)
 	
 	glState.drawTrans = true;
 
-	// diffusioncubemaps
-	if( GL_Support( R_SEAMLESS_CUBEMAP ) )
-		pglEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
-
 	// brushes:
 	for( i = 0; i < tr.num_trans_entities; i++ )
 	{
@@ -1731,12 +1727,6 @@ void R_DrawTranslucentEntities(void)
 
 		R_DrawSpriteModel( RI->currententity );
 	}
-
-	GL_CheckForErrors();
-
-	// diffusioncubemaps
-	if( GL_Support( R_SEAMLESS_CUBEMAP ) )
-		pglDisable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 
 	GL_CheckForErrors();
 }
@@ -2151,6 +2141,10 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 	}
 
 	memset( tr.visbytes, 0, tr.pvssize );
+
+	// diffusioncubemaps
+	if( GL_Support( R_SEAMLESS_CUBEMAP ) )
+		pglEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
 
 	GL_LoadAndRebuildCubemaps( RI->params );  // diffusioncubemaps
 
