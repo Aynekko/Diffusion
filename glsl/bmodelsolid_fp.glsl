@@ -45,7 +45,6 @@ uniform sampler2D	u_WaterTex;     // water diffuse texture to mix with reflectio
 uniform float           u_PlanarReflectScale;
 #endif
 
-uniform sampler2D	u_DetailMap;
 uniform sampler2D	u_DepthMap;
 uniform sampler2D	u_GlowMap;
 
@@ -186,10 +185,6 @@ void main( void )
 
 #if defined( BMODEL_MONOCHROME )
 	diffuse.rgb = vec3( GetLuminance( diffuse.rgb )); 
-#endif
-	// apply the detail texture
-#if defined( BMODEL_HAS_DETAIL )
-	diffuse.rgb *= texture2D( u_DetailMap, var_TexGlobal ).rgb * DETAIL_SCALE;
 #endif
 
 	vec3 light = vec3( 0.0 ); // completely black if have no lightmaps

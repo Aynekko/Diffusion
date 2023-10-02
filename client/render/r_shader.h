@@ -61,7 +61,6 @@ typedef struct glsl_prog_s
 	GLint		u_DepthMap;	// 1-th unit
 	GLint		u_NormalMap;	// 1-th unit
 	GLint		u_GlossMap;	// 2-th unit
-	GLint		u_DetailMap;	// 6-th unit
 	GLint		u_ProjectMap;	// 0-th unit
 	GLint		u_ShadowMap;	// 2-th unit
 	GLint		u_AttnZMap;	// 1-th unit

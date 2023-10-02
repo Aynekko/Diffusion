@@ -38,7 +38,6 @@ uniform float		u_GlossScale;
 uniform float		u_EmbossScale;
 #endif
 
-uniform sampler2D	u_DetailMap;
 uniform sampler2D	u_ScreenMap;	// screen copy
 
 #if defined( BMODEL_LIGHT_PROJECTION )
@@ -186,11 +185,6 @@ void main( void )
 #if defined( BMODEL_BUMP )
 	// now, rotate normalmap to worldspace
 	N = normalize( var_MatrixTBN * N );
-#endif
-
-	// apply the detail texture
-#if defined( BMODEL_HAS_DETAIL )
-	diffuse.rgb *= texture2D( u_DetailMap, var_TexGlobal ).rgb * DETAIL_SCALE;
 #endif
 
 	vec3 light = vec3( 1.0 );
