@@ -452,7 +452,7 @@ void R_DrawGrassMesh( grass_t *grass, int tex, word &hLastShader, word &hCachedM
 		hCachedMatrix = -1;
 	}
 
-	if( CVAR_TO_BOOL( r_lightmap ) && !CVAR_TO_BOOL( r_fullbright ))
+	if( r_lightmap->value && !r_fullbright->value )
 		GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 	else GL_Bind( GL_TEXTURE0, grasstexs[tex].gl_texturenum );
 

@@ -4963,7 +4963,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 
 		if( cached_material != mat )
 		{
-			if( CVAR_TO_BOOL( r_lightmap ) && !CVAR_TO_BOOL( r_fullbright ) )
+			if( r_lightmap->value && !r_fullbright->value )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 			else if( tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id > 0 )
 				GL_Bind( GL_TEXTURE0, tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id );
@@ -5203,7 +5203,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 		if( cached_material != mat )
 		{
-			if( CVAR_TO_BOOL( r_lightmap ) && !CVAR_TO_BOOL( r_fullbright ) )
+			if( r_lightmap->value && !r_fullbright->value )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 			else if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
 				IEngineStudio.StudioSetupSkin( m_pStudioHeader, pskinref[pMesh->skinref] );

@@ -2144,7 +2144,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 				GL_Bind( GL_TEXTURE0, tr.cinTextures[es->cintexturenum - 1] );
 				GL_LoadIdentityTexMatrix();
 			}
-			else if( CVAR_TO_BOOL( r_lightmap ) )
+			else if( r_lightmap->value )
 			{
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 				GL_LoadIdentityTexMatrix();
@@ -2458,13 +2458,13 @@ R_DrawBrushList
 */
 void R_DrawBrushList( void )
 {
-	int		cached_mirror = -1;
-	int		cached_lightmap = -1;
-	int		cached_texture = -1;
-	qboolean		flush_buffer = false;
+	int	cached_mirror = -1;
+	int	cached_lightmap = -1;
+	int	cached_texture = -1;
+	qboolean flush_buffer = false;
 	cl_entity_t *e = RI->currententity;
-	float		cached_texofs[2] = { -1.0f, -1.0f };
-	int		startv, endv;
+	float cached_texofs[2] = { -1.0f, -1.0f };
+	int startv, endv;
 	mcubemap_t *cached_cubemap[2];
 
 	if( !tr.num_draw_surfaces )
@@ -2489,6 +2489,7 @@ void R_DrawBrushList( void )
 		gl_bmodelface_t *entry = &tr.draw_surfaces[i];
 		mextrasurf_t *es = entry->surface->info;
 		msurface_t *s = entry->surface;
+		texture_t *tex = s->texinfo->texture;
 
 		if( !entry->hProgram ) continue;
 
@@ -2501,7 +2502,7 @@ void R_DrawBrushList( void )
 		if( cached_mirror != es->subtexture[glState.stack_position] )
 			flush_buffer = true;
 
-		if( cached_texture != es->gl_texturenum )
+		if( cached_texture != tex->gl_texturenum )
 			flush_buffer = true;
 
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
@@ -2554,7 +2555,7 @@ void R_DrawBrushList( void )
 			cached_cubemap[1] = 0;
 		}
 
-		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != es->gl_texturenum) )
+		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != tex->gl_texturenum) )
 		{
 			mtexinfo_t *tx = s->texinfo;
 			mfaceinfo_t *land = tx->faceinfo;
@@ -2576,14 +2577,19 @@ void R_DrawBrushList( void )
 				GL_LoadTexMatrix( tr.subviewTextures[handle - 1].matrix );
 
 				if( FBitSet( s->flags, SURF_REFLECT ) )
-					pglUniform1fARB( RI->currentshader->u_PlanarReflectScale, tr.materials[es->gl_texturenum].PlanarReflectScale );
+					pglUniform1fARB( RI->currentshader->u_PlanarReflectScale, tr.materials[tex->gl_texturenum].PlanarReflectScale );
+			}
+			else if( r_lightmap->value )
+			{
+				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
+				GL_LoadIdentityTexMatrix();
 			}
 			else
 			{
-				if( tr.materials[es->gl_texturenum].gl_fallbacktex_id > 0 )
-					GL_Bind( GL_TEXTURE0, tr.materials[es->gl_texturenum].gl_fallbacktex_id );
+				if( tr.materials[tex->gl_texturenum].gl_fallbacktex_id > 0 )
+					GL_Bind( GL_TEXTURE0, tr.materials[tex->gl_texturenum].gl_fallbacktex_id );
 				else
-					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
+					GL_Bind( GL_TEXTURE0, tex->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
 			}
 
@@ -2619,15 +2625,15 @@ void R_DrawBrushList( void )
 			}
 			else
 			{
-				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[es->gl_texturenum].GlossSmoothness );
-				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[es->gl_texturenum].GlossScale );
-				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[es->gl_texturenum].EmbossScale );
+				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[tex->gl_texturenum].GlossSmoothness );
+				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[tex->gl_texturenum].GlossScale );
+				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[tex->gl_texturenum].EmbossScale );
 
-				if( tr.materials[es->gl_texturenum].gl_normalmap_id > 0 )
-					GL_Bind( GL_TEXTURE4, tr.materials[es->gl_texturenum].gl_normalmap_id );
+				if( tr.materials[tex->gl_texturenum].gl_normalmap_id > 0 )
+					GL_Bind( GL_TEXTURE4, tr.materials[tex->gl_texturenum].gl_normalmap_id );
 			}
 
-			pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[es->gl_texturenum].Fresnel );
+			pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[tex->gl_texturenum].Fresnel );
 
 			// diffusion - refracted water!!!
 			if( FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
@@ -2647,19 +2653,19 @@ void R_DrawBrushList( void )
 			}
 
 			// diffusion - interior mapping
-			if( tr.materials[es->gl_texturenum].gl_interiormap_id > 0 )
+			if( tr.materials[tex->gl_texturenum].gl_interiormap_id > 0 )
 			{
 				pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform2fARB( RI->currentshader->u_InteriorGrid, tr.materials[es->gl_texturenum].InteriorGrid.x, tr.materials[es->gl_texturenum].InteriorGrid.y );
-				pglUniform1fARB( RI->currentshader->u_InteriorLightState, (float)tr.materials[es->gl_texturenum].InteriorLightState );
-				GL_Bind( GL_TEXTURE5, tr.materials[es->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
+				pglUniform2fARB( RI->currentshader->u_InteriorGrid, tr.materials[tex->gl_texturenum].InteriorGrid.x, tr.materials[tex->gl_texturenum].InteriorGrid.y );
+				pglUniform1fARB( RI->currentshader->u_InteriorLightState, (float)tr.materials[tex->gl_texturenum].InteriorLightState );
+				GL_Bind( GL_TEXTURE5, tr.materials[tex->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
 			}
 			else if( FBitSet( s->flags, SURF_WATER ) && (gl_water_planar->value > 0) )
-				GL_Bind( GL_TEXTURE5, es->gl_texturenum ); // u_WaterTex - mix turbulency texture and reflection
+				GL_Bind( GL_TEXTURE5, tex->gl_texturenum ); // u_WaterTex - mix turbulency texture and reflection
 			else if( FBitSet( s->flags, SURF_LANDSCAPE ) && land && land->terrain )
 				GL_Bind( GL_TEXTURE5, land->terrain->indexmap.gl_heightmap_id );
 
-			if( !RP_CUBEPASS() && (world->rebuilding_cubemaps == CMREBUILD_INACTIVE) && (tr.materials[es->gl_texturenum].ReflectScale > 0.01f) && CVAR_TO_BOOL( gl_cubemaps ) && (world->num_cubemaps > 0) ) // diffusioncubemaps
+			if( !RP_CUBEPASS() && (world->rebuilding_cubemaps == CMREBUILD_INACTIVE) && (tr.materials[tex->gl_texturenum].ReflectScale > 0.01f) && CVAR_TO_BOOL( gl_cubemaps ) && (world->num_cubemaps > 0) ) // diffusioncubemaps
 			{
 				int cubemap_tex_unit[2] = { GL_TEXTURE6, GL_TEXTURE7 };
 				if( FBitSet( s->flags, SURF_WATER ) )
@@ -2697,14 +2703,14 @@ void R_DrawBrushList( void )
 				pglUniform2fARB( RI->currentshader->u_CubeMipCount, r, g );
 
 				pglUniform1fARB( RI->currentshader->u_LerpFactor, es->lerpFactor );
-				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale );
+				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[tex->gl_texturenum].ReflectScale );
 
 				cached_cubemap[0] = es->cubemap[0];
 				cached_cubemap[1] = es->cubemap[1];
 			}
 
 			// diffusion - apply custom color to a specific texture
-			if( tr.materials[es->gl_texturenum].ApplyColor && (e->index > 0) )
+			if( tr.materials[tex->gl_texturenum].ApplyColor && (e->index > 0) )
 			{
 				// hack
 				if( e->curstate.rendermode == kRenderTransAdd )
@@ -2721,7 +2727,7 @@ void R_DrawBrushList( void )
 				R_SetRenderColor( RI->currententity );
 
 			cached_mirror = es->subtexture[glState.stack_position];
-			cached_texture = es->gl_texturenum;
+			cached_texture = tex->gl_texturenum;
 			cached_texofs[0] = -1.0f;
 			cached_texofs[1] = -1.0f;
 		}

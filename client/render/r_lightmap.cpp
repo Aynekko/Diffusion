@@ -477,7 +477,7 @@ void R_UpdateSurfaceParams( msurface_t *surf )
 	{
 		esrf->gl_texturenum = tr.cinTextures[esrf->cintexturenum-1];
 	}
-	else if( CVAR_TO_BOOL( r_lightmap ) || e->curstate.rendermode == kRenderTransColor )
+	else if( r_lightmap->value )
 	{
 		esrf->gl_texturenum = tr.whiteTexture;
 	}
