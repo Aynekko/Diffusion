@@ -1781,7 +1781,7 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 
 	if( CVAR_TO_BOOL( r_shadows ) && !tr.shadows_notsupport )
 	{
-		if( !FBitSet( pl->flags, CF_NOSHADOWS ) )
+		if( shadows )
 			GL_AddShaderDirective( options, "BMODEL_HAS_SHADOWS" );
 	}
 
@@ -2117,7 +2117,7 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 
 	if( CVAR_TO_BOOL( r_shadows ) && !tr.shadows_notsupport )
 	{
-		if(!FBitSet(pl->flags, CF_NOSHADOWS))
+		if( shadows )
 			GL_AddShaderDirective( options, "STUDIO_HAS_SHADOWS" );
 	}
 

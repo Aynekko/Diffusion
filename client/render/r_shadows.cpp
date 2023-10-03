@@ -496,7 +496,10 @@ void R_RenderShadowScene( plight_t *pl )
 	r_stats.num_passes++;
 	R_ShadowPassSetupFrame( pl );
 	R_ShadowPassSetupGL( pl );
+	pglEnable( GL_SCISSOR_TEST );
+	pglScissor( RI->viewport[0], RI->viewport[1], RI->viewport[2], RI->viewport[3] );
 	pglClear( GL_DEPTH_BUFFER_BIT );
+	pglDisable( GL_SCISSOR_TEST );
 
 	R_MarkLeaves();
 	R_ShadowPassDrawWorld( pl );
