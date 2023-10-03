@@ -1205,7 +1205,7 @@ Using backward recursion to find waterline leaf
 from underwater leaf (idea: XaeroX)
 =============
 */
-static void R_CheckFog( void )
+void R_CheckFog( void )
 {
 	cl_entity_t	*ent = NULL;
 	int		texture = -1;

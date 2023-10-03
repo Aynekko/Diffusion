@@ -775,6 +775,7 @@ void R_PushRefState( void );
 void R_PopRefState( void );
 ref_instance_t *R_GetPrevInstance( void );
 void R_DrawPostEffects( void );
+void R_CheckFog( void );
 
 //
 // r_misc.cpp
