@@ -2502,7 +2502,7 @@ void R_DrawBrushList( void )
 		if( cached_mirror != es->subtexture[glState.stack_position] )
 			flush_buffer = true;
 
-		if( cached_texture != tex->gl_texturenum )
+		if( cached_texture != es->gl_texturenum )
 			flush_buffer = true;
 
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
@@ -2555,7 +2555,7 @@ void R_DrawBrushList( void )
 			cached_cubemap[1] = 0;
 		}
 
-		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != tex->gl_texturenum) )
+		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != es->gl_texturenum) )
 		{
 			mtexinfo_t *tx = s->texinfo;
 			mfaceinfo_t *land = tx->faceinfo;
@@ -2589,7 +2589,7 @@ void R_DrawBrushList( void )
 				if( tr.materials[tex->gl_texturenum].gl_fallbacktex_id > 0 )
 					GL_Bind( GL_TEXTURE0, tr.materials[tex->gl_texturenum].gl_fallbacktex_id );
 				else
-					GL_Bind( GL_TEXTURE0, tex->gl_texturenum );
+					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
 			}
 
@@ -2727,7 +2727,7 @@ void R_DrawBrushList( void )
 				R_SetRenderColor( RI->currententity );
 
 			cached_mirror = es->subtexture[glState.stack_position];
-			cached_texture = tex->gl_texturenum;
+			cached_texture = es->gl_texturenum;
 			cached_texofs[0] = -1.0f;
 			cached_texofs[1] = -1.0f;
 		}
