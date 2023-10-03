@@ -2128,12 +2128,16 @@ void R_DrawLightForSurfList( plight_t *pl )
 		{
 			mtexinfo_t *tx = s->texinfo;
 			mfaceinfo_t *land = tx->faceinfo;
-			float xScale, yScale, waveHeight;
+			float waveHeight = 0.0f;
 
 			// set the current waveheight
 			if( s->polys->verts[0][2] >= RI->vieworg[2] )
 				waveHeight = -RI->currententity->curstate.scale;
-			else waveHeight = RI->currententity->curstate.scale;
+			else
+				waveHeight = RI->currententity->curstate.scale;
+
+			if( FBitSet( s->flags, SURF_WATER ) && (waveHeight != 0.0f) )
+				pglUniform1fARB( RI->currentshader->u_WaveHeight, waveHeight );
 
 			if( FBitSet( s->flags, SURF_MOVIE ) && RI->currententity->curstate.body )
 			{
@@ -2165,8 +2169,6 @@ void R_DrawLightForSurfList( plight_t *pl )
 			if( land && land->terrain && land->terrain->indexmap.gl_diffuse_id != 0 )
 				GL_Bind( GL_TEXTURE0, land->terrain->indexmap.gl_diffuse_id );
 
-			GET_DETAIL_SCALE( tex->gl_texturenum, &xScale, &yScale );
-			pglUniform3fARB( RI->currentshader->u_DetailScale, xScale, yScale, waveHeight );
 			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
 			pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );
 
@@ -2556,13 +2558,16 @@ void R_DrawBrushList( void )
 		{
 			mtexinfo_t *tx = s->texinfo;
 			mfaceinfo_t *land = tx->faceinfo;
-			float waveHeight;
+			float waveHeight = 0.0f;
 
 			// set the current waveheight
 			if( s->polys->verts[0][2] >= RI->vieworg[2] )
 				waveHeight = -RI->currententity->curstate.scale;
 			else
 				waveHeight = RI->currententity->curstate.scale;
+
+			if( FBitSet( s->flags, SURF_WATER ) && (waveHeight != 0.0f) )
+				pglUniform1fARB( RI->currentshader->u_WaveHeight, waveHeight );
 
 			if( FBitSet( s->flags, SURF_REFLECT | SURF_PORTAL | SURF_SCREEN ) && es->subtexture[glState.stack_position] )
 			{
@@ -2581,8 +2586,6 @@ void R_DrawBrushList( void )
 					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
 			}
-
-			pglUniform3fARB( RI->currentshader->u_DetailScale, 0.0f, 0.0f, waveHeight );
 
 			pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );
 

@@ -62,7 +62,6 @@ varying vec3		var_TexLight0;
 varying vec3		var_TexLight1;
 varying vec3		var_TexLight2;
 varying vec3		var_TexLight3;
-varying vec2		var_TexDetail;
 varying vec3		var_ViewVec; 
 varying vec3		var_Normal;
 varying mat3		var_MatrixTBN;
@@ -210,7 +209,7 @@ void main( void )
 
 	#if defined( BMODEL_APPLY_STYLE0 ) || defined( BMODEL_APPLY_STYLE1 ) || defined( BMODEL_APPLY_STYLE2 ) || defined( BMODEL_APPLY_STYLE3 )
 		light = min(( light * LIGHTMAP_SHIFT ), 1.0 );
-	        gloss = min(( gloss * LIGHTMAP_SHIFT ), 1.0 );
+		gloss = min(( gloss * LIGHTMAP_SHIFT ), 1.0 );
 	#endif
 
 	diffuse.rgb *= light;

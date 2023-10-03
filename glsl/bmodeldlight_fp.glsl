@@ -73,7 +73,6 @@ varying vec4		var_ShadowCoord;
 
 varying vec2		var_TexDiffuse;
 varying vec2		var_TexGlobal;
-varying vec2		var_TexDetail;
 varying vec3		var_LightVec;
 varying vec3	        var_ViewVec; 
 varying vec3		var_Normal;

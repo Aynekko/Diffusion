@@ -18,7 +18,9 @@ GNU General Public License for more details.
 #include "tnbasis.h"
 
 #define u_RealTime	u_TexOffset.z
-#define u_WaveHeight	u_DetailScale.z
+#if defined( BMODEL_WAVEHEIGHT )
+uniform float u_WaveHeight;
+#endif
 
 attribute vec3		attr_Position;
 attribute vec4		attr_TexCoord0;	// diffuse\terrain
@@ -28,7 +30,6 @@ attribute vec4		attr_LightStyles;
 
 uniform float		u_LightStyleValues[MAX_LIGHTSTYLES];
 uniform mat4		u_ModelMatrix;
-uniform vec3		u_DetailScale;
 uniform vec3		u_TexOffset;	// conveyor stuff
 uniform vec3	    u_ViewOrigin;
 
@@ -38,7 +39,6 @@ varying vec3		var_TexLight0;
 varying vec3		var_TexLight1;
 varying vec3		var_TexLight2;
 varying vec3		var_TexLight3;
-varying vec2		var_TexDetail;
 varying vec2		var_TexGlobal;
 varying vec3		var_ViewVec;
 varying vec3		var_Normal;
@@ -72,7 +72,6 @@ void main( void )
 
 	// used for diffuse, normalmap, specular and height map
 	var_TexDiffuse = ( attr_TexCoord0.xy + u_TexOffset.xy );
-	var_TexDetail = ( attr_TexCoord0.xy + u_TexOffset.xy ) * u_DetailScale.xy;
 
 #if defined( BMODEL_WATER )
 	float os = var_TexDiffuse.x;

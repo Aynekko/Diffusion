@@ -18,14 +18,15 @@ GNU General Public License for more details.
 #include "tnbasis.h"
 
 #define u_RealTime	u_TexOffset.z
-#define u_WaveHeight	u_DetailScale.z
+#if defined( BMODEL_WAVEHEIGHT )
+uniform float u_WaveHeight;
+#endif
 
 attribute vec3		attr_Position;
 attribute vec4		attr_TexCoord0;
 
 // model specific
 uniform mat4		u_ModelMatrix;
-uniform vec3		u_DetailScale;
 uniform vec3		u_TexOffset;
 
 // light specific
@@ -36,7 +37,6 @@ uniform vec3	        u_ViewOrigin;
 // shared variables
 varying vec2		var_TexDiffuse;
 varying vec2		var_TexGlobal;
-varying vec2		var_TexDetail;
 varying vec3		var_LightVec;
 varying vec3		var_ViewVec;
 varying vec3		var_Normal;
@@ -67,7 +67,6 @@ void main( void )
 	vec3 srcN = tbn[2];
 
 	var_TexDiffuse = ( attr_TexCoord0.xy + u_TexOffset.xy );
-	var_TexDetail = ( attr_TexCoord0.xy + u_TexOffset.xy ) * u_DetailScale.xy;
 
 #if defined( BMODEL_WATER )
 	float os = var_TexDiffuse.x;

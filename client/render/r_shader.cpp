@@ -742,7 +742,8 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 
 	shader->u_LightStyleValues = pglGetUniformLocationARB( shader->handle, "u_LightStyleValues" );
 	shader->u_ModelMatrix = pglGetUniformLocationARB( shader->handle, "u_ModelMatrix" );
-	shader->u_DetailScale = pglGetUniformLocationARB( shader->handle, "u_DetailScale" );
+	if( GL_FindShaderDirective( shader, "BMODEL_WAVEHEIGHT" ) )
+		shader->u_WaveHeight = pglGetUniformLocationARB( shader->handle, "u_WaveHeight" );
 	shader->u_TexOffset = pglGetUniformLocationARB( shader->handle, "u_TexOffset" );
 	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
 	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
@@ -801,7 +802,8 @@ static void GL_InitBmodelDlightUniforms( glsl_program_t *shader )
 		shader->u_LayerMap = pglGetUniformLocationARB( shader->handle, "u_LayerMap" );
 
 	shader->u_ModelMatrix = pglGetUniformLocationARB( shader->handle, "u_ModelMatrix" );
-	shader->u_DetailScale = pglGetUniformLocationARB( shader->handle, "u_DetailScale" );
+	if( GL_FindShaderDirective( shader, "BMODEL_WAVEHEIGHT" ) )
+		shader->u_WaveHeight = pglGetUniformLocationARB( shader->handle, "u_WaveHeight" );
 	shader->u_TexOffset = pglGetUniformLocationARB( shader->handle, "u_TexOffset" );
 
 	shader->u_LightDir = pglGetUniformLocationARB( shader->handle, "u_LightDir" );

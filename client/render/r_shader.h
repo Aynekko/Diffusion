@@ -123,7 +123,7 @@ typedef struct glsl_prog_s
 	GLint		u_AberrationScale;
 	GLint		u_ShadowMode;
 	GLint		u_ShadowParams;
-	GLint		u_DetailScale;
+	GLint		u_WaveHeight;
 	GLint		u_RenderAlpha;
 	GLint		u_RefractScale;
 	GLint		u_ReflectScale;
