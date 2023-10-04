@@ -4361,10 +4361,6 @@ void CStudioModelRenderer::StudioRenderModel( void )
 			DBG_DrawBBox( m_pCurrentEntity->curstate.mins, m_pCurrentEntity->curstate.maxs );
 	}
 
-	// diffusion - fixed some occasional depth issue on other models, when glowshell model was visible
-	if( !(RI->params & RP_SHADOWPASS) && !(RI->params & RP_SKYPORTALVIEW) )
-		GL_DepthMask( GL_FALSE );
-
 	//	StudioRestoreRenderer();
 }
 
