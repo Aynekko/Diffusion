@@ -1299,6 +1299,9 @@ void R_DrawParticles( qboolean trans )
 	if( FBitSet( RI->params, RP_SKYPORTALVIEW ))
 		return;
 
+	if( IsBuildingCubemaps() )
+		return;
+
 	rvp.viewport[0] = RI->viewport[0];
 	rvp.viewport[1] = RI->viewport[1];
 	rvp.viewport[2] = RI->viewport[2];
@@ -2025,6 +2028,17 @@ bool R_CheckMonsterView( const ref_viewpass_t *rvp )
 
  	if( view && view->model && view->model->type == mod_studio && FBitSet( view->curstate.eflags, EFLAG_SLERP ))
 		return true;
+	return false;
+}
+
+bool IsBuildingCubemaps( void )
+{
+	if( RP_CUBEPASS() )
+		return true;
+
+	if( world->rebuilding_cubemaps > CMREBUILD_INACTIVE_NEEDSREBUILD )
+		return true;
+
 	return false;
 }
 

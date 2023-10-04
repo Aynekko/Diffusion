@@ -877,7 +877,7 @@ R_DrawWeather
 */
 void R_DrawWeather( void )
 {	
-	if( FBitSet( RI->params, RP_SKYPORTALVIEW ) || FBitSet( RI->params, RP_SHADOWPASS ) || FBitSet( RI->params, RP_ENVVIEW ) )
+	if( FBitSet( RI->params, RP_SKYPORTALVIEW ) || FBitSet( RI->params, RP_SHADOWPASS ) || IsBuildingCubemaps() )
 		return;
 
 	GL_CleanupDrawState();

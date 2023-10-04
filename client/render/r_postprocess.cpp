@@ -906,7 +906,7 @@ void Bloom( void )
 	if( !CVAR_TO_BOOL( r_bloom ) )
 		return;
 
-	if( FBitSet( RI->params, RP_ENVVIEW ) ) // no bloom in cubemaps
+	if( IsBuildingCubemaps() ) // no bloom in cubemaps
 		return;
 
 	GL_Bind( GL_TEXTURE0, tr.screen_fbo_texture_color );
@@ -995,6 +995,9 @@ int RenderExposureStorage(void)
 void ToneMap(void)
 {
 	if( !CVAR_TO_BOOL( gl_exposure ) )
+		return;
+
+	if( IsBuildingCubemaps() ) // no exposure change in cubemaps
 		return;
 
 	const int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );

@@ -1601,7 +1601,7 @@ CQuakePart *CQuakePartSystem :: AllocParticle( void )
 	
 void CQuakePartSystem :: Update( void )
 {
-	if( (RI->params & RP_ENVVIEW) || (RI->params & RP_SHADOWPASS) || (RI->params & RP_MIRRORVIEW) )
+	if( IsBuildingCubemaps() || (RI->params & RP_SHADOWPASS) || (RI->params & RP_MIRRORVIEW) )
 		return;
 
 	if( glState.drawTrans )

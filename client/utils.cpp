@@ -389,6 +389,9 @@ byte *Mod_GetEngineVis( void )
 
 bool Mod_CheckBoxVisible( const Vector &absmin, const Vector &absmax )
 {
+	if( IsBuildingCubemaps() )
+		return true;
+
 	return Mod_BoxVisible( absmin, absmax, Mod_GetCurrentVis( ));
 }
 

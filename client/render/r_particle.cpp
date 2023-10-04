@@ -96,7 +96,7 @@ void CParticleSystemManager :: MarkSystemForDeletion( CParticleSystem *pSys )
 
 void CParticleSystemManager :: UpdateSystems( void )
 {
-	if( FBitSet( RI->params, RP_ENVVIEW ) )
+	if( IsBuildingCubemaps() )
 		return;
 	
 	CParticleSystem *pSystem;

@@ -936,7 +936,7 @@ void CSpriteModelRenderer::SpriteDrawModelShadowPass( void )
 
 void CSpriteModelRenderer::DrawSpriteModelInternal( cl_entity_t *e )
 {
-	if( RI->params & RP_ENVVIEW )
+	if( IsBuildingCubemaps() )
 		return;
 
 	if( !Mod_Extradata( e->model ))

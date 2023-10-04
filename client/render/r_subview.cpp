@@ -836,14 +836,17 @@ void R_RenderSubview( void )
 {
 	int	flags = world->features;
 
+	// no mirrors, portals or screens anyway
+	if( !FBitSet( flags, WORLD_HAS_MIRRORS ) && !FBitSet( flags, WORLD_HAS_SCREENS ) && !FBitSet( flags, WORLD_HAS_PORTALS ))
+		return;
+
 	if( glState.stack_position > (unsigned int)r_recursion_depth->value )
 		return; // too deep...
 
-	if( FBitSet( RI->params, RP_OVERVIEW ))
+	if( FBitSet( RI->params, RP_OVERVIEW ) )
 		return;
 
-	// no mirrors, portals or screens anyway
-	if( !FBitSet( flags, WORLD_HAS_MIRRORS ) && !FBitSet( flags, WORLD_HAS_SCREENS ) && !FBitSet( flags, WORLD_HAS_PORTALS ))
+	if( IsBuildingCubemaps() )
 		return;
 
 	// player is outside world. Don't draw subview for speedup reasons

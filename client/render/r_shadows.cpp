@@ -94,7 +94,8 @@ void R_ResetShadowTextures( void )
 //==============================================================================
 int R_AllocateShadowFramebuffer( plight_t *pl, int side = 0 )
 {
-	int i, texture;
+	int i;
+	int texture = 0;
 
 	if( pl->pointlight )
 	{
@@ -352,10 +353,10 @@ static void R_ShadowPassSetupGL( const plight_t *pl, int split = 0 )
 
 	GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	pglColorMask( GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE );
-	pglEnable( GL_POLYGON_OFFSET_FILL );
+//	pglEnable( GL_POLYGON_OFFSET_FILL );
 	GL_Texture2D( GL_FALSE );
 	GL_DepthMask( GL_TRUE );
-	pglPolygonOffset( 1.0f, 2.0f );
+//	pglPolygonOffset( 1.0f, 2.0f );
 	GL_DepthTest( GL_TRUE );
 	GL_AlphaTest( GL_FALSE );
 	GL_Blend( GL_FALSE );
@@ -543,7 +544,7 @@ void R_RenderShadowmaps(void)
 	if (R_FullBright() || !CVAR_TO_BOOL(r_shadows) || tr.fGamePaused || tr.shadows_notsupport)
 		return;
 
-	if( FBitSet( RI->params, RP_ENVVIEW ) )
+	if( IsBuildingCubemaps() )
 		return;
 	
 	// check for dynamic lights

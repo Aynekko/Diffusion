@@ -4613,7 +4613,7 @@ void CStudioModelRenderer::DrawStudioModelInternal( cl_entity_t *e )
 		return;
 
 	// diffusion - allow static models during cubemap pass
-	if( (RI->params & RP_ENVVIEW) && !FBitSet( e->curstate.iuser1, CF_STATIC_ENTITY ) )
+	if( IsBuildingCubemaps() && !FBitSet( e->curstate.iuser1, CF_STATIC_ENTITY ) )
 		return;
 
 	if( !(RI->params & RP_SHADOWPASS) && (e->curstate.renderfx == kRenderFxOnlyShadows) )
@@ -5028,7 +5028,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 
 void CStudioModelRenderer::RenderDynLightList( void )
 {
-	if( FBitSet( RI->params, RP_ENVVIEW ) )
+	if( IsBuildingCubemaps() )
 		return;
 
 	if( !R_CountPlights() )
@@ -5246,7 +5246,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				StudioSetRenderMode( m_pCurrentEntity->curstate.rendermode );
 			}
 
-			if( !RP_CUBEPASS() && (world->rebuilding_cubemaps == CMREBUILD_INACTIVE) && (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f) && CVAR_TO_BOOL( gl_cubemaps ) && (world->num_cubemaps > 0) ) // diffusioncubemaps
+			if( !IsBuildingCubemaps() && (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f) && CVAR_TO_BOOL( gl_cubemaps ) && (world->num_cubemaps > 0) ) // diffusioncubemaps
 			{
 				if( m_pModelInstance->cubemap[0] != NULL )
 					GL_Bind( GL_TEXTURE2, m_pModelInstance->cubemap[0]->texture );

@@ -258,13 +258,13 @@ void CFrustum :: DrawFrustumDebug( void )
 
 bool CFrustum :: CullBox( const Vector &mins, const Vector &maxs, int userClipFlags )
 {
-	int iClipFlags;
-
-//	if( world->rebuilding_cubemaps != CMREBUILD_INACTIVE ) // !!! diffusioncubemaps - TTTEST
-//		return false;
+	if( IsBuildingCubemaps() )
+		return false;
 
 	if( CVAR_TO_BOOL( r_nocull ) )
 		return false;
+
+	int iClipFlags;
 
 	if( userClipFlags != 0 )
 		iClipFlags = userClipFlags;

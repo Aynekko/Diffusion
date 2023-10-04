@@ -2271,7 +2271,7 @@ draw dynamic lights for world and bmodels
 */
 void R_RenderDynLightList( void )
 {
-	if( FBitSet( RI->params, RP_ENVVIEW ) )
+	if( IsBuildingCubemaps() )
 		return;
 
 	if( R_FullBright() )
@@ -2665,7 +2665,7 @@ void R_DrawBrushList( void )
 			else if( FBitSet( s->flags, SURF_LANDSCAPE ) && land && land->terrain )
 				GL_Bind( GL_TEXTURE5, land->terrain->indexmap.gl_heightmap_id );
 
-			if( !RP_CUBEPASS() && (world->rebuilding_cubemaps == CMREBUILD_INACTIVE) && (tr.materials[tex->gl_texturenum].ReflectScale > 0.01f) && CVAR_TO_BOOL( gl_cubemaps ) && (world->num_cubemaps > 0) ) // diffusioncubemaps
+			if( !IsBuildingCubemaps() && (tr.materials[tex->gl_texturenum].ReflectScale > 0.01f) && CVAR_TO_BOOL( gl_cubemaps ) && (world->num_cubemaps > 0) ) // diffusioncubemaps
 			{
 				int cubemap_tex_unit[2] = { GL_TEXTURE6, GL_TEXTURE7 };
 				if( FBitSet( s->flags, SURF_WATER ) )
