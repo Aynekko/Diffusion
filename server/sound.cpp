@@ -1780,7 +1780,7 @@ void TEXTURETYPE_Init()
 		while( buffer[i] && isspace( buffer[i] ) )
 			i++;
 
-		char *commentStart = strstr( buffer, "//" );
+		char *commentStart = Q_strstr( buffer, "//" );
 
 		if( commentStart )
 			*commentStart = '\0';

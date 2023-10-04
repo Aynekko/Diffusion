@@ -787,7 +787,7 @@ void ClientCommand( edict_t *pEntity )
 	{
 		pPlayer->SelectItem((char *)CMD_ARGV(1));
 	}
-	else if (((pstr = strstr(pcmd, "weapon_")) != NULL)  && (pstr == pcmd))
+	else if (((pstr = Q_strstr(pcmd, "weapon_")) != NULL)  && (pstr == pcmd))
 	{
 		pPlayer->SelectItem(pcmd);
 	}

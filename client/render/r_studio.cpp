@@ -4620,7 +4620,7 @@ void CStudioModelRenderer::DrawStudioModelInternal( cl_entity_t *e )
 		return;
 
 	// diffusion - don't draw dummy models
-	if( e->model && strstr( e->model->name, "null" ) )
+	if( e->model && Q_strstr( e->model->name, "null" ) )
 		return;
 
 	int flags = (STUDIO_RENDER | STUDIO_EVENTS);
