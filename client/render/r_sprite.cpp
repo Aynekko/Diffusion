@@ -825,7 +825,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	}
 
 	if( m_pSpriteHeader->facecull == SPR_CULL_NONE || m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide )
-		GL_Cull( GL_NONE );
+		GL_Cull( GL_FRONT );
 
 	if( (m_pCurrentEntity->curstate.rendermode == kRenderGlow) || (m_pCurrentEntity->curstate.rendermode == kRenderConstantGlow) )
 		GL_DepthTest( GL_TRUE );
