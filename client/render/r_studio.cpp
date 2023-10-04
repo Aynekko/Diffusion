@@ -5219,10 +5219,8 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 			if( FBitSet( mat->flags, STUDIO_NF_MASKED ) || FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) )
 			{
-			//	GL_AlphaFunc( GL_GREATER, 0.5f );
-			//	GL_AlphaTest( GL_TRUE );
-			//	GL_DepthMask( GL_TRUE );
-			//	GL_Blend( GL_FALSE );
+				GL_AlphaFunc( GL_GREATER, 0.5f );
+				GL_AlphaTest( GL_TRUE );
 			}
 			else if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) )
 			{
