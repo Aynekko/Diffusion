@@ -2066,7 +2066,7 @@ void R_BuildFaceListForLight( plight_t *pl )
 		skip_cull:
 		// if the surface with such culltype got here, it means it's not culled forcibly
 		if( psurf->info->culltype == CULL_BACKSIDE )
-			psurf->info->culltype = CULL_VISIBLE;
+			psurf->info->culltype = CULL_OTHER;
 
 		// move from main list into light list
 		R_AddSurfaceToDrawList( entry->surface, true );
@@ -2264,7 +2264,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			else
 				R_SetRenderColor( RI->currententity );
 
-			if( es->culltype == CULL_VISIBLE )
+			if( es->culltype == CULL_OTHER ) // probably a twoside texture
 				GL_Cull( GL_NONE );
 			else
 				GL_Cull( GL_FRONT );
@@ -2451,7 +2451,7 @@ void R_DrawShadowBrushList( void )
 			else
 				GL_AlphaTest( GL_FALSE );
 
-			if( es->culltype == CULL_VISIBLE )
+			if( es->culltype == CULL_OTHER ) // probably a twoside texture
 				GL_Cull( GL_NONE );
 			else
 				GL_Cull( GL_FRONT );
@@ -2782,7 +2782,7 @@ void R_DrawBrushList( void )
 
 		if( tr.viewparams.waterlevel >= 3 && RP_NORMALPASS() && FBitSet( s->flags, SURF_WATER ) )
 			GL_Cull( GL_BACK );
-		else if( es->culltype == CULL_VISIBLE )
+		else if( es->culltype == CULL_OTHER ) // probably a twoside texture
 			GL_Cull( GL_NONE );
 		else 
 			GL_Cull( GL_FRONT );
@@ -3054,7 +3054,7 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 		skip_cull:		
 		// if the surface with such culltype got here, it means it's not culled forcibly
 		if( psurf->info->culltype == CULL_BACKSIDE )
-			psurf->info->culltype = CULL_VISIBLE;
+			psurf->info->culltype = CULL_OTHER;
 
 		R_AddSurfaceToDrawList( psurf, false );
 	}
@@ -3144,7 +3144,7 @@ void R_DrawBrushModelShadow( cl_entity_t *e )
 		skip_cull:
 		// if the surface with such culltype got here, it means it's not culled forcibly
 		if( psurf->info->culltype == CULL_BACKSIDE )
-			psurf->info->culltype = CULL_VISIBLE;
+			psurf->info->culltype = CULL_OTHER;
 
 		R_AddSurfaceToDrawList( psurf, false );
 	}
