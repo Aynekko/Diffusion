@@ -3065,9 +3065,6 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 
 			if( psurf->info->culltype != CULL_VISIBLE )
 				continue;
-
-			if( psurf->info->culltype != CULL_VISIBLE )
-				continue;
 		}
 
 		skip_cull:
