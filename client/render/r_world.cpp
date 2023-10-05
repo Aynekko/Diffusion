@@ -555,7 +555,7 @@ Mod_LinkLeafLights
 static void Mod_LinkLeafLights( void )
 {
 	mworldleaf_t *leaf;
-	int		i, j;
+	int	i, j;
 	mlightprobe_t *lp;
 
 	leaf = (mworldleaf_t *)world->leafs;
@@ -583,7 +583,7 @@ static void Mod_LoadVertNormals( const byte *base, const dlump_t *l )
 	dnormallump_t *nhdr;
 	dnormal_t *in;
 	byte *data;
-	int		count;
+	int	count;
 
 	if( !l->filelen ) return;
 
@@ -668,7 +668,7 @@ static void Mod_LoadLeafAmbientLighting( const byte *base, const dlump_t *l )
 	dleafsample_t *in;
 	dvlightlump_t *vl;
 	mlightprobe_t *out;
-	int		i, count;
+	int	i, count;
 
 	if( !l->filelen ) return;
 
@@ -887,7 +887,7 @@ if shaders was changed we need to resort them
 static void Mod_ResortFaces( void )
 {
 	msurface_t *surf;
-	int		i;
+	int	i;
 
 	if( !tr.params_changed ) return;
 
@@ -927,7 +927,7 @@ compute normals if missed
 static void Mod_ComputeVertexNormal( msurface_t *surf, mextrasurf_t *esrf )
 {
 	bvert_t *v0, *v1, *v2;
-	Vector	areaNormal;
+	Vector areaNormal;
 
 	if( world->normals ) return;
 
@@ -971,18 +971,20 @@ compute smooth TBN with baked normals
 */
 static void Mod_ComputeFaceTBN( msurface_t *surf, mextrasurf_t *esrf )
 {
-	Vector	texdirections[2];
-	Vector	directionnormals[2];
-	Vector	faceNormal;
-	Vector  vertNormal = g_vecZero;
+	Vector texdirections[2];
+	Vector directionnormals[2];
+	Vector faceNormal;
+	Vector vertNormal = g_vecZero;
 	int	side;
+	bvert_t *v;
+	int l, i, vert;
 
 	// build areaweighted normal
-	for( int i = 0; i < esrf->numverts; i++ )
+	for( i = 0; i < esrf->numverts; i++ )
 	{
-		bvert_t *v = &world->vertexes[esrf->firstvertex + i];
-		int l = worldmodel->surfedges[surf->firstedge + i];
-		int vert = worldmodel->edges[abs( l )].v[(l > 0) ? 0 : 1];
+		v = &world->vertexes[esrf->firstvertex + i];
+		l = worldmodel->surfedges[surf->firstedge + i];
+		vert = worldmodel->edges[abs( l )].v[(l > 0) ? 0 : 1];
 
 		if( world->surfnormals != NULL && world->normals != NULL )
 		{
@@ -1033,12 +1035,12 @@ trying to smooth the normals
 */
 static void Mod_SmoothVertexNormals( void )
 {
-	float	 	smooth_threshold;
-	int		i, j, k, l;
-	Vector		faceNormal;
+	float smooth_threshold;
+	int i, j, k, l;
+	Vector faceNormal;
 	msurface_t *s0, *s1;
 	bvert_t *v0, *v1;
-	double		start;
+	double start;
 
 	if( world->normals ) return;
 
@@ -1242,7 +1244,7 @@ static void Mod_MappingLandscapes( msurface_t *surf, mextrasurf_t *esrf )
 {
 	mtexinfo_t *tx = surf->texinfo;
 	mfaceinfo_t *land = tx->faceinfo;
-	float		mappingScale;
+	float mappingScale;
 	terrain_t *terra;
 	bvert_t *v;
 
@@ -2052,21 +2054,19 @@ void R_BuildFaceListForLight( plight_t *pl )
 
 		es->culltype = R_CullSurfaceExt( entry->surface, &pl->frustum );
 		
-		if( es->culltype == CULL_BACKSIDE )
+		if( es->culltype <= CULL_BACKSIDE )
 		{
-			if( e->curstate.renderfx == kRenderFxTwoSide )
+			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided || e->curstate.renderfx == kRenderFxTwoSide )
+			{
+				psurf->info->culltype = CULL_OTHER;
 				goto skip_cull;
+			}
 
-			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided )
-				goto skip_cull;
-
-			continue;
+			if( psurf->info->culltype != CULL_VISIBLE )
+				continue;
 		}
 
 		skip_cull:
-		// if the surface with such culltype got here, it means it's not culled forcibly
-		if( psurf->info->culltype == CULL_BACKSIDE )
-			psurf->info->culltype = CULL_OTHER;
 
 		// move from main list into light list
 		R_AddSurfaceToDrawList( entry->surface, true );
@@ -2100,13 +2100,18 @@ void R_DrawLightForSurfList( plight_t *pl )
 	Vector lightdir = pl->frustum.GetPlane( FRUSTUM_FAR )->normal;
 	pl->lightviewProjMatrix.CopyToArray( gl_lightViewProjMatrix );
 
+	gl_bmodelface_t *entry;
+	mextrasurf_t *es;
+	msurface_t *s;
+	texture_t *tex;
+
 	for( int i = 0; i < tr.num_light_surfaces; i++ )
 	{
-		gl_bmodelface_t *entry = &tr.light_surfaces[i];
-		mextrasurf_t *es = entry->surface->info;
-		msurface_t *s = entry->surface;
+		entry = &tr.light_surfaces[i];
+		es = entry->surface->info;
+		s = entry->surface;
 
-		texture_t *tex = R_TextureAnimation( s );
+		tex = R_TextureAnimation( s );
 
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 			flush_buffer = true;
@@ -2388,17 +2393,23 @@ void R_DrawShadowBrushList( void )
 	pglBindVertexArray( world->vertex_array_object );
 	GL_TextureTarget( GL_NONE );
 
+	gl_bmodelface_t *entry;
+	mextrasurf_t *es;
+	msurface_t *s;
+	texture_t *tex;
+	int curtex;
+
 	for( int i = 0; i < tr.num_draw_surfaces; i++ )
 	{
-		gl_bmodelface_t *entry = &tr.draw_surfaces[i];
-		mextrasurf_t *es = entry->surface->info;
-		msurface_t *s = entry->surface;
+		entry = &tr.draw_surfaces[i];
+		es = entry->surface->info;
+		s = entry->surface;
 
 		if( !entry->hProgram )
 			continue;
 
-		int curtex = tr.whiteTexture;
-		texture_t *tex = R_TextureAnimation( s );
+		curtex = tr.whiteTexture;
+		tex = R_TextureAnimation( s );
 		if( FBitSet( s->flags, SURF_TRANSPARENT ) )
 			curtex = tex->gl_texturenum;
 
@@ -2532,13 +2543,17 @@ void R_DrawBrushList( void )
 	cached_cubemap[1] = &world->defaultCubemap;
 
 	int i;
+	gl_bmodelface_t *entry;
+	mextrasurf_t *es;
+	msurface_t *s;
+	texture_t *tex;
+
 	for( i = 0; i < tr.num_draw_surfaces; i++ )
 	{
-		gl_bmodelface_t *entry = &tr.draw_surfaces[i];
-		mextrasurf_t *es = entry->surface->info;
-		msurface_t *s = entry->surface;
-		texture_t *tex = s->texinfo->texture;
-
+		entry = &tr.draw_surfaces[i];
+		es = entry->surface->info;
+		s = entry->surface;
+		tex = s->texinfo->texture;
 		if( !entry->hProgram ) continue;
 
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
@@ -3034,7 +3049,7 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 		if( !force && psurf->info->culltype >= CULL_FRUSTUM )
 			continue;
 
-		if( psurf->info->culltype == CULL_BACKSIDE )
+		if( psurf->info->culltype <= CULL_BACKSIDE )
 		{
 			if( FBitSet( psurf->flags, SURF_WATER ) )
 				goto skip_cull;
@@ -3042,20 +3057,20 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 			if( psurf->pdecals && (e->curstate.rendermode == kRenderTransTexture) )
 				goto skip_cull;
 
-			if( e->curstate.renderfx == kRenderFxTwoSide )
+			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided || e->curstate.renderfx == kRenderFxTwoSide )
+			{
+				psurf->info->culltype = CULL_OTHER;
 				goto skip_cull;
+			}
 
-			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided )
-				goto skip_cull;
+			if( psurf->info->culltype != CULL_VISIBLE )
+				continue;
 
-			continue;
+			if( psurf->info->culltype != CULL_VISIBLE )
+				continue;
 		}
 
-		skip_cull:		
-		// if the surface with such culltype got here, it means it's not culled forcibly
-		if( psurf->info->culltype == CULL_BACKSIDE )
-			psurf->info->culltype = CULL_OTHER;
-
+		skip_cull:
 		R_AddSurfaceToDrawList( psurf, false );
 	}
 
@@ -3130,22 +3145,19 @@ void R_DrawBrushModelShadow( cl_entity_t *e )
 		if( !force && psurf->info->culltype >= CULL_FRUSTUM )
 			continue;
 
-		if( psurf->info->culltype == CULL_BACKSIDE )
+		if( psurf->info->culltype <= CULL_BACKSIDE )
 		{
-			if( e->curstate.renderfx == kRenderFxTwoSide )
+			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided || e->curstate.renderfx == kRenderFxTwoSide )
+			{
+				psurf->info->culltype = CULL_OTHER;
 				goto skip_cull;
+			}
 
-			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided )
-				goto skip_cull;
-
-			continue;
+			if( psurf->info->culltype != CULL_VISIBLE )
+				continue;
 		}
 
 		skip_cull:
-		// if the surface with such culltype got here, it means it's not culled forcibly
-		if( psurf->info->culltype == CULL_BACKSIDE )
-			psurf->info->culltype = CULL_OTHER;
-
 		R_AddSurfaceToDrawList( psurf, false );
 	}
 
