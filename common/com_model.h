@@ -75,6 +75,7 @@ typedef struct material_s
 	bool ApplyColor;
 	unsigned short gl_colormask_id;
 	float Fresnel;
+	bool TwoSided;
 
 	// parallax interiors
 	unsigned short	gl_interiormap_id;
@@ -288,7 +289,8 @@ typedef struct mextrasurf_s
 	short		subtexture[8];	// MAX_REF_STACK
 	word		gl_texturenum;	// current diffuse texture
 	word		dt_texturenum;	// current detail texture
-	int		reserved[25];	// just for future expansions or mod-makers
+	int culltype;
+	int	reserved[24];	// just for future expansions or mod-makers
 } mextrasurf_t;
 
 typedef struct msurface_s

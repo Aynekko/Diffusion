@@ -1539,7 +1539,6 @@ void R_DrawGrass( qboolean lightpass )
 	GL_Cull( GL_NONE );
 	GL_AlphaTest( GL_TRUE );
 	GL_AlphaFunc( GL_GREATER, bound( 0.0f, r_grass_alpha->value, 1.0f ));
-//	GL_Cull( GL_NONE );
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 	GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 

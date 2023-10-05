@@ -74,6 +74,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 	tr.materials[texnum].FoliageSwayHeight = 0;
 	tr.materials[texnum].ApplyColor = false;
 	tr.materials[texnum].Fresnel = 4.0f;
+	tr.materials[texnum].TwoSided = false;
 
 	tr.materials[texnum].gl_normalmap_id = 0;
 	tr.materials[texnum].gl_interiormap_id = 0;
@@ -179,6 +180,22 @@ void LoadMaterialSettingsForTexture( int texnum )
 				flValue = Q_atof( token );
 				flValue = bound( 0.0f, flValue, 1.0f );
 				tr.materials[texnum].ReflectScale = flValue;
+			}
+			else
+			{
+				Error = true;
+				break;
+			}
+		}
+		else if( !Q_stricmp( token, "TwoSide" ) )
+		{
+			// parse value for this setting
+			afile = COM_ParseLine( afile, token );
+			if( afile && token[0] > 0 )
+			{
+				flValue = Q_atoi( token );
+				if( flValue > 0 )
+					tr.materials[texnum].TwoSided = true;
 			}
 			else
 			{
@@ -2012,15 +2029,19 @@ void R_BuildFaceListForLight( plight_t *pl )
 
 	tr.num_light_surfaces = 0;
 	tr.modelorg = pl->origin;
+	gl_bmodelface_t *entry;
+	msurface_t *psurf;
+	mextrasurf_t *es;
+	gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
+	tr.modelorg = glm->transform.VectorITransform( pl->origin );
 
 	// only visible polys passed through the light list
 	for( int i = 0; i < tr.num_draw_surfaces; i++ )
 	{
-		gl_bmodelface_t *entry = &tr.draw_surfaces[i];
-		mextrasurf_t *es = entry->surface->info;
-		gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
-		tr.modelorg = glm->transform.VectorITransform( pl->origin );
-
+		entry = &tr.draw_surfaces[i];
+		psurf = entry->surface;
+		es = entry->surface->info;
+		
 		if( es->subtexture[glState.stack_position] && !(es->surf->flags & SURF_WATER) )
 			continue; // don't light the mirrors, portals etc // diffusion - except water
 
@@ -2029,8 +2050,23 @@ void R_BuildFaceListForLight( plight_t *pl )
 
 		R_AddGrassToChain( entry->surface, &pl->frustum, true );
 
-		if( R_CullSurfaceExt( entry->surface, &pl->frustum ) )
+		es->culltype = R_CullSurfaceExt( entry->surface, &pl->frustum );
+		
+		if( es->culltype == CULL_BACKSIDE )
+		{
+			if( e->curstate.renderfx == kRenderFxTwoSide )
+				goto skip_cull;
+
+			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided )
+				goto skip_cull;
+
 			continue;
+		}
+
+		skip_cull:
+		// if the surface with such culltype got here, it means it's not culled forcibly
+		if( psurf->info->culltype == CULL_BACKSIDE )
+			psurf->info->culltype = CULL_VISIBLE;
 
 		// move from main list into light list
 		R_AddSurfaceToDrawList( entry->surface, true );
@@ -2228,6 +2264,11 @@ void R_DrawLightForSurfList( plight_t *pl )
 			else
 				R_SetRenderColor( RI->currententity );
 
+			if( es->culltype == CULL_VISIBLE )
+				GL_Cull( GL_NONE );
+			else
+				GL_Cull( GL_FRONT );
+
 			cached_texture = tex;
 		}
 
@@ -2255,6 +2296,8 @@ void R_DrawLightForSurfList( plight_t *pl )
 		numTempElems = 0;
 		endv = 0;
 	}
+
+	GL_Cull( GL_FRONT );
 
 	if( R_GrassUseBufferObject() )
 		R_DrawLightForGrass( pl );
@@ -2407,6 +2450,11 @@ void R_DrawShadowBrushList( void )
 			}
 			else
 				GL_AlphaTest( GL_FALSE );
+
+			if( es->culltype == CULL_VISIBLE )
+				GL_Cull( GL_NONE );
+			else
+				GL_Cull( GL_FRONT );
 		}
 
 		if( es->firstvertex < startv )
@@ -2734,7 +2782,10 @@ void R_DrawBrushList( void )
 
 		if( tr.viewparams.waterlevel >= 3 && RP_NORMALPASS() && FBitSet( s->flags, SURF_WATER ) )
 			GL_Cull( GL_BACK );
-		else GL_Cull( GL_FRONT );
+		else if( es->culltype == CULL_VISIBLE )
+			GL_Cull( GL_NONE );
+		else 
+			GL_Cull( GL_FRONT );
 
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
 		{
@@ -2923,10 +2974,10 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 	if( !(RI->params & RP_SHADOWPASS) && (e->curstate.renderfx == kRenderFxOnlyShadows) )
 		return;
 	
-	Vector		absmin, absmax;
+	Vector absmin, absmax;
 	msurface_t *psurf;
 	model_t *clmodel;
-	mplane_t		plane;
+	mplane_t plane;
 
 	clmodel = e->model;
 
@@ -2978,18 +3029,33 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 		// in some cases surface is invisible but grass is visible
 		bool force = R_AddGrassToChain( psurf, &RI->frustum );
 
-		int cull_type = R_CullSurface( psurf ); // ignore frustum for bmodels
+		psurf->info->culltype = R_CullSurface( psurf ); // ignore frustum for bmodels
 
-		if( !force && cull_type >= CULL_FRUSTUM )
+		if( !force && psurf->info->culltype >= CULL_FRUSTUM )
 			continue;
 
-		if( cull_type == CULL_BACKSIDE )
+		if( psurf->info->culltype == CULL_BACKSIDE )
 		{
-			if( !FBitSet( psurf->flags, SURF_WATER ) && !(psurf->pdecals && ((e->curstate.rendermode == kRenderTransTexture) || (e->curstate.rendermode == kRenderFade)) ) )
-				continue;
+			if( FBitSet( psurf->flags, SURF_WATER ) )
+				goto skip_cull;
+
+			if( psurf->pdecals && (e->curstate.rendermode == kRenderTransTexture) )
+				goto skip_cull;
+
+			if( e->curstate.renderfx == kRenderFxTwoSide )
+				goto skip_cull;
+
+			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided )
+				goto skip_cull;
+
+			continue;
 		}
 
-		// FIXME: store the cull type
+		skip_cull:		
+		// if the surface with such culltype got here, it means it's not culled forcibly
+		if( psurf->info->culltype == CULL_BACKSIDE )
+			psurf->info->culltype = CULL_VISIBLE;
+
 		R_AddSurfaceToDrawList( psurf, false );
 	}
 
@@ -3059,13 +3125,26 @@ void R_DrawBrushModelShadow( cl_entity_t *e )
 		// in some cases surface is invisible but grass is visible
 		bool force = R_AddGrassToChain( psurf, &RI->frustum );
 
-		int cull_type = R_CullSurface( psurf ); // ignore frustum for bmodels
+		psurf->info->culltype = R_CullSurface( psurf ); // ignore frustum for bmodels
 
-		if( !force && cull_type >= CULL_FRUSTUM )
+		if( !force && psurf->info->culltype >= CULL_FRUSTUM )
 			continue;
 
-		if( cull_type == CULL_BACKSIDE )
+		if( psurf->info->culltype == CULL_BACKSIDE )
+		{
+			if( e->curstate.renderfx == kRenderFxTwoSide )
+				goto skip_cull;
+
+			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided )
+				goto skip_cull;
+
 			continue;
+		}
+
+		skip_cull:
+		// if the surface with such culltype got here, it means it's not culled forcibly
+		if( psurf->info->culltype == CULL_BACKSIDE )
+			psurf->info->culltype = CULL_VISIBLE;
 
 		R_AddSurfaceToDrawList( psurf, false );
 	}
