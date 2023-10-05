@@ -865,7 +865,8 @@ void R_RenderSubview( void )
 	RI->currentmodel = RI->currententity->model;
 	RI->num_subview_faces = 0;
 
-	R_WorldFindMirrors();	// yes, only mirrors are allowed in the world
+	// diffusion - disable this function. It's quite expensive, just make a brush entity with a mirror texture instead.
+//	R_WorldFindMirrors();	// yes, only mirrors are allowed in the world
 	R_FindSubviewEnts();	// include mirrors, portals and screens
 
 	if( RI->num_subview_faces != 0 )
