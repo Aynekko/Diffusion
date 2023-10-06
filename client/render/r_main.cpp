@@ -1797,6 +1797,8 @@ void R_RenderScene( void )
 
 	R_DrawCubeMaps(); // diffusioncubemaps
 
+	R_DrawTangentSpaces();
+
 	// these must be before viewmodel
 	if( RP_NORMALPASS() )
 	{

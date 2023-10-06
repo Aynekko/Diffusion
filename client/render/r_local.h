@@ -711,6 +711,7 @@ void DrawLightProbes( void );
 void DrawWireFrame( void );
 void DrawNormals( void );
 bool ValidateFBO( void );
+void R_DrawTangentSpaces( void );
 
 //
 // r_decals.c

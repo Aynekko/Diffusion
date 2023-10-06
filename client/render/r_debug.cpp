@@ -106,9 +106,7 @@ void DrawLightProbes( void )
 
 /*
 ================
-DrawTangentSpaces
-
-Draws vertex tangent spaces for debugging
+DrawNormals
 ================
 */
 void DrawNormals( void )
@@ -117,7 +115,6 @@ void DrawNormals( void )
 	float	vecLen = 4.0f;
 
 	GL_Texture2D( GL_FALSE );
-	GL_DepthTest( GL_FALSE );
 	GL_Blend( GL_FALSE );
 	pglBegin( GL_LINES );
 
@@ -144,8 +141,59 @@ void DrawNormals( void )
 	}
 
 	pglEnd();
-	GL_DepthTest( GL_TRUE );
 	GL_Texture2D( GL_TRUE );
+}
+
+/*
+================
+DrawTangentSpaces
+
+Draws vertex tangent spaces for debugging
+================
+*/
+void R_DrawTangentSpaces( void )
+{
+	if( !r_show_tbn->value )
+		return;
+
+	float	temp[3];
+	float	vecLen = 4.0f;
+
+	GL_Bind( GL_TEXTURE0, tr.whiteTexture );
+	pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+	GL_Blend( GL_FALSE );
+	pglBegin( GL_LINES );
+
+	for( int i = 0; i < worldmodel->nummodelsurfaces; i++ )
+	{
+		msurface_t *surf = &worldmodel->surfaces[i];
+		mextrasurf_t *esrf = surf->info;
+
+		if( FBitSet( surf->flags, SURF_WATER | SURF_DRAWSKY ) )
+			continue;
+
+		bvert_t *mv = &world->vertexes[esrf->firstvertex];
+
+		for( int j = 0; j < esrf->numverts; j++, mv++ )
+		{
+			pglColor3f( 1.0f, 0.0f, 0.0f );
+			pglVertex3fv( mv->vertex );
+			VectorMA( mv->vertex, vecLen, Vector( mv->tangent ), temp );
+			pglVertex3fv( temp );
+
+			pglColor3f( 0.0f, 1.0f, 0.0f );
+			pglVertex3fv( mv->vertex );
+			VectorMA( mv->vertex, vecLen, Vector( mv->binormal ), temp );
+			pglVertex3fv( temp );
+
+			pglColor3f( 0.0f, 0.0f, 1.0f );
+			pglVertex3fv( mv->vertex );
+			VectorMA( mv->vertex, vecLen, Vector( mv->normal ), temp );
+			pglVertex3fv( temp );
+		}
+	}
+
+	pglEnd();
 }
 
 void DrawWireFrame( void )

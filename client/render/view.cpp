@@ -141,6 +141,7 @@ cvar_t *gl_cubemaps;
 cvar_t *gl_bump;
 cvar_t *cubeshot; // advanced envshot :)
 cvar_t *cl_notbn;
+cvar_t *r_show_tbn;
 
 cvar_t  *r_blur;
 cvar_t *r_blur_threshold;
@@ -364,6 +365,7 @@ void V_Init( void )
 	cl_viewmodelblend = CVAR_REGISTER( "cl_viewmodelblend", "0", FCVAR_ARCHIVE );
 	cl_tutor = CVAR_REGISTER( "cl_tutor", "1", FCVAR_ARCHIVE );
 	cl_notbn = CVAR_REGISTER( "cl_notbn", "0", 0 );
+	r_show_tbn = CVAR_REGISTER( "r_show_tbn", "0", 0 );
 
 	// setup some engine cvars for custom rendering
 	r_extensions	= CVAR_GET_POINTER( "gl_allow_extensions" );

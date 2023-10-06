@@ -624,7 +624,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	if( m_pSpriteHeader->texFormat == SPR_ALPHTEST && m_pCurrentEntity->curstate.rendermode != kRenderTransAdd )
 	{
 		GL_AlphaTest( GL_TRUE );
-		GL_AlphaFunc( GL_GREATER, 0.0f );
+		GL_AlphaFunc( GL_GREATER, 0.5f );
 	}
 
 	// select proper rendermode
