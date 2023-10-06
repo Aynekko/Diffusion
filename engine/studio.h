@@ -671,11 +671,13 @@ USER-DEFINED DATA
 // this struct may be expaned by user request
 typedef struct vbomesh_s
 {
-	unsigned int	skinref;			// skin reference
-	unsigned short	numVerts;			// trifan vertices count
-	unsigned int	numElems;			// trifan elements count
+	unsigned int skinref; // skin reference
+	unsigned short numVerts; // trifan vertices count
+	unsigned int numElems; // trifan elements count
 
-	unsigned int	vbo, vao, ibo;		// buffer objects
+	unsigned int vbo, vao, ibo; // buffer objects
+
+	unsigned int cacheSize;	// debug info: uploaded cache size for this buffer
 } vbomesh_t;
 
 // each mstudiotexture_t has a material

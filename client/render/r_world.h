@@ -163,6 +163,8 @@ typedef struct
 	bool ignore_restart_check; // to prevent bug with invalid restart check in GL_InitVertexLightCache
 
 	material_t *materials;	// [worldmodel->numtextures]
+
+	uint cacheSize;
 } gl_world_t;
 
 void R_WorldMarkVisibleFaces( void );

@@ -61,6 +61,9 @@ GNU General Public License for more details.
 #define PARM_GLES_WRAPPER	35	//
 #define PARM_STENCIL_ACTIVE	36
 #define PARM_WATER_ALPHA	37
+#define PARM_TEX_MEMORY	38	// returns total memory of uploaded texture in bytes
+#define PARM_DELUXEDATA	39	// nasty hack, convert int to pointer
+#define PARM_SHADOWDATA	40	// nasty hack, convert int to pointer
 
 // skybox ordering
 enum

@@ -1585,6 +1585,11 @@ static void Mod_CreateBufferObject( void )
 	// don't forget to unbind them
 	pglBindVertexArray( GL_FALSE );
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
+
+	world->cacheSize = world->numvertexes * sizeof( bvert_t );
+
+	// update stats
+	tr.total_vbo_memory += world->cacheSize;
 }
 
 /*
@@ -1598,6 +1603,8 @@ static void Mod_DeleteBufferObject( void )
 	if( world->vertex_buffer_object ) pglDeleteBuffersARB( 1, &world->vertex_buffer_object );
 
 	world->vertex_array_object = world->vertex_buffer_object = 0;
+	tr.total_vbo_memory -= world->cacheSize;
+	world->cacheSize = 0;
 }
 
 /*

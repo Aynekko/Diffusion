@@ -241,6 +241,9 @@ void R_CreateSurfaceVBO( grass_t *out )
 
 	world->grassmem += sizeof( gvert_t ) * m_iNumVertex;
 	world->grasscount += m_iNumVertex;
+
+	// update stats
+	tr.total_vbo_memory += sizeof( gvert_t ) * m_iNumVertex;
 }
 
 void R_DeleteSurfaceVBO( grass_t *out )
@@ -251,6 +254,9 @@ void R_DeleteSurfaceVBO( grass_t *out )
 
 	world->grassmem -= sizeof( gvert_t ) * out->vbo.numVerts;
 	world->grasscount -= out->vbo.numVerts;
+
+	// update stats
+	tr.total_vbo_memory -= sizeof( gvert_t ) * out->vbo.numVerts;
 }
 
 /*

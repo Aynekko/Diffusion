@@ -89,17 +89,19 @@ typedef struct
 // stored into single vbo
 typedef struct grass_s
 {
-	byte		texture;		// not a real texture just index into array
+	byte texture;		// not a real texture just index into array
 
 	union
 	{
-		grassvbo_t	vbo;
-		grasscva_t	cva;
+		grassvbo_t vbo;
+		grasscva_t cva;
 	};
 
-	struct grass_s	*chain;		// for sequentially drawing
-	struct grass_s	*lightchain;	// for sequentially drawing light
-	unsigned short	hCachedMatrix;	// HACKHACK: get matrices
+	struct grass_s *chain;		// for sequentially drawing
+	struct grass_s *lightchain;	// for sequentially drawing light
+	unsigned short hCachedMatrix;	// HACKHACK: get matrices
+
+	unsigned int cacheSize;	// debug info: uploaded cache size for this buffer
 } grass_t;
 
 typedef struct grasstex_s

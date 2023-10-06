@@ -448,6 +448,8 @@ typedef struct
 	plight_t defSpotlight;
 	plight_t defOmnilight;
 
+	int total_vbo_memory; // r_speeds
+
 } ref_globals_t;
 
 typedef struct

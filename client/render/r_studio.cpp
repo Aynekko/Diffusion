@@ -865,6 +865,8 @@ void CStudioModelRenderer::UploadBufferBase( vbomesh_t *pOut, svert_t *arrayxver
 
 	pglVertexAttribPointerARB( ATTR_INDEX_BONE_INDEXES, 4, GL_BYTE, GL_FALSE, sizeof( svert_v0_t ), (void *)offsetof( svert_v0_t, boneid ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_BONE_INDEXES );
+
+	pOut->cacheSize = pOut->numVerts * sizeof( svert_v3_t );
 }
 
 void CStudioModelRenderer::UploadBufferVLight( vbomesh_t *pOut, svert_t *arrayxvert )
@@ -914,6 +916,8 @@ void CStudioModelRenderer::UploadBufferVLight( vbomesh_t *pOut, svert_t *arrayxv
 
 	pglVertexAttribPointerARB( ATTR_INDEX_LIGHT_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof( svert_v1_t ), (void *)offsetof( svert_v1_t, light ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_LIGHT_COLOR );
+
+	pOut->cacheSize = pOut->numVerts * sizeof( svert_v3_t );
 }
 
 void CStudioModelRenderer::UploadBufferWeight( vbomesh_t *pOut, svert_t *arrayxvert )
@@ -970,11 +974,13 @@ void CStudioModelRenderer::UploadBufferWeight( vbomesh_t *pOut, svert_t *arrayxv
 
 	pglVertexAttribPointerARB( ATTR_INDEX_BONE_WEIGHTS, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof( svert_v2_t ), (void *)offsetof( svert_v2_t, weight ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_BONE_WEIGHTS );
+
+	pOut->cacheSize = pOut->numVerts * sizeof( svert_v3_t );
 }
 
 void CStudioModelRenderer::UploadBufferGeneric( vbomesh_t *pOut, svert_t *arrayxvert, bool vertex_light )
 {
-	static svert_v3_t	arraysvert[MAXARRAYVERTS];
+	static svert_v3_t arraysvert[MAXARRAYVERTS];
 
 	// convert to GLSL-compacted array
 	for( unsigned int i = 0; i < m_nNumArrayVerts; i++ )
@@ -1041,6 +1047,8 @@ void CStudioModelRenderer::UploadBufferGeneric( vbomesh_t *pOut, svert_t *arrayx
 		pglVertexAttribPointerARB( ATTR_INDEX_LIGHT_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof( svert_v3_t ), (void *)offsetof( svert_v3_t, light ) );
 		pglEnableVertexAttribArrayARB( ATTR_INDEX_LIGHT_COLOR );
 	}
+
+	pOut->cacheSize = pOut->numVerts * sizeof( svert_v3_t );
 }
 
 
@@ -1391,6 +1399,9 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 	pglBindVertexArray( GL_FALSE );
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 	pglBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
+
+	// update stats
+	tr.total_vbo_memory += pOut->cacheSize;
 }
 
 mvbocache_t *CStudioModelRenderer::CreateMeshCache( dmodellight_t *dml )
@@ -1749,6 +1760,8 @@ void CStudioModelRenderer::ReleaseVBOCache( mvbocache_t **ppvbocache )
 				if( pMesh->vao ) pglDeleteVertexArrays( 1, &pMesh->vao );
 				if( pMesh->vbo ) pglDeleteBuffersARB( 1, &pMesh->vbo );
 				if( pMesh->ibo ) pglDeleteBuffersARB( 1, &pMesh->ibo );
+				tr.total_vbo_memory -= pMesh->cacheSize;
+				pMesh->cacheSize = 0;
 			}
 		}
 	}
