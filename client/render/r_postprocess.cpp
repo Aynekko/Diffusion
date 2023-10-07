@@ -130,7 +130,15 @@ void InitPostEffects( void )
 void InitSSAO( void )
 {
 	if( gl_ssao->value <= 0 )
+	{
+		if( ScreenAO )
+		{
+			FREE_TEXTURE( ScreenAO );
+			ScreenAO = 0;
+		}
+
 		return;
+	}
 
 	int width = glState.width;
 	int height = glState.height;
@@ -792,14 +800,14 @@ void Monochrome( void )
 
 void SSAO( void )
 {
-	if( !CVAR_TO_BOOL( gl_ssao ) )
-		return;
-
 	if( tr.ssao_params_changed )
 	{
 		InitSSAO();
 		tr.ssao_params_changed = false;
 	}
+
+	if( !CVAR_TO_BOOL( gl_ssao ) )
+		return;
 
 	bool Debug = false;
 	if( CVAR_TO_BOOL( gl_ssao_debug ) )
