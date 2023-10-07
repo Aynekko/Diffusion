@@ -274,6 +274,11 @@ void LoadMaterialSettingsForTexture( int texnum )
 				tr.materials[texnum].gl_interiormap_id = LOAD_TEXTURE( token, NULL, 0, 0 );
 				if( tr.materials[texnum].gl_interiormap_id == 0 )
 					ConPrintf( "^1Error:^7 InteriorMap for texture \"%s\" couldn't be loaded.\n", tr.materials[texnum].name );
+				else
+				{
+					if( cl_notbn->value )
+						ConPrintf( "^3Warning:^7 cl_notbn is active. Interior mapping won't work without TBN.\n" );
+				}
 			}
 			else
 			{
@@ -2059,19 +2064,18 @@ void R_BuildFaceListForLight( plight_t *pl )
 
 		R_AddGrassToChain( entry->surface, &pl->frustum, true );
 
+		es->culltype = CULL_VISIBLE; // set default first
+
+		if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided || e->curstate.renderfx == kRenderFxTwoSide )
+		{
+			es->culltype = CULL_OTHER;
+			goto skip_cull;
+		}
+
 		es->culltype = R_CullSurfaceExt( entry->surface, &pl->frustum );
 		
-		if( es->culltype <= CULL_BACKSIDE )
-		{
-			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided || e->curstate.renderfx == kRenderFxTwoSide )
-			{
-				psurf->info->culltype = CULL_OTHER;
-				goto skip_cull;
-			}
-
-			if( psurf->info->culltype != CULL_VISIBLE )
-				continue;
-		}
+		if( es->culltype )
+			continue;
 
 		skip_cull:
 
@@ -3051,28 +3055,28 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 		// in some cases surface is invisible but grass is visible
 		bool force = R_AddGrassToChain( psurf, &RI->frustum );
 
+		psurf->info->culltype = CULL_VISIBLE; // set default first
+
+		if( FBitSet( psurf->flags, SURF_WATER ) )
+			goto skip_cull;
+
+		if( psurf->pdecals && (e->curstate.rendermode == kRenderTransTexture) )
+			goto skip_cull;
+
+		if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided || e->curstate.renderfx == kRenderFxTwoSide )
+		{
+			psurf->info->culltype = CULL_OTHER;
+			goto skip_cull;
+		}
+
+		// now perform culling
 		psurf->info->culltype = R_CullSurface( psurf ); // ignore frustum for bmodels
 
 		if( !force && psurf->info->culltype >= CULL_FRUSTUM )
 			continue;
 
-		if( psurf->info->culltype <= CULL_BACKSIDE )
-		{
-			if( FBitSet( psurf->flags, SURF_WATER ) )
-				goto skip_cull;
-
-			if( psurf->pdecals && (e->curstate.rendermode == kRenderTransTexture) )
-				goto skip_cull;
-
-			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided || e->curstate.renderfx == kRenderFxTwoSide )
-			{
-				psurf->info->culltype = CULL_OTHER;
-				goto skip_cull;
-			}
-
-			if( psurf->info->culltype != CULL_VISIBLE )
-				continue;
-		}
+		if( psurf->info->culltype )
+			continue;
 
 		skip_cull:
 		R_AddSurfaceToDrawList( psurf, false );
@@ -3144,22 +3148,21 @@ void R_DrawBrushModelShadow( cl_entity_t *e )
 		// in some cases surface is invisible but grass is visible
 		bool force = R_AddGrassToChain( psurf, &RI->frustum );
 
+		psurf->info->culltype = CULL_VISIBLE; // set default first
+
+		if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided || e->curstate.renderfx == kRenderFxTwoSide )
+		{
+			psurf->info->culltype = CULL_OTHER;
+			goto skip_cull;
+		}
+
 		psurf->info->culltype = R_CullSurface( psurf ); // ignore frustum for bmodels
 
 		if( !force && psurf->info->culltype >= CULL_FRUSTUM )
 			continue;
 
-		if( psurf->info->culltype <= CULL_BACKSIDE )
-		{
-			if( tr.materials[psurf->texinfo->texture->gl_texturenum].TwoSided || e->curstate.renderfx == kRenderFxTwoSide )
-			{
-				psurf->info->culltype = CULL_OTHER;
-				goto skip_cull;
-			}
-
-			if( psurf->info->culltype != CULL_VISIBLE )
-				continue;
-		}
+		if( psurf->info->culltype )
+			continue;
 
 		skip_cull:
 		R_AddSurfaceToDrawList( psurf, false );
