@@ -34,7 +34,7 @@ GNU General Public License for more details.
 #define MODEL_HAS_ORIGIN	BIT( 1 )
 
 #define R_SurfCmp( a, b )	(( a.shaderNum > b.shaderNum ) ? true : ( a.shaderNum < b.shaderNum ))
-#define R_ModelOpaque( rm, amt )	( rm == kRenderNormal || rm == kRenderTransAlpha || (rm == kRenderTransColor && amt == 255) )
+#define R_ModelOpaque( rm, amt )	( rm == kRenderNormal || rm == kRenderTransAlpha )//|| (rm == kRenderTransColor && amt == 255) )
 
 #define MAX_FADING_ENTS 8192
 

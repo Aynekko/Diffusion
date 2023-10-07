@@ -1402,65 +1402,12 @@ qboolean R_AddEntity( struct cl_entity_s *clent, int entityType )
 // rendering performance. Note: this is also controlled on server side, look
 // for sv_fade_props command.
 //==============================================================================
-/*float R_ComputeFadingDistance( cl_entity_t *e )
-{
-	float blend = 1.0f;
-	
-	if( !CVAR_TO_BOOL( r_fade_props ))
-		return blend;
-	
-	// fade distance is not set in the entity
-	if( e->curstate.iuser4 <= 0 )
-		return blend;
-	
-	// calculate correct origin (helps for brush ents)
-	Vector CenterOffset = (e->curstate.mins + e->curstate.maxs) / 2.f;
-	Vector EntOrigin = e->curstate.origin + CenterOffset;
-
-	// calculate new, increased fade distance if we are zoomed
-	// for FOV above 70 it is assumed that distance remains unchanged
-	float FOVfactor = bound( 30, RI->fov_x, 70) / 70;
-	int FadeDistance = e->curstate.iuser4 * (1 / FOVfactor);
-	
-	// FIXME: entities in monitor/portal view are not counted
-	// they could be culled serverside already, because I only count the distance from the player (host) and entity directly
-	Vector ViewOrigin = tr.viewparams.vieworg;
-
-	// player within range, no need to fade
-	if( (ViewOrigin - EntOrigin).Length() <= FadeDistance )
-		return blend;
-
-//	int EntRenderAmt = 255; // set default render amt for opaque ents
-	int EntRenderAmt = e->baseline.renderamt;
-
-	// grab the custom render amt to start fading from
-	if( (e->baseline.rendermode != kRenderNormal) && (e->baseline.rendermode != kRenderTransAlpha) )
-		EntRenderAmt = e->baseline.renderamt;
-
-	// if the distance from model origin and the player exceeds desired fade distance, start fading
-	if( (int)(ViewOrigin - EntOrigin).Length() > FadeDistance )
-		e->curstate.renderamt = EntRenderAmt - ( (int)(ViewOrigin - EntOrigin).Length() - FadeDistance );
-
-	// keep the custom render mode intact, only switch to Fade if Normal or Solid (those can't fade)
-	if( e->curstate.renderamt < 255 )
-	{
-		if( (e->curstate.rendermode == kRenderNormal) || (e->curstate.rendermode == kRenderTransAlpha) )
-			e->curstate.rendermode = kRenderFade; // this is a 100% clone of Texture, the only difference is light brightness (Texture has much less - see BMODEL_KRENDERTRANSTEXTURE)
-	}
-
-	e->curstate.renderamt = bound( 0, e->curstate.renderamt, 255);
-
-	blend = e->curstate.renderamt / 255.0f;
-	
-	if (blend <= 0)
-		r_stats.num_faded_ents++; // to see this, sv_fade_props must be disabled
-	else if( blend > 0 && blend < 1 )
-		r_stats.num_fading_ents++;
-
-	return blend;
-}*/
 float R_ComputeFadingDistance( cl_entity_t *e )
 {
+	// diffusion - fix mapper's/hammer's mistake...
+	if( e->curstate.rendermode == kRenderNormal && e->curstate.renderamt <= 0 )
+		e->curstate.renderamt = 255;
+	
 	if( e->index >= MAX_FADING_ENTS )
 		return 1.0f;
 	
@@ -1490,14 +1437,9 @@ float R_ComputeFadingDistance( cl_entity_t *e )
 	if( (ViewOrigin - EntOrigin).Length() <= FadeDistance )
 		return tr.fadeblend[e->index];
 
-	//	int EntRenderAmt = 255; // set default render amt for opaque ents
-	int EntRenderAmt = e->curstate.renderamt;
-	if( EntRenderAmt == 0 )
-		EntRenderAmt = 255;
-
 	// if the distance from model origin and the player exceeds desired fade distance, start fading
 	if( (int)(ViewOrigin - EntOrigin).Length() > FadeDistance )
-		tr.fadeblend[e->index] = (EntRenderAmt - ((int)(ViewOrigin - EntOrigin).Length() - FadeDistance)) / 255.0f;
+		tr.fadeblend[e->index] = (e->curstate.renderamt - ((int)(ViewOrigin - EntOrigin).Length() - FadeDistance)) / 255.0f;
 
 	// keep the custom render mode intact, only switch to Fade if Normal or Solid (those can't fade)
 	if( tr.fadeblend[e->index] < 1.0f )
@@ -1925,7 +1867,8 @@ void HUD_PrintStats( void )
 		{
 			pglGetIntegerv( GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &total_mem_kb );
 			pglGetIntegerv( GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &cur_avail_mem_kb );
-			R_Speeds_Printf( "GPU used mem. %.2fMb, total: %iMb\n", (float)((total_mem_kb - cur_avail_mem_kb) / 1024.0f), (int)(total_mem_kb / 1024) );
+		//	R_Speeds_Printf( "GPU used mem. %.2fMb, total: %iMb\n", (float)((total_mem_kb - cur_avail_mem_kb) / 1024.0f), (int)(total_mem_kb / 1024) );
+			R_Speeds_Printf( "%s:\n%.2fMb / %iMb\n", glConfig.renderer_string, (float)((total_mem_kb - cur_avail_mem_kb) / 1024.0f), (int)(total_mem_kb / 1024) );
 		}
 		break;		
 	case 2:
