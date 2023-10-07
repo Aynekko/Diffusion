@@ -1890,7 +1890,13 @@ void HUD_PrintStats( void )
 	GLint cur_avail_mem_kb = 0;
 	GLint total_mem_kb = 0;
 
-	R_Speeds_Printf( "Renderer: ^2XashXT | Diffusion^7\n\n" );
+	if( tr.lowmemory )
+	{
+		R_Speeds_Printf( "Renderer: ^2XashXT | Diffusion^7\n" );
+		R_Speeds_Printf( "^3LOW MEMORY MODE^7\n\n" );
+	}
+	else
+		R_Speeds_Printf( "Renderer: ^2XashXT | Diffusion^7\n\n" );
 
 	switch( (int)r_speeds->value )
 	{

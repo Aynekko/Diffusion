@@ -1593,7 +1593,7 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 			if( RI->currententity->curstate.scale )
 				GL_AddShaderDirective( options, "BMODEL_WAVEHEIGHT" );
 
-			if( (gl_water_refraction->value > 0) && (RI->currententity->curstate.renderfx != kRenderFxNoRefraction) )
+			if( !tr.lowmemory && (gl_water_refraction->value > 0) && (RI->currententity->curstate.renderfx != kRenderFxNoRefraction) )
 			{
 				GL_AddShaderDirective( options, "BMODEL_WATER_REFRACTION" );
 				GL_EncodeNormal( options, tr.waterTextures[0] );
@@ -1771,7 +1771,7 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 		if( RI->currententity && RI->currententity->curstate.scale)
 			GL_AddShaderDirective( options, "BMODEL_WAVEHEIGHT" );
 
-		if( RI->currententity && (gl_water_refraction->value > 0) && (RI->currententity->curstate.renderfx != kRenderFxNoRefraction) )
+		if( !tr.lowmemory && RI->currententity && (gl_water_refraction->value > 0) && (RI->currententity->curstate.renderfx != kRenderFxNoRefraction) )
 		{
 			GL_AddShaderDirective( options, "BMODEL_WATER_REFRACTION" );
 			GL_EncodeNormal( options, tr.waterTextures[0] );

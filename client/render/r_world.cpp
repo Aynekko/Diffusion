@@ -179,7 +179,8 @@ void LoadMaterialSettingsForTexture( int texnum )
 			{
 				flValue = Q_atof( token );
 				flValue = bound( 0.0f, flValue, 1.0f );
-				tr.materials[texnum].ReflectScale = flValue;
+				if( !tr.lowmemory )
+					tr.materials[texnum].ReflectScale = flValue;
 			}
 			else
 			{
@@ -211,7 +212,8 @@ void LoadMaterialSettingsForTexture( int texnum )
 			{
 				flValue = Q_atof( token );
 				flValue = bound( 0.0f, flValue, 1.0f );
-				tr.materials[texnum].PlanarReflectScale = flValue;
+				if( !tr.lowmemory )
+					tr.materials[texnum].PlanarReflectScale = flValue;
 			}
 			else
 			{
@@ -253,11 +255,14 @@ void LoadMaterialSettingsForTexture( int texnum )
 			afile = COM_ParseLine( afile, token );
 			if( afile && token[0] > 0 )
 			{
-				tr.materials[texnum].gl_normalmap_id = LOAD_TEXTURE( token, NULL, 0, TF_NORMALMAP );
-				if( tr.materials[texnum].gl_normalmap_id > 0 )
-					strcpy_s( tr.materials[texnum].normalmap_name, token );
-				else
-					ConPrintf( "^1Error:^7 NormalMap for texture \"%s\" couldn't be loaded.\n", tr.materials[texnum].name );
+				if( !tr.lowmemory )
+				{
+					tr.materials[texnum].gl_normalmap_id = LOAD_TEXTURE( token, NULL, 0, TF_NORMALMAP );
+					if( tr.materials[texnum].gl_normalmap_id > 0 )
+						strcpy_s( tr.materials[texnum].normalmap_name, token );
+					else
+						ConPrintf( "^1Error:^7 NormalMap for texture \"%s\" couldn't be loaded.\n", tr.materials[texnum].name );
+				}
 			}
 			else
 			{
@@ -400,7 +405,7 @@ static void Mod_LoadWorldMaterials( void )
 		// build material names
 		Q_snprintf( diffuse, sizeof( diffuse ), "textures/%s", tx->name );
 
-		if( IMAGE_EXISTS( diffuse ) )
+		if( !tr.lowmemory && IMAGE_EXISTS( diffuse ) )
 		{
 			int	texture_ext = LOAD_TEXTURE( diffuse, NULL, 0, 0 );
 			int	encodeType = RENDER_GET_PARM( PARM_TEX_ENCODE, texture_ext );
@@ -423,6 +428,7 @@ static void Mod_LoadWorldMaterials( void )
 		Q_snprintf( tr.materials[tx->gl_texturenum].name, sizeof( tr.materials[tx->gl_texturenum].name ), "%s", tx->name );
 		LoadMaterialSettingsForTexture( tx->gl_texturenum );
 
+		/*
 		// build material names
 		Q_snprintf( luma, sizeof( luma ), "textures/%s_luma", tx->name );
 
@@ -442,7 +448,7 @@ static void Mod_LoadWorldMaterials( void )
 				// can't use encoded textures
 				FREE_TEXTURE( texture_ext );
 			}
-		}
+		}*/
 
 		if( !Q_strncmp( tx->name, "sky", 3 ) )
 			SetBits( world->features, WORLD_HAS_SKYBOX );
@@ -1804,7 +1810,7 @@ static void Mod_LoadWorld( model_t *mod, const byte *buf )
 	if( extrahdr->id == IDEXTRAHEADER && extrahdr->version == EXTRA_VERSION )
 	{
 		// diffusioncubemaps
-		if( GL_Support( R_TEXTURECUBEMAP_EXT ) ) // loading cubemaps only when it's supported
+		if( GL_Support( R_TEXTURECUBEMAP_EXT ) && !tr.lowmemory ) // loading cubemaps only when it's supported
 			Mod_LoadCubemaps( buf, &extrahdr->lumps[LUMP_CUBEMAPS] );
 	}
 }
@@ -2260,7 +2266,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 					GL_Bind( GL_TEXTURE6, tr.materials[tex->gl_texturenum].gl_normalmap_id );
 			}
 
-			if( FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
+			if( !tr.lowmemory && FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
 				GL_Bind( GL_TEXTURE6, tr.waterTextures[(int)(tr.time * 20.0f) % WATER_TEXTURES] ); // u_NormalMap
 
 			// diffusion - interior mapping
@@ -2684,7 +2690,12 @@ void R_DrawBrushList( void )
 					if( FBitSet( s->flags, SURF_WATER ) )
 						GL_Bind( GL_TEXTURE2, tr.whiteTexture ); // FIXME for some reason deluxmap is visible on water on AMD card...wtf?
 					else
-						GL_Bind( GL_TEXTURE2, tr.lightmaps[es->lightmaptexturenum].deluxmap );
+					{
+						if( tr.lowmemory )
+							GL_Bind( GL_TEXTURE2, tr.grayTexture );
+						else
+							GL_Bind( GL_TEXTURE2, tr.lightmaps[es->lightmaptexturenum].deluxmap );
+					}
 				}
 				cached_lightmap = es->lightmaptexturenum;
 			}
@@ -2710,7 +2721,7 @@ void R_DrawBrushList( void )
 			pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[tex->gl_texturenum].Fresnel );
 
 			// diffusion - refracted water!!!
-			if( FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
+			if( !tr.lowmemory && FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
 			{
 				// request screen depth
 				GL_Bind( GL_TEXTURE6, tr.screen_depth ); // u_DepthMap
@@ -2979,7 +2990,7 @@ void R_SetRenderMode( cl_entity_t *e )
 
 		if( e->curstate.skin == CONTENTS_WATER )
 		{
-			if( e->curstate.renderfx == kRenderFxNoRefraction || (gl_water_refraction->value == 0) )
+			if( tr.lowmemory || e->curstate.renderfx == kRenderFxNoRefraction || (gl_water_refraction->value == 0) )
 				GL_Blend( GL_TRUE ); // default half-life water
 			else
 				GL_Blend( GL_FALSE );

@@ -143,16 +143,24 @@ void InitSSAO( void )
 	int width = glState.width;
 	int height = glState.height;
 
-	switch( (int)gl_ssao->value )
+	if( tr.lowmemory )
 	{
-	case 1:
 		width = glState.width / 4;
 		height = glState.height / 4;
-		break;
-	case 2:
-		width = glState.width / 2;
-		height = glState.height / 2;
-		break;
+	}
+	else
+	{
+		switch( (int)gl_ssao->value )
+		{
+		case 1:
+			width = glState.width / 4;
+			height = glState.height / 4;
+			break;
+		case 2:
+			width = glState.width / 2;
+			height = glState.height / 2;
+			break;
+		}
 	}
 	
 	if( ScreenAO )
@@ -192,7 +200,12 @@ void InitPostTextures( void )
 	}
 	
 	if( !tr.target_rgb[0] )
-		tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE512, TARGET_SIZE512, NULL, TF_SCREEN );
+	{
+		if( tr.lowmemory )
+			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE, TARGET_SIZE, NULL, TF_SCREEN ); // 128
+		else
+			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE512, TARGET_SIZE512, NULL, TF_SCREEN );
+	}
 
 	if( ScreenWaterTexture )
 	{
@@ -301,6 +314,10 @@ void RenderSunShafts( void )
 	Vector skyVec = tr.sky_normal.Normalize();
 	Vector sunPos = RI->vieworg + skyVec * 1000.0;
 
+	int TargetSize = TARGET_SIZE512;
+	if( tr.lowmemory )
+		TargetSize = TARGET_SIZE;
+
 	if( skyVec == g_vecZero ) return;
 
 	ColorNormalize( skyColor, skyColor );
@@ -324,7 +341,7 @@ void RenderSunShafts( void )
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 	// set target viewport
-	pglViewport( 0, 0, TARGET_SIZE512, TARGET_SIZE512 );
+	pglViewport( 0, 0, TargetSize, TargetSize );
 
 	// generate shafts
 	GL_BindShader( glsl.genSunShafts );
@@ -338,9 +355,9 @@ void RenderSunShafts( void )
 
 	// request target copy
 	GL_Bind( GL_TEXTURE0, tr.target_rgb[0] );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, TARGET_SIZE512, TARGET_SIZE512 );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, TargetSize, TargetSize );
 #if 1
-	pglViewport( 0, 0, TARGET_SIZE512, TARGET_SIZE512 );
+	pglViewport( 0, 0, TargetSize, TargetSize );
 	
 	// combine normal and blurred scenes
 	GL_BindShader( glsl.blurShader[0] );
@@ -351,7 +368,7 @@ void RenderSunShafts( void )
 	
 	// request target copy
 	GL_Bind( GL_TEXTURE0, tr.target_rgb[0] );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, TARGET_SIZE512, TARGET_SIZE512 );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, TargetSize, TargetSize );
 
 	GL_BindShader( glsl.blurShader[1] );
 	ASSERT( RI->currentshader != NULL );
@@ -361,7 +378,7 @@ void RenderSunShafts( void )
 	
 	// request target copy
 	GL_Bind( GL_TEXTURE0, tr.target_rgb[0] );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, TARGET_SIZE512, TARGET_SIZE512 );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, TargetSize, TargetSize );
 #endif
 	pglViewport( 0, 0, glState.width, glState.height );
 
@@ -828,16 +845,24 @@ void SSAO( void )
 	int width = glState.width;
 	int height = glState.height;
 
-	switch( (int)gl_ssao->value )
+	if( tr.lowmemory )
 	{
-	case 1:
 		width = glState.width / 4;
 		height = glState.height / 4;
-		break;
-	case 2:
-		width = glState.width / 2;
-		height = glState.height / 2;
-		break;
+	}
+	else
+	{
+		switch( (int)gl_ssao->value )
+		{
+		case 1:
+			width = glState.width / 4;
+			height = glState.height / 4;
+			break;
+		case 2:
+			width = glState.width / 2;
+			height = glState.height / 2;
+			break;
+		}
 	}
 
 	pglViewport( 0, 0, width, height );

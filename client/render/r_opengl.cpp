@@ -867,11 +867,14 @@ static void GL_InitTextures( void )
 	R_InitAlphaContrast();
 
 	// load water animation
-	for( int i = 0; i < WATER_TEXTURES; i++ )
+	if( !tr.lowmemory )
 	{
-		char path[256];
-		Q_snprintf( path, sizeof( path ), "gfx/water/water_normal_%i", i );
-		tr.waterTextures[i] = LOAD_TEXTURE( path, NULL, 0, TF_NORMALMAP );
+		for( int i = 0; i < WATER_TEXTURES; i++ )
+		{
+			char path[256];
+			Q_snprintf( path, sizeof( path ), "gfx/water/water_normal_%i", i );
+			tr.waterTextures[i] = LOAD_TEXTURE( path, NULL, 0, TF_NORMALMAP );
+		}
 	}
 }
 
@@ -896,6 +899,12 @@ bool R_Init( void )
 		CVAR_SET_FLOAT( "gl_renderer", 0 );
 		R_Shutdown();
 		return false;
+	}
+
+	if( gEngfuncs.CheckParm( "-lowmem", NULL ) )
+	{
+		tr.lowmemory = true;
+		ConPrintf( "^3Warning:^7 low memory mode is active!\n" );
 	}
 
 	GL_InitGPUShaders();

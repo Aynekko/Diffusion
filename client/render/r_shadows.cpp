@@ -79,6 +79,9 @@ void R_ResetShadowTextures( void )
 	case 4: ShadowViewport = 4096; break;
 	}
 
+	if( tr.lowmemory )
+		ShadowViewport = 256;
+
 	if( !FBOsupported )
 	{
 		ShadowViewport = bound( 256, ShadowViewport, 512 );

@@ -91,7 +91,7 @@ static void LM_UploadPages( bool lightmap, bool deluxmap )
 			lms->lightmap = CREATE_TEXTURE( lmName, BLOCK_SIZE, BLOCK_SIZE, NULL, TF_LIGHTMAP ); 
 		}
 
-		if( deluxmap && !lms->deluxmap )
+		if( !tr.lowmemory && deluxmap && !lms->deluxmap )
 		{
 			Q_snprintf( lmName, sizeof( lmName ), "*normals%i", i );
 			lms->deluxmap = CREATE_TEXTURE( lmName, BLOCK_SIZE, BLOCK_SIZE, NULL, TF_DELUXMAP );
@@ -330,7 +330,7 @@ static void R_UpdateLightMap( msurface_t *surf )
 	ClearBits( surf->flags, SURF_LM_UPDATE );
 
 	// upload the deluxemap
-	if( esrf->deluxemap != NULL && FBitSet( surf->flags, SURF_DM_UPDATE ))
+	if( !tr.lowmemory && esrf->deluxemap != NULL && FBitSet( surf->flags, SURF_DM_UPDATE ))
 	{
 		GL_Bind( GL_TEXTURE0, tr.lightmaps[esrf->lightmaptexturenum].deluxmap );
 

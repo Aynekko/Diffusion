@@ -431,6 +431,9 @@ void CL_BuildCubemaps_f( void )
 		m->valid = m->texture = false;
 	}
 
+	if( tr.lowmemory )
+		return;
+
 	if( FBitSet( world->features, WORLD_HAS_SKYBOX ) )
 		world->build_default_cubemap = true;
 	else

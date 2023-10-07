@@ -1804,7 +1804,7 @@ void CStudioModelRenderer::LoadStudioMaterials( void )
 		pmaterial->pSource = ptexture;
 		pmaterial->flags = ptexture->flags;
 
-		if( IMAGE_EXISTS( diffuse ) && !FBitSet( ptexture->flags, STUDIO_NF_COLORMAP ) )
+		if( !tr.lowmemory && IMAGE_EXISTS( diffuse ) && !FBitSet( ptexture->flags, STUDIO_NF_COLORMAP ) )
 		{
 			int	texture_ext = LOAD_TEXTURE( diffuse, NULL, 0, 0 );
 			int	encodeType = RENDER_GET_PARM( PARM_TEX_ENCODE, texture_ext );
@@ -3910,7 +3910,7 @@ void CStudioModelRenderer::StudioSetRenderMode( const int rendermode )
 	switch( rendermode )
 	{
 	case kRenderNormal:
-	case kRenderTransTexture:
+	case kRenderTransAlpha:
 		break;
 	case kRenderTransColor:
 		if( RI->currententity->curstate.renderamt != 255 || tr.fadeblend[RI->currententity->index] < 1.0f ) // diffusion - fix, otherwise it was possible to look through them
