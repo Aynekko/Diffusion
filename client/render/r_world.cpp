@@ -88,7 +88,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 		tr.materials[texnum].GlossSmoothness = 0.75f;
 		tr.materials[texnum].ReflectScale = 0.5f;
 	}
-
+	
 	char AddPath[10] = "textures/";
 	char Path[100] = "";
 	sprintf_s( Path, "%s%s.txt", AddPath, tr.materials[texnum].name );
@@ -357,9 +357,14 @@ void LoadMaterialSettingsForTexture( int texnum )
 			afile = COM_ParseLine( afile, token );
 			if( afile && token[0] > 0 )
 			{
-				tr.materials[texnum].gl_fallbacktex_id = LOAD_TEXTURE( token, NULL, 0, 0 );
-				if( tr.materials[texnum].gl_fallbacktex_id == 0 )
-					ConPrintf( "^1Error:^7 FallbackTexture for texture \"%s\" couldn't be loaded.\n", tr.materials[texnum].name );
+				if( !Q_strstr( token, "textures/!common" ) )
+					ConPrintf( "^1Error:^7 FallbackTexture for texture \"%s\" must be in \"textures/!common/\" folder. Skipped.\n", tr.materials[texnum].name );
+				else
+				{
+					tr.materials[texnum].gl_fallbacktex_id = LOAD_TEXTURE( token, NULL, 0, 0 );
+					if( tr.materials[texnum].gl_fallbacktex_id == 0 )
+						ConPrintf( "^1Error:^7 FallbackTexture for texture \"%s\" couldn't be loaded.\n", tr.materials[texnum].name );
+				}
 			}
 			else
 			{
