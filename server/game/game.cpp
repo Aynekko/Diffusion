@@ -1099,8 +1099,6 @@ void GameDLLInit( void )
 	
 	SERVER_COMMAND( "exec skill.cfg\n" );
 
-	WorldPhysic->InitPhysic();	// initialize physic world
-
 	// Yes in the Xash3D we can register messages here
 	LinkUserMessages();
 }

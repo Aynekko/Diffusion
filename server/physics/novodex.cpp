@@ -163,13 +163,13 @@ void CPhysicNovodex :: InitPhysic( void )
 {
 	if( m_pPhysics )
 	{
-		ALERT( at_error, "InitPhysic: physics already initalized\n" );
+		ALERT( at_console, "^2InitPhysic:^7 physics already initalized\n" );
 		return;
 	}
 
-	if( g_allow_physx != NULL && g_allow_physx->value == 0.0f )
+	if( !g_allow_physx->value )
 	{
-		ALERT( at_console, "InitPhysic: PhysX support is disabled by user.\n" );
+		ALERT( at_console, "^2InitPhysic:^7 PhysX support is disabled by user.\n" );
 		GameInitNullPhysics ();
 		return;
 	}
@@ -180,7 +180,7 @@ void CPhysicNovodex :: InitPhysic( void )
 		// NOTE: using '*' symbol to force loading dll from system path not game folder (Nvidia PhysX drivers)
 		if( !Sys_LoadLibrary( "*PhysXLoader.dll", &hPhysics, NxPhysics ))
 		{
-			ALERT( at_error, "InitPhysic: failed to loading NxPhysics.dll.\nPhysics abstraction layer will be disabled.\n" );
+			ALERT( at_console, "^3InitPhysic:^7 failed to loading NxPhysics.dll.\nPhysics abstraction layer will be disabled.\n" );
 			GameInitNullPhysics ();
 			return;
 		}
@@ -190,7 +190,7 @@ void CPhysicNovodex :: InitPhysic( void )
 
 	if( !m_pPhysics )
 	{
-		ALERT( at_error, "InitPhysic: failed to initalize physics engine\n" );
+		ALERT( at_console, "^3InitPhysic:^7 failed to initalize physics engine\n" );
 		Sys_FreeLibrary( &hPhysics );
 		GameInitNullPhysics ();
 		return;

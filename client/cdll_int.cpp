@@ -132,8 +132,6 @@ int Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	// diffusion - execute mod-specific stuff
 	ClientCmd( "exec diffusion.cfg\n" );
 
-	// diffusion - check name
-
 	return 1;
 }
 

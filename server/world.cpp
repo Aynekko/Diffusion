@@ -645,7 +645,8 @@ void CWorld :: Spawn( void )
 void CWorld :: Precache( void )
 {
 	g_pLastSpawn = NULL;
-	g_pWorld = this;	
+	g_pWorld = this;
+	WorldPhysic->InitPhysic();	// initialize physic world
 
 	if ( pev->gravity > 0.0f )
 		CVAR_SET_FLOAT( "sv_gravity", pev->gravity );
