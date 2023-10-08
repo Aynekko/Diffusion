@@ -79,7 +79,7 @@ void InitAutoExposure(void)
 	}
 
 	if( !tr.avg_luminance_texture )
-		tr.avg_luminance_texture = CREATE_TEXTURE( "*avg_luminance_texture", glState.width, glState.height, NULL, TF_CLAMP | TF_HAS_ALPHA | TF_ARB_16BIT );
+		tr.avg_luminance_texture = CREATE_TEXTURE( "*avg_luminance_texture", glState.width, glState.height, NULL, TF_COLORBUFFER ); // was TF_CLAMP | TF_HAS_ALPHA | TF_ARB_16BIT
 
 	GL_Bind( GL_TEXTURE0, tr.avg_luminance_texture );
 	pglGenerateMipmap( GL_TEXTURE_2D );
@@ -170,7 +170,7 @@ void InitSSAO( void )
 	}
 
 	if( !ScreenAO )
-		ScreenAO = CREATE_TEXTURE( "*screenao", width, height, NULL, (TF_COLORBUFFER | TF_ARB_16BIT) );
+		ScreenAO = CREATE_TEXTURE( "*screenao", width, height, NULL, TF_COLORBUFFER );
 }
 
 void InitPostTextures( void )
@@ -235,7 +235,7 @@ void InitPostTextures( void )
 	}
 
 	if( !tr.screen_fbo_texture_color )
-		tr.screen_fbo_texture_color = CREATE_TEXTURE( "*screen_temp_fbo_texture_color", glState.width, glState.height, NULL, TF_HAS_ALPHA | TF_ARB_16BIT | TF_CLAMP | TF_ARB_FLOAT );
+		tr.screen_fbo_texture_color = CREATE_TEXTURE( "*screen_temp_fbo_texture_color", glState.width, glState.height, NULL, TF_COLORBUFFER ); // was TF_HAS_ALPHA | TF_ARB_16BIT | TF_CLAMP | TF_ARB_FLOAT
 
 	GL_Bind( GL_TEXTURE0, tr.screen_fbo_texture_color );
 	pglGenerateMipmap( GL_TEXTURE_2D );
