@@ -3905,12 +3905,12 @@ StudioSetRenderMode
 */
 void CStudioModelRenderer::StudioSetRenderMode( const int rendermode )
 {
-	GL_AlphaTest( GL_FALSE );
-
 	switch( rendermode )
 	{
 	case kRenderNormal:
 	case kRenderTransAlpha:
+		GL_AlphaTest( GL_FALSE );
+		GL_Blend( GL_FALSE );
 		break;
 	case kRenderTransColor:
 		if( RI->currententity->curstate.renderamt != 255 || tr.fadeblend[RI->currententity->index] < 1.0f ) // diffusion - fix, otherwise it was possible to look through them
