@@ -812,9 +812,6 @@ void CWorld :: Precache( void )
 	UPDATE_PACKED_FOG( pev->impulse );
 
 	// watersplash
-	PRECACHE_MODEL( "sprites/effects/waterring2.spr" );
-	PRECACHE_MODEL( "sprites/effects/wsplash3.spr" );
-	PRECACHE_MODEL( "sprites/effects/splash2.spr" );
 	PRECACHE_MODEL( "sprites/effects/watertrail.spr" );
 	PRECACHE_SOUND( "items/water_splash/water_splash1.wav" );
 	PRECACHE_SOUND( "items/water_splash/water_splash2.wav" );
