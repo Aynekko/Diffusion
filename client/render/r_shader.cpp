@@ -1643,9 +1643,9 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	if( translucent )
 		GL_AddShaderDirective( options, "BMODEL_TRANSLUCENT" );
 #endif
-	if( FBitSet( s->flags, SURF_LANDSCAPE ) && landscape && landscape->terrain )
+	if( FBitSet( s->flags, SURF_LANDSCAPE ) )
 	{
-		if( landscape->terrain->layermap.gl_diffuse_id != 0 )
+		if( landscape && landscape->terrain && landscape->terrain->layermap.gl_diffuse_id != 0 )
 		{
 			GL_AddShaderDirective( options, va( "TERRAIN_NUM_LAYERS %i", landscape->terrain->numLayers ));
 			GL_AddShaderDirective( options, "BMODEL_MULTI_LAYERS" );
@@ -1716,9 +1716,9 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 
 	texture_t *tx = s->texinfo->texture;
 
-	if( FBitSet( s->flags, SURF_LANDSCAPE ) && landscape && landscape->terrain )
+	if( FBitSet( s->flags, SURF_LANDSCAPE ) )
 	{
-		if( landscape->terrain->layermap.gl_diffuse_id != 0 )
+		if( landscape && landscape->terrain && landscape->terrain->layermap.gl_diffuse_id != 0 )
 		{
 			GL_AddShaderDirective( options, va( "TERRAIN_NUM_LAYERS %i", landscape->terrain->numLayers ));
 			GL_AddShaderDirective( options, "BMODEL_MULTI_LAYERS" );
