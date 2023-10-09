@@ -22,11 +22,40 @@
 #include "r_local.h"
 #include "edict.h"
 
+static void CableSetRender( bool start )
+{
+	if( start )
+	{
+		GL_Texture2D( GL_FALSE );
+		GL_Cull( GL_NONE );
+		if( glState.drawTrans )
+		{
+			GL_DepthMask( GL_FALSE );
+			GL_Blend( GL_TRUE );
+			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		}
+		else
+		{
+			GL_Blend( GL_FALSE );
+			GL_DepthTest( GL_TRUE );
+			GL_DepthMask( GL_TRUE );
+		}
+	}
+	else
+	{
+		GL_Texture2D( GL_TRUE );
+		GL_DepthMask( GL_TRUE );
+		GL_Blend( GL_FALSE );
+		GL_Cull( GL_FRONT );
+	}
+}
+
 void HUD_DrawNormalTriangles( void )
 {
 	gEngfuncs.pTriAPI->Begin(TRI_POLYGON);
 	gEngfuncs.pTriAPI->End();
 
+	CableSetRender( true );
 	for( int i = 0; i < tr.num_solid_entities; i++ )
 	{
 		RI->currententity = tr.solid_entities[i];
@@ -39,6 +68,7 @@ void HUD_DrawNormalTriangles( void )
 
 		R_DrawCable( RI->currententity );
 	}
+	CableSetRender( false );
 
 	g_pParticles.Update();
 }
@@ -58,6 +88,7 @@ void HUD_DrawTransparentTriangles( void )
 		tr.frametime = tr.time - tr.oldtime;
 	}
 
+	CableSetRender( true );
 	for( int i = 0; i < tr.num_trans_entities; i++ )
 	{
 		RI->currententity = tr.trans_entities[i];
@@ -70,6 +101,7 @@ void HUD_DrawTransparentTriangles( void )
 
 		R_DrawCable( RI->currententity );
 	}
+	CableSetRender( false );
 
 	if( g_pParticleSystems )
 		g_pParticleSystems->UpdateSystems();
@@ -173,21 +205,6 @@ void R_DrawCable( cl_entity_t *e )
 	VectorAngles( forward, angles );
 	AngleVectors( angles, NULL, right, NULL );
 
-	if( RenderAmt < 1.0f )
-	{
-		GL_DepthMask( GL_FALSE );
-		GL_Blend( GL_TRUE );
-		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	}
-	else
-	{
-		GL_Blend( GL_FALSE );
-		GL_DepthTest( GL_TRUE );
-		GL_DepthMask( GL_TRUE );
-	}
-	GL_Texture2D( GL_FALSE );
-	pglDisable( GL_CULL_FACE );
-
 	pglBegin( GL_TRIANGLE_STRIP );
 	for( int j = 0; j < inumpoints; j++ )
 	{
@@ -216,10 +233,6 @@ void R_DrawCable( cl_entity_t *e )
 		pglVertex3fv( vVertex );
 	}
 	pglEnd();
-	pglEnable( GL_CULL_FACE );
-	GL_Texture2D( GL_TRUE );
-	GL_DepthMask( GL_TRUE );
-	GL_Blend( GL_FALSE );
 
 	r_stats.c_cables++;
 }
