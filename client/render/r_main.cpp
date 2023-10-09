@@ -1863,13 +1863,6 @@ void HUD_PrintStats( void )
 		R_Speeds_Printf( "GLSL shaders: %3i\n\n", Q_max( num_glsl_programs - 1, 0 ) );
 		R_Speeds_Printf( "TEX used mem. %s\n", Q_memprint( RENDER_GET_PARM( PARM_TEX_MEMORY, 0 ) ) );
 		R_Speeds_Printf( "VBO used mem. %s\n", Q_memprint( tr.total_vbo_memory ) );
-		if( glConfig.hardware_type == GLHW_NVIDIA )
-		{
-			pglGetIntegerv( GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &total_mem_kb );
-			pglGetIntegerv( GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &cur_avail_mem_kb );
-		//	R_Speeds_Printf( "GPU used mem. %.2fMb, total: %iMb\n", (float)((total_mem_kb - cur_avail_mem_kb) / 1024.0f), (int)(total_mem_kb / 1024) );
-			R_Speeds_Printf( "%s:\n%.2fMb / %iMb\n", glConfig.renderer_string, (float)((total_mem_kb - cur_avail_mem_kb) / 1024.0f), (int)(total_mem_kb / 1024) );
-		}
 		break;		
 	case 2:
 		if( !curleaf ) curleaf = worldmodel->leafs;
@@ -1884,7 +1877,14 @@ void HUD_PrintStats( void )
 	case 4:
 		R_Speeds_Printf( "DIP count %3i\nShader bind %3i\n", r_stats.num_flushes, r_stats.num_shader_binds );
 		R_Speeds_Printf( "Total GLSL shaders %3i\n", Q_max( num_glsl_programs - 1, 0 ));
-		R_Speeds_Printf( "frame total tris %3i\n", r_stats.c_total_tris );
+		R_Speeds_Printf( "frame total tris %3i\n\n", r_stats.c_total_tris );
+		if( glConfig.hardware_type == GLHW_NVIDIA )
+		{
+			pglGetIntegerv( GPU_MEMORY_INFO_TOTAL_AVAILABLE_MEMORY_NVX, &total_mem_kb );
+			pglGetIntegerv( GPU_MEMORY_INFO_CURRENT_AVAILABLE_VIDMEM_NVX, &cur_avail_mem_kb );
+			//	R_Speeds_Printf( "GPU used mem. %.2fMb, total: %iMb\n", (float)((total_mem_kb - cur_avail_mem_kb) / 1024.0f), (int)(total_mem_kb / 1024) );
+			R_Speeds_Printf( "%s:\n%.2fMb / %iMb\n", glConfig.renderer_string, (float)((total_mem_kb - cur_avail_mem_kb) / 1024.0f), (int)(total_mem_kb / 1024) );
+		}
 		break;
 	case 5:
 		// draw hierarchy map of recursion calls
