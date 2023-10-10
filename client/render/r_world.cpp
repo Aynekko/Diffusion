@@ -1270,9 +1270,16 @@ static void Mod_MappingLandscapes( msurface_t *surf, mextrasurf_t *esrf )
 	terrain_t *terra;
 	bvert_t *v;
 
-	if( !land ) return; // no landscape specified
+	if( !land )
+		return; // no landscape specified
+
 	terra = land->terrain;
-	if( !terra ) return; // ooops! something bad happened!
+
+	if( !terra )
+		return; // ooops! something bad happened!
+
+	if( !land->terrain->layermap.gl_diffuse_id )
+		return; // texture array wasn't created
 
 	// now we have landscape info!
 	SetBits( surf->flags, SURF_LANDSCAPE );
