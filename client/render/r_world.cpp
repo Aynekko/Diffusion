@@ -439,28 +439,6 @@ static void Mod_LoadWorldMaterials( void )
 		Q_snprintf( tr.materials[tx->gl_texturenum].name, sizeof( tr.materials[tx->gl_texturenum].name ), "%s", tx->name );
 		LoadMaterialSettingsForTexture( tx->gl_texturenum );
 
-		/*
-		// build material names
-		Q_snprintf( luma, sizeof( luma ), "textures/%s_luma", tx->name );
-
-		if( IMAGE_EXISTS( luma ) )
-		{
-			int	texture_ext = LOAD_TEXTURE( luma, NULL, 0, 0 );
-			int	encodeType = RENDER_GET_PARM( PARM_TEX_ENCODE, texture_ext );
-
-			// NOTE: default renderer can't unpack encoded textures
-			// so keep lowres copies for this case
-			if( encodeType == DXT_ENCODE_DEFAULT )
-			{
-				tx->fb_texturenum = texture_ext;
-			}
-			else
-			{
-				// can't use encoded textures
-				FREE_TEXTURE( texture_ext );
-			}
-		}*/
-
 		if( !Q_strncmp( tx->name, "sky", 3 ) )
 			SetBits( world->features, WORLD_HAS_SKYBOX );
 	}

@@ -1422,7 +1422,18 @@ mvbocache_t *CStudioModelRenderer::CreateMeshCache( dmodellight_t *dml )
 	mstudiobone_t *pbones;
 
 	// materials goes first to determine bump
-	if( unique_model ) LoadStudioMaterials();
+	if( unique_model ) 
+		LoadStudioMaterials();
+	else // precache studio shaders
+	{
+		bool bone_weights = FBitSet( m_pStudioHeader->flags, STUDIO_HAS_BONEWEIGHTS ) != 0;
+		mstudiomaterial_t *pmaterial = (mstudiomaterial_t *)m_pRenderModel->materials;
+
+		for( int i = 0; i < m_pStudioHeader->numtextures; i++, pmaterial++ )
+		{
+			GL_UberShaderForSolidStudio( pmaterial, false, bone_weights, false, m_pStudioHeader->numbones );
+		}
+	}
 
 	// build default pose to build seamless TBN-space
 	pbones = (mstudiobone_t *)((byte *)m_pStudioHeader + m_pStudioHeader->boneindex);
