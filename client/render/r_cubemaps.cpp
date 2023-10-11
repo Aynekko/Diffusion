@@ -68,6 +68,7 @@ void Mod_FreeCubemaps( void )
 	world->loading_cubemaps = false;
 	world->cubemap_build_number = 0;
 	world->num_cubemaps = 0;
+	world->cubemaps_ready = false;
 }
 
 /*
@@ -227,6 +228,11 @@ void Mod_LoadCubemaps( const byte *base, const dlump_t *l )
 	{
 		ConPrintf( "^3Warning:^7 Map has %i cubemaps which require rebuilding. Run 'buildcubemaps' to build them.\n", world->num_cubemaps );
 		world->build_default_cubemap = false;
+		world->cubemaps_ready = false;
+	}
+	else if( world->loading_cubemaps )
+	{
+		world->cubemaps_ready = true;
 	}
 }
 
@@ -258,7 +264,7 @@ void CL_FindNearestCubeMap( const Vector &pos, mcubemap_t **result )
 
 	if( !*result )
 	{
-		// this may happens if map
+		// this may happen if map
 		// doesn't have any cubemaps
 		*result = &world->defaultCubemap;
 	}
@@ -431,6 +437,8 @@ void CL_BuildCubemaps_f( void )
 		m->valid = m->texture = false;
 	}
 
+	world->cubemaps_ready = false;
+
 	if( tr.lowmemory )
 		return;
 
@@ -529,12 +537,14 @@ void GL_LoadAndRebuildCubemaps( int refParams )
 		tr.params_changed = true;
 		tr.glsl_valid_sequence++;
 		tr.fClearScreen = false;
+		world->cubemaps_ready = true;
 	}
 
-	// now all the cubemaps are recreated, so we can starts to upload them
+	// now all the cubemaps are recreated, so we can start to upload them
 	if( world->loading_cubemaps )
 	{
 		Mod_LoadCubemap( &world->defaultCubemap );
+
 		int i, j;
 		for( i = 0; i < world->num_cubemaps; i++ )
 		{

@@ -113,52 +113,52 @@ typedef CCubeMap< LightShadowZBufferSample_t, SHADOW_ZBUF_RES> lightzbuffer_t;
 	
 typedef struct
 {
-	char		name[64];		// to avoid reloading on same
+	char name[64];		// to avoid reloading on same
 
-	word		features;		// world features
+	word features;		// world features
 
-	mworldleaf_t	*leafs;		// [worldmodel->numleafs]
-	int		numleafs;		// [submodels[0].visleafs + 1]
-	mworldnode_t	*nodes;		// [worldmodel->numodes]
-	int		numnodes;
+	mworldleaf_t *leafs;		// [worldmodel->numleafs]
+	int numleafs;		// [submodels[0].visleafs + 1]
+	mworldnode_t *nodes;		// [worldmodel->numodes]
+	int numnodes;
 
-	dvertnorm_t	*surfnormals;	// is not NULL here a indexed normals
-	dnormal_t		*normals;
-	int		numnormals;
+	dvertnorm_t *surfnormals;	// is not NULL here a indexed normals
+	dnormal_t *normals;
+	int numnormals;
 
-	int		numleaflights;
-	mlightprobe_t	*leaflights;
+	int numleaflights;
+	mlightprobe_t *leaflights;
 
-	terrain_t		*terrains;
-	int		num_terrains;
+	terrain_t *terrains;
+	int num_terrains;
 
-	bvert_t		*vertexes;
-	int		numvertexes;
+	bvert_t *vertexes;
+	int numvertexes;
 
-	dvlightlump_t	*vertex_lighting;	// used for env_statics
+	dvlightlump_t *vertex_lighting;	// used for env_statics
 
 	// single buffer for all the models
-	unsigned int	vertex_buffer_object;
-	unsigned int	vertex_array_object;
+	unsigned int vertex_buffer_object;
+	unsigned int vertex_array_object;
 
-	unsigned short	*sortedfaces;	// surfaces sorted through all models
-	unsigned short	numsortedfaces;
+	unsigned short *sortedfaces;	// surfaces sorted through all models
+	unsigned short numsortedfaces;
 
 	// misc info
-	int		grasscount;	// number of bushes per world (used to determine total VBO size)
-	int		grassmem;		// total video memory that used by grass 
-	Vector2D		orthocenter;	// overview stuff
-	Vector2D		orthohalf;
+	int grasscount;	// number of bushes per world (used to determine total VBO size)
+	int grassmem;		// total video memory that used by grass 
+	Vector2D orthocenter;	// overview stuff
+	Vector2D orthohalf;
 
 	// cubemap builder internal state
-	bool		loading_cubemaps;
-	bool		build_default_cubemap;
-	int		rebuilding_cubemaps;
-	int		cubemap_build_number;
-
-	mcubemap_t	cubemaps[MAX_MAP_CUBEMAPS];
-	mcubemap_t	defaultCubemap;
-	int		num_cubemaps;
+	bool loading_cubemaps;
+	bool build_default_cubemap;
+	int rebuilding_cubemaps;
+	int cubemap_build_number;
+	mcubemap_t cubemaps[MAX_MAP_CUBEMAPS];
+	mcubemap_t defaultCubemap;
+	int num_cubemaps;
+	bool cubemaps_ready;
 
 	bool ignore_restart_check; // to prevent bug with invalid restart check in GL_InitVertexLightCache
 

@@ -5266,7 +5266,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				StudioSetRenderMode( m_pCurrentEntity->curstate.rendermode );
 			}
 
-			if( !IsBuildingCubemaps() && (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f) && CVAR_TO_BOOL( gl_cubemaps ) && (world->num_cubemaps > 0) ) // diffusioncubemaps
+			if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
 			{
 				if( m_pModelInstance->cubemap[0] != NULL )
 					GL_Bind( GL_TEXTURE2, m_pModelInstance->cubemap[0]->texture );
