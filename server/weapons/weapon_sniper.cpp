@@ -116,13 +116,15 @@ void CSniperRifle::Precache( void )
 
 	PRECACHE_MODEL( "models/w_9mmARclip.mdl" );
 	
-	PRECACHE_SOUND( "weapons/sniper_clipin.wav" );
-	PRECACHE_SOUND( "weapons/sniper_clipout.wav" );
-	PRECACHE_SOUND( "weapons/sniper_pull.wav" );
+	PRECACHE_SOUND( "weapons/g36c_deploy.wav" );
+	PRECACHE_SOUND( "weapons/g36c_safety.wav" );
+	PRECACHE_SOUND( "weapons/sniper_magrelease.wav" );
+	PRECACHE_SOUND( "weapons/sniper_magout.wav" );
+	PRECACHE_SOUND( "weapons/sniper_magin.wav" );
+	PRECACHE_SOUND( "weapons/sniper_boltpull.wav" );
+	PRECACHE_SOUND( "weapons/sniper_boltrelease.wav" );
 	PRECACHE_SOUND( "weapons/sniper_wpn_fire.wav" );
 	PRECACHE_SOUND( "weapons/sniper_wpn_fire_d.wav" );
-
-	PRECACHE_MODEL( "sprites/muzzleflash1.spr" );
 }
 
 int CSniperRifle::GetItemInfo( ItemInfo *p )
@@ -157,7 +159,7 @@ int CSniperRifle::AddToPlayer( CBasePlayer *pPlayer )
 BOOL CSniperRifle::Deploy()
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	m_flNextPrimaryAttack = gpGlobals->time + 1.5; 
+	m_flNextPrimaryAttack = gpGlobals->time + 1; 
 	m_flNextSecondaryAttack = gpGlobals->time + 1;
 	return DefaultDeploy( "models/v_sniper.mdl", "models/p_sniper.mdl", ANIM_DRAW, "bow" );
 }
@@ -318,9 +320,9 @@ void CSniperRifle::Reload( void )
 		ResetZoom();
 
 	if( !m_iClip )
-		DefaultReload( SNIPER_MAX_CLIP, ANIM_RELOAD, 3 );
+		DefaultReload( SNIPER_MAX_CLIP, ANIM_RELOAD, 5.5 );
 	else
-		DefaultReload( SNIPER_MAX_CLIP, ANIM_RELOAD_NOSHOT, 2.35 );
+		DefaultReload( SNIPER_MAX_CLIP, ANIM_RELOAD_NOSHOT, 4.5 );
 }
 
 void CSniperRifle::WeaponIdle( void )
@@ -332,9 +334,9 @@ void CSniperRifle::WeaponIdle( void )
 	if( m_flTimeWeaponIdle > gpGlobals->time )
 		return;
 
-	SendWeaponAnim( ANIM_IDLE );
+//	SendWeaponAnim( ANIM_IDLE );
 
-	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT( 10, 15 );// how long till we do this again.
+//	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT( 10, 15 );// how long till we do this again.
 }
 
 

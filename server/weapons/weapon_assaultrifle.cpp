@@ -109,8 +109,6 @@ void CMP5::Precache( void )
 	PRECACHE_SOUND( "weapons/glauncher.wav" );
 
 	PRECACHE_SOUND ("weapons/357_cock1.wav");
-
-//	PRECACHE_MODEL("sprites/muzzleflash1.spr");
 }
 
 int CMP5::GetItemInfo(ItemInfo *p)

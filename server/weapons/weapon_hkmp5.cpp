@@ -93,8 +93,6 @@ void CWeaponHKMP5::Precache( void )
 	PRECACHE_SOUND( "weapons/mp5-3_d.wav" );
 
 	PRECACHE_SOUND ("weapons/357_cock1.wav");
-
-	PRECACHE_MODEL("sprites/muzzleflash1.spr");
 }
 
 int CWeaponHKMP5::GetItemInfo(ItemInfo *p)

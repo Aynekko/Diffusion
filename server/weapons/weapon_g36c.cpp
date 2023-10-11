@@ -98,8 +98,6 @@ void CWeaponG36C::Precache( void )
 	PRECACHE_SOUND ("weapons/g36c_shoot.wav");
 
 	PRECACHE_SOUND ("weapons/357_cock1.wav");
-
-	PRECACHE_MODEL("sprites/muzzleflash1.spr");
 }
 
 int CWeaponG36C::GetItemInfo(ItemInfo *p)

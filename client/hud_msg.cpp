@@ -443,11 +443,11 @@ bool CheckForLocalWeaponShootAnimation( int seq )
 	break;
 	case WEAPON_SNIPER:
 		if( seq == 3 ) // caught reload anim!
-			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 3.0;
+			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 5.5;
 		else if( seq == 4 ) // caught reload_noshot anim!
-			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 2.35;
+			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 4.5;
 		else if( seq == 0 ) // caught deploy anim!
-			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 2.0;
+			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1;
 
 		if( seq != 2 ) // only interested in FIRE animations
 			return false;
