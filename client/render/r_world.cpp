@@ -2174,17 +2174,8 @@ void R_DrawLightForSurfList( plight_t *pl )
 			GL_Bind( GL_TEXTURE2, pl->projectionTexture );
 			GL_Bind( GL_TEXTURE3, pl->shadowTexture[0] );
 
-			// reset cache
-			cached_texture = NULL;
-		}
-
-		if( cached_texture != tex )
-		{
-			mtexinfo_t *tx = s->texinfo;
-			mfaceinfo_t *land = tx->faceinfo;
-			float waveHeight = 0.0f;
-
 			// set the current waveheight
+			float waveHeight = 0.0f;
 			if( s->polys->verts[0][2] >= RI->vieworg[2] )
 				waveHeight = -RI->currententity->curstate.scale;
 			else
@@ -2193,6 +2184,18 @@ void R_DrawLightForSurfList( plight_t *pl )
 			if( FBitSet( s->flags, SURF_WATER ) && (waveHeight != 0.0f) )
 				pglUniform1fARB( RI->currentshader->u_WaveHeight, waveHeight );
 
+			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
+			pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );
+
+			// reset cache
+			cached_texture = NULL;
+		}
+
+		if( cached_texture != tex )
+		{
+			mtexinfo_t *tx = s->texinfo;
+			mfaceinfo_t *land = tx->faceinfo;
+			
 			if( FBitSet( s->flags, SURF_MOVIE ) && RI->currententity->curstate.body )
 			{
 				GL_Bind( GL_TEXTURE0, tr.cinTextures[es->cintexturenum - 1] );
@@ -2222,9 +2225,6 @@ void R_DrawLightForSurfList( plight_t *pl )
 					GL_Bind( GL_TEXTURE0, tex->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
 			}
-
-			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
-			pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );
 
 			if( ScreenCopyRequired( RI->currentshader ) )
 				GL_Bind( GL_TEXTURE4, tr.screen_color );
@@ -2619,7 +2619,19 @@ void R_DrawBrushList( void )
 			pglUniform1fARB( RI->currentshader->u_zFar, -RI->farClip );
 			//	R_SetRenderColor( RI->currententity );
 
-				// reset cache
+			// set the current waveheight
+			float waveHeight = 0.0f;
+			if( s->polys->verts[0][2] >= RI->vieworg[2] )
+				waveHeight = -RI->currententity->curstate.scale;
+			else
+				waveHeight = RI->currententity->curstate.scale;
+
+			if( FBitSet( s->flags, SURF_WATER ) && (waveHeight != 0.0f) )
+				pglUniform1fARB( RI->currentshader->u_WaveHeight, waveHeight );
+
+			pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );
+
+			// reset cache
 			cached_texofs[0] = -1.0f;
 			cached_texofs[1] = -1.0f;
 			cached_texture = NULL;
@@ -2635,16 +2647,6 @@ void R_DrawBrushList( void )
 		{
 			mtexinfo_t *tx = s->texinfo;
 			mfaceinfo_t *land = tx->faceinfo;
-			float waveHeight = 0.0f;
-
-			// set the current waveheight
-			if( s->polys->verts[0][2] >= RI->vieworg[2] )
-				waveHeight = -RI->currententity->curstate.scale;
-			else
-				waveHeight = RI->currententity->curstate.scale;
-
-			if( FBitSet( s->flags, SURF_WATER ) && (waveHeight != 0.0f) )
-				pglUniform1fARB( RI->currentshader->u_WaveHeight, waveHeight );
 
 			if( FBitSet( s->flags, SURF_REFLECT | SURF_PORTAL | SURF_SCREEN ) && es->subtexture[glState.stack_position] )
 			{
@@ -2668,8 +2670,6 @@ void R_DrawBrushList( void )
 					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
 			}
-
-			pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );
 
 			if( cached_lightmap != es->lightmaptexturenum )
 			{
