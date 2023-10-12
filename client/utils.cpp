@@ -1100,3 +1100,11 @@ float CL_UTIL_Approach( float target, float value, float speed )
 
 	return value;
 }
+
+void CL_UTIL_Sparks( Vector org )
+{
+	if( tr.time == tr.oldtime )
+		return;
+
+	gEngfuncs.pEfxAPI->R_SparkEffect( org, 1, 10, 10 );
+}
