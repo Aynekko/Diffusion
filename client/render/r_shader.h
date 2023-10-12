@@ -57,111 +57,108 @@ typedef struct glsl_prog_s
 	struct glsl_prog_s	*nextHash;
 
 	// sampler parameters
-	GLint		u_ColorMap;	// 0-th unit
-	GLint		u_DepthMap;	// 1-th unit
-	GLint		u_NormalMap;	// 1-th unit
-	GLint		u_GlossMap;	// 2-th unit
-	GLint		u_ProjectMap;	// 0-th unit
-	GLint		u_ShadowMap;	// 2-th unit
-	GLint		u_AttnZMap;	// 1-th unit
-	GLint		u_LightMap;	// 1-th unit
-	GLint		u_DeluxeMap;	// 3-th unit (lightvectors)
-	GLint		u_DecalMap;	// 0-th unit
-	GLint		u_ScreenMap;	// 2-th unit
-	GLint		u_EnvMap0;	// env_cubemap
-	GLint		u_EnvMap1;	// env_cubemap
-	GLint		u_LayerMap;
-	GLint		u_WaterTex;
-	GLint		u_ColorMask; // texture mask to apply color - implemented for studio models only
+	GLint u_ColorMap;	// 0-th unit
+	GLint u_DepthMap;	// 1-th unit
+	GLint u_NormalMap;	// 1-th unit
+	GLint u_GlossMap;	// 2-th unit
+	GLint u_ProjectMap;	// 0-th unit
+	GLint u_ShadowMap;	// 2-th unit
+	GLint u_AttnZMap;	// 1-th unit
+	GLint u_LightMap;	// 1-th unit
+	GLint u_DeluxeMap;	// 3-th unit (lightvectors)
+	GLint u_DecalMap;	// 0-th unit
+	GLint u_ScreenMap;	// 2-th unit
+	GLint u_EnvMap0;	// env_cubemap
+	GLint u_EnvMap1;	// env_cubemap
+	GLint u_LayerMap;
+	GLint u_WaterTex;
+	GLint u_ColorMask; // texture mask to apply color - implemented for studio models only
 
 	// parallax interiors
-	GLint		u_InteriorMap;
-	GLint		u_InteriorGrid;
-	GLint		u_InteriorLightState;
+	GLint u_InteriorMap;
+	GLint u_InteriorGrid;
+	GLint u_InteriorLightState;
 
 	// uniform parameters
-//	GLint		u_BonesArray;	// bonematrix
-	GLint		u_BoneQuaternion;
-	GLint		u_BonePosition;
-	GLint		u_GammaTable;
-	GLint		u_ViewMatrix;
-	GLint		u_ModelMatrix;
-	GLint		u_ModelViewMatrix;
-	GLint		u_LightViewProjectionMatrix;
-	GLint		u_ModelViewProjectionMatrix;
-	GLint		u_GenericCondition;	// generic parm
-	GLint		u_GenericCondition2;// generic parm
-	GLint		u_BlurFactor;	// blur factor
-	GLint		u_ScreenWidth;
-	GLint		u_ScreenHeight;
-	GLint		u_ScreenSizeInv;
-	GLint		u_zFar;		// global z-far value
-	GLint		u_FocalDepth;
-	GLint		u_FocalLength;
-	GLint		u_FStop;
-	GLint		u_LightDir;
-	GLint		u_LightColor;
-	GLint		u_LightAmbient;
-	GLint		u_LightShade;
-	GLint		u_LightDiffuse;
-	GLint		u_LightSamples;	// sample count
-	GLint		u_LightStyleValues;	// array
-	GLint		u_AmbientCube;
-	GLint		u_AmbientFactor;
-	GLint		u_DiffuseFactor;
-	GLint		u_Smoothness;
-	GLint		u_FogParams;
-	GLint		u_LightOrigin;
-	GLint		u_LightScale;
-	GLint		u_ViewOrigin;
-	GLint		u_ViewRight;
-	GLint		u_FaceFlags;
-	GLint		u_LerpFactor;
-	GLint		u_FaceTangent;
-	GLint		u_FaceBinormal;
-	GLint		u_FaceNormal;
-	GLint		u_AberrationScale;
-	GLint		u_ShadowMode;
-	GLint		u_ShadowParams;
-	GLint		u_WaveHeight;
-	GLint		u_RenderAlpha;
-	GLint		u_RefractScale;
-	GLint		u_ReflectScale;
-	GLint		u_PlanarReflectScale;
-	GLint		u_TexOffset;	// e.g. conveyor belt
-	GLint		u_RenderColor;	// color + alpha
-	GLint		u_RealTime;	// tr.time
-	GLint		u_BoxMins;	// cubemaps stuff
-	GLint		u_BoxMaxs;	// cubemaps stuff
-	GLint		u_CubeOrigin;	// cubemaps stuff
-	GLint		u_CubeMipCount;	// cubemaps stuff
-	GLint		u_GrassFadeStart;
-	GLint		u_GrassFadeDist;
-	GLint		u_GrassFadeEnd;
-	GLint		u_MeshScale;
-	GLint		u_MeshRadius;
-	GLint		u_MeshAngles;
-	GLint		u_DynLightBrightness;
-	GLint		u_GlossScale;
-	GLint		u_GlossSmoothness;
-	GLint		u_EmbossScale;
-	GLint		u_FoliageSwayHeight;
-	GLint		u_Fresnel;
+	GLint u_BoneQuaternion;
+	GLint u_BonePosition;
+	GLint u_GammaTable;
+	GLint u_ViewMatrix;
+	GLint u_ModelMatrix;
+	GLint u_ModelViewMatrix;
+	GLint u_LightViewProjectionMatrix;
+	GLint u_ModelViewProjectionMatrix;
+	GLint u_GenericCondition;	// generic parm
+	GLint u_GenericCondition2;// generic parm
+	GLint u_BlurFactor;	// blur factor
+	GLint u_ScreenWidth;
+	GLint u_ScreenHeight;
+	GLint u_ScreenSizeInv;
+	GLint u_zFar;		// global z-far value
+	GLint u_FocalDepth;
+	GLint u_FocalLength;
+	GLint u_FStop;
+	GLint u_LightDir;
+	GLint u_LightColor;
+	GLint u_LightAmbient;
+	GLint u_LightShade;
+	GLint u_LightDiffuse;
+	GLint u_LightSamples;	// sample count
+	GLint u_LightStyleValues;	// array
+	GLint u_AmbientCube;
+	GLint u_AmbientFactor;
+	GLint u_DiffuseFactor;
+	GLint u_Smoothness;
+	GLint u_FogParams;
+	GLint u_LightOrigin;
+	GLint u_LightScale;
+	GLint u_ViewOrigin;
+	GLint u_ViewRight;
+	GLint u_FaceFlags;
+	GLint u_LerpFactor;
+	GLint u_FaceTangent;
+	GLint u_FaceBinormal;
+	GLint u_FaceNormal;
+	GLint u_AberrationScale;
+	GLint u_ShadowMode;
+	GLint u_ShadowParams;
+	GLint u_WaveHeight;
+	GLint u_RenderAlpha;
+	GLint u_RefractScale;
+	GLint u_ReflectScale;
+	GLint u_PlanarReflectScale;
+	GLint u_TexOffset;	// e.g. conveyor belt
+	GLint u_RenderColor;	// color + alpha
+	GLint u_RealTime;	// tr.time
+	GLint u_BoxMins;	// cubemaps stuff
+	GLint u_BoxMaxs;	// cubemaps stuff
+	GLint u_CubeOrigin;	// cubemaps stuff
+	GLint u_CubeMipCount;	// cubemaps stuff
+	GLint u_GrassFadeStart;
+	GLint u_GrassFadeDist;
+	GLint u_GrassFadeEnd;
+	GLint u_DynLightBrightness;
+	GLint u_GlossScale;
+	GLint u_GlossSmoothness;
+	GLint u_EmbossScale;
+	GLint u_FoliageSwayHeight;
+	GLint u_Fresnel;
+	GLint u_MeshParams; // array for studio models: world origin, angles and scale
 
 	// motion blur
-	GLint		u_Accum;
-	GLint		u_MB_Velocity;
+	GLint u_Accum;
+	GLint u_MB_Velocity;
 
 	// sunshafts
-	GLint		u_SS_Brightness;
+	GLint u_SS_Brightness;
 
-	GLint		u_AOMap;
-	GLint		u_RotateMap;
-	GLint		u_MipLod;
-	GLint		u_TexCoordClamp;
-	GLint		u_TimeDelta;
-	GLint		u_BloomFirstPass;
-	GLint		u_HDRExposure;
+	GLint u_AOMap;
+	GLint u_RotateMap;
+	GLint u_MipLod;
+	GLint u_TexCoordClamp;
+	GLint u_TimeDelta;
+	GLint u_BloomFirstPass;
+	GLint u_HDRExposure;
 } glsl_program_t;
 
 typedef struct
@@ -195,8 +192,8 @@ typedef struct
 
 void GL_AddShaderDirective( char *options, const char *directive );
 
-extern glsl_program_t	glsl_programs[MAX_GLSL_PROGRAMS];
-extern unsigned int		num_glsl_programs;
-extern ref_shaders_t	glsl;
+extern glsl_program_t glsl_programs[MAX_GLSL_PROGRAMS];
+extern unsigned int num_glsl_programs;
+extern ref_shaders_t glsl;
 
 #endif//GL_SHADER_H

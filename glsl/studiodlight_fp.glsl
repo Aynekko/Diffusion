@@ -48,14 +48,12 @@ uniform vec4		u_LightOrigin;
 uniform vec4		u_ShadowParams;
 uniform vec4		u_FogParams;
 uniform vec4		u_RenderColor;
-uniform vec3            u_MeshAngles;
-
-uniform float		u_MeshScale;
 uniform float	        u_GlossSmoothness;
 uniform float	        u_GlossScale;
 uniform float	        u_EmbossScale;
 uniform float		u_DynLightBrightness;
 uniform float           u_RealTime;
+uniform vec3		u_MeshParams[3];
 
 // shared variables
 #if defined( STUDIO_LIGHT_PROJECTION )
@@ -168,7 +166,8 @@ void main( void )
 	// that's all. everything below (between the lines) is my mess trying to compensate
 	// but I think it works :)
 
-	vec3 ShadowVec = VectorRotate( var_LightVec, u_MeshAngles ); // rotate entity angles to worldspace
+	vec3 MeshAngles = u_MeshParams[1];
+	vec3 ShadowVec = VectorRotate( var_LightVec, MeshAngles ); // rotate entity angles to worldspace
 	shadow = ShadowOmni( -ShadowVec, u_ShadowParams );
 
 	if( shadow <= 0.0 ) discard; // fast reject

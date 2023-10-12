@@ -893,14 +893,13 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
 	shader->u_BoneQuaternion = pglGetUniformLocationARB( shader->handle, "u_BoneQuaternion" );
 	shader->u_BonePosition = pglGetUniformLocationARB( shader->handle, "u_BonePosition" );
-	shader->u_MeshScale = pglGetUniformLocationARB( shader->handle, "u_MeshScale" );
 	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
 	shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
 	shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
-	shader->u_MeshAngles = pglGetUniformLocationARB( shader->handle, "u_MeshAngles" );
 	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
 	shader->u_ColorMask = pglGetUniformLocationARB( shader->handle, "u_ColorMask" );
 	shader->u_Fresnel = pglGetUniformLocationARB( shader->handle, "u_Fresnel" );
+	shader->u_MeshParams = pglGetUniformLocationARB( shader->handle, "u_MeshParams" );
 
 	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) ) // diffusioncubemaps
 	{
@@ -973,10 +972,7 @@ static void GL_InitStudioDlightUniforms( glsl_program_t *shader )
 	shader->u_ShadowMap = pglGetUniformLocationARB( shader->handle, "u_ShadowMap" );
 	shader->u_BoneQuaternion = pglGetUniformLocationARB( shader->handle, "u_BoneQuaternion" );
 	shader->u_BonePosition = pglGetUniformLocationARB( shader->handle, "u_BonePosition" );
-//	shader->u_BonesArray = pglGetUniformLocationARB( shader->handle, "u_BonesArray" );
-	shader->u_MeshScale = pglGetUniformLocationARB( shader->handle, "u_MeshScale" );
 	shader->u_DynLightBrightness = pglGetUniformLocationARB( shader->handle, "u_DynLightBrightness" );
-	shader->u_MeshAngles = pglGetUniformLocationARB( shader->handle, "u_MeshAngles" );
 	shader->u_RenderColor = pglGetUniformLocationARB( shader->handle, "u_RenderColor" );
 	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
 	shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
@@ -991,6 +987,7 @@ static void GL_InitStudioDlightUniforms( glsl_program_t *shader )
 	shader->u_ViewOrigin = pglGetUniformLocationARB( shader->handle, "u_ViewOrigin" );
 	shader->u_ViewRight = pglGetUniformLocationARB( shader->handle, "u_ViewRight" );
 	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
+	shader->u_MeshParams = pglGetUniformLocationARB( shader->handle, "u_MeshParams" );
 
 	if( GL_FindShaderDirective( shader, "STUDIO_INTERIOR" ) )
 	{
@@ -1026,7 +1023,6 @@ static void GL_InitStudioDepthFillUniforms( glsl_program_t *shader )
 
 	shader->u_BoneQuaternion = pglGetUniformLocationARB( shader->handle, "u_BoneQuaternion" );
 	shader->u_BonePosition = pglGetUniformLocationARB( shader->handle, "u_BonePosition" );
-	shader->u_MeshScale = pglGetUniformLocationARB( shader->handle, "u_MeshScale" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );

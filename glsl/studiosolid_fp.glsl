@@ -38,6 +38,7 @@ uniform float           u_EmbossScale;
 uniform float           u_ReflectScale;
 uniform float           u_RealTime;
 uniform float			u_Fresnel;
+uniform vec3		u_MeshParams[3];
 
 // shared variables
 varying vec3		var_LightDiffuse;
@@ -56,6 +57,7 @@ void main( void )
 	vec3 L = normalize( var_LightVec );		
 	vec3 V = normalize( var_ViewVec );
 	vec3 N;
+	vec3 MeshOrigin = u_MeshParams[0];
 
         // compute the normal term
 #if defined( STUDIO_BUMP )
@@ -124,14 +126,14 @@ void main( void )
 #if defined( REFLECTION_CUBEMAP )
 	vec3 NW = N;
 	vec3 VW = V;
-	#if defined(  STUDIO_BUMP  )
+	#if defined( STUDIO_BUMP )
 		mat3 tbnBasis = mat3( normalize( var_MatrixTBN[0] ), normalize( var_MatrixTBN[1] ), normalize( var_MatrixTBN[2] ));
 		NW = normalize( tbnBasis * NW );
 		VW = normalize( tbnBasis * VW );
 	#endif
 	vec3 R = reflect( -VW, NW );
 	float fresnel = GetFresnel( VW, NW, u_Fresnel, u_ReflectScale );
-	vec3 cubemap_reflection = CubemapReflectionProbe( var_Position, R, glossmap ) * u_ReflectScale;
+	vec3 cubemap_reflection = CubemapReflectionProbe( MeshOrigin, R, glossmap ) * u_ReflectScale;
 	diffuse.rgb += cubemap_reflection * fresnel * var_LightDiffuse;
 #endif
 

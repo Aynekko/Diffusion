@@ -4934,7 +4934,6 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			pglUniform4fARB( RI->currentshader->u_LightDir, lightdir.x, lightdir.y, lightdir.z, pl->fov );
 			pglUniform4fARB( RI->currentshader->u_LightDiffuse, pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
 			pglUniform4fARB( RI->currentshader->u_ShadowParams, shadowWidth, shadowHeight, -OmniShadowMatrix[2][2], OmniShadowMatrix[3][2] );
-			pglUniform3fARB( RI->currentshader->u_MeshAngles, ang.x, ang.y, ang.z );
 			pglUniform4fARB( RI->currentshader->u_LightOrigin, lightorg.x, lightorg.y, lightorg.z, (1.0f / pl->radius) );
 			pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.modelorg.x, tr.modelorg.y, tr.modelorg.z );
 			pglUniform3fARB( RI->currentshader->u_ViewRight, right.x, right.y, right.z );
@@ -4944,10 +4943,17 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			num_bones = Q_min( m_pStudioHeader->numbones, glConfig.max_skinning_bones );
 			pglUniform4fvARB( RI->currentshader->u_BoneQuaternion, num_bones, &m_pModelInstance->m_studioquat[0][0] );
 			pglUniform3fvARB( RI->currentshader->u_BonePosition, num_bones, &m_pModelInstance->m_studiopos[0][0] );
-			//	pglUniform4fvARB( RI->currentshader->u_BonesArray, num_bones * 3, &m_pModelInstance->m_glstudiobones[0][0] );
 
 			GL_Bind( GL_TEXTURE1, pl->projectionTexture );
 			GL_Bind( GL_TEXTURE2, pl->shadowTexture[0] );
+
+			float scale = m_pCurrentEntity->curstate.scale;
+			if( scale <= 0.0f ) scale = 1.0f;
+			Vector meshparams[3];
+			meshparams[0] = m_pCurrentEntity->curstate.origin;
+			meshparams[1] = ang;
+			meshparams[2] = Vector( scale, 0, 0 );
+			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
 
 			// reset cache
 			cached_material = NULL;
@@ -4968,12 +4974,6 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			{
 				pglUniform4fvARB( RI->currentshader->u_BoneQuaternion, num_bones, &m_pModelInstance->m_studioquat[0][0] );
 				pglUniform3fvARB( RI->currentshader->u_BonePosition, num_bones, &m_pModelInstance->m_studiopos[0][0] );
-				//	pglUniformMatrix4fvARB( RI->currentshader->u_BonesArray, m_pStudioHeader->numbones, GL_FALSE, &m_pModelInstance->m_glbones[0][0] );
-
-						// diffusion - an attempt to fix the lighting (P.S. and it worked in the end)
-				float scale = m_pCurrentEntity->curstate.scale;
-				if( scale <= 0.0f ) scale = 1.0f;
-				pglUniform1fARB( RI->currentshader->u_MeshScale, scale );
 			}
 
 			ModelInstance_t *inst = &m_ModelInstances[m_pCurrentEntity->modelhandle];
@@ -5160,6 +5160,14 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) )
 				pglUniform4fvARB( RI->currentshader->u_GammaTable, 64, &tr.gamma_table[0][0] );
 
+			float scale = m_pCurrentEntity->curstate.scale;
+			if( scale <= 0.0f ) scale = 1.0f;
+			Vector meshparams[3];
+			meshparams[0] = m_pCurrentEntity->origin;
+			meshparams[1] = m_pCurrentEntity->angles;
+			meshparams[2] = Vector( scale, 0, 0 );
+			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
+
 			// reset cache
 			cached_material = NULL;
 			cached_entity = NULL;
@@ -5193,10 +5201,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			{
 				pglUniform4fvARB( RI->currentshader->u_BoneQuaternion, num_bones, &m_pModelInstance->m_studioquat[0][0] );
 				pglUniform3fvARB( RI->currentshader->u_BonePosition, num_bones, &m_pModelInstance->m_studiopos[0][0] );
-				//		pglUniform4fvARB( RI->currentshader->u_BonesArray, num_bones * 3, &m_pModelInstance->m_glstudiobones[0][0] );
-				float scale = RI->currententity->curstate.scale;
-				if( scale <= 0.0f ) scale = 1.0f;
-				pglUniform1fARB( RI->currentshader->u_MeshScale, scale );
 			}
 
 			if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) )
@@ -5212,8 +5216,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				pglUniform1fARB( RI->currentshader->u_LightShade, light->shadelight );
 			}
 
-			Vector ang = m_pCurrentEntity->angles;
-			pglUniform3fARB( RI->currentshader->u_MeshAngles, ang.x, ang.y, ang.z );
 			pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
 
 		//	R_SetRenderColor( m_pCurrentEntity );
@@ -5418,6 +5420,14 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 
 			ASSERT( RI->currentshader != NULL );
 
+			float scale = m_pCurrentEntity->curstate.scale;
+			if( scale <= 0.0f ) scale = 1.0f;
+			Vector meshparams[3];
+			meshparams[0] = m_pCurrentEntity->origin;
+			meshparams[1] = m_pCurrentEntity->angles;
+			meshparams[2] = Vector( scale, 0, 0 );
+			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
+
 			// reset cache
 			cached_material = NULL;
 			cached_model = NULL;
@@ -5438,11 +5448,8 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 				pglUniform4fvARB( RI->currentshader->u_BoneQuaternion, num_bones, &m_pModelInstance->m_studioquat[0][0] );
 				pglUniform3fvARB( RI->currentshader->u_BonePosition, num_bones, &m_pModelInstance->m_studiopos[0][0] );
 				//	pglUniform4fvARB( RI->currentshader->u_BonesArray, num_bones * 3, &m_pModelInstance->m_glstudiobones[0][0] );
-
-				float scale = RI->currententity->curstate.scale;
-				if( scale <= 0.0f ) scale = 1.0f;
-				pglUniform1fARB( RI->currentshader->u_MeshScale, scale );
 			}
+
 			cached_model = m_pRenderModel;
 		}
 

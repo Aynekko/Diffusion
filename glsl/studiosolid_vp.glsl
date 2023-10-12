@@ -47,8 +47,7 @@ uniform float		u_LightShade;
 uniform vec3		u_LightDir;
 uniform vec3		u_ViewOrigin;
 uniform vec3		u_ViewRight;
-uniform float		u_MeshScale;
-uniform vec3		u_MeshAngles;
+uniform vec3		u_MeshParams[3];
 
 varying vec3		var_LightDiffuse;
 varying vec2		var_TexDiffuse;
@@ -65,7 +64,7 @@ varying mat3		var_MatrixTBN;
 void main( void )
 {
 	vec4 position = vec4( attr_Position, 1.0 );
-	float MeshScale = u_MeshScale;
+	float MeshScale = u_MeshParams[2].x;
 
 #if defined( STUDIO_SWAY_FOLIAGE )
 	if( position.z > u_FoliageSwayHeight )
@@ -108,15 +107,16 @@ void main( void )
 	// compute TBN
 	mat3 tbn = ComputeTBN( boneMatrix );
 
-	tbn[0] = VectorRotate( tbn[0], u_MeshAngles );
-	tbn[1] = VectorRotate( tbn[1], u_MeshAngles );
-	tbn[2] = VectorRotate( tbn[2], u_MeshAngles );
+	vec3 MeshAngles = u_MeshParams[1];
+	tbn[0] = VectorRotate( tbn[0], MeshAngles );
+	tbn[1] = VectorRotate( tbn[1], MeshAngles );
+	tbn[2] = VectorRotate( tbn[2], MeshAngles );
 
 	// compute vectors
 	vec3 srcL = u_LightDir;
-	srcL = VectorRotate( srcL, u_MeshAngles );
+	srcL = VectorRotate( srcL, MeshAngles );
 	vec3 srcV = ( u_ViewOrigin - worldpos.xyz );
-	srcV = VectorRotate( srcV, u_MeshAngles );
+	srcV = VectorRotate( srcV, MeshAngles );
 	vec3 srcN = tbn[2];
 
 	// transform vertex position into homogenous clip-space
