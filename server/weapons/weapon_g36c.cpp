@@ -31,6 +31,7 @@ enum WeaponG36C_e
 	RELOAD,
 	DRAW,
 	SHOOT,
+	RELOAD_EMPTY,
 };
 
 class CWeaponG36C : public CBasePlayerWeapon
@@ -92,8 +93,12 @@ void CWeaponG36C::Precache( void )
 	PRECACHE_MODEL("models/w_9mmARclip.mdl");
 	PRECACHE_SOUND("items/9mmclip1.wav");              
 
-	PRECACHE_SOUND("weapons/g36c_cliprelease.wav");
-	PRECACHE_SOUND("weapons/g36c_clipinsert.wav");
+	PRECACHE_SOUND( "weapons/g36c_magout.wav" );
+	PRECACHE_SOUND( "weapons/g36c_magin.wav" );
+	PRECACHE_SOUND( "weapons/g36c_magtap.wav" );
+	PRECACHE_SOUND( "weapons/g36c_deploy.wav" );
+	PRECACHE_SOUND( "weapons/g36c_safety.wav" );
+	PRECACHE_SOUND( "weapons/g36c_boltpull.wav" );
 
 	PRECACHE_SOUND ("weapons/g36c_shoot.wav");
 
@@ -304,7 +309,10 @@ void CWeaponG36C::Reload( void )
 	if( m_fInZoom )
 		ResetZoom();
 
-	DefaultReload( 30, RELOAD, 3.0 );
+	if( !m_iClip )
+		DefaultReload( 30, RELOAD_EMPTY, 4.8 );
+	else
+		DefaultReload( 30, RELOAD, 3.0 );
 }
 
 void CWeaponG36C::WeaponIdle( void )

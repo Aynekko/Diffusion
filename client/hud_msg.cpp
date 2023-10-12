@@ -383,6 +383,8 @@ bool CheckForLocalWeaponShootAnimation( int seq )
 			localanim_NextPAttackTime = tr.time + 3.0;
 		else if( seq == 2 ) // caught deploy anim!
 			localanim_NextPAttackTime = tr.time + 1.3;
+		else if( seq == 4 ) // caught reload empty anim!
+			localanim_NextPAttackTime = tr.time + 4.8;
 
 		if( seq != 3 ) // only interested in FIRE animations
 			return false;
