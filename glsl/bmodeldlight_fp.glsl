@@ -176,7 +176,7 @@ void main( void )
 	diffuse.rgb *= u_RenderColor.rgb; // kRenderTransColor
 
 #if defined( BMODEL_INTERIOR )
-	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, u_RealTime, var_ViewVec, var_Position );
+	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec, var_Position ); // u_realtime is currently not used
 #endif
 
 	if( diffuse.a < 0.5 ) discard;

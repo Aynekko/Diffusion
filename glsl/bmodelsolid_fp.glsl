@@ -222,7 +222,7 @@ void main( void )
 #endif
 
 #if defined( BMODEL_INTERIOR )
-	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, u_RealTime, var_ViewVec, var_Position );
+	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec, var_Position ); // u_realtime is currently not used
 #endif
 
 /*

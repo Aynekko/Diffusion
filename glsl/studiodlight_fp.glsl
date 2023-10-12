@@ -132,7 +132,7 @@ void main( void )
 #endif
 
 #if defined( STUDIO_INTERIOR )
-	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, u_RealTime, var_ViewVec * var_MatrixTBN, var_Position );
+	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec * var_MatrixTBN, var_Position ); // u_realtime is currently not used
 #endif
 
 	if( diffuse.a < 0.5 ) discard; // no glowing on tex with alpha

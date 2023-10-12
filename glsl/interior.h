@@ -13,6 +13,7 @@ const float IntRefraction = 0.1;
 
 vec4 InteriorMapping( vec4 diffuse, vec2 TexDiffuse, vec3 N, float Time, vec3 ViewVec, vec3 vPos )
 {
+	// Time: u_realtime is currently not used in lighting change
 	vec2 gridSize = u_InteriorGrid;
 
 	vec2 uv = fract( TexDiffuse );

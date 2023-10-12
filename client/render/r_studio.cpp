@@ -4955,6 +4955,12 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			meshparams[2] = Vector( scale, 0, 0 );
 			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
 
+			if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
+			{
+				pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
+				pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, (float)tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
+			}
+
 			// reset cache
 			cached_material = NULL;
 			cached_model = NULL;
@@ -5010,11 +5016,6 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
 			pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
 			pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
-			if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
-			{
-				pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, (float)tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
-			}
 
 			// diffusion - apply custom color to a specific texture
 			if( tr.materials[mat->gl_diffuse_id].ApplyColor || tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
@@ -5168,6 +5169,12 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			meshparams[2] = Vector( scale, 0, 0 );
 			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
 
+			if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
+			{
+				pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
+				pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, (float)tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
+			}
+
 			// reset cache
 			cached_material = NULL;
 			cached_entity = NULL;
@@ -5215,8 +5222,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				pglUniform1fARB( RI->currentshader->u_LightAmbient, light->ambientlight );
 				pglUniform1fARB( RI->currentshader->u_LightShade, light->shadelight );
 			}
-
-			pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
 
 		//	R_SetRenderColor( m_pCurrentEntity );
 			cached_entity = m_pCurrentEntity;
@@ -5321,11 +5326,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
 			pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
 			pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[mat->gl_diffuse_id].Fresnel );
-			if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
-			{
-				pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, (float)tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
-			}
 
 			// diffusion - apply custom color to a specific texture
 			if( tr.materials[mat->gl_diffuse_id].ApplyColor || tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )

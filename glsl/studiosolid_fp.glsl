@@ -101,7 +101,7 @@ void main( void )
 	diffuse.rgb *= var_LightDiffuse; // apply lighting
 
 #if defined( STUDIO_INTERIOR )
-	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, u_RealTime, var_ViewVec, var_Position );
+	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec, var_Position ); // u_realtime is currently not used
 #endif
 
 #if defined( ALPHA_RESCALING )
