@@ -1065,3 +1065,8 @@ extern float localanim_NextPAttackTime;
 extern float localanim_NextSAttackTime;
 extern int localanim_WeaponID;
 extern bool localanim_AllowRpgShoot;
+
+// local_weapon_anims.cpp
+void V_LocalWeaponAnimations( struct ref_params_s *pparams );
+bool LocalWeaponAnims( void );
+bool CheckForLocalWeaponShootAnimation( int seq );

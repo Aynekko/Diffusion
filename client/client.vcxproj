@@ -205,6 +205,7 @@
     <ClCompile Include="input_mouse.cpp" />
     <ClCompile Include="input_xash3d.cpp" />
     <ClCompile Include="lensflare.cpp" />
+    <ClCompile Include="local_weapon_anims.cpp" />
     <ClCompile Include="menu.cpp" />
     <ClCompile Include="message.cpp" />
     <ClCompile Include="motd.cpp" />

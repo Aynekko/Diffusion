@@ -251,6 +251,9 @@
     <ClCompile Include="input_xash3d.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="local_weapon_anims.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ammo.h">

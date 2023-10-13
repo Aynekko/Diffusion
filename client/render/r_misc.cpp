@@ -2474,20 +2474,6 @@ void R_MakeWeaponShake( int Weapon, int Mode, bool Override )
 	gHUD.shake.next_shake = 0.0f; // apply immediately
 }
 
-bool LocalWeaponAnims( void )
-{
-//	if( CL_IsThirdPerson() || CL_IsDead() )
-//		return;
-	
-	if( cl_localweaponanims->value == 2 )
-		return true; // allow in singleplayer too (for testing)
-	
-	if( cl_localweaponanims->value == 1 && tr.viewparams.maxclients > 1 )
-		return true; // only in multiplayer
-	
-	return false;
-}
-
 void PlayLowAmmoSound( int entindex, Vector origin, int Volume )
 {
 	if( Volume <= 0 )
