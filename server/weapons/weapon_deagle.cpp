@@ -23,15 +23,15 @@
 
 enum python_e
 {
-	PYTHON_IDLE1 = 0,
-	PYTHON_FIDGET,
-	PYTHON_FIRE1,
-	PYTHON_RELOAD,
-	PYTHON_RELOAD_NOSHOT,
-	PYTHON_HOLSTER,
-	PYTHON_DRAW,
-	PYTHON_IDLE2,
-	PYTHON_IDLE3
+	DEAGLE_IDLE1 = 0,
+	DEAGLE_FIDGET,
+	DEAGLE_FIRE1,
+	DEAGLE_RELOAD,
+	DEAGLE_RELOAD_NOSHOT,
+	DEAGLE_HOLSTER,
+	DEAGLE_DRAW,
+	DEAGLE_IDLE2,
+	DEAGLE_IDLE3
 };
 
 class CPython : public CBasePlayerWeapon
@@ -67,7 +67,7 @@ int CPython::GetItemInfo(ItemInfo *p)
 	p->iSlot = WPN_SLOT_DEAGLE;
 	p->iPosition = WPN_POS_DEAGLE;
 	p->iId = m_iId = WEAPON_DEAGLE;
-	p->iWeight = PYTHON_WEIGHT;
+	p->iWeight = DEAGLE_WEIGHT;
 
 	return 1;
 }
@@ -91,7 +91,7 @@ void CPython::Spawn( void )
 	m_iId = WEAPON_DEAGLE;
 	SET_MODEL(ENT(pev), "models/w_357.mdl");
 
-	m_iDefaultAmmo = PYTHON_DEFAULT_GIVE;
+	m_iDefaultAmmo = DEAGLE_DEFAULT_GIVE;
 
 	FallInit();// get ready to fall down.
 }
@@ -118,7 +118,7 @@ BOOL CPython::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1;
-	return DefaultDeploy( "models/v_357.mdl", "models/p_357.mdl", PYTHON_DRAW, "python" );
+	return DefaultDeploy( "models/v_357.mdl", "models/p_357.mdl", DEAGLE_DRAW, "python" );
 }
 
 
@@ -126,7 +126,7 @@ void CPython::Holster( void )
 {
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 1.0;
 	m_flTimeWeaponIdle = gpGlobals->time + 10 + RANDOM_FLOAT ( 0, 5 );
-	SendWeaponAnim( PYTHON_HOLSTER );
+	SendWeaponAnim( DEAGLE_HOLSTER );
 	BaseClass::Holster();
 }
 
@@ -161,7 +161,7 @@ void CPython::PrimaryAttack()
 
 	m_iClip--;
 
-	SendWeaponAnim( PYTHON_FIRE1 );
+	SendWeaponAnim( DEAGLE_FIRE1 );
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
@@ -219,9 +219,9 @@ void CPython::Reload( void )
 //	EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/357_reload1.wav", RANDOM_FLOAT( 0.8, 0.9 ), ATTN_NORM );
 
 	if( !m_iClip )
-		DefaultReload( 7, PYTHON_RELOAD, 2.0 );
+		DefaultReload( 7, DEAGLE_RELOAD, 2.0 );
 	else
-		DefaultReload( 7, PYTHON_RELOAD_NOSHOT, 1.8 );
+		DefaultReload( 7, DEAGLE_RELOAD_NOSHOT, 1.8 );
 }
 
 
@@ -238,22 +238,22 @@ void CPython::WeaponIdle( void )
 	float flRand = RANDOM_FLOAT(0, 1);
 	if (flRand <= 0.5)
 	{
-		iAnim = PYTHON_IDLE1;
+		iAnim = DEAGLE_IDLE1;
 		m_flTimeWeaponIdle = gpGlobals->time + (70.0/30.0);
 	}
 	else if (flRand <= 0.7)
 	{
-		iAnim = PYTHON_IDLE2;
+		iAnim = DEAGLE_IDLE2;
 		m_flTimeWeaponIdle = gpGlobals->time + (60.0/30.0);
 	}
 	else if (flRand <= 0.9)
 	{
-		iAnim = PYTHON_IDLE3;
+		iAnim = DEAGLE_IDLE3;
 		m_flTimeWeaponIdle = gpGlobals->time + (88.0/30.0);
 	}
 	else
 	{
-		iAnim = PYTHON_FIDGET;
+		iAnim = DEAGLE_FIDGET;
 		m_flTimeWeaponIdle = gpGlobals->time + (170.0/30.0);
 	}
 	SendWeaponAnim( iAnim );

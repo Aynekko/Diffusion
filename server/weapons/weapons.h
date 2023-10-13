@@ -117,7 +117,7 @@ public:
 // weapon weight factors (for auto-switching)   (-1 = noswitch)
 #define CROWBAR_WEIGHT		0
 #define GLOCK_WEIGHT		10
-#define PYTHON_WEIGHT		15
+#define DEAGLE_WEIGHT		15
 #define MP5_WEIGHT			15
 #define SHOTGUN_WEIGHT		15
 #define CROSSBOW_WEIGHT		10
@@ -175,7 +175,7 @@ public:
 
 // the default amount of ammo that comes with each gun when it spawns
 #define GLOCK_DEFAULT_GIVE			GLOCK_MAX_CLIP * 2
-#define PYTHON_DEFAULT_GIVE			7
+#define DEAGLE_DEFAULT_GIVE			7
 #define MRC_DEFAULT_GIVE			50
 #define MP5_DEFAULT_GIVE			MP5_MAX_CLIP * 2
 #define MRC_GR_DEFAULT_GIVE			0

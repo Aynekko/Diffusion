@@ -26,7 +26,7 @@ float primary_fire_delay[WEAPON_G36C +1][5][2] = {
    {{0.0f, 0.1f}, {0.2f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.6f, 1.0f}},
    // WEAPON_GLOCK (9mm)
    {{0.0f, 0.1f}, {0.1f, 0.2f}, {0.2f, 0.3f}, {0.3f, 0.4f}, {0.4f, 0.5f}},
-   // WEAPON_PYTHON (357)
+   // WEAPON_DEAGLE (357)
    {{0.0f, 0.25f}, {0.2f, 0.5f}, {0.4f, 0.8f}, {1.0f, 1.3f}, {1.5f, 2.0f}},
    // WEAPON_MP5 (9mmAR)
    {{0.0f, 0.1f}, {0.1f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.5f, 0.8f}},
@@ -77,7 +77,7 @@ float secondary_fire_delay[WEAPON_G36C +1][5][2] = {
 	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
 	// WEAPON_GLOCK (9mm)
 	{{0.0f, 0.1f}, {0.0f, 0.1f}, {0.1f, 0.2f}, {0.1f, 0.2f}, {0.2f, 0.4f}},
-	// WEAPON_PYTHON (357)
+	// WEAPON_DEAGLE (357)
 	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
 	// WEAPON_MP5 (9mmAR)
 	{{0.0f, 0.3f}, {0.5f, 0.8f}, {0.7f, 1.0f}, {1.0f, 1.6f}, {1.4f, 2.0f}},
@@ -706,7 +706,7 @@ BOOL CBot::BotFireWeapon( Vector v_enemy_origin, int weapon_choice, BOOL primary
 	  }
    }
 
-   // if the bot is carrying the 357/PYTHON, (can't use underwater)...
+   // if the bot is carrying the 357/DEAGLE, (can't use underwater)...
    if ((HasWeapon(WEAPON_DEAGLE)) && (pev->waterlevel != 3))
    {
 	  // if close enough for 357 shot...
