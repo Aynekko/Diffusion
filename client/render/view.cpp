@@ -1927,7 +1927,10 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 	case WEAPON_DEAGLE:
 		if( Attack1 && !Underwater )
 		{
-			gEngfuncs.pfnWeaponAnim( 2, 0 );
+			if( CurrentPAmmoClip == 1 ) // last bullet
+				gEngfuncs.pfnWeaponAnim( 7, 0 );
+			else
+				gEngfuncs.pfnWeaponAnim( 2, 0 );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/deagle_shot1.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_NextPAttackTime = tr.time + 0.75;
 			R_MakeWeaponShake( WEAPON_DEAGLE, 0, true );

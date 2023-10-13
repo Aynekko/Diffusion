@@ -26,12 +26,11 @@ enum python_e
 	DEAGLE_IDLE1 = 0,
 	DEAGLE_FIDGET,
 	DEAGLE_FIRE1,
+	DEAGLE_RELOAD_EMPTY,
 	DEAGLE_RELOAD,
-	DEAGLE_RELOAD_NOSHOT,
 	DEAGLE_HOLSTER,
 	DEAGLE_DRAW,
-	DEAGLE_IDLE2,
-	DEAGLE_IDLE3
+	DEAGLE_FIRE_EMPTY,
 };
 
 class CPython : public CBasePlayerWeapon
@@ -106,10 +105,15 @@ void CPython::Precache( void )
 	PRECACHE_MODEL("models/w_357ammobox.mdl");
 	PRECACHE_SOUND("items/9mmclip1.wav");              
 
-	PRECACHE_SOUND ("weapons/357_reload1.wav");
 	PRECACHE_SOUND ("weapons/357_cock1.wav");
 	PRECACHE_SOUND ("weapons/deagle_shot1.wav");
 	PRECACHE_SOUND ("weapons/deagle_shot1_d.wav");
+
+	PRECACHE_SOUND( "weapons/de_clipout.wav" );
+	PRECACHE_SOUND( "weapons/de_clipin.wav" );
+	PRECACHE_SOUND( "weapons/de_slide.wav" );
+	PRECACHE_SOUND( "weapons/de_draw.wav" );
+	PRECACHE_SOUND( "weapons/de_back.wav" );
 
 	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 }
@@ -159,9 +163,12 @@ void CPython::PrimaryAttack()
 	m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
-	m_iClip--;
+	if( m_iClip == 1 )
+		SendWeaponAnim( DEAGLE_FIRE_EMPTY );
+	else
+		SendWeaponAnim( DEAGLE_FIRE1 );
 
-	SendWeaponAnim( DEAGLE_FIRE1 );
+	m_iClip--;
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
@@ -216,12 +223,11 @@ void CPython::PrimaryAttack()
 void CPython::Reload( void )
 {
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
-//	EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/357_reload1.wav", RANDOM_FLOAT( 0.8, 0.9 ), ATTN_NORM );
 
 	if( !m_iClip )
-		DefaultReload( 7, DEAGLE_RELOAD, 2.0 );
+		DefaultReload( 7, DEAGLE_RELOAD_EMPTY, 3.5 );
 	else
-		DefaultReload( 7, DEAGLE_RELOAD_NOSHOT, 1.8 );
+		DefaultReload( 7, DEAGLE_RELOAD, 2.6 );
 }
 
 
@@ -230,33 +236,6 @@ void CPython::WeaponIdle( void )
 	ResetEmptySound( );
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_10DEGREES );
-
-	if (m_flTimeWeaponIdle > gpGlobals->time)
-		return;
-
-	int iAnim;
-	float flRand = RANDOM_FLOAT(0, 1);
-	if (flRand <= 0.5)
-	{
-		iAnim = DEAGLE_IDLE1;
-		m_flTimeWeaponIdle = gpGlobals->time + (70.0/30.0);
-	}
-	else if (flRand <= 0.7)
-	{
-		iAnim = DEAGLE_IDLE2;
-		m_flTimeWeaponIdle = gpGlobals->time + (60.0/30.0);
-	}
-	else if (flRand <= 0.9)
-	{
-		iAnim = DEAGLE_IDLE3;
-		m_flTimeWeaponIdle = gpGlobals->time + (88.0/30.0);
-	}
-	else
-	{
-		iAnim = DEAGLE_FIDGET;
-		m_flTimeWeaponIdle = gpGlobals->time + (170.0/30.0);
-	}
-	SendWeaponAnim( iAnim );
 }
 
 class CPythonAmmo : public CBasePlayerAmmo

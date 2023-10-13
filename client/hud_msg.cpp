@@ -355,14 +355,14 @@ bool CheckForLocalWeaponShootAnimation( int seq )
 			return true;
 	break;
 	case WEAPON_DEAGLE:
-		if( seq == 3 ) // caught reload anim!
-			localanim_NextPAttackTime = tr.time + 2.0;
-		else if( seq == 4 ) // caught reload_noshot anim!
-			localanim_NextPAttackTime = tr.time + 1.8;
+		if( seq == 3 ) // caught reload_empty anim!
+			localanim_NextPAttackTime = tr.time + 3.5;
+		else if( seq == 4 ) // caught reload anim!
+			localanim_NextPAttackTime = tr.time + 2.6;
 		else if( seq == 5 ) // caught deploy anim!
 			localanim_NextPAttackTime = tr.time + 1.0;
 
-		if( seq != 2 ) // only interested in FIRE animations
+		if( seq != 2 && seq != 7 ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
