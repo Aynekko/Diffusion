@@ -128,8 +128,8 @@ void MakeNormalVectors( const vec3 forward, inout vec3 right, inout vec3 up )
 {
 	// this rotate and negate guarantees a vector not colinear with the original
 	right = vec3( forward.z, -forward.x, forward.y );
-	right -= forward * dot( right, forward );
-	up = cross( normalize( right ), forward );
+	right = normalize( right - forward * dot( right, forward ) );
+	up = cross( right, forward );
 }
 
 vec2 VogelDiskSample( int sampleIndex, int samplesCount, float phi )
