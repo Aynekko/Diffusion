@@ -142,7 +142,7 @@ int R_AllocateShadowFramebuffer( plight_t *pl, int side = 0 )
 
 				Q_snprintf( txName, sizeof( txName ), "*shadowCM%i", i );
 
-				tr.shadowCubemaps[i] = CREATE_TEXTURE( txName, ShadowViewport, ShadowViewport, NULL, TF_SHADOW_CUBEMAP );
+				tr.shadowCubemaps[i] = CREATE_TEXTURE( txName, ShadowViewport, ShadowViewport, NULL, TF_SHADOW_CUBEMAP|TF_ARB_16BIT );
 				texture = tr.shadowCubemaps[i];
 			}
 		}
@@ -172,7 +172,7 @@ int R_AllocateShadowFramebuffer( plight_t *pl, int side = 0 )
 
 			Q_snprintf( txName, sizeof( txName ), "*shadow%i", i );
 
-			tr.shadowTextures[i] = CREATE_TEXTURE( txName, ShadowViewport, ShadowViewport, NULL, TF_SHADOW );
+			tr.shadowTextures[i] = CREATE_TEXTURE( txName, ShadowViewport, ShadowViewport, NULL, TF_SHADOW|TF_ARB_16BIT );
 			texture = tr.shadowTextures[i];
 		}
 
@@ -207,7 +207,7 @@ int R_AllocateShadowTexture( void )
 
 		Q_snprintf( txName, sizeof( txName ), "*shadow%i", i );
 
-		tr.shadowTextures[i] = CREATE_TEXTURE( txName, ShadowViewport, ShadowViewport, NULL, TF_SHADOW );
+		tr.shadowTextures[i] = CREATE_TEXTURE( txName, ShadowViewport, ShadowViewport, NULL, TF_SHADOW|TF_ARB_16BIT );
 		texture = tr.shadowTextures[i];
 	}
 
