@@ -778,12 +778,12 @@ public:
 	bool CodeSuccess;
 	void DisableCodeScreen( void );
 	void EnterCode( int num );
-	int CodeInputSpr;
+	CAnimatex CodeInputSpr;
 	Vector InputOrigin; // disable screen if player goes away
 	float CloseTime; // time in future when screen disappears
-	float r;
-	float g;
-	float b;
+	int r;
+	int g;
+	int b;
 };
 
 class CScreenEffects : public CHudBase

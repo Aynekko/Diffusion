@@ -7,12 +7,11 @@
 #include "event_api.h"
 
 //===========================================================================================
-// diffusion - draw icons for player's available electroblasts
+// diffusion - draw code input screen
 //===========================================================================================
 
-// get rid of this...
-#define SPR_WIDTH 500
-#define SPR_HEIGHT 300
+int ImageWidth = 0;
+int ImageHeight = 0;
 
 DECLARE_MESSAGE( m_CodeInput, CodeInput );
 
@@ -27,7 +26,12 @@ int CHudCodeInput::Init( void )
 int CHudCodeInput::VidInit(void)
 {
 	DisableCodeScreen();
-	CodeInputSpr = LoadSprite( "sprites/diffusion/codeinput.spr" );
+	CodeInputSpr.Init( "sprites/diffusion/code_input/code_input" );
+	if( CodeInputSpr.Initialized() )
+	{
+		ImageWidth = RENDER_GET_PARM( PARM_TEX_WIDTH, CodeInputSpr.Texture[0] );
+		ImageHeight = RENDER_GET_PARM( PARM_TEX_HEIGHT, CodeInputSpr.Texture[0] );
+	}
 	return 1;
 }
 
@@ -75,9 +79,9 @@ int CHudCodeInput::MsgFunc_CodeInput( const char *pszName, int iSize, void *pbuf
 	CodeInputScreenIsOn = true;
 	InputStep = 0; // user didn't enter anything yet
 	CodeSuccess = false;
-	r = 1.0f;
-	g = 1.0f;
-	b = 1.0f;
+	r = 255;
+	g = 255;
+	b = 255;
 	memset( num_user, 0, sizeof( num_user ) );
 
 	return 1;
@@ -86,7 +90,8 @@ int CHudCodeInput::MsgFunc_CodeInput( const char *pszName, int iSize, void *pbuf
 int CHudCodeInput::Draw( float flTime )
 {
 	// player's view isn't near the code object
-	if( (tr.viewparams.vieworg - InputOrigin).Length() > 100 )
+	float DistanceFromInputStart = (tr.viewparams.vieworg - InputOrigin).Length();
+	if( DistanceFromInputStart > 75 )
 	{
 		DisableCodeScreen();
 	}
@@ -109,9 +114,9 @@ int CHudCodeInput::Draw( float flTime )
 		if( CodeSuccess )
 		{
 		//	ConPrintf( "CODE SUCCESS!\n" );
-			r = 0.1f;
-			g = 1.0f;
-			b = 0.1f;
+			r = 25;
+			g = 255;
+			b = 25;
 			char szbuf[32];
 			sprintf_s( szbuf, "code %d %d%d%d%d\n", entindex, num[0], num[1], num[2], num[3] );
 			ClientCmd( szbuf );
@@ -119,9 +124,9 @@ int CHudCodeInput::Draw( float flTime )
 		else
 		{
 		//	ConPrintf( "CODE FAIL!\n" );
-			r = 1.0f;
-			g = 0.1f;
-			b = 0.1f;
+			r = 255;
+			g = 25;
+			b = 25;
 		}
 
 		InputStep = 5;
@@ -132,23 +137,24 @@ int CHudCodeInput::Draw( float flTime )
 		return 1;
 
 	// slightly blacken the screen
-	gEngfuncs.pfnFillRGBABlend( 0, 0, ScreenWidth, ScreenHeight, 0, 0, 0, 150 );
+	gEngfuncs.pfnFillRGBABlend( 0, 0, ScreenWidth, ScreenHeight, 0, 0, 0, 150 - (DistanceFromInputStart * 2.0f) );
 
 	// draw user inputs
-	int x = (ScreenWidth / 2) - (SPR_WIDTH / 2);
-	int y = (ScreenHeight / 2) - (SPR_HEIGHT / 2);
-	int xmax = (ScreenWidth / 2) + (SPR_WIDTH / 2);
-	int ymax = (ScreenHeight / 2) + (SPR_HEIGHT / 2);
-
-	const model_s *pSpr = gEngfuncs.GetSpritePointer( CodeInputSpr );
-	if( !gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pSpr, InputStep ) )
-		return 1;
+	int x = (ScreenWidth / 2) - (ImageWidth / 2);
+	int y = (ScreenHeight / 2) - (ImageHeight / 2);
+	int xmax = (ScreenWidth / 2) + (ImageWidth / 2);
+	int ymax = (ScreenHeight / 2) + (ImageHeight / 2);
 	
-	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
-	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-	gEngfuncs.pTriAPI->Color4f( r, g, b, 1.0f );
-	DrawQuad( x, y, xmax, ymax );
-	gEngfuncs.pTriAPI->End();
+	if( CodeInputSpr.Initialized() )
+	{
+		CodeInputSpr.SetRenderMode( kRenderTransAdd );
+		CodeInputSpr.SetColor( r, g, b );
+		CodeInputSpr.SetPos( x, y, xmax, ymax );
+		if( !CodeSuccess )
+			CodeInputSpr.DrawFrame( InputStep );
+		else
+			CodeInputSpr.DrawFrame( 5 );
+	}
 
 	if( InputStep == 5 )
 	{
@@ -162,9 +168,9 @@ int CHudCodeInput::Draw( float flTime )
 			{
 				InputStep = 0;
 				CloseTime = 0.0f;
-				r = 1.0f;
-				g = 1.0f;
-				b = 1.0f;
+				r = 255;
+				g = 255;
+				b = 255;
 			}
 		}
 	}

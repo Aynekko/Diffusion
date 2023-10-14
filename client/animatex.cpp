@@ -93,7 +93,16 @@ void CAnimatex::SetCurFrame( int Frame )
 
 void CAnimatex::DrawFrame( int Frame )
 {
-	GL_Bind( 0, Texture[Frame] );
+	if( Frame >= GetTotalFrames() )
+		Frame = GetTotalFrames() - 1;
+	
+	int Tex = Texture[Frame];
+	
+	// frame missing?
+	if( !Tex )
+		Tex = tr.defaultTexture;
+	
+	GL_Bind( 0, Tex );
 	pglColor4f( r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f );
 	pglBegin( GL_QUADS );
 	DrawQuad( xmin, ymin, xmax, ymax );
