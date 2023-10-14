@@ -150,10 +150,10 @@ int CHudCodeInput::Draw( float flTime )
 		CodeInputSpr.SetRenderMode( kRenderTransAdd );
 		CodeInputSpr.SetColor( r, g, b );
 		CodeInputSpr.SetPos( x, y, xmax, ymax );
-		if( !CodeSuccess )
-			CodeInputSpr.DrawFrame( InputStep );
+		if( CodeSuccess )
+			CodeInputSpr.DrawFrame( 6 );
 		else
-			CodeInputSpr.DrawFrame( 5 );
+			CodeInputSpr.DrawFrame( InputStep );
 	}
 
 	if( InputStep == 5 )
