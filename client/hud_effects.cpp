@@ -10,7 +10,6 @@
 #include "r_efx.h"
 #include "r_world.h"
 #include "event_api.h"
-#include "animatex.h"
 
 #define SPEED_ARROW_STEP 2
 #define SPEED_ARROW_FRAMES 121
@@ -31,7 +30,7 @@ int CScreenEffects::VidInit(void)
 	SpeedometerArrows = LoadSprite( "sprites/diffusion/speed_arrows.spr" );
 	SpeedometerGears = LoadSprite( "sprites/diffusion/speed_gears.spr" );
 	LastOrigin = g_vecZero;
-	SaveIcon = LoadSprite( "sprites/diffusion/gamesaved.spr" );
+	SaveIcon.Init( "sprites/diffusion/saveicon/saveicon" );
 
 	return 1;
 }
@@ -53,53 +52,45 @@ int CScreenEffects::Draw( float flTime )
 //===============================================
 void CScreenEffects::DrawGameSaved(void)
 {
+	if( !SaveIcon.Initialized() )
+		return;
+	
 	if( SaveIcon_Reset )
 	{
-		SaveIcon_Frame = 0;
-		SaveIcon_Brightness = 0.0f;
+		SaveIcon.SetCurFrame( 0 );
+		SaveIcon.SetTransparency( 0 );
 		SaveIcon_Reset = false;
 	}
 	
 	if( !ShouldDrawGameSaved )
 		return;
 
-//	if( tr.time == tr.oldtime ) // not in paused
-//		return;
-
-	const model_s *pSaveIcon = gEngfuncs.GetSpritePointer( SaveIcon );
-	int total_frames = SPR_Frames( SaveIcon );
-	if( SaveIcon_Frame >= total_frames - 1 )
+	int total_frames = SaveIcon.GetTotalFrames();
+	if( SaveIcon.GetCurFrame() >= total_frames - 1 )
 	{
-		SaveIcon_Frame = total_frames - 1;
-		if( SaveIcon_Brightness > 0.0f )
-			SaveIcon_Brightness -= 300 * g_fFrametime;
+		SaveIcon.SetCurFrame( total_frames - 1 );
+		if( SaveIcon.a > 0.0f )
+			SaveIcon.a -= 300 * g_fFrametime;
 
-		if( SaveIcon_Brightness <= 0.0f )
+		if( SaveIcon.a <= 0.0f )
 		{
 			ShouldDrawGameSaved = false;
-			SaveIcon_Frame = 0;
-			SaveIcon_Brightness = 0.0f;
+			SaveIcon.SetCurFrame( 0 );
+			SaveIcon.SetTransparency( 0 );
 			return;
 		}
 	}
 	else
 	{
-		if( SaveIcon_Brightness < 255.0f )
-			SaveIcon_Brightness += 350 * g_fFrametime;
-
-		SaveIcon_Frame += 100 * g_fFrametime;
+		if( SaveIcon.a < 255.0f )
+			SaveIcon.a += 350 * g_fFrametime;
 	}
-
-	if( !gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pSaveIcon, (int)SaveIcon_Frame ) )
-		return;
 
 	int SQUARE_SIZE = 150;
 
-	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
-	gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, SaveIcon_Brightness / 255.0f );
-	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-	DrawQuad( (ScreenWidth * 0.5f) - (SQUARE_SIZE/2), ScreenHeight - 75 - SQUARE_SIZE, (ScreenWidth * 0.5f) + (SQUARE_SIZE/2), ScreenHeight - 75 );
-	gEngfuncs.pTriAPI->End();
+	SaveIcon.SetRenderMode( kRenderTransAdd );
+	SaveIcon.SetPos( (ScreenWidth * 0.5f) - (SQUARE_SIZE / 2), ScreenHeight - 75 - SQUARE_SIZE, (ScreenWidth * 0.5f) + (SQUARE_SIZE / 2), ScreenHeight - 75 );
+	SaveIcon.DrawAnimate( 100 );
 }
 
 //===============================================

@@ -12,6 +12,7 @@ public:
 	int Texture[MAX_ANIMATEX_FRAMES];
 	float fCurFrame;
 	int xmin, ymin, xmax, ymax;
+	float r, g, b, a;
 
 	void Init( char *Tex );
 	bool Initialized( void );
@@ -20,7 +21,9 @@ public:
 	int GetCurFrame( void );
 	void DrawFrame( int Frame );
 	void DrawAnimate( float Speed = 10.0f );
-	void SetColor( int r, int g, int b, int a = 255 );
+	void SetColor( int R, int G, int B );
+	void SetTransparency( int A );
 	void SetRenderMode( int RenderMode );
 	void Free( void );
+	void SetCurFrame( int Frame );
 };

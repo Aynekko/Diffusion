@@ -37,6 +37,7 @@
 #include "r_view.h"
 #include "ammo.h"
 #include "achievementdata.h"
+#include "animatex.h"
 
 #define EXPORT	_declspec( dllexport )
 #define DLLEXPORT	__declspec( dllexport )
@@ -807,9 +808,7 @@ private:
 	int Speedometer;
 	int SpeedometerArrows;
 	int SpeedometerGears;
-	SpriteHandle SaveIcon;
-	float SaveIcon_Frame;
-	float SaveIcon_Brightness;
+	CAnimatex SaveIcon;
 	float VignetteAlpha;
 	float ShieldAlpha;
 	float SpeedArrowFrame;

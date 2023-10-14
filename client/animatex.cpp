@@ -1,4 +1,3 @@
-#include "animatex.h"
 #include "hud.h"
 #include "r_local.h"
 #include "triangleapi.h"
@@ -15,6 +14,10 @@ void CAnimatex::Init( char *Tex )
 	iTotalFrames = 0;
 	iFrame = 0;
 	memset( Texture, 0, sizeof( Texture ) );
+	r = 255.0f;
+	g = 255.0f;
+	b = 255.0f;
+	a = 255.0f;
 
 	// load frames
 	char tmp[MAX_PATH];
@@ -31,7 +34,7 @@ void CAnimatex::Init( char *Tex )
 		else
 		{
 			if( i == 0 )
-				ConPrintf( "^3Error:^7 CAnimatex can't load any frames for \"%s\".\n", Tex );
+				ConPrintf( "^1Error:^7 CAnimatex can't load any frames for \"%s\".\n", Tex );
 
 			break;
 		}
@@ -40,7 +43,8 @@ void CAnimatex::Init( char *Tex )
 		iTotalFrames++;
 	}
 
-	ConPrintf( "^2Animatex:^7 loaded %i frames for \"%s\".\n", iTotalFrames, Tex );
+	if( iTotalFrames > 0 )
+		ConPrintf( "^2Animatex:^7 loaded %i frames for \"%s\".\n", iTotalFrames, Tex );
 }
 
 bool CAnimatex::Initialized( void )
@@ -78,9 +82,16 @@ int CAnimatex::GetCurFrame( void )
 	return (int)fCurFrame;
 }
 
+void CAnimatex::SetCurFrame( int Frame )
+{
+	Frame = bound( 0, Frame, iTotalFrames - 1 );
+	fCurFrame = Frame;
+}
+
 void CAnimatex::DrawFrame( int Frame )
 {
 	GL_Bind( 0, Texture[Frame] );
+	pglColor4f( r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f );
 	pglBegin( GL_QUADS );
 	DrawQuad( xmin, ymin, xmax, ymax );
 	pglEnd();
@@ -98,14 +109,16 @@ void CAnimatex::DrawAnimate( float Speed )
 	DrawFrame( (int)fCurFrame );
 }
 
-void CAnimatex::SetColor( int r, int g, int b, int a )
+void CAnimatex::SetColor( int R, int G, int B )
 {
-	float R = r / 255.0f;
-	float G = g / 255.0f;
-	float B = b / 255.0f;
-	float A = a / 255.0f;
+	r = R;
+	g = G;
+	b = B;
+}
 
-	pglColor4f( R, G, B, A );
+void CAnimatex::SetTransparency( int A )
+{
+	a = A;
 }
 
 void CAnimatex::SetRenderMode( int RenderMode )
