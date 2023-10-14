@@ -11,12 +11,20 @@ BEGIN_DATADESC( CBoat )
 	DEFINE_KEYFIELD( BoatLength, FIELD_INTEGER, "boatlength" ),
 	DEFINE_KEYFIELD( BoatWidth, FIELD_INTEGER, "boatwidth" ),
 	DEFINE_KEYFIELD( BoatDepth, FIELD_INTEGER, "boatdepth" ),
+	DEFINE_FIELD( AddZ, FIELD_FLOAT ),
+	DEFINE_KEYFIELD( wheel1, FIELD_STRING, "wheel1" ),
+	DEFINE_KEYFIELD( wheel2, FIELD_STRING, "wheel2" ),
+	DEFINE_KEYFIELD( wheel3, FIELD_STRING, "wheel3" ),
+	DEFINE_KEYFIELD( wheel4, FIELD_STRING, "wheel4" ),
 	DEFINE_KEYFIELD( chassis, FIELD_STRING, "chassis" ),
 	DEFINE_KEYFIELD( carhurt, FIELD_STRING, "carhurt" ),
 	DEFINE_KEYFIELD( camera1, FIELD_STRING, "camera1" ),
 	DEFINE_KEYFIELD( camera2, FIELD_STRING, "camera2" ),
+	DEFINE_KEYFIELD( tank_tower, FIELD_STRING, "tank_tower" ),
 	DEFINE_FIELD( Camera1LocalOrigin, FIELD_VECTOR ),
 	DEFINE_FIELD( Camera2LocalOrigin, FIELD_VECTOR ),
+	DEFINE_FIELD( Camera1LocalAngles, FIELD_VECTOR ),
+	DEFINE_FIELD( Camera2LocalAngles, FIELD_VECTOR ),
 	DEFINE_KEYFIELD( MaxCamera1Sway, FIELD_INTEGER, "maxcam1sway" ),
 	DEFINE_KEYFIELD( MaxCamera2Sway, FIELD_INTEGER, "maxcam2sway" ),
 	DEFINE_KEYFIELD( drivermdl, FIELD_STRING, "drivermdl" ),
@@ -29,6 +37,7 @@ BEGIN_DATADESC( CBoat )
 	DEFINE_KEYFIELD( BrakeRate, FIELD_INTEGER, "brakerate" ),
 	DEFINE_KEYFIELD( TurningRate, FIELD_INTEGER, "turningrate" ),
 	DEFINE_KEYFIELD( MaxTurn, FIELD_INTEGER, "maxturn" ),
+	DEFINE_KEYFIELD( DamageMult, FIELD_FLOAT, "damagemult" ),
 	DEFINE_FIELD( hDriver, FIELD_EHANDLE ),
 	DEFINE_FUNCTION( Setup ),
 	DEFINE_FUNCTION( Drive ),
@@ -40,12 +49,14 @@ BEGIN_DATADESC( CBoat )
 	DEFINE_FIELD( pCarHurt, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pDriverMdl, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pChassisMdl, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pTankTower, FIELD_CLASSPTR ),
 	DEFINE_KEYFIELD( m_iszEngineSnd, FIELD_STRING, "enginesnd" ),
 	DEFINE_KEYFIELD( m_iszIdleSnd, FIELD_STRING, "idlesnd" ),
 	DEFINE_FIELD( AllowCamera, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CarInAir, FIELD_BOOLEAN ),
 	DEFINE_FIELD( BrokenCar, FIELD_BOOLEAN ),
-	DEFINE_FIELD( AddZ, FIELD_FLOAT ),
+	DEFINE_FIELD( StartSilent, FIELD_BOOLEAN ),
+	DEFINE_FIELD( PrevOrigin, FIELD_VECTOR ),
 	DEFINE_KEYFIELD( m_iszAltTarget, FIELD_STRING, "m_iszAltTarget" ),
 END_DATADESC()
 
@@ -412,7 +423,7 @@ void CBoat::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Co
 	UTIL_MakeVectors( GetAbsAngles() );
 
 	bool hit_carblocker = false;
-
+	
 	int magic = 10;
 	if( Forward == 1 )
 	{
@@ -424,7 +435,7 @@ void CBoat::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Co
 		if( trCol.flFraction < 1.0f )
 		{
 			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * ColDotProduct;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
 			*ColPoint = ColPointWFR;
 			if( *ColDotProduct < 0.6 )
 				*ColDotProduct *= -1;
@@ -444,7 +455,7 @@ void CBoat::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Co
 		if( trCol.flFraction < 1.0f )
 		{
 			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * ColDotProduct;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
 			*ColPoint = ColPointWFL;
 			if( *ColDotProduct < 0.6 )
 				*ColDotProduct *= -1;
@@ -467,7 +478,7 @@ void CBoat::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Co
 		if( trCol.flFraction < 1.0f )
 		{
 			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
 			*ColPoint = ColPointWRR;
 		}
 		else if( hit_carblocker )
@@ -485,7 +496,7 @@ void CBoat::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Co
 		if( trCol.flFraction < 1.0f )
 		{
 			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
-			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
 			*ColPoint = ColPointWRL;
 		}
 		else if( hit_carblocker )
@@ -721,13 +732,15 @@ void CBoat::Drive( void )
 	if( TrCross.flFraction < 1.0f && !Afloat )
 		RearPoint = TrCross.vecEndPos.z;
 	const float CrossPoint = (RearPoint - FrontPoint) * 0.5f;
-	if( CrossPoint != 0.0f || !Afloat )
+	if( !Collision.IsNull() || CrossPoint != 0.0f || !Afloat )
 	{
 		AccelAddX = 0;
 		BrakeAddX = 0;
 	}
 
 	float NewChassisAngX = BrakeAddX + AccelAddX + CrossPoint;
+	if( !Collision.IsNull() )
+		NewChassisAngX = 0;
 	ChassisAng.x = UTIL_Approach( NewChassisAngX, ChassisAng.x, 100 * gpGlobals->frametime );
 
 	// Z - lateral rotation
@@ -896,7 +909,6 @@ void CBoat::Drive( void )
 
 	bool TookDamage = false;
 	float DriverDamage = 0.0f;
-	bool Collided = false;
 
 	// do timing stuff each 0.5 seconds
 	if( !Collision.IsNull() && (gpGlobals->time > time) )
@@ -906,19 +918,17 @@ void CBoat::Drive( void )
 		else if( ColDotProduct > 0 && ColDotProduct < 0.18 )
 			ColDotProduct = 0.18;
 		// 0.18 so the multiplier would be less than 1 always
-	//	CarSpeed *= -0.15 / ColDotProduct; // moved to bottom
-		Collided = true;
-
+		
 		if( AbsCarSpeed > 500 )
 		{
 			TookDamage = true;
 			DriverDamage = AbsCarSpeed * 0.025f * fabs(ColDotProduct);
 		}
 
-		if( AbsCarSpeed > 200 )
+		if( AbsCarSpeed > 100 )
 		{
 			// apply collision effects
-			if( ColPoint.Length() > 0 )
+			if( !ColPoint.IsNull() )
 				UTIL_Sparks( ColPoint );
 
 			switch( RANDOM_LONG( 0, 3 ) )
@@ -996,16 +1006,13 @@ void CBoat::Drive( void )
 
 	SetLocalAngles( BoatAng ); // car direction is now set
 
-	if( Collided )
-		CarSpeed *= -0.1 / ColDotProduct;
-
 	SafeSpawnPosition();
 
-	if( TookDamage && DriverDamage > 10.0f )
+	if( TookDamage && DriverDamage > 7.5f )
 	{
 		TakeDamage( pev, pev, DriverDamage, DMG_CRUSH );
 		UTIL_ScreenShakeLocal( hDriver, GetAbsOrigin(), AbsCarSpeed * 0.01, 100, 1, 300, true );
-		if( DriverDamage > 25 ) // fall off scooter :)
+		if( DriverDamage > 15.0f ) // fall off scooter :)
 			Use( this, this, USE_OFF, 0 );
 	}
 	// !!! hDriver can become NULL after this, by taking damage and dying, game will crash.
@@ -1063,7 +1070,7 @@ Vector CBoat::SafeSpawnPosition( void )
 	Vector vecSrc, vecEnd;
 	TraceResult TrExit, VisCheck;
 
-	vecSrc = CarCenter - gpGlobals->v_forward * (RearSuspDist + RearBumperLength + 50);
+	vecSrc = CarCenter - gpGlobals->v_forward * (BoatLength + 50);
 	vecEnd = vecSrc;
 	UTIL_TraceHull( vecSrc, vecEnd, dont_ignore_monsters, human_hull, edict(), &TrExit );
 	UTIL_TraceLine( CarCenter, vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );

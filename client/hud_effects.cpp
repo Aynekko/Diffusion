@@ -125,7 +125,7 @@ void CScreenEffects::DrawSpeedometer(void)
 //	gEngfuncs.Con_NPrintf( 1,"%i\n", (int)gHUD.CarSpeed );
 
 	// draw the arrow
-	SpeedArrowRotation = CL_UTIL_Approach( gHUD.CarSpeed / SPEED_ARROW_STEP, SpeedArrowRotation, 25 * g_fFrametime );
+	SpeedArrowRotation = CL_UTIL_Approach( gHUD.CarSpeed, SpeedArrowRotation, 25 * g_fFrametime );
 	GL_Bind( 0, SpeedometerArrow );
 	pglPushMatrix();
 	pglTranslatef( ScreenWidth - 320 + 150, ScreenHeight - 320 + 150, 0 );
