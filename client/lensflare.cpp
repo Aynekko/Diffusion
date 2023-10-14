@@ -201,10 +201,12 @@ int CHudLensflare::Draw( float flTime )
 	Sundistx = Screenmx - Suncoordx;
 	Sundisty = Screenmy - Suncoordy;
 
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+//	gEngfuncs.pTriAPI->CullFace( TRI_FRONT );
+
 	if( SunFlareTexture > 0 )
 	{
 		int crd = 190;
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 		gEngfuncs.pTriAPI->Color4f( tr.movevars->skycolor_r / 255, tr.movevars->skycolor_g / 255, tr.movevars->skycolor_b / 255, flPlayerBlend2 / 355.0 );
 		gEngfuncs.pTriAPI->Brightness( flPlayerBlend2 / 355.0 );
 		GL_SelectTexture( 0 );
@@ -217,9 +219,7 @@ int CHudLensflare::Draw( float flTime )
 
 	if( tex[3] > 0 )
 	{
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd ); //additive
 		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.GetSpritePointer( tex[3] ), 0 );
-		gEngfuncs.pTriAPI->CullFace( TRI_NONE ); //no culling
 		gEngfuncs.pTriAPI->Color4f( 1.0, 1.0, 1.0, flPlayerBlend3 / 255.0 );
 		gEngfuncs.pTriAPI->Brightness( flPlayerBlend3 / 255.0 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS ); //start our quad
@@ -228,26 +228,23 @@ int CHudLensflare::Draw( float flTime )
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Suncoordx - 160, Suncoordy - 160, 0 ); //bottom right
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Suncoordx - 160, Suncoordy + 160, 0 ); //top right
 		gEngfuncs.pTriAPI->End(); //end our list of vertexes
-		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	}
+
+	gEngfuncs.pTriAPI->Brightness( flPlayerBlend2 / 255.0 );
 
 	int i = 1;
 	if( tex[i] > 0 )
 	{
 		Lensx[i] = (Suncoordx + (Sundistx * multi[i]));
 		Lensy[i] = (Suncoordy + (Sundisty * multi[i]));
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd ); //additive
 		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.GetSpritePointer( tex[i] ), 0 ); //hotglow, or any other sprite for the texture
-		gEngfuncs.pTriAPI->CullFace( TRI_NONE ); //no culling
 		gEngfuncs.pTriAPI->Color4f( red[i], green[i], green[i], flPlayerBlend2 / 255.0 );
-		gEngfuncs.pTriAPI->Brightness( flPlayerBlend2 / 255.0 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS ); //start our quad
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] + scale[i], 0 ); //top left
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] - scale[i], 0 ); //bottom left
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] - scale[i], 0 ); //bottom right
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] + scale[i], 0 ); //top right
 		gEngfuncs.pTriAPI->End(); //end our list of vertexes
-		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	}
 
 	i++;
@@ -255,18 +252,14 @@ int CHudLensflare::Draw( float flTime )
 	{
 		Lensx[i] = (Suncoordx + (Sundistx * multi[i]));
 		Lensy[i] = (Suncoordy + (Sundisty * multi[i]));
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd ); //additive
 		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.GetSpritePointer( tex[i] ), 0 ); //hotglow, or any other sprite for the texture
-		gEngfuncs.pTriAPI->CullFace( TRI_NONE ); //no culling
 		gEngfuncs.pTriAPI->Color4f( red[i], green[i], green[i], flPlayerBlend2 / 255.0 );
-		gEngfuncs.pTriAPI->Brightness( flPlayerBlend2 / 255.0 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS ); //start our quad
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] + scale[i], 0 ); //top left
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] - scale[i], 0 ); //bottom left
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] - scale[i], 0 ); //bottom right
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] + scale[i], 0 ); //top right
 		gEngfuncs.pTriAPI->End(); //end our list of vertexes
-		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	}
 
 	i++;
@@ -274,18 +267,14 @@ int CHudLensflare::Draw( float flTime )
 	{
 		Lensx[i] = (Suncoordx + (Sundistx * multi[i]));
 		Lensy[i] = (Suncoordy + (Sundisty * multi[i]));
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd ); //additive
 		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.GetSpritePointer( tex[i] ), 0 ); //hotglow, or any other sprite for the texture
-		gEngfuncs.pTriAPI->CullFace( TRI_NONE ); //no culling
 		gEngfuncs.pTriAPI->Color4f( red[i], green[i], green[i], flPlayerBlend2 / 255.0 );
-		gEngfuncs.pTriAPI->Brightness( flPlayerBlend2 / 255.0 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS ); //start our quad
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] + scale[i], 0 ); //top left
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] - scale[i], 0 ); //bottom left
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] - scale[i], 0 ); //bottom right
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] + scale[i], 0 ); //top right
 		gEngfuncs.pTriAPI->End(); //end our list of vertexes
-		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	}
 
 	i++;
@@ -293,18 +282,14 @@ int CHudLensflare::Draw( float flTime )
 	{
 		Lensx[i] = (Suncoordx + (Sundistx * multi[i]));
 		Lensy[i] = (Suncoordy + (Sundisty * multi[i]));
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd ); //additive
 		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.GetSpritePointer( tex[i] ), 0 ); //hotglow, or any other sprite for the texture
-		gEngfuncs.pTriAPI->CullFace( TRI_NONE ); //no culling
 		gEngfuncs.pTriAPI->Color4f( red[i], green[i], green[i], flPlayerBlend2 / 255.0 );
-		gEngfuncs.pTriAPI->Brightness( flPlayerBlend2 / 255.0 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS ); //start our quad
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] + scale[i], 0 ); //top left
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] - scale[i], 0 ); //bottom left
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] - scale[i], 0 ); //bottom right
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] + scale[i], 0 ); //top right
 		gEngfuncs.pTriAPI->End(); //end our list of vertexes
-		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	}
 
 	i++;
@@ -312,36 +297,28 @@ int CHudLensflare::Draw( float flTime )
 	{
 		Lensx[i] = (Suncoordx + (Sundistx * multi[i]));
 		Lensy[i] = (Suncoordy + (Sundisty * multi[i]));
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd ); //additive
 		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.GetSpritePointer( tex[i] ), 0 ); //hotglow, or any other sprite for the texture
-		gEngfuncs.pTriAPI->CullFace( TRI_NONE ); //no culling
 		gEngfuncs.pTriAPI->Color4f( red[i], green[i], green[i], flPlayerBlend2 / 255.0 );
-		gEngfuncs.pTriAPI->Brightness( flPlayerBlend2 / 255.0 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS ); //start our quad
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] + scale[i], 0 ); //top left
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] - scale[i], 0 ); //bottom left
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] - scale[i], 0 ); //bottom right
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] + scale[i], 0 ); //top right
 		gEngfuncs.pTriAPI->End(); //end our list of vertexes
-		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	}
 
 	i++;
 	{
 		Lensx[i] = (Suncoordx + (Sundistx * multi[i]));
 		Lensy[i] = (Suncoordy + (Sundisty * multi[i]));
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd ); //additive
 		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.GetSpritePointer( tex[i] ), 0 ); //hotglow, or any other sprite for the texture
-		gEngfuncs.pTriAPI->CullFace( TRI_NONE ); //no culling
 		gEngfuncs.pTriAPI->Color4f( red[i], green[i], green[i], flPlayerBlend2 / 255.0 );
-		gEngfuncs.pTriAPI->Brightness( flPlayerBlend2 / 255.0 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS ); //start our quad
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] + scale[i], 0 ); //top left
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] - scale[i], 0 ); //bottom left
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] - scale[i], 0 ); //bottom right
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] + scale[i], 0 ); //top right
 		gEngfuncs.pTriAPI->End(); //end our list of vertexes
-		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	}
 
 	i++;
@@ -349,39 +326,33 @@ int CHudLensflare::Draw( float flTime )
 	{
 		Lensx[i] = (Suncoordx + (Sundistx * multi[i]));
 		Lensy[i] = (Suncoordy + (Sundisty * multi[i]));
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd ); //additive
 		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.GetSpritePointer( tex[i] ), 0 ); //hotglow, or any other sprite for the texture
-		gEngfuncs.pTriAPI->CullFace( TRI_NONE ); //no culling
 		gEngfuncs.pTriAPI->Color4f( red[i], green[i], green[i], flPlayerBlend2 / 255.0 );
-		gEngfuncs.pTriAPI->Brightness( flPlayerBlend2 / 255.0 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS ); //start our quad
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] + scale[i], 0 ); //top left
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] + scale[i], Lensy[i] - scale[i], 0 ); //bottom left
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] - scale[i], 0 ); //bottom right
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx[i] - scale[i], Lensy[i] + scale[i], 0 ); //top right
 		gEngfuncs.pTriAPI->End(); //end our list of vertexes
-		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	}
 
 	i++;
 	int scale1 = 32;
 	int Lensx1, Lensy1 = 0;
+
+	gEngfuncs.pTriAPI->Color4f( 0.9, 0.9, 0.9, flPlayerBlend2 / 255.0 );
+
 	if( tex[i] > 0 )
 	{
 		Lensx1 = (Suncoordx + (Sundistx * 0.88));
 		Lensy1 = (Suncoordy + (Sundisty * 0.88));
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd ); //additive
 		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.GetSpritePointer( tex[i] ), 0 ); //hotglow, or any other sprite for the texture
-		gEngfuncs.pTriAPI->CullFace( TRI_NONE ); //no culling
-		gEngfuncs.pTriAPI->Color4f( 0.9, 0.9, 0.9, flPlayerBlend2 / 255.0 );
-		gEngfuncs.pTriAPI->Brightness( flPlayerBlend2 / 255.0 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS ); //start our quad
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx1 + scale1, Lensy1 + scale1, 0 ); //top left
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx1 + scale1, Lensy1 - scale1, 0 ); //bottom left
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx1 - scale1, Lensy1 - scale1, 0 ); //bottom right
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx1 - scale1, Lensy1 + scale1, 0 ); //top right
 		gEngfuncs.pTriAPI->End(); //end our list of vertexes
-		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	}
 
 	i++;
@@ -390,19 +361,16 @@ int CHudLensflare::Draw( float flTime )
 		scale1 = 140;
 		Lensx1 = (Suncoordx + (Sundistx * 1.1));
 		Lensy1 = (Suncoordy + (Sundisty * 1.1));
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd ); //additive
 		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)gEngfuncs.GetSpritePointer( tex[i] ), 0 ); //hotglow, or any other sprite for the texture
-		gEngfuncs.pTriAPI->CullFace( TRI_NONE ); //no culling
-		gEngfuncs.pTriAPI->Color4f( 0.9, 0.9, 0.9, flPlayerBlend2 / 255.0 );
-		gEngfuncs.pTriAPI->Brightness( flPlayerBlend2 / 255.0 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS ); //start our quad
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx1 + scale1, Lensy1 + scale1, 0 ); //top left
 		gEngfuncs.pTriAPI->TexCoord2f( 0.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx1 + scale1, Lensy1 - scale1, 0 ); //bottom left
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 0.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx1 - scale1, Lensy1 - scale1, 0 ); //bottom right
 		gEngfuncs.pTriAPI->TexCoord2f( 1.0f, 1.0f ); gEngfuncs.pTriAPI->Vertex3f( Lensx1 - scale1, Lensy1 + scale1, 0 ); //top right
 		gEngfuncs.pTriAPI->End(); //end our list of vertexes
-		gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 	}
+
+	gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
 
 	return 1;
 }
