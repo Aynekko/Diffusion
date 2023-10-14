@@ -928,6 +928,4 @@ void R_AddSkyBoxSurface( msurface_t *fa );
 void R_InitBloomTextures( void );
 void R_BloomBlend(void);
 
-#define ConPrintf gEngfuncs.Con_Printf
-
 #endif//R_LOCAL_H

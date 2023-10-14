@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "parsemsg.h"
 #include "r_cvars.h"
+#include "triangleapi.h"
 
 DECLARE_MESSAGE( m_StatusIconsTutor, StatusIconTutor );
 
@@ -18,6 +19,7 @@ int CHudTutorial::VidInit( void )
 	IsTutorDrawing = false;
 	TutorStartTime = 0;
 	x_direction = false;
+	CurrentImage = 0;
 	return 1;
 }
 
@@ -40,18 +42,15 @@ void CHudTutorial::EnableTutorial( char *pszIconName )
 	if( !cl_tutor->value )
 		return;
 
-	// the sprite must be listed in hud.txt
-	int spr_index;
-	spr_index = gHUD.GetSpriteIndex( pszIconName );
-	m_TutorSpr.spr = gHUD.GetSprite( spr_index );
-	if( !m_TutorSpr.spr )
+	char Path[128];
+	sprintf_s( Path, "sprites/tutor/%s", pszIconName );
+	CurrentImage = LOAD_TEXTURE( Path, NULL, 0, 0 );
+
+	if( !CurrentImage )
 	{
-		spr_index = gHUD.GetSpriteIndex( "error" );
-		m_TutorSpr.spr = gHUD.GetSprite( spr_index );
+		ConPrintf( "^1Error:^7 Tutorial image \"%s\" couldn't be loaded!\n", pszIconName );
+		return;
 	}
-	m_TutorSpr.rc = gHUD.GetSpriteRect( spr_index );
-	m_TutorSpr.r = m_TutorSpr.g = m_TutorSpr.b = 255;
-	Q_strcpy( m_TutorSpr.szSpriteName, pszIconName );
 
 	TutorStartTime = gHUD.m_flTime;
 	IsTutorDrawing = true;
@@ -71,11 +70,8 @@ int CHudTutorial::Draw( float flTime )
 	if( !IsTutorDrawing )
 		return 0;
 
-//	if( gHUD.m_flTime > TutorStartTime + 1 )
-//	{
-//		if( gHUD.m_iKeyBits & IN_USE )
-//			x_direction = true; // let's hide the tutor
-//	}
+	if( !CurrentImage )
+		return 0;
 
 	// set the coordinates
 	y = ScreenHeight * 0.15;
@@ -100,11 +96,13 @@ int CHudTutorial::Draw( float flTime )
 		}
 	}
 
-	if( m_TutorSpr.spr )
-	{
-		SPR_Set( m_TutorSpr.spr, m_TutorSpr.r, m_TutorSpr.g, m_TutorSpr.b );
-		SPR_Draw( 0, x, y, &m_TutorSpr.rc );
-	}
+	int xmax = RENDER_GET_PARM( PARM_TEX_WIDTH, CurrentImage );
+	int ymax = RENDER_GET_PARM( PARM_TEX_HEIGHT, CurrentImage );
+	GL_Bind( 0, CurrentImage );
+	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	DrawQuad( x, y, x + xmax, y + ymax );
+	gEngfuncs.pTriAPI->End();
 	
 	return 1;
 }

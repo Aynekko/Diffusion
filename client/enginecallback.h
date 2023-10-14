@@ -173,4 +173,6 @@ inline bool FILE_EXISTS( const char *filename )
 #define Sys_DoubleTime		(*gEngfuncs.pfnSys_FloatTime)
 #define GET_MAX_CLIENTS		(*gEngfuncs.GetMaxClients)
 
+#define ConPrintf gEngfuncs.Con_Printf
+
 #endif//ENGINECALLBACK_H

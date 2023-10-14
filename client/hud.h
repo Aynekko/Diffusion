@@ -619,17 +619,7 @@ public:
 	bool IsTutorDrawing;
 	bool x_direction; // false - right, true - left
 	void EnableTutorial(char* pszIconName );
-
-private:
-	typedef struct
-	{
-		char szSpriteName[MAX_ICONSPRITENAME_LENGTH];
-		SpriteHandle spr;
-		wrect_t rc;
-		unsigned char r, g, b;
-	} icon_spritetutor_t;
-
-	icon_spritetutor_t m_TutorSpr;
+	int CurrentImage;
 };
 
 class CHudAchievement: public CHudBase
