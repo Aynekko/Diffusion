@@ -628,7 +628,6 @@ public:
 	int Init( void );
 	int VidInit( void );
 	int Draw(float flTime);
-	int MsgFunc_StatusIconAchievement( const char *pszName, int iSize, void *pbuf );
 	void _cdecl UserCmd_RefreshAchievementFile( void );
 	void _cdecl UserCmd_ResetAchievementFile( void );
 	float x, y;
@@ -636,17 +635,11 @@ public:
 	bool IsAchDrawing;
 
 	FILE *achStatsFile;
-//	FILE *achGoalsFile;
 	bool bAchievements; // disabled if the goal file wasn't loaded
 	int AchievementStats[TOTAL_ACHIEVEMENTS]; // here we keep pure stats of what the player did and then compare them to goals
 	int AchievementGoal[TOTAL_ACHIEVEMENTS]; // an array with requirements for each achievement
 	bool AchievementComplete[TOTAL_ACHIEVEMENTS]; // true if the Stats >= Goal
 	char AchievementName[TOTAL_ACHIEVEMENTS][100];
-
-	enum {
-		MAX_ICONSPRITENAME_LENGTH = MAX_SPRITE_NAME_LENGTH,
-		MAX_ICONSPRITES = 4,
-	};
 
 	void EnableAchievement(char* pszIconName );
 
@@ -656,17 +649,7 @@ public:
 	void CheckAchievement( void );
 	void CreateDefaultAchievementFile( void );
 	float AchievementCheckTime;
-
-private:
-	typedef struct
-	{
-		char szSpriteName[MAX_ICONSPRITENAME_LENGTH];
-		SpriteHandle spr;
-		wrect_t rc;
-		unsigned char r, g, b;
-	} icon_spriteachievement_t;
-
-	icon_spriteachievement_t m_AchievementSpr;
+	int CurrentImage;
 };
 
 class CHudCrosshairStatic: public CHudBase

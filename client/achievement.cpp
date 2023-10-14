@@ -13,7 +13,6 @@
 
 #define SHOW_ACHIEVEMENT_TIME 7
 
-DECLARE_MESSAGE( m_StatusIconsAchievement, StatusIconAchievement );
 DECLARE_COMMAND( m_StatusIconsAchievement, RefreshAchievementFile );
 DECLARE_COMMAND( m_StatusIconsAchievement, ResetAchievementFile );
 
@@ -21,7 +20,6 @@ static bool y_direction = false; // false - up, true - down
 
 int CHudAchievement::Init( void )
 {
-	HOOK_MESSAGE( StatusIconAchievement );
 	HOOK_COMMAND( "ach_refresh", RefreshAchievementFile );
 	HOOK_COMMAND( "ach_reset", ResetAchievementFile );
 	gHUD.AddHudElem( this );
@@ -74,17 +72,23 @@ int CHudAchievement::VidInit( void )
 
 int CHudAchievement::Draw( float flTime )
 {
-	if( gHUD.m_flTimeDelta == 0 ) // paused
+	if( tr.time == tr.oldtime ) // paused
 		return 0;
 
 	if( !IsAchDrawing )
 		return 0;
 
+	if( !CurrentImage )
+		return 0;
+
 	if( gHUD.m_flTime > AchStartTime + SHOW_ACHIEVEMENT_TIME )
 		y_direction = true;
 
+	int xmax = RENDER_GET_PARM( PARM_TEX_WIDTH, CurrentImage );
+	int ymax = RENDER_GET_PARM( PARM_TEX_HEIGHT, CurrentImage );
+
 	// screen center
-	x = (ScreenWidth / 2) - ((m_AchievementSpr.rc.right - m_AchievementSpr.rc.left) / 2);
+	x = (ScreenWidth - xmax) / 2;
 
 	if( !y_direction ) // achievement sprite is now showing
 	{
@@ -105,39 +109,26 @@ int CHudAchievement::Draw( float flTime )
 		}
 	}
 
-	if( m_AchievementSpr.spr )
-	{
-		SPR_Set( m_AchievementSpr.spr, m_AchievementSpr.r, m_AchievementSpr.g, m_AchievementSpr.b );	
-		SPR_Draw( 0, x, y, &m_AchievementSpr.rc );
-	}
-
-	return 1;
-}
-
-int CHudAchievement::MsgFunc_StatusIconAchievement( const char *pszName, int iSize, void *pbuf )
-{
-	BEGIN_READ( pszName, pbuf, iSize );
-	char *pszIconName = READ_STRING();
-	END_READ();
-
-	EnableAchievement( pszIconName );
+	GL_Bind( 0, CurrentImage );
+	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	DrawQuad( x, y, x + xmax, y + ymax );
+	gEngfuncs.pTriAPI->End();
 
 	return 1;
 }
 
 void CHudAchievement::EnableAchievement( char *pszIconName )
 {
-	// the sprite must be listed in hud.txt
-	int spr_index = gHUD.GetSpriteIndex( pszIconName );
-	m_AchievementSpr.spr = gHUD.GetSprite( spr_index );
-	if( !m_AchievementSpr.spr )
+	char Path[128];
+	sprintf_s( Path, "sprites/ach/%s", pszIconName );
+	CurrentImage = LOAD_TEXTURE( Path, NULL, 0, 0 );
+
+	if( !CurrentImage )
 	{
-		spr_index = gHUD.GetSpriteIndex( "error" );
-		m_AchievementSpr.spr = gHUD.GetSprite( spr_index );
+		ConPrintf( "^1Error:^7 Achievement image \"%s\" couldn't be loaded!\n", pszIconName );
+		return;
 	}
-	m_AchievementSpr.rc = gHUD.GetSpriteRect( spr_index );
-	m_AchievementSpr.r = m_AchievementSpr.g = m_AchievementSpr.b = 255;
-	Q_strcpy( m_AchievementSpr.szSpriteName, pszIconName );
 
 	y = ScreenHeight + 200; // starting position below the bottom of the screen
 	IsAchDrawing = true;
@@ -271,7 +262,7 @@ void CHudAchievement::ReportAchievementsToConsole(void)
 	if( !bAchievements )
 		return;
 	
-	char Completed[5];
+	char Completed[3];
 	ALERT( at_console, "- - - - - - - - - - - - - - - - - - - -\n- - - - - - - - - - - - - - - - - - - -\n" );
 	for( int i = 0; i < TOTAL_ACHIEVEMENTS; i++ )
 	{

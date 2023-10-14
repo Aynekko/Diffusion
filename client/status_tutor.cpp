@@ -36,9 +36,6 @@ int CHudTutorial::MsgFunc_StatusIconTutor( const char *pszName, int iSize, void 
 
 void CHudTutorial::EnableTutorial( char *pszIconName )
 {
-//	if( IsTutorDrawing ) // don't override currently showing tutor
-//		return;
-
 	if( !cl_tutor->value )
 		return;
 
