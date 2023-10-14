@@ -254,6 +254,9 @@
     <ClCompile Include="local_weapon_anims.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="animatex.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ammo.h">
@@ -347,6 +350,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="input_mouse.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="animatex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

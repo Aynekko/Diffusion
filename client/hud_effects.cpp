@@ -6,12 +6,11 @@
 #include "utils.h"
 #include "triangleapi.h"
 #include "r_local.h"
-
 #include "pm_defs.h"
 #include "r_efx.h"
 #include "r_world.h"
 #include "event_api.h"
-
+#include "animatex.h"
 
 #define SPEED_ARROW_STEP 2
 #define SPEED_ARROW_FRAMES 121
@@ -33,6 +32,7 @@ int CScreenEffects::VidInit(void)
 	SpeedometerGears = LoadSprite( "sprites/diffusion/speed_gears.spr" );
 	LastOrigin = g_vecZero;
 	SaveIcon = LoadSprite( "sprites/diffusion/gamesaved.spr" );
+
 	return 1;
 }
 

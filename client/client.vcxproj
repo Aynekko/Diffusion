@@ -184,6 +184,7 @@
     <ClCompile Include="ammo.cpp" />
     <ClCompile Include="ammohistory.cpp" />
     <ClCompile Include="ammo_secondary.cpp" />
+    <ClCompile Include="animatex.cpp" />
     <ClCompile Include="battery.cpp" />
     <ClCompile Include="cdll_int.cpp" />
     <ClCompile Include="crosshair.cpp" />
@@ -268,6 +269,7 @@
     <ClInclude Include="..\game_shared\vector.h" />
     <ClInclude Include="ammo.h" />
     <ClInclude Include="ammohistory.h" />
+    <ClInclude Include="animatex.h" />
     <ClInclude Include="cubemap.h" />
     <ClInclude Include="hud.h" />
     <ClInclude Include="input_mouse.h" />
