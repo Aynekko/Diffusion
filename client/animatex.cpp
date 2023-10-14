@@ -60,7 +60,10 @@ void CAnimatex::Free( void )
 	for( int i = 0; i < iTotalFrames; i++ )
 	{
 		if( Texture[i] )
+		{
 			FREE_TEXTURE( Texture[i] );
+			Texture[i] = 0;
+		}
 	}
 }
 

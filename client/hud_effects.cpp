@@ -14,6 +14,7 @@
 #define SPEED_ARROW_STEP 2
 #define SPEED_ARROW_FRAMES 121
 #define SPEEDOMETER_Y_OFFSET 5
+#define SAVE_SQUARE_SIZE 150
 
 int CScreenEffects::Init( void )
 {
@@ -27,8 +28,8 @@ int CScreenEffects::VidInit(void)
 	Vignette = LOAD_TEXTURE( "sprites/ef_vignette.dds", NULL, 0, 0 );
 	DroneScreen = LOAD_TEXTURE( "sprites/ef_dronescreen.dds", NULL, 0, 0 );
 	Speedometer = LOAD_TEXTURE( "sprites/diffusion/speedometer.dds", NULL, 0, 0 );
-	SpeedometerArrows = LoadSprite( "sprites/diffusion/speed_arrows.spr" );
-	SpeedometerGears = LoadSprite( "sprites/diffusion/speed_gears.spr" );
+	SpeedometerArrow = LOAD_TEXTURE( "sprites/diffusion/speedometer_arrow.dds", NULL, 0, 0 );
+	SpeedometerGears.Init( "sprites/diffusion/speed_gears/speed_gears" );
 	LastOrigin = g_vecZero;
 	SaveIcon.Init( "sprites/diffusion/saveicon/saveicon" );
 
@@ -86,10 +87,8 @@ void CScreenEffects::DrawGameSaved(void)
 			SaveIcon.a += 350 * g_fFrametime;
 	}
 
-	int SQUARE_SIZE = 150;
-
 	SaveIcon.SetRenderMode( kRenderTransAdd );
-	SaveIcon.SetPos( (ScreenWidth * 0.5f) - (SQUARE_SIZE / 2), ScreenHeight - 75 - SQUARE_SIZE, (ScreenWidth * 0.5f) + (SQUARE_SIZE / 2), ScreenHeight - 75 );
+	SaveIcon.SetPos( (ScreenWidth * 0.5f) - (SAVE_SQUARE_SIZE / 2), ScreenHeight - 75 - SAVE_SQUARE_SIZE, (ScreenWidth * 0.5f) + (SAVE_SQUARE_SIZE / 2), ScreenHeight - 75 );
 	SaveIcon.DrawAnimate( 100 );
 }
 
@@ -101,8 +100,7 @@ void CScreenEffects::DrawSpeedometer(void)
 	if( !gHUD.InCar )
 	{
 		gHUD.CarSpeed = 0.0f;
-		if( SpeedArrowFrame > 0 )
-			SpeedArrowFrame = 0;
+		SpeedArrowRotation = 0;
 		return;
 	}
 
@@ -124,32 +122,25 @@ void CScreenEffects::DrawSpeedometer(void)
 		timedelta = gEngfuncs.GetLocalPlayer()->curstate.msg_time - gEngfuncs.GetLocalPlayer()->prevstate.msg_time;
 	
 	gHUD.CarSpeed = Distance / (timedelta / 3600.0f);
-//	gEngfuncs.Con_NPrintf( 1,"%i\n", (int)kph );
+//	gEngfuncs.Con_NPrintf( 1,"%i\n", (int)gHUD.CarSpeed );
 
-	const model_s *pArrows = gEngfuncs.GetSpritePointer( SpeedometerArrows );
-	// choose arrow frame, each step equals 2 kph
-	SpeedArrowFrame = CL_UTIL_Approach( gHUD.CarSpeed / SPEED_ARROW_STEP, SpeedArrowFrame, 25 * g_fFrametime );
-	SpeedArrowFrame = bound( 0, SpeedArrowFrame, SPEED_ARROW_FRAMES - 1  );
-	if( !gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pArrows, (int)SpeedArrowFrame ) )
-		return;
-
+	// draw the arrow
+	SpeedArrowRotation = CL_UTIL_Approach( gHUD.CarSpeed / SPEED_ARROW_STEP, SpeedArrowRotation, 25 * g_fFrametime );
+	GL_Bind( 0, SpeedometerArrow );
+	pglPushMatrix();
+	pglTranslatef( ScreenWidth - 320 + 150, ScreenHeight - 320 + 150, 0 );
+	pglRotatef( SpeedArrowRotation, 0, 0, 1 );
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-	DrawQuad( ScreenWidth - 320, ScreenHeight - 320 - SPEEDOMETER_Y_OFFSET, ScreenWidth - 20, ScreenHeight - 20 - SPEEDOMETER_Y_OFFSET );
+	DrawQuad( -128, -128, 128, 128 );
 	gEngfuncs.pTriAPI->End();
+	pglPopMatrix();
 
 	// draw gears
-	const model_s *pGears = gEngfuncs.GetSpritePointer( SpeedometerGears );
 	// 9 frames in total (EMPTY-1-2-3-4-5-6-7-R)
-	int GearFrame = Gear;
-	GearFrame = bound( 0, GearFrame, 9 );
-	if( !gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pGears, GearFrame ) )
-		return;
-
-	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
-	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-	DrawQuad( ScreenWidth - 320, ScreenHeight - 320 - SPEEDOMETER_Y_OFFSET, ScreenWidth - 20, ScreenHeight - 20 - SPEEDOMETER_Y_OFFSET );
-	gEngfuncs.pTriAPI->End();
+	SpeedometerGears.SetPos( ScreenWidth - 320, ScreenHeight - 320 - SPEEDOMETER_Y_OFFSET, ScreenWidth - 20, ScreenHeight - 20 - SPEEDOMETER_Y_OFFSET );
+	SpeedometerGears.SetRenderMode( kRenderTransAdd );
+	SpeedometerGears.DrawFrame( Gear );
 }
 
 //===============================================

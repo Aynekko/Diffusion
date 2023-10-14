@@ -806,12 +806,12 @@ private:
 	int Vignette;
 	int DroneScreen;
 	int Speedometer;
-	int SpeedometerArrows;
-	int SpeedometerGears;
+	int SpeedometerArrow;
+	CAnimatex SpeedometerGears;
 	CAnimatex SaveIcon;
 	float VignetteAlpha;
 	float ShieldAlpha;
-	float SpeedArrowFrame;
+	float SpeedArrowRotation;
 	float LastOriginUpdate; // multiplayer issues!
 	Vector LastOrigin;
 };
