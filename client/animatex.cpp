@@ -6,6 +6,9 @@
 
 void CAnimatex::Init( char *Tex )
 {
+	if( Initialized() )
+		return;
+	
 	fCurFrame = 0.0f;
 	xmin = 0;
 	xmax = 100;
