@@ -1947,18 +1947,6 @@ void R_VidInit( void )
 		FREE_TEXTURE( tr.subviewTextures[i].texturenum );
 	}
 
-	for( i = 0; i < MAX_SHADOWS; i++ )
-	{
-		if( !tr.shadowTextures[i] ) break;
-		FREE_TEXTURE( tr.shadowTextures[i] );
-	}
-
-	for( i = 0; i < MAX_SHADOWS; i++ )
-	{
-		if( !tr.shadowCubemaps[i] ) break;
-		FREE_TEXTURE( tr.shadowCubemaps[i] );
-	}
-
 	for( i = 0; i < tr.num_framebuffers; i++ )
 	{
 		if( !tr.frame_buffers[i].init ) break;
@@ -1966,9 +1954,9 @@ void R_VidInit( void )
 	}
 
 	memset( tr.subviewTextures, 0, sizeof( tr.subviewTextures ) );
-	memset( tr.shadowTextures, 0, sizeof( tr.shadowTextures ) );
-	memset( tr.shadowCubemaps, 0, sizeof( tr.shadowCubemaps ) );
 	memset( tr.frame_buffers, 0, sizeof( tr.frame_buffers ) );
+
+	R_ResetShadowTextures();
 
 	tr.num_framebuffers = 0;
 	tr.num_subview_used = 0;
