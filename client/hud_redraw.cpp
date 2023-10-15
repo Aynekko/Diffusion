@@ -128,10 +128,12 @@ void CHud::Think( void )
 
 int CHud :: Redraw( float flTime, int intermission )
 {
+	GL_AlphaTest( GL_FALSE );
+	
 	m_fOldTime = m_flTime;	// save time of previous redraw
 	m_flTime = flTime;
 	m_flTimeDelta = (double)m_flTime - m_fOldTime;
-
+	
 	// Clock was reset, reset delta
 	if( m_flTimeDelta < 0 ) m_flTimeDelta = 0;
 

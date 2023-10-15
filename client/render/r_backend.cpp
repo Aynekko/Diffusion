@@ -173,8 +173,8 @@ void GL_Setup3D( void )
 	GL_LoadMatrix( RI->worldviewMatrix );
 
 	GL_DepthTest( GL_TRUE );
-	GL_AlphaTest( GL_TRUE );
-	GL_Blend( GL_TRUE );
+	GL_AlphaTest( GL_FALSE );
+	GL_Blend( GL_FALSE );
 	GL_DepthMask( GL_TRUE );
 	GL_Cull( GL_FRONT );
 }

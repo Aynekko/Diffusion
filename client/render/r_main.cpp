@@ -1738,7 +1738,7 @@ void R_RenderScene( void )
 	R_DrawEntitiesOnList();
 
 	R_DrawCubeMaps(); // diffusioncubemaps
-
+	
 	R_DrawTangentSpaces();
 
 	// these must be before viewmodel
@@ -2148,7 +2148,7 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 	R_UnloadFarGrass();
 
 	HUD_PrintStats();
-
+	
 	return 1;
 }
 
