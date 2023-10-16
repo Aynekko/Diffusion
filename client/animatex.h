@@ -26,4 +26,6 @@ public:
 	void SetRenderMode( int RenderMode );
 	void Free( void );
 	void SetCurFrame( int Frame );
+	int GetAnimationCurFrame( void );
+	void AdvanceFrame( float Speed );
 };

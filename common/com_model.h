@@ -92,6 +92,8 @@ typedef struct material_s
 	char normalmap_name[64]; // to remember, for landscape arrays
 
 	int		flags;			// brush material flags
+
+	int animation_id; // link to tr.animation
 } material_t;
 
 typedef struct mplane_s

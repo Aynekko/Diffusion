@@ -2126,6 +2126,8 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 	tr.fCustomRendering = true;
 	tr.realframecount++;
 
+	R_Animatex();
+
 	// draw main view
 	R_RenderScene();
 
@@ -2234,4 +2236,25 @@ int HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_inter
 	g_fRenderInitialized = TRUE;
 
 	return TRUE;
+}
+
+//=========================================================
+// R_Animatex: this function advances all animations so they
+// can run regardless of being in the player's view
+//=========================================================
+void R_Animatex( void )
+{
+	if( !RP_NORMALPASS() )
+		return;
+
+	int i = 0;
+
+	while( i < MAX_ANIMATIONS )
+	{
+		if( !tr.animation[i].Initialized() )
+			break;
+
+		tr.animation[i].AdvanceFrame( tr.anim_spd[i] );
+		i++;
+	}
 }

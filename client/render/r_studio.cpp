@@ -4993,6 +4993,11 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 			else if( tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id > 0 )
 				GL_Bind( GL_TEXTURE0, tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id );
+			else if( mat->gl_diffuse_id != tr.defaultTexture && tr.materials[mat->gl_diffuse_id].animation_id >= 0 )
+			{
+				int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
+				GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
+			}
 			else
 				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
 
@@ -5236,6 +5241,11 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				IEngineStudio.StudioSetupSkin( m_pStudioHeader, pskinref[pMesh->skinref] );
 			else if( tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id > 0 )
 				GL_Bind( GL_TEXTURE0, tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id );
+			else if( mat->gl_diffuse_id != tr.defaultTexture && tr.materials[mat->gl_diffuse_id].animation_id >= 0 )
+			{
+				int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
+				GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
+			}
 			else 
 				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
 

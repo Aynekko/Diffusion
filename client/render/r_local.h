@@ -37,10 +37,8 @@ GNU General Public License for more details.
 #define R_ModelOpaque( rm, amt )	( rm == kRenderNormal || rm == kRenderTransAlpha )//|| (rm == kRenderTransColor && amt == 255) )
 
 #define MAX_FADING_ENTS 8192
-
+#define MAX_ANIMATIONS 64
 #define WATER_TEXTURES 29
-
-#define MAX_PARALLAX_INTERIORS 8
 
 // refparams
 #define RP_NONE		0
@@ -452,6 +450,9 @@ typedef struct
 
 	bool lowmemory; // -lowmem parameter in the shortcut
 
+	CAnimatex animation[MAX_ANIMATIONS];
+	int anim_spd[MAX_ANIMATIONS];
+
 } ref_globals_t;
 
 typedef struct
@@ -765,6 +766,7 @@ void R_SetupModelviewMatrix( matrix4x4 &m );
 void R_DrawParticles( qboolean trans );
 void R_CheckChanges( void );
 void R_RenderScene( void );
+void R_Animatex( void );
 int CL_FxBlend( cl_entity_t *e );
 void R_LoadIdentity( void );
 void R_RotateForEntity( cl_entity_t *e );

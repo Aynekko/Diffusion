@@ -68,6 +68,8 @@ void CAnimatex::Free( void )
 			Texture[i] = 0;
 		}
 	}
+
+	iTotalFrames = 0;
 }
 
 void CAnimatex::SetPos( int x_min, int y_min, int x_max, int y_max )
@@ -117,11 +119,23 @@ void CAnimatex::DrawAnimate( float Speed )
 	if( !Initialized() )
 		return;
 
+	AdvanceFrame( Speed );
+	DrawFrame( (int)fCurFrame );
+}
+
+int CAnimatex::GetAnimationCurFrame( void )
+{
+	if( !Initialized() )
+		return tr.defaultTexture;
+
+	return Texture[(int)fCurFrame];
+}
+
+void CAnimatex::AdvanceFrame( float Speed )
+{
 	fCurFrame += Speed * g_fFrametime;
 	if( fCurFrame >= GetTotalFrames() )
 		fCurFrame = 0;
-
-	DrawFrame( (int)fCurFrame );
 }
 
 void CAnimatex::SetColor( int R, int G, int B )

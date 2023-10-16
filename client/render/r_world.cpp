@@ -75,6 +75,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 	tr.materials[texnum].ApplyColor = false;
 	tr.materials[texnum].Fresnel = 4.0f;
 	tr.materials[texnum].TwoSided = false;
+	tr.materials[texnum].animation_id = -1;
 
 	tr.materials[texnum].gl_normalmap_id = 0;
 	tr.materials[texnum].gl_interiormap_id = 0;
@@ -370,6 +371,46 @@ void LoadMaterialSettingsForTexture( int texnum )
 						if( tr.materials[texnum].gl_fallbacktex_id == 0 )
 							ConPrintf( "^1Error:^7 FallbackTexture for texture \"%s\" couldn't be loaded.\n", tr.materials[texnum].name );
 					}
+				}
+			}
+			else
+			{
+				Error = true;
+				break;
+			}
+		}
+		else if( !Q_stricmp( token, "Animation" ) )
+		{
+			// parse value for this setting
+			afile = COM_ParseLine( afile, token );
+			if( afile && token[0] > 0 )
+			{
+				// find a free slot
+				int f = 0;
+				while( f < MAX_ANIMATIONS )
+				{
+					if( !tr.animation[f].Initialized() )
+					{
+						tr.animation[f].Init( token );
+						if( tr.animation[f].Initialized() )
+							tr.materials[texnum].animation_id = f;
+
+						break;
+					}
+					f++;
+				}
+
+				// parse framerate value
+				afile = COM_ParseLine( afile, token );
+				if( afile && token[0] > 0 )
+				{
+					if( tr.animation[f].Initialized() )
+						tr.anim_spd[f] = Q_atoi( token );
+				}
+				else // no framerate set, use default
+				{
+					if( tr.animation[f].Initialized() )
+						tr.anim_spd[f] = 10;
 				}
 			}
 			else
@@ -1857,6 +1898,13 @@ static void Mod_FreeWorld( model_t *mod )
 
 	memset( world, 0, sizeof( gl_world_t ) );
 	tr.grass_total_size = 0;
+
+	for( int i = 0; i < MAX_ANIMATIONS; i++ )
+	{
+		if( tr.animation[i].Initialized() )
+			tr.animation[i].Free();
+	}
+	memset( tr.anim_spd, 0, sizeof( tr.anim_spd ) );
 }
 
 /*
@@ -2221,6 +2269,11 @@ void R_DrawLightForSurfList( plight_t *pl )
 			{
 				if( tr.materials[tex->gl_texturenum].gl_fallbacktex_id > 0 )
 					GL_Bind( GL_TEXTURE0, tr.materials[tex->gl_texturenum].gl_fallbacktex_id );
+				else if( tex->gl_texturenum != tr.defaultTexture && tr.materials[tex->gl_texturenum].animation_id >= 0 )
+				{
+					int anim_id = tr.materials[tex->gl_texturenum].animation_id;
+					GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
+				}
 				else
 					GL_Bind( GL_TEXTURE0, tex->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
@@ -2666,6 +2719,11 @@ void R_DrawBrushList( void )
 			{
 				if( tr.materials[es->gl_texturenum].gl_fallbacktex_id > 0 )
 					GL_Bind( GL_TEXTURE0, tr.materials[es->gl_texturenum].gl_fallbacktex_id );
+				else if( es->gl_texturenum != tr.defaultTexture && tr.materials[es->gl_texturenum].animation_id >= 0 )
+				{
+					int anim_id = tr.materials[es->gl_texturenum].animation_id;
+					GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
+				}
 				else
 					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
