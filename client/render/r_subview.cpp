@@ -927,7 +927,7 @@ static void R_RenderDroneView( void )
 	RI->pvsorigin = pDrone->origin;
 	RI->vieworg = origin;
 
-	RI->params = RP_DRONEVIEW;
+	RI->params = RP_SCREENVIEW;
 
 	memcpy( viewport, RI->viewport, sizeof( viewport ) );
 
@@ -967,7 +967,7 @@ void R_RenderSubview( void )
 	if( glState.stack_position > (unsigned int)r_recursion_depth->value )
 		return; // too deep...
 
-	if( FBitSet( RI->params, RP_OVERVIEW ) || FBitSet( RI->params, RP_DRONEVIEW ) ) // drone view is also excluded for now, for speedup reasons
+	if( FBitSet( RI->params, RP_OVERVIEW ) )
 		return;
 
 	if( IsBuildingCubemaps() )
