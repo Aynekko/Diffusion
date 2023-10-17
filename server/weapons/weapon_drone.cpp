@@ -31,12 +31,20 @@ enum wpndrone_e
 	DRONE_NODRONE,
 };
 
+/*
 enum wpndroneradio_e
 {
 	DRONERADIO_IDLE = 0,
 	DRONERADIO_IDLE2, // not used
 	DRONERADIO_DEPLOY,
 	DRONERADIO_CALL,
+};*/
+enum wpndroneradio_e
+{
+	DRONERADIO_IDLE = 0,
+	DRONERADIO_DEPLOY,
+	DRONERADIO_CALL,
+	DRONERADIO_HOLSTER,
 };
 
 class CWpnDrone : public CBasePlayerWeapon
@@ -338,6 +346,7 @@ void CWpnDrone::PrimaryAttack()
 			pDrone->pev->health = DroneHealth;
 			pDrone->pev->max_health = 500;
 			pDrone->m_iCounter = DroneAmmo;
+			pDrone->pev->iuser3 = -662; // a flag so we can render drone's camera in viewmodel screen
 
 			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 			if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )

@@ -94,6 +94,7 @@ typedef struct material_s
 	int		flags;			// brush material flags
 
 	int animation_id; // link to tr.animation
+	bool drone_view; // this texture is a camera
 } material_t;
 
 typedef struct mplane_s

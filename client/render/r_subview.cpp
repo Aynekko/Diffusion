@@ -24,6 +24,8 @@ GNU General Public License for more details.
 
 #define MIRROR_PLANE_EPSILON		32.0f	// g-cont. tune this by taste
 
+cl_entity_t *pDrone = NULL;
+
 /*
 =============================================================
 
@@ -546,8 +548,8 @@ void R_CalcSubviewMatrix( int subtexturenum, const matrix4x4 &viewmatrix, cl_ent
 
 void R_DrawSubviewPasses( void )
 {
-	int		viewport[4];
-	ref_instance_t	*prevRI;
+	int viewport[4];
+	ref_instance_t *prevRI;
 	cl_entity_t	*camera;
 	unsigned int oldFBO;
 
@@ -825,6 +827,126 @@ void R_FindSubviewEnts( void )
 	}
 }
 
+static void R_RenderDroneView( void )
+{
+	// don't bother if the drone is not selected at all
+	if( gHUD.m_Ammo.WeaponID != WEAPON_DRONE )
+		return;
+	
+	// reset drone pointer
+	pDrone = NULL;
+
+	// check solid entities
+	for( int i = 0; i < tr.num_solid_entities; i++ )
+	{
+		RI->currententity = tr.solid_entities[i];
+		if( RI->currententity->curstate.iuser3 == -662 )
+		{
+			// it's our drone
+			if( RI->currententity->curstate.owner == gEngfuncs.GetLocalPlayer()->index )
+			{
+				pDrone = RI->currententity;
+				break;
+			}
+		}
+	}
+	
+	if( !pDrone )
+		return;
+
+	if( !RP_NORMALPASS() )
+		return;
+
+	if( FBitSet( RI->params, RP_OVERVIEW ) )
+		return;
+
+	if( IsBuildingCubemaps() )
+		return;
+
+	// player is outside world. Don't draw subview for speedup reasons
+	if( RP_OUTSIDE( RI->viewleaf ) )
+		return;
+
+	if( !FBitSet( RI->params, RP_OLDVIEWLEAF ) )
+		R_FindViewLeaf();
+	R_SetupFrustum();
+	R_MarkLeaves();
+
+	tr.modelorg = RI->vieworg;
+	RI->currententity = GET_ENTITY( 0 );
+	RI->currentmodel = RI->currententity->model;
+	RI->num_subview_faces = 0;
+
+	int viewport[4];
+	ref_instance_t *prevRI;
+
+	R_PushRefState();
+	prevRI = R_GetPrevInstance();
+
+	matrix4x4 viewmatrix;
+
+	Vector origin, angles;
+	float fov = 90;
+
+	viewmatrix.Identity();
+
+	origin = pDrone->origin;
+	angles = pDrone->angles;
+	angles.x += 15;
+
+	studiohdr_t *view = (studiohdr_t *)IEngineStudio.Mod_Extradata( pDrone->model );
+
+	if( view )
+	{
+		Vector forward;
+		AngleVectors( angles, forward, NULL, NULL );
+		Vector viewpos = view->eyeposition;
+		origin += viewpos + forward * 8.0f;
+	}
+
+	// setup the screen fov
+	fov = 100;
+
+	RI->viewport[2] = RI->viewport[3] = 512;
+
+	// setup the screen FOV
+	if( RI->viewport[2] == RI->viewport[3] )
+	{
+		RI->fov_x = fov;
+		RI->fov_y = fov;
+	}
+	else
+	{
+		RI->fov_x = fov;
+		RI->fov_y = V_CalcFov( RI->fov_x, RI->viewport[2], RI->viewport[3] );
+	}
+
+	RI->viewangles[0] = anglemod( angles[0] );
+	RI->viewangles[1] = anglemod( angles[1] );
+	RI->viewangles[2] = anglemod( angles[2] );
+	RI->pvsorigin = pDrone->origin;
+	RI->vieworg = origin;
+
+	RI->params = RP_DRONEVIEW;
+
+	memcpy( viewport, RI->viewport, sizeof( viewport ) );
+
+	R_RenderScene();
+
+	if( !tr.DroneViewTex )
+	{
+		// create new texture
+		tr.DroneViewTex = CREATE_TEXTURE( "*droneView", viewport[2], viewport[3], NULL, TF_NOMIPMAP );
+	}
+
+	GL_Bind( GL_TEXTURE0, tr.DroneViewTex );
+	pglCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, viewport[0], viewport[1], viewport[2], viewport[3], 0 );
+
+	R_ResetRefState();
+
+	R_PopRefState();
+}
+
 /*
 ================
 R_RenderSubview
@@ -834,6 +956,8 @@ find all the subview faces
 */
 void R_RenderSubview( void )
 {
+	R_RenderDroneView();
+	
 	int	flags = world->features;
 
 	// no mirrors, portals or screens anyway
@@ -843,7 +967,7 @@ void R_RenderSubview( void )
 	if( glState.stack_position > (unsigned int)r_recursion_depth->value )
 		return; // too deep...
 
-	if( FBitSet( RI->params, RP_OVERVIEW ) )
+	if( FBitSet( RI->params, RP_OVERVIEW ) || FBitSet( RI->params, RP_DRONEVIEW ) ) // drone view is also excluded for now, for speedup reasons
 		return;
 
 	if( IsBuildingCubemaps() )
@@ -856,7 +980,7 @@ void R_RenderSubview( void )
 	if( !FBitSet( RI->params, RP_OLDVIEWLEAF ))
 		R_FindViewLeaf();
 	R_SetupFrustum();
-	R_MarkLeaves ();
+	R_MarkLeaves();
 
 	if( FBitSet( RI->params, RP_MIRRORVIEW ))
 		tr.modelorg = RI->pvsorigin;

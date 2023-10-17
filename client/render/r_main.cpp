@@ -1664,12 +1664,6 @@ void R_DrawTranslucentEntities(void)
 
 		if( tr.blend <= 0.0f ) continue;
 
-	//	if( RI->currententity->curstate.iuser3 == -669 )
-	//	{
-	//		R_DrawCable( RI->currententity );
-	//		continue;
-	//	}
-
 		R_DrawSpriteModel( RI->currententity );
 	}
 

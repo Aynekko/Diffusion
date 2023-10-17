@@ -33,6 +33,7 @@ GNU General Public License for more details.
 used iuser3 "flags":
 -660 func_smokevolume
 -661 prop_explosive_barrel
+-662 player's drone
 -663 env_bubbles
 -666 item_flare
 -667 monster on fire

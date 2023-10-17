@@ -4998,6 +4998,8 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 				int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
 				GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
 			}
+			else if( tr.materials[mat->gl_diffuse_id].drone_view )
+				GL_Bind( GL_TEXTURE0, tr.DroneViewTex );
 			else
 				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
 
@@ -5246,6 +5248,8 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
 				GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
 			}
+			else if( tr.materials[mat->gl_diffuse_id].drone_view )
+				GL_Bind( GL_TEXTURE0, tr.DroneViewTex );
 			else 
 				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
 

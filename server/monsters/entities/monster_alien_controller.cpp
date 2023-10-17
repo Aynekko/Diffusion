@@ -2724,6 +2724,12 @@ void CDrone :: IdleSound(void)
 
 void CDrone::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
+	if( pActivator )
+	{
+		if( pev->owner != pActivator->edict() )
+			return; // you can't steal someone else's drone! (lol)
+	}
+	
 	CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
 
 	pPlayer->GiveAmmo( 1, "drone", 1 );
