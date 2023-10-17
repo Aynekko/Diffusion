@@ -625,7 +625,11 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 
 	case TE_BEAMPARTICLES:
 	{
-		pos = GET_VIEWMODEL()->attachment[0];
+		entityIndex = READ_SHORT();
+		if( UTIL_IsLocal(entityIndex))
+			pos = GET_VIEWMODEL()->attachment[0];
+		else // other player
+			pos = GET_ENTITY( entityIndex )->attachment[0];
 		pos2.x = READ_COORD();
 		pos2.y = READ_COORD();
 		pos2.z = READ_COORD();

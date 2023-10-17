@@ -469,6 +469,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 
 			MESSAGE_BEGIN( MSG_PAS, gmsgTempEnt, tr.vecEndPos );
 				WRITE_BYTE( TE_BEAMPARTICLES );
+				WRITE_SHORT( m_pPlayer->entindex() );
 				WRITE_COORD( tr.vecEndPos.x );
 				WRITE_COORD( tr.vecEndPos.y );
 				WRITE_COORD( tr.vecEndPos.z );
