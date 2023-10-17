@@ -49,6 +49,7 @@ MemBlock<CQuakePart>ParticleArray_Dirt( MAX_PARTICLES ); // TYPE_DIRT
 MemBlock<CQuakePart>ParticleArray_Fireball( MAX_PARTICLES ); // TYPE_FIREBALL
 MemBlock<CQuakePart>ParticleArray_Blood( MAX_PARTICLES ); // TYPE_BLOOD
 MemBlock<CQuakePart>ParticleArray_Bubbles( MAX_PARTICLES ); // TYPE_BUBBLES
+MemBlock<CQuakePart>ParticleArray_Beamring( MAX_PARTICLES ); // TYPE_BEAMRING
 int partcounter = 0;
 
 //===============================================================================
@@ -78,6 +79,7 @@ CQuakePart InitializeParticle( void )
 	dst.m_vecAddedVelocity = g_vecZero;
 	dst.m_flDieTime = 0;
 	dst.m_flSinSpeed = 0;
+	dst.m_vecView = g_vecZero;
 
 	// only used with flag FPART_DISTANCESCALE
 	dst.m_flMinScale = 1.0f;
@@ -120,7 +122,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 	if( !curParticle->m_hTexture )
 		return;
 
-	if( FBitSet( curParticle->m_iFlags, FPART_FLOATING_ORIENTED ) ) // some of them will be visible from underwater
+	if( FBitSet( curParticle->m_iFlags, FPART_TWOSIDE ) || FBitSet( curParticle->m_iFlags, FPART_FLOATING_ORIENTED ) ) // some of them will be visible from underwater
 		GL_Cull( GL_NONE );
 	else
 		GL_Cull( GL_FRONT );
@@ -479,7 +481,9 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		}
 
 		// diffusion - look at player, but don't rotate with view rotation
-		if( FBitSet( curParticle->m_iFlags, FPART_AFLOAT ) && FBitSet( curParticle->m_iFlags, FPART_FLOATING_ORIENTED ) ) // look at the ceiling
+		if( !curParticle->m_vecView.IsNull() )
+			VectorAngles( curParticle->m_vecView, ViewVec );
+		else if( FBitSet( curParticle->m_iFlags, FPART_AFLOAT ) && FBitSet( curParticle->m_iFlags, FPART_FLOATING_ORIENTED ) ) // look at the ceiling
 			VectorAngles( Vector( 0, 0, -1 ), ViewVec );
 		else
 			VectorAngles( org - RI->vieworg, ViewVec );
@@ -927,7 +931,9 @@ bool CQuakePart::Evaluate( float gravity )
 
 	// diffusion - look at player, but don't rotate with view rotation
 	Vector ViewVec;
-	if( FBitSet( m_iFlags, FPART_AFLOAT ) && FBitSet( m_iFlags, FPART_FLOATING_ORIENTED ) ) // look at the ceiling
+	if( !m_vecView.IsNull() )
+		VectorAngles( m_vecView, ViewVec );
+	else if( FBitSet( m_iFlags, FPART_AFLOAT ) && FBitSet( m_iFlags, FPART_FLOATING_ORIENTED ) ) // look at the ceiling
 		VectorAngles( Vector(0,0,-1), ViewVec );
 	else
 		VectorAngles( org - RI->vieworg, ViewVec );
@@ -983,7 +989,7 @@ bool CQuakePart::Evaluate( float gravity )
 
 	GL_Blend( GL_TRUE );
 
-	if( FBitSet( m_iFlags, FPART_AFLOAT ) && FBitSet( m_iFlags, FPART_FLOATING_ORIENTED ) ) // visible from underwater
+	if( FBitSet( m_iFlags, FPART_TWOSIDE ) || (FBitSet( m_iFlags, FPART_AFLOAT ) && FBitSet( m_iFlags, FPART_FLOATING_ORIENTED )) ) // visible from underwater
 		GL_Cull( GL_NONE );
 	else
 		GL_Cull( GL_FRONT );
@@ -1052,6 +1058,7 @@ CQuakePartSystem :: CQuakePartSystem( void )
 	ParticleArray_Fireball.Clear();
 	ParticleArray_Blood.Clear();
 	ParticleArray_Bubbles.Clear();
+	ParticleArray_Beamring.Clear();
 
 	partcounter = 0;
 
@@ -1089,6 +1096,7 @@ void CQuakePartSystem :: Clear( void )
 	m_hDustMote = LOAD_TEXTURE( "gfx/particles/dustmote", NULL, 0, TF_CLAMP );
 	m_hExplosion = LOAD_TEXTURE( "gfx/particles/explosion", NULL, 0, TF_CLAMP );
 	m_hBubble = LOAD_TEXTURE( "gfx/particles/bubble", NULL, 0, TF_CLAMP );
+	m_hBeamRing = LOAD_TEXTURE( "gfx/particles/beamring", NULL, 0, TF_CLAMP );
 
 	ParsePartInfos( "data/particles.txt" );
 
@@ -1102,6 +1110,7 @@ void CQuakePartSystem :: Clear( void )
 	ParticleArray_Fireball.Clear();
 	ParticleArray_Blood.Clear();
 	ParticleArray_Bubbles.Clear();
+	ParticleArray_Beamring.Clear();
 
 	partcounter = 0;
 
@@ -1617,6 +1626,7 @@ void CQuakePartSystem :: Update( void )
 	DrawParticles( ParticleArray_Fireball );
 	DrawParticles( ParticleArray_Blood );
 	DrawParticles( ParticleArray_Bubbles );
+	DrawParticles( ParticleArray_Beamring );
 
 	// draw particles from txt-file (through glbegin-end...)
 	CQuakePart *pCur, *pNext;
@@ -1718,6 +1728,8 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 	case TYPE_BUBBLES:
 		dst = ParticleArray_Bubbles.Allocate();
 		break;
+	case TYPE_BEAMRING:
+		dst = ParticleArray_Beamring.Allocate();
 	case TYPE_CUSTOM:
 		dst = AllocParticle();
 		break;
@@ -1760,6 +1772,7 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 	dst->EntIndex = src->EntIndex;
 	dst->m_flDieTime = src->m_flDieTime;
 	dst->m_flSinSpeed = src->m_flSinSpeed;
+	dst->m_vecView = src->m_vecView;
 //	dst->AlphaDownScale = 1.0f;
 
 	// needs to save old origin
@@ -2369,4 +2382,49 @@ void CQuakePartSystem::Bubble( int EntIndex, const Vector &pos, float Speed, int
 	src.m_flSinSpeed = SinSpeed * RANDOM_FLOAT(0.05f, 0.15f);
 
 	AddParticle( &src, m_hBubble, flags );
+}
+
+void CQuakePartSystem::Beamring( int EntIndex, const Vector &start, const Vector &end )
+{
+	if( !g_fRenderInitialized )
+		return;
+
+	CQuakePart src = InitializeParticle();
+
+	int flags = FPART_TWOSIDE;
+
+	// get direction and distance
+	Vector ViewVec;
+	Vector forward;
+	VectorAngles( end - start, ViewVec );
+	gEngfuncs.pfnAngleVectors( ViewVec, forward, NULL, NULL );
+	float dist = (start - end).Length();
+
+	float Scale = 10;
+
+	src.m_flAlphaVelocity = -0.75f;
+	src.m_flRadius = Scale;
+	src.m_flRadiusVelocity = 50;
+	src.ParticleType = TYPE_BEAMRING;
+	src.EntIndex = EntIndex;
+	src.m_vecView = end - start;
+
+	// add the rest of the rings
+	// draw starting from end point
+	float dist_orig = dist;
+	while( dist > 0.1f )
+	{
+		src.m_vecOrigin = start + forward * dist;
+		dist *= 0.85f;
+		// some empirical trickery...
+		src.m_flRadius = RemapVal( dist, 0, dist_orig, 0, Scale );
+		src.m_flRadius = bound( 1.0, src.m_flRadius, Scale );
+		src.m_flRotation++;
+		src.m_flRotationVelocity += 100;
+		src.m_flRadiusVelocity *= 0.8f;
+		if( src.m_flAlphaVelocity > -2.0f )
+			src.m_flAlphaVelocity *= 1.025f;
+
+		AddParticle( &src, m_hBeamRing, flags );
+	}
 }

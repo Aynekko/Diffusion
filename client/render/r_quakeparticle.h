@@ -42,6 +42,7 @@ GNU General Public License for more details.
 #define FPART_SINEWAVE		BIT(14) // for the bubbles...
 #define FPART_OPAQUE		BIT(15) // goes through solid render pass
 #define FPART_NOTINSOLID	BIT(16) // don't draw in solid
+#define FPART_TWOSIDE		BIT(17)
 
 typedef enum
 {
@@ -55,6 +56,7 @@ typedef enum
 	TYPE_FIREBALL,
 	TYPE_BLOOD,
 	TYPE_BUBBLES,
+	TYPE_BEAMRING,
 	TYPE_CUSTOM,
 };
 
@@ -81,6 +83,7 @@ public:
 	Vector		m_vecAddedVelocity;
 	float		m_flDieTime;
 	float		m_flSinSpeed;
+	Vector		m_vecView; // orientation vector
 
 	// only used with flag FPART_DISTANCESCALE
 	float m_flMinScale;
@@ -164,6 +167,7 @@ public:
 	int m_hDustMote;
 	int m_hExplosion;
 	int m_hBubble;
+	int m_hBeamRing;
 
 	CQuakePart *m_pActiveParticles;
 
@@ -184,6 +188,7 @@ public:
 	void ExplosionParticles( int EntIndex, const Vector &pos );
 	void BulletParticles( int EntIndex, const Vector &org, const Vector &dir );
 	void Bubble( int EntIndex, const Vector &pos, float Speed, int Distance, float DieTime, float SinSpeed );
+	void Beamring( int EntIndex, const Vector &start, const Vector &end );
 	void SparkParticles( int EntIndex, const Vector &org, const Vector &dir );
 	void RicochetSparks( int EntIndex, const Vector &org, float scale );
 	void SmokeParticles( int EntIndex, const Vector &pos, int count, float speed = 0, float scale = 0 );

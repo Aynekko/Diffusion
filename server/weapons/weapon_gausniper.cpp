@@ -350,7 +350,7 @@ void CGauss::StartFire( void )
 
 	float flZVel = m_pPlayer->GetAbsVelocity().z;
 
-	m_pPlayer->SetAbsVelocity( m_pPlayer->GetAbsVelocity() - gpGlobals->v_forward * flDamage * 1 );
+//	m_pPlayer->SetAbsVelocity( m_pPlayer->GetAbsVelocity() - gpGlobals->v_forward * flDamage * 1 );
 
 	SendWeaponAnim( GAUSS_FIRE );
 
@@ -432,19 +432,16 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 		if (pEntity == NULL)
 			break;
 
-		int Brightness = 255;
-
 		if (fFirstBeam)
 		{
 			m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 			fFirstBeam = 0;
 
-			Vector tmpSrc = vecSrc + gpGlobals->v_up * -8 + gpGlobals->v_right * 3;
+			Vector tmpSrc = vecSrc + gpGlobals->v_up * -4 + gpGlobals->v_right * 3 + gpGlobals->v_forward * 32;
 
 			// don't draw beam until the damn thing looks like it's coming out of the barrel
 			// draw beam
-			
-			MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, tr.vecEndPos );
+			MESSAGE_BEGIN( MSG_PAS, gmsgTempEnt, tr.vecEndPos );
 				WRITE_BYTE( TE_BEAMENTPOINT );
 				WRITE_SHORT( m_pPlayer->entindex() + 0x1000 );
 				WRITE_COORD( tr.vecEndPos.x);
@@ -453,23 +450,29 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 				WRITE_SHORT( m_iBeam );
 				WRITE_BYTE( 0 ); // startframe
 				WRITE_BYTE( 0 ); // framerate
-				WRITE_BYTE( 1 ); // life
+				WRITE_BYTE( 3 ); // life
 
 				WRITE_BYTE( 10 );  // width
 
 				WRITE_BYTE( 0 );   // noise
 
-					// always white, and intensity based on charge
-				WRITE_BYTE( 255 );   // r, g, b
-				WRITE_BYTE( 255 );   // r, g, b
+				WRITE_BYTE( 70 );   // r, g, b
+				WRITE_BYTE( 169 );   // r, g, b
 				WRITE_BYTE( 255 );   // r, g, b
 				
-				WRITE_BYTE( Brightness );	// brightness
+				WRITE_BYTE( 255 );	// brightness
 
 				WRITE_BYTE( 0 );		// speed
 			MESSAGE_END();
 			
 			nTotal += 26;
+
+			MESSAGE_BEGIN( MSG_PAS, gmsgTempEnt, tr.vecEndPos );
+				WRITE_BYTE( TE_BEAMPARTICLES );
+				WRITE_COORD( tr.vecEndPos.x );
+				WRITE_COORD( tr.vecEndPos.y );
+				WRITE_COORD( tr.vecEndPos.z );
+			MESSAGE_END();
 		}
 		else
 		{
@@ -497,7 +500,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 				WRITE_BYTE( 255 );   // r, g, b
 				WRITE_BYTE( 255 );   // r, g, b
 				
-				WRITE_BYTE( Brightness );	// brightness
+				WRITE_BYTE( 255 );	// brightness
 
 				WRITE_BYTE( 0 );		// speed
 			MESSAGE_END();

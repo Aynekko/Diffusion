@@ -530,8 +530,8 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 	int Message, Model, Color, Value, Count;
 	int entityIndex, decalIndex;
 	TEMPENTITY *pTemp;
-	int Mode, Flags, Weapon;
-	float Scale, Framerate, Life;
+	int Mode, Flags, Weapon, Startframe;
+	float Scale, Framerate, Life, Speed, r, g, b, a, noise;
 	pmtrace_t trace;
 	
 	BEGIN_READ( pszName, pbuf, iSize );
@@ -620,6 +620,40 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 			R_Bubbles( pos, pos2, Scale, Count, vel );
 		else 
 			R_BubbleTrail( pos, pos2, Scale, Count, vel );
+	}
+	break;
+
+	case TE_BEAMPARTICLES:
+	{
+		pos = GET_VIEWMODEL()->attachment[0];
+		pos2.x = READ_COORD();
+		pos2.y = READ_COORD();
+		pos2.z = READ_COORD();
+		g_pParticles.Beamring( 0, pos, pos2 );
+	}
+	break;
+
+	case TE_BEAMENTPOINT:
+	{
+		entityIndex = READ_SHORT();
+		pos.x = READ_COORD();
+		pos.y = READ_COORD();
+		pos.z = READ_COORD();
+		Model = READ_SHORT();
+		Startframe = READ_BYTE();
+		Framerate = (float)READ_BYTE() * 0.1f;
+		Life = (float)READ_BYTE() * 0.1f;
+		Scale = (float)READ_BYTE() * 0.1f;
+		noise = (float)READ_BYTE() * 0.01f;
+		r = (float)READ_BYTE() / 255.0f;
+		g = (float)READ_BYTE() / 255.0f;
+		b = (float)READ_BYTE() / 255.0f;
+		a = (float)READ_BYTE() / 255.0f;
+		Speed = (float)READ_BYTE() * 0.1f;
+		gEngfuncs.pEfxAPI->R_BeamEntPoint( entityIndex, pos, Model, Life, Scale, noise, a, Speed, Startframe, Framerate, r, g, b );
+
+		// add a second noisy white beam
+		gEngfuncs.pEfxAPI->R_BeamEntPoint( entityIndex, pos, Model, Life, Scale * 0.5f, 0.05f, a, Speed, Startframe, Framerate, 1, 1, 1 );
 	}
 	break;
 
