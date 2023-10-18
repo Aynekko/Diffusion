@@ -32,6 +32,7 @@ int CScreenEffects::VidInit(void)
 	SpeedometerGears.Init( "sprites/diffusion/speed_gears/speed_gears" );
 	LastOrigin = g_vecZero;
 	SaveIcon.Init( "sprites/diffusion/saveicon/saveicon" );
+	SaveIcon.flags = ATX_STOPATLASTFRAME;
 
 	return 1;
 }
@@ -66,10 +67,8 @@ void CScreenEffects::DrawGameSaved(void)
 	if( !ShouldDrawGameSaved )
 		return;
 
-	int total_frames = SaveIcon.GetTotalFrames();
-	if( SaveIcon.GetCurFrame() >= total_frames - 1 )
+	if( SaveIcon.IsLastFrame() )
 	{
-		SaveIcon.SetCurFrame( total_frames - 1 );
 		if( SaveIcon.a > 0.0f )
 			SaveIcon.a -= 300 * g_fFrametime;
 

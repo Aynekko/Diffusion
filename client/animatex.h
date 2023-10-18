@@ -3,6 +3,8 @@
 //============================================================================
 
 #define MAX_ANIMATEX_FRAMES 256
+// flags
+#define ATX_STOPATLASTFRAME BIT(0)
 
 class CAnimatex
 {
@@ -13,6 +15,7 @@ public:
 	float fCurFrame;
 	int xmin, ymin, xmax, ymax;
 	float r, g, b, a;
+	int flags;
 
 	void Init( char *Tex );
 	bool Initialized( void );
@@ -28,4 +31,5 @@ public:
 	void SetCurFrame( int Frame );
 	int GetAnimationCurFrame( void );
 	void AdvanceFrame( float Speed );
+	bool IsLastFrame( void );
 };

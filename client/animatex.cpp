@@ -134,8 +134,21 @@ int CAnimatex::GetAnimationCurFrame( void )
 void CAnimatex::AdvanceFrame( float Speed )
 {
 	fCurFrame += Speed * g_fFrametime;
-	if( fCurFrame >= GetTotalFrames() )
-		fCurFrame = 0;
+	if( (int)fCurFrame >= GetTotalFrames() )
+	{
+		if( flags & ATX_STOPATLASTFRAME )
+			fCurFrame = GetTotalFrames() - 1;
+		else
+			fCurFrame = 0;
+	}
+}
+
+bool CAnimatex::IsLastFrame( void )
+{
+	if( GetCurFrame() == GetTotalFrames() - 1 )
+		return true;
+
+	return false;
 }
 
 void CAnimatex::SetColor( int R, int G, int B )
