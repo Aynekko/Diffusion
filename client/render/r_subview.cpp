@@ -833,21 +833,20 @@ static void R_RenderDroneView( void )
 	// don't bother if the drone is not selected at all
 	if( gHUD.m_Ammo.WeaponID != WEAPON_DRONE )
 		return;
+
+	// reset drone pointer
+	tr.pDrone = NULL;
 	
-	if( !tr.pDrone )
+	for( int i = 0; i < tr.num_solid_entities; i++ )
 	{
-		// check solid entities
-		for( int i = 0; i < tr.num_solid_entities; i++ )
+		RI->currententity = tr.solid_entities[i];
+		if( RI->currententity->curstate.iuser3 == -662 )
 		{
-			RI->currententity = tr.solid_entities[i];
-			if( RI->currententity->curstate.iuser3 == -662 )
+			// it's our drone
+			if( RI->currententity->curstate.owner == gEngfuncs.GetLocalPlayer()->index )
 			{
-				// it's our drone
-				if( RI->currententity->curstate.owner == gEngfuncs.GetLocalPlayer()->index )
-				{
-					tr.pDrone = RI->currententity;
-					break;
-				}
+				tr.pDrone = RI->currententity;
+				break;
 			}
 		}
 	}
@@ -857,8 +856,10 @@ static void R_RenderDroneView( void )
 		screen_static.Init( "textures/anim_noise/noise" );
 
 	if( screen_static.Initialized() )
+	{
 		screen_static.AdvanceFrame( 15 );
-	
+	}
+
 	if( !tr.pDrone )
 	{
 		tr.DroneViewTex = screen_static.GetAnimationCurFrame();
@@ -906,15 +907,6 @@ static void R_RenderDroneView( void )
 	origin = tr.pDrone->origin;
 	angles = tr.pDrone->angles;
 	angles.x += 15;
-
-//	studiohdr_t *view = (studiohdr_t *)IEngineStudio.Mod_Extradata( pDrone->model );
-
-//	if( view )
-//	{
-//		AngleVectors( angles, forward, NULL, NULL );
-//		Vector viewpos = view->eyeposition;
-//		origin += viewpos + forward * 8.0f;
-//	}
 
 	// setup the screen fov
 	float fov = 100;

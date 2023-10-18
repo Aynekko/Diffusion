@@ -2731,10 +2731,13 @@ void CDrone::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTyp
 	
 	CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
 
-	pPlayer->GiveAmmo( 1, "drone", 1 );
-	pPlayer->DroneHealth = pev->health;
-	pPlayer->DroneAmmo = m_iCounter;
-	pPlayer->DroneDeployed = false;
+	if( pPlayer )
+	{
+		pPlayer->GiveAmmo( 1, "drone", 1 );
+		pPlayer->DroneHealth = pev->health;
+		pPlayer->DroneAmmo = m_iCounter;
+		pPlayer->DroneDeployed = false;
+	}
 
 	// very important to do this!!!
 	if( pev->effects & EF_MERGE_VISIBILITY )
