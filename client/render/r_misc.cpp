@@ -1928,6 +1928,8 @@ void R_NewMap( void )
 
 	gHUD.m_ScreenEffects.SaveIcon_Reset = true;
 	gHUD.m_ScreenEffects.ShouldDrawGameSaved = false;
+
+	tr.pDrone = NULL;
 }
 
 void R_VidInit( void )

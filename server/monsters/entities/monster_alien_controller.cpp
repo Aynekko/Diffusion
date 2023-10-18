@@ -2568,8 +2568,7 @@ void CDrone :: RunTask ( Task_t *pTask )
 			MakeIdealYaw( m_vecEnemyLKP );
 			ChangeYaw( pev->yaw_speed );
 		}
-
-		if( m_hTargetEnt != NULL ) // diffusion - look to my scripted_sequence
+		else if( m_hTargetEnt != NULL ) // diffusion - look to my scripted_sequence
 		{
 			MakeIdealYaw( m_hTargetEnt->GetAbsOrigin() );
 			ChangeYaw( 20 );// pev->yaw_speed // turn slowly. !!!this must be a editable value.

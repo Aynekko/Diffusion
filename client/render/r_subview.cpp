@@ -24,7 +24,8 @@ GNU General Public License for more details.
 
 #define MIRROR_PLANE_EPSILON		32.0f	// g-cont. tune this by taste
 
-cl_entity_t *pDrone = NULL;
+CAnimatex screen_static;
+int drone_view_tex = 0;
 
 /*
 =============================================================
@@ -833,26 +834,42 @@ static void R_RenderDroneView( void )
 	if( gHUD.m_Ammo.WeaponID != WEAPON_DRONE )
 		return;
 	
-	// reset drone pointer
-	pDrone = NULL;
-
-	// check solid entities
-	for( int i = 0; i < tr.num_solid_entities; i++ )
+	if( !tr.pDrone )
 	{
-		RI->currententity = tr.solid_entities[i];
-		if( RI->currententity->curstate.iuser3 == -662 )
+		// check solid entities
+		for( int i = 0; i < tr.num_solid_entities; i++ )
 		{
-			// it's our drone
-			if( RI->currententity->curstate.owner == gEngfuncs.GetLocalPlayer()->index )
+			RI->currententity = tr.solid_entities[i];
+			if( RI->currententity->curstate.iuser3 == -662 )
 			{
-				pDrone = RI->currententity;
-				break;
+				// it's our drone
+				if( RI->currententity->curstate.owner == gEngfuncs.GetLocalPlayer()->index )
+				{
+					tr.pDrone = RI->currententity;
+					break;
+				}
 			}
 		}
 	}
+
+	// advance noise when drone is absent
+	if( !screen_static.Initialized() )
+		screen_static.Init( "textures/anim_noise/noise" );
+
+	if( screen_static.Initialized() )
+		screen_static.AdvanceFrame( 15 );
 	
-	if( !pDrone )
+	if( !tr.pDrone )
+	{
+		tr.DroneViewTex = screen_static.GetAnimationCurFrame();
 		return;
+	}
+
+	// first person view from the drone
+	if( tr.pDrone == GET_ENTITY( RI->viewentity ) )
+		return;
+
+	Vector origin, angles, forward;
 
 	if( !RP_NORMALPASS() )
 		return;
@@ -884,28 +901,23 @@ static void R_RenderDroneView( void )
 	prevRI = R_GetPrevInstance();
 
 	matrix4x4 viewmatrix;
-
-	Vector origin, angles;
-	float fov = 90;
-
 	viewmatrix.Identity();
 
-	origin = pDrone->origin;
-	angles = pDrone->angles;
+	origin = tr.pDrone->origin;
+	angles = tr.pDrone->angles;
 	angles.x += 15;
 
-	studiohdr_t *view = (studiohdr_t *)IEngineStudio.Mod_Extradata( pDrone->model );
+//	studiohdr_t *view = (studiohdr_t *)IEngineStudio.Mod_Extradata( pDrone->model );
 
-	if( view )
-	{
-		Vector forward;
-		AngleVectors( angles, forward, NULL, NULL );
-		Vector viewpos = view->eyeposition;
-		origin += viewpos + forward * 8.0f;
-	}
+//	if( view )
+//	{
+//		AngleVectors( angles, forward, NULL, NULL );
+//		Vector viewpos = view->eyeposition;
+//		origin += viewpos + forward * 8.0f;
+//	}
 
 	// setup the screen fov
-	fov = 100;
+	float fov = 100;
 
 	RI->viewport[2] = RI->viewport[3] = 512;
 
@@ -924,7 +936,7 @@ static void R_RenderDroneView( void )
 	RI->viewangles[0] = anglemod( angles[0] );
 	RI->viewangles[1] = anglemod( angles[1] );
 	RI->viewangles[2] = anglemod( angles[2] );
-	RI->pvsorigin = pDrone->origin;
+	RI->pvsorigin = tr.pDrone->origin;
 	RI->vieworg = origin;
 
 	RI->params = RP_SCREENVIEW;
@@ -933,14 +945,16 @@ static void R_RenderDroneView( void )
 
 	R_RenderScene();
 
-	if( !tr.DroneViewTex )
+	if( !drone_view_tex )
 	{
 		// create new texture
-		tr.DroneViewTex = CREATE_TEXTURE( "*droneView", viewport[2], viewport[3], NULL, TF_NOMIPMAP );
+		drone_view_tex = CREATE_TEXTURE( "*droneView", viewport[2], viewport[3], NULL, TF_NOMIPMAP );
 	}
 
-	GL_Bind( GL_TEXTURE0, tr.DroneViewTex );
+	GL_Bind( GL_TEXTURE0, drone_view_tex );
 	pglCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, viewport[0], viewport[1], viewport[2], viewport[3], 0 );
+
+	tr.DroneViewTex = drone_view_tex;
 
 	R_ResetRefState();
 

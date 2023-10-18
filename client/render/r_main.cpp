@@ -2039,9 +2039,16 @@ void R_SetupRefParams( const ref_viewpass_t *rvp )
 	RI->viewport[1] = rvp->viewport[1];
 	RI->viewport[2] = rvp->viewport[2];
 	RI->viewport[3] = rvp->viewport[3];
+	RI->vieworg = rvp->vieworigin;
 
 	// calc FOV
-	if( R_CheckMonsterView( rvp ))
+	if( GET_ENTITY( rvp->viewentity ) == tr.pDrone )
+	{
+		RI->fov_x = 100; // adjust fov for monster view
+		RI->fov_y = V_CalcFov( RI->fov_x, RI->viewport[2], RI->viewport[3] );
+		RI->vieworg = tr.pDrone->origin;
+	}
+	else if( R_CheckMonsterView( rvp ))
 	{
 		RI->fov_x = 100; // adjust fov for monster view
 		RI->fov_y = V_CalcFov( RI->fov_x, RI->viewport[2], RI->viewport[3] );
@@ -2052,7 +2059,6 @@ void R_SetupRefParams( const ref_viewpass_t *rvp )
 		RI->fov_y = rvp->fov_y;
 	}
 
-	RI->vieworg = rvp->vieworigin;
 	RI->viewangles = rvp->viewangles;
 	RI->pvsorigin = rvp->vieworigin;
 	RI->viewentity = rvp->viewentity;
