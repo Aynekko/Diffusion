@@ -43,7 +43,7 @@ DLL_GLOBAL short	g_sModelIndexSmoke;// holds the index for the smoke cloud
 DLL_GLOBAL short	g_sModelIndexWExplosion;// holds the index for the underwater explosion
 DLL_GLOBAL short	g_sModelIndexBubbles;// holds the index for the bubbles model
 DLL_GLOBAL short	g_sModelIndexBloodDrop;// holds the sprite index for the initial blood
-DLL_GLOBAL short	g_sModelIndexBloodSpray;// holds the sprite index for splattered blood
+//DLL_GLOBAL short	g_sModelIndexBloodSpray;// holds the sprite index for splattered blood
 DLL_GLOBAL short	g_sModelIndexFire;
 DLL_GLOBAL short	g_sModelIndexMetalGibs;
 
@@ -479,7 +479,7 @@ void W_Precache(void)
 	g_sModelIndexWExplosion = PRECACHE_MODEL ("sprites/WXplo1.spr");// underwater fireball
 	g_sModelIndexSmoke = PRECACHE_MODEL ("sprites/steam1.spr");// smoke
 	g_sModelIndexBubbles = PRECACHE_MODEL ("sprites/bubble.spr");//bubbles
-	g_sModelIndexBloodSpray = PRECACHE_MODEL ("sprites/bloodspray.spr"); // initial blood
+//	g_sModelIndexBloodSpray = PRECACHE_MODEL ("sprites/bloodspray.spr"); // initial blood
 	g_sModelIndexBloodDrop = PRECACHE_MODEL ("sprites/blood.spr"); // splattered blood 
 	g_sModelIndexFire = PRECACHE_MODEL("sprites/fire3.spr"); // caught fire
 	g_sModelIndexMetalGibs = PRECACHE_MODEL( "models/npc/dronegibs.mdl" );
