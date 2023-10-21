@@ -830,6 +830,9 @@ void R_FindSubviewEnts( void )
 
 static void R_RenderDroneView( void )
 {
+	if( !RP_NORMALPASS() )
+		return;
+	
 	// don't bother if the drone is not selected at all
 	if( gHUD.m_Ammo.WeaponID != WEAPON_DRONE )
 		return;
@@ -872,9 +875,6 @@ static void R_RenderDroneView( void )
 
 	Vector origin, angles, forward;
 
-	if( !RP_NORMALPASS() )
-		return;
-
 	if( FBitSet( RI->params, RP_OVERVIEW ) )
 		return;
 
@@ -896,10 +896,8 @@ static void R_RenderDroneView( void )
 	RI->num_subview_faces = 0;
 
 	int viewport[4];
-	ref_instance_t *prevRI;
 
 	R_PushRefState();
-	prevRI = R_GetPrevInstance();
 
 	matrix4x4 viewmatrix;
 	viewmatrix.Identity();

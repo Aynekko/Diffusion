@@ -631,6 +631,11 @@ public:
 	float gtbdPrev; // for CheckTimeBasedDamage()
 
 	bool IsShowingObjective; // not saved
+
+	// drone stuff
+	int drone_forwmove, drone_sidemove, drone_upmove;
+	float drone_Speed, drone_UpdateTime, drone_DirChange;
+	Vector drone_currentdir;
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

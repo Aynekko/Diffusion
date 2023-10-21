@@ -3200,14 +3200,6 @@ void CBasePlayer::PreThink( void )
 //==========================================================================
 void CBasePlayer::ManageDrone( void )
 {
-	// FIXME get rid of statics for multiplayer
-	static int forwmove, sidemove, upmove;
-	static float Speed, UpdateTime, DirChange;
-	static Vector currentdir;
-
-	if( !IsAlive() && (m_hDrone != NULL) && (gpGlobals->maxClients > 1) )
-		UTIL_Remove( m_hDrone ); // in case of multiplayer, this will do for now
-
 	if( DroneDeployed )
 	{
 		if( m_hDrone == NULL )
@@ -3295,52 +3287,52 @@ void CBasePlayer::ManageDrone( void )
 				// movement
 				// set up the direction
 				if( pev->button & IN_FORWARD )
-					forwmove = 1;
+					drone_forwmove = 1;
 				else if( pev->button & IN_BACK )
-					forwmove = -1;
+					drone_forwmove = -1;
 				else
-					forwmove = 0;
+					drone_forwmove = 0;
 
 				if( pev->button & IN_MOVERIGHT )
-					sidemove = 1;
+					drone_sidemove = 1;
 				else if( pev->button & IN_MOVELEFT )
-					sidemove = -1;
+					drone_sidemove = -1;
 				else
-					sidemove = 0;
+					drone_sidemove = 0;
 
 				if( pev->button & IN_JUMP )
-					upmove = 1;
+					drone_upmove = 1;
 				else if( pev->button & IN_DUCK )
-					upmove = -1;
+					drone_upmove = -1;
 				else
-					upmove = 0;
+					drone_upmove = 0;
 
 				// accelerate/decelerate
 				if( pev->button & (IN_FORWARD | IN_BACK | IN_MOVERIGHT | IN_MOVELEFT | IN_JUMP | IN_DUCK) )
-					Speed += 200 * gpGlobals->frametime;
+					drone_Speed += 200 * gpGlobals->frametime;
 				else
-					Speed -= 300 * gpGlobals->frametime;
+					drone_Speed -= 300 * gpGlobals->frametime;
 
-				Speed = bound( 0, Speed, 300 );
+				drone_Speed = bound( 0, drone_Speed, 300 );
 
 				// update the direction vector
 				// only update this vector once in a while to prevent stucking in walls and the drone could bounce
-				if( UpdateTime > gpGlobals->time )
-					UpdateTime = 0; // map change / saverestore issues
+				if( drone_UpdateTime > gpGlobals->time )
+					drone_UpdateTime = 0; // map change / saverestore issues
 
-				if( gpGlobals->time > UpdateTime + 0.1 )
+				if( gpGlobals->time > drone_UpdateTime + 0.1 )
 				{
 					// record current movement direction
-					currentdir = m_hDrone->pev->velocity.Normalize();
+					drone_currentdir = m_hDrone->pev->velocity.Normalize();
 					// update direction
-					m_hDrone->pev->velocity += (gpGlobals->v_forward * forwmove + gpGlobals->v_right * sidemove + gpGlobals->v_up * upmove) * Speed;
+					m_hDrone->pev->velocity += (gpGlobals->v_forward * drone_forwmove + gpGlobals->v_right * drone_sidemove + gpGlobals->v_up * drone_upmove) * drone_Speed;
 					// calculate difference between directions, this will affect the velocity
 					// I don't know math so it will have to do :(
-					DirChange = DotProduct( currentdir, m_hDrone->pev->velocity.Normalize() );
-					if( DirChange <= 0.4f )
-						DirChange = 0.4f;
+					drone_DirChange = DotProduct( drone_currentdir, m_hDrone->pev->velocity.Normalize() );
+					if( drone_DirChange <= 0.4f )
+						drone_DirChange = 0.4f;
 
-					Speed *= DirChange;
+					drone_Speed *= drone_DirChange;
 
 					// shooting will be also updated here
 					if( (pev->button & IN_ATTACK) && (m_hDrone->m_iCounter > 0) )
@@ -3366,11 +3358,11 @@ void CBasePlayer::ManageDrone( void )
 						// UNDONE brass shell?
 					}
 
-					UpdateTime = gpGlobals->time;
+					drone_UpdateTime = gpGlobals->time;
 				}
 
 				// update velocity and direction
-				m_hDrone->pev->velocity = m_hDrone->pev->velocity.Normalize() * Speed * DirChange;
+				m_hDrone->pev->velocity = m_hDrone->pev->velocity.Normalize() * drone_Speed * drone_DirChange;
 			}
 			else // player has left 1st person mode
 			{
@@ -3391,8 +3383,8 @@ void CBasePlayer::ManageDrone( void )
 				m_hDrone->pev->velocity = g_vecZero;
 				m_hDrone->RemoveFlag( F_PLAYER_CONTROL );
 				m_hDrone->SetAbsVelocity( g_vecZero );
-				Speed = 0;
-				forwmove = sidemove = upmove = 0;
+				drone_Speed = 0;
+				drone_forwmove = drone_sidemove = drone_upmove = 0;
 
 				DroneCrosshairUpdate = true;
 			}
@@ -3409,7 +3401,7 @@ void CBasePlayer::ManageDrone( void )
 			pev->effects &= ~EF_PLAYERDRONECONTROL;
 			DroneCrosshairUpdate = true;
 
-			forwmove = sidemove = upmove = 0;
+			drone_forwmove = drone_sidemove = drone_upmove = 0;
 			DroneControl = false;
 		}
 
