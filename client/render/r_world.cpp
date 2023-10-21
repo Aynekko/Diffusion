@@ -83,7 +83,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 	tr.materials[texnum].gl_colormask_id = 0;
 	tr.materials[texnum].gl_fallbacktex_id = 0;
 
-	strcpy_s( tr.materials[texnum].normalmap_name, "0" );
+	tr.materials[texnum].normalmap_name[0] = '\0';
 
 	if( tr.materials[texnum].name[0] == '!' ) // water
 	{
@@ -261,7 +261,9 @@ void LoadMaterialSettingsForTexture( int texnum )
 				{
 					tr.materials[texnum].gl_normalmap_id = LOAD_TEXTURE( token, NULL, 0, TF_NORMALMAP );
 					if( tr.materials[texnum].gl_normalmap_id > 0 )
+					{					
 						strcpy_s( tr.materials[texnum].normalmap_name, token );
+					}
 					else
 						ConPrintf( "^1Error:^7 NormalMap for texture \"%s\" couldn't be loaded.\n", tr.materials[texnum].name );
 				}
@@ -2282,7 +2284,9 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 			else
 			{
-				if( tr.materials[tex->gl_texturenum].gl_fallbacktex_id > 0 )
+				if( FBitSet( s->flags, SURF_LANDSCAPE ) )
+					GL_Bind( GL_TEXTURE0, tex->gl_texturenum );
+				else if( tr.materials[tex->gl_texturenum].gl_fallbacktex_id > 0 )
 					GL_Bind( GL_TEXTURE0, tr.materials[tex->gl_texturenum].gl_fallbacktex_id );
 				else if( tex->gl_texturenum != tr.defaultTexture && tr.materials[tex->gl_texturenum].animation_id >= 0 )
 				{
@@ -2732,7 +2736,9 @@ void R_DrawBrushList( void )
 			}
 			else
 			{
-				if( tr.materials[es->gl_texturenum].gl_fallbacktex_id > 0 )
+				if( FBitSet( s->flags, SURF_LANDSCAPE ) )
+					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
+				else if( tr.materials[es->gl_texturenum].gl_fallbacktex_id > 0 )
 					GL_Bind( GL_TEXTURE0, tr.materials[es->gl_texturenum].gl_fallbacktex_id );
 				else if( es->gl_texturenum != tr.defaultTexture && tr.materials[es->gl_texturenum].animation_id >= 0 )
 				{
@@ -2769,13 +2775,17 @@ void R_DrawBrushList( void )
 				cached_lightmap = es->lightmaptexturenum;
 			}
 			
-			if( FBitSet( s->flags, SURF_LANDSCAPE ) && land && land->terrain )
+			if( FBitSet( s->flags, SURF_LANDSCAPE ) )
 			{
-				pglUniform1fvARB( RI->currentshader->u_GlossSmoothness, land->terrain->numLayers, &land->terrain->layermap.GlossSmoothness[0] );
-				pglUniform1fvARB( RI->currentshader->u_GlossScale, land->terrain->numLayers, &land->terrain->layermap.GlossScale[0] );
-				pglUniform1fvARB( RI->currentshader->u_EmbossScale, land->terrain->numLayers, &land->terrain->layermap.EmbossScale[0] );
-				if( land->terrain->layermap.gl_normalmap_id > 0 )
-					GL_Bind( GL_TEXTURE4, land->terrain->layermap.gl_normalmap_id );
+				if( land && land->terrain )
+				{
+					pglUniform1fvARB( RI->currentshader->u_GlossSmoothness, land->terrain->numLayers, &land->terrain->layermap.GlossSmoothness[0] );
+					pglUniform1fvARB( RI->currentshader->u_GlossScale, land->terrain->numLayers, &land->terrain->layermap.GlossScale[0] );
+					pglUniform1fvARB( RI->currentshader->u_EmbossScale, land->terrain->numLayers, &land->terrain->layermap.EmbossScale[0] );
+					GL_Bind( GL_TEXTURE5, land->terrain->indexmap.gl_heightmap_id );
+					if( land->terrain->layermap.gl_normalmap_id > 0 )
+						GL_Bind( GL_TEXTURE4, land->terrain->layermap.gl_normalmap_id );
+				}
 			}
 			else
 			{
@@ -2815,9 +2825,9 @@ void R_DrawBrushList( void )
 				GL_Bind( GL_TEXTURE5, tr.materials[es->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
 			}
 			else if( FBitSet( s->flags, SURF_WATER ) && (gl_water_planar->value > 0) )
+			{
 				GL_Bind( GL_TEXTURE5, tex->gl_texturenum ); // u_WaterTex - mix turbulency texture and reflection
-			else if( FBitSet( s->flags, SURF_LANDSCAPE ) && land && land->terrain )
-				GL_Bind( GL_TEXTURE5, land->terrain->indexmap.gl_heightmap_id );
+			}
 
 			if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
 			{

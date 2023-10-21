@@ -82,6 +82,8 @@ void R_ResetShadowTextures( void )
 	if( tr.lowmemory )
 		ShadowViewport = 256;
 
+	FBOsupported = GL_Support( R_FRAMEBUFFER_OBJECT );
+
 	if( !FBOsupported )
 	{
 		ShadowViewport = bound( 256, ShadowViewport, 512 );
@@ -554,8 +556,6 @@ void R_RenderShadowmaps(void)
 	if (!R_CountPlights(true)) return;
 
 	R_PushRefState();
-
-	FBOsupported = GL_Support( R_FRAMEBUFFER_OBJECT );
 
 	if( ShadowQualityLevel != (int)r_shadowquality->value )
 	{

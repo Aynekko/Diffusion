@@ -481,12 +481,15 @@ void R_UpdateSurfaceParams( msurface_t *surf )
 	{
 		esrf->gl_texturenum = tr.whiteTexture;
 	}
-	else if( FBitSet( surf->flags, SURF_LANDSCAPE ) && land && land->terrain )
+	else if( FBitSet( surf->flags, SURF_LANDSCAPE ) )
 	{
-		if( land->terrain->layermap.gl_diffuse_id )
-			esrf->gl_texturenum = land->terrain->layermap.gl_diffuse_id;
-		else
-			esrf->gl_texturenum = tex->gl_texturenum;
+		if( land && land->terrain )
+		{
+			if( land->terrain->layermap.gl_diffuse_id )
+				esrf->gl_texturenum = land->terrain->layermap.gl_diffuse_id;
+			else
+				esrf->gl_texturenum = tex->gl_texturenum;
+		}
 	}
 	else
 	{

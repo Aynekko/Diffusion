@@ -1496,7 +1496,7 @@ bool LoadTerrainLayers( layerMap_t* lm, int numLayers )
 		lm->GlossSmoothness[i] = tr.materials[tex_id].GlossSmoothness;
 		lm->EmbossScale[i] = tr.materials[tex_id].EmbossScale;
 
-		if( _stricmp( tr.materials[tex_id].normalmap_name, "0" ) )
+		if( tr.materials[tex_id].normalmap_name[0] != '\0' )
 		{
 			Q_snprintf( normalmaps[i], nameLen, "%s", tr.materials[tex_id].normalmap_name );
 			normalmap_count++;
