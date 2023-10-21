@@ -54,6 +54,8 @@ used iuser3 "flags":
 void SetupFlashlight( cl_entity_t *pEnt )
 {
 	Vector v_origin, v_angles;
+	static Vector s_origin = tr.viewparams.vieworg; // just for init
+	static Vector s_angles = tr.viewparams.viewangles;
 	Vector forward, right, up;
 	int FlashlightFOV = 65;
 	int FlashlightRadius = 600;
@@ -76,7 +78,14 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		dltest->entindex = pEnt->index;
 		dltest->effect = 1;
 
-		v_origin = pEnt->origin + tr.viewparams.forward * 25;
+		if( r_flashlightlockposition->value )
+			v_origin = s_origin;
+		else
+		{
+			v_origin = pEnt->origin + tr.viewparams.forward * 25;
+			s_origin = v_origin;
+		}
+
 		dltest->color.r = dltest->color.g = dltest->color.b = 255;
 		dltest->die = tr.time;
 
@@ -96,12 +105,24 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		pl->brightness = 1.1f;
 		if( r_shadowquality->value < 1 ) // shadows on very low, disable
 			pl->flags |= CF_NOSHADOWS;
-		gEngfuncs.GetViewAngles( v_angles );
-		gEngfuncs.pfnAngleVectors( v_angles, tr.viewparams.forward, tr.viewparams.right, tr.viewparams.up );
-		v_origin = gEngfuncs.GetLocalPlayer()->origin;
-		v_origin.z = tr.viewparams.vieworg.z; // this coord seems to be falling behind a couple of frames, but it looks better when crouching
-		v_origin -= tr.viewparams.forward * 15; // move plight behind player's back so the shadows would move when rotating mouse
-		v_origin.z -= 6; // drop down plight to have longer shadows
+		
+		if( r_flashlightlockposition->value )
+		{
+			v_origin = s_origin;
+			v_angles = s_angles;
+			gEngfuncs.pfnAngleVectors( v_angles, tr.viewparams.forward, tr.viewparams.right, tr.viewparams.up );
+		}
+		else
+		{
+			gEngfuncs.GetViewAngles( v_angles );
+			gEngfuncs.pfnAngleVectors( v_angles, tr.viewparams.forward, tr.viewparams.right, tr.viewparams.up );
+			s_angles = v_angles;
+			v_origin = gEngfuncs.GetLocalPlayer()->origin;
+			v_origin.z = tr.viewparams.vieworg.z; // this coord seems to be falling behind a couple of frames, but it looks better when crouching
+			v_origin -= tr.viewparams.forward * 15; // move plight behind player's back so the shadows would move when rotating mouse
+			v_origin.z -= 6; // drop down plight to have longer shadows
+			s_origin = v_origin;
+		}
 		FlashlightFOV = 50;
 
 		// flickering when low battery.

@@ -102,6 +102,7 @@ extern cvar_t *gl_bump;
 extern cvar_t *cubeshot;
 extern cvar_t *cl_notbn;
 extern cvar_t *r_show_tbn;
+extern cvar_t *r_flashlightlockposition;
 
 extern cvar_t *ui_is_active; // internal cvar
 extern cvar_t *ui_backgroundmap_active;
