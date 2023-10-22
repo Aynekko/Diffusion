@@ -18,6 +18,7 @@ GNU General Public License for more details.
 #include "cbase.h"
 #include "player.h"
 #include "game/gamerules.h"
+#include "studio.h"
 
 // =================== FUNC_MONITOR ==============================================
 
@@ -31,6 +32,7 @@ class CFuncMonitor : public CBaseDelay
 {
 	DECLARE_CLASS( CFuncMonitor, CBaseDelay );
 public:
+	void Precache( void );
 	void Spawn( void );
 	void ChangeCamera( string_t newcamera );
 	void KeyValue( KeyValueData *pkvd );
@@ -38,7 +40,7 @@ public:
 	virtual BOOL IsFuncScreen( void ) { return TRUE; }
 	bool AllowToFindClientInPVS( CBaseEntity *pTarget );
 	void StartMessage( CBasePlayer *pPlayer );
-	virtual STATE GetState( void ) { return pev->body ? STATE_ON:STATE_OFF; };
+	virtual STATE GetState( void ) { return (pev->iuser3 == -670) ? STATE_ON : STATE_OFF; };
 	virtual int ObjectCaps( void );
 	BOOL OnControls( CBaseEntity *pTest );
 	void Activate( void );
@@ -63,6 +65,11 @@ BEGIN_DATADESC( CFuncMonitor )
 	DEFINE_FUNCTION( VisThink ),
 END_DATADESC()
 
+void CFuncMonitor::Precache( void )
+{
+	PRECACHE_MODEL( GetModel() );
+}
+
 void CFuncMonitor::KeyValue( KeyValueData *pkvd )
 {
 	if( FStrEq( pkvd->szKeyName, "camera" ))
@@ -80,24 +87,48 @@ void CFuncMonitor::KeyValue( KeyValueData *pkvd )
 
 void CFuncMonitor :: Spawn( void )
 {
-	pev->movetype = MOVETYPE_PUSH;
-
-	if( FBitSet( pev->spawnflags, SF_MONITOR_PASSABLE ))
-		pev->solid = SOLID_NOT;
-	else pev->solid = SOLID_BSP;
+	Precache();	
+	pev->solid = SOLID_NOT;
 
 	SET_MODEL( edict(), GetModel() );
+
 	pev->effects |= EF_SCREEN;
 	m_iState = STATE_OFF;
 
 	SetLocalAngles( m_vecTempAngles );
-	UTIL_SetOrigin( this, GetLocalOrigin( ));
+	UTIL_SetOrigin( this, GetLocalOrigin() );
 
-	if( FBitSet( pev->spawnflags, SF_MONITOR_MONOCRHOME ))
-		pev->iuser1 |= CF_MONOCHROME;
+	if( UTIL_GetModelType( pev->modelindex ) == mod_brush )
+	{
+		pev->movetype = MOVETYPE_PUSH;
+
+		if( HasSpawnFlags(SF_MONITOR_PASSABLE) )
+			pev->solid = SOLID_NOT;
+		else pev->solid = SOLID_BSP;
+
+		if( HasSpawnFlags(SF_MONITOR_MONOCRHOME) )
+			pev->iuser1 |= CF_MONOCHROME;
+	}
+	else // studio model
+	{
+		studiohdr_t *pstudiohdr;
+		pstudiohdr = (studiohdr_t *)GET_MODEL_PTR( edict() );
+		if( pev->scale <= 0 )
+			pev->scale = 1;
+		pev->startpos = Vector( pev->scale, pev->scale, pev->scale );
+
+		if( pstudiohdr == NULL )
+		{
+			UTIL_SetSize( pev, Vector( -10, -10, -10 ), Vector( 10, 10, 10 ) );
+			ALERT( at_error, "func_monitor: studio: unable to fetch model pointer!\n" );
+		}
+
+		mstudioseqdesc_t *pseqdesc = (mstudioseqdesc_t *)((byte *)pstudiohdr + pstudiohdr->seqindex);
+		UTIL_SetSize( pev, pseqdesc[0].bbmin * pev->startpos, pseqdesc[0].bbmax * pev->startpos );
+	}
 
 	// enable monitor
-	if( FBitSet( pev->spawnflags, SF_MONITOR_START_ON ))
+	if( HasSpawnFlags(SF_MONITOR_START_ON))
 	{
 		SetThink( &CBaseEntity::SUB_CallUseToggle );
 		SetNextThink( 0.1 );
@@ -118,7 +149,7 @@ void CFuncMonitor :: StartMessage( CBasePlayer *pPlayer )
 
 int CFuncMonitor :: ObjectCaps( void ) 
 {
-	if( FBitSet( pev->spawnflags, SF_MONITOR_USEABLE ))
+	if( HasSpawnFlags(SF_MONITOR_USEABLE) )
 		return (BaseClass::ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_IMPULSE_USE | FCAP_HOLD_ANGLES;
 	return (BaseClass::ObjectCaps() & ~FCAP_ACROSS_TRANSITION)| FCAP_HOLD_ANGLES;
 }
@@ -143,7 +174,7 @@ void CFuncMonitor::ChangeCamera( string_t newcamera )
 		// update the visible state
 		if( m_iState == STATE_ON )
 			SetBits( pCamera->pev->effects, EF_MERGE_VISIBILITY );
-		pev->sequence = pCamera->entindex();
+
 		m_hCachedCamera = pCamera;
 		pev->aiment = pCamera->edict(); // tell engine about portal entity with camera
 	}
@@ -154,9 +185,9 @@ void CFuncMonitor::ChangeCamera( string_t newcamera )
 void CFuncMonitor :: SetCameraVisibility( bool fEnable )
 {
 	// set camera PVS
-	if( pev->sequence > 0 )
+	if( pev->aiment > 0 )
 	{
-		CBaseEntity *pTarget = CBaseEntity::Instance( INDEXENT( pev->sequence ) );
+		CBaseEntity *pTarget = CBaseEntity::Instance( pev->aiment );
 
 		if( !pTarget )
 			return;
@@ -187,9 +218,9 @@ bool CFuncMonitor :: AllowToFindClientInPVS( CBaseEntity *pTarget )
 
 void CFuncMonitor :: VisThink( void )
 {
-	if( pev->sequence != 0 )
+	if( pev->aiment != 0 )
 	{
-		CBaseEntity *pTarget = CBaseEntity::Instance( INDEXENT( pev->sequence ));
+		CBaseEntity *pTarget = CBaseEntity::Instance( pev->aiment );
 
 		// no reason to find in PVS itself
 		if( AllowToFindClientInPVS( pTarget ))
@@ -225,7 +256,7 @@ void CFuncMonitor :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 
 	if( ShouldToggle( useType ))
 	{
-		if(( useType == USE_SET || useType == USE_RESET ) && pActivator->IsPlayer() && FBitSet( pev->spawnflags, SF_MONITOR_USEABLE ))
+		if(( useType == USE_SET || useType == USE_RESET ) && pActivator->IsPlayer() && HasSpawnFlags(SF_MONITOR_USEABLE) )
 		{
 			if( useType == USE_SET )
 			{
@@ -233,7 +264,7 @@ void CFuncMonitor :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 				{
 					UTIL_SetView( pActivator, pev->target );
 					m_pController = (CBasePlayer *)pActivator;
-					if( FBitSet( pev->spawnflags, SF_MONITOR_HIDEHUD ))
+					if( HasSpawnFlags(SF_MONITOR_HIDEHUD) )
 						m_pController->m_iHideHUD |= HIDEHUD_ALL;
 					m_pController->m_pMonitor = this;
 
@@ -248,19 +279,22 @@ void CFuncMonitor :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 			}
 			else if( useType == USE_RESET )
 			{
-				if( FBitSet( pev->spawnflags, SF_MONITOR_HIDEHUD ))
+				if( HasSpawnFlags(SF_MONITOR_HIDEHUD) )
 					((CBasePlayer *)pActivator)->m_iHideHUD &= ~HIDEHUD_ALL;
 				UTIL_SetView( pActivator );
 			}
 			return;
 		}
 
-		pev->body = !pev->body;
-		m_iState = (pev->body) ? STATE_ON : STATE_OFF;
+		if( pev->iuser3 == -670 )
+			pev->iuser3 = 0;
+		else
+			pev->iuser3 = -670;
+		m_iState = (pev->iuser3 == -670) ? STATE_ON : STATE_OFF;
 
 		SetThink( &CFuncMonitor::VisThink );
 
-		if( pev->body )
+		if( pev->iuser3 == -670 )
 		{
 			SetCameraVisibility( TRUE );
 			SetNextThink( 0.1f );
@@ -338,7 +372,7 @@ void CFuncPortal :: Spawn( void )
 
 	SetThink(&CFuncMonitor::VisThink );
 
-	if( FBitSet( pev->spawnflags, SF_PORTAL_START_OFF ))
+	if( HasSpawnFlags(SF_PORTAL_START_OFF) )
 	{
 		m_iState = STATE_OFF;
 		pev->effects |= EF_NODRAW;
@@ -485,7 +519,7 @@ void CFuncPortal :: Touch( CBaseEntity *pOther )
 	ChangeCamera( pev->target ); // update PVS
 	pOther->pev->flags &= ~FL_ONGROUND;
 
-	if( FBitSet( pev->spawnflags, SF_PORTAL_CLIENTONLYFIRE ) && !pOther->IsPlayer() )
+	if( HasSpawnFlags(SF_PORTAL_CLIENTONLYFIRE) && !pOther->IsPlayer() )
 		return;
 
 	UTIL_FireTargets( pev->netname, pOther, this, USE_TOGGLE ); // fire target

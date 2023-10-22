@@ -463,7 +463,7 @@ bool R_CheckScreenSource( msurface_t *surf, msurface_t *check )
 		return false;
 
 	// different cameras
-	if( surf->info->parent->curstate.sequence != check->info->parent->curstate.sequence )
+	if( surf->info->parent->curstate.aiment != check->info->parent->curstate.aiment )
 		return false;
 
 	// just reuse the handle
@@ -484,7 +484,7 @@ bool R_CheckPortalSource( msurface_t *surf, msurface_t *check )
 		return false;
 
 	// different cameras
-	if( surf->info->parent->curstate.sequence != check->info->parent->curstate.sequence )
+	if( surf->info->parent->curstate.aiment != check->info->parent->curstate.aiment )
 		return false;
 
 	// just reuse the handle
@@ -569,9 +569,9 @@ void R_DrawSubviewPasses( void )
 		// handle camera
 		if( !FBitSet( surf->flags, SURF_REFLECT ))
 		{
-			if( surf->info->parent->curstate.sequence <= 0 )
+			if( surf->info->parent->curstate.aiment <= 0 )
 				continue;	// target is missed
-			camera = GET_ENTITY( surf->info->parent->curstate.sequence );
+			camera = GET_ENTITY( surf->info->parent->curstate.aiment );
 		}
 		else camera = surf->info->parent; // mirror camera is himself
 
@@ -706,7 +706,7 @@ void R_FindBmodelSubview( cl_entity_t *e )
 	clmodel = e->model;
 
 	// disabled screen
-	if( FBitSet( e->curstate.effects, EF_SCREEN ) && !e->curstate.body )
+	if( FBitSet( e->curstate.effects, EF_SCREEN ) && e->curstate.iuser3 != -670 )
 		return;
 
 	gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
@@ -951,6 +951,106 @@ static void R_RenderDroneView( void )
 	R_PopRefState();
 }
 
+static void R_RenderStudioScreen( cl_entity_t *e )
+{
+	if( !e )
+		return;
+	
+	cl_entity_t *camera = GET_ENTITY( e->curstate.aiment );
+	if( !camera )
+		return;
+	
+	Vector absmin = e->origin + e->curstate.mins;
+	Vector absmax = e->origin + e->curstate.maxs;
+	if( !Mod_CheckBoxVisible( absmin, absmax ) )
+		return;
+	if( R_CullModel( e, absmin, absmax ) )
+		return;
+	
+	Vector origin, angles, forward;
+
+	if( !FBitSet( RI->params, RP_OLDVIEWLEAF ) )
+		R_FindViewLeaf();
+	R_SetupFrustum();
+	R_MarkLeaves();
+
+	tr.modelorg = RI->vieworg;
+	RI->currententity = GET_ENTITY( 0 );
+	RI->currentmodel = RI->currententity->model;
+	RI->num_subview_faces = 0;
+
+	int viewport[4];
+
+	R_PushRefState();
+
+	matrix4x4 viewmatrix;
+	viewmatrix.Identity();
+
+	origin = camera->origin;
+	angles = camera->angles;
+
+	// setup the screen fov
+	float fov = 90;
+	if( e->curstate.fuser2 != 0.0f )
+		fov = bound( 10, e->curstate.fuser2, 120 );
+
+	RI->viewport[2] = RI->viewport[3] = 512;
+	RI->fov_x = RI->fov_y = fov;
+	RI->viewangles = angles;
+	RI->pvsorigin = origin;
+	RI->vieworg = origin;
+
+	RI->params = RP_SCREENVIEW;
+
+	memcpy( viewport, RI->viewport, sizeof( viewport ) );
+
+	R_RenderScene();
+
+	if( !tr.studio_screen_tex[e->index] )
+	{
+		// create new texture
+		tr.studio_screen_tex[e->index] = CREATE_TEXTURE( va( "*screenTexENT%i", e->index ), viewport[2], viewport[3], NULL, TF_NOMIPMAP );
+	}
+
+	GL_Bind( GL_TEXTURE0, tr.studio_screen_tex[e->index] );
+	pglCopyTexImage2D( GL_TEXTURE_2D, 0, GL_RGB, viewport[0], viewport[1], viewport[2], viewport[3], 0 );
+
+	R_ResetRefState();
+
+	R_PopRefState();
+}
+
+static void R_FindScreenStudio( void )
+{
+	if( !RP_NORMALPASS() )
+		return;
+
+	if( !FBitSet( world->features, WORLD_HAS_SCREENS ) || !CVAR_TO_BOOL( gl_allow_screens ) )
+		return;
+
+	if( FBitSet( RI->params, RP_OVERVIEW ) )
+		return;
+
+	if( IsBuildingCubemaps() )
+		return;
+
+	// player is outside world. Don't draw subview for speedup reasons
+	if( RP_OUTSIDE( RI->viewleaf ) )
+		return;
+	
+	for( int i = 0; i < tr.num_solid_entities; i++ )
+	{
+		RI->currententity = tr.solid_entities[i];
+		RI->currentmodel = RI->currententity->model;
+
+		if( RI->currentmodel->type != mod_studio )
+			continue;
+
+		if( FBitSet( RI->currententity->curstate.effects, EF_SCREEN ) && RI->currententity->curstate.iuser3 == -670 )
+			R_RenderStudioScreen( RI->currententity );
+	}
+}
+
 /*
 ================
 R_RenderSubview
@@ -961,6 +1061,8 @@ find all the subview faces
 void R_RenderSubview( void )
 {
 	R_RenderDroneView();
+
+	R_FindScreenStudio();
 	
 	int	flags = world->features;
 

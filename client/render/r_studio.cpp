@@ -4401,7 +4401,7 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 
 	if( !StudioSetEntity( IEngineStudio.GetCurrentEntity() ) )
 		return 0;
-
+	
 	if( FBitSet( flags, STUDIO_RENDER ) )
 	{
 		if( !StudioComputeBBox( m_pCurrentEntity ) )
@@ -4413,7 +4413,7 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 		// see if the bounding box lets us trivially reject, also sets
 		if( R_CullModel( m_pCurrentEntity, m_pModelInstance->absmin, m_pModelInstance->absmax ) )
 			return 0;
-
+		
 		m_pModelInstance->visframe = tr.realframecount; // visible
 
 		r_stats.c_studio_models_drawn++; // render data cache cookie
@@ -4581,7 +4581,7 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 
 			r_stats.c_studio_models_drawn++;
 		}
-
+		
 		StudioRenderModel();
 	}
 
@@ -5241,6 +5241,8 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 			else if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
 				IEngineStudio.StudioSetupSkin( m_pStudioHeader, pskinref[pMesh->skinref] );
+			else if( tr.materials[mat->gl_diffuse_id].monitor && tr.studio_screen_tex[m_pCurrentEntity->index] )
+				GL_Bind( GL_TEXTURE0, tr.studio_screen_tex[m_pCurrentEntity->index] );
 			else if( tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id > 0 )
 				GL_Bind( GL_TEXTURE0, tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id );
 			else if( mat->gl_diffuse_id != tr.defaultTexture && tr.materials[mat->gl_diffuse_id].animation_id >= 0 )

@@ -438,6 +438,7 @@ typedef struct
 	int screen_fbo_texture_color;
 
 	material_t materials[8192]; // MAX_TEXTURES
+	int studio_screen_tex[8192]; // by entindex
 
 	bool ssao_params_changed; // to keep track of gl_ssao
 

@@ -39,6 +39,7 @@ used iuser3 "flags":
 -667 monster on fire
 -668 dust particles from car wheel
 -669 cable
+-670 turned on monitor
 */
 
 #define DEFAULT_SMOOTHNESS	0.35f
@@ -258,6 +259,9 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 		// use engine renderer
 		if( gl_renderer->value == 0 )
 			return 1;
+
+		if( ent->curstate.iuser3 == -670 )
+			ent->curstate.movetype = 0; // clear movetype for studio model screen (engine sets this to MOVETYPE_FOLLOW because we use aiment. Argh!)
 
 		if( ent->curstate.effects & EF_SKYCAMERA )
 		{
@@ -1951,6 +1955,14 @@ void R_NewMap( void )
 	gHUD.m_ScreenEffects.ShouldDrawGameSaved = false;
 
 	tr.pDrone = NULL;
+
+	for( int i = 0; i < 8192; i++ )
+	{
+		if( tr.studio_screen_tex[i] > 0 )
+			FREE_TEXTURE( tr.studio_screen_tex[i] );
+	}
+
+	memset( tr.studio_screen_tex, 0, sizeof( tr.studio_screen_tex ) );
 }
 
 void R_VidInit( void )

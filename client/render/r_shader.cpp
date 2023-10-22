@@ -1938,6 +1938,9 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 	bool texAlphaToCoverage = FBitSet( mat->flags, STUDIO_NF_ALPHATOCOVERAGE ) ? true : false;
 	bool usingAlphaBlend = texTransparent && FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) && !texAlphaToCoverage;
 
+	if( tr.materials[mat->gl_diffuse_id].monitor )
+		fullbright = true;
+
 	if( numbones > 0 && glConfig.max_skinning_bones < MAXSTUDIOBONES && glConfig.uniforms_economy )
 	{
 		int num_bones = Q_min( numbones, glConfig.max_skinning_bones );

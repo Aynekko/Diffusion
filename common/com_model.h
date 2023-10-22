@@ -95,6 +95,7 @@ typedef struct material_s
 
 	int animation_id; // link to tr.animation
 	bool drone_view; // this texture is a camera
+	bool monitor; // this texture is a screen (func_monitor)
 } material_t;
 
 typedef struct mplane_s

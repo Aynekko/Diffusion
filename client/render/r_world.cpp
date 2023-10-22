@@ -77,6 +77,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 	tr.materials[texnum].TwoSided = false;
 	tr.materials[texnum].animation_id = -1;
 	tr.materials[texnum].drone_view = false;
+	tr.materials[texnum].monitor = false;
 
 	tr.materials[texnum].gl_normalmap_id = 0;
 	tr.materials[texnum].gl_interiormap_id = 0;
@@ -429,6 +430,21 @@ void LoadMaterialSettingsForTexture( int texnum )
 			if( afile && token[0] > 0 )
 			{
 				tr.materials[texnum].drone_view = true;
+			}
+			else
+			{
+				Error = true;
+				break;
+			}
+		}
+		else if( !Q_stricmp( token, "Monitor" ) )
+		{
+			// parse value for this setting
+			afile = COM_ParseLine( afile, token );
+			if( afile && token[0] > 0 )
+			{
+				tr.materials[texnum].monitor = true;
+				SetBits( world->features, WORLD_HAS_SCREENS );
 			}
 			else
 			{
