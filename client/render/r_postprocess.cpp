@@ -1033,6 +1033,9 @@ void ToneMap(void)
 	if( IsBuildingCubemaps() ) // no exposure change in cubemaps
 		return;
 
+	if( R_FullBright() )
+		return;
+
 	const int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
 
 	// render luminance to first mip
