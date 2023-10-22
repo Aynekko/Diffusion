@@ -49,21 +49,13 @@ void main( void )
 	float fShaftsMask = saturate( 1.00001 - accum.w );
 	float fBlend = accum.w * Brightness;	// shaft brightness
 
-	accum += texture2D( u_ColorMap, tc + sunVec.xy * 1.0 ) * (1.0 - 1.0 / 8.0);
-		accum += texture2D( u_ColorMap, tc + sunVec.xy * 1.5 ) * (1.0 - 1.5 / 8.0);
-	accum += texture2D( u_ColorMap, tc + sunVec.xy * 2.0 ) * (1.0 - 2.0 / 8.0);
-		accum += texture2D( u_ColorMap, tc + sunVec.xy * 2.5 ) * (1.0 - 2.5 / 8.0);
-	accum += texture2D( u_ColorMap, tc + sunVec.xy * 3.0 ) * (1.0 - 3.0 / 8.0);
-		accum += texture2D( u_ColorMap, tc + sunVec.xy * 3.5 ) * (1.0 - 3.5 / 8.0);
-	accum += texture2D( u_ColorMap, tc + sunVec.xy * 4.0 ) * (1.0 - 4.0 / 8.0);
-		accum += texture2D( u_ColorMap, tc + sunVec.xy * 4.5 ) * (1.0 - 4.5 / 8.0);
-	accum += texture2D( u_ColorMap, tc + sunVec.xy * 5.0 ) * (1.0 - 5.0 / 8.0);
-		accum += texture2D( u_ColorMap, tc + sunVec.xy * 5.5 ) * (1.0 - 5.5 / 8.0);
-	accum += texture2D( u_ColorMap, tc + sunVec.xy * 6.0 ) * (1.0 - 6.0 / 8.0);
-		accum += texture2D( u_ColorMap, tc + sunVec.xy * 6.5 ) * (1.0 - 6.5 / 8.0);
-	accum += texture2D( u_ColorMap, tc + sunVec.xy * 7.0 ) * (1.0 - 7.0 / 8.0);
-		accum += texture2D( u_ColorMap, tc + sunVec.xy * 7.5 ) * (1.0 - 7.5 / 8.0);
-	accum /= 16.0;
+	int Steps = 32;
+	float step = 8.0 / Steps;
+	for( int i = 1; i < Steps; i++ )
+	{	
+		accum += texture2D( u_ColorMap, tc + sunVec.xy * (0.5 + step * i) ) * (1.0 - (0.5 + step * i) / 8.0);
+	}
+	accum /= Steps;
 
  	accum *= 2.0 * vec4( sunDist, sunDist, sunDist, 1.0 );
 	
