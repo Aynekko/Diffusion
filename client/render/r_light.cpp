@@ -201,8 +201,6 @@ void R_SetupLightProjection( plight_t *pl, const Vector &origin, const Vector &a
 
 			pl->frustum.InitProjection( pl->viewMatrix, Z_NEAR_LIGHT, pl->radius, pl->fov, fov_y );
 			pl->frustum.ComputeFrustumBounds( pl->absmin, pl->absmax );
-
-		//	pl->frustum.DisablePlane( FRUSTUM_FAR ); // only use plane.normal // diffusion - this adds too many surfaces. I don't think it was needed.
 		}
 
 		matrix4x4 projectionView;//, m1, s1;
