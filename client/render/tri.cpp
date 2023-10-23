@@ -55,7 +55,8 @@ void HUD_DrawNormalTriangles( void )
 	gEngfuncs.pTriAPI->Begin(TRI_POLYGON);
 	gEngfuncs.pTriAPI->End();
 
-	CableSetRender( true );
+	bool CableRender = false;
+	
 	for( int i = 0; i < tr.num_solid_entities; i++ )
 	{
 		RI->currententity = tr.solid_entities[i];
@@ -66,9 +67,27 @@ void HUD_DrawNormalTriangles( void )
 
 		SET_CURRENT_ENTITY( RI->currententity );
 
+		Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
+		Vector absmax = RI->currententity->origin + RI->currententity->curstate.maxs;
+		if( !Mod_CheckBoxVisible( absmin, absmax ) )
+			continue;
+		if( R_CullModel( RI->currententity, absmin, absmax ) )
+			continue;
+
+		if( !CableRender )
+		{
+			CableSetRender( true );
+			CableRender = true;
+		}
+
+		if( r_drawentities->value == 7 )
+			DBG_DrawBBox( absmin, absmax );
+
 		R_DrawCable( RI->currententity );
 	}
-	CableSetRender( false );
+	
+	if( CableRender )
+		CableSetRender( false );
 
 	g_pParticles.Update();
 }
@@ -88,7 +107,8 @@ void HUD_DrawTransparentTriangles( void )
 		tr.frametime = tr.time - tr.oldtime;
 	}
 
-	CableSetRender( true );
+	bool CableRender = false;
+
 	for( int i = 0; i < tr.num_trans_entities; i++ )
 	{
 		RI->currententity = tr.trans_entities[i];
@@ -99,9 +119,27 @@ void HUD_DrawTransparentTriangles( void )
 
 		SET_CURRENT_ENTITY( RI->currententity );
 
+		Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
+		Vector absmax = RI->currententity->origin + RI->currententity->curstate.maxs;
+		if( !Mod_CheckBoxVisible( absmin, absmax ) )
+			continue;
+		if( R_CullModel( RI->currententity, absmin, absmax ) )
+			continue;
+
+		if( !CableRender )
+		{
+			CableSetRender( true );
+			CableRender = true;
+		}
+
+		if( r_drawentities->value == 7 )
+			DBG_DrawBBox( absmin, absmax );
+
 		R_DrawCable( RI->currententity );
 	}
-	CableSetRender( false );
+	
+	if( CableRender )
+		CableSetRender( false );
 
 	if( g_pParticleSystems )
 		g_pParticleSystems->UpdateSystems();
@@ -120,16 +158,6 @@ void R_DrawCable( cl_entity_t *e )
 {
 	if( e->index >= 8192 )
 		return; // ¯\_(ツ)_/¯
-
-	Vector absmin = e->origin + e->curstate.mins;
-	Vector absmax = e->origin + e->curstate.maxs;
-	if( !Mod_CheckBoxVisible( absmin, absmax ) )
-		return;
-	if( R_CullModel( e, absmin, absmax ) )
-		return;
-
-	if( r_drawentities->value == 7 )
-		DBG_DrawBBox( absmin, absmax );
 
 	if( RI->params & RP_SHADOWPASS )
 	{
