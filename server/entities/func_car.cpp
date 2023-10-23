@@ -1485,6 +1485,7 @@ void CCar::Drive( void )
 		{
 			ShiftStartTime = gpGlobals->time;
 			IsShifting = true;
+			CanPlayTurboSound = true;
 		}
 		else
 		{
@@ -1495,7 +1496,6 @@ void CCar::Drive( void )
 				if( Gear > LastGear )
 				{
 					Upshifting = true;
-					CanPlayTurboSound = true;
 				}
 
 				LastGear = Gear;
