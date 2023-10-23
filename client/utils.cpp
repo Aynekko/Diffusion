@@ -1108,3 +1108,68 @@ void CL_UTIL_Sparks( Vector org )
 
 	gEngfuncs.pEfxAPI->R_SparkEffect( org, 1, 10, 10 );
 }
+
+//============================================================
+// diffusion - moved screen shake from engine to here
+//============================================================
+void CalcShake( void )
+{
+	int	i;
+	float	fraction, freq;
+	float	localAmp;
+
+	if( gHUD.shake.time == 0.0f )
+		return;
+
+	if( (tr.time > gHUD.shake.time) || gHUD.shake.amplitude <= 0 || gHUD.shake.frequency <= 0 )
+	{
+		memset( &gHUD.shake, 0, sizeof( gHUD.shake ) );
+		return;
+	}
+
+	if( tr.time > gHUD.shake.next_shake )
+	{
+		// higher frequency means we recalc the extents more often and perturb the display again
+		gHUD.shake.next_shake = tr.time + (1.0f / gHUD.shake.frequency);
+
+		// compute random shake extents (the shake will settle down from this)
+		for( i = 0; i < 3; i++ )
+			gHUD.shake.offset[i] = RANDOM_FLOAT( -gHUD.shake.amplitude, gHUD.shake.amplitude );
+		gHUD.shake.angle = RANDOM_FLOAT( -gHUD.shake.amplitude * 0.25f, gHUD.shake.amplitude * 0.25f );
+	}
+
+	// ramp down amplitude over duration (fraction goes from 1 to 0 linearly with slope 1/duration)
+	fraction = (gHUD.shake.time - tr.time) / gHUD.shake.duration;
+
+	// ramp up frequency over duration
+	if( fraction )
+	{
+		freq = (gHUD.shake.frequency / fraction);
+	}
+	else
+	{
+		freq = 0;
+	}
+
+	// square fraction to approach zero more quickly
+	fraction *= fraction;
+
+	// Sine wave that slowly settles to zero
+	fraction = fraction * sin( tr.time * freq );
+
+	// add to view origin
+	gHUD.shake.applied_offset = gHUD.shake.offset * fraction;
+
+	// add to roll
+	gHUD.shake.applied_angle = gHUD.shake.angle * fraction;
+
+	// drop amplitude a bit, less for higher frequency shakes
+	localAmp = gHUD.shake.amplitude * (g_fFrametime / (gHUD.shake.duration * gHUD.shake.frequency));
+	gHUD.shake.amplitude -= localAmp;
+}
+
+void ApplyShake( float *origin, float *angles, float factor )
+{
+	if( origin ) VectorMA( origin, factor, gHUD.shake.applied_offset, origin );
+	if( angles ) angles[ROLL] += gHUD.shake.applied_angle * factor;
+}

@@ -125,6 +125,8 @@ void CScreenEffects::DrawSpeedometer(void)
 
 	// draw the arrow
 	SpeedArrowRotation = CL_UTIL_Approach( gHUD.CarSpeed, SpeedArrowRotation, 25 * g_fFrametime );
+	if( SpeedArrowRotation > 240 )
+		SpeedArrowRotation = 240;
 	GL_Bind( 0, SpeedometerArrow );
 	pglPushMatrix();
 	pglTranslatef( ScreenWidth - 320 + 150, ScreenHeight - 320 + 150, 0 );

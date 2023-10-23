@@ -112,6 +112,8 @@ typedef struct leaflist_s
 
 float CL_UTIL_Approach( float target, float value, float speed );
 void CL_UTIL_Sparks( Vector org );
+void CalcShake( void );
+void ApplyShake( float *origin, float *angles, float factor );
 
 struct mleaf_s *Mod_PointInLeaf( Vector p, struct mnode_s *node );
 bool Mod_BoxVisible( const Vector mins, const Vector maxs, const byte *visbits );
