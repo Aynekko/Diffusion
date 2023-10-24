@@ -513,8 +513,11 @@ static void Mod_LoadWorldMaterials( void )
 		Q_snprintf( tr.materials[tx->gl_texturenum].name, sizeof( tr.materials[tx->gl_texturenum].name ), "%s", tx->name );
 		LoadMaterialSettingsForTexture( tx->gl_texturenum );
 
-		if( !Q_strncmp( tx->name, "sky", 3 ) )
-			SetBits( world->features, WORLD_HAS_SKYBOX );
+		if( !(world->features & WORLD_HAS_SKYBOX) )
+		{
+			if( !Q_strncmp( tx->name, "sky", 3 ) )
+				SetBits( world->features, WORLD_HAS_SKYBOX );
+		}
 	}
 }
 

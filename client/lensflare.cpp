@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "r_local.h"
 #include "r_cvars.h"
+#include "r_world.h"
 #include "pm_movevars.h"
 #include "event_api.h"
 #include "triangleapi.h"
@@ -39,6 +40,9 @@ int CHudLensflare::Draw( float flTime )
 	if( gl_lensflare->value <= 0 )
 		return 1;
 
+	if( !(world->features & WORLD_HAS_SKYBOX) )
+		return 1; // don't waste time on tracing
+
 	if( tr.time == tr.oldtime )
 		return 1; // not in paused
 
@@ -50,7 +54,7 @@ int CHudLensflare::Draw( float flTime )
 	}
 
 	if( CVAR_TO_BOOL( ui_is_active ) && !CVAR_GET_FLOAT( "cl_background" ) )
-		return 0;
+		return 1;
 
 	Vector sunangles, sundir, suntarget;
 	Vector v_forward, v_right, v_up, angles;
@@ -97,7 +101,7 @@ int CHudLensflare::Draw( float flTime )
 		if( ent->curstate.rendermode == kRenderTransColor && ent->curstate.renderamt == 255 )
 			break;
 
-		// if close enought to end pos, stop, otherwise continue trace
+		// if close enough to end pos, stop, otherwise continue trace
 		if( (suntarget - trace.endpos).Length() < 1.0f )
 			break;
 		else
