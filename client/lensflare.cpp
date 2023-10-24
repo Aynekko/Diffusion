@@ -112,8 +112,7 @@ int CHudLensflare::Draw( float flTime )
 		maxLoops--;
 	}
 
-	const char *texName = gEngfuncs.pEventAPI->EV_TraceTexture( trace.ent, vecStart, trace.endpos );
-	if( texName && !Q_strnicmp( texName, "sky", 3 ) && DotP > 0.8 )
+	if( (POINT_CONTENTS(trace.endpos) == CONTENTS_SKY) && DotP > 0.8 )
 		BlendMult += 5 * g_fFrametime;
 	else
 		BlendMult -= g_fFrametime;
