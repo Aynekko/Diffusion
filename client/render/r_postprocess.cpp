@@ -516,8 +516,7 @@ void GaussBlur( void )
 		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
 		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, VecEnd, PM_GLASS_IGNORE, -1, &ptr );
 		
-		const char *texName = gEngfuncs.pEventAPI->EV_TraceTexture( ptr.ent, PlayerOrg, VecEnd );
-		if( texName && !Q_strnicmp( texName, "sky", 3 ) )
+		if( POINT_CONTENTS(ptr.endpos) == CONTENTS_SKY )
 			skyblur -= 0.1 * g_fFrametime;
 		else
 			skyblur += 0.1 * g_fFrametime;
