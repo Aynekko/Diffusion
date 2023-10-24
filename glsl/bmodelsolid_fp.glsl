@@ -88,7 +88,7 @@ void main( void )
 
 	float alpha = u_RenderColor.a;
 	float fogFactor = 0.0f;
-	float fresnel = 0.0f; 
+	float fresnel = 0.0f;
 
         // compute the masks for terrain
 #if defined( BMODEL_MULTI_LAYERS )
@@ -208,8 +208,8 @@ void main( void )
 	#endif
 
 	#if defined( BMODEL_APPLY_STYLE0 ) || defined( BMODEL_APPLY_STYLE1 ) || defined( BMODEL_APPLY_STYLE2 ) || defined( BMODEL_APPLY_STYLE3 )
-		light = min(( light * LIGHTMAP_SHIFT ), 1.0 );
-		gloss = min(( gloss * LIGHTMAP_SHIFT ), 1.0 );
+		light = min(( light * LIGHTMAP_SHIFT ), 2.0 );
+		gloss = min(( gloss * LIGHTMAP_SHIFT ), 2.0 );
 	#endif
 
 	diffuse.rgb *= light;
