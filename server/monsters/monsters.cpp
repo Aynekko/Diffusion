@@ -2743,12 +2743,6 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 
 	current = UTIL_AngleMod( angles.y );
 	ideal = pev->ideal_yaw;
-	if( iTest )
-	{
-		ideal += 180;
-		if( ideal > 180 ) ideal -= 360;
-		if( ideal < -180 ) ideal += 360;
-	}
 
 	if (current != ideal)
 	{
