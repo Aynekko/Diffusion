@@ -377,6 +377,8 @@ public:
 
 	float NextThinkTime; // unused
 	float LastServerTime;
+
+	int iTest; // just for testing purposes
 };
 
 

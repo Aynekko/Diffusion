@@ -1346,9 +1346,7 @@ BOOL CBaseMonster :: PopEnemy( )
 //=========================================================
 void CBaseMonster :: SetActivity ( Activity NewActivity )
 {
-	int	iSequence;
-
-	iSequence = LookupActivity ( NewActivity );
+	int	iSequence = LookupActivity ( NewActivity );
 
 	// Set to the desired anim, or default anim if the desired is not present
 	if ( iSequence > ACTIVITY_NOT_AVAILABLE )
@@ -1362,7 +1360,7 @@ void CBaseMonster :: SetActivity ( Activity NewActivity )
 
 		pev->sequence = iSequence;	// Set to the reset anim (if it's there)
 		ResetSequenceInfo( );
-		SetYawSpeed();
+	//	SetYawSpeed();
 	}
 	else
 	{
@@ -1372,11 +1370,11 @@ void CBaseMonster :: SetActivity ( Activity NewActivity )
 	}
 
 	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
+
+	SetYawSpeed(); // diffusion - this must go after setting m_Activity? Otherwise we will have old act for yaw speed.
 	
 	// In case someone calls this with something other than the ideal activity
 	m_IdealActivity = m_Activity;
-
-
 }
 
 //=========================================================
@@ -1384,9 +1382,7 @@ void CBaseMonster :: SetActivity ( Activity NewActivity )
 //=========================================================
 void CBaseMonster :: SetSequenceByName ( char *szSequence )
 {
-	int	iSequence;
-
-	iSequence = LookupSequence ( szSequence );
+	int	iSequence = LookupSequence ( szSequence );
 
 	// Set to the desired anim, or default anim if the desired is not present
 	if ( iSequence > ACTIVITY_NOT_AVAILABLE )
@@ -1396,15 +1392,15 @@ void CBaseMonster :: SetSequenceByName ( char *szSequence )
 			pev->frame = 0;
 		}
 
-		pev->sequence		= iSequence;	// Set to the reset anim (if it's there)
-		ResetSequenceInfo( );
+		pev->sequence = iSequence;	// Set to the reset anim (if it's there)
+		ResetSequenceInfo();
 		SetYawSpeed();
 	}
 	else
 	{
 		// Not available try to get default anim
 		ALERT ( at_aiconsole, "%s has no sequence named:%f\n", STRING(pev->classname), szSequence );
-		pev->sequence		= 0;	// Set to the reset anim (if it's there)
+		pev->sequence = 0;	// Set to the reset anim (if it's there)
 	}
 }
 
@@ -1956,8 +1952,8 @@ void CBaseMonster :: Move ( float flInterval )
 	vecDir = ( m_Route[ m_iRouteIndex ].vecLocation - GetAbsOrigin() ).Normalize();
 	flWaypointDist = ( m_Route[ m_iRouteIndex ].vecLocation - GetAbsOrigin() ).Length2D();
 	
-	MakeIdealYaw ( m_Route[ m_iRouteIndex ].vecLocation );
-	ChangeYaw ( pev->yaw_speed );
+	MakeIdealYaw( m_Route[m_iRouteIndex].vecLocation );
+	ChangeYaw( pev->yaw_speed );
 
 	// if the waypoint is closer than CheckDist, CheckDist is the dist to waypoint
 	if ( flWaypointDist < DIST_TO_CHECK )
@@ -2747,6 +2743,13 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 
 	current = UTIL_AngleMod( angles.y );
 	ideal = pev->ideal_yaw;
+	if( iTest )
+	{
+		ideal += 180;
+		if( ideal > 180 ) ideal -= 360;
+		if( ideal < -180 ) ideal += 360;
+	}
+
 	if (current != ideal)
 	{
 		//speed = (float)yawSpeed * gpGlobals->frametime * 10;
@@ -2851,7 +2854,7 @@ void CBaseMonster :: StepSound( void )
 	const char *pTextureName;
 	TraceResult ptr;
 	float fattn = ATTN_NORM;
-	int fWalking;
+	bool fWalking = false;
 	int cnt;
 
 	UTIL_TraceLine( pev->origin + Vector( 0, 0, 8 ), pev->origin - Vector( 0, 0, 16 ), ignore_monsters, ENT( pev ), &ptr );
@@ -2882,7 +2885,6 @@ void CBaseMonster :: StepSound( void )
 
 	if ( m_Activity == ACT_WALK )
 		fWalking = true;
-	else fWalking = false;	
 
 	switch( chTextureType )
 	{

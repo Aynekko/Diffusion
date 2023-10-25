@@ -16,17 +16,18 @@
 // monster template
 //=========================================================
 
-#include	"extdll.h"
-#include	"util.h"
-#include	"cbase.h"
-#include	"monsters.h"
-#include	"talkmonster.h"
-#include	"game/schedule.h"
-#include	"game/defaultai.h"
-#include	"game/scripted.h"
-#include	"weapons/weapons.h"
-#include	"entities/soundent.h"
-#include	"plane.h"
+#include "extdll.h"
+#include "util.h"
+#include "cbase.h"
+#include "monsters.h"
+#include "talkmonster.h"
+#include "game/schedule.h"
+#include "game/defaultai.h"
+#include "game/scripted.h"
+#include "weapons/weapons.h"
+#include "entities/soundent.h"
+#include "plane.h"
+#include "animation.h"
 
 //=========================================================
 // Monster's Anim Events Go Here
@@ -1520,7 +1521,7 @@ Schedule_t *CAlice :: GetSchedule ( void )
 				}
 			}
 
-			if ( HasConditions( bits_COND_CLIENT_PUSH ) )
+			if( HasConditions( bits_COND_CLIENT_PUSH ) )
 				return GetScheduleOfType( SCHED_MOVE_AWAY );
 
 			// try to say something about smells
