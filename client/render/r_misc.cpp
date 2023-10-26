@@ -492,10 +492,18 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 						vecSpot[1] = SmV_Org.y + RANDOM_FLOAT( -0.5f, 0.5f ) * SmV_Size.y;
 						vecSpot[2] = SmV_Org.z + RANDOM_FLOAT( -0.5f, 0.5f ) * SmV_Size.z;
 
-						if( POINT_CONTENTS( vecSpot ) == CONTENTS_WATER )
+						// test distance here
+						if( SmV_Distance > 0 )
+						{
+							if( (vecSpot - tr.viewparams.vieworg).Length() > SmV_Distance )
+								continue;
+						}
+
+						int Contents = POINT_CONTENTS( vecSpot );
+						if( Contents == CONTENTS_WATER )
 							continue;
 
-						if( POINT_CONTENTS( vecSpot ) != CONTENTS_SOLID )
+						if( Contents != CONTENTS_SOLID )
 							break; // valid spot
 					}
 

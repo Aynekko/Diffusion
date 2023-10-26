@@ -40,12 +40,9 @@ void CFuncSmokeVolume::Spawn( void )
 	// keep them above zero
 	if( !pev->vuser2.IsNull() )
 	{
-		if( pev->vuser2.x < 0.0f )
-			pev->vuser2.x = -pev->vuser2.x;
-		if( pev->vuser2.y < 0.0f )
-			pev->vuser2.y = -pev->vuser2.x;
-		if( pev->vuser2.z < 0.0f )
-			pev->vuser2.z = -pev->vuser2.x;
+		pev->vuser2.x = fabs( pev->vuser2.x );
+		pev->vuser2.y = fabs( pev->vuser2.y );
+		pev->vuser2.z = fabs( pev->vuser2.z );
 	}
 
 	SET_MODEL( edict(), GetModel() );
