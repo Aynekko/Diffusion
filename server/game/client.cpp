@@ -1874,6 +1874,9 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 	// diffusion - apply a flag to laser spot, will be using local origin on client
 	if( FClassnameIs(pEntity,"laser_spot"))
 	{
+		if( pEntity->pev->effects & EF_MYLASERSPOT )
+			pEntity->pev->effects &= ~EF_MYLASERSPOT;
+
 		if( pEntity->pev->owner == pPlayer->edict() )
 		{
 			if( !(pEntity->pev->effects & EF_MYLASERSPOT) )
