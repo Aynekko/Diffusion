@@ -515,6 +515,8 @@ void CStudioModelRenderer::ClearInstanceData( bool create )
 
 	for( int map = 0; map < MAXLIGHTMAPS; map++ )
 		m_pModelInstance->styles[map] = 255;
+
+	m_pModelInstance->numlods = StudioCheckLOD();
 }
 
 void CStudioModelRenderer::ProcessUserData( model_t *mod, qboolean create, const byte *buffer )
@@ -2322,9 +2324,9 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 	Vector scale = Vector( 1.0f, 1.0f, 1.0f );
 
 	float lodDist = (origin - RI->vieworg).Length() * tr.lodScale;
-	float  radius = Q_max( m_pModelInstance->radius, 1.0f ); // to avoid division by zero
+	float radius = Q_max( m_pModelInstance->radius, 1.0f ); // to avoid division by zero
 	int lodnum = (int)(lodDist / radius);
-	int numLods;
+	int numLods = m_pModelInstance->numlods;
 
 	if( CVAR_TO_BOOL( m_pCvarLodScale ) )
 		lodnum /= (int)fabs( m_pCvarLodScale->value );
@@ -2332,7 +2334,7 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 		lodnum += (int)fabs( m_pCvarLodBias->value );
 
 	// apply lodnum to model
-	if( (numLods = StudioCheckLOD()) != 0 )
+	if( numLods > 0 )
 	{
 		// set derived LOD
 		m_pCurrentEntity->curstate.body = Q_min( lodnum, numLods - 1 );

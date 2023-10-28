@@ -437,6 +437,8 @@ private:
 		int		visframe;				// model is visible this frame
 
 		GLfloat m_glmatrix[16];
+
+		int numlods; // number of LODs
 	};
 
 	struct Decal_t
