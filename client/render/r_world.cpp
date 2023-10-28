@@ -478,7 +478,7 @@ static void Mod_LoadWorldMaterials( void )
 	{
 		texture_t *tx = worldmodel->textures[i];
 
-		char diffuse[128], luma[128];
+		char diffuse[128];
 
 		// bad texture? 
 		if( !tx || !tx->name[0] )

@@ -44,7 +44,7 @@ GNU General Public License for more details.
 #define FPART_NOTINSOLID	BIT(16) // don't draw in solid
 #define FPART_TWOSIDE		BIT(17)
 
-typedef enum
+enum
 {
 	TYPE_DEFAULT = 0,
 	TYPE_DUSTMOTE,
@@ -103,7 +103,7 @@ public:
 	bool Evaluate( float gravity );
 };
 
-typedef enum
+enum
 {
 	NORMAL_IGNORE = 0,
 	NORMAL_OFFSET,
