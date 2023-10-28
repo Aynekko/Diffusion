@@ -670,6 +670,9 @@ void R_GrassPrepareFrame( void )
 {
 	if( !CVAR_TO_BOOL( r_grass ) )
 		return;
+
+	if( !FBitSet( world->features, WORLD_HAS_GRASS ) )
+		return; // don't waste time
 	
 	for( int i = 0; i < GRASS_TEXTURES; i++ )
 		grass_surfaces[i] = NULL;
