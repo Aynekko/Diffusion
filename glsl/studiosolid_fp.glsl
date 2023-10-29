@@ -62,7 +62,7 @@ void main( void )
         // compute the normal term
 #if defined( STUDIO_BUMP )
 	#if defined( STUDIO_INTERIOR )
-		N = normalmap2D( u_NormalMap, fract(var_TexDiffuse * u_InteriorGrid));
+		N = normalmap2D( u_NormalMap, fract(var_TexDiffuse * vec2(u_InteriorParams.x,u_InteriorParams.y)));
 	#else
 		N = normalmap2D( u_NormalMap, var_TexDiffuse );
 	#endif

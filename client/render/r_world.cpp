@@ -2360,8 +2360,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			if( tr.materials[tex->gl_texturenum].gl_interiormap_id > 0 )
 			{
 			//	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform2fARB( RI->currentshader->u_InteriorGrid, tr.materials[tex->gl_texturenum].InteriorGrid.x, tr.materials[tex->gl_texturenum].InteriorGrid.y );
-				pglUniform1fARB( RI->currentshader->u_InteriorLightState, (float)tr.materials[tex->gl_texturenum].InteriorLightState );
+				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[tex->gl_texturenum].InteriorGrid.x, tr.materials[tex->gl_texturenum].InteriorGrid.y, (float)tr.materials[tex->gl_texturenum].InteriorLightState );
 				GL_Bind( GL_TEXTURE7, tr.materials[tex->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
 			}
 
@@ -2839,8 +2838,7 @@ void R_DrawBrushList( void )
 			if( tr.materials[es->gl_texturenum].gl_interiormap_id > 0 )
 			{
 			//	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform2fARB( RI->currentshader->u_InteriorGrid, tr.materials[es->gl_texturenum].InteriorGrid.x, tr.materials[es->gl_texturenum].InteriorGrid.y );
-				pglUniform1fARB( RI->currentshader->u_InteriorLightState, (float)tr.materials[es->gl_texturenum].InteriorLightState );
+				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[es->gl_texturenum].InteriorGrid.x, tr.materials[es->gl_texturenum].InteriorGrid.y, (float)tr.materials[es->gl_texturenum].InteriorLightState );
 				GL_Bind( GL_TEXTURE5, tr.materials[es->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
 			}
 			else if( FBitSet( s->flags, SURF_WATER ) && (gl_water_planar->value > 0) )

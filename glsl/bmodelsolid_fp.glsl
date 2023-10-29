@@ -111,7 +111,7 @@ void main( void )
 #else
 	#if defined( BMODEL_BUMP )
 		#if defined( BMODEL_INTERIOR )
-			N = normalmap2D( u_NormalMap, fract(var_TexDiffuse * u_InteriorGrid));
+			N = normalmap2D( u_NormalMap, fract(var_TexDiffuse * vec2(u_InteriorParams.x,u_InteriorParams.y)));
 		#else
 			N = normalmap2D( u_NormalMap, var_TexDiffuse );
 		#endif

@@ -3,8 +3,7 @@
 // thanks to ncuxonaT for room position fix on stretched textures and helping to implement an atlas technique instead of cubemaps
 
 uniform sampler2D		u_InteriorMap;
-uniform vec2			u_InteriorGrid;
-uniform float			u_InteriorLightState;
+uniform vec3			u_InteriorParams;
 
 #define SEED_CHANGING_FREQ 0.5
 const float INTERIOR_BACK_PLANE_SCALE = 0.5;
@@ -14,7 +13,7 @@ const float IntRefraction = 0.1;
 vec4 InteriorMapping( vec4 diffuse, vec2 TexDiffuse, vec3 N, float Time, vec3 ViewVec, vec3 vPos )
 {
 	// Time: u_realtime is currently not used in lighting change
-	vec2 gridSize = u_InteriorGrid;
+	vec2 gridSize = vec2( u_InteriorParams.x, u_InteriorParams.y );
 
 	vec2 uv = fract( TexDiffuse );
 	vec2 slicedUv = fract(uv * gridSize);
@@ -79,7 +78,7 @@ vec4 InteriorMapping( vec4 diffuse, vec2 TexDiffuse, vec3 N, float Time, vec3 Vi
 	vec4 interior3 = interior0;
 	vec4 interior4 = interior0;
 
-	float LightChance = u_InteriorLightState * 0.01;
+	float LightChance = u_InteriorParams.z * 0.01;
 
 	// randomize room lighting
 	if( randomVal <= 0.2 )

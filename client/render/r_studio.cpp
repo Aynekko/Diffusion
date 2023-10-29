@@ -5011,8 +5011,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			// diffusion - interior mapping
 			if( tr.materials[mat->gl_diffuse_id].gl_interiormap_id > 0 )
 			{
-				pglUniform2fARB( RI->currentshader->u_InteriorGrid, tr.materials[mat->gl_diffuse_id].InteriorGrid.x, tr.materials[mat->gl_diffuse_id].InteriorGrid.y );
-				pglUniform1fARB( RI->currentshader->u_InteriorLightState, (float)tr.materials[mat->gl_diffuse_id].InteriorLightState );
+				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[mat->gl_diffuse_id].InteriorGrid.x, tr.materials[mat->gl_diffuse_id].InteriorGrid.y, (float)tr.materials[mat->gl_diffuse_id].InteriorLightState );
 				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_interiormap_id ); // u_InteriorMap
 			}
 
@@ -5335,8 +5334,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			// diffusion - interior mapping
 			if( tr.materials[mat->gl_diffuse_id].gl_interiormap_id > 0 )
 			{
-				pglUniform2fARB( RI->currentshader->u_InteriorGrid, tr.materials[mat->gl_diffuse_id].InteriorGrid.x, tr.materials[mat->gl_diffuse_id].InteriorGrid.y );
-				pglUniform1fARB( RI->currentshader->u_InteriorLightState, (float)tr.materials[mat->gl_diffuse_id].InteriorLightState );
+				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[mat->gl_diffuse_id].InteriorGrid.x, tr.materials[mat->gl_diffuse_id].InteriorGrid.y, (float)tr.materials[mat->gl_diffuse_id].InteriorLightState );
 				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_interiormap_id ); // u_InteriorMap
 			}
 

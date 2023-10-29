@@ -76,8 +76,7 @@ typedef struct glsl_prog_s
 
 	// parallax interiors
 	GLint u_InteriorMap;
-	GLint u_InteriorGrid;
-	GLint u_InteriorLightState;
+	GLint u_InteriorParams;
 
 	// uniform parameters
 	GLint u_BoneQuaternion;

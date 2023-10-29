@@ -718,8 +718,7 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 	{
 		shader->u_InteriorMap = pglGetUniformLocationARB( shader->handle, "u_InteriorMap" );
 		shader->u_RealTime = pglGetUniformLocationARB( shader->handle, "u_RealTime" );
-		shader->u_InteriorGrid = pglGetUniformLocationARB( shader->handle, "u_InteriorGrid" );
-		shader->u_InteriorLightState = pglGetUniformLocationARB( shader->handle, "u_InteriorLightState" );
+		shader->u_InteriorParams = pglGetUniformLocationARB( shader->handle, "u_InteriorParams" );
 	}
 	else if( GL_FindShaderDirective( shader, "BMODEL_REFLECTION_PLANAR" ) || GL_FindShaderDirective( shader, "BMODEL_WATER_PLANAR" ) )
 	{
@@ -824,8 +823,7 @@ static void GL_InitBmodelDlightUniforms( glsl_program_t *shader )
 	{
 		shader->u_InteriorMap = pglGetUniformLocationARB( shader->handle, "u_InteriorMap" );
 		shader->u_RealTime = pglGetUniformLocationARB( shader->handle, "u_RealTime" );
-		shader->u_InteriorGrid = pglGetUniformLocationARB( shader->handle, "u_InteriorGrid" );
-		shader->u_InteriorLightState = pglGetUniformLocationARB( shader->handle, "u_InteriorLightState" );
+		shader->u_InteriorParams = pglGetUniformLocationARB( shader->handle, "u_InteriorParams" );
 	}
 
 	GL_BindShader( shader );
@@ -916,8 +914,7 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 	if( GL_FindShaderDirective( shader, "STUDIO_INTERIOR" ) )
 	{
 		shader->u_InteriorMap = pglGetUniformLocationARB( shader->handle, "u_InteriorMap" );
-		shader->u_InteriorGrid = pglGetUniformLocationARB( shader->handle, "u_InteriorGrid" );
-		shader->u_InteriorLightState = pglGetUniformLocationARB( shader->handle, "u_InteriorLightState" );
+		shader->u_InteriorParams = pglGetUniformLocationARB( shader->handle, "u_InteriorParams" );
 	}
 
 	if( GL_FindShaderDirective( shader, "STUDIO_VERTEX_LIGHTING" ))
@@ -992,8 +989,7 @@ static void GL_InitStudioDlightUniforms( glsl_program_t *shader )
 	if( GL_FindShaderDirective( shader, "STUDIO_INTERIOR" ) )
 	{
 		shader->u_InteriorMap = pglGetUniformLocationARB( shader->handle, "u_InteriorMap" );
-		shader->u_InteriorGrid = pglGetUniformLocationARB( shader->handle, "u_InteriorGrid" );
-		shader->u_InteriorLightState = pglGetUniformLocationARB( shader->handle, "u_InteriorLightState" );
+		shader->u_InteriorParams = pglGetUniformLocationARB( shader->handle, "u_InteriorParams" );
 	}
 
 	shader->u_RealTime = pglGetUniformLocationARB( shader->handle, "u_RealTime" );
