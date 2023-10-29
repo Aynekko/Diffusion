@@ -696,7 +696,6 @@ void ScreenWater(void)
 	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height) );
 	pglUniform1fARB( RI->currentshader->u_Accum, Speed );
 
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
 	GL_Bind( GL_TEXTURE1, ScreenWaterTexture );
 
 	RenderFSQ( glState.width, glState.height );
@@ -727,8 +726,6 @@ void Glitch( void )
 	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
 	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height) );
 	pglUniform1fARB( RI->currentshader->u_Accum, gHUD.GlitchAmount );
-
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
 
 	RenderFSQ( glState.width, glState.height );
 
