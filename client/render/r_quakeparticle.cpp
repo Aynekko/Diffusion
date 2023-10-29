@@ -380,33 +380,6 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			curParticle->m_vecLastOrg = org;
 		}
 
-		// vertex lit particle
-		if( FBitSet( curParticle->m_iFlags, FPART_VERTEXLIGHT ) )
-		{
-			Vector light;
-			// gather static lighting
-			gEngfuncs.pTriAPI->LightAtPoint( org, light );
-			light *= (1.0f / 255.0f);
-
-			// gather dynamic lighting
-			light += R_LightsForPoint( org, curRadius );
-
-			// renormalize lighting
-			float f = Q_max( Q_max( light.x, light.y ), light.z );
-			if( f > 1.0f ) light *= (1.0f / f);
-
-		//	curColor *= light;	// multiply to diffuse
-			if( curParticle->newLight.IsNull() )
-				curParticle->newLight = light;
-			else
-			{
-				curParticle->newLight.x = CL_UTIL_Approach( light.x, curParticle->newLight.x, g_fFrametime * 3 );
-				curParticle->newLight.y = CL_UTIL_Approach( light.y, curParticle->newLight.y, g_fFrametime * 3 );
-				curParticle->newLight.z = CL_UTIL_Approach( light.z, curParticle->newLight.z, g_fFrametime * 3 );
-			}
-			curColor *= curParticle->newLight;
-		}
-
 		if( FBitSet( curParticle->m_iFlags, FPART_INSTANT ) )
 		{
 			// instant particle
@@ -439,11 +412,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			scale += (org.y - RI->vieworg.y) * RI->vforward.y;
 			scale += (org.z - RI->vieworg.z) * RI->vforward.z;
 			if( scale >= 20.0f ) curRadius = 1.0f + scale * 0.004f;
-		}
-
-		curColor.x = bound( 0.0f, curColor.x, 1.0f );
-		curColor.y = bound( 0.0f, curColor.y, 1.0f );
-		curColor.z = bound( 0.0f, curColor.z, 1.0f );
+		}	
 
 		// clear any added velocity this frame
 		curParticle->m_vecVelocity -= curParticle->m_vecAddedVelocity;
@@ -479,6 +448,37 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			r_stats.c_particles_culled++;
 			continue;
 		}
+
+		// vertex lit particle
+		if( FBitSet( curParticle->m_iFlags, FPART_VERTEXLIGHT ) )
+		{
+			Vector light;
+			// gather static lighting
+			gEngfuncs.pTriAPI->LightAtPoint( org, light );
+			light *= (1.0f / 255.0f);
+
+			// gather dynamic lighting
+			light += R_LightsForPoint( org, curRadius );
+
+			// renormalize lighting
+			float f = Q_max( Q_max( light.x, light.y ), light.z );
+			if( f > 1.0f ) light *= (1.0f / f);
+
+			//	curColor *= light;	// multiply to diffuse
+			if( curParticle->newLight.IsNull() )
+				curParticle->newLight = light;
+			else
+			{
+				curParticle->newLight.x = CL_UTIL_Approach( light.x, curParticle->newLight.x, g_fFrametime * 3 );
+				curParticle->newLight.y = CL_UTIL_Approach( light.y, curParticle->newLight.y, g_fFrametime * 3 );
+				curParticle->newLight.z = CL_UTIL_Approach( light.z, curParticle->newLight.z, g_fFrametime * 3 );
+			}
+			curColor *= curParticle->newLight;
+		}
+
+		curColor.x = bound( 0.0f, curColor.x, 1.0f );
+		curColor.y = bound( 0.0f, curColor.y, 1.0f );
+		curColor.z = bound( 0.0f, curColor.z, 1.0f );
 
 		// diffusion - look at player, but don't rotate with view rotation
 		if( !curParticle->m_vecView.IsNull() )
@@ -830,33 +830,6 @@ bool CQuakePart::Evaluate( float gravity )
 		m_vecLastOrg = org;
 	}
 
-	// vertex lit particle
-	if( FBitSet( m_iFlags, FPART_VERTEXLIGHT ) )
-	{
-		Vector light;
-		// gather static lighting
-		gEngfuncs.pTriAPI->LightAtPoint( org, light );
-		light *= (1.0f / 255.0f);
-
-		// gather dynamic lighting
-		light += R_LightsForPoint( org, curRadius );
-
-		// renormalize lighting
-		float f = Q_max( Q_max( light.x, light.y ), light.z );
-		if( f > 1.0f ) light *= (1.0f / f);
-
-	//	curColor *= light;	// multiply to diffuse
-		if( newLight.IsNull() )
-			newLight = light;
-		else
-		{
-			newLight.x = CL_UTIL_Approach( light.x, newLight.x, g_fFrametime * 3 );
-			newLight.y = CL_UTIL_Approach( light.y, newLight.y, g_fFrametime * 3 );
-			newLight.z = CL_UTIL_Approach( light.z, newLight.z, g_fFrametime * 3 );
-		}
-		curColor *= newLight;
-	}
-
 	if( FBitSet( m_iFlags, FPART_INSTANT ) )
 	{
 		// instant particle
@@ -891,10 +864,6 @@ bool CQuakePart::Evaluate( float gravity )
 		if( scale >= 20.0f ) curRadius = 1.0f + scale * 0.004f;
 	}
 
-	curColor.x = bound( 0.0f, curColor.x, 1.0f );
-	curColor.y = bound( 0.0f, curColor.y, 1.0f );
-	curColor.z = bound( 0.0f, curColor.z, 1.0f );
-
 	// clear any added velocity this frame
 	m_vecVelocity -= m_vecAddedVelocity;
 	m_vecAddedVelocity.x = CL_UTIL_Approach( 0, m_vecAddedVelocity.x, g_fFrametime );
@@ -907,6 +876,38 @@ bool CQuakePart::Evaluate( float gravity )
 		r_stats.c_particles_culled++;
 		return true;
 	}
+
+	// vertex lit particle
+	if( FBitSet( m_iFlags, FPART_VERTEXLIGHT ) )
+	{
+		Vector light;
+		// gather static lighting
+		gEngfuncs.pTriAPI->LightAtPoint( org, light );
+		light *= (1.0f / 255.0f);
+
+		// gather dynamic lighting
+		light += R_LightsForPoint( org, curRadius );
+
+		// renormalize lighting
+		float f = Q_max( Q_max( light.x, light.y ), light.z );
+		if( f > 1.0f ) light *= (1.0f / f);
+
+		//	curColor *= light;	// multiply to diffuse
+		if( newLight.IsNull() )
+			newLight = light;
+		else
+		{
+			newLight.x = CL_UTIL_Approach( light.x, newLight.x, g_fFrametime * 3 );
+			newLight.y = CL_UTIL_Approach( light.y, newLight.y, g_fFrametime * 3 );
+			newLight.z = CL_UTIL_Approach( light.z, newLight.z, g_fFrametime * 3 );
+		}
+		curColor *= newLight;
+	}
+
+	curColor.x = bound( 0.0f, curColor.x, 1.0f );
+	curColor.y = bound( 0.0f, curColor.y, 1.0f );
+	curColor.z = bound( 0.0f, curColor.z, 1.0f );
+
 	/*
 	if( ParticleType == TYPE_SMOKE )
 	{
