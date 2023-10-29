@@ -1179,8 +1179,6 @@ void WaterDrops( void )
 	pglUniform1fARB( RI->currentshader->u_Accum, gHUD.ScreenDrips_CurVisibility );
 	pglUniform1fARB( RI->currentshader->u_LerpFactor, gHUD.ScreenDrips_DripIntensity );
 
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-
 	RenderFSQ( glState.width, glState.height );
 
 	GL_BindShader( NULL );
