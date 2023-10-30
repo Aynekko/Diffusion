@@ -1742,9 +1742,8 @@ void R_RenderScene( void )
 		SSAO();
 		HorizontalBlur();
 		GL_Setup3D();
+		R_DrawViewModel();
 	}
-
-	R_DrawViewModel();
 
 	R_EndGL();
 

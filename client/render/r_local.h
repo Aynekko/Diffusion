@@ -371,9 +371,10 @@ typedef struct
 	int		num_draw_decals;
 
 	cl_entity_t	*sky_camera;
-	bool		fIgnoreSkybox;		// we already draw 3d skybox, so don't overwrite it in current pass
-	ref_params_t	viewparams;		// local copy of ref_params_t
-	struct movevars_s	*movevars;
+	bool fIgnoreSkybox; // we already draw 3d skybox, so don't overwrite it in current pass
+	bool bDraw3DSky; // sets to true if a sky surface was found and turns on 3D sky for the next frame
+	ref_params_t viewparams;		// local copy of ref_params_t
+	struct movevars_s *movevars;
 
 	bool		fogEnabled;
 	Vector		fogColor;

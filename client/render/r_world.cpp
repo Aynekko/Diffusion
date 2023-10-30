@@ -3302,7 +3302,7 @@ Mark the leaves and nodes that are in the PVS for the current leaf
 */
 void R_MarkLeaves( void )
 {
-	bool		novis = false;
+	bool novis = false;
 	mworldnode_t *node;
 
 	if( FBitSet( r_novis->flags, FCVAR_CHANGED ) || tr.fResetVis )
@@ -3477,7 +3477,10 @@ void R_WorldMarkVisibleFaces( void )
 	msurface_t *surf, **mark;
 	mextrasurf_t *esrf;
 	mworldleaf_t *leaf;
-	int		i, j;
+	int i, j;
+
+	if( RP_NORMALPASS() )
+		tr.bDraw3DSky = false;
 
 	// always skip the leaf 0, because it's an outside leaf
 	for( i = 1, leaf = &world->leafs[1]; i < world->numleafs; i++, leaf++ )
@@ -3539,6 +3542,9 @@ void R_WorldMarkVisibleFaces( void )
 #endif
 				if( FBitSet( surf->flags, SURF_DRAWSKY ) )
 				{
+					if( RP_NORMALPASS() )
+						tr.bDraw3DSky = true; // 3D sky will be rendered next frame (3dsky visibility state is delayed by 1 frame)
+					
 					if( FBitSet( RI->params, RP_SHADOWPASS ) )
 						continue;
 

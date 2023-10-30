@@ -322,10 +322,10 @@ void R_DrawSkyPortal( cl_entity_t *skyPortal )
 
 void R_WorldFindSky( void )
 {
-	CFrustum		*frustum = &RI->frustum;
-	msurface_t	*surf, **mark;
-	mworldleaf_t	*leaf;
-	int		i, j;
+	CFrustum *frustum = &RI->frustum;
+	msurface_t *surf, **mark;
+	mworldleaf_t *leaf;
+	int i, j;
 
 	memset( RI->visfaces, 0x00, ( world->numsortedfaces + 7) >> 3 );
 
@@ -412,7 +412,11 @@ void R_CheckSkyPortal( cl_entity_t *skyPortal )
 
 	RI->currententity = GET_ENTITY( 0 );
 	RI->currentmodel = RI->currententity->model;
-	R_WorldFindSky();
+
+	if( tr.bDraw3DSky )
+		RI->params |= RP_SKYVISIBLE;
+//	else
+//		R_WorldFindSky(); // expensive. Instead find sky surface during normalpass and delay 3d skybox state by 1 frame using bDraw3DSky
 
 	if( FBitSet( RI->params, RP_SKYVISIBLE ))
 	{
