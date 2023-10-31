@@ -415,8 +415,8 @@ void R_CheckSkyPortal( cl_entity_t *skyPortal )
 
 	if( tr.bSkySurfFound )
 		RI->params |= RP_SKYVISIBLE;
-//	else
-//		R_WorldFindSky(); // expensive. Instead find sky surface during normalpass and delay 3d skybox state by 1 frame using bDraw3DSky
+	else if( (RI->params & RP_SCREENVIEW) || (RI->params & RP_PORTALVIEW) )
+		R_WorldFindSky(); // expensive. Instead find sky surface during normalpass and delay 3d skybox state by 1 frame using bDraw3DSky
 
 	if( FBitSet( RI->params, RP_SKYVISIBLE ))
 	{
