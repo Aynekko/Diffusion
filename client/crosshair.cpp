@@ -18,6 +18,8 @@
 DECLARE_MESSAGE( m_CrosshairStatic, CrosshairStatic );
 DECLARE_MESSAGE( m_CrosshairStatic, GaussHUD );
 
+static int CurCrosshair = 0;
+
 int CHudCrosshairStatic::Init( void )
 {
 	HOOK_MESSAGE( CrosshairStatic );
@@ -37,6 +39,7 @@ int CHudCrosshairStatic::VidInit( void )
 	AlienCrosshairImage = LOAD_TEXTURE( "sprites/scope_alien.dds", NULL, 0, 0 );
 	G36CCrosshairImage = LOAD_TEXTURE( "sprites/scope_g36c.dds", NULL, 0, 0 );
 	ZoomBlur = 0.0f;
+	CurCrosshair = cl_crosshair->value;
 
 	// gauss-specific
 	int Gframe = gHUD.GetSpriteIndex( "hud_gausniper_frame" );
@@ -106,32 +109,38 @@ int CHudCrosshairStatic::MsgFunc_GaussHUD( const char *pszName, int iSize, void 
 
 int CHudCrosshairStatic::Draw( float flTime )
 {
-	// using default half-life crosshairs?
-	// UNDONE no way to disable the new ones
-	// make a cvar!
-	if( CVAR_GET_FLOAT( "crosshair" ) == 1 )
-		return 0;
+	if( !CVAR_TO_BOOL( cl_crosshair ) )
+		return 1;
+
+	if( CurCrosshair != cl_crosshair->value )
+	{
+		LoadCrosshairForWeapon( WeaponID );
+		CurCrosshair = cl_crosshair->value;
+	}
 
 	int r, g, b;
 
 	// hitmarker is allowed at all times
-	if( EnableHitMarker == true )
+	if( EnableHitMarker )
 	{
 		x = (ScreenWidth / 2) - (m_HM.rc.right / 2);
 		y = (ScreenHeight / 2) - (m_HM.rc.bottom / 2);
 
-		if( ConfirmedHit == 1 )
+		switch( ConfirmedHit )
 		{
+		case 1:
 			UnpackRGB( r, g, b, 0x00FFFFFF );
-			HMTransparency -= 300 * g_fFrametime;
-		}
-		else if( ConfirmedHit == 2 )
-		{
+			HMTransparency -= 666 * g_fFrametime;
+			break;
+		case 2:
 			UnpackRGB( r, g, b, 0x00FF0000 );
-			HMTransparency -= 150 * g_fFrametime;
-		}
-		else // FIXME weapon changed while hitmarker was still visible, causing it to update (changing color and not being removed from screen)
+			HMTransparency -= 250 * g_fFrametime;
+			break;
+		default:
+			// FIXME weapon changed while hitmarker was still visible, causing it to update (changing color and not being removed from screen)
 			HMTransparency = 0;
+			break;
+		}
 
 		ScaleColors( r, g, b, HMTransparency );
 		SPR_Set( m_HM.spr, r, g, b );
@@ -146,7 +155,7 @@ int CHudCrosshairStatic::Draw( float flTime )
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
 	
-	if( gHUD.IsZoomed == true ) // draw sniper scope
+	if( gHUD.IsZoomed ) // draw sniper scope
 	{
 		float YawSpeed = (PrevViewAngles - tr.viewparams.viewangles).Length() / g_fFrametime;
 		float Velocity = gEngfuncs.GetLocalPlayer()->curstate.velocity.Length();
@@ -173,16 +182,21 @@ int CHudCrosshairStatic::Draw( float flTime )
 		gEngfuncs.pTriAPI->Color4f( 1, 1, 1, 1.0f );
 		gEngfuncs.pTriAPI->CullFace( TRI_NONE );
 
-		GL_SelectTexture( 0 );
-
-		if( WeaponID == WEAPON_CROSSBOW )
-			GL_Bind( 0, CrossbowCrosshairImage );
-		else if( WeaponID == WEAPON_SNIPER )
-			GL_Bind( 0, SniperCrosshairImage );
-		else if( WeaponID == WEAPON_GAUSS )
-			GL_Bind( 0, AlienCrosshairImage );
-		else if( WeaponID == WEAPON_G36C )
-			GL_Bind( 0, G36CCrosshairImage );
+		switch( WeaponID )
+		{
+		case WEAPON_CROSSBOW:
+			GL_Bind( GL_TEXTURE0, CrossbowCrosshairImage );
+			break;
+		case WEAPON_SNIPER:
+			GL_Bind( GL_TEXTURE0, SniperCrosshairImage );
+			break;
+		case WEAPON_GAUSS:
+			GL_Bind( GL_TEXTURE0, AlienCrosshairImage );
+			break;
+		case WEAPON_G36C:
+			GL_Bind( GL_TEXTURE0, G36CCrosshairImage );
+			break;
+		}
 
 		// draw a square image with the scope crosshair
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
@@ -221,32 +235,59 @@ void CHudCrosshairStatic::LoadCrosshairForWeapon( int WeaponID )
 {
 	char* pszCrosshair;
 
-	switch (WeaponID)
+	if( cl_crosshair->value == 2 ) // simple
 	{
-	case WEAPON_RPG:		pszCrosshair = (char *)("crossy_rpg");		break;
-	case WEAPON_TRIPMINE:	pszCrosshair = (char*)("crossy_nade");		break;
-	case WEAPON_KNIFE:	pszCrosshair = (char*)("crossy_nade");		break;
-	case WEAPON_CROSSBOW:	pszCrosshair = (char*)("crossy_xbow");		break;
-	case WEAPON_SHOTGUN_XM:
-	case WEAPON_SHOTGUN:	pszCrosshair = (char*)("crossy_sgun");		break;
-	case WEAPON_AR2:		pszCrosshair = (char*)("crossy_ar2");		break;
-	case WEAPON_DRONE:
-					{
-						if( DroneControl )
-							pszCrosshair = (char *)("crossy_drone");
-						else
-							pszCrosshair = (char *)("crossy_empty");
-					} break;
-	
-	case WEAPON_SNIPER:
-	case WEAPON_HANDGRENADE:
-	case WEAPON_SATCHEL:
-	case WEAPON_SENTRY:
-	case WEAPON_GAUSS:
-		pszCrosshair = (char*)("crossy_empty");	
-		break; // no crosshair for those weapons, but we need to set an empty one to display a hitmarker
+		switch( WeaponID )
+		{
+		case WEAPON_DRONE:
+		{
+			if( DroneControl )
+				pszCrosshair = (char *)("crossy_drone");
+			else
+				pszCrosshair = (char *)("crossy_empty");
+		} break;
 
-	default: pszCrosshair = (char*)("crossy"); break; // default crosshair
+		case WEAPON_SNIPER:
+		case WEAPON_HANDGRENADE:
+		case WEAPON_SATCHEL:
+		case WEAPON_SENTRY:
+		case WEAPON_GAUSS:
+			pszCrosshair = (char *)("crossy_empty");
+			break; // no crosshair for those weapons, but we need to set an empty one to display a hitmarker
+
+		default: pszCrosshair = (char *)("crossy_simple"); break; // default crosshair
+		}
+	}
+	else
+	{
+		switch( WeaponID )
+		{
+		case WEAPON_DEAGLE:		pszCrosshair = (char *)("crossy_deagle");	break;
+		case WEAPON_RPG:		pszCrosshair = (char *)("crossy_rpg");		break;
+		case WEAPON_TRIPMINE:	pszCrosshair = (char *)("crossy_nade");		break;
+		case WEAPON_KNIFE:	pszCrosshair = (char *)("crossy_nade");		break;
+		case WEAPON_CROSSBOW:	pszCrosshair = (char *)("crossy_xbow");		break;
+		case WEAPON_SHOTGUN_XM:
+		case WEAPON_SHOTGUN:	pszCrosshair = (char *)("crossy_sgun");		break;
+		case WEAPON_AR2:		pszCrosshair = (char *)("crossy_ar2");		break;
+		case WEAPON_DRONE:
+		{
+			if( DroneControl )
+				pszCrosshair = (char *)("crossy_drone");
+			else
+				pszCrosshair = (char *)("crossy_empty");
+		} break;
+
+		case WEAPON_SNIPER:
+		case WEAPON_HANDGRENADE:
+		case WEAPON_SATCHEL:
+		case WEAPON_SENTRY:
+		case WEAPON_GAUSS:
+			pszCrosshair = (char *)("crossy_empty");
+			break; // no crosshair for those weapons, but we need to set an empty one to display a hitmarker
+
+		default: pszCrosshair = (char *)("crossy"); break; // default crosshair
+		}
 	}
 	
 	// the sprite must be listed in hud.txt
@@ -255,7 +296,11 @@ void CHudCrosshairStatic::LoadCrosshairForWeapon( int WeaponID )
 	m_CrosshairStatic.rc = gHUD.GetSpriteRect( CrosshairSprite );
 	Q_strcpy( m_CrosshairStatic.szSpriteName, pszCrosshair);
 
-	HMSprite = gHUD.GetSpriteIndex( "crossyhit" );
+	// hitmarker
+	if( cl_crosshair->value == 2 )
+		HMSprite = gHUD.GetSpriteIndex( "crossyhit_simple" );
+	else
+		HMSprite = gHUD.GetSpriteIndex( "crossyhit" );
 	m_HM.spr = gHUD.GetSprite( HMSprite );
 	m_HM.rc = gHUD.GetSpriteRect( HMSprite );
 	Q_strcpy( m_HM.szSpriteName, "crossyhit" );

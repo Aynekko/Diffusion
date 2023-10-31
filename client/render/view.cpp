@@ -143,6 +143,7 @@ cvar_t *cubeshot; // advanced envshot :)
 cvar_t *cl_notbn;
 cvar_t *r_show_tbn;
 cvar_t *r_flashlightlockposition;
+cvar_t *cl_crosshair;
 
 cvar_t  *r_blur;
 cvar_t *r_blur_threshold;
@@ -297,6 +298,7 @@ void V_Init( void )
 	cl_tutor = CVAR_REGISTER( "cl_tutor", "1", FCVAR_ARCHIVE );
 	cl_notbn = CVAR_REGISTER( "cl_notbn", "0", 0 );
 	r_show_tbn = CVAR_REGISTER( "r_show_tbn", "0", 0 );
+	cl_crosshair = CVAR_REGISTER( "cl_crosshair", "1", FCVAR_ARCHIVE );
 
 	// setup some engine cvars for custom rendering
 	r_extensions	= CVAR_GET_POINTER( "gl_allow_extensions" );
