@@ -413,7 +413,7 @@ void R_CheckSkyPortal( cl_entity_t *skyPortal )
 	RI->currententity = GET_ENTITY( 0 );
 	RI->currentmodel = RI->currententity->model;
 
-	if( tr.bDraw3DSky )
+	if( tr.bSkySurfFound )
 		RI->params |= RP_SKYVISIBLE;
 //	else
 //		R_WorldFindSky(); // expensive. Instead find sky surface during normalpass and delay 3d skybox state by 1 frame using bDraw3DSky

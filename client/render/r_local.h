@@ -372,7 +372,7 @@ typedef struct
 
 	cl_entity_t	*sky_camera;
 	bool fIgnoreSkybox; // we already draw 3d skybox, so don't overwrite it in current pass
-	bool bDraw3DSky; // sets to true if a sky surface was found and turns on 3D sky for the next frame
+	bool bSkySurfFound; // sets to true if a sky surface was found and turns on 3D sky for the next frame
 	ref_params_t viewparams;		// local copy of ref_params_t
 	struct movevars_s *movevars;
 

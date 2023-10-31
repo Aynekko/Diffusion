@@ -3480,7 +3480,7 @@ void R_WorldMarkVisibleFaces( void )
 	int i, j;
 
 	if( RP_NORMALPASS() )
-		tr.bDraw3DSky = false;
+		tr.bSkySurfFound = false;
 
 	// always skip the leaf 0, because it's an outside leaf
 	for( i = 1, leaf = &world->leafs[1]; i < world->numleafs; i++, leaf++ )
@@ -3543,7 +3543,7 @@ void R_WorldMarkVisibleFaces( void )
 				if( FBitSet( surf->flags, SURF_DRAWSKY ) )
 				{
 					if( RP_NORMALPASS() )
-						tr.bDraw3DSky = true; // 3D sky will be rendered next frame (3dsky visibility state is delayed by 1 frame)
+						tr.bSkySurfFound = true; // 3D sky will be rendered next frame (3dsky visibility state is delayed by 1 frame)
 					
 					if( FBitSet( RI->params, RP_SHADOWPASS ) )
 						continue;
