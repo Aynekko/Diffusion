@@ -505,6 +505,9 @@ void GaussBlur( void )
 			if( tr.shader_modifier->curstate.iuser1 == 1 )
 				return;
 		}
+
+		if( !tr.bSkySurfFound )
+			return; // no sky surface was found this frame, don't waste time tracing
 		
 		pmtrace_t ptr;
 		Vector PlayerOrg, PlayerAngles, VecEnd, Forward;

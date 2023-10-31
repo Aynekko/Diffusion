@@ -56,6 +56,9 @@ int CHudLensflare::Draw( float flTime )
 	if( CVAR_TO_BOOL( ui_is_active ) && !CVAR_GET_FLOAT( "cl_background" ) )
 		return 1;
 
+	if( !tr.bSkySurfFound )
+		return 1; // no sky surface was found this frame, don't waste time tracing
+
 	Vector sunangles, sundir, suntarget;
 	Vector v_forward, v_right, v_up, angles;
 	Vector forward, right, up, screen;
