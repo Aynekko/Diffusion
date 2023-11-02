@@ -78,6 +78,7 @@
       <PrecompiledHeaderOutputFile>.\..\temp\server\!debug\server.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\..\temp\server\!debug\</ObjectFileName>
       <ProgramDataBaseFileName>.\..\temp\server\!debug\</ProgramDataBaseFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <PostBuildEvent>
       <Command>copy /Y "D:\!DIFFUSION 2020\source code\client-server-launcher\temp\server\!release\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server.dll"</Command>
@@ -133,6 +134,7 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <PostBuildEvent>
       <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\temp\server\!release\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server.dll"</Command>

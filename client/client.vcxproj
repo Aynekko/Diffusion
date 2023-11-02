@@ -81,6 +81,7 @@
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <PostBuildEvent>
       <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\temp\client\!release\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client.dll"</Command>
@@ -132,6 +133,7 @@
       <PrecompiledHeaderOutputFile>.\..\temp\client\!debug\client.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\..\temp\client\!debug\</ObjectFileName>
       <ProgramDataBaseFileName>.\..\temp\client\!debug\</ProgramDataBaseFileName>
+      <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
