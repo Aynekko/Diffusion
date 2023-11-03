@@ -790,8 +790,8 @@ static int Mod_SurfaceCompareBuild( const unsigned short **a, const unsigned sho
 {
 	msurface_t *surf1, *surf2;
 
-	surf1 = &worldmodel->surfaces[(unsigned short)*a];
-	surf2 = &worldmodel->surfaces[(unsigned short)*b];
+	surf1 = &worldmodel->surfaces[*(unsigned short*)a];
+	surf2 = &worldmodel->surfaces[*(unsigned short*)b];
 
 	if( FBitSet( surf1->flags, SURF_DRAWSKY ) && !FBitSet( surf2->flags, SURF_DRAWSKY ) )
 		return -1;
@@ -828,8 +828,8 @@ static int Mod_SurfaceCompareInGame( const unsigned short **a, const unsigned sh
 	msurface_t *surf1, *surf2;
 	mextrasurf_t *esrf1, *esrf2;
 
-	surf1 = &worldmodel->surfaces[(unsigned short)*a];
-	surf2 = &worldmodel->surfaces[(unsigned short)*b];
+	surf1 = &worldmodel->surfaces[*(unsigned short*)a];
+	surf2 = &worldmodel->surfaces[*(unsigned short*)b];
 	texture_t *tx1 = R_TextureAnimation( surf1 );
 	texture_t *tx2 = R_TextureAnimation( surf2 );
 
