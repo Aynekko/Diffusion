@@ -38,9 +38,7 @@
 #include "ammo.h"
 #include "achievementdata.h"
 #include "animatex.h"
-
-#define EXPORT	_declspec( dllexport )
-#define DLLEXPORT	__declspec( dllexport )
+#include "exportdef.h"
 
 typedef struct cvar_s	cvar_t;
 

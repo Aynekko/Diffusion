@@ -170,7 +170,7 @@ void DumpStrings_f( void )
 	g_GameStringPool.Dump();
 }
 
-extern "C" EXPORT void custom( entvars_t * pev )
+extern "C" DLLEXPORT void custom( entvars_t * pev )
 {
 	EntityFactoryDictionary()->Create( STRING( pev->classname ), pev );
 }

@@ -135,20 +135,20 @@ void R_SplitPolygon( int numPoints, Vector *points, const struct mplane_s *plane
 bool UTIL_IsPlayer( int idx );
 bool UTIL_IsLocal( int idx );
 
-extern void HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
-extern void HUD_TempEntUpdate( double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree,
-struct tempent_s **ppTempEntActive, int ( *Callback_AddVisibleEntity )( struct cl_entity_s *pEntity ),
-void ( *Callback_TempEntPlaySound )( struct tempent_s *pTemp, float damp ));
+extern "C"
+{
+	int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname );
+	void DLLEXPORT HUD_CreateEntities( void );
+	void DLLEXPORT HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
+	void DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client );
+	void DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src );
+	void DLLEXPORT HUD_TxferPredictionData( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd );
+	void DLLEXPORT HUD_TempEntUpdate( double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int (*Callback_AddVisibleEntity)(struct cl_entity_s *pEntity), void (*Callback_TempEntPlaySound)(struct tempent_s *pTemp, float damp) );
+	struct cl_entity_s DLLEXPORT *HUD_GetUserEntity( int index );
 
-
-extern int HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname );
-extern void HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client );
-//extern "C" void DLLEXPORT HUD_ProcessPlayerState(struct entity_state_s* dst, const struct entity_state_s* src);
-extern void HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src );
-extern void HUD_TxferPredictionData( entity_state_t *ps, const entity_state_t *pps, clientdata_t *pcd, const clientdata_t *ppcd, weapon_data_t *wd, const weapon_data_t *pwd );
-extern void HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
-extern void HUD_CreateEntities( void );
-
+	int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback );
+	int DLLEXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio );
+}
 
 extern int CL_ButtonBits( int );
 extern void CL_ResetButtonBits( int bits );
@@ -172,8 +172,11 @@ extern int CL_IsDead( void );
 extern int HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback );
 extern int HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio );
 
-extern void HUD_DrawNormalTriangles( void );
-extern void HUD_DrawTransparentTriangles( void );
+extern "C"
+{
+	void DLLEXPORT HUD_DrawNormalTriangles( void );
+	void DLLEXPORT HUD_DrawTransparentTriangles( void );
+};
 
 extern void PM_Init( struct playermove_s *ppmove );
 extern void PM_Move( struct playermove_s *ppmove, int server );
@@ -184,9 +187,12 @@ void UTIL_CreateAurora( cl_entity_t *ent, const char *file, int attachment, floa
 void UTIL_RemoveAurora( cl_entity_t *ent );
 extern int PM_GetPhysEntInfo( int ent );
 
-extern void CAM_Think( void );
-extern void CL_CameraOffset( float *ofs );
-extern int CL_IsThirdPerson( void );
+extern "C"
+{
+	extern void CAM_Think( void );
+	extern DLLEXPORT void CL_CameraOffset( float *ofs );
+	extern DLLEXPORT int CL_IsThirdPerson( void );
+}
 
 // xxx need client dll function to get and clear impuse
 extern cvar_t *in_joystick;

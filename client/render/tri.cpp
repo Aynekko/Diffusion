@@ -50,7 +50,7 @@ static void CableSetRender( bool start )
 	}
 }
 
-void HUD_DrawNormalTriangles( void )
+void DLLEXPORT HUD_DrawNormalTriangles( void )
 {
 	gEngfuncs.pTriAPI->Begin(TRI_POLYGON);
 	gEngfuncs.pTriAPI->End();
@@ -92,7 +92,7 @@ void HUD_DrawNormalTriangles( void )
 	g_pParticles.Update();
 }
 
-void HUD_DrawTransparentTriangles( void )
+void DLLEXPORT HUD_DrawTransparentTriangles( void )
 {
 	if( !g_fRenderInitialized )
 	{

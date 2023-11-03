@@ -20,13 +20,21 @@
 
 // thirdperson camera
 void CAM_Think( void ) {}
-void CL_CameraOffset( float *ofs ) { g_vecZero.CopyToArray( ofs ); }
-int CL_IsThirdPerson( void )
-{ 
-	if( gHUD.m_iCameraMode == 1 )
-		return 1;
 
-	return 0;
+extern "C"
+{
+	void DLLEXPORT CL_CameraOffset( float *ofs ) 
+	{
+		g_vecZero.CopyToArray( ofs );
+	}
+
+	int DLLEXPORT CL_IsThirdPerson( void )
+	{
+		if( gHUD.m_iCameraMode == 1 )
+			return 1;
+
+		return 0;
+	}
 }
 
 cl_entity_t *v_intermission_spot;
