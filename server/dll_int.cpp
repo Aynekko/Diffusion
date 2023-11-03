@@ -27,6 +27,7 @@
 #include	"game/client.h"
 #include	"game/game.h"
 #include	"game/gamerules.h"
+#include	"build.h"
 
 
 // Holds engine functionality callbacks
@@ -35,18 +36,29 @@ globalvars_t *gpGlobals;
 server_physics_api_t g_physfuncs;
 
 // Main DLL entry point
+#if XASH_WIN32
 BOOL WINAPI DllMain( HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved )
 {
 	return TRUE;
 }
+#endif
 
-void DLLEXPORT GiveFnptrsToDll( enginefuncs_t *pengfuncsFromEngine, globalvars_t *pGlobals )
+#if XASH_WIN32
+#define GIVEFNPTRSTODLL_CALLDECL WINAPI
+#else
+#define GIVEFNPTRSTODLL_CALLDECL
+#endif
+
+extern "C"
 {
-	memcpy( &g_engfuncs, pengfuncsFromEngine, sizeof( enginefuncs_t ) );
-	g_iXashEngineBuildNumber = (int)CVAR_GET_FLOAT( "build" ); // 0 for old builds or GoldSrc
-	if( g_iXashEngineBuildNumber <= 0 )
-		g_iXashEngineBuildNumber = (int)CVAR_GET_FLOAT( "buildnum" );
-	gpGlobals = pGlobals;
+	void DLLEXPORT GIVEFNPTRSTODLL_CALLDECL GiveFnptrsToDll( enginefuncs_t *pengfuncsFromEngine, globalvars_t *pGlobals )
+	{
+		memcpy( &g_engfuncs, pengfuncsFromEngine, sizeof( enginefuncs_t ) );
+		g_iXashEngineBuildNumber = (int)CVAR_GET_FLOAT( "build" ); // 0 for old builds or GoldSrc
+		if( g_iXashEngineBuildNumber <= 0 )
+			g_iXashEngineBuildNumber = (int)CVAR_GET_FLOAT( "buildnum" );
+		gpGlobals = pGlobals;
+	}
 }
 
 static DLL_FUNCTIONS gFunctionTable =

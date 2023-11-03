@@ -355,5 +355,8 @@
     <ClInclude Include="animatex.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\common\exportdef.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

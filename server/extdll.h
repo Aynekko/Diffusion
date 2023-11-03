@@ -15,6 +15,8 @@
 #ifndef EXTDLL_H
 #define EXTDLL_H
 
+#include "build.h"
+
 #pragma warning (disable : 4430)
 #pragma warning (disable : 4996)
 #pragma warning (disable : 4091)
@@ -33,6 +35,12 @@
 #pragma warning(disable : 4201)		// nameless struct/union
 #pragma warning(disable : 4514)		// unreferenced inline function removed
 #pragma warning(disable : 4100)		// unreferenced formal parameter
+
+#if XASH_WIN32 != 1
+#include <limits.h>
+#include <stdarg.h>
+#include <ctype.h>
+#endif
 
 // Prevent tons of unused windows definitions
 #ifdef _WIN32
@@ -70,7 +78,11 @@ typedef int BOOL;
 // Header file containing definition of globalvars_t and entvars_t
 typedef int	string_t;		// from engine's pr_comp.h;
 
-typedef HMODULE	dllhandle_t;
+#if XASH_WIN32 == 1
+typedef HMODULE dllhandle_t;
+#else
+typedef void *dllhandle_t;
+#endif
 
 typedef struct dllfunc_s
 {

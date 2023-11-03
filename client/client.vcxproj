@@ -256,6 +256,7 @@
     <ClCompile Include="zoom.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\common\exportdef.h" />
     <ClInclude Include="..\game_shared\achievementdata.h" />
     <ClInclude Include="..\game_shared\bs_defs.h" />
     <ClInclude Include="..\game_shared\cdll_dll.h" />
