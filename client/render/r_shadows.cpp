@@ -414,6 +414,13 @@ void R_ShadowPassDrawSolidEntities( plight_t *pl )
 		if( RI->currentmodel->type == mod_sprite )
 			continue;
 
+		if( pl->effect == 2 )
+		{
+			// no self-shadow from your own muzzleflash
+			if( RI->currententity->index == pl->entindex )
+				continue;
+		}
+
 		// this model has indicated to not make shadows
 		if( (RI->currententity->curstate.renderfx == kRenderFxNoShadows) || (RI->currententity->curstate.renderfx == kRenderFxFullbrightNoShadows) )
 			continue;

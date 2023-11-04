@@ -526,7 +526,7 @@ void DCL( int index )
 //=======================================================================================
 int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 {
-	Vector pos, pos2, pos3;
+	Vector pos, pos2, pos3, ang;
 	int Message, Model, Color, Value, Count;
 	int entityIndex, decalIndex;
 	TEMPENTITY *pTemp;
@@ -979,6 +979,28 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 	}
 	break;
 
+	case TE_MODEL:
+	{
+		pos.x = READ_COORD();
+		pos.y = READ_COORD();
+		pos.z = READ_COORD();
+		pos2.x = READ_COORD();
+		pos2.y = READ_COORD();
+		pos2.z = READ_COORD();
+		ang.x = 0.0f;
+		ang.y = READ_ANGLE(); // yaw angle
+		ang.z = 0.0f;
+		Model = READ_SHORT();
+		Flags = READ_BYTE();	// sound flags
+		Life = (float)(READ_BYTE() * 0.1f);
+		pTemp = gEngfuncs.pEfxAPI->R_TempModel( pos, pos2, ang, Life, Model, Flags );
+		if( pTemp && pTemp->entity.model && Q_strstr( pTemp->entity.model->name, "shell" ) )
+		{
+			pTemp->entity.baseline.renderfx = kRenderFxNoShadows;
+			pTemp->entity.curstate.renderfx = kRenderFxNoShadows;
+		}
+	}
+	break;
 	}
 
 	END_READ();

@@ -302,7 +302,7 @@ void EjectBrass ( const Vector &vecOrigin, const Vector &vecVelocity, float rota
 {
 	// FIX: when the player shoots, their gun isn't in the same position as it is on the model other players see.
 
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecOrigin );
+	MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecOrigin );
 		WRITE_BYTE( TE_MODEL);
 		WRITE_COORD( vecOrigin.x);
 		WRITE_COORD( vecOrigin.y);

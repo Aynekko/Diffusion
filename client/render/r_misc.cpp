@@ -48,6 +48,7 @@ used iuser3 "flags":
 #define FLASHLIGHT_KEY -1
 #define FLASHLIGHT_MIRROR_KEY -2
 #define FLASHLIGHT_DIFFUSE_KEY -3
+#define MUZZLEFLASH_LIGHT_KEY -4
 
 //===============================================================
 // Flashlight: players' and monsters' flashlight management
@@ -788,16 +789,28 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 	if( RP_LOCALCLIENT( e ) && !(RI->params & RP_THIRDPERSON) )
 		return;
 	
-	plight_t *dl = CL_AllocPlight( 0 );
+	plight_t *dl = CL_AllocPlight( MUZZLEFLASH_LIGHT_KEY );
 
-	dl->pointlight = true;
-	dl->projectionTexture = tr.whiteCubeTexture;
-	dl->flags |= CF_NOSHADOWS;
-//	dl->flags |= CF_NOGRASSLIGHTING;
-
-	// add shadows for muzzleflash if high quality is set
-//	if( (e == GET_VIEWMODEL()) && (r_shadowquality->value > 2) )
-//		dl->flags &= ~CF_NOSHADOWS;
+	if( e == GET_VIEWMODEL() )
+	{
+		dl->pointlight = false; // use projector like L4D
+		dl->projectionTexture = tr.spotlightTexture;
+		if( tr.lowmemory )
+			dl->flags |= CF_NOSHADOWS;
+		Vector v_angles, Forward;
+		gEngfuncs.GetViewAngles( v_angles );
+		gEngfuncs.pfnAngleVectors( v_angles, Forward, NULL, NULL );
+		origin -= Forward * 15;
+		origin.x += RANDOM_FLOAT( -2.5f, 2.5f );
+		origin.y += RANDOM_FLOAT( -2.5f, 2.5f );
+		origin.z += RANDOM_LONG( -5, 5 );
+	}
+	else
+	{
+		dl->pointlight = true;
+		dl->projectionTexture = tr.whiteCubeTexture;
+		dl->flags |= CF_NOSHADOWS;
+	}
 
 	dl->die = tr.time + 0.05f;
 	
@@ -806,7 +819,7 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 	int G = 255;
 	int B = 180;
 	int Radius = 100;
-	float Brightness = 1.25;
+	float Brightness = 1.25f;
 	
 	switch( WeaponID )
 	{
@@ -822,7 +835,7 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 	break;
 	case WEAPON_SNIPER:
 		Radius = 200;
-		Brightness = 1.8;
+		Brightness = 1.8f;
 	break;
 	case WEAPON_GLOCK:
 	case WEAPON_FIVESEVEN:
@@ -850,9 +863,19 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 	dl->color.g = bound( 0, G, 255 );
 	dl->color.b = bound( 0, B, 255 );
 	dl->brightness = Brightness;
+	dl->effect = 2; // muzzleflash light
+	dl->entindex = gEngfuncs.GetLocalPlayer()->index;
 
-	R_SetupLightProjection( dl, origin, g_vecZero, Radius, 90.0f );
-	R_SetupLightAttenuationTexture( dl );
+	if( e == GET_VIEWMODEL() )
+	{
+		R_SetupLightProjection( dl, origin, e->curstate.angles, Radius * 3.0f, 120.0f );
+		dl->lightFalloff = 2.5f;
+	}
+	else
+	{
+		R_SetupLightProjection( dl, origin, g_vecZero, Radius, 90.0f );
+		R_SetupLightAttenuationTexture( dl );
+	}
 }
 
 //==============================================================
