@@ -26,6 +26,7 @@ int CScreenEffects::Init( void )
 int CScreenEffects::VidInit(void)
 {
 	Vignette = LOAD_TEXTURE( "sprites/ef_vignette.dds", NULL, 0, 0 );
+	VignetteShield = LOAD_TEXTURE( "sprites/ef_vignette_shield.dds", NULL, 0, 0 );
 	DroneScreen = LOAD_TEXTURE( "sprites/ef_dronescreen.dds", NULL, 0, 0 );
 	Speedometer = LOAD_TEXTURE( "sprites/diffusion/speedometer.dds", NULL, 0, 0 );
 	SpeedometerArrow = LOAD_TEXTURE( "sprites/diffusion/speedometer_arrow.dds", NULL, 0, 0 );
@@ -257,7 +258,7 @@ void CScreenEffects::DrawShieldVignette(void)
 
 		GL_SelectTexture( 0 );
 
-		GL_Bind( 0, LOAD_TEXTURE( "sprites/ef_vignette_shield.dds", NULL, 0, 0 ) );
+		GL_Bind( 0, VignetteShield );
 
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 		DrawQuad( 0, 0, ScreenWidth, ScreenHeight );

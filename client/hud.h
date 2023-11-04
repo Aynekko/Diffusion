@@ -775,6 +775,7 @@ public:
 	int Gear;
 private:
 	int Vignette;
+	int VignetteShield;
 	int DroneScreen;
 	int Speedometer;
 	int SpeedometerArrow;

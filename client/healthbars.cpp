@@ -138,8 +138,9 @@ int CHealthbars::Draw( float flTime )
 		break;
 	}
 
-	// draw the background texture
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+
+	// draw the background texture
 	gEngfuncs.pTriAPI->Color4f( 70 / 255.0f, 169 / 255.0f, 1.0f, Transparency / 255.0f );
 	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
 	GL_SelectTexture( 0 );
@@ -152,7 +153,6 @@ int CHealthbars::Draw( float flTime )
 	float Denom = 255.0f;
 	if( health > 100 )
 		Denom = 500.0f; // make it less brighter so second bar would be more visible
-	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, Transparency / Denom );
 	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
 	GL_SelectTexture( 0 );
@@ -186,7 +186,6 @@ int CHealthbars::Draw( float flTime )
 		ymax = y + height;
 
 		// draw the red health bar on top
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 		gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, Transparency / 255.0f );
 		gEngfuncs.pTriAPI->CullFace( TRI_NONE );
 		GL_SelectTexture( 0 );
