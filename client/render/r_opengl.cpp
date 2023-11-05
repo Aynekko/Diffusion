@@ -522,20 +522,13 @@ void GL_CheckExtension( const char *name, const dllfunc_t *funcs, const char *cv
 
 static void GL_InitExtensions( void )
 {
-	if( g_iXashEngineBuildNumber < 4140 )
-	{
-		ALERT( at_error, "too old version of Xash3D engine. XashXT required at least build 4140 or higher\n" );
-		g_fRenderInitialized = FALSE;
-		return;
-	}
-
 	// initialize gl extensions
 	GL_CheckExtension( "OpenGL 1.1.0", opengl_110funcs, NULL, R_OPENGL_110 );
 	GL_CheckExtension( "OpenGL 2.0", opengl_200funcs, NULL, R_OPENGL_200 );
 
 	if( !GL_Support( R_OPENGL_110 ))
 	{
-		ALERT( at_error, "OpenGL 1.0 can't be installed. Custom renderer disabled\n" );
+		ConPrintf( "^1Error:^7 OpenGL 1.0 can't be installed. Custom renderer disabled.\n" );
 		g_fRenderInitialized = FALSE;
 		return;
 	}
@@ -574,7 +567,7 @@ static void GL_InitExtensions( void )
 
 	if( !GL_Support( R_DRAW_RANGEELEMENTS_EXT ))
 	{
-		ALERT( at_error, "GL_EXT_draw_range_elements not supported. Custom renderer disabled\n" );
+		ConPrintf( "^1Error:^7 GL_EXT_draw_range_elements not supported. Custom renderer disabled\n" );
 		g_fRenderInitialized = FALSE;
 		return;
 	}
@@ -591,7 +584,7 @@ static void GL_InitExtensions( void )
 
 	if( !GL_Support( R_ARB_MULTITEXTURE ))
 	{
-		ALERT( at_error, "GL_ARB_multitexture is not supported. Custom renderer disabled.\n" );
+		ConPrintf( "^1Error:^7 GL_ARB_multitexture is not supported. Custom renderer disabled.\n" );
 		g_fRenderInitialized = FALSE;
 		return;
 	}
@@ -667,7 +660,7 @@ static void GL_InitExtensions( void )
 
 	if( !GL_Support( R_SHADER_OBJECTS_EXT ))
 	{
-		ALERT( at_error, "GL_ARB_shader_objects not support. Custom renderer disabled\n" );
+		ConPrintf( "^1Error:^7 GL_ARB_shader_objects not support. Custom renderer disabled\n" );
 		g_fRenderInitialized = FALSE;
 		return;
 	}
@@ -676,7 +669,7 @@ static void GL_InitExtensions( void )
 
 	if( !GL_Support( R_SHADER_GLSL100_EXT ))
 	{
-		ALERT( at_error, "GL_ARB_shading_language_100 not support. Custom renderer disabled\n" );
+		ConPrintf( "^1Error:^7 GL_ARB_shading_language_100 not support. Custom renderer disabled\n" );
 		g_fRenderInitialized = FALSE;
 		return;
 	}
@@ -685,7 +678,7 @@ static void GL_InitExtensions( void )
 
 	if( !GL_Support( R_VERTEX_SHADER_EXT ))
 	{
-		ALERT( at_error, "GL_ARB_vertex_shader not support. Custom renderer disabled\n" );
+		ConPrintf( "^1Error:^7 GL_ARB_vertex_shader not support. Custom renderer disabled\n" );
 		g_fRenderInitialized = FALSE;
 		return;
 	}
@@ -694,7 +687,7 @@ static void GL_InitExtensions( void )
 
 	if( !GL_Support( R_FRAGMENT_SHADER_EXT ))
 	{
-		ALERT( at_error, "GL_ARB_fragment_shader not support. Custom renderer disabled\n" );
+		ConPrintf( "^1Error:^7 GL_ARB_fragment_shader not support. Custom renderer disabled\n" );
 		g_fRenderInitialized = FALSE;
 		return;
 	}
