@@ -1077,21 +1077,21 @@ Returns false if the entity removed itself.
 */
 BOOL SV_RunThink( CBaseEntity *pEntity )
 {
-	float	thinktime;
 	edict_t	*ed = pEntity->edict();
+	float thinktime = pEntity->pev->nextthink;
+	float phystime = PHYSICS_TIME();
 
-	thinktime = pEntity->pev->nextthink;
-
-	if( thinktime <= 0 || thinktime > PHYSICS_TIME( ) + gpGlobals->frametime )
+	if( thinktime <= 0 || thinktime > phystime + gpGlobals->frametime )
 		return TRUE;
 		
-	if( thinktime < PHYSICS_TIME( ))
-		thinktime = PHYSICS_TIME();	// don't let things stay in the past.
+	if( thinktime < phystime )
+		thinktime = phystime;	// don't let things stay in the past.
 					// it is possible to start that way
 					// by a trigger with a local time.
 	pEntity->DontThink();
 
 	gpGlobals->time = thinktime;	// ouch!!!
+
 	DispatchThink( pEntity->edict() );
 
 	return (ed->free) ? FALSE : TRUE;
