@@ -2186,6 +2186,11 @@ void R_DrawLightForSurfList( plight_t *pl )
 	GLfloat	gl_lightViewProjMatrix[16];
 	int	startv, endv;
 
+	float cached_dynlightscale = -1.0f;
+	float cached_glossscale = -1.0f;
+	float cached_glosssmoothness = -1.0f;
+	float cached_embossscale = -1.0f;
+
 	GL_BlendFunc( GL_ONE, GL_ONE );
 	startv = MAX_MAP_ELEMS;
 	numTempElems = 0;
@@ -2273,6 +2278,10 @@ void R_DrawLightForSurfList( plight_t *pl )
 
 			// reset cache
 			cached_texture = NULL;
+			cached_dynlightscale = -1.0f;
+			cached_glossscale = -1.0f;
+			cached_glosssmoothness = -1.0f;
+			cached_embossscale = -1.0f;
 		}
 
 		if( cached_texture != tex )
@@ -2344,10 +2353,30 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 			else
 			{
-				pglUniform1fARB( RI->currentshader->u_DynLightBrightness, pl->brightness * tr.materials[tex->gl_texturenum].DynlightScale );
-				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[tex->gl_texturenum].GlossSmoothness );
-				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[tex->gl_texturenum].GlossScale );
-				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[tex->gl_texturenum].EmbossScale );
+				float newdynlightscale = pl->brightness * tr.materials[tex->gl_texturenum].DynlightScale;
+				if( newdynlightscale != cached_dynlightscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_DynLightBrightness, newdynlightscale );
+					cached_dynlightscale = newdynlightscale;
+				}
+
+				if( tr.materials[tex->gl_texturenum].GlossSmoothness != cached_glosssmoothness )
+				{
+					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[tex->gl_texturenum].GlossSmoothness );
+					cached_glosssmoothness = tr.materials[tex->gl_texturenum].GlossSmoothness;
+				}
+
+				if( tr.materials[tex->gl_texturenum].GlossScale != cached_glossscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[tex->gl_texturenum].GlossScale );
+					cached_glossscale = tr.materials[tex->gl_texturenum].GlossScale;
+				}
+
+				if( tr.materials[tex->gl_texturenum].EmbossScale != cached_embossscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[tex->gl_texturenum].EmbossScale );
+					cached_embossscale = tr.materials[tex->gl_texturenum].EmbossScale;
+				}
 
 				if( tr.materials[tex->gl_texturenum].gl_normalmap_id > 0 )
 					GL_Bind( GL_TEXTURE6, tr.materials[tex->gl_texturenum].gl_normalmap_id );
@@ -2645,6 +2674,11 @@ void R_DrawBrushList( void )
 	cached_cubemap[0] = &world->defaultCubemap;
 	cached_cubemap[1] = &world->defaultCubemap;
 
+	float cached_glossscale = -1.0f;
+	float cached_glosssmoothness = -1.0f;
+	float cached_embossscale = -1.0f;
+	float cached_fresnel = -1.0f;
+
 	int i;
 	gl_bmodelface_t *entry;
 	mextrasurf_t *es;
@@ -2731,6 +2765,11 @@ void R_DrawBrushList( void )
 			// diffusioncubemaps
 			cached_cubemap[0] = 0;
 			cached_cubemap[1] = 0;
+
+			cached_glossscale = -1.0f;
+			cached_glosssmoothness = -1.0f;
+			cached_embossscale = -1.0f;
+			cached_fresnel = -1.0f;
 		}
 
 		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != es->gl_texturenum) )
@@ -2807,15 +2846,33 @@ void R_DrawBrushList( void )
 			}
 			else
 			{
-				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[es->gl_texturenum].GlossSmoothness );
-				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[es->gl_texturenum].GlossScale );
-				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[es->gl_texturenum].EmbossScale );
+				if( tr.materials[es->gl_texturenum].GlossSmoothness != cached_glosssmoothness )
+				{
+					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[es->gl_texturenum].GlossSmoothness );
+					cached_glosssmoothness = tr.materials[es->gl_texturenum].GlossSmoothness;
+				}
+
+				if( tr.materials[es->gl_texturenum].GlossScale != cached_glossscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[es->gl_texturenum].GlossScale );
+					cached_glossscale = tr.materials[es->gl_texturenum].GlossScale;
+				}
+
+				if( tr.materials[es->gl_texturenum].EmbossScale != cached_embossscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[es->gl_texturenum].EmbossScale );
+					cached_embossscale = tr.materials[es->gl_texturenum].EmbossScale;
+				}
 
 				if( tr.materials[es->gl_texturenum].gl_normalmap_id > 0 )
 					GL_Bind( GL_TEXTURE4, tr.materials[es->gl_texturenum].gl_normalmap_id );
 			}
 
-			pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[es->gl_texturenum].Fresnel );
+			if( tr.materials[es->gl_texturenum].Fresnel != cached_fresnel )
+			{
+				pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[es->gl_texturenum].Fresnel );
+				cached_fresnel = tr.materials[es->gl_texturenum].Fresnel;
+			}
 
 			// diffusion - refracted water!!!
 			if( !tr.lowmemory && FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )

@@ -4903,6 +4903,10 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 	projectionView.CopyToArray( gl_lightViewProjMatrix );
 
 	matrix4x4 OmniShadowMatrix = pl->projectionMatrix;
+	float cached_dynlightscale = -1.0f;
+	float cached_glossscale = -1.0f;
+	float cached_glosssmoothness = -1.0f;
+	float cached_embossscale = -1.0f;
 
 	// sorting list to reduce shader switches
 	for( int i = 0; i < m_nNumLightMeshes; i++ )
@@ -4966,6 +4970,10 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			// reset cache
 			cached_material = NULL;
 			cached_model = NULL;
+			cached_dynlightscale = -1.0f;
+			cached_glossscale = -1.0f;
+			cached_glosssmoothness = -1.0f;
+			cached_embossscale = -1.0f;
 		}
 
 		if( cached_model != m_pRenderModel )
@@ -5020,10 +5028,30 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			else
 				GL_Cull( GL_FRONT );
 
-			pglUniform1fARB( RI->currentshader->u_DynLightBrightness, pl->brightness * tr.materials[mat->gl_diffuse_id].DynlightScale );
-			pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
-			pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
-			pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
+			float newdynlightscale = pl->brightness * tr.materials[mat->gl_diffuse_id].DynlightScale;
+			if( newdynlightscale != cached_dynlightscale )
+			{
+				pglUniform1fARB( RI->currentshader->u_DynLightBrightness, newdynlightscale );
+				cached_dynlightscale = newdynlightscale;
+			}
+
+			if( tr.materials[mat->gl_diffuse_id].GlossSmoothness != cached_glosssmoothness )
+			{
+				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
+				cached_glosssmoothness = tr.materials[mat->gl_diffuse_id].GlossSmoothness;
+			}
+
+			if( tr.materials[mat->gl_diffuse_id].GlossScale != cached_glossscale )
+			{
+				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
+				cached_glossscale = tr.materials[mat->gl_diffuse_id].GlossScale;
+			}
+
+			if( tr.materials[mat->gl_diffuse_id].EmbossScale != cached_embossscale )
+			{
+				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
+				cached_embossscale = tr.materials[mat->gl_diffuse_id].EmbossScale;
+			}
 
 			// diffusion - apply custom color to a specific texture
 			if( tr.materials[mat->gl_diffuse_id].ApplyColor || tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
@@ -5129,6 +5157,11 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	cached_cubemap[0] = &world->defaultCubemap;
 	cached_cubemap[1] = &world->defaultCubemap;
 
+	float cached_glossscale = -1.0f;
+	float cached_glosssmoothness = -1.0f;
+	float cached_embossscale = -1.0f;
+	float cached_fresnel = -1.0f;
+
 	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
 	//	R_LoadIdentity();
 	GL_Blend( GL_FALSE );
@@ -5191,6 +5224,11 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			// diffusioncubemaps
 			cached_cubemap[0] = 0;
 			cached_cubemap[1] = 0;
+
+			cached_glossscale = -1.0f;
+			cached_glosssmoothness = -1.0f;
+			cached_embossscale = -1.0f;
+			cached_fresnel = -1.0f;
 		}
 
 		if( cached_entity != m_pCurrentEntity || (cached_model != m_pRenderModel) )
@@ -5338,10 +5376,29 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_interiormap_id ); // u_InteriorMap
 			}
 
-			pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
-			pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
-			pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
-			pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[mat->gl_diffuse_id].Fresnel );
+			if( tr.materials[mat->gl_diffuse_id].GlossSmoothness != cached_glosssmoothness )
+			{
+				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
+				cached_glosssmoothness = tr.materials[mat->gl_diffuse_id].GlossSmoothness;
+			}
+
+			if( tr.materials[mat->gl_diffuse_id].GlossScale != cached_glossscale )
+			{
+				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
+				cached_glossscale = tr.materials[mat->gl_diffuse_id].GlossScale;
+			}
+
+			if( tr.materials[mat->gl_diffuse_id].EmbossScale != cached_embossscale )
+			{
+				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
+				cached_embossscale = tr.materials[mat->gl_diffuse_id].EmbossScale;
+			}
+
+			if( tr.materials[mat->gl_diffuse_id].Fresnel != cached_fresnel )
+			{
+				pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[mat->gl_diffuse_id].Fresnel );
+				cached_fresnel = tr.materials[mat->gl_diffuse_id].Fresnel;
+			}
 
 			// diffusion - apply custom color to a specific texture
 			if( tr.materials[mat->gl_diffuse_id].ApplyColor || tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
@@ -5393,7 +5450,7 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 {
 	mstudiomaterial_t *cached_material = NULL;
 	model_t *cached_model = NULL;
-	int		i;
+	int i;
 
 	if( !m_nNumDrawMeshes )
 		return;
