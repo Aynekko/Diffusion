@@ -776,6 +776,9 @@
     <ClCompile Include="weapons\weapon_smokegrenade.cpp">
       <Filter>Source Files\weapons</Filter>
     </ClCompile>
+    <ClCompile Include="entities\env_controller_adjuster.cpp">
+      <Filter>Source Files\entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="monsters\activity.h">

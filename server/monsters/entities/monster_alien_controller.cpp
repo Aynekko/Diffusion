@@ -2932,6 +2932,9 @@ void CDrone::ClearEffects(void)
 	STOP_SOUND( ENT(pev), CHAN_STATIC, "drone/drone_spawn.wav" );
 	UTIL_Remove( AlienEye );
 	AlienEye = NULL;
+
+	if( pev->effects & EF_MERGE_VISIBILITY )
+		pev->effects &= ~EF_MERGE_VISIBILITY;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////

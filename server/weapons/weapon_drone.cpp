@@ -391,7 +391,7 @@ void CWpnDrone::SecondaryAttack( void )
 	// don't hold the button
 	CLIENT_COMMAND(m_pPlayer->edict(), "-attack2\n");
 	
-	if( m_pPlayer->DroneDeployed == false )
+	if( !m_pPlayer->DroneDeployed )
 		return;
 
 	m_flNextSecondaryAttack = gpGlobals->time + 2;

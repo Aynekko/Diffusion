@@ -2075,7 +2075,7 @@ void CBasePlayer::PlayerUse ( void )
 	if (IsObserver() || DroneControl )
 		return;
 
-	if( CanUse == false )
+	if( !CanUse )
 		return;
 	
 	// Was use pressed or released?
@@ -3253,6 +3253,7 @@ void CBasePlayer::ManageDrone( void )
 					pev->flags |= FL_ONTRAIN;
 					pev->effects |= EF_PLAYERDRONECONTROL;
 					DroneCrosshairUpdate = true;
+					m_hDrone->pev->effects &= ~EF_MERGE_VISIBILITY;
 					// we are all set and controlling the drone.
 				}
 
@@ -3383,6 +3384,7 @@ void CBasePlayer::ManageDrone( void )
 				m_hDrone->pev->velocity = g_vecZero;
 				m_hDrone->RemoveFlag( F_PLAYER_CONTROL );
 				m_hDrone->SetAbsVelocity( g_vecZero );
+				m_hDrone->pev->effects |= EF_MERGE_VISIBILITY;
 				drone_Speed = 0;
 				drone_forwmove = drone_sidemove = drone_upmove = 0;
 
