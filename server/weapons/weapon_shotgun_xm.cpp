@@ -26,6 +26,8 @@ public:
 	int m_fInReload;
 	float m_flNextReload;
 	int m_iShell;
+
+	bool bUseAfterReloadEmpty;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_shotgun_xm, CShotgunXM );
@@ -115,7 +117,10 @@ void CShotgunXM::PrimaryAttack()
 	if( m_fInReload > 0 )
 	{
 		CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
-		SendWeaponAnim( SHOTGUNXM_END_RELOAD );
+		if( bUseAfterReloadEmpty )
+			SendWeaponAnim( SHOTGUNXM_END_RELOAD_EMPTY );
+		else
+			SendWeaponAnim( SHOTGUNXM_END_RELOAD );
 		m_fInReload = 0;
 		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUNXM_RELOAD_FINISH_TIME;
 		m_flTimeWeaponIdle = gpGlobals->time + 1.5;
@@ -220,6 +225,7 @@ void CShotgunXM::Reload( void )
 		m_flTimeWeaponIdle = gpGlobals->time + 0.5;
 		m_flNextPrimaryAttack = gpGlobals->time + 1;
 		m_flNextSecondaryAttack = gpGlobals->time + 1;
+		bUseAfterReloadEmpty = (m_iClip <= 0);
 		return;
 	}
 	else if( m_fInReload == 1 )
@@ -271,7 +277,10 @@ void CShotgunXM::WeaponIdle( void )
 			else
 			{
 				// reload debounce has timed out
-				SendWeaponAnim( SHOTGUNXM_END_RELOAD );
+				if( bUseAfterReloadEmpty )
+					SendWeaponAnim( SHOTGUNXM_END_RELOAD_EMPTY );
+				else
+					SendWeaponAnim( SHOTGUNXM_END_RELOAD );
 
 				// play cocking sound
 			//	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/scock1.wav", 1, ATTN_NORM, 0, 95 + RANDOM_LONG(0,0x1f));
