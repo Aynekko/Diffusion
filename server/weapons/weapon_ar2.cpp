@@ -125,7 +125,7 @@ int C_AR2::AddToPlayer( CBasePlayer *pPlayer )
 BOOL C_AR2::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 0.5;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + AR2_DEPLOY_TIME;
 	return DefaultDeploy( "models/v_ar2.mdl", "models/p_ar2.mdl", AR2_DEPLOY, "mp5" );
 }
 
@@ -209,9 +209,9 @@ void C_AR2::PrimaryAttack()
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+	m_flNextPrimaryAttack = gpGlobals->time + AR2_NEXT_PA_TIME;
 	if (m_flNextPrimaryAttack < gpGlobals->time)
-		m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+		m_flNextPrimaryAttack = gpGlobals->time + AR2_NEXT_PA_TIME;
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 
@@ -270,8 +270,8 @@ void C_AR2::SecondaryAttack( void )
 
 	MakeWeaponShake( m_pPlayer, WEAPON_AR2, 1 );
 	
-	m_flNextPrimaryAttack = gpGlobals->time + 1;
-	m_flNextSecondaryAttack = gpGlobals->time + 1;
+	m_flNextPrimaryAttack = gpGlobals->time + AR2_NEXT_SA_TIME;
+	m_flNextSecondaryAttack = gpGlobals->time + AR2_NEXT_SA_TIME;
 	m_flTimeWeaponIdle = gpGlobals->time + 5;// idle pretty soon after shooting.
 
 	if (!m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType])

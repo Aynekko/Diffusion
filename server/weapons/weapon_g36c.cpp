@@ -128,7 +128,7 @@ int CWeaponG36C::AddToPlayer( CBasePlayer *pPlayer )
 BOOL CWeaponG36C::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1.3;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + G36C_DEPLOY_TIME;
 	return DefaultDeploy( "models/v_g36c.mdl", "models/p_g36c.mdl", G36C_DRAW, "mp5" );
 }
 
@@ -237,9 +237,9 @@ void CWeaponG36C::PrimaryAttack()
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+	m_flNextPrimaryAttack = gpGlobals->time + G36C_NEXT_PA_TIME;
 	if (m_flNextPrimaryAttack < gpGlobals->time)
-		m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+		m_flNextPrimaryAttack = gpGlobals->time + G36C_NEXT_PA_TIME;
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 }
@@ -301,9 +301,9 @@ void CWeaponG36C::Reload( void )
 		ResetZoom();
 
 	if( !m_iClip )
-		DefaultReload( 30, G36C_RELOAD_EMPTY, 4.8 );
+		DefaultReload( 30, G36C_RELOAD_EMPTY, G36C_RELOADEMPTY_TIME );
 	else
-		DefaultReload( 30, G36C_RELOAD, 3.0 );
+		DefaultReload( 30, G36C_RELOAD, G36C_RELOAD_TIME );
 }
 
 void CWeaponG36C::WeaponIdle( void )

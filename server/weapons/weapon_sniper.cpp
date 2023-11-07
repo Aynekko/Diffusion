@@ -150,8 +150,8 @@ int CSniperRifle::AddToPlayer( CBasePlayer *pPlayer )
 BOOL CSniperRifle::Deploy()
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	m_flNextPrimaryAttack = gpGlobals->time + 1; 
-	m_flNextSecondaryAttack = gpGlobals->time + 1;
+	m_flNextPrimaryAttack = gpGlobals->time + SNIPER_DEPLOY_TIME;
+	m_flNextSecondaryAttack = gpGlobals->time + SNIPER_DEPLOY_TIME;
 	return DefaultDeploy( "models/v_sniper.mdl", "models/p_sniper.mdl", SNIPER_DRAW, "bow" );
 }
 
@@ -243,7 +243,7 @@ void CSniperRifle::PrimaryAttack()
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate( "!HEV_AMO0", FALSE, 0 );
 
-	m_flNextPrimaryAttack = gpGlobals->time + 1.0;
+	m_flNextPrimaryAttack = gpGlobals->time + SNIPER_NEXT_PA_TIME;
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT( 10, 15 );
 }
@@ -311,9 +311,9 @@ void CSniperRifle::Reload( void )
 		ResetZoom();
 
 	if( !m_iClip )
-		DefaultReload( SNIPER_MAX_CLIP, SNIPER_RELOAD, 5.5 );
+		DefaultReload( SNIPER_MAX_CLIP, SNIPER_RELOAD_EMPTY, SNIPER_RELOADEMPTY_TIME );
 	else
-		DefaultReload( SNIPER_MAX_CLIP, SNIPER_RELOAD_NOSHOT, 4.5 );
+		DefaultReload( SNIPER_MAX_CLIP, SNIPER_RELOAD, SNIPER_RELOAD_TIME );
 }
 
 void CSniperRifle::WeaponIdle( void )

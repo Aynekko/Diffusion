@@ -131,7 +131,7 @@ int CMRC::AddToPlayer( CBasePlayer *pPlayer )
 BOOL CMRC::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + MRC_DEPLOY_TIME;
 	return DefaultDeploy( "models/v_9mmAR.mdl", "models/p_9mmAR.mdl", MRC_DEPLOY, "mp5" );
 }
 
@@ -223,9 +223,9 @@ void CMRC::PrimaryAttack()
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+	m_flNextPrimaryAttack = gpGlobals->time + MRC_NEXT_PA_TIME;
 	if (m_flNextPrimaryAttack < gpGlobals->time)
-		m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+		m_flNextPrimaryAttack = gpGlobals->time + MRC_NEXT_PA_TIME;
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 
@@ -282,8 +282,8 @@ void CMRC::SecondaryAttack( void )
 	// we don't add in player velocity anymore.
 	CGrenade::ShootContact( m_pPlayer->pev, m_pPlayer->EyePosition() + gpGlobals->v_forward * 16, gpGlobals->v_forward * 800 );
 	
-	m_flNextPrimaryAttack = gpGlobals->time + 1;
-	m_flNextSecondaryAttack = gpGlobals->time + 1;
+	m_flNextPrimaryAttack = gpGlobals->time + MRC_NEXT_SA_TIME;
+	m_flNextSecondaryAttack = gpGlobals->time + MRC_NEXT_SA_TIME;
 	m_flTimeWeaponIdle = gpGlobals->time + 5;// idle pretty soon after shooting.
 
 	if (!m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType])
@@ -296,7 +296,7 @@ void CMRC::SecondaryAttack( void )
 void CMRC::Reload( void )
 {
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
-	DefaultReload( MRC_MAX_CLIP, MRC_RELOAD, 2.0 );
+	DefaultReload( MRC_MAX_CLIP, MRC_RELOAD, MRC_RELOAD_TIME );
 }
 
 void CMRC::WeaponIdle( void )

@@ -83,6 +83,7 @@ BOOL CSmokeGrenade::Deploy()
 {
 	m_flReleaseThrow = -1;
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
+	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
 	return DefaultDeploy( "models/v_smoke.mdl", "models/p_smoke.mdl", HANDGRENADE_DRAW, "crowbar" );
 }
 

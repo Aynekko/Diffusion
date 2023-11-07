@@ -407,6 +407,7 @@ int CCrossbow::GetItemInfo(ItemInfo *p)
 BOOL CCrossbow::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
+	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
 	if (m_iClip)
 		return DefaultDeploy( "models/v_crossbow.mdl", "models/p_crossbow.mdl", CROSSBOW_DRAW1, "bow" );
 	return DefaultDeploy( "models/v_crossbow.mdl", "models/p_crossbow.mdl", CROSSBOW_DRAW2, "bow" );
@@ -601,7 +602,7 @@ void CCrossbow::FireBolt( void )
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_flNextPrimaryAttack = gpGlobals->time + 0.75;
+	m_flNextPrimaryAttack = gpGlobals->time + CROSSBOW_NEXT_PA_TIME;
 
 //	m_flNextSecondaryAttack = gpGlobals->time + 0.75;
 	if (m_iClip != 0)
@@ -674,7 +675,7 @@ void CCrossbow::Reload( void )
 	if( m_fInZoom )
 		ResetZoom();
 
-	if (DefaultReload( 5, CROSSBOW_RELOAD, 4.5 ))
+	if (DefaultReload( 5, CROSSBOW_RELOAD, CROSSBOW_RELOAD_TIME ))
 		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/xbow_reload1.wav", RANDOM_FLOAT(0.95, 1.0), ATTN_NORM, 0, 93 + RANDOM_LONG(0,0xF));
 }
 

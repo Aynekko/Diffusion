@@ -109,7 +109,7 @@ void CDeagle::Precache( void )
 BOOL CDeagle::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + DEAGLE_DEPLOY_TIME;
 	return DefaultDeploy( "models/v_357.mdl", "models/p_357.mdl", DEAGLE_DRAW, "python" );
 }
 
@@ -189,7 +189,7 @@ void CDeagle::PrimaryAttack()
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_flNextPrimaryAttack = gpGlobals->time + 0.75;
+	m_flNextPrimaryAttack = gpGlobals->time + DEAGLE_NEXT_PA_TIME;
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 
 	m_pPlayer->pev->punchangle.x -= 10;
@@ -213,9 +213,9 @@ void CDeagle::Reload( void )
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
 
 	if( !m_iClip )
-		DefaultReload( 7, DEAGLE_RELOAD_EMPTY, 3.5 );
+		DefaultReload( 7, DEAGLE_RELOAD_EMPTY, DEAGLE_RELOADEMPTY_TIME );
 	else
-		DefaultReload( 7, DEAGLE_RELOAD, 2.6 );
+		DefaultReload( 7, DEAGLE_RELOAD, DEAGLE_RELOAD_TIME );
 }
 
 

@@ -77,8 +77,8 @@ int CKnife::GetItemInfo(ItemInfo *p)
 
 BOOL CKnife::Deploy( )
 {
-	m_flNextPrimaryAttack = gpGlobals->time + 1.1;
-	m_flNextSecondaryAttack = gpGlobals->time + 1.1;
+	m_flNextPrimaryAttack = gpGlobals->time + KNIFE_DEPLOY_TIME;
+	m_flNextSecondaryAttack = gpGlobals->time + KNIFE_DEPLOY_TIME;
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	return DefaultDeploy( "models/v_crowbar.mdl", "models/p_crowbar.mdl", KNIFE_DRAW, "crowbar" );
 }
@@ -116,7 +116,7 @@ void CKnife::PrimaryAttack( void )
 
 	SendWeaponAnim( KNIFE_ATTACK1HIT );
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 0.5;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + KNIFE_NEXT_PA_TIME;
 }
 
 void CKnife::SecondaryAttack( void )
@@ -136,5 +136,5 @@ void CKnife::SecondaryAttack( void )
 
 	SendWeaponAnim( KNIFE_ATTACK2HIT );
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1.25;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + KNIFE_NEXT_SA_TIME;
 }

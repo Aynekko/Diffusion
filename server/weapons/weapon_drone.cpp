@@ -233,7 +233,7 @@ int CWpnDrone::AddDuplicate( CBasePlayerItem *pOriginal )
 
 BOOL CWpnDrone::Deploy( )
 {
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1.5;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + DRONE_DEPLOY_TIME;
 
 	ConfirmExplosion = 0;
 

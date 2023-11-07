@@ -1112,7 +1112,7 @@ BOOL CBasePlayerWeapon :: DefaultDeploy( char *szViewModel, char *szWeaponModel,
 
 	SendWeaponAnim( iAnim, skiplocal, body );
 
-	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
+	m_pPlayer->m_flNextAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
 
 	return TRUE;
 }

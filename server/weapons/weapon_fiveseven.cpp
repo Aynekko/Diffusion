@@ -89,7 +89,7 @@ int CWpnFiveSeven::GetItemInfo(ItemInfo *p)
 BOOL CWpnFiveSeven::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + WPN57_DEPLOY_TIME;
 	return DefaultDeploy( "models/v_fiveseven.mdl", "models/p_fiveseven.mdl", WPN57_DEPLOY, "onehanded" );
 }
 
@@ -98,7 +98,7 @@ void CWpnFiveSeven::PrimaryAttack( void )
 //	if( m_iClip <= 0 )
 		CLIENT_COMMAND(m_pPlayer->edict(), "-attack\n");
 	
-	FiveSevenFire( 0.008, 0.2, TRUE );
+	FiveSevenFire( 0.008, WPN57_NEXT_PA_TIME, TRUE );
 }
 
 void CWpnFiveSeven::FiveSevenFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
@@ -190,12 +190,12 @@ void CWpnFiveSeven::FiveSevenFire( float flSpread , float flCycleTime, BOOL fUse
 
 void CWpnFiveSeven::Reload( void )
 {
-	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == 20 )
+	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == FIVESEVEN_MAX_CLIP )
 		return;
 
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
 
-	DefaultReload( 20, WPN57_RELOAD, 3.0 );
+	DefaultReload( FIVESEVEN_MAX_CLIP, WPN57_RELOAD, 3.0 );
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 }

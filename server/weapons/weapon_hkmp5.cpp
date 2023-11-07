@@ -116,7 +116,7 @@ int CWeaponHKMP5::AddToPlayer( CBasePlayer *pPlayer )
 BOOL CWeaponHKMP5::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + HKMP5_DEPLOY_TIME;
 	return DefaultDeploy( "models/v_mp5.mdl", "models/p_mp5.mdl", HKMP5_DRAW, "mp5" );
 }
 
@@ -208,9 +208,9 @@ void CWeaponHKMP5::PrimaryAttack()
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+	m_flNextPrimaryAttack = gpGlobals->time + HKMP5_NEXT_PA_TIME;
 	if (m_flNextPrimaryAttack < gpGlobals->time)
-		m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+		m_flNextPrimaryAttack = gpGlobals->time + HKMP5_NEXT_PA_TIME;
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
  
@@ -221,9 +221,9 @@ void CWeaponHKMP5::Reload( void )
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
 
 	if( !m_iClip )
-		DefaultReload( 30, HKMP5_RELOAD, 2.5 );
+		DefaultReload( 30, HKMP5_RELOAD_EMPTY, HKMP5_RELOADEMPTY_TIME );
 	else
-		DefaultReload( 30, HKMP5_RELOAD_NOSHOT, 2.0 );
+		DefaultReload( 30, HKMP5_RELOAD, HKMP5_RELOAD_TIME );
 }
 
 void CWeaponHKMP5::WeaponIdle( void )

@@ -284,8 +284,8 @@ enum handgrenade_e // smokegrenade uses this too
 enum WeaponHKMP5_e
 {
 	HKMP5_IDLE = 0,
+	HKMP5_RELOAD_EMPTY,
 	HKMP5_RELOAD,
-	HKMP5_RELOAD_NOSHOT,
 	HKMP5_DRAW,
 	HKMP5_FIRE1,
 	HKMP5_FIRE2,
@@ -378,8 +378,8 @@ enum sniper_e
 	SNIPER_DRAW = 0,
 	SNIPER_IDLE,
 	SNIPER_SHOOT,
+	SNIPER_RELOAD_EMPTY,
 	SNIPER_RELOAD,
-	SNIPER_RELOAD_NOSHOT,
 };
 
 enum beretta_e
@@ -397,5 +397,71 @@ enum beretta_e
 	BERETTA_SHOOT_SILENCER,
 	BERETTA_SHOOT_EMPTY_SILENCER,
 };
+
+//====================================================================
+// weapon timings
+//====================================================================
+#define DEFAULT_DEPLOY_TIME		0.5
+
+#define AR2_DEPLOY_TIME			0.5
+#define AR2_NEXT_PA_TIME		0.1
+#define AR2_NEXT_SA_TIME		1.0
+
+#define MRC_DEPLOY_TIME			1.0
+#define MRC_NEXT_PA_TIME		0.1
+#define MRC_NEXT_SA_TIME		1.0
+#define MRC_RELOAD_TIME			2.0
+
+#define CROSSBOW_NEXT_PA_TIME	0.75
+#define CROSSBOW_RELOAD_TIME	4.5
+
+#define DEAGLE_DEPLOY_TIME		1.0
+#define DEAGLE_NEXT_PA_TIME		0.75
+#define DEAGLE_RELOAD_TIME		2.6
+#define DEAGLE_RELOADEMPTY_TIME	3.5
+
+#define DRONE_DEPLOY_TIME		1.5
+
+#define WPN57_DEPLOY_TIME		1.0
+#define WPN57_NEXT_PA_TIME		0.2
+#define WPN57_RELOAD_TIME		3.0
+
+#define G36C_DEPLOY_TIME		1.3
+#define G36C_NEXT_PA_TIME		0.1
+#define G36C_RELOAD_TIME		3.0
+#define G36C_RELOADEMPTY_TIME	4.8
+
+#define HKMP5_DEPLOY_TIME		1.0
+#define HKMP5_NEXT_PA_TIME		0.1
+#define HKMP5_RELOAD_TIME		2.0
+#define HKMP5_RELOADEMPTY_TIME	2.5
+
+#define KNIFE_DEPLOY_TIME		1.1
+#define KNIFE_NEXT_PA_TIME		0.5
+#define KNIFE_NEXT_SA_TIME		1.25
+
+#define BERETTA_DEPLOY_TIME		1.0
+#define BERETTA_NEXT_PA_TIME	0.3
+#define BERETTA_NEXT_SA_TIME	0.2
+#define BERETTA_RELOAD_TIME		1.5
+
+#define RPG_RELOAD_TIME			2.1
+
+#define SENTRY_DEPLOY_TIME		2.0
+
+#define SHOTGUN_DEPLOY_TIME		0.6
+#define SHOTGUN_NEXT_PA_TIME	1.2
+#define SHOTGUN_NEXT_SA_TIME	1.6
+#define SHOTGUN_RELOAD_TIME		0.45
+#define SHOTGUN_RELOAD_FINISH_TIME 0.7
+
+#define SHOTGUNXM_NEXT_PA_TIME	0.5
+#define SHOTGUNXM_RELOAD_TIME	0.45
+#define SHOTGUNXM_RELOAD_FINISH_TIME 0.8
+
+#define SNIPER_DEPLOY_TIME		1.0
+#define SNIPER_NEXT_PA_TIME		1.0
+#define SNIPER_RELOAD_TIME		4.5
+#define SNIPER_RELOADEMPTY_TIME 5.5
 
 #endif//WEAPONINFO_H

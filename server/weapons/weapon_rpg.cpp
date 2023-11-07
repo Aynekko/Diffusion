@@ -874,6 +874,7 @@ int CRpg::AddToPlayer( CBasePlayer *pPlayer )
 BOOL CRpg::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
+	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
 
 	if ( m_iClip == 0 )
 		return DefaultDeploy( "models/v_rpg.mdl", "models/p_rpg.mdl", RPG_DRAW_UL, "rpg" );
@@ -987,7 +988,7 @@ void CRpg::Reload( void )
 	// Set the next attack time into the future so that WeaponIdle will get called more often
 	// than reload, allowing the RPG LTD to be updated
 	
-	m_flNextPrimaryAttack = gpGlobals->time + 0.5;
+	m_flNextPrimaryAttack = gpGlobals->time + RPG_RELOAD_TIME;
 
 	if ( m_cActiveRockets > 0 && m_fSpotActive )
 	{
@@ -998,13 +999,13 @@ void CRpg::Reload( void )
 
 	if (m_pSpot && m_fSpotActive)
 	{
-		m_pSpot->Suspend( 2.1 );
-		m_flNextSecondaryAttack = gpGlobals->time + 2.1;
+		m_pSpot->Suspend( RPG_RELOAD_TIME );
+		m_flNextSecondaryAttack = gpGlobals->time + RPG_RELOAD_TIME;
 	}
 
 	if (m_iClip == 0)
 	{
-		iResult = DefaultReload( RPG_MAX_CLIP, RPG_RELOAD, 2 );
+		iResult = DefaultReload( RPG_MAX_CLIP, RPG_RELOAD, RPG_RELOAD_TIME );
 	}
 
 	if (iResult)

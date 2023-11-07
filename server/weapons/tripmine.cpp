@@ -581,6 +581,7 @@ BOOL CTripmine::Deploy( )
 {
 	pev->body = 0;
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
+	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
 	return DefaultDeploy( "models/v_tripmine.mdl", "models/p_tripmine.mdl", TRIPMINE_DRAW, "trip" );
 }
 

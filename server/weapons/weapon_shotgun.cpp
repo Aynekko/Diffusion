@@ -129,6 +129,8 @@ BOOL CShotgun::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 2.0;
 	m_fInReload = 0; // reset any reloading
+	m_flNextPrimaryAttack = gpGlobals->time + SHOTGUN_DEPLOY_TIME;
+	m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_DEPLOY_TIME;
 	return DefaultDeploy( "models/v_shotgun.mdl", "models/p_shotgun.mdl", SHOTGUN_DRAW, "shotgun" );
 }
 
@@ -143,7 +145,7 @@ void CShotgun::PrimaryAttack()
 	{
 		SendWeaponAnim( SHOTGUN_END_RELOAD );
 		m_fInReload = 0;
-		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 0.7;
+		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOAD_FINISH_TIME;
 		m_flTimeWeaponIdle = gpGlobals->time + 1.5;
 		return;
 	}
@@ -213,8 +215,8 @@ void CShotgun::PrimaryAttack()
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_flNextPrimaryAttack = gpGlobals->time + 1.2; // diffusion - was 0.75
-	m_flNextSecondaryAttack = gpGlobals->time + 1.2;
+	m_flNextPrimaryAttack = gpGlobals->time + SHOTGUN_NEXT_PA_TIME; // diffusion - was 0.75
+	m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_NEXT_PA_TIME;
 
 	m_fInReload = 0;
 }
@@ -228,7 +230,7 @@ void CShotgun::SecondaryAttack( void )
 	{
 		SendWeaponAnim( SHOTGUN_END_RELOAD );
 		m_fInReload = 0;
-		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 0.7;
+		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOAD_FINISH_TIME;
 		m_flTimeWeaponIdle = gpGlobals->time + 1.5;
 		return;
 	}
@@ -314,8 +316,8 @@ void CShotgun::SecondaryAttack( void )
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_flNextPrimaryAttack = gpGlobals->time + 1.6;
-	m_flNextSecondaryAttack = gpGlobals->time + 1.6;
+	m_flNextPrimaryAttack = gpGlobals->time + SHOTGUN_NEXT_SA_TIME;
+	m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_NEXT_SA_TIME;
 
 	m_fInReload = 0;
 }
@@ -340,9 +342,9 @@ void CShotgun::Reload( void )
 		SendWeaponAnim( SHOTGUN_START_RELOAD );
 		m_fInReload = 1;
 		m_pPlayer->m_flNextAttack = gpGlobals->time + 0.6;
-		m_flTimeWeaponIdle = gpGlobals->time + 0.4;
-		m_flNextPrimaryAttack = gpGlobals->time + 1;
-		m_flNextSecondaryAttack = gpGlobals->time + 1;
+		m_flTimeWeaponIdle = gpGlobals->time + SHOTGUN_RELOAD_TIME;
+		m_flNextPrimaryAttack = gpGlobals->time + 1.5;
+		m_flNextSecondaryAttack = gpGlobals->time + 1.5;
 		return;
 	}
 	else if (m_fInReload == 1)
@@ -366,8 +368,8 @@ void CShotgun::Reload( void )
 		case 2: EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/reload3.wav", 1, ATTN_NORM, 0, 85 + RANDOM_LONG( 0, 0x1f ) ); break;
 		}
 
-		m_flNextReload = gpGlobals->time + 0.4;   // diffusion - was 0.5
-		m_flTimeWeaponIdle = gpGlobals->time + 0.4;
+		m_flNextReload = gpGlobals->time + SHOTGUN_RELOAD_TIME;
+		m_flTimeWeaponIdle = gpGlobals->time + SHOTGUN_RELOAD_TIME;
 	}
 	else
 		m_fInReload = 1;

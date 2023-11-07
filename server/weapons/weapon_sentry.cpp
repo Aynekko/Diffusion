@@ -129,7 +129,7 @@ int CWpnSentry::AddToPlayer( CBasePlayer *pPlayer )
 
 BOOL CWpnSentry::Deploy( )
 {
-	m_flNextPrimaryAttack = gpGlobals->time + 2;
+	m_flNextPrimaryAttack = gpGlobals->time + SENTRY_DEPLOY_TIME;
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	return DefaultDeploy( "models/v_sentry.mdl", "models/p_sentry.mdl", SENTRY_DEPLOY, "trip" );
 }

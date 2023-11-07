@@ -105,7 +105,7 @@ BOOL CBeretta::Deploy( )
 		pev->body = 0;
 
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1;
+	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + BERETTA_DEPLOY_TIME;
 	return DefaultDeploy( "models/v_9mmhandgun.mdl", "models/p_9mmhandgun.mdl", BERETTA_DRAW, "onehanded" );
 }
 
@@ -114,7 +114,7 @@ void CBeretta::SecondaryAttack( void )
 	if( m_iClip <= 0 )
 		CLIENT_COMMAND(m_pPlayer->edict(), "-attack2\n");
 
-	GlockFire( 0.1, 0.2, FALSE );
+	GlockFire( 0.1, BERETTA_NEXT_SA_TIME, FALSE );
 }
 
 void CBeretta::PrimaryAttack( void )
@@ -122,7 +122,7 @@ void CBeretta::PrimaryAttack( void )
 	if( m_iClip <= 0 )
 		CLIENT_COMMAND(m_pPlayer->edict(), "-attack\n");
 	
-	GlockFire( 0.01, 0.3, TRUE );
+	GlockFire( 0.01, BERETTA_NEXT_PA_TIME, TRUE );
 }
 
 void CBeretta::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
@@ -235,9 +235,9 @@ void CBeretta::Reload( void )
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
 
 	if (m_iClip == 0)
-		iResult = DefaultReload( BERETTA_MAX_CLIP, BERETTA_RELOAD, 1.5 );
+		iResult = DefaultReload( BERETTA_MAX_CLIP, BERETTA_RELOAD, BERETTA_RELOAD_TIME );
 	else
-		iResult = DefaultReload( BERETTA_MAX_CLIP, BERETTA_RELOAD_NOT_EMPTY, 1.5 );
+		iResult = DefaultReload( BERETTA_MAX_CLIP, BERETTA_RELOAD_NOT_EMPTY, BERETTA_RELOAD_TIME );
 
 	if (iResult)
 	{
