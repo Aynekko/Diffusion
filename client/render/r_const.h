@@ -18,7 +18,7 @@ GNU General Public License for more details.
 
 #define INVALID_HANDLE	0xFFFF
 
-#define Z_NEAR		2.0f
+#define Z_NEAR		4.0f
 #define Z_NEAR_LIGHT	0.1f
 
 #define BLOCK_SIZE		4096	// lightmap blocksize
