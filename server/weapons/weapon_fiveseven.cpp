@@ -81,7 +81,7 @@ int CWpnFiveSeven::GetItemInfo(ItemInfo *p)
 	p->iPosition = WPN_POS_57;
 	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_FIVESEVEN;
-	p->iWeight = GLOCK_WEIGHT;
+	p->iWeight = BERETTA_WEIGHT;
 
 	return 1;
 }

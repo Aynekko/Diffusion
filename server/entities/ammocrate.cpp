@@ -196,7 +196,7 @@ void CAmmoCrate::GenerateCrateText(void)
 		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_9mmclip" ) )
 		{
 			TmpString = MAKE_STRING( "Beretta ammo" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_GLOCKCLIP_GIVE;
+			TmpAmmoCount = m_weaponCount[i] * AMMO_BERETTACLIP_GIVE;
 		}
 		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_rpgclip" ) )
 		{
@@ -446,8 +446,8 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 			// check ammo and calculate ratio
 			switch( i )
 			{
-			case WEAPON_GLOCK:
-				Ratio[WEAPON_GLOCK] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "9mm" ) ) / _9MM_MAX_CARRY;
+			case WEAPON_BERETTA:
+				Ratio[WEAPON_BERETTA] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "9mm" ) ) / _9MM_MAX_CARRY;
 				break;
 			case WEAPON_DEAGLE:
 				Ratio[WEAPON_DEAGLE] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "357" ) ) / _357_MAX_CARRY;
@@ -544,7 +544,7 @@ void CAmmoCrate::GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float Curr
 
 	switch( WeaponID )
 	{
-	case WEAPON_GLOCK:
+	case WEAPON_BERETTA:
 		pPlayer->GiveAmmo( (int)((_9MM_MAX_CARRY - (_9MM_MAX_CARRY * CurrentRatio)) * 0.5), "9mm", _9MM_MAX_CARRY );
 		break;
 	case WEAPON_DEAGLE:

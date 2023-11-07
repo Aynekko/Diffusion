@@ -45,158 +45,158 @@ bool CheckForLocalWeaponShootAnimation( int seq )
 	switch( localanim_WeaponID )
 	{
 	case WEAPON_HKMP5:
-		if( seq == 1 ) // caught reload anim!
+		if( seq == HKMP5_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = tr.time + 2.5;
-		else if( seq == 2 ) // caught reload_noshot anim!
+		else if( seq == HKMP5_RELOAD_NOSHOT ) // caught reload_noshot anim!
 			localanim_NextPAttackTime = tr.time + 2.0;
-		else if( seq == 3 ) // caught deploy anim!
+		else if( seq == HKMP5_DRAW ) // caught deploy anim!
 			localanim_NextPAttackTime = tr.time + 1.0;
 
-		if( seq < 4 ) // only interested in FIRE animations
+		if( seq < HKMP5_FIRE1 ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
 	case WEAPON_MRC:
-		if( seq == 3 ) // caught reload anim!
+		if( seq == MRC_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = tr.time + 2.0;
-		else if( seq == 4 ) // caught deploy anim!
+		else if( seq == MRC_DEPLOY ) // caught deploy anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1.0;
 
-		if( seq < 5 && seq != 2 ) // only interested in FIRE animations
+		if( seq < MRC_FIRE1 && seq != MRC_LAUNCH ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
-	case WEAPON_GLOCK:
-		if( seq == 5 || seq == 6 ) // caught reload anim!
+	case WEAPON_BERETTA:
+		if( seq == BERETTA_RELOAD || seq == BERETTA_RELOAD_NOT_EMPTY ) // caught reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1.5;
-		else if( seq == 7 ) // caught deploy anim!
+		else if( seq == BERETTA_DRAW ) // caught deploy anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1.0;
 
-		if( seq != 3 ) // only interested in FIRE animations
+		if( seq != BERETTA_SHOOT && seq != BERETTA_SHOOT_EMPTY ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
 	case WEAPON_AR2:
-		if( seq == 2 ) // caught deploy anim!
+		if( seq == AR2_DEPLOY ) // caught deploy anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 0.5;
 
-		if( seq != 1 && seq != 3 ) // only interested in FIRE animations
+		if( seq != AR2_LAUNCH && seq != AR2_FIRE ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
 	case WEAPON_CROSSBOW:
-		if( seq == 7 ) // caught reload anim!
+		if( seq == CROSSBOW_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = tr.time + 4.5;
-		else if( seq == 8 || seq == 9 ) // caught deploy anim!
+		else if( seq == CROSSBOW_DRAW1 || seq == CROSSBOW_DRAW2 ) // caught deploy anim!
 			localanim_NextPAttackTime = tr.time + 0.5;
 
-		if( seq != 4 && seq != 6 ) // only interested in FIRE animations
+		if( seq != CROSSBOW_FIRE1 && seq != CROSSBOW_FIRE3 ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
 	case WEAPON_DEAGLE:
-		if( seq == 3 ) // caught reload_empty anim!
+		if( seq == DEAGLE_RELOAD_EMPTY ) // caught reload_empty anim!
 			localanim_NextPAttackTime = tr.time + 3.5;
-		else if( seq == 4 ) // caught reload anim!
+		else if( seq == DEAGLE_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = tr.time + 2.6;
-		else if( seq == 6 ) // caught deploy anim!
+		else if( seq == DEAGLE_DRAW ) // caught deploy anim!
 			localanim_NextPAttackTime = tr.time + 1.0;
 
-		if( seq != 2 && seq != 7 ) // only interested in FIRE animations
+		if( seq != DEAGLE_FIRE1 && seq != DEAGLE_FIRE_EMPTY ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
 	case WEAPON_FIVESEVEN:
-		if( seq == 4 ) // caught reload anim!
+		if( seq == WPN57_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = tr.time + 3.0;
-		else if( seq == 5 ) // caught deploy anim!
+		else if( seq == WPN57_DEPLOY ) // caught deploy anim!
 			localanim_NextPAttackTime = tr.time + 1.0;
 
-		if( seq != 1 && seq != 3 ) // only interested in FIRE animations
+		if( seq != WPN57_SHOOT && seq != WPN57_SHOOT_EMPTY ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
 	case WEAPON_G36C:
-		if( seq == 1 ) // caught reload anim!
+		if( seq == G36C_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = tr.time + 3.0;
-		else if( seq == 2 ) // caught deploy anim!
+		else if( seq == G36C_DRAW ) // caught deploy anim!
 			localanim_NextPAttackTime = tr.time + 1.3;
-		else if( seq == 4 ) // caught reload empty anim!
+		else if( seq == G36C_RELOAD_EMPTY ) // caught reload empty anim!
 			localanim_NextPAttackTime = tr.time + 4.8;
 
-		if( seq != 3 ) // only interested in FIRE animations
+		if( seq != G36C_SHOOT ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
 	case WEAPON_KNIFE:
-		if( seq == 1 ) // caught deploy anim!
+		if( seq == KNIFE_DRAW ) // caught deploy anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1.1;
 
-		if( seq != 3 && seq != 6 ) // only interested in FIRE animations
+		if( seq != KNIFE_ATTACK1HIT && seq != KNIFE_ATTACK2HIT ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
 	case WEAPON_RPG:
-		if( seq == 2 ) // caught reload anim!
+		if( seq == RPG_RELOAD ) // caught reload anim!
 		{
 			localanim_NextPAttackTime = tr.time + 2.0;
 			localanim_AllowRpgShoot = true;
 		}
-		else if( seq == 7 || seq == 5 ) // caught deploy anim!
+		else if( seq == RPG_DRAW1 || seq == RPG_DRAW_UL ) // caught deploy anim!
 		{
 			localanim_NextPAttackTime = tr.time + 0.5;
 			localanim_AllowRpgShoot = true;
 		}
 
-		if( seq != 3 ) // only interested in FIRE animations
+		if( seq != RPG_FIRE ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
 	case WEAPON_SHOTGUN:
-		if( seq == 5 || seq == 3 ) // caught reload anim!
+		if( seq == SHOTGUN_RELOAD || seq == SHOTGUN_START_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1.5; // !!! slightly pushed forward...
-		else if( seq == 6 ) // caught deploy anim!
+		else if( seq == SHOTGUN_DRAW ) // caught deploy anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 0.5;
-		else if( seq == 4 ) // caught finish reload anim!
+		else if( seq == SHOTGUN_END_RELOAD ) // caught finish reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 0.7;
 
-		if( seq != 1 && seq != 2 ) // only interested in FIRE animations
+		if( seq != SHOTGUN_FIRE && seq != SHOTGUN_FIRE2 ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
 	case WEAPON_SHOTGUN_XM:
-		if( seq == 5 || seq == 3 ) // caught reload anim!
+		if( seq == SHOTGUNXM_RELOAD || seq == SHOTGUNXM_START_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1.5; // !!! slightly pushed forward...
-		else if( seq == 6 ) // caught deploy anim!
+		else if( seq == SHOTGUNXM_DRAW ) // caught deploy anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 0.5;
-		else if( seq == 4 ) // caught finish reload anim!
+		else if( seq == SHOTGUNXM_END_RELOAD ) // caught finish reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 0.8;
 
-		if( seq != 1 ) // only interested in FIRE animations
+		if( seq != SHOTGUNXM_FIRE ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
 		break;
 	case WEAPON_SNIPER:
-		if( seq == 3 ) // caught reload anim!
+		if( seq == SNIPER_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 5.5;
-		else if( seq == 4 ) // caught reload_noshot anim!
+		else if( seq == SNIPER_RELOAD_NOSHOT ) // caught reload_noshot anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 4.5;
-		else if( seq == 0 ) // caught deploy anim!
+		else if( seq == SNIPER_DRAW ) // caught deploy anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1;
 
-		if( seq != 2 ) // only interested in FIRE animations
+		if( seq != SNIPER_SHOOT ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
@@ -263,7 +263,7 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 	case WEAPON_HKMP5:
 		if( Attack1 && !Underwater )
 		{
-			gEngfuncs.pfnWeaponAnim( RANDOM_LONG( 4, 6 ), 0 );
+			WeaponAnim( RANDOM_LONG( HKMP5_FIRE1, HKMP5_FIRE3 ), 0 );
 			switch( RANDOM_LONG( 0, 2 ) )
 			{
 			case 0: gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/mp5-1.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) ); break;
@@ -278,7 +278,7 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 	case WEAPON_MRC:
 		if( Attack1 && !Underwater )
 		{
-			gEngfuncs.pfnWeaponAnim( RANDOM_LONG( 5, 7 ), 0 );
+			WeaponAnim( RANDOM_LONG( MRC_FIRE1, MRC_FIRE3 ), 0 );
 			switch( RANDOM_LONG( 0, 2 ) )
 			{
 			case 0: gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/hks1.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) ); break;
@@ -291,7 +291,7 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 		}
 		if( Attack2 && !Underwater )
 		{
-			gEngfuncs.pfnWeaponAnim( 2, 0 );
+			WeaponAnim( MRC_LAUNCH, 0 );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/glauncher.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1.0;
 			R_MakeWeaponShake( WEAPON_MRC, 1, true );
@@ -300,7 +300,7 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 	case WEAPON_AR2:
 		if( Attack1 && !Underwater )
 		{
-			gEngfuncs.pfnWeaponAnim( 3, 0 );
+			WeaponAnim( AR2_FIRE, 0 );
 			switch( RANDOM_LONG( 0, 3 ) )
 			{
 			case 0: gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "drone/aliendrone_shoot1.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) ); break;
@@ -313,16 +313,19 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 		}
 		if( Attack2 && !Underwater )
 		{
-			gEngfuncs.pfnWeaponAnim( 1, 0 );
+			WeaponAnim( AR2_LAUNCH, 0 );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/ar2_secondary.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1.0;
 			R_MakeWeaponShake( WEAPON_AR2, 1, true );
 		}
 		break;
-	case WEAPON_GLOCK:
+	case WEAPON_BERETTA:
 		if( Attack1 || Attack2 )
 		{
-			gEngfuncs.pfnWeaponAnim( 3, 0 );
+			if( CurrentPAmmoClip == 1 ) // last bullet
+				WeaponAnim( BERETTA_SHOOT_EMPTY, 0 );
+			else
+				WeaponAnim( BERETTA_SHOOT, 0 );
 			switch( RANDOM_LONG( 0, 2 ) )
 			{
 			case 0: gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/pistol1.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) ); break;
@@ -339,9 +342,9 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 		if( Attack1 )
 		{
 			if( CurrentPAmmoClip == 1 ) // last bolt
-				gEngfuncs.pfnWeaponAnim( 6, 0 );
+				WeaponAnim( CROSSBOW_FIRE3, 0 );
 			else
-				gEngfuncs.pfnWeaponAnim( 4, 0 );
+				WeaponAnim( CROSSBOW_FIRE1, 0 );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/xbow_fire1.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_NextPAttackTime = tr.time + 0.75;
 		}
@@ -350,9 +353,9 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 		if( Attack1 && !Underwater )
 		{
 			if( CurrentPAmmoClip == 1 ) // last bullet
-				gEngfuncs.pfnWeaponAnim( 7, 0 );
+				WeaponAnim( DEAGLE_FIRE_EMPTY, 0 );
 			else
-				gEngfuncs.pfnWeaponAnim( 2, 0 );
+				WeaponAnim( DEAGLE_FIRE1, 0 );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/deagle_shot1.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_NextPAttackTime = tr.time + 0.75;
 			R_MakeWeaponShake( WEAPON_DEAGLE, 0, true );
@@ -362,9 +365,9 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 		if( Attack1 && !Underwater )
 		{
 			if( CurrentPAmmoClip == 1 ) // last bullet
-				gEngfuncs.pfnWeaponAnim( 3, 0 );
+				WeaponAnim( WPN57_SHOOT_EMPTY, 0 );
 			else
-				gEngfuncs.pfnWeaponAnim( 1, 0 );
+				WeaponAnim( WPN57_SHOOT, 0 );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/fiveseven_shoot.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_NextPAttackTime = tr.time + 0.2;
 		}
@@ -372,7 +375,7 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 	case WEAPON_G36C:
 		if( Attack1 && !Underwater )
 		{
-			gEngfuncs.pfnWeaponAnim( 3, 0 );
+			WeaponAnim( G36C_SHOOT, 0 );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/g36c_shoot.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_NextPAttackTime = tr.time + 0.1;
 			R_MakeWeaponShake( WEAPON_G36C, 0, true );
@@ -382,19 +385,19 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 	case WEAPON_KNIFE:
 		if( Attack1 )
 		{
-			gEngfuncs.pfnWeaponAnim( 3, 0 );
+			WeaponAnim( KNIFE_ATTACK1HIT, 0 );
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 0.5;
 		}
 		if( Attack2 )
 		{
-			gEngfuncs.pfnWeaponAnim( 6, 0 );
+			WeaponAnim( KNIFE_ATTACK2HIT, 0 );
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1.25;
 		}
 		break;
 	case WEAPON_RPG:
 		if( Attack1 && localanim_AllowRpgShoot )
 		{
-			gEngfuncs.pfnWeaponAnim( 3, 0 );
+			WeaponAnim( RPG_FIRE, 0 );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/rocketfire1.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_AllowRpgShoot = false; // do not allow any more animations, until we catch reload or deploy
 		}
@@ -402,7 +405,7 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 	case WEAPON_SHOTGUN:
 		if( Attack1 && !Underwater )
 		{
-			gEngfuncs.pfnWeaponAnim( 1, 0 );
+			WeaponAnim( SHOTGUN_FIRE, 0 );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/shotgun_single.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + 1.2;
 			R_MakeWeaponShake( WEAPON_SHOTGUN, 0, true );
@@ -411,13 +414,13 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 		{
 			if( CurrentPAmmoClip > 1 )
 			{
-				gEngfuncs.pfnWeaponAnim( 2, 0 );
+				WeaponAnim( SHOTGUN_FIRE2, 0 );
 				gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/shotgun_dbl.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 				R_MakeWeaponShake( WEAPON_SHOTGUN, 1, true );
 			}
 			else
 			{
-				gEngfuncs.pfnWeaponAnim( 1, 0 );
+				WeaponAnim( SHOTGUN_FIRE, 0 );
 				gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/shotgun_single.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 				R_MakeWeaponShake( WEAPON_SHOTGUN, 0, true );
 			}
@@ -427,7 +430,7 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 	case WEAPON_SHOTGUN_XM:
 		if( Attack1 && !Underwater )
 		{
-			gEngfuncs.pfnWeaponAnim( 1, 0 );
+			WeaponAnim( SHOTGUNXM_FIRE, 0 );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/xm_fire.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_NextPAttackTime = tr.time + 0.5;
 			R_MakeWeaponShake( WEAPON_SHOTGUN_XM, 0, true );
@@ -436,7 +439,7 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 	case WEAPON_SNIPER:
 		if( Attack1 && !Underwater )
 		{
-			gEngfuncs.pfnWeaponAnim( 2, 0 );
+			WeaponAnim( SNIPER_SHOOT, 0 );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/sniper_wpn_fire.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_NextPAttackTime = tr.time + 1.0;
 			R_MakeWeaponShake( WEAPON_SNIPER, 0, true );

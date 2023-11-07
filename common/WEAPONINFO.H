@@ -72,7 +72,7 @@ typedef struct weapon_data_s
 
 #define WEAPON_NONE				0
 #define WEAPON_KNIFE			1
-#define WEAPON_GLOCK			2
+#define WEAPON_BERETTA			2
 #define WEAPON_DEAGLE			3
 #define WEAPON_MRC				4
 #define WEAPON_CYCLER			5
@@ -108,11 +108,11 @@ typedef struct weapon_data_s
 
 #define WPN_POS_KNIFE			0
 // slot 1 -----------------------------------
-#define WPN_SLOT_GLOCK			1
+#define WPN_SLOT_BERETTA			1
 #define WPN_SLOT_DEAGLE			1
 #define WPN_SLOT_57				1
 
-#define WPN_POS_GLOCK			0
+#define WPN_POS_BERETTA			0
 #define WPN_POS_DEAGLE			1
 #define WPN_POS_57				2
 // slot 2 -----------------------------------
@@ -225,6 +225,18 @@ enum wpndroneradio_e
 	DRONERADIO_HOLSTER,
 };
 
+enum deagle_e
+{
+	DEAGLE_IDLE1 = 0,
+	DEAGLE_FIDGET,
+	DEAGLE_FIRE1,
+	DEAGLE_RELOAD_EMPTY,
+	DEAGLE_RELOAD,
+	DEAGLE_HOLSTER,
+	DEAGLE_DRAW,
+	DEAGLE_FIRE_EMPTY,
+};
+
 enum WpnFiveSeven_e
 {
 	WPN57_IDLE = 0,
@@ -237,11 +249,11 @@ enum WpnFiveSeven_e
 
 enum WeaponG36C_e
 {
-	IDLE = 0,
-	RELOAD,
-	DRAW,
-	SHOOT,
-	RELOAD_EMPTY,
+	G36C_IDLE = 0,
+	G36C_RELOAD,
+	G36C_DRAW,
+	G36C_SHOOT,
+	G36C_RELOAD_EMPTY,
 };
 
 enum gauss_e
@@ -299,7 +311,7 @@ enum rpg_e
 	RPG_IDLE = 0,
 	RPG_FIDGET,
 	RPG_RELOAD,	// to reload
-	RPG_FIRE2,	// to empty
+	RPG_FIRE,	// to empty
 	RPG_HOLSTER1,	// loaded
 	RPG_DRAW1,	// loaded
 	RPG_HOLSTER2,	// unloaded
@@ -363,11 +375,27 @@ enum shotgunxm_e
 
 enum sniper_e
 {
-	ANIM_DRAW = 0,
-	ANIM_IDLE,
-	ANIM_SHOOT,
-	ANIM_RELOAD,
-	ANIM_RELOAD_NOSHOT,
+	SNIPER_DRAW = 0,
+	SNIPER_IDLE,
+	SNIPER_SHOOT,
+	SNIPER_RELOAD,
+	SNIPER_RELOAD_NOSHOT,
+};
+
+enum beretta_e
+{
+	BERETTA_IDLE1 = 0,
+	BERETTA_IDLE2,
+	BERETTA_IDLE3,
+	BERETTA_SHOOT,
+	BERETTA_SHOOT_EMPTY,
+	BERETTA_RELOAD,
+	BERETTA_RELOAD_NOT_EMPTY,
+	BERETTA_DRAW,
+	BERETTA_HOLSTER,
+	BERETTA_ADD_SILENCER,
+	BERETTA_SHOOT_SILENCER,
+	BERETTA_SHOOT_EMPTY_SILENCER,
 };
 
 #endif//WEAPONINFO_H

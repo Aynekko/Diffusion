@@ -78,7 +78,7 @@ public:
 
 // weapon weight factors (for auto-switching)   (-1 = noswitch)
 #define CROWBAR_WEIGHT		0
-#define GLOCK_WEIGHT		10
+#define BERETTA_WEIGHT		10
 #define DEAGLE_WEIGHT		15
 #define MP5_WEIGHT			15
 #define SHOTGUN_WEIGHT		15
@@ -114,7 +114,7 @@ public:
 #define WEAPON_NOCLIP			-1
 
 //#define CROWBAR_MAX_CLIP		WEAPON_NOCLIP
-#define GLOCK_MAX_CLIP			15
+#define BERETTA_MAX_CLIP			15
 #define DEAGLE_MAX_CLIP			7 
 #define MRC_MAX_CLIP			50
 #define MP5_MAX_CLIP			30
@@ -135,7 +135,7 @@ public:
 #define G36C_MAX_CLIP			30
 
 // the default amount of ammo that comes with each gun when it spawns
-#define GLOCK_DEFAULT_GIVE			GLOCK_MAX_CLIP * 2
+#define BERETTA_DEFAULT_GIVE			BERETTA_MAX_CLIP * 2
 #define DEAGLE_DEFAULT_GIVE			7
 #define MRC_DEFAULT_GIVE			50
 #define MP5_DEFAULT_GIVE			MP5_MAX_CLIP * 2
@@ -156,7 +156,7 @@ public:
 
 // The amount of ammo given to a player by an ammo item.
 #define AMMO_URANIUMBOX_GIVE	5
-#define AMMO_GLOCKCLIP_GIVE		GLOCK_MAX_CLIP
+#define AMMO_BERETTACLIP_GIVE		BERETTA_MAX_CLIP
 #define AMMO_357BOX_GIVE		DEAGLE_MAX_CLIP
 #define AMMO_MRCCLIP_GIVE		MRC_MAX_CLIP
 #define AMMO_CHAINBOX_GIVE		200

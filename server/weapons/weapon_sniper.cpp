@@ -152,7 +152,7 @@ BOOL CSniperRifle::Deploy()
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = gpGlobals->time + 1; 
 	m_flNextSecondaryAttack = gpGlobals->time + 1;
-	return DefaultDeploy( "models/v_sniper.mdl", "models/p_sniper.mdl", ANIM_DRAW, "bow" );
+	return DefaultDeploy( "models/v_sniper.mdl", "models/p_sniper.mdl", SNIPER_DRAW, "bow" );
 }
 
 void CSniperRifle::PrimaryAttack()
@@ -186,7 +186,7 @@ void CSniperRifle::PrimaryAttack()
 	if( m_pPlayer->LoudWeaponsRestricted )
 		m_pPlayer->FireLoudWeaponRestrictionEntity();
 
-	SendWeaponAnim( ANIM_SHOOT );
+	SendWeaponAnim( SNIPER_SHOOT );
 	m_flNextAnimTime = gpGlobals->time + 1;
 
 	// player "shoot" animation
@@ -311,9 +311,9 @@ void CSniperRifle::Reload( void )
 		ResetZoom();
 
 	if( !m_iClip )
-		DefaultReload( SNIPER_MAX_CLIP, ANIM_RELOAD, 5.5 );
+		DefaultReload( SNIPER_MAX_CLIP, SNIPER_RELOAD, 5.5 );
 	else
-		DefaultReload( SNIPER_MAX_CLIP, ANIM_RELOAD_NOSHOT, 4.5 );
+		DefaultReload( SNIPER_MAX_CLIP, SNIPER_RELOAD_NOSHOT, 4.5 );
 }
 
 void CSniperRifle::WeaponIdle( void )

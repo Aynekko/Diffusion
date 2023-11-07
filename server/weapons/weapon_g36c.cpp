@@ -129,7 +129,7 @@ BOOL CWeaponG36C::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1.3;
-	return DefaultDeploy( "models/v_g36c.mdl", "models/p_g36c.mdl", DRAW, "mp5" );
+	return DefaultDeploy( "models/v_g36c.mdl", "models/p_g36c.mdl", G36C_DRAW, "mp5" );
 }
 
 void CWeaponG36C::Holster( void )
@@ -180,7 +180,7 @@ void CWeaponG36C::PrimaryAttack()
 
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 
-	SendWeaponAnim( SHOOT );
+	SendWeaponAnim( G36C_SHOOT );
 	m_flNextAnimTime = gpGlobals->time + 0.2;
 
 	// player "shoot" animation
@@ -301,9 +301,9 @@ void CWeaponG36C::Reload( void )
 		ResetZoom();
 
 	if( !m_iClip )
-		DefaultReload( 30, RELOAD_EMPTY, 4.8 );
+		DefaultReload( 30, G36C_RELOAD_EMPTY, 4.8 );
 	else
-		DefaultReload( 30, RELOAD, 3.0 );
+		DefaultReload( 30, G36C_RELOAD, 3.0 );
 }
 
 void CWeaponG36C::WeaponIdle( void )

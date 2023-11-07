@@ -7722,7 +7722,7 @@ void CBasePlayer::CheckTutorMessage( int m_iId )
 	switch( m_iId )
 	{
 		case WEAPON_KNIFE:	TempString = MAKE_STRING("tutor_knife"); break;
-		case WEAPON_GLOCK:		TempString = MAKE_STRING("tutor_pistol"); break;
+		case WEAPON_BERETTA:		TempString = MAKE_STRING("tutor_pistol"); break;
 		case WEAPON_DEAGLE:		TempString = MAKE_STRING("tutor_deagle"); break;
 		case WEAPON_MRC:		TempString = MAKE_STRING("tutor_mrc"); break;
 		case WEAPON_CYCLER:		TempString = MAKE_STRING("tutor_cycler"); break; // ???

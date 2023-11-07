@@ -914,7 +914,7 @@ void CRpg::PrimaryAttack()
 		m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
 		m_pPlayer->m_iWeaponFlash = BRIGHT_GUN_FLASH;
 
-		SendWeaponAnim( RPG_FIRE2 );
+		SendWeaponAnim( RPG_FIRE );
 
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );

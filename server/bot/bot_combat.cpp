@@ -24,7 +24,7 @@ float primary_fire_delay[WEAPON_G36C +1][5][2] = {
    {{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
    // WEAPON_KNIFE
    {{0.0f, 0.1f}, {0.2f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.6f, 1.0f}},
-   // WEAPON_GLOCK (9mm)
+   // WEAPON_BERETTA (9mm)
    {{0.0f, 0.1f}, {0.1f, 0.2f}, {0.2f, 0.3f}, {0.3f, 0.4f}, {0.4f, 0.5f}},
    // WEAPON_DEAGLE (357)
    {{0.0f, 0.25f}, {0.2f, 0.5f}, {0.4f, 0.8f}, {1.0f, 1.3f}, {1.5f, 2.0f}},
@@ -75,7 +75,7 @@ float secondary_fire_delay[WEAPON_G36C +1][5][2] = {
 	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
 	// WEAPON_KNIFE - Not applicable
 	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
-	// WEAPON_GLOCK (9mm)
+	// WEAPON_BERETTA (9mm)
 	{{0.0f, 0.1f}, {0.0f, 0.1f}, {0.1f, 0.2f}, {0.1f, 0.2f}, {0.2f, 0.4f}},
 	// WEAPON_DEAGLE (357)
 	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
@@ -416,9 +416,9 @@ void CBot::BotWeaponInventory( void )
 
 		if (strcmp("9mm", CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
 		{
-			primary_ammo[WEAPON_GLOCK] = m_rgAmmo[i];
-			if( weapon_ptr[WEAPON_GLOCK] )
-				primary_ammo[WEAPON_GLOCK] += ((CBasePlayerWeapon *)weapon_ptr[WEAPON_GLOCK])->m_iClip;
+			primary_ammo[WEAPON_BERETTA] = m_rgAmmo[i];
+			if( weapon_ptr[WEAPON_BERETTA] )
+				primary_ammo[WEAPON_BERETTA] += ((CBasePlayerWeapon *)weapon_ptr[WEAPON_BERETTA])->m_iClip;
 		}
 		else if (strcmp("357", CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
 		{
@@ -1220,17 +1220,17 @@ camping_weapons:
 	camping_end_time = 0;
 	f_duck_release_time = 0;
 
-	//===================== WEAPON_GLOCK =======================================================================
+	//===================== WEAPON_BERETTA =======================================================================
 	// if the bot is carrying the 9mm glock...
-	if (HasWeapon(WEAPON_GLOCK))
+	if (HasWeapon(WEAPON_BERETTA))
 	{
 		// if nothing else was selected, try the good ol' 9mm glock...
-		if (((distance < 1200) && (weapon_choice == 0)) || (weapon_choice == WEAPON_GLOCK))
+		if (((distance < 1200) && (weapon_choice == 0)) || (weapon_choice == WEAPON_BERETTA))
 		{
-			new_weapon = weapon_ptr[WEAPON_GLOCK];
+			new_weapon = weapon_ptr[WEAPON_BERETTA];
 
 			// check if the bot has any ammo left for this weapon...
-			if (primary_ammo[WEAPON_GLOCK] > 0)
+			if (primary_ammo[WEAPON_BERETTA] > 0)
 			{
 				// check if the bot isn't already using this item...
 				if( m_pActiveItem != new_weapon )
@@ -1249,7 +1249,7 @@ camping_weapons:
 					pev->button |= IN_ATTACK2;  // use secondary attack (bang! bang!)
 
 					// set next time to shoot
-					//   f_shoot_time = gpGlobals->time + 0.2 + RANDOM_FLOAT(secondary_fire_delay[WEAPON_GLOCK][bot_skill][0], secondary_fire_delay[WEAPON_GLOCK][bot_skill][1]);
+					//   f_shoot_time = gpGlobals->time + 0.2 + RANDOM_FLOAT(secondary_fire_delay[WEAPON_BERETTA][bot_skill][0], secondary_fire_delay[WEAPON_BERETTA][bot_skill][1]);
 					f_shoot_time = gpGlobals->time;
 				}
 				else
@@ -1257,7 +1257,7 @@ camping_weapons:
 					pev->button |= IN_ATTACK;  // use primary attack (bang! bang!)
 
 					// set next time to shoot
-					f_shoot_time = gpGlobals->time + 0.3 + RANDOM_FLOAT(primary_fire_delay[WEAPON_GLOCK][bot_skill][0], primary_fire_delay[WEAPON_GLOCK][bot_skill][1]);
+					f_shoot_time = gpGlobals->time + 0.3 + RANDOM_FLOAT(primary_fire_delay[WEAPON_BERETTA][bot_skill][0], primary_fire_delay[WEAPON_BERETTA][bot_skill][1]);
 				}
 
 				return TRUE;

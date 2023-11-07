@@ -35,6 +35,7 @@ extern render_api_t gRenderfuncs;
 #define Msg					(*gEngfuncs.Con_Printf)
 #define DrawString			(*gEngfuncs.pfnDrawString)
 #define DrawStringReverse	(*gEngfuncs.pfnDrawStringReverse)
+#define WeaponAnim			(*gEngfuncs.pfnWeaponAnim)
 
 #define GET_LOCAL_PLAYER	(*gEngfuncs.GetLocalPlayer)
 #define GET_VIEWMODEL	(*gEngfuncs.GetViewModel)

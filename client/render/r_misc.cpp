@@ -839,7 +839,7 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 		Radius = 200;
 		Brightness = 1.8f;
 	break;
-	case WEAPON_GLOCK:
+	case WEAPON_BERETTA:
 	case WEAPON_FIVESEVEN:
 		Radius = 130;
 	break;
@@ -1171,7 +1171,7 @@ void GetMuzzleflashSprite( const cl_entity_t *e, int type, int &modelIndex, floa
 			modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/muzzleflash1.spr" );
 	break;
 
-	case WEAPON_GLOCK:
+	case WEAPON_BERETTA:
 	case WEAPON_HKMP5:
 	case WEAPON_FIVESEVEN:
 	case WEAPON_G36C:
@@ -2235,7 +2235,7 @@ void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoV
 
 	switch( sndnum )
 	{
-	case WEAPON_GLOCK:
+	case WEAPON_BERETTA:
 		if( localanim ) // shooting sound plays with client animation
 			break;
 		sndname[0] = "weapons/pistol1.wav";

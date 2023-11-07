@@ -21,18 +21,6 @@
 #include "player.h"
 #include "game/gamerules.h"
 
-enum python_e
-{
-	DEAGLE_IDLE1 = 0,
-	DEAGLE_FIDGET,
-	DEAGLE_FIRE1,
-	DEAGLE_RELOAD_EMPTY,
-	DEAGLE_RELOAD,
-	DEAGLE_HOLSTER,
-	DEAGLE_DRAW,
-	DEAGLE_FIRE_EMPTY,
-};
-
 class CDeagle : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CDeagle, CBasePlayerWeapon );

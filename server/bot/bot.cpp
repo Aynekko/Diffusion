@@ -2024,7 +2024,7 @@ BOOL CBot::BotShootTripmine( void )
 
    pev->v_angle.x = -pev->v_angle.x;  //adjust pitch to point gun
 
-   return (BotFireWeapon( v_tripmine_origin, WEAPON_GLOCK, TRUE ));
+   return (BotFireWeapon( v_tripmine_origin, WEAPON_BERETTA, TRUE ));
 }
 
 

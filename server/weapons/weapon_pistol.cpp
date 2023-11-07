@@ -22,29 +22,13 @@
 #include "player.h"
 #include "game/gamerules.h"
 
-enum glock_e
-{
-	GLOCK_IDLE1 = 0,
-	GLOCK_IDLE2,
-	GLOCK_IDLE3,
-	GLOCK_SHOOT,
-	GLOCK_SHOOT_EMPTY,
-	GLOCK_RELOAD,
-	GLOCK_RELOAD_NOT_EMPTY,
-	GLOCK_DRAW,
-	GLOCK_HOLSTER,
-	GLOCK_ADD_SILENCER,
-	GLOCK_SHOOT_SILENCER,
-	GLOCK_SHOOT_EMPTY_SILENCER,
-};
-
 class CBeretta : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CBeretta, CBasePlayerWeapon );
 public:
 	void Spawn( void );
 	void Precache( void );
-	int iItemSlot( void ) { return WPN_SLOT_GLOCK + 1; }
+	int iItemSlot( void ) { return WPN_SLOT_BERETTA + 1; }
 	int GetItemInfo(ItemInfo *p);
 
 	void PrimaryAttack( void );
@@ -66,10 +50,10 @@ void CBeretta::Spawn( )
 {
 	pev->classname = MAKE_STRING( "weapon_9mmhandgun" ); // hack to allow for old names
 	Precache( );
-	m_iId = WEAPON_GLOCK;
+	m_iId = WEAPON_BERETTA;
 	SET_MODEL( edict(), "models/w_9mmhandgun.mdl" );
 
-	m_iDefaultAmmo = GLOCK_DEFAULT_GIVE;
+	m_iDefaultAmmo = BERETTA_DEFAULT_GIVE;
 
 	FallInit();// get ready to fall down.
 }
@@ -103,12 +87,12 @@ int CBeretta::GetItemInfo(ItemInfo *p)
 	p->iMaxAmmo1 = _9MM_MAX_CARRY;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
-	p->iMaxClip = GLOCK_MAX_CLIP;
-	p->iSlot = WPN_SLOT_GLOCK;
-	p->iPosition = WPN_POS_GLOCK;
+	p->iMaxClip = BERETTA_MAX_CLIP;
+	p->iSlot = WPN_SLOT_BERETTA;
+	p->iPosition = WPN_POS_BERETTA;
 	p->iFlags = 0;
-	p->iId = m_iId = WEAPON_GLOCK;
-	p->iWeight = GLOCK_WEIGHT;
+	p->iId = m_iId = WEAPON_BERETTA;
+	p->iWeight = BERETTA_WEIGHT;
 
 	return 1;
 }
@@ -122,7 +106,7 @@ BOOL CBeretta::Deploy( )
 
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1;
-	return DefaultDeploy( "models/v_9mmhandgun.mdl", "models/p_9mmhandgun.mdl", GLOCK_DRAW, "onehanded" );
+	return DefaultDeploy( "models/v_9mmhandgun.mdl", "models/p_9mmhandgun.mdl", BERETTA_DRAW, "onehanded" );
 }
 
 void CBeretta::SecondaryAttack( void )
@@ -160,9 +144,9 @@ void CBeretta::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 	m_iClip--;
 
 	if (m_iClip != 0)
-		SendWeaponAnim( GLOCK_SHOOT );
+		SendWeaponAnim( BERETTA_SHOOT );
 	else
-		SendWeaponAnim( GLOCK_SHOOT_EMPTY );
+		SendWeaponAnim( BERETTA_SHOOT_EMPTY );
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
@@ -204,7 +188,7 @@ void CBeretta::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 	//	case 1: EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pistol2.wav", RANDOM_FLOAT(0.92, 1.0), ATTN_NORM, 0, 90 + RANDOM_LONG(0,12)); break;
 	//	case 2: EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/pistol3.wav", RANDOM_FLOAT(0.92, 1.0), ATTN_NORM, 0, 90 + RANDOM_LONG(0,12)); break;
 	//	}
-		PlayClientSound( m_pPlayer, WEAPON_GLOCK );
+		PlayClientSound( m_pPlayer, WEAPON_BERETTA );
 
 		if( m_pPlayer->LoudWeaponsRestricted )
 			m_pPlayer->FireLoudWeaponRestrictionEntity();
@@ -251,9 +235,9 @@ void CBeretta::Reload( void )
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
 
 	if (m_iClip == 0)
-		iResult = DefaultReload( GLOCK_MAX_CLIP, GLOCK_RELOAD, 1.5 );
+		iResult = DefaultReload( BERETTA_MAX_CLIP, BERETTA_RELOAD, 1.5 );
 	else
-		iResult = DefaultReload( GLOCK_MAX_CLIP, GLOCK_RELOAD_NOT_EMPTY, 1.5 );
+		iResult = DefaultReload( BERETTA_MAX_CLIP, BERETTA_RELOAD_NOT_EMPTY, 1.5 );
 
 	if (iResult)
 	{
@@ -265,19 +249,19 @@ void CBeretta::WeaponIdle( void )
 {
 	if( !ResetSilencer )
 	{
-	//	SendWeaponAnim( GLOCK_IDLE1 );
+	//	SendWeaponAnim( BERETTA_IDLE1 );
 		ResetSilencer = true;
 	}
 	
 	if( m_pPlayer->LoudWeaponsRestricted && pev->body == 0 )
 	{
 		pev->body = 1;
-		SendWeaponAnim( GLOCK_IDLE1 );
+		SendWeaponAnim( BERETTA_IDLE1 );
 	}
 	else if( !m_pPlayer->LoudWeaponsRestricted && pev->body == 1 )
 	{
 		pev->body = 0;
-		SendWeaponAnim( GLOCK_IDLE1 );
+		SendWeaponAnim( BERETTA_IDLE1 );
 	}
 	
 	ResetEmptySound( );
@@ -294,17 +278,17 @@ void CBeretta::WeaponIdle( void )
 		float flRand = RANDOM_FLOAT(0, 1);
 		if (flRand <= 0.3 + 0 * 0.75)
 		{
-			iAnim = GLOCK_IDLE3;
+			iAnim = BERETTA_IDLE3;
 			m_flTimeWeaponIdle = gpGlobals->time + 49.0 / 16;
 		}
 		else if (flRand <= 0.6 + 0 * 0.875)
 		{
-			iAnim = GLOCK_IDLE1;
+			iAnim = BERETTA_IDLE1;
 			m_flTimeWeaponIdle = gpGlobals->time + 60.0 / 16.0;
 		}
 		else
 		{
-			iAnim = GLOCK_IDLE2;
+			iAnim = BERETTA_IDLE2;
 			m_flTimeWeaponIdle = gpGlobals->time + 40.0 / 16.0;
 		}
 		SendWeaponAnim( iAnim );
@@ -328,7 +312,7 @@ class CBerettaAmmo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
-		if (pOther->GiveAmmo( AMMO_GLOCKCLIP_GIVE, "9mm", _9MM_MAX_CARRY ) != -1)
+		if (pOther->GiveAmmo( AMMO_BERETTACLIP_GIVE, "9mm", _9MM_MAX_CARRY ) != -1)
 		{
 		//	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
 			PlayPickupSound( pOther );
