@@ -80,7 +80,7 @@ int CHud :: InitHUDMessages( void )
 	
 	CVAR_REGISTER( "zoom_sensitivity_ratio", "1.2", 0 );
 	default_fov = CVAR_REGISTER( "default_fov", "90", 0 );
-	m_pCvarDraw = CVAR_REGISTER( "hud_draw", "1", FCVAR_ARCHIVE );
+	m_pCvarDraw = CVAR_REGISTER( "hud_draw", "1", 0 );
 	m_pSpriteList = NULL;
 
 	// clear any old HUD list
