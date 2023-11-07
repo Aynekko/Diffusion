@@ -382,23 +382,35 @@ void CSatchel::PrimaryAttack( void )
 	{
 		SendWeaponAnim(SATCHEL_RADIO_FIRE);
 
-		edict_t* pPlayer = m_pPlayer->edict();
-
+		edict_t* edPlayer = m_pPlayer->edict();
 		CBaseEntity* pSatchel = NULL;
+		bool fire_restriction = false;
 
-		while ((pSatchel = UTIL_FindEntityInSphere(pSatchel, m_pPlayer->GetAbsOrigin(), 4096)) != NULL)
+		while( (pSatchel = UTIL_FindEntityByClassname( pSatchel, "monster_satchel" )) != NULL )
 		{
-			if (FClassnameIs(pSatchel->pev, "monster_satchel"))
+			if( pSatchel->pev->owner == edPlayer )
 			{
-				if (pSatchel->pev->owner == pPlayer)
+				fire_restriction = true;
+				CSatchelCharge *MySatchel = (CSatchelCharge *)pSatchel;
+				
+				// if player is too far from this charge, don't leave it in the world - delete it
+				float dist = (m_pPlayer->GetAbsOrigin() - pSatchel->GetAbsOrigin()).Length();
+				if( dist > 6000 )
 				{
-					pSatchel->Use(m_pPlayer, m_pPlayer, USE_ON, 0);
-				//	m_chargeReady = 2;
-
-					if( m_pPlayer->LoudWeaponsRestricted )
-						m_pPlayer->FireLoudWeaponRestrictionEntity();
+					MySatchel->Deactivate();
+					continue;
 				}
+
+				// the value passed into Use() is the explosion delay
+				// it kind of simulates the signal delay due to long distance :) (1000 units = 0.1 sec delay)
+				pSatchel->Use( m_pPlayer, m_pPlayer, USE_ON, dist * 0.0001f );
 			}
+		}
+
+		if( fire_restriction )
+		{
+			if( m_pPlayer->LoudWeaponsRestricted )
+				m_pPlayer->FireLoudWeaponRestrictionEntity();
 		}
 
 		m_chargeReady = 2;

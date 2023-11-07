@@ -237,7 +237,7 @@ void CGrenade::ClearEffects( void )
 void CGrenade::DetonateUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
 	SetThink(&CGrenade::Detonate );
-	SetNextThink( 0 );
+	SetNextThink( value );
 }
 
 void CGrenade::PreDetonate( void )
