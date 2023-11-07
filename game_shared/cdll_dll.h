@@ -20,15 +20,7 @@
 #ifndef CDLL_DLL_H
 #define CDLL_DLL_H
 
-#define MAX_WEAPONS			64
-#define MAX_WEAPON_BYTES		(( MAX_WEAPONS + 7 ) / 8 )
-#define WEAPON_SUIT			(MAX_WEAPONS - 1)
-
-#define MAX_WEAPON_SLOTS		6	// hud item selection buckets
-#define MAX_WEAPON_POSITIONS		7 // this is the max number of items in each bucket
-
-#define MAX_ITEM_TYPES		MAX_WEAPON_POSITIONS	// hud item selection slots
-#define MAX_ITEMS			5	// hard coded item types
+#include "weaponinfo.h"
 
 #define HIDEHUD_WPNS		BIT(0)
 #define HIDEHUD_FLASHLIGHT	BIT(1)
@@ -37,9 +29,6 @@
 #define HIDEHUD_WPNS_HOLDABLEITEM BIT(4) // diffusion - separate flag when we hide weapons after picking up a holdable item
 										// otherwise it can break during a script when player is holding an item
 #define HIDEHUD_WPNS_CUSTOM BIT(5) // script entity insists on hiding weapons (player_customize)
-
-#define MAX_AMMO_TYPES		32
-#define MAX_AMMO_SLOTS  		32
 
 #define HUD_PRINTNOTIFY		1
 #define HUD_PRINTCONSOLE		2

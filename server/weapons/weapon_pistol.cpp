@@ -38,9 +38,9 @@ enum glock_e
 	GLOCK_SHOOT_EMPTY_SILENCER,
 };
 
-class CGlock : public CBasePlayerWeapon
+class CBeretta : public CBasePlayerWeapon
 {
-	DECLARE_CLASS( CGlock, CBasePlayerWeapon );
+	DECLARE_CLASS( CBeretta, CBasePlayerWeapon );
 public:
 	void Spawn( void );
 	void Precache( void );
@@ -59,10 +59,10 @@ private:
 	bool ResetSilencer; // saverestore issues
 };
 
-LINK_ENTITY_TO_CLASS( weapon_glock, CGlock );
-LINK_ENTITY_TO_CLASS( weapon_9mmhandgun, CGlock );
+LINK_ENTITY_TO_CLASS( weapon_glock, CBeretta );
+LINK_ENTITY_TO_CLASS( weapon_9mmhandgun, CBeretta );
 
-void CGlock::Spawn( )
+void CBeretta::Spawn( )
 {
 	pev->classname = MAKE_STRING( "weapon_9mmhandgun" ); // hack to allow for old names
 	Precache( );
@@ -74,7 +74,7 @@ void CGlock::Spawn( )
 	FallInit();// get ready to fall down.
 }
 
-void CGlock::Precache( void )
+void CBeretta::Precache( void )
 {
 	PRECACHE_MODEL("models/v_9mmhandgun.mdl");
 	PRECACHE_MODEL("models/w_9mmhandgun.mdl");
@@ -96,7 +96,7 @@ void CGlock::Precache( void )
 	PRECACHE_SOUND( "weapons/pistol3_d.wav" );
 }
 
-int CGlock::GetItemInfo(ItemInfo *p)
+int CBeretta::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "9mm";
@@ -113,7 +113,7 @@ int CGlock::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-BOOL CGlock::Deploy( )
+BOOL CBeretta::Deploy( )
 {
 	if( m_pPlayer->LoudWeaponsRestricted )
 		pev->body = 1;
@@ -125,7 +125,7 @@ BOOL CGlock::Deploy( )
 	return DefaultDeploy( "models/v_9mmhandgun.mdl", "models/p_9mmhandgun.mdl", GLOCK_DRAW, "onehanded" );
 }
 
-void CGlock::SecondaryAttack( void )
+void CBeretta::SecondaryAttack( void )
 {
 	if( m_iClip <= 0 )
 		CLIENT_COMMAND(m_pPlayer->edict(), "-attack2\n");
@@ -133,7 +133,7 @@ void CGlock::SecondaryAttack( void )
 	GlockFire( 0.1, 0.2, FALSE );
 }
 
-void CGlock::PrimaryAttack( void )
+void CBeretta::PrimaryAttack( void )
 {
 	if( m_iClip <= 0 )
 		CLIENT_COMMAND(m_pPlayer->edict(), "-attack\n");
@@ -141,7 +141,7 @@ void CGlock::PrimaryAttack( void )
 	GlockFire( 0.01, 0.3, TRUE );
 }
 
-void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
+void CBeretta::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 {
 	if (m_iClip <= 0)
 	{
@@ -244,7 +244,7 @@ void CGlock::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 	m_pPlayer->pev->punchangle.y += -Cone * RANDOM_LONG( -10, 20 );
 }
 
-void CGlock::Reload( void )
+void CBeretta::Reload( void )
 {
 	int iResult;
 
@@ -261,7 +261,7 @@ void CGlock::Reload( void )
 	}
 }
 
-void CGlock::WeaponIdle( void )
+void CBeretta::WeaponIdle( void )
 {
 	if( !ResetSilencer )
 	{
@@ -311,9 +311,9 @@ void CGlock::WeaponIdle( void )
 	}
 }
 
-class CGlockAmmo : public CBasePlayerAmmo
+class CBerettaAmmo : public CBasePlayerAmmo
 {
-	DECLARE_CLASS( CGlockAmmo, CBasePlayerAmmo );
+	DECLARE_CLASS( CBerettaAmmo, CBasePlayerAmmo );
 
 	void Spawn( void )
 	{ 
@@ -338,5 +338,5 @@ class CGlockAmmo : public CBasePlayerAmmo
 	}
 };
 
-LINK_ENTITY_TO_CLASS( ammo_glockclip, CGlockAmmo );
-LINK_ENTITY_TO_CLASS( ammo_9mmclip, CGlockAmmo );
+LINK_ENTITY_TO_CLASS( ammo_glockclip, CBerettaAmmo );
+LINK_ENTITY_TO_CLASS( ammo_9mmclip, CBerettaAmmo );

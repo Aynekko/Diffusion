@@ -20,18 +20,6 @@
 #include "nodes.h"
 #include "player.h"
 
-enum smokegrenade_e
-{
-	HANDGRENADE_IDLE = 0,
-	HANDGRENADE_FIDGET,
-	HANDGRENADE_PINPULL,
-	HANDGRENADE_THROW1,	// toss
-	HANDGRENADE_THROW2,	// medium
-	HANDGRENADE_THROW3,	// hard
-	HANDGRENADE_HOLSTER,
-	HANDGRENADE_DRAW,
-};
-
 class CSmokeGrenade : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CSmokeGrenade, CBasePlayerWeapon );

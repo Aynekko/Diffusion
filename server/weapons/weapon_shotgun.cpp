@@ -26,20 +26,6 @@
 #define VECTOR_CONE_DM_SHOTGUN	Vector( 0.08716f, 0.04362f, 0.00f ) // 10 degrees by 5 degrees
 #define VECTOR_CONE_DM_DOUBLESHOTGUN	Vector( 0.17365f, 0.04362f, 0.00f ) // 20 degrees by 5 degrees
 
-enum shotgun_e
-{
-	SHOTGUN_IDLE = 0,
-	SHOTGUN_FIRE,
-	SHOTGUN_FIRE2,
-	SHOTGUN_RELOAD,
-	SHOTGUN_END_RELOAD,
-	SHOTGUN_START_RELOAD,
-	SHOTGUN_DRAW,
-	SHOTGUN_HOLSTER,
-	SHOTGUN_IDLE4,
-	SHOTGUN_IDLE_DEEP
-};
-
 class CShotgun : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CShotgun, CBasePlayerWeapon );

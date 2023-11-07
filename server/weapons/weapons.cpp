@@ -65,8 +65,6 @@ extern int gmsgWeaponAnim;
 
 MULTIDAMAGE gMultiDamage;
 
-#define TRACER_FREQ		0//4			// Tracers fire every fourth bullet
-
 //==================================================================
 // PlayPickupSound: play sound on client, and for this client only
 //==================================================================

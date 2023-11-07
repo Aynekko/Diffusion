@@ -23,17 +23,6 @@
 #include "entities/soundent.h"
 #include "game/gamerules.h"
 
-enum WeaponHKMP5_e
-{
-	HKMP5_IDLE = 0,
-	HKMP5_RELOAD,
-	HKMP5_RELOAD_NOSHOT,
-	HKMP5_DRAW,
-	HKMP5_FIRE1,
-	HKMP5_FIRE2,
-	HKMP5_FIRE3,
-};
-
 class CWeaponHKMP5 : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CWeaponHKMP5, CBasePlayerWeapon );

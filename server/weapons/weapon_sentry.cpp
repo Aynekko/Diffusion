@@ -23,14 +23,6 @@
 #include "entities/soundent.h"
 #include "game/gamerules.h"
 
-enum wpnsentry_e
-{
-	SENTRY_IDLE = 0,
-	SENTRY_DEPLOY,
-	SENTRY_DEPLOYSLOW,
-	SENTRY_NOSENTRY,
-};
-
 class CWpnSentry : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CWpnSentry, CBasePlayerWeapon );

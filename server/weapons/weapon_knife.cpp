@@ -22,19 +22,6 @@
 #include "player.h"
 #include "game/gamerules.h"
 
-enum crowbar_e
-{
-	KNIFE_IDLE = 0,
-	KNIFE_DRAW,
-	KNIFE_HOLSTER,
-	KNIFE_ATTACK1HIT,
-	KNIFE_ATTACK1MISS,
-	KNIFE_ATTACK2MISS,
-	KNIFE_ATTACK2HIT,
-	KNIFE_ATTACK3MISS,
-	KNIFE_ATTACK3HIT
-};
-
 class CKnife : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CKnife, CBasePlayerWeapon );

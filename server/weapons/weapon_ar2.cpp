@@ -23,15 +23,6 @@
 #include "entities/soundent.h"
 #include "game/gamerules.h"
 
-enum mp555_e
-{
-	MP555_IDLE,
-	MP555_LAUNCH,
-	MP555_DEPLOY,
-	MP555_FIRE,
-	MP555_HOLSTER,
-};
-
 class C_AR2 : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( C_AR2, CBasePlayerWeapon );
@@ -135,7 +126,7 @@ BOOL C_AR2::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 0.5;
-	return DefaultDeploy( "models/v_ar2.mdl", "models/p_ar2.mdl", MP555_DEPLOY, "mp5" );
+	return DefaultDeploy( "models/v_ar2.mdl", "models/p_ar2.mdl", AR2_DEPLOY, "mp5" );
 }
 
 void C_AR2::PrimaryAttack()
@@ -164,7 +155,7 @@ void C_AR2::PrimaryAttack()
 	if( m_pPlayer->LoudWeaponsRestricted )
 		m_pPlayer->FireLoudWeaponRestrictionEntity();
 
-	SendWeaponAnim( MP555_FIRE );
+	SendWeaponAnim( AR2_FIRE );
 	m_flNextAnimTime = gpGlobals->time + 0.2;
 
 	// player "shoot" animation
@@ -256,7 +247,7 @@ void C_AR2::SecondaryAttack( void )
 			
 	m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType]--;
 
-	SendWeaponAnim( MP555_LAUNCH );
+	SendWeaponAnim( AR2_LAUNCH );
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
@@ -299,7 +290,7 @@ void C_AR2::WeaponIdle( void )
 	if (m_flTimeWeaponIdle > gpGlobals->time)
 		return;
 
-	SendWeaponAnim( MP555_IDLE );
+	SendWeaponAnim( AR2_IDLE );
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );// how long till we do this again.
 }

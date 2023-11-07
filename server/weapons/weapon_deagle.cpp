@@ -33,9 +33,9 @@ enum python_e
 	DEAGLE_FIRE_EMPTY,
 };
 
-class CPython : public CBasePlayerWeapon
+class CDeagle : public CBasePlayerWeapon
 {
-	DECLARE_CLASS( CPython, CBasePlayerWeapon );
+	DECLARE_CLASS( CDeagle, CBasePlayerWeapon );
 public:
 	void Spawn( void );
 	void Precache( void );
@@ -51,10 +51,10 @@ public:
 	int m_iShell;
 };
 
-LINK_ENTITY_TO_CLASS( weapon_python, CPython );
-LINK_ENTITY_TO_CLASS( weapon_357, CPython );
+LINK_ENTITY_TO_CLASS( weapon_python, CDeagle );
+LINK_ENTITY_TO_CLASS( weapon_357, CDeagle );
 
-int CPython::GetItemInfo(ItemInfo *p)
+int CDeagle::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "357";
@@ -71,7 +71,7 @@ int CPython::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-int CPython::AddToPlayer( CBasePlayer *pPlayer )
+int CDeagle::AddToPlayer( CBasePlayer *pPlayer )
 {
 	if ( CBasePlayerWeapon::AddToPlayer( pPlayer ) )
 	{
@@ -83,7 +83,7 @@ int CPython::AddToPlayer( CBasePlayer *pPlayer )
 	return FALSE;
 }
 
-void CPython::Spawn( void )
+void CDeagle::Spawn( void )
 {
 	pev->classname = MAKE_STRING("weapon_357"); // hack to allow for old names
 	Precache( );
@@ -96,7 +96,7 @@ void CPython::Spawn( void )
 }
 
 
-void CPython::Precache( void )
+void CDeagle::Precache( void )
 {
 	PRECACHE_MODEL("models/v_357.mdl");
 	PRECACHE_MODEL("models/w_357.mdl");
@@ -118,7 +118,7 @@ void CPython::Precache( void )
 	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 }
 
-BOOL CPython::Deploy( )
+BOOL CDeagle::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1;
@@ -126,7 +126,7 @@ BOOL CPython::Deploy( )
 }
 
 
-void CPython::Holster( void )
+void CDeagle::Holster( void )
 {
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 1.0;
 	m_flTimeWeaponIdle = gpGlobals->time + 10 + RANDOM_FLOAT ( 0, 5 );
@@ -134,7 +134,7 @@ void CPython::Holster( void )
 	BaseClass::Holster();
 }
 
-void CPython::PrimaryAttack()
+void CDeagle::PrimaryAttack()
 {
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
@@ -220,7 +220,7 @@ void CPython::PrimaryAttack()
 }
 
 
-void CPython::Reload( void )
+void CDeagle::Reload( void )
 {
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
 
@@ -231,16 +231,16 @@ void CPython::Reload( void )
 }
 
 
-void CPython::WeaponIdle( void )
+void CDeagle::WeaponIdle( void )
 {
 	ResetEmptySound( );
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_10DEGREES );
 }
 
-class CPythonAmmo : public CBasePlayerAmmo
+class CDeagleAmmo : public CBasePlayerAmmo
 {
-	DECLARE_CLASS( CPythonAmmo, CBasePlayerAmmo );
+	DECLARE_CLASS( CDeagleAmmo, CBasePlayerAmmo );
 
 	void Spawn( void )
 	{ 
@@ -265,4 +265,4 @@ class CPythonAmmo : public CBasePlayerAmmo
 	}
 };
 
-LINK_ENTITY_TO_CLASS( ammo_357, CPythonAmmo );
+LINK_ENTITY_TO_CLASS( ammo_357, CDeagleAmmo );

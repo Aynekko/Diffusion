@@ -23,30 +23,6 @@
 #include "entities/soundent.h"
 #include "game/gamerules.h"
 
-enum wpndrone_e
-{
-	DRONE_IDLE = 0,
-	DRONE_DEPLOY,
-	DRONE_DEPLOYSLOW,
-	DRONE_NODRONE,
-};
-
-/*
-enum wpndroneradio_e
-{
-	DRONERADIO_IDLE = 0,
-	DRONERADIO_IDLE2, // not used
-	DRONERADIO_DEPLOY,
-	DRONERADIO_CALL,
-};*/
-enum wpndroneradio_e
-{
-	DRONERADIO_IDLE = 0,
-	DRONERADIO_DEPLOY,
-	DRONERADIO_CALL,
-	DRONERADIO_HOLSTER,
-};
-
 class CWpnDrone : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CWpnDrone, CBasePlayerWeapon );

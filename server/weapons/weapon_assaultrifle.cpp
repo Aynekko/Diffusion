@@ -23,21 +23,9 @@
 #include "entities/soundent.h"
 #include "game/gamerules.h"
 
-enum mp5_e
+class CMRC : public CBasePlayerWeapon
 {
-	MP5_LONGIDLE = 0,
-	MP5_IDLE1,
-	MP5_LAUNCH,
-	MP5_RELOAD,
-	MP5_DEPLOY,
-	MP5_FIRE1,
-	MP5_FIRE2,
-	MP5_FIRE3,
-};
-
-class CMP5 : public CBasePlayerWeapon
-{
-	DECLARE_CLASS( CMP5, CBasePlayerWeapon );
+	DECLARE_CLASS( CMRC, CBasePlayerWeapon );
 public:
 	void Spawn( void );
 	void Precache( void );
@@ -59,18 +47,18 @@ public:
 	int m_iShell;
 };
 
-LINK_ENTITY_TO_CLASS( weapon_mrc, CMP5 );
-LINK_ENTITY_TO_CLASS( weapon_9mmAR, CMP5 );
+LINK_ENTITY_TO_CLASS( weapon_mrc, CMRC );
+LINK_ENTITY_TO_CLASS( weapon_9mmAR, CMRC );
 
 
 //=========================================================
 //=========================================================
-int CMP5::SecondaryAmmoIndex( void )
+int CMRC::SecondaryAmmoIndex( void )
 {
 	return m_iSecondaryAmmoType;
 }
 
-void CMP5::Spawn( void )
+void CMRC::Spawn( void )
 {
 	pev->classname = MAKE_STRING("weapon_9mmAR"); // hack to allow for old names
 	Precache( );
@@ -83,7 +71,7 @@ void CMP5::Spawn( void )
 }
 
 
-void CMP5::Precache( void )
+void CMRC::Precache( void )
 {
 	PRECACHE_MODEL("models/v_9mmAR.mdl");
 	PRECACHE_MODEL("models/w_9mmAR.mdl");
@@ -111,7 +99,7 @@ void CMP5::Precache( void )
 	PRECACHE_SOUND ("weapons/357_cock1.wav");
 }
 
-int CMP5::GetItemInfo(ItemInfo *p)
+int CMRC::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = "mrcbullets";
@@ -128,7 +116,7 @@ int CMP5::GetItemInfo(ItemInfo *p)
 	return 1;
 }
 
-int CMP5::AddToPlayer( CBasePlayer *pPlayer )
+int CMRC::AddToPlayer( CBasePlayer *pPlayer )
 {
 	if ( CBasePlayerWeapon::AddToPlayer( pPlayer ) )
 	{
@@ -140,14 +128,14 @@ int CMP5::AddToPlayer( CBasePlayer *pPlayer )
 	return FALSE;
 }
 
-BOOL CMP5::Deploy( )
+BOOL CMRC::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 1;
-	return DefaultDeploy( "models/v_9mmAR.mdl", "models/p_9mmAR.mdl", MP5_DEPLOY, "mp5" );
+	return DefaultDeploy( "models/v_9mmAR.mdl", "models/p_9mmAR.mdl", MRC_DEPLOY, "mp5" );
 }
 
-void CMP5::PrimaryAttack()
+void CMRC::PrimaryAttack()
 {
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
@@ -173,7 +161,7 @@ void CMP5::PrimaryAttack()
 	if( m_pPlayer->LoudWeaponsRestricted )
 		m_pPlayer->FireLoudWeaponRestrictionEntity();
 
-	SendWeaponAnim( MP5_FIRE1 + RANDOM_LONG(0,2));
+	SendWeaponAnim( MRC_FIRE1 + RANDOM_LONG(0,2));
 	m_flNextAnimTime = gpGlobals->time + 0.2;
 
 	// player "shoot" animation
@@ -243,7 +231,7 @@ void CMP5::PrimaryAttack()
 
 }
 
-void CMP5::SecondaryAttack( void )
+void CMRC::SecondaryAttack( void )
 {
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
@@ -271,7 +259,7 @@ void CMP5::SecondaryAttack( void )
 			
 	m_pPlayer->m_rgAmmo[m_iSecondaryAmmoType]--;
 
-	SendWeaponAnim( MP5_LAUNCH );
+	SendWeaponAnim( MRC_LAUNCH );
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
@@ -305,13 +293,13 @@ void CMP5::SecondaryAttack( void )
 	m_pPlayer->pev->punchangle.x -= 10;
 }
 
-void CMP5::Reload( void )
+void CMRC::Reload( void )
 {
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
-	DefaultReload( MRC_MAX_CLIP, MP5_RELOAD, 2.0 );
+	DefaultReload( MRC_MAX_CLIP, MRC_RELOAD, 2.0 );
 }
 
-void CMP5::WeaponIdle( void )
+void CMRC::WeaponIdle( void )
 {
 	ResetEmptySound( );
 
@@ -324,12 +312,12 @@ void CMP5::WeaponIdle( void )
 	switch ( RANDOM_LONG( 0, 1 ) )
 	{
 	case 0:	
-		iAnim = MP5_LONGIDLE;	
+		iAnim = MRC_LONGIDLE;
 		break;
 	
 	default:
 	case 1:
-		iAnim = MP5_IDLE1;
+		iAnim = MRC_IDLE1;
 		break;
 	}
 
@@ -338,9 +326,9 @@ void CMP5::WeaponIdle( void )
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );// how long till we do this again.
 }
 
-class CMP5AmmoClip : public CBasePlayerAmmo
+class CMRCAmmoClip : public CBasePlayerAmmo
 {
-	DECLARE_CLASS( CMP5AmmoClip, CBasePlayerAmmo );
+	DECLARE_CLASS( CMRCAmmoClip, CBasePlayerAmmo );
 
 	void Spawn( void )
 	{ 
@@ -365,13 +353,13 @@ class CMP5AmmoClip : public CBasePlayerAmmo
 	}
 };
 
-LINK_ENTITY_TO_CLASS( ammo_mp5clip, CMP5AmmoClip );
-LINK_ENTITY_TO_CLASS( ammo_9mmAR, CMP5AmmoClip );
+LINK_ENTITY_TO_CLASS( ammo_mp5clip, CMRCAmmoClip );
+LINK_ENTITY_TO_CLASS( ammo_9mmAR, CMRCAmmoClip );
 
 
-class CMP5Chainammo : public CBasePlayerAmmo
+class CMRCChainammo : public CBasePlayerAmmo
 {
-	DECLARE_CLASS( CMP5Chainammo, CBasePlayerAmmo );
+	DECLARE_CLASS( CMRCChainammo, CBasePlayerAmmo );
 
 	void Spawn( void )
 	{ 
@@ -396,11 +384,11 @@ class CMP5Chainammo : public CBasePlayerAmmo
 	}
 };
 
-LINK_ENTITY_TO_CLASS( ammo_9mmbox, CMP5Chainammo );
+LINK_ENTITY_TO_CLASS( ammo_9mmbox, CMRCChainammo );
 
-class CMP5AmmoGrenade : public CBasePlayerAmmo
+class CMRCAmmoGrenade : public CBasePlayerAmmo
 {
-	DECLARE_CLASS( CMP5AmmoGrenade, CBasePlayerAmmo );
+	DECLARE_CLASS( CMRCAmmoGrenade, CBasePlayerAmmo );
 
 	void Spawn( void )
 	{ 
@@ -425,5 +413,5 @@ class CMP5AmmoGrenade : public CBasePlayerAmmo
 	}
 };
 
-LINK_ENTITY_TO_CLASS( ammo_mp5grenades, CMP5AmmoGrenade );
-LINK_ENTITY_TO_CLASS( ammo_ARgrenades, CMP5AmmoGrenade );
+LINK_ENTITY_TO_CLASS( ammo_mp5grenades, CMRCAmmoGrenade );
+LINK_ENTITY_TO_CLASS( ammo_ARgrenades, CMRCAmmoGrenade );

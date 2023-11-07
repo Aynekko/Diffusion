@@ -22,16 +22,6 @@
 #include "player.h"
 #include "game/gamerules.h"
 
-enum WpnFiveSeven_e
-{
-	WPN57_IDLE = 0,
-	WPN57_SHOOT,
-	WPN57_SHOOT2,
-	WPN57_SHOOT_EMPTY,
-	WPN57_RELOAD,
-	WPN57_DEPLOY,
-};
-
 class CWpnFiveSeven : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CWpnFiveSeven, CBasePlayerWeapon );

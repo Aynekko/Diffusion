@@ -25,15 +25,6 @@
 
 #define G36C_MAX_ZOOM 45
 
-enum WeaponG36C_e
-{
-	IDLE = 0,
-	RELOAD,
-	DRAW,
-	SHOOT,
-	RELOAD_EMPTY,
-};
-
 class CWeaponG36C : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CWeaponG36C, CBasePlayerWeapon );

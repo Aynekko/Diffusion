@@ -26,15 +26,6 @@
 #define SNIPER_MID_ZOOM 30
 #define SNIPER_MAX_ZOOM 10
 
-enum SniperAnims_e
-{
-	ANIM_DRAW = 0,
-	ANIM_IDLE,
-	ANIM_SHOOT,
-	ANIM_RELOAD,
-	ANIM_RELOAD_NOSHOT,
-};
-
 class CSniperRifle : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CSniperRifle, CBasePlayerWeapon );

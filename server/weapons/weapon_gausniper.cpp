@@ -32,19 +32,6 @@
 #define GAUSS_MID_ZOOM 30
 #define GAUSS_MAX_ZOOM 10
 
-enum gauss_e
-{
-	GAUSS_IDLE = 0,
-	GAUSS_IDLE2,
-	GAUSS_FIDGET,
-	GAUSS_SPINUP,
-	GAUSS_SPIN,
-	GAUSS_FIRE,
-	GAUSS_FIRE2,
-	GAUSS_HOLSTER,
-	GAUSS_DRAW
-};
-
 class CGauss : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CGauss, CBasePlayerWeapon );

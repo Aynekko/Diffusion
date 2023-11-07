@@ -74,45 +74,7 @@ public:
 	Vector OrgAboveWater; // last not-in-water valid position
 };
 
-
-// constant items
-#define ITEM_HEALTHKIT		1
-#define ITEM_ANTIDOTE		2
-#define ITEM_SECURITY		3
-#define ITEM_BATTERY		4
-
-#define WEAPON_NONE				0
-#define WEAPON_KNIFE			1
-#define WEAPON_GLOCK			2
-#define WEAPON_DEAGLE			3
-#define WEAPON_MRC				4
-#define WEAPON_CYCLER			5
-#define WEAPON_CROSSBOW			6
-#define WEAPON_SHOTGUN			7
-#define WEAPON_RPG				8
-#define WEAPON_GAUSS			9
-#define WEAPON_EGON				10
-#define WEAPON_HORNETGUN		11
-#define WEAPON_HANDGRENADE		12
-#define WEAPON_TRIPMINE			13
-#define WEAPON_SATCHEL			14
-#define WEAPON_SNARK			15
-#define WEAPON_AR2				16
-#define WEAPON_DRONE			17
-#define WEAPON_SENTRY			18
-#define WEAPON_HKMP5			19
-#define WEAPON_FIVESEVEN		20
-#define WEAPON_SNIPER			21
-#define WEAPON_SHOTGUN_XM		22
-#define WEAPON_G36C				23
-#define WEAPON_SMOKEGRENADE		24
-
-#define TOTAL_WEAPONS 25
-
-#define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
-
 #define MAX_NORMAL_BATTERY	100
-
 
 // weapon weight factors (for auto-switching)   (-1 = noswitch)
 #define CROWBAR_WEIGHT		0
@@ -129,7 +91,6 @@ public:
 #define SNARK_WEIGHT		5
 #define SATCHEL_WEIGHT		-10
 #define TRIPMINE_WEIGHT		-10
-
 
 // weapon clip/carry ammo capacities
 #define URANIUM_MAX_CARRY		10
@@ -222,60 +183,6 @@ public:
 #define DMG_WEAPON_SHOTGUN_XM	15
 #define DMG_WPN_KNIFE			27
 #define DMG_WPN_SNIPER			150
-
-// weapon menu positions
-// slot 0 -----------------------------------
-#define WPN_SLOT_KNIFE			0
-
-#define WPN_POS_KNIFE			0
-// slot 1 -----------------------------------
-#define WPN_SLOT_GLOCK			1
-#define WPN_SLOT_DEAGLE			1
-#define WPN_SLOT_57				1
-
-#define WPN_POS_GLOCK			0
-#define WPN_POS_DEAGLE			1
-#define WPN_POS_57				2
-// slot 2 -----------------------------------
-#define WPN_SLOT_AR2			2
-#define WPN_SLOT_MRC			2
-#define WPN_SLOT_G36C			2
-#define WPN_SLOT_HKMP5			2
-#define WPN_SLOT_SHOTGUN		2
-#define WPN_SLOT_SHOTGUN_XM		2
-
-#define WPN_POS_MRC				0
-#define WPN_POS_HKMP5			1
-#define WPN_POS_SHOTGUN_XM		2
-#define WPN_POS_SHOTGUN			4
-#define WPN_POS_AR2				5
-#define WPN_POS_G36C			6
-// slot 3 -----------------------------------
-#define WPN_SLOT_GAUSS			3
-#define WPN_SLOT_RPG			3
-#define WPN_SLOT_SNIPER			3
-#define WPN_SLOT_CROSSBOW		3
-
-#define WPN_POS_RPG				0
-#define WPN_POS_GAUSS			1
-#define WPN_POS_SNIPER			2
-#define WPN_POS_CROSSBOW		3
-// slot 4 -----------------------------------
-#define WPN_SLOT_TRIPMINE		4
-#define WPN_SLOT_HANDGRENADE	4
-#define WPN_SLOT_SATCHEL		4
-#define WPN_SLOT_SMOKEGRENADE	4
-
-#define WPN_POS_HANDGRENADE		0
-#define WPN_POS_SMOKEGRENADE	1
-#define WPN_POS_SATCHEL			2
-#define WPN_POS_TRIPMINE		3
-// slot 5 -----------------------------------
-#define WPN_SLOT_DRONE			5
-#define WPN_SLOT_SENTRY			5
-
-#define WPN_POS_DRONE			0
-#define WPN_POS_SENTRY			1
 
 // bullet types
 typedef	enum

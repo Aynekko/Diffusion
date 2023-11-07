@@ -7,20 +7,6 @@
 #include "player.h"
 #include "game/gamerules.h"
 
-enum shotgun_e
-{
-	SHOTGUN_IDLE = 0,
-	SHOTGUN_FIRE,
-	SHOTGUN_FIRE2,
-	SHOTGUN_RELOAD,
-	SHOTGUN_END_RELOAD,
-	SHOTGUN_START_RELOAD,
-	SHOTGUN_DRAW,
-	SHOTGUN_HOLSTER,
-	SHOTGUN_IDLE4,
-	SHOTGUN_IDLE_DEEP
-};
-
 class CShotgunXM : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CShotgunXM, CBasePlayerWeapon );
@@ -119,7 +105,7 @@ BOOL CShotgunXM::Deploy()
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 2.0;
 	m_fInReload = 0; // reset any reloading
-	return DefaultDeploy( "models/v_m1014.mdl", "models/p_m1014.mdl", SHOTGUN_DRAW, "shotgun" );
+	return DefaultDeploy( "models/v_m1014.mdl", "models/p_m1014.mdl", SHOTGUNXM_DRAW, "shotgun" );
 }
 
 void CShotgunXM::PrimaryAttack()
@@ -128,7 +114,7 @@ void CShotgunXM::PrimaryAttack()
 	if( m_fInReload > 0 )
 	{
 		CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
-		SendWeaponAnim( SHOTGUN_END_RELOAD );
+		SendWeaponAnim( SHOTGUNXM_END_RELOAD );
 		m_fInReload = 0;
 		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 0.8;
 		m_flTimeWeaponIdle = gpGlobals->time + 1.5;
@@ -167,7 +153,7 @@ void CShotgunXM::PrimaryAttack()
 		m_iClip--;
 		m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 
-		SendWeaponAnim( SHOTGUN_FIRE );
+		SendWeaponAnim( SHOTGUNXM_FIRE );
 
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
@@ -227,7 +213,7 @@ void CShotgunXM::Reload( void )
 	// check to see if we're ready to reload
 	if( m_fInReload == 0 )
 	{
-		SendWeaponAnim( SHOTGUN_START_RELOAD );
+		SendWeaponAnim( SHOTGUNXM_START_RELOAD );
 		m_fInReload = 1;
 		m_pPlayer->m_flNextAttack = gpGlobals->time + 0.6;
 		m_flTimeWeaponIdle = gpGlobals->time + 0.4;
@@ -243,7 +229,7 @@ void CShotgunXM::Reload( void )
 
 		m_fInReload = 2;
 
-		SendWeaponAnim( SHOTGUN_RELOAD );
+		SendWeaponAnim( SHOTGUNXM_RELOAD );
 
 		// Add them to the clip
 		m_iClip++;
@@ -284,7 +270,7 @@ void CShotgunXM::WeaponIdle( void )
 			else
 			{
 				// reload debounce has timed out
-				SendWeaponAnim( SHOTGUN_END_RELOAD );
+				SendWeaponAnim( SHOTGUNXM_END_RELOAD );
 
 				// play cocking sound
 			//	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/scock1.wav", 1, ATTN_NORM, 0, 95 + RANDOM_LONG(0,0x1f));
@@ -298,17 +284,17 @@ void CShotgunXM::WeaponIdle( void )
 			float flRand = RANDOM_FLOAT( 0, 1 );
 			if( flRand <= 0.8 )
 			{
-				iAnim = SHOTGUN_IDLE_DEEP;
+				iAnim = SHOTGUNXM_IDLE_DEEP;
 				m_flTimeWeaponIdle = gpGlobals->time + (60.0 / 12.0);// * RANDOM_LONG(2, 5);
 			}
 			else if( flRand <= 0.95 )
 			{
-				iAnim = SHOTGUN_IDLE;
+				iAnim = SHOTGUNXM_IDLE;
 				m_flTimeWeaponIdle = gpGlobals->time + (20.0 / 9.0);
 			}
 			else
 			{
-				iAnim = SHOTGUN_IDLE4;
+				iAnim = SHOTGUNXM_IDLE4;
 				m_flTimeWeaponIdle = gpGlobals->time + (20.0 / 9.0);
 			}
 

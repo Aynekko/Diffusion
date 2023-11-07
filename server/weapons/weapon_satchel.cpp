@@ -182,23 +182,6 @@ void CSatchelCharge :: BounceSound( void )
 	}
 }
 
-enum satchel_e
-{
-	SATCHEL_IDLE1 = 0,
-	SATCHEL_FIDGET1,
-	SATCHEL_DRAW,
-	SATCHEL_DROP
-};
-
-enum satchel_radio_e
-{
-	SATCHEL_RADIO_IDLE1 = 0,
-	SATCHEL_RADIO_FIDGET1,
-	SATCHEL_RADIO_DRAW,
-	SATCHEL_RADIO_FIRE,
-	SATCHEL_RADIO_HOLSTER
-};
-
 class CSatchel : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CSatchel, CBasePlayerWeapon );
