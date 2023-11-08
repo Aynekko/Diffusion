@@ -660,13 +660,6 @@ enum
 	SPREE_SND_MONSTERKILL,
 };
 
-extern int gmsgHudText;
-extern int gmsgParticle;
-//extern int gmsgStudioDecal;
-extern int gmsgMusicFade;
-extern int gmsgSetupBones;
-extern int gmsgTempEnt;
-extern int gmsgGaussHUD;
 extern BOOL gInitHUD;
 
 #endif // PLAYER_H

@@ -15,20 +15,17 @@
 //
 // teamplay_gamerules.cpp
 //
-#include	"extdll.h"
-#include	"util.h"
-#include	"cbase.h"
-#include	"player.h"
-#include	"weapons/weapons.h"
-#include	"game/gamerules.h"
-#include	"game/skill.h"
-#include	"items.h"
+#include "extdll.h"
+#include "util.h"
+#include "cbase.h"
+#include "player.h"
+#include "weapons/weapons.h"
+#include "game/gamerules.h"
+#include "game/skill.h"
+#include "items.h"
 
-extern DLL_GLOBAL CGameRules	*g_pGameRules;
-extern DLL_GLOBAL BOOL	g_fGameOver;
-extern int gmsgDeathMsg;	// client dll messages
-extern int gmsgScoreInfo;
-extern int gmsgMOTD;
+extern DLL_GLOBAL CGameRules *g_pGameRules;
+extern DLL_GLOBAL BOOL g_fGameOver;
 
 //=========================================================
 //=========================================================

@@ -30,8 +30,6 @@
 
 //===================grenade
 
-extern int gmsgWaterSplash;
-
 LINK_ENTITY_TO_CLASS( grenade, CGrenade );
 
 // Grenades flagged with this will be triggered when the owner calls detonateSatchelCharges

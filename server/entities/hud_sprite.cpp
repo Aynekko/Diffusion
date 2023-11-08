@@ -5,8 +5,6 @@
 #include "game/gamerules.h"
 #include "game/game.h"
 
-extern int gmsgStatusIcon;
-
 class CHudSprite : public CBaseEntity
 {
 	DECLARE_CLASS(CHudSprite, CBaseEntity);

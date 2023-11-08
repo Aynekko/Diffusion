@@ -15,36 +15,22 @@
 //
 // multiplay_gamerules.cpp
 //
-#include	"extdll.h"
-#include	"util.h"
-#include	"cbase.h"
-#include	"player.h"
-#include	"weapons/weapons.h"
-#include	"game/gamerules.h"
- 
-#include	"game/skill.h"
-#include	"game/game.h"
-#include	"items.h"
-#include	"hltv.h"
-
+#include "extdll.h"
+#include "util.h"
+#include "cbase.h"
+#include "player.h"
+#include "weapons/weapons.h"
+#include "game/gamerules.h"
+#include "game/skill.h"
+#include "game/game.h"
+#include "items.h"
+#include "hltv.h"
 #include <iostream>
 #include <ctime>
-
 #include "bot/bot.h"
 
-// START BOT
-//#include "bot/bot.h"
-//#include "bot/botcam.h"
-//extern respawn_t bot_respawn[32];
-// END BOT
-
-extern DLL_GLOBAL CGameRules	*g_pGameRules;
-extern DLL_GLOBAL BOOL	g_fGameOver;
-extern int gmsgDeathMsg;	// client dll messages
-extern int gmsgScoreInfo;
-extern int gmsgMOTD;
-extern int gmsgServerName;
-extern int gmsgSpectator;
+extern DLL_GLOBAL CGameRules *g_pGameRules;
+extern DLL_GLOBAL BOOL g_fGameOver;
 
 extern int g_teamplay;
 

@@ -28,8 +28,7 @@
 #include "explode.h"
 #include "player.h"
 
-extern DLL_GLOBAL Vector		g_vecAttackDir;
-extern int gmsgKillDecals;
+extern DLL_GLOBAL Vector g_vecAttackDir;
 
 // =================== FUNC_Breakable ==============================================
 

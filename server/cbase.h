@@ -56,6 +56,7 @@ CBaseEntity
 
 #include "game/saverestore.h"
 #include "game/schedule.h"
+#include "game/user_messages.h"
 
 #ifndef MONSTEREVENT_H
 #include "monsterevent.h"
@@ -1224,10 +1225,3 @@ inline void CBaseEntity::SetNullModel(void)
 {
 	SET_MODEL( edict(), "sprites/null.spr" );
 }
-
-extern int gmsgTempEnt;
-extern int gmsgCrosshairStatic;
-extern int gmsgGaussHUD;
-extern int gmsgBlastIcons;
-extern int gmsgCodeInput;
-extern int gmsgWaterSplash;

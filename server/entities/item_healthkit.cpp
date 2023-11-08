@@ -22,8 +22,6 @@
 #include "items.h"
 #include "game/gamerules.h"
 
-extern int gmsgItemPickup;
-
 class CHealthKit : public CItem
 {
 	DECLARE_CLASS( CHealthKit, CItem );

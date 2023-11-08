@@ -18,8 +18,7 @@
 
 // Screen / View effects
 
-// screen shake
-extern int gmsgShake;
+#include "game/user_messages.h"
 
 // This structure is sent over the net to describe a screen shake event
 typedef struct
@@ -28,9 +27,6 @@ typedef struct
 	unsigned short 	duration;		// FIXED 4.12 seconds duration
 	unsigned short	frequency;	// FIXED 8.8 noise frequency (low frequency is a jerk,high frequency is a rumble)
 } ScreenShake;
-
-// Fade in/out
-extern int gmsgFade;
 
 #define FFADE_IN		0x0000		// Just here so we don't pass 0 into the function
 #define FFADE_OUT		0x0001		// Fade out (not in)

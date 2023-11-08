@@ -25,12 +25,7 @@
 #include	"weapons/weapons.h"
 #include	"pm_defs.h"
 
-#define NEXT_OBSERVER_INPUT_DELAY	0.5
-
-extern int gmsgCurWeapon;
-extern int gmsgSetFOV;
-extern int gmsgTeamInfo;
-extern int gmsgSpectator;
+#define NEXT_OBSERVER_INPUT_DELAY 0.5
 
 extern int g_teamplay;
 

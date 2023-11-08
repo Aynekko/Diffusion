@@ -16,10 +16,9 @@
 #define WEAPONS_H
 
 #include "effects.h"
+#include "game/user_messages.h"
 
 class CBasePlayer;
-extern int gmsgWeapPickup;
-extern int gmsgZoom;
 
 void DeactivateSatchels( CBasePlayer *pOwner );
 void PlayPickupSound( CBaseEntity *pPlayer, int Id = 250 );

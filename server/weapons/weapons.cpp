@@ -57,12 +57,6 @@ DLL_GLOBAL short g_sBlastTexture;
 ItemInfo CBasePlayerItem::ItemInfoArray[MAX_WEAPONS];
 AmmoInfo CBasePlayerItem::AmmoInfoArray[MAX_AMMO_SLOTS];
 
-extern int gmsgCurWeapon;
-extern int gmsgCrosshairStatic;
-extern int gmsgUseIcon;
-extern int gmsgZoom;
-extern int gmsgWeaponAnim;
-
 MULTIDAMAGE gMultiDamage;
 
 //==================================================================

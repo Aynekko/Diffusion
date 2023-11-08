@@ -271,6 +271,7 @@
     <ClCompile Include="game\game.cpp" />
     <ClCompile Include="game\gamerules.cpp" />
     <ClCompile Include="monsters\entities\monster_hevsuit_dead.cpp" />
+    <ClCompile Include="user_messages.cpp" />
     <ClCompile Include="weapons\ggrenade.cpp" />
     <ClCompile Include="game\globals.cpp" />
     <ClCompile Include="entities\item_flare.cpp" />
@@ -457,6 +458,7 @@
     <ClInclude Include="entities\func_break.h" />
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\gamerules.h" />
+    <ClInclude Include="game\user_messages.h" />
     <ClInclude Include="physics\NxErrorStream.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="game\saverestore.h" />

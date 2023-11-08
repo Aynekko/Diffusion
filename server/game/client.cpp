@@ -64,7 +64,6 @@ extern DLL_GLOBAL ULONG		g_ulFrameCount;
 
 extern void CopyToBodyQue( CBaseEntity *pCorpse );
 extern int giPrecacheGrunt;
-extern int gmsgSayText;
 
 extern int g_teamplay;
 

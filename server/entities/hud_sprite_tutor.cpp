@@ -7,8 +7,6 @@
 
 // =====================TUTOR SPRITE=========================================
 
-extern int gmsgStatusIconTutor;
-
 class CHudSpriteTutor : public CBaseEntity
 {
 	DECLARE_CLASS(CHudSpriteTutor, CBaseEntity);

@@ -15,20 +15,20 @@
 //
 // teamplay_gamerules.cpp
 //
-#include	"extdll.h"
-#include	"util.h"
-#include	"cbase.h"
-#include	"player.h"
-#include	"weapons/weapons.h"
-#include	"game/gamerules.h"
-#include	"game/teamplay_gamerules.h"
-#include	"game/game.h"
+#include "extdll.h"
+#include "util.h"
+#include "cbase.h"
+#include "player.h"
+#include "weapons/weapons.h"
+#include "game/gamerules.h"
+#include "game/teamplay_gamerules.h"
+#include "game/game.h"
 
 static char team_names[MAX_TEAMS][MAX_TEAMNAME_LENGTH];
 static int team_scores[MAX_TEAMS];
 static int num_teams = 0;
 
-extern DLL_GLOBAL BOOL		g_fGameOver;
+extern DLL_GLOBAL BOOL g_fGameOver;
 
 CHalfLifeTeamplay :: CHalfLifeTeamplay()
 {
@@ -154,12 +154,6 @@ BOOL CHalfLifeTeamplay :: ClientCommand( CBasePlayer *pPlayer, const char *pcmd 
 
 	return FALSE;
 }
-
-extern int gmsgGameMode;
-extern int gmsgSayText;
-extern int gmsgTeamInfo;
-extern int gmsgTeamNames;
-extern int gmsgScoreInfo;
 
 void CHalfLifeTeamplay :: UpdateGameMode( CBasePlayer *pPlayer )
 {
@@ -353,8 +347,6 @@ void CHalfLifeTeamplay::ClientUserInfoChanged( CBasePlayer *pPlayer, char *infob
 	// recound stuff
 	RecountTeams( TRUE );
 }
-
-extern int gmsgDeathMsg;
 
 //=========================================================
 // Deathnotice. 

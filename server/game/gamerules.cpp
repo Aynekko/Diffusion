@@ -16,22 +16,20 @@
 // GameRules.cpp
 //=========================================================
 
-#include	"extdll.h"
-#include	"util.h"
-#include	"cbase.h"
-#include	"player.h"
-#include	"weapons/weapons.h"
-#include	"game/gamerules.h"
-#include	"game/teamplay_gamerules.h"
-#include	"game/skill.h"
-#include	"game/game.h"
+#include "extdll.h"
+#include "util.h"
+#include "cbase.h"
+#include "player.h"
+#include "weapons/weapons.h"
+#include "game/gamerules.h"
+#include "game/teamplay_gamerules.h"
+#include "game/skill.h"
+#include "game/game.h"
 
 extern edict_t *EntSelectSpawnPoint( CBaseEntity *pPlayer );
 
-DLL_GLOBAL CGameRules*	g_pGameRules = NULL;
-extern DLL_GLOBAL BOOL	g_fGameOver;
-extern int gmsgDeathMsg;	// client dll messages
-extern int gmsgMOTD;
+DLL_GLOBAL CGameRules* g_pGameRules = NULL;
+extern DLL_GLOBAL BOOL g_fGameOver;
 
 int g_teamplay = 0;
 

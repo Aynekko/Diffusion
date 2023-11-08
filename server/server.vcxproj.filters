@@ -779,6 +779,9 @@
     <ClCompile Include="entities\env_controller_adjuster.cpp">
       <Filter>Source Files\entities</Filter>
     </ClCompile>
+    <ClCompile Include="user_messages.cpp">
+      <Filter>Source Files\game</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="monsters\activity.h">
@@ -1034,6 +1037,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="entities\func_car.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="game\user_messages.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

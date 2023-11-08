@@ -21,9 +21,6 @@ extern DLL_GLOBAL ULONG g_ulModelIndexPlayer;
 extern entvars_t *g_pevLastInflictor;
 
 extern DLL_GLOBAL BOOL g_fGameOver;
-extern int gmsgHealth;
-extern int gmsgCurWeapon;
-extern int gmsgSetFOV;
 
 #define PLAYER_SEARCH_RADIUS (float)40
 
