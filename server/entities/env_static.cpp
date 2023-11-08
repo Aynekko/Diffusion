@@ -121,7 +121,7 @@ void CEnvStatic::Spawn(void)
 		m_pUserData = WorldPhysic->CreateStaticBodyFromEntity( this );
 		RelinkEntity( TRUE );
 	}
-
+#if 0
 	// diffusion - EXPERIMENTAL check if the origin of the model in solid world brush.
 	// if it is, set the model to skip PVS to be always visible.
 	// I decided not to set this to all props, because the slight fps drop is still there, despite culling on client.
@@ -131,6 +131,7 @@ void CEnvStatic::Spawn(void)
 	TRACE_LINE( vecStart, vecEnd, TRUE, edict(), &trace );
 	if( trace.fStartSolid && FStrEq(STRING(trace.pHit->v.classname), "worldspawn")  )
 		pev->effects |= EF_SKIPPVS;
+#endif
 
 	if( HasSpawnFlags( SF_STATIC_IGNOREPVS ))
 		pev->effects |= EF_SKIPPVS;
