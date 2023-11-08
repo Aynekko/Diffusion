@@ -901,6 +901,8 @@ R_SetupProjectionMatrix
 */
 void R_SetupProjectionMatrix( float fov_x, float fov_y, matrix4x4 &m )
 {
+	float z_near = Z_NEAR;
+	
 	if( FBitSet( RI->params, RP_OVERVIEW ))
 	{
 		const ref_overview_t *ov = GET_OVERVIEW_PARMS();
@@ -909,7 +911,9 @@ void R_SetupProjectionMatrix( float fov_x, float fov_y, matrix4x4 &m )
 	}
 	else
 	{
-		m.CreateProjection( fov_x, fov_y, Z_NEAR, RI->farClip );
+		if( RI->currententity && RI->currententity == GET_VIEWMODEL() )
+			z_near = 2.0f;
+		m.CreateProjection( fov_x, fov_y, z_near, RI->farClip );
 	}
 }
 
