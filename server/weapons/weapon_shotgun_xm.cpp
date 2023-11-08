@@ -119,13 +119,25 @@ void CShotgunXM::PrimaryAttack()
 	// stop reloading, move the gun
 	if( m_fInReload > 0 )
 	{
+		// don't stop reload if didn't load anything yet
+		if( m_iClip <= 0 )
+		{
+			CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
+			return;
+		}
+
 		CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
 		if( bUseAfterReloadEmpty )
+		{
 			SendWeaponAnim( SHOTGUNXM_END_RELOAD_EMPTY );
+			m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUNXM_RELOADEMPTY_FINISH_TIME;
+		}
 		else
+		{
 			SendWeaponAnim( SHOTGUNXM_END_RELOAD );
+			m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUNXM_RELOAD_FINISH_TIME;
+		}
 		m_fInReload = 0;
-		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUNXM_RELOAD_FINISH_TIME;
 		m_flTimeWeaponIdle = gpGlobals->time + 1.5;
 		return;
 	}
@@ -224,8 +236,8 @@ void CShotgunXM::Reload( void )
 	{
 		SendWeaponAnim( SHOTGUNXM_START_RELOAD );
 		m_fInReload = 1;
-		m_pPlayer->m_flNextAttack = gpGlobals->time + 0.6;
-		m_flTimeWeaponIdle = gpGlobals->time + 0.5;
+		m_pPlayer->m_flNextAttack = gpGlobals->time + SHOTGUNXM_STARTRELOAD_TIME;
+		m_flTimeWeaponIdle = gpGlobals->time + SHOTGUNXM_STARTRELOAD_TIME;
 		m_flNextPrimaryAttack = gpGlobals->time + 1;
 		m_flNextSecondaryAttack = gpGlobals->time + 1;
 		bUseAfterReloadEmpty = (m_iClip <= 0);
@@ -293,6 +305,7 @@ void CShotgunXM::WeaponIdle( void )
 		}
 		else
 		{
+			/*
 			int iAnim = 0;
 			float flRand = RANDOM_FLOAT( 0, 1 );
 			if( flRand <= 0.8 )
@@ -311,7 +324,7 @@ void CShotgunXM::WeaponIdle( void )
 				m_flTimeWeaponIdle = gpGlobals->time + (20.0 / 9.0);
 			}
 
-			SendWeaponAnim( iAnim );
+			SendWeaponAnim( iAnim );*/
 		}
 	}
 }

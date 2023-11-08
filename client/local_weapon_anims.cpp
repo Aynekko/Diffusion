@@ -176,12 +176,16 @@ bool CheckForLocalWeaponShootAnimation( int seq )
 			return true;
 		break;
 	case WEAPON_SHOTGUN_XM:
-		if( seq == SHOTGUNXM_RELOAD || seq == SHOTGUNXM_START_RELOAD ) // caught reload anim!
+		if( seq == SHOTGUNXM_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUNXM_RELOAD_TIME + 1.0f; // !!! slightly pushed forward so we don't have an accidental shot between animations
+		else if( seq == SHOTGUN_START_RELOAD )
+			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUNXM_STARTRELOAD_TIME + 1.0f; // !!! slightly pushed forward so we don't have an accidental shot between animations
 		else if( seq == SHOTGUNXM_DRAW ) // caught deploy anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + DEFAULT_DEPLOY_TIME;
-		else if( seq == SHOTGUNXM_END_RELOAD || seq == SHOTGUNXM_END_RELOAD_EMPTY ) // caught finish reload anim!
+		else if( seq == SHOTGUNXM_END_RELOAD ) // caught finish reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUNXM_RELOAD_FINISH_TIME;
+		else if( seq == SHOTGUNXM_END_RELOAD_EMPTY )  // caught finish reload anim!
+			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUNXM_RELOADEMPTY_FINISH_TIME;
 
 		if( seq != SHOTGUNXM_FIRE ) // only interested in FIRE animations
 			return false;
