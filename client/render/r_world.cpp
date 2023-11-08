@@ -444,7 +444,6 @@ void LoadMaterialSettingsForTexture( int texnum )
 			if( afile && token[0] > 0 )
 			{
 				tr.materials[texnum].monitor = true;
-				SetBits( world->features, WORLD_HAS_SCREENS );
 			}
 			else
 			{
