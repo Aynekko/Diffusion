@@ -24,10 +24,10 @@ class CBotCam;
 #include "entities/func_car.h"
 
 #define PLAYER_FATAL_FALL_SPEED	1024	// approx 60 feet
-#define PLAYER_MAX_SAFE_FALL_SPEED	500//580	// approx 20 feet
+#define PLAYER_MAX_SAFE_FALL_SPEED	540//580	// approx 20 feet
 #define DAMAGE_FOR_FALL_SPEED		100.0f / ( PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED )// damage per unit per second.
 #define PLAYER_MIN_BOUNCE_SPEED	200
-#define PLAYER_FALL_PUNCH_THRESHHOLD	350.0f // won't punch player's screen/make scrape noise unless player falling at least this fast.
+#define PLAYER_FALL_PUNCH_THRESHHOLD	320.0f // won't punch player's screen/make scrape noise unless player falling at least this fast.
 
 #define USEICON_NOICON 0
 #define USEICON_CANUSE 1

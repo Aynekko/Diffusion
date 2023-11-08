@@ -106,10 +106,10 @@ playermove_t *pmove = NULL;
 #define STEP_LADDER_WOOD 16 // custom ladder
 
 #define PLAYER_FATAL_FALL_SPEED		1024// approx 60 feet
-#define PLAYER_MAX_SAFE_FALL_SPEED		500//580// approx 20 feet
+#define PLAYER_MAX_SAFE_FALL_SPEED		540//580// approx 20 feet
 #define DAMAGE_FOR_FALL_SPEED			(float) 100 / ( PLAYER_FATAL_FALL_SPEED - PLAYER_MAX_SAFE_FALL_SPEED )// damage per unit per second.
 #define PLAYER_MIN_BOUNCE_SPEED		200
-#define PLAYER_FALL_PUNCH_THRESHHOLD		(float)300 //won't punch player's screen/make scrape noise unless player falling at least this fast.//diffusion - was 350
+#define PLAYER_FALL_PUNCH_THRESHHOLD		(float)320 //won't punch player's screen/make scrape noise unless player falling at least this fast.//diffusion - was 350
 
 #define PLAYER_LONGJUMP_SPEED			(pmove->maxspeed * 1.095f) // how fast we longjump
 #define PM_CHECKSTUCK_MINTIME			0.05f	// Don't check again too quickly.
