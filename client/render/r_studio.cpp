@@ -5280,7 +5280,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 			else if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
 				IEngineStudio.StudioSetupSkin( m_pStudioHeader, pskinref[pMesh->skinref] );
-			else if( tr.materials[mat->gl_diffuse_id].monitor && tr.studio_screen_tex[m_pCurrentEntity->index] )
+			else if( (m_pCurrentEntity->curstate.iuser3 == -670) && tr.materials[mat->gl_diffuse_id].monitor && tr.studio_screen_tex[m_pCurrentEntity->index] )
 				GL_Bind( GL_TEXTURE0, tr.studio_screen_tex[m_pCurrentEntity->index] );
 			else if( tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id > 0 )
 				GL_Bind( GL_TEXTURE0, tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id );

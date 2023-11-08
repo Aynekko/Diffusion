@@ -263,9 +263,9 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s* ent, const char* mode
 		if( gl_renderer->value == 0 )
 			return 1;
 
-		if( ent->curstate.iuser3 == -670 )
+		if( ent->curstate.effects & EF_SCREEN )
 		{
-			ent->curstate.movetype = 0; // clear movetype for studio model screen (engine sets this to MOVETYPE_FOLLOW because we use aiment. Argh!)
+			ent->curstate.movetype = 0; // clear movetype for screen (engine sets this to MOVETYPE_FOLLOW because we use aiment. Argh!)
 			if( !FBitSet(world->features, WORLD_HAS_SCREENS) ) // set it here if it wasn't set (happens with studio screens)
 				SetBits( world->features, WORLD_HAS_SCREENS );
 		}
