@@ -490,6 +490,8 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s* ent, const char* mode
 				if( SmV_Alpha <= 0.0f )
 					SmV_Alpha = 0.1f;
 
+				int Contents = 0;
+
 				for( i = 0; i < Count; i++ )
 				{
 					for( j = 0; j < 32; j++ )
@@ -499,19 +501,19 @@ int DLLEXPORT HUD_AddEntity( int type, struct cl_entity_s* ent, const char* mode
 						vecSpot[1] = SmV_Org.y + RANDOM_FLOAT( -0.5f, 0.5f ) * SmV_Size.y;
 						vecSpot[2] = SmV_Org.z + RANDOM_FLOAT( -0.5f, 0.5f ) * SmV_Size.z;
 
-						// test distance here
-						if( SmV_Distance > 0 )
-						{
-							if( (vecSpot - tr.viewparams.vieworg).Length() > SmV_Distance )
-								continue;
-						}
-
-						int Contents = POINT_CONTENTS( vecSpot );
+						Contents = POINT_CONTENTS( vecSpot );
 						if( Contents == CONTENTS_WATER )
 							continue;
 
 						if( Contents != CONTENTS_SOLID )
 							break; // valid spot
+					}
+
+					// test distance here
+					if( SmV_Distance > 0 )
+					{
+						if( (vecSpot - tr.viewparams.vieworg).Length() > SmV_Distance )
+							continue;
 					}
 
 					g_pParticles.SmokeVolume( ParticleEntIndex, ent->curstate.iuser1, vecSpot, ent->curstate.vuser1, ent->curstate.vuser2, SmV_Scale, SmV_Alpha, SmV_Distance );
