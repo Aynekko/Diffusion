@@ -19,11 +19,16 @@ GNU General Public License for more details.
 uniform samplerCube	u_EnvMap0;
 uniform samplerCube	u_EnvMap1;
 
-uniform vec3		u_BoxMins[2];
-uniform vec3		u_BoxMaxs[2];
-uniform vec3		u_CubeOrigin[2];
-uniform vec2		u_CubeMipCount;
-uniform float		u_LerpFactor;
+uniform vec3			u_Cubemap[7];
+#define BoxMins0		u_Cubemap[0]
+#define BoxMins1		u_Cubemap[1]
+#define BoxMaxs0		u_Cubemap[2]
+#define BoxMaxs1		u_Cubemap[3]
+#define CubeOrigin0		u_Cubemap[4]
+#define CubeOrigin1		u_Cubemap[5]
+#define CubeMipCount0	u_Cubemap[6].x
+#define CubeMipCount1	u_Cubemap[6].y
+#define LerpFactor		u_Cubemap[6].z
 
 vec3 CubemapBoxParallaxCorrected( const vec3 vReflVec, vec3 vPosition, const vec3 vCubePos, const vec3 vBoxExtentsMin, const vec3 vBoxExtentsMax )
 {
@@ -33,43 +38,43 @@ vec3 CubemapBoxParallaxCorrected( const vec3 vReflVec, vec3 vPosition, const vec
 //	vPosition = clamp( vPosition, cubeCenter - cubeExtent * 0.8 , cubeCenter + cubeExtent * 0.8 );
 
 	// min/max intersection
-	vec3 vBoxIntersectionMax = ( vBoxExtentsMax - vPosition ) / vReflVec;
-	vec3 vBoxIntersectionMin = ( vBoxExtentsMin - vPosition ) / vReflVec;
-	
+	vec3 vBoxIntersectionMax = (vBoxExtentsMax - vPosition) / vReflVec;
+	vec3 vBoxIntersectionMin = (vBoxExtentsMin - vPosition) / vReflVec;
+
 	vec3 vFurthestPlane;
 
 	// intersection test
-	vFurthestPlane.x = ( vReflVec.x > 0.0 ) ? vBoxIntersectionMax.x : vBoxIntersectionMin.x;
-	vFurthestPlane.y = ( vReflVec.y > 0.0 ) ? vBoxIntersectionMax.y : vBoxIntersectionMin.y;
-	vFurthestPlane.z = ( vReflVec.z > 0.0 ) ? vBoxIntersectionMax.z : vBoxIntersectionMin.z;	
+	vFurthestPlane.x = (vReflVec.x > 0.0) ? vBoxIntersectionMax.x : vBoxIntersectionMin.x;
+	vFurthestPlane.y = (vReflVec.y > 0.0) ? vBoxIntersectionMax.y : vBoxIntersectionMin.y;
+	vFurthestPlane.z = (vReflVec.z > 0.0) ? vBoxIntersectionMax.z : vBoxIntersectionMin.z;
 	float fDistance = min( min( vFurthestPlane.x, vFurthestPlane.y ), vFurthestPlane.z );
 
 	// apply new reflection position
 	vec3 vInterectionPos = vPosition + vReflVec * fDistance;
-	return ( vInterectionPos - vCubePos );
+	return (vInterectionPos - vCubePos);
 }
 
 vec3 GetReflectionProbe( const vec3 vPos, const vec3 vView, const vec3 nWorld, const vec3 glossmap, const float smoothness )
 {
 	vec3 I = normalize( vPos - vView ); // in world space
 	vec3 NW = normalize( nWorld );
-	vec3 wRef = normalize( reflect( I, NW ));
-	vec3 R1 = CubemapBoxParallaxCorrected( wRef, vPos, u_CubeOrigin[0], u_BoxMins[0], u_BoxMaxs[0] );
-	vec3 R2 = CubemapBoxParallaxCorrected( wRef, vPos, u_CubeOrigin[1], u_BoxMins[1], u_BoxMaxs[1] );
-	vec3 srcColor0 = textureCubeLod( u_EnvMap0, R1, u_CubeMipCount.x - smoothness * u_CubeMipCount.x ).rgb;
-	vec3 srcColor1 = textureCubeLod( u_EnvMap1, R2, u_CubeMipCount.y - smoothness * u_CubeMipCount.y ).rgb;
-	vec3 reflectance = mix( srcColor0, srcColor1, u_LerpFactor );
+	vec3 wRef = normalize( reflect( I, NW ) );
+	vec3 R1 = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin0, BoxMins0, BoxMaxs0 );
+	vec3 R2 = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin1, BoxMins1, BoxMaxs1 );
+	vec3 srcColor0 = textureCubeLod( u_EnvMap0, R1, CubeMipCount0 - smoothness * CubeMipCount0 ).rgb;
+	vec3 srcColor1 = textureCubeLod( u_EnvMap1, R2, CubeMipCount1 - smoothness * CubeMipCount1 ).rgb;
+	vec3 reflectance = mix( srcColor0, srcColor1, LerpFactor );
 
 	return reflectance;
 }
 
 vec3 CubemapReflectionProbe( const vec3 vPos, const vec3 wRef, const vec3 glossmap )
 {
-	vec3 R1 = CubemapBoxParallaxCorrected( wRef, vPos, u_CubeOrigin[0], u_BoxMins[0], u_BoxMaxs[0] );
-	vec3 R2 = CubemapBoxParallaxCorrected( wRef, vPos, u_CubeOrigin[1], u_BoxMins[1], u_BoxMaxs[1] );
-	vec3 srcColor0 = textureCubeLod( u_EnvMap0, R1, glossmap.r * ( u_CubeMipCount.x - 2.0 )).rgb;
-	vec3 srcColor1 = textureCubeLod( u_EnvMap1, R2, glossmap.r * ( u_CubeMipCount.y - 2.0 )).rgb;
-	vec3 CubemapReflection = mix( srcColor0, srcColor1, u_LerpFactor );
+	vec3 R1 = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin0, BoxMins0, BoxMaxs0 );
+	vec3 R2 = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin1, BoxMins1, BoxMaxs1 );
+	vec3 srcColor0 = textureCubeLod( u_EnvMap0, R1, glossmap.r * (CubeMipCount0 - 2.0) ).rgb;
+	vec3 srcColor1 = textureCubeLod( u_EnvMap1, R2, glossmap.r * (CubeMipCount1 - 2.0) ).rgb;
+	vec3 CubemapReflection = mix( srcColor0, srcColor1, LerpFactor );
 
 	return CubemapReflection;
 }

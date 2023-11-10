@@ -5162,6 +5162,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	float cached_embossscale = -1.0f;
 	float cached_fresnel = -1.0f;
 	float cached_reflectscale = -1.0f;
+	Vector cubemap_params[7];
 
 	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
 	//	R_LoadIdentity();
@@ -5342,26 +5343,22 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				else
 					GL_Bind( GL_TEXTURE3, tr.whiteCubeTexture );
 
-				Vector mins[2];
-				mins[0] = m_pModelInstance->cubemap[0]->mins;
-				mins[1] = m_pModelInstance->cubemap[1]->mins;
-				pglUniform3fvARB( RI->currentshader->u_BoxMins, 2, &mins[0][0] );
+				// box mins
+				cubemap_params[0] = m_pModelInstance->cubemap[0]->mins;
+				cubemap_params[1] = m_pModelInstance->cubemap[1]->mins;
+				// box maxs
+				cubemap_params[2] = m_pModelInstance->cubemap[0]->maxs;
+				cubemap_params[3] = m_pModelInstance->cubemap[1]->maxs;
+				// origins
+				cubemap_params[4] = m_pModelInstance->cubemap[0]->origin;
+				cubemap_params[5] = m_pModelInstance->cubemap[1]->origin;
+				// lod bias - 8 is cv_cube_lod_bias->value UNDONE
+				cubemap_params[6].x = Q_max( 1, m_pModelInstance->cubemap[0]->numMips - 8 );
+				cubemap_params[6].y = Q_max( 1, m_pModelInstance->cubemap[1]->numMips - 8 );
+				cubemap_params[6].z = m_pModelInstance->lerpFactor;
+				// send through one call!
+				pglUniform3fvARB( RI->currentshader->u_Cubemap, 7, &cubemap_params[0][0] );
 
-				Vector maxs[2];
-				maxs[0] = m_pModelInstance->cubemap[0]->maxs;
-				maxs[1] = m_pModelInstance->cubemap[1]->maxs;
-				pglUniform3fvARB( RI->currentshader->u_BoxMaxs, 2, &maxs[0][0] );
-
-				Vector origin[2];
-				origin[0] = m_pModelInstance->cubemap[0]->origin;
-				origin[1] = m_pModelInstance->cubemap[1]->origin;
-				pglUniform3fvARB( RI->currentshader->u_CubeOrigin, 2, &origin[0][0] );
-
-				float r = Q_max( 1, m_pModelInstance->cubemap[0]->numMips - 8 ); // 8 is cv_cube_lod_bias->value UNDONE
-				float g = Q_max( 1, m_pModelInstance->cubemap[1]->numMips - 8 );
-				pglUniform2fARB( RI->currentshader->u_CubeMipCount, r, g );
-
-				pglUniform1fARB( RI->currentshader->u_LerpFactor, m_pModelInstance->lerpFactor );
 				if( tr.materials[mat->gl_diffuse_id].ReflectScale != cached_reflectscale )
 				{
 					pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[mat->gl_diffuse_id].ReflectScale );

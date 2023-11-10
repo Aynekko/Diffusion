@@ -129,10 +129,7 @@ typedef struct glsl_prog_s
 	GLint u_TexOffset;	// e.g. conveyor belt
 	GLint u_RenderColor;	// color + alpha
 	GLint u_RealTime;	// tr.time
-	GLint u_BoxMins;	// cubemaps stuff
-	GLint u_BoxMaxs;	// cubemaps stuff
-	GLint u_CubeOrigin;	// cubemaps stuff
-	GLint u_CubeMipCount;	// cubemaps stuff
+	GLint u_Cubemap;	// cubemaps stuff
 	GLint u_GrassFadeStart;
 	GLint u_GrassFadeDist;
 	GLint u_GrassFadeEnd;

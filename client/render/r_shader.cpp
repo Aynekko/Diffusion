@@ -706,11 +706,7 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 	{
 		shader->u_EnvMap0 = pglGetUniformLocationARB( shader->handle, "u_EnvMap0" );
 		shader->u_EnvMap1 = pglGetUniformLocationARB( shader->handle, "u_EnvMap1" );
-		shader->u_CubeMipCount = pglGetUniformLocationARB( shader->handle, "u_CubeMipCount" );
-		shader->u_CubeOrigin = pglGetUniformLocationARB( shader->handle, "u_CubeOrigin" );
-		shader->u_LerpFactor = pglGetUniformLocationARB( shader->handle, "u_LerpFactor" );
-		shader->u_BoxMins = pglGetUniformLocationARB( shader->handle, "u_BoxMins" );
-		shader->u_BoxMaxs = pglGetUniformLocationARB( shader->handle, "u_BoxMaxs" );
+		shader->u_Cubemap = pglGetUniformLocationARB( shader->handle, "u_Cubemap" );
 		shader->u_ReflectScale = pglGetUniformLocationARB( shader->handle, "u_ReflectScale" );
 	}
 
@@ -903,11 +899,7 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 	{
 		shader->u_EnvMap0 = pglGetUniformLocationARB( shader->handle, "u_EnvMap0" );
 		shader->u_EnvMap1 = pglGetUniformLocationARB( shader->handle, "u_EnvMap1" );
-		shader->u_CubeMipCount = pglGetUniformLocationARB( shader->handle, "u_CubeMipCount" );
-		shader->u_CubeOrigin = pglGetUniformLocationARB( shader->handle, "u_CubeOrigin" );
-		shader->u_LerpFactor = pglGetUniformLocationARB( shader->handle, "u_LerpFactor" );
-		shader->u_BoxMins = pglGetUniformLocationARB( shader->handle, "u_BoxMins" );
-		shader->u_BoxMaxs = pglGetUniformLocationARB( shader->handle, "u_BoxMaxs" );
+		shader->u_Cubemap = pglGetUniformLocationARB( shader->handle, "u_Cubemap" );
 		shader->u_ReflectScale = pglGetUniformLocationARB( shader->handle, "u_ReflectScale" );
 	}
 	
