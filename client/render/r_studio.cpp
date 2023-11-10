@@ -5161,6 +5161,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	float cached_glosssmoothness = -1.0f;
 	float cached_embossscale = -1.0f;
 	float cached_fresnel = -1.0f;
+	float cached_reflectscale = -1.0f;
 
 	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
 	//	R_LoadIdentity();
@@ -5229,6 +5230,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			cached_glosssmoothness = -1.0f;
 			cached_embossscale = -1.0f;
 			cached_fresnel = -1.0f;
+			cached_reflectscale = -1.0f;
 		}
 
 		if( cached_entity != m_pCurrentEntity || (cached_model != m_pRenderModel) )
@@ -5360,7 +5362,11 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				pglUniform2fARB( RI->currentshader->u_CubeMipCount, r, g );
 
 				pglUniform1fARB( RI->currentshader->u_LerpFactor, m_pModelInstance->lerpFactor );
-				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[mat->gl_diffuse_id].ReflectScale );
+				if( tr.materials[mat->gl_diffuse_id].ReflectScale != cached_reflectscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[mat->gl_diffuse_id].ReflectScale );
+					cached_reflectscale = tr.materials[mat->gl_diffuse_id].ReflectScale;
+				}
 
 				cached_cubemap[0] = m_pModelInstance->cubemap[0];
 				cached_cubemap[1] = m_pModelInstance->cubemap[1];

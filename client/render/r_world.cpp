@@ -2677,6 +2677,7 @@ void R_DrawBrushList( void )
 	float cached_glosssmoothness = -1.0f;
 	float cached_embossscale = -1.0f;
 	float cached_fresnel = -1.0f;
+	float cached_reflectscale = -1.0f;
 
 	int i;
 	gl_bmodelface_t *entry;
@@ -2769,6 +2770,7 @@ void R_DrawBrushList( void )
 			cached_glosssmoothness = -1.0f;
 			cached_embossscale = -1.0f;
 			cached_fresnel = -1.0f;
+			cached_reflectscale = -1.0f;
 		}
 
 		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != es->gl_texturenum) )
@@ -2940,7 +2942,12 @@ void R_DrawBrushList( void )
 				pglUniform2fARB( RI->currentshader->u_CubeMipCount, r, g );
 
 				pglUniform1fARB( RI->currentshader->u_LerpFactor, es->lerpFactor );
-				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale );
+
+				if( tr.materials[es->gl_texturenum].ReflectScale != cached_reflectscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale );
+					cached_reflectscale = tr.materials[es->gl_texturenum].ReflectScale;
+				}
 
 				cached_cubemap[0] = es->cubemap[0];
 				cached_cubemap[1] = es->cubemap[1];
