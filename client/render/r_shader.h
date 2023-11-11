@@ -142,6 +142,7 @@ typedef struct glsl_prog_s
 	GLint u_FoliageSwayHeight;
 	GLint u_Fresnel;
 	GLint u_MeshParams; // array for studio models: world origin, angles and scale
+	GLint u_WaterDrops;
 
 	// motion blur
 	GLint u_Accum;

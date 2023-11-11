@@ -1174,10 +1174,12 @@ void WaterDrops( void )
 	GL_BindShader( glsl.WaterDrops );
 	ASSERT( RI->currentshader != NULL );
 
-	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, (float)(glState.width), (float)(glState.height) );
-	pglUniform1fARB( RI->currentshader->u_Accum, gHUD.ScreenDrips_CurVisibility );
-	pglUniform1fARB( RI->currentshader->u_LerpFactor, gHUD.ScreenDrips_DripIntensity );
+	Vector waterdrops_params[2];
+	// screensizeinv + realtime
+	waterdrops_params[0] = Vector( (float)glState.width, (float)glState.height, tr.time );
+	// visibility + intensity
+	waterdrops_params[1] = Vector( gHUD.ScreenDrips_CurVisibility, gHUD.ScreenDrips_DripIntensity, 0.0f );
+	pglUniform3fvARB( RI->currentshader->u_WaterDrops, 2, &waterdrops_params[0][0] );
 
 	RenderFSQ( glState.width, glState.height );
 

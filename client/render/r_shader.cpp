@@ -1413,10 +1413,7 @@ static void GL_InitWaterDropsUniforms( glsl_program_t *shader )
 	ASSERT( shader != NULL );
 
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
-	shader->u_RealTime = pglGetUniformLocationARB( shader->handle, "u_RealTime" );
-	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
-	shader->u_Accum = pglGetUniformLocationARB( shader->handle, "u_Accum" );
-	shader->u_LerpFactor = pglGetUniformLocationARB( shader->handle, "u_LerpFactor" );
+	shader->u_WaterDrops = pglGetUniformLocationARB( shader->handle, "u_WaterDrops" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );

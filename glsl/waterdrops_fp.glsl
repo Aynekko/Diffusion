@@ -3,10 +3,11 @@
 // July 2017 - shadertoy.com/view/ldSBWW
 
 uniform sampler2D    u_ColorMap;
-uniform vec2         u_ScreenSizeInv; // not inverted
-uniform float        u_LerpFactor;
-uniform float        u_RealTime;
-uniform float        u_Accum;
+uniform vec3 u_WaterDrops[2];
+#define u_ScreenSize	u_WaterDrops[0].xy
+#define u_RealTime		u_WaterDrops[0].z
+#define u_Visibility	u_WaterDrops[1].x
+#define u_Intensity		u_WaterDrops[1].y
 
 vec2 rand( vec2 c )
 {
@@ -28,14 +29,14 @@ vec2 noise( vec2 p )
 
 void main( void )
 {
-    float Transparency = u_Accum; // ranged 0.0 - 1.0
-    float DripIntensity = u_LerpFactor; // 0 and above
+    float Transparency = u_Visibility; // ranged 0.0 - 1.0
+    float DripIntensity = u_Intensity; // 0 and above
 	
-    vec2 iResolution = u_ScreenSizeInv;
+    vec2 iResolution = u_ScreenSize;
     vec2 c = gl_FragCoord.xy;
 
-    vec2 u = c / u_ScreenSizeInv,
-    v = ( c * 0.1 ) / u_ScreenSizeInv,
+    vec2 u = c / iResolution,
+    v = ( c * 0.1 ) / iResolution,
     n = noise( v * 200.0 ); // Displacement
     
     vec4 InColor = texture( u_ColorMap, u, 2.5 );
@@ -44,7 +45,7 @@ void main( void )
     // Loop through the different inverse sizes of drops
     for( float r = 4.0; r > 0.0; r--) 
     {
-        vec2 x = 1.5 * u_ScreenSizeInv * r * 0.015,  // Number of potential drops (in a grid)
+        vec2 x = 1.5 * iResolution * r * 0.015,  // Number of potential drops (in a grid)
         p = 6.28 * u * x + ( n - 0.5 ) * 2.0,
         s = sin( p );
         
@@ -69,7 +70,7 @@ void main( void )
         }
     }
 
-    f = mix( InColor, f, u_Accum );
+    f = mix( InColor, f, Transparency );
 
     gl_FragColor = f;
 };
