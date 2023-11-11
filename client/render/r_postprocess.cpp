@@ -1104,13 +1104,6 @@ void ToneMap(void)
 
 void Enhance( void )
 {
-	// I wanted to make cvars but decided to leave it as is
-	bool Saturate = true;
-	bool Sharpen = true;
-
-	if( !Saturate && !Sharpen )
-		return;
-
 	// capture screen
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
@@ -1121,8 +1114,6 @@ void Enhance( void )
 	ASSERT( RI->currentshader != NULL );
 
 	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height) );
-	pglUniform1fARB( RI->currentshader->u_GenericCondition, (float)Saturate );
-	pglUniform1fARB( RI->currentshader->u_GenericCondition2, (float)Sharpen );
 
 	RenderFSQ( glState.width, glState.height );
 

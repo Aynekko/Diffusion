@@ -1276,8 +1276,6 @@ static void GL_InitEnhanceUniforms( glsl_program_t *shader )
 
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
 	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
-	shader->u_GenericCondition = pglGetUniformLocationARB( shader->handle, "u_GenericCondition" );
-	shader->u_GenericCondition2 = pglGetUniformLocationARB( shader->handle, "u_GenericCondition2" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
@@ -1301,7 +1299,6 @@ static void GL_InitBloomUniforms( glsl_program_t *shader )
 	GL_ValidateProgram( shader );
 	GL_ShowProgramUniforms( shader );
 }
-
 
 static void GL_InitTonemapUniforms( glsl_program_t *shader )
 {

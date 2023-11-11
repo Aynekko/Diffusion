@@ -2,9 +2,7 @@
 #include "mathlib.h"
 
 uniform sampler2D   u_ColorMap;
-uniform vec2        u_ScreenSizeInv;
-uniform float       u_GenericCondition;
-uniform float       u_GenericCondition2;
+uniform vec2 u_ScreenSizeInv;
 
 varying vec2        var_TexCoord;
 
@@ -45,22 +43,24 @@ vec4 sharpen( in sampler2D tex, in vec2 coords )
 void main( void )
 {
     vec4 color = texture2D( u_ColorMap, var_TexCoord, 0.0 );
+	bool Saturate = true;
+	bool Sharpen = true;
 	
     // saturate
-    if( bool( u_GenericCondition == 1.0f ))
+    if( Saturate )
     {
-	float Saturation = 0.55f;
-	vec3 col_hsv = RGBtoHSV( color.rgb );
-	col_hsv.y *= ( Saturation * 2.0 );
-	vec3 col_rgb = HSVtoRGB( col_hsv.rgb );
-        color.rgb = col_rgb;
+		float Saturation = 0.55f;
+		vec3 col_hsv = RGBtoHSV( color.rgb );
+		col_hsv.y *= ( Saturation * 2.0 );
+		vec3 col_rgb = HSVtoRGB( col_hsv.rgb );
+		color.rgb = col_rgb;
     }
 
     // sharpen
-    if( bool( u_GenericCondition2 == 1.0f ))
+    if( Sharpen )
     {
-	vec4 sharpen = sharpen( u_ColorMap,var_TexCoord );
-	color.rgb = mix( color.rgb, sharpen.rgb, 0.2 );
+		vec4 sharpen = sharpen( u_ColorMap,var_TexCoord );
+		color.rgb = mix( color.rgb, sharpen.rgb, 0.2 );
     }
 
     gl_FragColor = color;
