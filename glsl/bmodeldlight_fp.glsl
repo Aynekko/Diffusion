@@ -54,10 +54,12 @@ uniform samplerCube	u_ProjectMap;
 	#endif
 #endif
 
-uniform vec4		u_LightDir;
-uniform vec4		u_LightDiffuse;
-uniform vec4		u_LightOrigin;
-uniform vec4		u_ShadowParams;
+uniform vec4			u_LightParams[5];
+#define u_LightDir		u_LightParams[0]
+#define u_LightDiffuse	u_LightParams[1]
+#define u_ShadowParams	u_LightParams[2]
+#define u_LightOrigin	u_LightParams[3]
+
 uniform vec4		u_RenderColor;
 uniform vec4		u_FogParams;
 uniform vec2		u_ScreenSizeInv;

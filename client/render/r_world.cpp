@@ -2249,11 +2249,20 @@ void R_DrawLightForSurfList( plight_t *pl )
 			float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
 
 			// depth scale and bias and shadowmap resolution
-			pglUniform4fARB( RI->currentshader->u_LightDir, lightdir.x, lightdir.y, lightdir.z, pl->fov );
-			pglUniform4fARB( RI->currentshader->u_LightDiffuse, pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
-			pglUniform4fARB( RI->currentshader->u_ShadowParams, shadowWidth, shadowHeight, -pl->projectionMatrix[2][2], pl->projectionMatrix[3][2] );
-			pglUniform4fARB( RI->currentshader->u_LightOrigin, pl->origin.x, pl->origin.y, pl->origin.z, (1.0f / pl->radius) );
 			pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+			Vector4D light_params[5];
+			// light dir
+			light_params[0] = Vector4D( lightdir.x, lightdir.y, lightdir.z, pl->fov );
+			// light diffuse
+			light_params[1] = Vector4D( pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
+			// shadow parameters
+			light_params[2] = Vector4D( shadowWidth, shadowHeight, -pl->projectionMatrix[2][2], pl->projectionMatrix[3][2] );
+			// light origin
+			light_params[3] = Vector4D( pl->origin.x, pl->origin.y, pl->origin.z, (1.0f / pl->radius) );
+			// view origin
+			light_params[4] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, 0.0f );
+			// send through one call
+			pglUniform4fvARB( RI->currentshader->u_LightParams, 5, &light_params[0][0] );
 
 			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 			pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)glState.width, 1.0f / (float)glState.height );
@@ -2273,7 +2282,6 @@ void R_DrawLightForSurfList( plight_t *pl )
 				pglUniform1fARB( RI->currentshader->u_WaveHeight, waveHeight );
 
 			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
-			pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );
 
 			// reset cache
 			cached_texture = NULL;

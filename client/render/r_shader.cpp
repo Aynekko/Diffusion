@@ -801,16 +801,17 @@ static void GL_InitBmodelDlightUniforms( glsl_program_t *shader )
 		shader->u_WaveHeight = pglGetUniformLocationARB( shader->handle, "u_WaveHeight" );
 	shader->u_TexOffset = pglGetUniformLocationARB( shader->handle, "u_TexOffset" );
 
-	shader->u_LightDir = pglGetUniformLocationARB( shader->handle, "u_LightDir" );
-	shader->u_LightDiffuse = pglGetUniformLocationARB( shader->handle, "u_LightDiffuse" );
-	shader->u_ShadowParams = pglGetUniformLocationARB( shader->handle, "u_ShadowParams" );
-	shader->u_LightOrigin = pglGetUniformLocationARB( shader->handle, "u_LightOrigin" );
+//	shader->u_LightDir = pglGetUniformLocationARB( shader->handle, "u_LightDir" );
+//	shader->u_LightDiffuse = pglGetUniformLocationARB( shader->handle, "u_LightDiffuse" );
+//	shader->u_ShadowParams = pglGetUniformLocationARB( shader->handle, "u_ShadowParams" );
+//	shader->u_LightOrigin = pglGetUniformLocationARB( shader->handle, "u_LightOrigin" );
 	shader->u_LightViewProjectionMatrix = pglGetUniformLocationARB( shader->handle, "u_LightViewProjectionMatrix" );
 	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
 	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
 	shader->u_RenderColor = pglGetUniformLocationARB( shader->handle, "u_RenderColor" );
 	shader->u_DynLightBrightness = pglGetUniformLocationARB( shader->handle, "u_DynLightBrightness" );
-	shader->u_ViewOrigin = pglGetUniformLocationARB( shader->handle, "u_ViewOrigin" );
+//	shader->u_ViewOrigin = pglGetUniformLocationARB( shader->handle, "u_ViewOrigin" );
+	shader->u_LightParams = pglGetUniformLocationARB( shader->handle, "u_LightParams" );
 	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
 	shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
 	shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
@@ -968,13 +969,8 @@ static void GL_InitStudioDlightUniforms( glsl_program_t *shader )
 	shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
 	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
 	shader->u_ColorMask = pglGetUniformLocationARB( shader->handle, "u_ColorMask" );
-	shader->u_LightDir = pglGetUniformLocationARB( shader->handle, "u_LightDir" );
-	shader->u_LightDiffuse = pglGetUniformLocationARB( shader->handle, "u_LightDiffuse" );
-	shader->u_ShadowParams = pglGetUniformLocationARB( shader->handle, "u_ShadowParams" );
-	shader->u_LightOrigin = pglGetUniformLocationARB( shader->handle, "u_LightOrigin" );
 	shader->u_LightViewProjectionMatrix = pglGetUniformLocationARB( shader->handle, "u_LightViewProjectionMatrix" );
-	shader->u_ViewOrigin = pglGetUniformLocationARB( shader->handle, "u_ViewOrigin" );
-	shader->u_ViewRight = pglGetUniformLocationARB( shader->handle, "u_ViewRight" );
+	shader->u_LightParams = pglGetUniformLocationARB( shader->handle, "u_LightParams" );
 	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
 	shader->u_MeshParams = pglGetUniformLocationARB( shader->handle, "u_MeshParams" );
 

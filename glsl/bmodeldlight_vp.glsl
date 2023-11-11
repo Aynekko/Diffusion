@@ -31,8 +31,9 @@ uniform vec3		u_TexOffset;
 
 // light specific
 uniform mat4		u_LightViewProjectionMatrix;
-uniform vec4		u_LightOrigin;
-uniform vec3	        u_ViewOrigin;
+uniform vec4			u_LightParams[5];
+#define u_LightOrigin	u_LightParams[3]
+#define u_ViewOrigin	u_LightParams[4].xyz
 
 // shared variables
 varying vec2		var_TexDiffuse;

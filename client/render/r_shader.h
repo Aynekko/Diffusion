@@ -104,6 +104,7 @@ typedef struct glsl_prog_s
 	GLint u_LightDiffuse;
 	GLint u_LightSamples;	// sample count
 	GLint u_LightStyleValues;	// array
+	GLint u_LightParams;
 	GLint u_AmbientCube;
 	GLint u_AmbientFactor;
 	GLint u_DiffuseFactor;
