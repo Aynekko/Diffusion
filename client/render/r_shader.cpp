@@ -801,16 +801,11 @@ static void GL_InitBmodelDlightUniforms( glsl_program_t *shader )
 		shader->u_WaveHeight = pglGetUniformLocationARB( shader->handle, "u_WaveHeight" );
 	shader->u_TexOffset = pglGetUniformLocationARB( shader->handle, "u_TexOffset" );
 
-//	shader->u_LightDir = pglGetUniformLocationARB( shader->handle, "u_LightDir" );
-//	shader->u_LightDiffuse = pglGetUniformLocationARB( shader->handle, "u_LightDiffuse" );
-//	shader->u_ShadowParams = pglGetUniformLocationARB( shader->handle, "u_ShadowParams" );
-//	shader->u_LightOrigin = pglGetUniformLocationARB( shader->handle, "u_LightOrigin" );
 	shader->u_LightViewProjectionMatrix = pglGetUniformLocationARB( shader->handle, "u_LightViewProjectionMatrix" );
 	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
 	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
 	shader->u_RenderColor = pglGetUniformLocationARB( shader->handle, "u_RenderColor" );
 	shader->u_DynLightBrightness = pglGetUniformLocationARB( shader->handle, "u_DynLightBrightness" );
-//	shader->u_ViewOrigin = pglGetUniformLocationARB( shader->handle, "u_ViewOrigin" );
 	shader->u_LightParams = pglGetUniformLocationARB( shader->handle, "u_LightParams" );
 	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
 	shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
@@ -1049,18 +1044,8 @@ static void GL_InitGrassDlightUniforms( glsl_program_t *shader )
 	shader->u_ShadowMap = pglGetUniformLocationARB( shader->handle, "u_ShadowMap" );
 
 	shader->u_LightViewProjectionMatrix = pglGetUniformLocationARB( shader->handle, "u_LightViewProjectionMatrix" );
-	shader->u_ShadowParams = pglGetUniformLocationARB( shader->handle, "u_ShadowParams" );
-	shader->u_LightDiffuse = pglGetUniformLocationARB( shader->handle, "u_LightDiffuse" );
-	shader->u_LightOrigin = pglGetUniformLocationARB( shader->handle, "u_LightOrigin" );
-	shader->u_LightDir = pglGetUniformLocationARB( shader->handle, "u_LightDir" );
-	shader->u_ViewOrigin = pglGetUniformLocationARB( shader->handle, "u_ViewOrigin" );
 	shader->u_ModelMatrix = pglGetUniformLocationARB( shader->handle, "u_ModelMatrix" );
-	shader->u_GrassFadeStart = pglGetUniformLocationARB( shader->handle, "u_GrassFadeStart" );
-	shader->u_GrassFadeDist = pglGetUniformLocationARB( shader->handle, "u_GrassFadeDist" );
-	shader->u_GrassFadeEnd = pglGetUniformLocationARB( shader->handle, "u_GrassFadeEnd" );
-	shader->u_RealTime = pglGetUniformLocationARB( shader->handle, "u_RealTime" );
-	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
-	shader->u_DynLightBrightness = pglGetUniformLocationARB( shader->handle, "u_DynLightBrightness" );
+	shader->u_LightParams = pglGetUniformLocationARB( shader->handle, "u_LightParams" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );

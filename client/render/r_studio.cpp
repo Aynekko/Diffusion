@@ -4936,12 +4936,6 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
 
 			// depth scale and bias and shadowmap resolution
-		//	pglUniform4fARB( RI->currentshader->u_LightDir, lightdir.x, lightdir.y, lightdir.z, pl->fov );
-		//	pglUniform4fARB( RI->currentshader->u_LightDiffuse, pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
-		//	pglUniform4fARB( RI->currentshader->u_ShadowParams, shadowWidth, shadowHeight, -OmniShadowMatrix[2][2], OmniShadowMatrix[3][2] );
-		//	pglUniform4fARB( RI->currentshader->u_LightOrigin, lightorg.x, lightorg.y, lightorg.z, (1.0f / pl->radius) );
-		//	pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.modelorg.x, tr.modelorg.y, tr.modelorg.z );
-		//	pglUniform3fARB( RI->currentshader->u_ViewRight, right.x, right.y, right.z );
 			pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 		//	R_SetRenderColor( m_pCurrentEntity );
 			Vector4D light_params[6];

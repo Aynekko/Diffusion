@@ -22,12 +22,14 @@ attribute vec4		attr_Normal;
 
 uniform mat4		u_ModelMatrix;
 uniform mat4		u_LightViewProjectionMatrix;
-uniform float		u_GrassFadeStart;
-uniform float		u_GrassFadeDist;
-uniform float		u_GrassFadeEnd;
-uniform vec4		u_LightOrigin;
-uniform vec3		u_ViewOrigin;
-uniform float		u_RealTime;
+uniform vec4		u_LightParams[7];
+#define u_LightOrigin	u_LightParams[3]
+#define u_FogParams		u_LightParams[4]
+#define u_ViewOrigin	u_LightParams[5].xyz
+#define u_RealTime		u_LightParams[5].w
+#define u_GrassFadeStart u_LightParams[6].x
+#define u_GrassFadeDist	u_LightParams[6].y
+#define u_GrassFadeEnd	u_LightParams[6].z
 
 varying vec2		var_TexDiffuse;
 varying vec3		var_LightVec;

@@ -553,23 +553,26 @@ void R_DrawLightForGrassMesh( plight_t *pl, grass_t *grass, int tex, word &hLast
 		float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture[0] );
 		float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
 
-		// depth scale and bias and shadowmap resolution
-		pglUniform4fARB( RI->currentshader->u_LightDir, lightdir.x, lightdir.y, lightdir.z, pl->fov );
-		pglUniform4fARB( RI->currentshader->u_LightDiffuse, pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
-		pglUniform4fARB( RI->currentshader->u_ShadowParams, shadowWidth, shadowHeight, -pl->projectionMatrix[2][2], pl->projectionMatrix[3][2] );
-		pglUniform4fARB( RI->currentshader->u_LightOrigin, pl->origin.x, pl->origin.y, pl->origin.z, ( 1.0f / pl->radius ));
-		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
-		pglUniform1fARB( RI->currentshader->u_DynLightBrightness, pl->brightness );
-
 		GL_Bind( GL_TEXTURE1, pl->projectionTexture );
 		GL_Bind( GL_TEXTURE2, pl->shadowTexture[0] );
 
-		pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );
-	//	pglUniform3fARB( RI->currentshader->u_ViewOrigin, RI->vieworg.x, RI->vieworg.y, RI->vieworg.z ); // diffusion - use render view origin, not eyes
-		pglUniform1fARB( RI->currentshader->u_GrassFadeStart, m_flGrassFadeStart );
-		pglUniform1fARB( RI->currentshader->u_GrassFadeDist, m_flGrassFadeDist );
-		pglUniform1fARB( RI->currentshader->u_GrassFadeEnd, m_flGrassFadeEnd );
-		pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
+		Vector4D grasslight_params[7];
+		// light dir
+		grasslight_params[0] = Vector4D( lightdir.x, lightdir.y, lightdir.z, pl->fov );
+		// light diffuse
+		grasslight_params[1] = Vector4D( pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
+		// shadow parameters
+		grasslight_params[2] = Vector4D( shadowWidth, shadowHeight, -pl->projectionMatrix[2][2], pl->projectionMatrix[3][2] );
+		// light origin
+		grasslight_params[3] = Vector4D( pl->origin.x, pl->origin.y, pl->origin.z, (1.0f / pl->radius) );
+		// fog params
+		grasslight_params[4] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+		// view origin + realtime
+		grasslight_params[5] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, tr.time );
+		// grass params + light brightness
+		grasslight_params[6] = Vector4D( m_flGrassFadeStart, m_flGrassFadeDist, m_flGrassFadeEnd, pl->brightness );
+		// send through one call
+		pglUniform4fvARB( RI->currentshader->u_LightParams, 7, &grasslight_params[0][0] );
 
 		hLastShader = grass->vbo.hLightShader;
 		hCachedMatrix = -1;
