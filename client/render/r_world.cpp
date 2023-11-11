@@ -2687,6 +2687,9 @@ void R_DrawBrushList( void )
 	float cached_fresnel = -1.0f;
 	float cached_reflectscale = -1.0f;
 	Vector cubemap_params[7];
+	Vector4D brush_params[2];
+	Vector2D screensizeinv = Vector2D( 1.0f / (float)glState.width, 1.0f / (float)glState.height );
+	float waveHeight = 0.0f;
 
 	int i;
 	gl_bmodelface_t *entry;
@@ -2744,26 +2747,21 @@ void R_DrawBrushList( void )
 
 			gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
 
-			// write constants
-			pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
-			pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
-			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
-			pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)glState.width, 1.0f / (float)glState.height );
-			pglUniform1fARB( RI->currentshader->u_zFar, -RI->farClip );
-			//	R_SetRenderColor( RI->currententity );
-
 			// set the current waveheight
-			float waveHeight = 0.0f;
 			if( s->polys->verts[0][2] >= RI->vieworg[2] )
 				waveHeight = -RI->currententity->curstate.scale;
 			else
 				waveHeight = RI->currententity->curstate.scale;
 
-			if( FBitSet( s->flags, SURF_WATER ) && (waveHeight != 0.0f) )
-				pglUniform1fARB( RI->currentshader->u_WaveHeight, waveHeight );
-
-			pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );
-
+			// write constants
+			pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
+			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
+			// fog params
+			brush_params[0] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+			// view origin + waveheight
+			brush_params[1] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, waveHeight );
+			pglUniform4fvARB( RI->currentshader->u_BrushParams, 2, &brush_params[0][0] );
+			
 			// reset cache
 			cached_texofs[0] = -1.0f;
 			cached_texofs[1] = -1.0f;
@@ -2899,6 +2897,7 @@ void R_DrawBrushList( void )
 
 				float brushbounds = 2.0f * RadiusFromBounds( e->curstate.mins, e->curstate.maxs );
 				pglUniform1fARB( RI->currentshader->u_zFar, -brushbounds );
+				pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, screensizeinv.x, screensizeinv.y );
 			}
 
 			// diffusion - interior mapping

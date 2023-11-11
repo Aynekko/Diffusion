@@ -723,7 +723,12 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 			shader->u_WaterTex = pglGetUniformLocationARB( shader->handle, "u_WaterTex" );
 	}
 
-	shader->u_ViewOrigin = pglGetUniformLocationARB( shader->handle, "u_ViewOrigin" );
+	shader->u_BrushParams = pglGetUniformLocationARB( shader->handle, "u_BrushParams" );
+	if( GL_FindShaderDirective( shader, "BMODEL_WATER" ) && GL_FindShaderDirective( shader, "BMODEL_WATER_REFRACTION" ) )
+	{
+		shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
+		shader->u_zFar = pglGetUniformLocationARB( shader->handle, "u_zFar" );
+	}
 	shader->u_DeluxeMap = pglGetUniformLocationARB( shader->handle, "u_DeluxeMap" );
 	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
 	shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
@@ -737,13 +742,8 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 
 	shader->u_LightStyleValues = pglGetUniformLocationARB( shader->handle, "u_LightStyleValues" );
 	shader->u_ModelMatrix = pglGetUniformLocationARB( shader->handle, "u_ModelMatrix" );
-	if( GL_FindShaderDirective( shader, "BMODEL_WAVEHEIGHT" ) )
-		shader->u_WaveHeight = pglGetUniformLocationARB( shader->handle, "u_WaveHeight" );
 	shader->u_TexOffset = pglGetUniformLocationARB( shader->handle, "u_TexOffset" );
-	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
-	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
 	shader->u_RenderColor = pglGetUniformLocationARB( shader->handle, "u_RenderColor" );
-	shader->u_zFar = pglGetUniformLocationARB( shader->handle, "u_zFar" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
@@ -1532,9 +1532,6 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 
 		if( RI->currententity )
 		{
-			if( RI->currententity->curstate.scale )
-				GL_AddShaderDirective( options, "BMODEL_WAVEHEIGHT" );
-
 			if( !tr.lowmemory && (gl_water_refraction->value > 0) && (RI->currententity->curstate.renderfx != kRenderFxNoRefraction) )
 			{
 				GL_AddShaderDirective( options, "BMODEL_WATER_REFRACTION" );

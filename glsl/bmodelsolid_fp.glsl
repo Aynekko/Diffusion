@@ -17,13 +17,15 @@ GNU General Public License for more details.
 #include "mathlib.h"
 #include "texfetch.h"
 #include "terrain.h"
-#include "screen.h"
 #include "emboss.h"
 #include "specular.h"
 #include "deluxemap.h"
 #include "cubemap.h"
 #include "interior.h"
 #include "alpha2coverage.h"
+#if defined( BMODEL_WATER ) && defined( BMODEL_WATER_REFRACTION )
+#include "screen.h"
+#endif
 
 #if defined( BMODEL_MULTI_LAYERS )
 uniform sampler2DArray	u_ColorMap;
@@ -49,10 +51,14 @@ uniform sampler2D	u_DepthMap;
 uniform sampler2D	u_GlowMap;
 
 uniform vec4		u_RenderColor;
-uniform vec4		u_FogParams;
-uniform vec3		u_ViewOrigin;
-uniform float		u_RealTime;
-uniform float		u_zFar; 
+uniform vec4		u_BrushParams[2];
+#define u_FogParams		u_BrushParams[0]
+#define u_ViewOrigin	u_BrushParams[1].xyz
+
+#if defined( BMODEL_WATER ) && defined( BMODEL_WATER_REFRACTION )
+uniform float u_zFar;
+#endif
+
 uniform float       u_Fresnel;
 
 // shared variables
@@ -155,13 +161,13 @@ void main( void )
 		emboss = EmbossFilterTerrain( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3, EmbossScale );
 	#endif
 #else
-	diffuse = texture2D( u_ColorMap, var_TexDiffuse );	
+	diffuse = texture2D( u_ColorMap, var_TexDiffuse );
 	#if defined( BMODEL_SPECULAR )
-                #if defined( BMODEL_WATER )
+		#if defined( BMODEL_WATER )
 			glossmap = vec3( 0.5 );
-                #else
+		#else
 			glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
-                #endif
+		#endif
 	#endif
 	#if defined( BMODEL_EMBOSS )
 		emboss = EmbossFilter( u_ColorMap, var_TexDiffuse, EmbossScale );
@@ -192,19 +198,19 @@ void main( void )
 #if !defined( BMODEL_FULLBRIGHT )
 		// lighting the world polys
 	#if defined( BMODEL_APPLY_STYLE0 )
-	        ApplyLightStyle( var_TexLight0, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		ApplyLightStyle( var_TexLight0, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
 	#endif
 
 	#if defined( BMODEL_APPLY_STYLE1 )
-	        ApplyLightStyle( var_TexLight1, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		ApplyLightStyle( var_TexLight1, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
 	#endif
 
 	#if defined( BMODEL_APPLY_STYLE2 )
-	        ApplyLightStyle( var_TexLight2, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		ApplyLightStyle( var_TexLight2, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
 	#endif
 
 	#if defined( BMODEL_APPLY_STYLE3 )
-	        ApplyLightStyle( var_TexLight3, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		ApplyLightStyle( var_TexLight3, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
 	#endif
 
 	#if defined( BMODEL_APPLY_STYLE0 ) || defined( BMODEL_APPLY_STYLE1 ) || defined( BMODEL_APPLY_STYLE2 ) || defined( BMODEL_APPLY_STYLE3 )
@@ -225,12 +231,6 @@ void main( void )
 	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec, var_Position ); // u_realtime is currently not used
 #endif
 
-/*
-#if defined( BMODEL_TRANSLUCENT ) // this is never used currently
-	screenmap = texture2D( u_ScreenMap, gl_FragCoord.xy * u_ScreenSizeInv ).rgb;
-	diffuse.rgb = Q_mix( screenmap, diffuse.rgb, u_RenderColor.a );
-#endif
-*/
 	// apply fullbright pixels
 #if defined( BMODEL_HAS_LUMA )
 	diffuse.rgb += texture2D( u_GlowMap, var_TexDiffuse ).rgb;
@@ -297,13 +297,10 @@ void main( void )
 	diffuse.rgb = refracted;
 
 	gl_FragColor = diffuse;
+	// ---shader end for this condition---
+#else // not water and not refracted
 
-	// return so we don't touch fog twice
-	return;
-#endif
-//------------------------------------------------------------------------------------------------------
-//------------------------------------------------------------------------------------------------------
-        // apply cubemap reflection
+	// apply cubemap reflection
 #if defined( BMODEL_WATER ) && !defined( BMODEL_WATER_REFRACTION )
 	// skip cubemap
 #elif defined( REFLECTION_CUBEMAP )
@@ -327,4 +324,5 @@ void main( void )
 #endif//BMODEL_FOG_EXP
 	
 	gl_FragColor = vec4( diffuse.rgb, diffuse.a * alpha );
+#endif // /not water and not refracted
 }

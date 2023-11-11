@@ -94,6 +94,7 @@ typedef struct glsl_prog_s
 	GLint u_ScreenHeight;
 	GLint u_ScreenSizeInv;
 	GLint u_zFar;		// global z-far value
+	GLint u_BrushParams;
 	GLint u_FocalDepth;
 	GLint u_FocalLength;
 	GLint u_FStop;

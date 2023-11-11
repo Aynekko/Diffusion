@@ -18,9 +18,9 @@ GNU General Public License for more details.
 #include "tnbasis.h"
 
 #define u_RealTime	u_TexOffset.z
-#if defined( BMODEL_WAVEHEIGHT )
-uniform float u_WaveHeight;
-#endif
+uniform vec4 u_BrushParams[2];
+#define u_WaveHeight u_BrushParams[1].w
+#define u_ViewOrigin u_BrushParams[1].xyz
 
 attribute vec3		attr_Position;
 attribute vec4		attr_TexCoord0;	// diffuse\terrain
@@ -31,7 +31,6 @@ attribute vec4		attr_LightStyles;
 uniform float		u_LightStyleValues[MAX_LIGHTSTYLES];
 uniform mat4		u_ModelMatrix;
 uniform vec3		u_TexOffset;	// conveyor stuff
-uniform vec3	    u_ViewOrigin;
 
 // shared variables
 varying vec2		var_TexDiffuse;
@@ -57,11 +56,13 @@ void main( void )
 {
 	vec4 position = vec4( attr_Position, 1.0 ); // in object space
 
-#if defined( BMODEL_WAVEHEIGHT )
-	float nv = r_turbsin( u_RealTime * 2.6 + attr_Position.y + attr_Position.x ) + 8.0;
-	nv = ( r_turbsin( attr_Position.x * 5.0 + u_RealTime * 2.71 - attr_Position.y ) + 8.0 ) * 0.8 + nv;
-	position.z = nv * u_WaveHeight + attr_Position.z;
-#endif
+	if( u_WaveHeight > 0.0f )
+	{
+		float nv = r_turbsin( u_RealTime * 2.6 + attr_Position.y + attr_Position.x ) + 8.0;
+		nv = ( r_turbsin( attr_Position.x * 5.0 + u_RealTime * 2.71 - attr_Position.y ) + 8.0 ) * 0.8 + nv;
+		position.z = nv * u_WaveHeight + attr_Position.z;
+	}
+
 	vec4 worldpos = u_ModelMatrix * position;
 	gl_Position = gl_ModelViewProjectionMatrix * worldpos;
 	gl_ClipVertex = gl_ModelViewMatrix * worldpos;
