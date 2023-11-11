@@ -886,6 +886,7 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 	shader->u_ColorMask = pglGetUniformLocationARB( shader->handle, "u_ColorMask" );
 	shader->u_Fresnel = pglGetUniformLocationARB( shader->handle, "u_Fresnel" );
 	shader->u_MeshParams = pglGetUniformLocationARB( shader->handle, "u_MeshParams" );
+	shader->u_StudioLighting = pglGetUniformLocationARB( shader->handle, "u_StudioLighting" );
 
 	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) ) // diffusioncubemaps
 	{
@@ -902,26 +903,14 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 	}
 
 	if( GL_FindShaderDirective( shader, "STUDIO_VERTEX_LIGHTING" ))
-	{
-		shader->u_LightStyleValues = pglGetUniformLocationARB( shader->handle, "u_LightStyles" ); 
+	{ 
 		shader->u_GammaTable = pglGetUniformLocationARB( shader->handle, "u_GammaTable" );
-		shader->u_LightDir = pglGetUniformLocationARB( shader->handle, "u_LightDir" );
-	}
-	else
-	{
-		shader->u_LightDir = pglGetUniformLocationARB( shader->handle, "u_LightDir" );
-		shader->u_LightColor = pglGetUniformLocationARB( shader->handle, "u_LightColor" );
-		shader->u_LightAmbient = pglGetUniformLocationARB( shader->handle, "u_LightAmbient" );
-		shader->u_LightShade = pglGetUniformLocationARB( shader->handle, "u_LightShade" );
 	}
 
-	shader->u_ViewOrigin = pglGetUniformLocationARB( shader->handle, "u_ViewOrigin" );
-	shader->u_ViewRight = pglGetUniformLocationARB( shader->handle, "u_ViewRight" );
 	shader->u_RenderColor = pglGetUniformLocationARB( shader->handle, "u_RenderColor" );
-	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
-
-	shader->u_RealTime = pglGetUniformLocationARB( shader->handle, "u_RealTime" );
-	shader->u_FoliageSwayHeight = pglGetUniformLocationARB( shader->handle, "u_FoliageSwayHeight" );
+	shader->u_StudioParams = pglGetUniformLocationARB( shader->handle, "u_StudioParams" );
+	if( GL_FindShaderDirective( shader, "STUDIO_SWAY_FOLIAGE" ) )
+		shader->u_FoliageSwayHeight = pglGetUniformLocationARB( shader->handle, "u_FoliageSwayHeight" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );

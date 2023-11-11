@@ -54,7 +54,7 @@ uniform samplerCube	u_ProjectMap;
 	#endif
 #endif
 
-uniform vec4			u_LightParams[5];
+uniform vec4			u_LightParams[6];
 #define u_LightDir		u_LightParams[0]
 #define u_LightDiffuse	u_LightParams[1]
 #define u_ShadowParams	u_LightParams[2]

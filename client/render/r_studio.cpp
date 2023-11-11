@@ -5171,6 +5171,8 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	float cached_fresnel = -1.0f;
 	float cached_reflectscale = -1.0f;
 	Vector cubemap_params[7];
+	Vector4D studio_params[3];
+	Vector4D studio_lighting[2];
 
 	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
 	//	R_LoadIdentity();
@@ -5205,9 +5207,13 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			ASSERT( RI->currentshader != NULL );
 
 			// write constants
-			pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.modelorg.x, tr.modelorg.y, tr.modelorg.z );
-			pglUniform3fARB( RI->currentshader->u_ViewRight, right.x, right.y, right.z );
-			pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+			// view origin + realtime
+			studio_params[0] = Vector4D( tr.modelorg.x, tr.modelorg.y, tr.modelorg.z, tr.time );
+			// view right
+			studio_params[1] = Vector4D( right.x, right.y, right.z, 0.0f );
+			// fog params
+			studio_params[2] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+			pglUniform4fvARB( RI->currentshader->u_StudioParams, 3, &studio_params[0][0] );
 
 			if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) )
 				pglUniform4fvARB( RI->currentshader->u_GammaTable, 64, &tr.gamma_table[0][0] );
@@ -5219,12 +5225,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			meshparams[1] = m_pCurrentEntity->angles;
 			meshparams[2] = Vector( scale, 0, 0 );
 			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
-
-			if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
-			{
-				pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, (float)tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
-			}
 
 			// reset cache
 			cached_material = NULL;
@@ -5269,16 +5269,18 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 			if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) )
 			{
-				pglUniform4fARB( RI->currentshader->u_LightStyleValues, lightstyles.x, lightstyles.y, lightstyles.z, lightstyles.w );
-				pglUniform3fARB( RI->currentshader->u_LightDir, light->plightvec[0], light->plightvec[1], light->plightvec[2] );
+				studio_lighting[0] = Vector4D( lightstyles.x, lightstyles.y, lightstyles.z, lightstyles.w );
+				studio_lighting[1] = Vector4D( light->plightvec[0], light->plightvec[1], light->plightvec[2], 0.0f );
 			}
 			else
 			{
-				pglUniform3fARB( RI->currentshader->u_LightColor, light->color.x, light->color.y, light->color.z );
-				pglUniform3fARB( RI->currentshader->u_LightDir, light->plightvec[0], light->plightvec[1], light->plightvec[2] );
-				pglUniform1fARB( RI->currentshader->u_LightAmbient, light->ambientlight );
-				pglUniform1fARB( RI->currentshader->u_LightShade, light->shadelight );
+				// light color + ambientlight
+				studio_lighting[0] = Vector4D( light->color.x, light->color.y, light->color.z, light->ambientlight );
+				// light dir + shadelight
+				studio_lighting[1] = Vector4D( light->plightvec[0], light->plightvec[1], light->plightvec[2], light->shadelight );
 			}
+
+			pglUniform4fvARB( RI->currentshader->u_StudioLighting, 2, &studio_lighting[0][0] );
 
 		//	R_SetRenderColor( m_pCurrentEntity );
 			cached_entity = m_pCurrentEntity;
@@ -5386,6 +5388,9 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[mat->gl_diffuse_id].InteriorGrid.x, tr.materials[mat->gl_diffuse_id].InteriorGrid.y, (float)tr.materials[mat->gl_diffuse_id].InteriorLightState );
 				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_interiormap_id ); // u_InteriorMap
 			}
+
+			if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
+				pglUniform1iARB( RI->currentshader->u_FoliageSwayHeight, tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
 
 			if( tr.materials[mat->gl_diffuse_id].GlossSmoothness != cached_glosssmoothness )
 			{

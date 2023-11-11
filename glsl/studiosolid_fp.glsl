@@ -30,15 +30,15 @@ uniform sampler2D	u_ColorMask;
 #endif
 
 uniform vec4		u_RenderColor;
-uniform vec4		u_FogParams;
-uniform vec3	        u_ViewOrigin;
-uniform float           u_GlossScale;
-uniform float           u_GlossSmoothness;
-uniform float           u_EmbossScale;
-uniform float           u_ReflectScale;
-uniform float           u_RealTime;
-uniform float			u_Fresnel;
+uniform float		u_GlossScale;
+uniform float		u_GlossSmoothness;
+uniform float		u_EmbossScale;
+uniform float		u_ReflectScale;
+uniform float		u_Fresnel;
 uniform vec3		u_MeshParams[3];
+uniform vec4		u_StudioParams[3];
+#define u_ViewOrigin	u_StudioParams[0].xyz
+#define u_FogParams		u_StudioParams[2]
 
 // shared variables
 varying vec3		var_LightDiffuse;

@@ -28,26 +28,28 @@ attribute vec4		attr_LightColor;
 #endif
 
 #if defined( STUDIO_SWAY_FOLIAGE )
-uniform float		u_RealTime;
-uniform float		u_FoliageSwayHeight;
+uniform int			u_FoliageSwayHeight;
 #endif
 
 uniform vec4		u_BoneQuaternion[MAXSTUDIOBONES];
 uniform vec3		u_BonePosition[MAXSTUDIOBONES];
 
+uniform vec4		u_StudioLighting[2];
+#define u_LightDir		u_StudioLighting[1].xyz
 #if defined( STUDIO_VERTEX_LIGHTING )
 uniform vec4		u_GammaTable[64];
-uniform vec4		u_LightStyles;
+#define u_LightStyles	u_StudioLighting[0]
 #else
-uniform vec3		u_LightColor;
-uniform float		u_LightAmbient;
-uniform float		u_LightShade;
+#define u_LightColor	u_StudioLighting[0].xyz
+#define u_LightAmbient	u_StudioLighting[0].w
+#define u_LightShade	u_StudioLighting[1].w
 #endif
 
-uniform vec3		u_LightDir;
-uniform vec3		u_ViewOrigin;
-uniform vec3		u_ViewRight;
 uniform vec3		u_MeshParams[3];
+uniform vec4		u_StudioParams[3];
+#define u_ViewOrigin	u_StudioParams[0].xyz
+#define u_RealTime		u_StudioParams[0].w
+#define u_ViewRight		u_StudioParams[1].xyz
 
 varying vec3		var_LightDiffuse;
 varying vec2		var_TexDiffuse;

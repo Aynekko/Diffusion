@@ -28,7 +28,7 @@ uniform vec3		u_TexOffset;
 
 // light specific
 uniform mat4		u_LightViewProjectionMatrix;
-uniform vec4			u_LightParams[5];
+uniform vec4			u_LightParams[6];
 #define u_LightOrigin	u_LightParams[3]
 #define u_ViewOrigin	u_LightParams[4].xyz
 #define u_WaveHeight	u_LightParams[4].w
