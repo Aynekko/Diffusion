@@ -1702,10 +1702,10 @@ void CStudioModelRenderer::CreateMeshCacheVL( const char *modelname, int cacheID
 		}
 
 		if( dml->numverts == m_nNumLightVerts )
-			ALERT( at_aiconsole, "vertexlit instance created, model verts %i, total verts %i\n", dml->numverts, m_nNumLightVerts );
+			ALERT( at_aiconsole, "%s: vertexlit instance created, model verts %i, total verts %i\n", modelname, dml->numverts, m_nNumLightVerts );
 		else if( m_pRenderModel->modelCRC != dml->modelCRC )
-			ALERT( at_error, "failed to create vertex lighting: model CRC %p != %p\n", m_pRenderModel->modelCRC, dml->modelCRC );
-		else ALERT( at_error, "failed to create vertex lighting: model verts %i != total verts %i\n", dml->numverts, m_nNumLightVerts );
+			ALERT( at_error, "%s: failed to create vertex lighting: model CRC %p != %p\n", modelname, m_pRenderModel->modelCRC, dml->modelCRC );
+		else ALERT( at_error, "%s: failed to create vertex lighting: model verts %i != total verts %i\n", modelname, dml->numverts, m_nNumLightVerts );
 		m_nNumLightVerts = 0;
 	}
 }
