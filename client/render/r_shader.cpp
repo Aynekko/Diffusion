@@ -1171,10 +1171,7 @@ static void GL_InitDrawShaftsUniforms( glsl_program_t *shader )
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
 	shader->u_DepthMap = pglGetUniformLocationARB( shader->handle, "u_DepthMap" );
 	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
-
-	shader->u_LightOrigin = pglGetUniformLocationARB( shader->handle, "u_LightOrigin" );
-	shader->u_LightDiffuse = pglGetUniformLocationARB( shader->handle, "u_LightDiffuse" );
-	shader->u_SS_Brightness = pglGetUniformLocationARB( shader->handle, "u_SS_Brightness" );
+	shader->u_Sunshafts = pglGetUniformLocationARB( shader->handle, "u_Sunshafts" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE0 );

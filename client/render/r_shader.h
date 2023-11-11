@@ -145,9 +145,7 @@ typedef struct glsl_prog_s
 	GLint u_Accum;
 	GLint u_MotionBlur;
 	GLint u_HorizontalBlur;
-
-	// sunshafts
-	GLint u_SS_Brightness;
+	GLint u_Sunshafts;
 
 	GLint u_AOMap;
 	GLint u_RotateMap;

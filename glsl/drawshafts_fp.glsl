@@ -18,9 +18,10 @@ GNU General Public License for more details.
 
 uniform sampler2D	u_ScreenMap;
 uniform sampler2D	u_ColorMap;
-uniform vec3		u_LightOrigin;
-uniform vec3		u_LightDiffuse;
-uniform float		u_SS_Brightness;
+uniform vec4		u_Sunshafts[2];
+#define u_LightOrigin	u_Sunshafts[0].xyz
+#define u_Brightness	u_Sunshafts[0].w
+#define u_LightDiffuse	u_Sunshafts[1].xyz
 
 varying vec2       	var_TexCoord;
 
@@ -42,7 +43,7 @@ void main( void )
 	float sunDist = saturate( u_LightOrigin.z ) * saturate( 1.0 - saturate( length( sunVec ) * 0.2 ));
 	sunVec *= 0.1 * u_LightOrigin.z;
 
-	float Brightness = u_SS_Brightness;
+	float Brightness = u_Brightness;
 	if( Brightness <= 0 ) Brightness = 1.0;
 
 	vec4 accum = texture2D( u_ColorMap, tc );

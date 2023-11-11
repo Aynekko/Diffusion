@@ -333,7 +333,7 @@ void RenderSunShafts( void )
 	if( view.z < 0.01f ) return; // fade out
 
 	// request screen color
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	GL_Bind( GL_TEXTURE1, tr.screen_color );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 	// request screen depth
@@ -349,8 +349,6 @@ void RenderSunShafts( void )
 
 	pglUniform1fARB( RI->currentshader->u_zFar, zFar );
 
-	GL_Bind( GL_TEXTURE0, tr.screen_depth );
-	GL_Bind( GL_TEXTURE1, tr.screen_color );
 	RenderFSQ( glState.width, glState.height );
 
 	// request target copy
@@ -385,9 +383,12 @@ void RenderSunShafts( void )
 	GL_BindShader( glsl.drawSunShafts );
 	ASSERT( RI->currentshader != NULL );
 
-	pglUniform3fARB( RI->currentshader->u_LightOrigin, view.x / glState.width, view.y / glState.height, view.z );
-	pglUniform3fARB( RI->currentshader->u_LightDiffuse, skyColor.x, skyColor.y, skyColor.z );
-	pglUniform1fARB( RI->currentshader->u_SS_Brightness, Brightness * OverriddenBrightness );
+	Vector4D sunshafts_params[2];
+	// light origin + brightness
+	sunshafts_params[0] = Vector4D( view.x / glState.width, view.y / glState.height, view.z, Brightness * OverriddenBrightness );
+	// light diffuse
+	sunshafts_params[1] = Vector4D( skyColor.x, skyColor.y, skyColor.z, 0.0f );
+	pglUniform4fvARB( RI->currentshader->u_Sunshafts, 2, &sunshafts_params[0][0] );
 
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
 	GL_Bind( GL_TEXTURE1, tr.target_rgb[0] );
