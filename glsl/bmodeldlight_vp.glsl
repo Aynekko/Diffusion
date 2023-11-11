@@ -51,11 +51,13 @@ void main( void )
 {
 	vec4 position = vec4( attr_Position, 1.0 ); // in object space
 
-#if defined( BMODEL_WAVEHEIGHT )
-	float nv = r_turbsin( u_RealTime * 2.6 + attr_Position.y + attr_Position.x ) + 8.0;
-	nv = ( r_turbsin( attr_Position.x * 5.0 + u_RealTime * 2.71 - attr_Position.y ) + 8.0 ) * 0.8 + nv;
-	position.z = nv * u_WaveHeight + attr_Position.z;
-#endif
+	if( u_WaveHeight > 0.0f )
+	{
+		float nv = r_turbsin( u_RealTime * 2.6 + attr_Position.y + attr_Position.x ) + 8.0;
+		nv = ( r_turbsin( attr_Position.x * 5.0 + u_RealTime * 2.71 - attr_Position.y ) + 8.0 ) * 0.8 + nv;
+		position.z = nv * u_WaveHeight + attr_Position.z;
+	}
+
 	vec4 worldpos = u_ModelMatrix * position;
 
 	gl_Position = gl_ModelViewProjectionMatrix * worldpos;
