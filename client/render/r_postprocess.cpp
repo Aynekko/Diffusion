@@ -438,9 +438,7 @@ allow_drunk:
 	GL_BindShader( glsl.MotionBlur );
 	ASSERT( RI->currentshader != NULL );
 
-	pglUniform3fARB( RI->currentshader->u_MB_Velocity, org.x / glState.width, org.y / glState.height, org.z );
-	pglUniform1fARB( RI->currentshader->u_Accum, Accum );
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	pglUniform3fARB( RI->currentshader->u_MotionBlur, org.x / glState.width, org.y / glState.height, Accum );
 
 	RenderFSQ( glState.width, glState.height );
 
@@ -598,7 +596,7 @@ void HorizontalBlur( void )
 			return;
 
 		// no blur if < 30 fps
-		if( g_fFrametime > (1.0f / 30.0f) )
+		if( g_fFrametime > 0.0333f )
 			return;
 
 		// do not allow this blur if we look too much up or down

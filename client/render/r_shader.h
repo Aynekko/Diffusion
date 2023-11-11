@@ -142,10 +142,9 @@ typedef struct glsl_prog_s
 	GLint u_WaterDrops;
 	GLint u_Glitch;
 	GLint u_ScreenWater;
-
-	// motion blur
 	GLint u_Accum;
-	GLint u_MB_Velocity;
+	GLint u_MotionBlur;
+	GLint u_HorizontalBlur;
 
 	// sunshafts
 	GLint u_SS_Brightness;

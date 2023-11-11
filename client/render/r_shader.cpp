@@ -1225,11 +1225,7 @@ static void GL_InitMotionBlurUniforms( glsl_program_t *shader )
 	ASSERT( shader != NULL );
 
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
-	shader->u_DepthMap = pglGetUniformLocationARB( shader->handle, "u_DepthMap" );
-
-	shader->u_MB_Velocity = pglGetUniformLocationARB( shader->handle, "u_MB_Velocity" );
-	shader->u_LightDiffuse = pglGetUniformLocationARB( shader->handle, "u_LightDiffuse" );
-	shader->u_Accum = pglGetUniformLocationARB( shader->handle, "u_Accum" );
+	shader->u_MotionBlur = pglGetUniformLocationARB( shader->handle, "u_MotionBlur" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
@@ -1244,7 +1240,6 @@ static void GL_InitHorizontalBlurUniforms( glsl_program_t *shader )
 	ASSERT( shader != NULL );
 
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
-	shader->u_MB_Velocity = pglGetUniformLocationARB( shader->handle, "u_MB_Velocity" );
 	shader->u_Accum = pglGetUniformLocationARB( shader->handle, "u_Accum" );
 
 	GL_BindShader( shader );
