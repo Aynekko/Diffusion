@@ -1056,6 +1056,10 @@ void ToneMap(void)
 	int mip_width = glState.width;
 	int mip_height = glState.height;
 
+	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height) );
+	pglUniform4fARB( RI->currentshader->u_TexCoordClamp, 0.0f, 0.0f, 1.0f, 1.0f );
+	pglUniform1fARB( RI->currentshader->u_BloomFirstPass, 0.0f );
+
 	for( int i = 1; i <= mipmap_count; i++ )
 	{
 		mip_width /= 2;
@@ -1066,10 +1070,7 @@ void ToneMap(void)
 
 		pglViewport( 0, 0, mip_width, mip_height );
 
-		pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height) );
 		pglUniform1fARB( RI->currentshader->u_MipLod, (float)(i - 1) );
-		pglUniform4fARB( RI->currentshader->u_TexCoordClamp, 0.0f, 0.0f, 1.0f, 1.0f );
-		pglUniform1fARB( RI->currentshader->u_BloomFirstPass, 0.0f );
 
 		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, tr.avg_luminance_fbo_mip[i] );
 		RenderFSQ( glState.width, glState.height );
