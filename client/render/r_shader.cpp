@@ -1020,12 +1020,7 @@ static void GL_InitGrassSolidUniforms( glsl_program_t *shader )
 	shader->u_ModelMatrix = pglGetUniformLocationARB( shader->handle, "u_ModelMatrix" );
 	shader->u_LightStyleValues = pglGetUniformLocationARB( shader->handle, "u_LightStyleValues" );
 	shader->u_GammaTable = pglGetUniformLocationARB( shader->handle, "u_GammaTable" );
-	shader->u_GrassFadeStart = pglGetUniformLocationARB( shader->handle, "u_GrassFadeStart" );
-	shader->u_GrassFadeDist = pglGetUniformLocationARB( shader->handle, "u_GrassFadeDist" );
-	shader->u_GrassFadeEnd = pglGetUniformLocationARB( shader->handle, "u_GrassFadeEnd" );
-	shader->u_ViewOrigin = pglGetUniformLocationARB( shader->handle, "u_ViewOrigin" );
-	shader->u_RealTime = pglGetUniformLocationARB( shader->handle, "u_RealTime" );
-	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
+	shader->u_GrassParams = pglGetUniformLocationARB( shader->handle, "u_GrassParams" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );

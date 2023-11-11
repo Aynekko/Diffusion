@@ -447,13 +447,16 @@ void R_DrawGrassMesh( grass_t *grass, int tex, word &hLastShader, word &hCachedM
 		ASSERT( RI->currentshader != NULL );
 
 		pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
-		pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );
-		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 		pglUniform4fvARB( RI->currentshader->u_GammaTable, 64, &tr.gamma_table[0][0] );
-		pglUniform1fARB( RI->currentshader->u_GrassFadeStart, m_flGrassFadeStart );
-		pglUniform1fARB( RI->currentshader->u_GrassFadeDist, m_flGrassFadeDist );
-		pglUniform1fARB( RI->currentshader->u_GrassFadeEnd, m_flGrassFadeEnd );
-		pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
+		Vector4D grass_params[3];
+		// view origin + real time
+		grass_params[0] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, tr.time );
+		// fog params
+		grass_params[1] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+		// grass params
+		grass_params[2] = Vector4D( m_flGrassFadeStart, m_flGrassFadeDist, m_flGrassFadeEnd, 0.0f );
+		// send!
+		pglUniform4fvARB( RI->currentshader->u_GrassParams, 3, &grass_params[0][0] );
 		hLastShader = grass->vbo.shaderNum;
 		hCachedMatrix = -1;
 	}
@@ -646,11 +649,13 @@ void R_RenderShadowGrassOnList( void )
 	GL_Cull( GL_NONE );	// grass is double-sided poly
 	GL_BindShader( glsl.grassDepthFill );
 
-	pglUniform3fARB( RI->currentshader->u_ViewOrigin, tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z );
-	pglUniform1fARB( RI->currentshader->u_GrassFadeStart, m_flGrassFadeStart );
-	pglUniform1fARB( RI->currentshader->u_GrassFadeDist, m_flGrassFadeDist );
-	pglUniform1fARB( RI->currentshader->u_GrassFadeEnd, m_flGrassFadeEnd );
-	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
+	Vector4D grass_params[2];
+	// view origin + real time
+	grass_params[0] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, tr.time );
+	// grass params
+	grass_params[1] = Vector4D( m_flGrassFadeStart, m_flGrassFadeDist, m_flGrassFadeEnd, 0.0f );
+	// send!
+	pglUniform4fvARB( RI->currentshader->u_GrassParams, 2, &grass_params[0][0] );
 
 	for( int i = 0; i < GRASS_TEXTURES; i++ )
 	{

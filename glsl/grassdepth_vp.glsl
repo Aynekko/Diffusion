@@ -20,11 +20,12 @@ attribute vec4		attr_Position;	// gl_VertexID emulation (already preserved by & 
 attribute vec4		attr_Normal;
 
 uniform mat4		u_ModelMatrix;
-uniform vec3		u_ViewOrigin;
-uniform float		u_RealTime;
-uniform float		u_GrassFadeStart;
-uniform float		u_GrassFadeDist;
-uniform float		u_GrassFadeEnd;
+uniform vec4 u_GrassParams[2];
+#define u_ViewOrigin		u_GrassParams[0].xyz
+#define u_RealTime			u_GrassParams[0].w
+#define u_GrassFadeStart	u_GrassParams[1].x
+#define u_GrassFadeDist		u_GrassParams[1].y
+#define u_GrassFadeEnd		u_GrassParams[1].z
 
 varying vec2		var_TexCoord;
 

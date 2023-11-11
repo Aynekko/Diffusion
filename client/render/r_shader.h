@@ -131,9 +131,10 @@ typedef struct glsl_prog_s
 	GLint u_RenderColor;	// color + alpha
 	GLint u_RealTime;	// tr.time
 	GLint u_Cubemap;	// cubemaps stuff
-	GLint u_GrassFadeStart;
-	GLint u_GrassFadeDist;
-	GLint u_GrassFadeEnd;
+//	GLint u_GrassFadeStart;
+//	GLint u_GrassFadeDist;
+//	GLint u_GrassFadeEnd;
+	GLint u_GrassParams;
 	GLint u_DynLightBrightness;
 	GLint u_GlossScale;
 	GLint u_GlossSmoothness;

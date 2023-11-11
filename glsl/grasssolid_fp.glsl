@@ -19,7 +19,8 @@ GNU General Public License for more details.
 
 uniform sampler2D		u_ColorMap;
 
-uniform vec4		u_FogParams;
+uniform vec4 u_GrassParams[3];
+#define u_FogParams u_GrassParams[1]
 
 varying vec2		var_TexDiffuse;
 varying vec3		var_VertexLight;

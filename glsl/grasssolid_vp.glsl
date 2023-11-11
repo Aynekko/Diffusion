@@ -24,11 +24,12 @@ attribute vec4		attr_LightStyles;
 uniform mat4		u_ModelMatrix;
 uniform float		u_LightStyleValues[MAX_LIGHTSTYLES];
 uniform vec4		u_GammaTable[64];
-uniform float		u_GrassFadeStart;
-uniform float		u_GrassFadeDist;
-uniform float		u_GrassFadeEnd;
-uniform vec3		u_ViewOrigin;
-uniform float		u_RealTime;
+uniform vec4 u_GrassParams[3];
+#define u_GrassFadeStart	u_GrassParams[2].x
+#define u_GrassFadeDist		u_GrassParams[2].y
+#define u_GrassFadeEnd		u_GrassParams[2].z
+#define u_ViewOrigin		u_GrassParams[0].xyz
+#define u_RealTime			u_GrassParams[0].w
 
 varying vec2		var_TexDiffuse;
 varying vec3		var_VertexLight;
