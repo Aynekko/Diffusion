@@ -131,9 +131,6 @@ typedef struct glsl_prog_s
 	GLint u_RenderColor;	// color + alpha
 	GLint u_RealTime;	// tr.time
 	GLint u_Cubemap;	// cubemaps stuff
-//	GLint u_GrassFadeStart;
-//	GLint u_GrassFadeDist;
-//	GLint u_GrassFadeEnd;
 	GLint u_GrassParams;
 	GLint u_DynLightBrightness;
 	GLint u_GlossScale;
@@ -144,6 +141,7 @@ typedef struct glsl_prog_s
 	GLint u_MeshParams; // array for studio models: world origin, angles and scale
 	GLint u_WaterDrops;
 	GLint u_Glitch;
+	GLint u_ScreenWater;
 
 	// motion blur
 	GLint u_Accum;

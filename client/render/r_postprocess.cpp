@@ -695,9 +695,7 @@ void ScreenWater(void)
 	GL_BindShader( glsl.ScreenWater );
 	ASSERT( RI->currentshader != NULL );
 
-	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height) );
-	pglUniform1fARB( RI->currentshader->u_Accum, Speed );
+	pglUniform4fARB( RI->currentshader->u_ScreenWater, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height), tr.time, Speed );
 
 	GL_Bind( GL_TEXTURE1, ScreenWaterTexture );
 
