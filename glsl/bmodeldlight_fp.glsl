@@ -38,7 +38,7 @@ uniform float		u_GlossScale;
 uniform float		u_EmbossScale;
 #endif
 
-uniform sampler2D	u_ScreenMap;	// screen copy
+//uniform sampler2D	u_ScreenMap;	// screen copy
 
 #if defined( BMODEL_LIGHT_PROJECTION )
 uniform sampler2D	u_ProjectMap;
@@ -59,11 +59,10 @@ uniform vec4			u_LightParams[5];
 #define u_LightDiffuse	u_LightParams[1]
 #define u_ShadowParams	u_LightParams[2]
 #define u_LightOrigin	u_LightParams[3]
+#define u_FogParams		u_LightParams[5]
 
 uniform vec4		u_RenderColor;
-uniform vec4		u_FogParams;
-uniform vec2		u_ScreenSizeInv;
-uniform float           u_RealTime;
+//uniform vec2		u_ScreenSizeInv;
 
 #if defined( BMODEL_LIGHT_PROJECTION )
 varying vec4		var_ProjCoord;
@@ -76,9 +75,9 @@ varying vec4		var_ShadowCoord;
 varying vec2		var_TexDiffuse;
 varying vec2		var_TexGlobal;
 varying vec3		var_LightVec;
-varying vec3	        var_ViewVec; 
+varying vec3		var_ViewVec; 
 varying vec3		var_Normal;
-varying mat3	        var_MatrixTBN;
+varying mat3		var_MatrixTBN;
 varying vec3		var_Position;
 
 void main( void )
@@ -236,12 +235,13 @@ void main( void )
 		diffuse.rgb += gloss * shadow;
 	#endif
 
+/* not used
 #if defined( BMODEL_TRANSLUCENT )
 	vec3 screenmap = texture2D( u_ScreenMap, gl_FragCoord.xy * u_ScreenSizeInv ).xyz;
 	screenmap.rgb *= light.rgb * NdotL * atten;
 	diffuse.rgb = Q_mix( screenmap, diffuse.rgb, u_RenderColor.a );
 #endif
-
+*/
 	// compute final color
 	gl_FragColor = diffuse;
 }

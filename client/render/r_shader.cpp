@@ -790,19 +790,15 @@ static void GL_InitBmodelDlightUniforms( glsl_program_t *shader )
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
 	shader->u_ProjectMap = pglGetUniformLocationARB( shader->handle, "u_ProjectMap" );
 	shader->u_ShadowMap = pglGetUniformLocationARB( shader->handle, "u_ShadowMap" ); // shadow2D or shadowCube
-	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
+//	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
 	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
 
 	if( GL_FindShaderDirective( shader, "BMODEL_MULTI_LAYERS" ))
 		shader->u_LayerMap = pglGetUniformLocationARB( shader->handle, "u_LayerMap" );
 
 	shader->u_ModelMatrix = pglGetUniformLocationARB( shader->handle, "u_ModelMatrix" );
-	if( GL_FindShaderDirective( shader, "BMODEL_WAVEHEIGHT" ) )
-		shader->u_WaveHeight = pglGetUniformLocationARB( shader->handle, "u_WaveHeight" );
 	shader->u_TexOffset = pglGetUniformLocationARB( shader->handle, "u_TexOffset" );
-
 	shader->u_LightViewProjectionMatrix = pglGetUniformLocationARB( shader->handle, "u_LightViewProjectionMatrix" );
-	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
 	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
 	shader->u_RenderColor = pglGetUniformLocationARB( shader->handle, "u_RenderColor" );
 	shader->u_DynLightBrightness = pglGetUniformLocationARB( shader->handle, "u_DynLightBrightness" );
@@ -822,7 +818,7 @@ static void GL_InitBmodelDlightUniforms( glsl_program_t *shader )
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
 	pglUniform1iARB( shader->u_ProjectMap, GL_TEXTURE2 );	// projection lights only
 	pglUniform1iARB( shader->u_ShadowMap, GL_TEXTURE3 );	// shadowmap or cubemap
-	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE4 );
+//	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE4 );
 
 	if( GL_FindShaderDirective( shader, "BMODEL_MULTI_LAYERS" ))
 		pglUniform1iARB( shader->u_LayerMap, GL_TEXTURE5 );
@@ -1706,9 +1702,6 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 	if( FBitSet( s->flags, SURF_WATER ))
 	{
 		GL_AddShaderDirective( options, "BMODEL_WATER" );
-
-		if( RI->currententity && RI->currententity->curstate.scale)
-			GL_AddShaderDirective( options, "BMODEL_WAVEHEIGHT" );
 
 		if( !tr.lowmemory && RI->currententity && (gl_water_refraction->value > 0) && (RI->currententity->curstate.renderfx != kRenderFxNoRefraction) )
 		{

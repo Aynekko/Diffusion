@@ -2205,6 +2205,8 @@ void R_DrawLightForSurfList( plight_t *pl )
 	mextrasurf_t *es;
 	msurface_t *s;
 	texture_t *tex;
+	Vector4D light_params[6];
+	float waveHeight = 0.0f;
 
 	for( int i = 0; i < tr.num_light_surfaces; i++ )
 	{
@@ -2248,9 +2250,12 @@ void R_DrawLightForSurfList( plight_t *pl )
 			float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture[0] );
 			float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
 
-			// depth scale and bias and shadowmap resolution
-			pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
-			Vector4D light_params[5];
+			// set the current waveheight
+			if( s->polys->verts[0][2] >= RI->vieworg[2] )
+				waveHeight = -RI->currententity->curstate.scale;
+			else
+				waveHeight = RI->currententity->curstate.scale;
+
 			// light dir
 			light_params[0] = Vector4D( lightdir.x, lightdir.y, lightdir.z, pl->fov );
 			// light diffuse
@@ -2259,10 +2264,12 @@ void R_DrawLightForSurfList( plight_t *pl )
 			light_params[2] = Vector4D( shadowWidth, shadowHeight, -pl->projectionMatrix[2][2], pl->projectionMatrix[3][2] );
 			// light origin
 			light_params[3] = Vector4D( pl->origin.x, pl->origin.y, pl->origin.z, (1.0f / pl->radius) );
-			// view origin
-			light_params[4] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, 0.0f );
+			// view origin + waveheight
+			light_params[4] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, waveHeight );
+			// fog params
+			light_params[5] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 			// send through one call
-			pglUniform4fvARB( RI->currentshader->u_LightParams, 5, &light_params[0][0] );
+			pglUniform4fvARB( RI->currentshader->u_LightParams, 6, &light_params[0][0] );
 
 			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 			pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)glState.width, 1.0f / (float)glState.height );
@@ -2270,16 +2277,6 @@ void R_DrawLightForSurfList( plight_t *pl )
 
 			GL_Bind( GL_TEXTURE2, pl->projectionTexture );
 			GL_Bind( GL_TEXTURE3, pl->shadowTexture[0] );
-
-			// set the current waveheight
-			float waveHeight = 0.0f;
-			if( s->polys->verts[0][2] >= RI->vieworg[2] )
-				waveHeight = -RI->currententity->curstate.scale;
-			else
-				waveHeight = RI->currententity->curstate.scale;
-
-			if( FBitSet( s->flags, SURF_WATER ) && (waveHeight != 0.0f) )
-				pglUniform1fARB( RI->currentshader->u_WaveHeight, waveHeight );
 
 			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
 
@@ -2332,11 +2329,6 @@ void R_DrawLightForSurfList( plight_t *pl )
 					GL_Bind( GL_TEXTURE0, tex->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
 			}
-
-			if( ScreenCopyRequired( RI->currentshader ) )
-				GL_Bind( GL_TEXTURE4, tr.screen_color );
-			else
-				GL_Bind( GL_TEXTURE4, tr.whiteTexture );
 
 			if( FBitSet( s->flags, SURF_LANDSCAPE ) )
 			{

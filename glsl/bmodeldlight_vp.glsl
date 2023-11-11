@@ -18,9 +18,6 @@ GNU General Public License for more details.
 #include "tnbasis.h"
 
 #define u_RealTime	u_TexOffset.z
-#if defined( BMODEL_WAVEHEIGHT )
-uniform float u_WaveHeight;
-#endif
 
 attribute vec3		attr_Position;
 attribute vec4		attr_TexCoord0;
@@ -34,6 +31,7 @@ uniform mat4		u_LightViewProjectionMatrix;
 uniform vec4			u_LightParams[5];
 #define u_LightOrigin	u_LightParams[3]
 #define u_ViewOrigin	u_LightParams[4].xyz
+#define u_WaveHeight	u_LightParams[4].w
 
 // shared variables
 varying vec2		var_TexDiffuse;
