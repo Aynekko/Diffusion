@@ -726,9 +726,7 @@ void Glitch( void )
 	GL_BindShader( glsl.Glitch );
 	ASSERT( RI->currentshader != NULL );
 
-	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height) );
-	pglUniform1fARB( RI->currentshader->u_Accum, gHUD.GlitchAmount );
+	pglUniform4fARB( RI->currentshader->u_Glitch, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height), tr.time, gHUD.GlitchAmount );
 
 	RenderFSQ( glState.width, glState.height );
 
@@ -950,6 +948,8 @@ void Bloom( void )
 	int w = glState.width;
 	int h = glState.height;
 
+	pglUniform4fARB( RI->currentshader->u_TexCoordClamp, 0.0f, 0.0f, 1.0f, 1.0f );
+
 	// render and blur mips
 	for( int i = 0; i < 6; i++ )
 	{
@@ -960,7 +960,6 @@ void Bloom( void )
 
 		pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)w, 1.0f / (float)h );
 		pglUniform1fARB( RI->currentshader->u_MipLod, (float)i );
-		pglUniform4fARB( RI->currentshader->u_TexCoordClamp, 0.0f, 0.0f, 1.0f, 1.0f );
 		pglUniform1fARB( RI->currentshader->u_BloomFirstPass, (i < 1) ? 1 : 0 );
 
 		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, tr.screen_fbo_mip[i] );

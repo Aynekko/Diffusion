@@ -2,10 +2,11 @@
 // modified, simplified (removed unneeded stuff)
 
 uniform sampler2D u_ColorMap;  // screen
-uniform float u_RealTime;
-uniform vec2 u_ScreenSizeInv;
-uniform float u_Accum;
 varying vec2 var_TexCoord;
+uniform vec4 u_Glitch;
+#define u_ScreenSizeInv u_Glitch.xy
+#define u_RealTime		u_Glitch.z
+#define u_GlitchAmount	u_Glitch.w
 
 // amount of seconds for which the glitch loop occurs
 #define DURATION 1.0
@@ -103,6 +104,6 @@ void main( void )
     col += (.15 + .65 * glitchAmount) * (hash33(vec3(gl_FragCoord.xy, mod(float(200), 1000.))).r) * displayNoise;
     col -= (.25 + .75 * glitchAmount) * (sin(4. * t + uv.y * u_ScreenSizeInv.x * 1.75)) * displayNoise;
 
-	float outAmount = u_Accum; // visibility controlled here
+	float outAmount = u_GlitchAmount; // visibility controlled here
 	gl_FragColor = vec4( mix( original.rgb, col.rgb, outAmount ), 1.0 );
 }

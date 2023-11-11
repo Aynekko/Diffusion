@@ -143,6 +143,7 @@ typedef struct glsl_prog_s
 	GLint u_Fresnel;
 	GLint u_MeshParams; // array for studio models: world origin, angles and scale
 	GLint u_WaterDrops;
+	GLint u_Glitch;
 
 	// motion blur
 	GLint u_Accum;
