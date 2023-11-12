@@ -18,7 +18,8 @@ GNU General Public License for more details.
 #include "matrix.h"
 
 uniform mat4		u_LightViewProjectionMatrix;
-uniform vec4		u_LightOrigin;
+uniform vec4		u_LightParams[6];
+#define u_LightOrigin u_LightParams[3]
 
 varying vec2		var_TexDiffuse;
 varying vec3		var_LightVec;

@@ -1045,14 +1045,8 @@ static void GL_InitGenericDlightUniforms( glsl_program_t *shader )
 	shader->u_ProjectMap = pglGetUniformLocationARB( shader->handle, "u_ProjectMap" );
 	shader->u_ShadowMap = pglGetUniformLocationARB( shader->handle, "u_ShadowMap" );
 
-	shader->u_LightDir = pglGetUniformLocationARB( shader->handle, "u_LightDir" );
-	shader->u_LightDiffuse = pglGetUniformLocationARB( shader->handle, "u_LightDiffuse" );
-	shader->u_ShadowParams = pglGetUniformLocationARB( shader->handle, "u_ShadowParams" );
-	shader->u_LightOrigin = pglGetUniformLocationARB( shader->handle, "u_LightOrigin" );
 	shader->u_LightViewProjectionMatrix = pglGetUniformLocationARB( shader->handle, "u_LightViewProjectionMatrix" );
-	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
-	shader->u_LightScale = pglGetUniformLocationARB( shader->handle, "u_LightScale" );
-	shader->u_DynLightBrightness = pglGetUniformLocationARB( shader->handle, "u_DynLightBrightness" );
+	shader->u_LightParams = pglGetUniformLocationARB( shader->handle, "u_LightParams" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );

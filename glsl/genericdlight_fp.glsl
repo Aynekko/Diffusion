@@ -31,13 +31,14 @@ uniform sampler2D		u_ColorMap;
 	#endif
 #endif
 
-uniform vec4		u_LightDir;
-uniform vec4		u_LightDiffuse;
-uniform vec4		u_LightOrigin;
-uniform vec4		u_ShadowParams;
-uniform vec4		u_FogParams;
-uniform float		u_LightScale;
-uniform float		u_DynLightBrightness;
+uniform vec4		u_LightParams[6];
+#define u_LightDir		u_LightParams[0]
+#define u_LightDiffuse	u_LightParams[1]
+#define u_ShadowParams	u_LightParams[2]
+#define u_LightOrigin	u_LightParams[3]
+#define u_FogParams		u_LightParams[4]
+#define u_LightScale	u_LightParams[5].x
+#define u_DynLightBrightness u_LightParams[5].y
 
 varying vec2		var_TexDiffuse;
 varying vec3		var_LightVec;

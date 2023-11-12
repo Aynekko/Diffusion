@@ -271,14 +271,21 @@ bool R_BeginDrawProjectionGLSL( plight_t *pl, float lightscale )
 	float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture[0] );
 	float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
 
-	// depth scale and bias and shadowmap resolution
-	pglUniform4fARB( RI->currentshader->u_LightDir, lightdir.x, lightdir.y, lightdir.z, pl->fov );
-	pglUniform4fARB( RI->currentshader->u_LightDiffuse, pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
-	pglUniform4fARB( RI->currentshader->u_ShadowParams, shadowWidth, shadowHeight, -pl->projectionMatrix[2][2], pl->projectionMatrix[3][2]  );
-	pglUniform4fARB( RI->currentshader->u_LightOrigin, pl->origin.x, pl->origin.y, pl->origin.z, ( 1.0f / pl->radius ));
-	pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
-	pglUniform1fARB( RI->currentshader->u_LightScale, lightscale );
-	pglUniform1fARB( RI->currentshader->u_DynLightBrightness, pl->brightness );
+	Vector4D light_params[6];
+	// light dir + fov
+	light_params[0] = Vector4D( lightdir.x, lightdir.y, lightdir.z, pl->fov );
+	// light diffuse
+	light_params[1] = Vector4D( pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
+	// shadow params
+	light_params[2] = Vector4D( shadowWidth, shadowHeight, -pl->projectionMatrix[2][2], pl->projectionMatrix[3][2] );
+	// light origin
+	light_params[3] = Vector4D( pl->origin.x, pl->origin.y, pl->origin.z, (1.0f / pl->radius) );
+	// fog params
+	light_params[4] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+	// lightscale and brightness
+	light_params[5] = Vector4D( lightscale, pl->brightness, 0.0f, 0.0f );
+	// send all out
+	pglUniform4fvARB( RI->currentshader->u_LightParams, 6, &light_params[0][0] );
 
 	GL_Bind( GL_TEXTURE1, pl->projectionTexture );
 	GL_Bind( GL_TEXTURE2, pl->shadowTexture[0] );
