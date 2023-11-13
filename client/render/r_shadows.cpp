@@ -91,6 +91,25 @@ void R_ResetShadowTextures( void )
 		return;
 	}
 
+	// create 3 shadow textures to decrease flashlight first lag
+	for( i = 0; i < 4; i++ )
+	{
+		if( !tr.shadowTextures[i] )
+		{
+			char txName[16];
+			Q_snprintf( txName, sizeof( txName ), "*shadow%i", i );
+			tr.shadowTextures[i] = CREATE_TEXTURE( txName, ShadowViewport, ShadowViewport, NULL, TF_SHADOW );
+		}
+	}
+
+	// create 1 shadow cubemap too
+	if( !tr.shadowCubemaps[0] )
+	{
+		char txName[16];
+		Q_snprintf( txName, sizeof( txName ), "*shadowCM0" );
+		tr.shadowCubemaps[0] = CREATE_TEXTURE( txName, ShadowViewport, ShadowViewport, NULL, TF_SHADOW_CUBEMAP );
+	}
+
 	ConPrintf( "Shadow textures reset to quality %i (%ip)\n", ShadowQualityLevel, ShadowViewport );
 }
 
