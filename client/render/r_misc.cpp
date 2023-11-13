@@ -80,7 +80,8 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		dltest->projectionTexture = tr.whiteCubeTexture;
 		// this needs to disable self-shadow
 		dltest->entindex = pEnt->index;
-		dltest->effect = 1;
+		if( !r_flashlightlockposition->value ) // allow lighting yourself if this is set
+			dltest->effect = 1;
 
 		if( r_flashlightlockposition->value )
 			v_origin = s_origin;
@@ -237,7 +238,8 @@ void SetupFlashlight( cl_entity_t *pEnt )
 	// copy the entity number - we don't need light and shadows
 	// for our own player model or weapon from our own flashlight
 	pl->entindex = pEnt->index;
-	pl->effect = 1; // diffusion - just a flag that this is a flashlight
+	if( !r_flashlightlockposition->value ) // allow lighting yourself if this is set
+		pl->effect = 1; // diffusion - just a flag that this is a flashlight
 
 	pl->projectionTexture = FlashlightTexture;
 	R_SetupLightProjection( pl, v_origin, v_angles, FlashlightRadius, FlashlightFOV );
