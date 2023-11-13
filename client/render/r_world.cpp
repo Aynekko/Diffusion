@@ -3724,8 +3724,6 @@ void R_DrawWorldShadowPass( void )
 	R_GrassPrepareFrame();
 	R_LoadIdentity();
 
-	R_MarkLeaves();
-
 	if( CVAR_TO_BOOL( r_recursive_world_node ) )
 		R_RecursiveWorldNode( world->nodes, RI->frustum.GetClipFlags() );
 	else
