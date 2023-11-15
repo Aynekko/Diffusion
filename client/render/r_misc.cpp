@@ -83,7 +83,7 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		if( !r_flashlightlockposition->value ) // allow lighting yourself if this is set
 			dltest->effect = 1;
 
-		if( r_flashlightlockposition->value )
+		if( r_flashlightlockposition->value && !(gHUD.m_iKeyBits & IN_RELOAD) )
 			v_origin = s_origin;
 		else
 		{
@@ -111,7 +111,7 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		if( r_shadowquality->value < 1 ) // shadows on very low, disable
 			pl->flags |= CF_NOSHADOWS;
 		
-		if( r_flashlightlockposition->value )
+		if( r_flashlightlockposition->value && !(gHUD.m_iKeyBits & IN_RELOAD) )
 		{
 			v_origin = s_origin;
 			v_angles = s_angles;
