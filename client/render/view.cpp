@@ -175,7 +175,6 @@ int g_iTeamNumber;
 int g_iUser1 = 0;
 int g_iUser2 = 0;
 int g_iUser3 = 0;
-bool g_bDucked = false;
 float g_fFrametime = 0.0f;
 
 //============================================================================== 

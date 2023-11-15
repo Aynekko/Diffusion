@@ -1026,7 +1026,6 @@ extern int g_iTeamNumber;
 extern int g_iUser1;
 extern int g_iUser2;
 extern int g_iUser3;
-extern bool g_bDucked; // true if has flag FL_DUCKED
 extern float g_fFrametime; // = pparams->frametime
 extern bool ApplyGaussBlur;
 extern bool ApplyDamageMonochrome;

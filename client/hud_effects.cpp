@@ -173,7 +173,7 @@ void CScreenEffects::DrawCinematicBorder( void )
 //===============================================
 void CScreenEffects::DrawVignette( void )
 {
-	if( (g_bDucked && tr.viewparams.onground) || (tr.time == tr.oldtime) )
+	if( (gEngfuncs.pEventAPI->EV_LocalPlayerDucking() && tr.viewparams.onground) || (tr.time == tr.oldtime) )
 	{
 		if( VignetteAlpha < 1 )
 			VignetteAlpha += 2 * g_fFrametime;

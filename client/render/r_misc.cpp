@@ -942,12 +942,6 @@ void DLLEXPORT HUD_TxferLocalOverrides( struct entity_state_s* state, const stru
 
 	// always have valid PVS message
 	r_currentMessageNum = state->messagenum;
-
-	// diffusion
-	if( client->flags & FL_DUCKING )
-		g_bDucked = true;
-	else
-		g_bDucked = false;
 }
 
 /*
