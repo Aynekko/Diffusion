@@ -2250,6 +2250,9 @@ void R_Animatex( void )
 	if( !RP_NORMALPASS() )
 		return;
 
+	if( tr.time == tr.oldtime )
+		return; // not in paused
+
 	int i = 0;
 
 	while( i < MAX_ANIMATIONS )
