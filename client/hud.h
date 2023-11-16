@@ -26,7 +26,12 @@
 #define RGB_GREY		0x00777777 // 119, 119, 119
 
 #include "wrect.h"
-#include "windows.h"
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <stdarg.h>
+#include <ctype.h>
+#endif
 #include "mathlib.h"
 #include "cdll_int.h"
 #include "cdll_dll.h"

@@ -26,7 +26,6 @@
 #include "entity_state.h"
 #include "r_particle.h"
 #include "cdll_exp.h"
-#include "pm_defs.h"
 
 int developer_level;
 int g_iXashEngineBuildNumber;
