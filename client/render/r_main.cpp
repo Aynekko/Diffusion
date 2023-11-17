@@ -2217,7 +2217,7 @@ static render_interface_t gRenderInterface =
 	R_ClearScene,
 };
 
-extern "C" int DLLEXPORT HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback )
+int HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback )
 {
 	if ( !callback || !renderfuncs || version != CL_RENDER_INTERFACE_VERSION )
 	{

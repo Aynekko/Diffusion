@@ -43,7 +43,6 @@
 #include "ammo.h"
 #include "achievementdata.h"
 #include "animatex.h"
-#include "exportdef.h"
 
 typedef struct cvar_s	cvar_t;
 

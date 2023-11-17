@@ -44,7 +44,7 @@ CStudioModelRenderer g_StudioRenderer;
 //			HUD_GetStudioModelInterface
 //	Export this function for the engine to use the studio renderer class to render objects.
 //================================================================================================
-extern "C" int DLLEXPORT HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio )
+int HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio )
 {
 	if( version != STUDIO_INTERFACE_VERSION )
 		return 0;

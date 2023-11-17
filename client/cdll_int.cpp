@@ -104,7 +104,7 @@ char HUD_PlayerMoveTexture( char *name )
 	return PM_FindTextureType( name );
 }
 
-extern "C" void DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
+void HUD_PlayerMove( struct playermove_s *ppmove, int server )
 {
 	PM_Move( ppmove, server );
 }
@@ -143,7 +143,7 @@ and whenever the vid_mode is changed
 so the HUD can reinitialize itself.
 ==========================
 */
-extern "C" int DLLEXPORT HUD_VidInit(void)
+int HUD_VidInit(void)
 {	
 	gHUD.VidInit();
 
@@ -161,7 +161,7 @@ to a server.  Reinitializes all
 the hud variables.
 ==========================
 */
-void DLLEXPORT HUD_Init( void )
+void HUD_Init( void )
 {
 	InitInput();
 	gHUD.Init();
@@ -176,7 +176,7 @@ void DLLEXPORT HUD_Init( void )
 	gHUD.m_StatusIconsAchievement.LoadAchievementFile();
 }
 
-void DLLEXPORT HUD_Shutdown( void )
+void HUD_Shutdown( void )
 {
 	// diffusion - save achievement stats
 	gHUD.m_StatusIconsAchievement.SaveAchievementFile();
@@ -201,7 +201,7 @@ called every screen frame to
 redraw the HUD.
 ===========================
 */
-extern "C" int DLLEXPORT HUD_Redraw(float time, int intermission)
+int HUD_Redraw(float time, int intermission)
 {
 	return gHUD.Redraw( time, intermission );
 }
@@ -218,7 +218,7 @@ to modify the data.
 returns 1 if anything has been changed, 0 otherwise.
 ==========================
 */
-extern "C" int DLLEXPORT HUD_UpdateClientData(client_data_t * pcldata, float flTime)
+int HUD_UpdateClientData(client_data_t * pcldata, float flTime)
 {
 	return gHUD.UpdateClientData( pcldata, flTime );
 }
@@ -230,7 +230,7 @@ extern "C" int DLLEXPORT HUD_UpdateClientData(client_data_t * pcldata, float flT
 Called at start and end of demos to restore to "non"HUD state.
 ==========================
 */
-extern "C" void DLLEXPORT HUD_Reset(void)
+void HUD_Reset(void)
 {
 	gHUD.VidInit();
 }
@@ -269,18 +269,18 @@ HUD_Frame
 Called by engine every frame that client .dll is loaded
 ==========================
 */
-extern "C" void DLLEXPORT HUD_Frame( double time )
+void HUD_Frame( double time )
 {
 	// run anti (_-=ZhekA=-_) system for Xash3D engine
 	gEngfuncs.VGui_ViewportPaintBackground( VGUI_GetRect( ));
 }
 
-extern "C" int DLLEXPORT HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
+int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 {
 	return 1;
 }
 
-extern "C" void DLLEXPORT HUD_PostRunCmd(struct local_state_s*, local_state_s*, struct usercmd_s*, int, double, unsigned int)
+void HUD_PostRunCmd(struct local_state_s*, local_state_s*, struct usercmd_s*, int, double, unsigned int)
 {
 }
 
@@ -296,7 +296,7 @@ void Demo_ReadBuffer( int size, unsigned char *buffer )
 {
 }
 
-cl_entity_t DLLEXPORT *HUD_GetUserEntity( int index )
+cl_entity_t *HUD_GetUserEntity( int index )
 {
 	return NULL;
 }
