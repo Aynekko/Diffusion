@@ -488,6 +488,7 @@ public:
 
 	void Dash(void);
 	Vector DashRememberVelocity;
+	bool Dash_onground_state;
 	void RegenerateHealth(void);
 	void ManageStamina(void);
 

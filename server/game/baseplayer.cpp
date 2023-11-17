@@ -4610,6 +4610,15 @@ void CBasePlayer::Dash(void)
 {
 	if( Dashed )
 	{
+		if( bool( pev->flags & FL_ONGROUND ) != Dash_onground_state )
+		{
+			pev->velocity.z = 0;
+			pev->velocity.x *= 0.5;
+			pev->velocity.y *= 0.5;
+			DashRememberVelocity.z = 0;
+			Dash_onground_state = (pev->flags & FL_ONGROUND);
+		}
+		
 		if( gpGlobals->time - LastDashTime > 0.15 )
 		{
 			SetAbsVelocity( DashRememberVelocity );
@@ -4686,6 +4695,10 @@ void CBasePlayer::Dash(void)
 			m_flStaminaWait = gpGlobals->time + 3;
 
 		//ALERT(at_console, "After-Dash Wait %.2f\n", m_flStaminaWait - gpGlobals->time);
+
+		// remember if the dash was started in air or on the ground
+		// if this state changes, we will zero out the falling velocity, to prevent jumping
+		Dash_onground_state = (pev->flags & FL_ONGROUND);
 	}
 
 	DashButton = false;
