@@ -2053,7 +2053,8 @@ void CQuakePartSystem::Smoke( int EntIndex, int Particle, const Vector &pos, con
 			src.m_flAlphaVelocity *= 0.5f;
 		src.m_flRadius = scale;
 		src.m_flRadiusVelocity = 7.0f;
-		src.m_flRotation = RANDOM_LONG( 0, 360 );
+		src.m_flRotation = RANDOM_LONG( 0, 359 );
+		src.m_flRotationVelocity = RANDOM_LONG( -15, 15 );
 		src.m_flDistance = Distance;
 		src.EntIndex = EntIndex;
 		if( Particle == m_hSmoke )

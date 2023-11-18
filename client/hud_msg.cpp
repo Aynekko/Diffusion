@@ -1001,6 +1001,16 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		}
 	}
 	break;
+
+	case TE_STEP_PARTICLE:
+	{
+		pos.x = READ_COORD();
+		pos.y = READ_COORD();
+		pos.z = READ_COORD();
+		Model = READ_BYTE();
+		g_pParticles.Smoke( 0, Model, pos, Vector( 0, 0, 5 ), 1, 0.15f, 10, 1 );
+	}
+	break;
 	}
 
 	END_READ();

@@ -2847,6 +2847,7 @@ void CBaseMonster :: StepSound( void )
 	float fattn = ATTN_NORM;
 	bool fWalking = false;
 	int cnt;
+	int particle = 0; // 0 asphalt, 1 sand, 2 dirt
 
 	UTIL_TraceLine( pev->origin + Vector( 0, 0, 8 ), pev->origin - Vector( 0, 0, 16 ), ignore_monsters, ENT( pev ), &ptr );
 	CBaseEntity *pEntity = CBaseEntity::Instance(ptr.pHit);
@@ -2902,6 +2903,7 @@ void CBaseMonster :: StepSound( void )
 		rgsz[2] = "footsteps/dirt2.wav";
 		rgsz[3] = "footsteps/dirt4.wav";
 		cnt = 4;
+		particle = 1;
 		break;
 	case CHAR_TEX_VENT:
 		fvol = fWalking ? 0.4 : 0.7;
@@ -2975,6 +2977,7 @@ void CBaseMonster :: StepSound( void )
 		rgsz[2] = "footsteps/gravel2.wav";
 		rgsz[3] = "footsteps/gravel4.wav";
 		cnt = 4;
+		particle = 1;
 		break;
 	case CHAR_TEX_GLASS:
 		fvol = fWalking ? 0.2 : 0.5;
@@ -3007,6 +3010,18 @@ void CBaseMonster :: StepSound( void )
 		// diffusion - add watersplash
 		Vector SplashOrg = GetAbsOrigin();
 		MakeWaterSplash( SplashOrg + Vector( 0, 0, 100 ), SplashOrg );
+	}
+
+	if( particle )
+	{
+		Vector pos = ptr.vecEndPos + Vector( 0, 0, 2 );
+		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pos );
+		WRITE_BYTE( TE_STEP_PARTICLE );
+		WRITE_COORD( pos.x );
+		WRITE_COORD( pos.y );
+		WRITE_COORD( pos.z );
+		WRITE_BYTE( particle );
+		MESSAGE_END();
 	}
 
 	EMIT_SOUND_DYN( ENT( pev ), CHAN_BODY, rgsz[RANDOM_LONG(0, cnt-1)], fvol, fattn, 0, 96 + RANDOM_LONG( 0, 0xf ));

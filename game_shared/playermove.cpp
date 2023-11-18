@@ -378,55 +378,6 @@ void PM_PlayStepSound( int step, float fvol )
 	hvel = pmove->velocity;
 	hvel[2] = 0.0;
 
-	// diffusion - ???
-	/*
-	switch ( step )
-	{
-	case STEP_LADDER:
-		szValue = pmove->PM_Info_ValueForKey( pmove->physinfo, "lsnd" );
-		if (szValue[0] && szValue[1])
-		{
-			PM_PlayGroupSound( szValue, irand, fvol );
-			return;
-		}
-		break;
-	case STEP_SLOSH:
-		szValue = pmove->PM_Info_ValueForKey( pmove->physinfo, "psnd" );
-		if (szValue[0] && szValue[1])
-		{
-			PM_PlayGroupSound( szValue, irand, fvol );
-			return;
-		}
-		break;
-	case STEP_WADE:
-		szValue = pmove->PM_Info_ValueForKey( pmove->physinfo, "wsnd" );
-		if (szValue[0] && szValue[1])
-		{
-			if ( iSkipStep == 0 )
-			{ iSkipStep++; return; }
-
-			if ( iSkipStep++ == 3 )
-			{ iSkipStep = 0; }
-
-			PM_PlayGroupSound( szValue, irand, fvol );
-			return;
-		}
-		break;
-	default:
-		szValue = pmove->PM_Info_ValueForKey( pmove->physinfo, "ssnd" );
-		if (szValue[0] && szValue[1])
-		{
-			PM_PlayGroupSound( szValue, irand, fvol );
-			return;
-		}
-		iType = atoi(pmove->PM_Info_ValueForKey( pmove->physinfo, "stype" ));
-		if (iType == -1)
-			step = STEP_CONCRETE;
-		else if (iType)
-			step = iType;
-	}
-	*/
-
 	// irand - 0,1 for right foot, 2,3 for left foot
 	// used to alternate left and right foot
 	// FIXME, move to player state
@@ -475,6 +426,11 @@ void PM_PlayStepSound( int step, float fvol )
 		case 2:	pmove->PM_PlaySound( CHAN_BODY, "footsteps/dirt2.wav", fvol, ATTN_NORM, 0, PITCH_NORM );	break;
 		case 3:	pmove->PM_PlaySound( CHAN_BODY, "footsteps/dirt4.wav", fvol, ATTN_NORM, 0, PITCH_NORM );	break;
 		}
+#ifdef CLIENT_DLL
+		// make dust particles
+		if( fvol > 0.2f )
+			g_pParticles.Smoke( 0, 1/*sand particle*/, pmove->origin - Vector( 0, 0, height - 2 ), Vector( 0, 0, 5 ), 1, 0.15f, 10, 1 );
+#endif
 		break;
 	case STEP_VENT:
 		switch(irand)
@@ -524,36 +480,10 @@ void PM_PlayStepSound( int step, float fvol )
 		case 3:	pmove->PM_PlaySound( CHAN_STATIC, "footsteps/slosh4.wav", fvol, ATTN_NORM, 0, PITCH_NORM );	break;
 		}
 #ifdef CLIENT_DLL
-	//	g_pParticles.WaterSplashParticle( 0, SplashOrg );
 		R_MakeWaterSplash( SplashOrg + Vector(0,0,100), pmove->origin - Vector(0,0,height) );
-		/*
-		iWaterSplash = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/effects/waterring2.spr" );
-
-		pTemp = gEngfuncs.pEfxAPI->R_TempSprite( SplashOrg, Vector( 0, 0, 0 ), RANDOM_FLOAT( 1, 1.5 ), iWaterSplash, kRenderTransAdd, 0, 1.0, 2, FTENT_SPRANIMATE );
-
-		if( pTemp )
-		{
-			pTemp->fadeSpeed = 60.0;
-			pTemp->entity.curstate.framerate = RANDOM_FLOAT( 30, 50 );
-			pTemp->entity.curstate.renderamt = 150;
-			pTemp->entity.curstate.rendercolor.r = 255;
-			pTemp->entity.curstate.rendercolor.g = 255;
-			pTemp->entity.curstate.rendercolor.b = 255;
-			pTemp->entity.angles = Vector( 90, 0, 0 );
-		}*/
 #endif
 		break;
 	case STEP_WADE:
-		/*
-		if ( iSkipStep == 0 )
-		{
-			iSkipStep++;
-			break;
-		}
-
-		if ( iSkipStep++ == 3 )
-			iSkipStep = 0;
-		*/
 		// diffusion - chan_static so the sound won't be cut off
 		switch (irand)
 		{
@@ -568,21 +498,6 @@ void PM_PlayStepSound( int step, float fvol )
 		// diffusion - add water splash
 #ifdef CLIENT_DLL
 		g_pParticles.WaterSplashParticle( 0, SplashOrg );
-		/*
-		iWaterSplash = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/effects/waterring2.spr" );
-		
-		pTemp = gEngfuncs.pEfxAPI->R_TempSprite( SplashOrg, Vector(0,0,0), RANDOM_FLOAT( 1,1.5 ), iWaterSplash, kRenderTransAdd, 0, 1.0, 2, FTENT_SPRANIMATE );
-
-		if( pTemp )
-		{
-			pTemp->fadeSpeed = 60.0;
-			pTemp->entity.curstate.framerate = RANDOM_FLOAT( 30, 50 );
-			pTemp->entity.curstate.renderamt = 150;
-			pTemp->entity.curstate.rendercolor.r = 255;
-			pTemp->entity.curstate.rendercolor.g = 255;
-			pTemp->entity.curstate.rendercolor.b = 255;
-			pTemp->entity.angles = Vector( 90, 0, 0 );
-		}*/
 #endif
 		break;
 	case STEP_LADDER:
@@ -681,6 +596,11 @@ void PM_PlayStepSound( int step, float fvol )
 		case 4:	pmove->PM_PlaySound( CHAN_BODY, "footsteps/gravel5.wav", fvol, ATTN_NORM, 0, PITCH_NORM );	break;
 		case 5:	pmove->PM_PlaySound( CHAN_BODY, "footsteps/gravel6.wav", fvol, ATTN_NORM, 0, PITCH_NORM );	break;
 		}
+#ifdef CLIENT_DLL
+		// make dust particles
+		if( fvol > 0.2f )
+			g_pParticles.Smoke( 0, 1/*sand particle*/, pmove->origin - Vector( 0, 0, height - 2 ), Vector( 0, 0, 5 ), 1, 0.15f, 10, 1 );
+#endif
 		break;
 	case STEP_GLASS:
 		if ( !pmove->RandomLong(0,3) )
