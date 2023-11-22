@@ -923,6 +923,11 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 	
 	if( GL_FindShaderDirective( shader, "STUDIO_INTERIOR" ) )
 		pglUniform1iARB( shader->u_InteriorMap, GL_TEXTURE4 );
+	else if( GL_FindShaderDirective( shader, "STUDIO_TEXTURE_BLEND" ) ) // they can't be together
+	{
+		pglUniform1iARB( shader->u_BlendTexture, GL_TEXTURE4 );
+		// the amount of dirt on the car is being sent through u_MeshParams[2].y
+	}
 
 	if( GL_FindShaderDirective( shader, "STUDIO_HAS_COLORMASK" ) )
 		pglUniform1iARB( shader->u_ColorMask, GL_TEXTURE5 );
@@ -1934,6 +1939,8 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 
 	if( tr.materials[mat->gl_diffuse_id].gl_interiormap_id > 0 )
 		GL_AddShaderDirective( options, "STUDIO_INTERIOR" );
+	else if( tr.materials[mat->gl_diffuse_id].gl_blendtex_id > 0 )
+		GL_AddShaderDirective( options, "STUDIO_TEXTURE_BLEND" );
 
 	if( tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
 		GL_AddShaderDirective( options, "STUDIO_HAS_COLORMASK" );

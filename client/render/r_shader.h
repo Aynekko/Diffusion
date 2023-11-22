@@ -73,6 +73,7 @@ typedef struct glsl_prog_s
 	GLint u_LayerMap;
 	GLint u_WaterTex;
 	GLint u_ColorMask; // texture mask to apply color - implemented for studio models only
+	GLint u_BlendTexture; // second texture which can be blended with diffuse using a float
 
 	// parallax interiors
 	GLint u_InteriorMap;

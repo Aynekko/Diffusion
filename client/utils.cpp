@@ -1087,7 +1087,7 @@ model_t *Mod_Handle( int modelIndex )
 float CL_UTIL_Approach( float target, float value, float speed )
 {
 	if( speed == 0.0f ) // diffusion
-		return target;
+		return value;
 
 	float delta = target - value;
 

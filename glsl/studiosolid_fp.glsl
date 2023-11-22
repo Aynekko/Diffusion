@@ -40,6 +40,11 @@ uniform vec4		u_StudioParams[3];
 #define u_ViewOrigin	u_StudioParams[0].xyz
 #define u_FogParams		u_StudioParams[2]
 
+#if defined( STUDIO_TEXTURE_BLEND )
+uniform sampler2D	u_BlendTexture;
+#define u_BlendAmount u_MeshParams[2].y
+#endif
+
 // shared variables
 varying vec3		var_LightDiffuse;
 varying vec2		var_TexDiffuse;
@@ -80,6 +85,13 @@ void main( void )
 
 	// compute the diffuse, emboss and specular term
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+
+#if defined( STUDIO_TEXTURE_BLEND )
+	vec4 blend_texture = texture2D( u_BlendTexture, var_TexDiffuse );
+	// blend them together
+	diffuse.rgb = Q_mix( diffuse.rgb, blend_texture.rgb, u_BlendAmount );
+#endif
+
 	vec3 glossmap = vec3(1.0);
 	#if defined( STUDIO_SPECULAR )
 		glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );

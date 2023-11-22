@@ -83,6 +83,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 	tr.materials[texnum].gl_interiormap_id = 0;
 	tr.materials[texnum].gl_colormask_id = 0;
 	tr.materials[texnum].gl_fallbacktex_id = 0;
+	tr.materials[texnum].gl_blendtex_id = 0;
 
 	tr.materials[texnum].normalmap_name[0] = '\0';
 
@@ -444,6 +445,22 @@ void LoadMaterialSettingsForTexture( int texnum )
 			if( afile && token[0] > 0 )
 			{
 				tr.materials[texnum].monitor = true;
+			}
+			else
+			{
+				Error = true;
+				break;
+			}
+		}
+		else if( !Q_stricmp( token, "BlendTex" ) ) // second dirty skin for blending
+		{
+			// parse value for this setting
+			afile = COM_ParseLine( afile, token );
+			if( afile && token[0] > 0 )
+			{
+				tr.materials[texnum].gl_blendtex_id = LOAD_TEXTURE( token, NULL, 0, 0 );
+				if( tr.materials[texnum].gl_blendtex_id == 0 )
+					ConPrintf( "^1Error:^7 BlendTex for texture \"%s\" couldn't be loaded.\n", tr.materials[texnum].name );
 			}
 			else
 			{
@@ -2714,10 +2731,6 @@ void R_DrawBrushList( void )
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
 			flush_buffer = true;
 
-		// diffusioncubemaps
-	//	if( cached_cubemap[0] != es->cubemap[0] || cached_cubemap[1] != es->cubemap[1] )
-	//		flush_buffer = true;
-
 		if( flush_buffer )
 		{
 			if( numTempElems )
@@ -2906,7 +2919,7 @@ void R_DrawBrushList( void )
 				GL_Bind( GL_TEXTURE5, tex->gl_texturenum ); // u_WaterTex - mix turbulency texture and reflection
 			}
 
-			if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
+			if( CVAR_TO_BOOL( gl_cubemaps ) && (es->cubemap[0] != cached_cubemap[0] || es->cubemap[1] != cached_cubemap[1]) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
 			{
 				int cubemap_tex_unit[2] = { GL_TEXTURE6, GL_TEXTURE7 };
 				if( FBitSet( s->flags, SURF_WATER ) )

@@ -13,12 +13,17 @@
 // USE AT YOUR OWN RISK.
 //============================================================
 
+#define ADDDIRT_SPEED_THRESHOLD 125.0f // car speed when body dirt state is affected (excluding water)
+
 #define SF_CAR_ONLYTRIGGER		BIT(0) // only trigger or external button
 #define SF_CAR_TURBO			BIT(1) // turbo sound (*pfsshhh...*)
 #define SF_CAR_STARTSILENT		BIT(2) // StartSilent = true
 #define SF_CAR_DRIFTMODE		BIT(3) // DriftMode = true
 #define SF_CAR_GEARWHINE		BIT(4) // whining transmission sound, like a race car (hello NFS MW)
 #define SF_CAR_ELECTRIC			BIT(5) // for now this only makes different sounds
+#define SF_CAR_CANTBEDIRTY		BIT(6) // don't accumulate dirt or wetness
+
+// fuser2 is used for both body and wheels' models to control the amount of dirt on the car
 
 BEGIN_DATADESC( CCar )
 	DEFINE_KEYFIELD( wheel1, FIELD_STRING, "wheel1" ),
@@ -983,6 +988,7 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 	int soundtype = 0;
 	int handbrakesoundtype = 8; // default asphalt brake sound
 	bool Particle = false;
+	bool AddDirt = false;
 	int Type = 2; // 0 asphalt, 1 sand, 2 dirt, 3 watersplash
 	CBaseEntity *pWheelX = pWheel1;
 	switch( wheelnum )
@@ -1014,6 +1020,7 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 				*surf_Mult = surf_GrassMult;
 				Particle = true;
 				Type = 2;
+				AddDirt = true;
 				break;
 			case CHAR_TEX_GRAVEL:
 				*ChassisShake = 5.0f;
@@ -1021,6 +1028,7 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 				handbrakesoundtype = 7;
 				*surf_Mult = surf_GravelMult;
 				Particle = true;
+				AddDirt = true;
 				Type = 1;
 				break;
 			case CHAR_TEX_SNOW:
@@ -1029,6 +1037,7 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 				handbrakesoundtype = 7;
 				*surf_Mult = surf_SnowMult;
 				// UNDONE PARTICLES
+				// UNDONE snow "dirt"?
 				break;
 			case CHAR_TEX_DIRT:
 				*ChassisShake = 4.0f;
@@ -1037,6 +1046,7 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 				*surf_Mult = surf_DirtMult;
 				Particle = true;
 				Type = 1;
+				AddDirt = true;
 				break;
 			case CHAR_TEX_WOOD:
 			case CHAR_TEX_WOODSTEP:
@@ -1116,6 +1126,30 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 		pWheelX->pev->fuser1 = AbsCarSpeed;
 
 	pWheelX->pev->iuser1 = Type;
+
+	// add some dirt on the wheels
+	if( !HasSpawnFlags( SF_CAR_CANTBEDIRTY ) )
+	{
+		if( pev->waterlevel != 0 )
+			AddDirt = false; // wash the car!
+
+		if( pev->waterlevel != 0 || HeatingTires || AbsCarSpeed > ADDDIRT_SPEED_THRESHOLD )
+		{
+			float targetdirt = (AddDirt ? 1.0f : 0.0f);
+			float adddirt_speed = 0.0f;
+
+			if( pev->waterlevel != 0 )
+				adddirt_speed = gpGlobals->frametime * 0.5f;
+			else if( HeatingTires && wheelnum > 2 )
+				adddirt_speed = gpGlobals->frametime * HeatingMult * 0.05f;
+			else
+				adddirt_speed = 0.05f * gpGlobals->frametime * AbsCarSpeed * 0.001f;
+
+			pWheelX->pev->fuser2 = UTIL_Approach( targetdirt, pWheelX->pev->fuser2, adddirt_speed );
+			if( pWheelX->m_hChild ) // the actual wheel can be an invisible brush, and a wheel model was attached instead
+				pWheelX->m_hChild->pev->fuser2 = pWheelX->pev->fuser2;
+		}
+	}
 }
 
 void CCar::Drive( void )
@@ -1411,6 +1445,16 @@ void CCar::Drive( void )
 
 	for( int setupwheel = 1; setupwheel <= 4; setupwheel++ )
 		SetupTireSoundAtSurface( setupwheel, AbsCarSpeed, &ChassisShake1, &surf_Mult1 );
+
+	if( !HasSpawnFlags(SF_CAR_CANTBEDIRTY) )
+	{
+		if( pChassisMdl && AbsCarSpeed > ADDDIRT_SPEED_THRESHOLD )
+		{
+			// add some dirt on the car based on the amount of dirt on wheels
+			// ! only if we are driving with significant speed
+			pChassisMdl->pev->fuser2 = (pWheel1->pev->fuser2 + pWheel2->pev->fuser2 + pWheel3->pev->fuser2 + pWheel4->pev->fuser2) * 0.25f;
+		}
+	}
 
 	ChassisShake = (ChassisShake1 + ChassisShake2 + ChassisShake3 + ChassisShake4) * 0.25f;
 	surf_CurrentMult = (surf_Mult1 + surf_Mult2 + surf_Mult3 + surf_Mult4) * 0.25f;
