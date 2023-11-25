@@ -704,8 +704,7 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 
 	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) ) // diffusioncubemaps
 	{
-		shader->u_EnvMap0 = pglGetUniformLocationARB( shader->handle, "u_EnvMap0" );
-		shader->u_EnvMap1 = pglGetUniformLocationARB( shader->handle, "u_EnvMap1" );
+		shader->u_CubemapBox = pglGetUniformLocationARB( shader->handle, "u_CubemapBox" );
 		shader->u_Cubemap = pglGetUniformLocationARB( shader->handle, "u_Cubemap" );
 		shader->u_ReflectScale = pglGetUniformLocationARB( shader->handle, "u_ReflectScale" );
 	}
@@ -767,13 +766,11 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 	{
 		if( GL_FindShaderDirective( shader, "BMODEL_WATER" ) )
 		{
-			pglUniform1iARB( shader->u_EnvMap0, GL_TEXTURE2 ); // water won't use deluxmap so I'll use it here
-			pglUniform1iARB( shader->u_EnvMap1, GL_TEXTURE7 );
+			pglUniform1iARB( shader->u_CubemapBox, GL_TEXTURE2 ); // water won't use deluxmap so I'll use it here
 		}
 		else
 		{
-			pglUniform1iARB( shader->u_EnvMap0, GL_TEXTURE6 ); // other brushes won't use depthmap so I'll use it here
-			pglUniform1iARB( shader->u_EnvMap1, GL_TEXTURE7 );
+			pglUniform1iARB( shader->u_CubemapBox, GL_TEXTURE6 ); // other brushes won't use depthmap so I'll use it here
 		}
 	}
 
@@ -890,8 +887,7 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 
 	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) ) // diffusioncubemaps
 	{
-		shader->u_EnvMap0 = pglGetUniformLocationARB( shader->handle, "u_EnvMap0" );
-		shader->u_EnvMap1 = pglGetUniformLocationARB( shader->handle, "u_EnvMap1" );
+		shader->u_CubemapBox = pglGetUniformLocationARB( shader->handle, "u_CubemapBox" );
 		shader->u_Cubemap = pglGetUniformLocationARB( shader->handle, "u_Cubemap" );
 		shader->u_ReflectScale = pglGetUniformLocationARB( shader->handle, "u_ReflectScale" );
 	}
@@ -916,10 +912,7 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
 	pglUniform1iARB( shader->u_NormalMap, GL_TEXTURE1 );
 	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) )  // diffusioncubemaps
-	{
-		pglUniform1iARB( shader->u_EnvMap0, GL_TEXTURE2 );
-		pglUniform1iARB( shader->u_EnvMap1, GL_TEXTURE3 );
-	}
+		pglUniform1iARB( shader->u_CubemapBox, GL_TEXTURE2 );
 	
 	if( GL_FindShaderDirective( shader, "STUDIO_INTERIOR" ) )
 		pglUniform1iARB( shader->u_InteriorMap, GL_TEXTURE4 );

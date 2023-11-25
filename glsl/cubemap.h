@@ -16,19 +16,12 @@ GNU General Public License for more details.
 #ifndef CUBEMAP_H
 #define CUBEMAP_H
 
-uniform samplerCube	u_EnvMap0;
-uniform samplerCube	u_EnvMap1;
+uniform samplerCube	u_CubemapBox;
 
-uniform vec3			u_Cubemap[7];
-#define BoxMins0		u_Cubemap[0]
-#define BoxMins1		u_Cubemap[1]
-#define BoxMaxs0		u_Cubemap[2]
-#define BoxMaxs1		u_Cubemap[3]
-#define CubeOrigin0		u_Cubemap[4]
-#define CubeOrigin1		u_Cubemap[5]
-#define CubeMipCount0	u_Cubemap[6].x
-#define CubeMipCount1	u_Cubemap[6].y
-#define LerpFactor		u_Cubemap[6].z
+uniform vec3		u_Cubemap[3];
+#define BoxMins		u_Cubemap[0]
+#define BoxMaxs		u_Cubemap[1]
+#define CubeOrigin	u_Cubemap[2]
 
 vec3 CubemapBoxParallaxCorrected( const vec3 vReflVec, vec3 vPosition, const vec3 vCubePos, const vec3 vBoxExtentsMin, const vec3 vBoxExtentsMax )
 {
@@ -59,24 +52,19 @@ vec3 GetReflectionProbe( const vec3 vPos, const vec3 vView, const vec3 nWorld, c
 	vec3 I = normalize( vPos - vView ); // in world space
 	vec3 NW = normalize( nWorld );
 	vec3 wRef = normalize( reflect( I, NW ) );
-	vec3 R1 = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin0, BoxMins0, BoxMaxs0 );
-	vec3 R2 = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin1, BoxMins1, BoxMaxs1 );
-	vec3 srcColor0 = textureCubeLod( u_EnvMap0, R1, CubeMipCount0 - smoothness * CubeMipCount0 ).rgb;
-	vec3 srcColor1 = textureCubeLod( u_EnvMap1, R2, CubeMipCount1 - smoothness * CubeMipCount1 ).rgb;
-	vec3 reflectance = mix( srcColor0, srcColor1, LerpFactor );
 
-	return reflectance;
+	vec3 R = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin, BoxMins, BoxMaxs );
+	vec3 Cubemap = textureCube( u_CubemapBox, R, smoothness ).rgb;
+
+	return Cubemap;
 }
 
 vec3 CubemapReflectionProbe( const vec3 vPos, const vec3 wRef, const vec3 glossmap )
 {
-	vec3 R1 = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin0, BoxMins0, BoxMaxs0 );
-	vec3 R2 = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin1, BoxMins1, BoxMaxs1 );
-	vec3 srcColor0 = textureCubeLod( u_EnvMap0, R1, glossmap.r * (CubeMipCount0 - 2.0) ).rgb;
-	vec3 srcColor1 = textureCubeLod( u_EnvMap1, R2, glossmap.r * (CubeMipCount1 - 2.0) ).rgb;
-	vec3 CubemapReflection = mix( srcColor0, srcColor1, LerpFactor );
+	vec3 R = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin, BoxMins, BoxMaxs );
+	vec3 Cubemap = textureCube( u_CubemapBox, R, glossmap.r ).rgb;
 
-	return CubemapReflection;
+	return Cubemap;
 }
 
 #endif//CUBEMAP_H

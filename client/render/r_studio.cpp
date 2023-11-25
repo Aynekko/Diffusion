@@ -489,8 +489,7 @@ void CStudioModelRenderer::ClearInstanceData( bool create )
 	m_pModelInstance->radius = 0.0f;
 	m_pModelInstance->info_flags = 0;
 	m_pModelInstance->lerpFactor = 0.0f;
-	m_pModelInstance->cubemap[0] = &world->defaultCubemap;
-	m_pModelInstance->cubemap[1] = &world->defaultCubemap;
+	m_pModelInstance->cubemap = &world->defaultCubemap;
 
 	m_boneSetup.SetStudioPointers( m_pStudioHeader, m_pModelInstance->m_poseparameter );
 
@@ -582,11 +581,7 @@ bool CStudioModelRenderer::CheckBoneCache( float f )
 	{
 		// search for center of bbox
 		Vector pos = (m_pModelInstance->absmin + m_pModelInstance->absmax) * 0.5f;
-		CL_FindTwoNearestCubeMap( pos, &m_pModelInstance->cubemap[0], &m_pModelInstance->cubemap[1] );
-
-		float dist0 = (m_pModelInstance->cubemap[0]->origin - pos).Length();
-		float dist1 = (m_pModelInstance->cubemap[1]->origin - pos).Length();
-		m_pModelInstance->lerpFactor = dist0 / (dist0 + dist1);
+		CL_FindNearestCubeMapBox( pos, &m_pModelInstance->cubemap );
 	}
 
 	// save rotationmatrix to GL-style array
@@ -5161,16 +5156,15 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	Vector right = m_pModelInstance->m_plightmatrix.VectorIRotate( RI->vright );
 
 	// diffusioncubemaps
-	mcubemap_t *cached_cubemap[2];
-	cached_cubemap[0] = &world->defaultCubemap;
-	cached_cubemap[1] = &world->defaultCubemap;
+	mcubemap_t *cached_cubemap;
+	cached_cubemap = &world->defaultCubemap;
 
 	float cached_glossscale = -1.0f;
 	float cached_glosssmoothness = -1.0f;
 	float cached_embossscale = -1.0f;
 	float cached_fresnel = -1.0f;
 	float cached_reflectscale = -1.0f;
-	Vector cubemap_params[7];
+	Vector cubemap_params[3];
 	Vector4D studio_params[3];
 	Vector4D studio_lighting[2];
 
@@ -5232,8 +5226,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			cached_model = NULL;
 
 			// diffusioncubemaps
-			cached_cubemap[0] = 0;
-			cached_cubemap[1] = 0;
+			cached_cubemap = 0;
 
 			cached_glossscale = -1.0f;
 			cached_glosssmoothness = -1.0f;
@@ -5343,37 +5336,31 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 			if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[mat->gl_diffuse_id].ReflectScale != cached_reflectscale) && (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
 			{
-				if( m_pModelInstance->cubemap[0] != NULL )
-					GL_Bind( GL_TEXTURE2, m_pModelInstance->cubemap[0]->texture );
+				if( m_pModelInstance->cubemap != NULL )
+				{
+					GL_Bind( GL_TEXTURE2, m_pModelInstance->cubemap->texture );
+					// box mins
+					cubemap_params[0] = m_pModelInstance->cubemap->mins;
+					// box maxs
+					cubemap_params[1] = m_pModelInstance->cubemap->maxs;
+					// origin
+					cubemap_params[2] = m_pModelInstance->cubemap->origin;
+				}
 				else
-					GL_Bind( GL_TEXTURE2, tr.whiteCubeTexture );
+				{
+					GL_Bind( GL_TEXTURE2, tr.blackCubeTexture );
+					cubemap_params[0] = g_vecZero;
+					cubemap_params[1] = g_vecZero;
+					cubemap_params[2] = g_vecZero;
+				}
 
-				if( m_pModelInstance->cubemap[1] != NULL )
-					GL_Bind( GL_TEXTURE3, m_pModelInstance->cubemap[1]->texture );
-				else
-					GL_Bind( GL_TEXTURE3, tr.whiteCubeTexture );
-
-				// box mins
-				cubemap_params[0] = m_pModelInstance->cubemap[0]->mins;
-				cubemap_params[1] = m_pModelInstance->cubemap[1]->mins;
-				// box maxs
-				cubemap_params[2] = m_pModelInstance->cubemap[0]->maxs;
-				cubemap_params[3] = m_pModelInstance->cubemap[1]->maxs;
-				// origins
-				cubemap_params[4] = m_pModelInstance->cubemap[0]->origin;
-				cubemap_params[5] = m_pModelInstance->cubemap[1]->origin;
-				// lod bias - 8 is cv_cube_lod_bias->value UNDONE
-				cubemap_params[6].x = Q_max( 1, m_pModelInstance->cubemap[0]->numMips - 8 );
-				cubemap_params[6].y = Q_max( 1, m_pModelInstance->cubemap[1]->numMips - 8 );
-				cubemap_params[6].z = m_pModelInstance->lerpFactor;
 				// send through one call!
-				pglUniform3fvARB( RI->currentshader->u_Cubemap, 7, &cubemap_params[0][0] );
+				pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
 
 				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[mat->gl_diffuse_id].ReflectScale );
 				cached_reflectscale = tr.materials[mat->gl_diffuse_id].ReflectScale;
 
-				cached_cubemap[0] = m_pModelInstance->cubemap[0];
-				cached_cubemap[1] = m_pModelInstance->cubemap[1];
+				cached_cubemap = m_pModelInstance->cubemap;
 			}
 
 			if( tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 )

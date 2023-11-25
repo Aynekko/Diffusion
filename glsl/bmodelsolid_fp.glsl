@@ -312,7 +312,8 @@ void main( void )
 	#endif
         fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale );
 	cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, NW, glossmap, GlossSmoothness ) * u_ReflectScale;
-								//	gl_FragColor = vec4( cubemap_reflection, 1.0 );
+								//	vec3 testmix = mix( diffuse.rgb, cubemap_reflection.rgb, 0.25 );
+								//	gl_FragColor = vec4( testmix, 1.0 );
 								//	return;
 	diffuse.rgb += cubemap_reflection * fresnel;
 #endif

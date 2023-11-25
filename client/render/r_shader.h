@@ -68,8 +68,7 @@ typedef struct glsl_prog_s
 	GLint u_DeluxeMap;	// 3-th unit (lightvectors)
 	GLint u_DecalMap;	// 0-th unit
 	GLint u_ScreenMap;	// 2-th unit
-	GLint u_EnvMap0;	// env_cubemap
-	GLint u_EnvMap1;	// env_cubemap
+	GLint u_CubemapBox;	// cubemap_box
 	GLint u_LayerMap;
 	GLint u_WaterTex;
 	GLint u_ColorMask; // texture mask to apply color - implemented for studio models only

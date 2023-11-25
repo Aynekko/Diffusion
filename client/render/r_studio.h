@@ -410,8 +410,8 @@ private:
 		CJiggleBones	*m_pJiggleBones;
 		CIKContext	m_ik;
 
-		// attached cubemaps
-		mcubemap_t* cubemap[2];
+		// attached cubemap
+		mcubemap_t* cubemap;
 		float lerpFactor;
 
 		mstudiomaterial_t	*materials;			// shaders cache

@@ -332,6 +332,7 @@ typedef struct
 	int		num_CM_shadows_used; // // used shadow cube textures per full frame
 	int		num_cin_used;	// used movie textures per full frame
 	int		whiteCubeTexture;	// stub
+	int		blackCubeTexture; // cubemap box stub
 
 	int		screen_depth;
 	int		screen_color;
@@ -889,14 +890,17 @@ void V_AdjustFov( float &fov_x, float &fov_y, float width, float height, bool lo
 // r_cubemaps.cpp
 //
 void CL_FindNearestCubeMap(const Vector& pos, mcubemap_t** result);
+void CL_FindNearestCubeMapBox( const Vector &pos, mcubemap_t **result );
 void CL_FindTwoNearestCubeMap(const Vector& pos, mcubemap_t** result1, mcubemap_t** result2);
 void CL_FindNearestCubeMapForSurface(const Vector& pos, const msurface_t* surf, mcubemap_t** result);
+void CL_FindNearestCubeMapBoxForSurface( const Vector &pos, const msurface_t *surf, mcubemap_t **result );
 void CL_FindTwoNearestCubeMapForSurface(const Vector& pos, const msurface_t* surf, mcubemap_t** result1, mcubemap_t** result2);
 void CL_BuildCubemaps_f(void);
 void R_InitCubemaps();
 void GL_LoadAndRebuildCubemaps( int refParams );
 void Mod_LoadCubemaps( const byte *base, const dlump_t *l );
 void Mod_FreeCubemaps( void );
+void Mod_LoadCubemapBoxes( void );
 
 //
 // r_world.cpp

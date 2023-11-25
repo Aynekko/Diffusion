@@ -1896,12 +1896,13 @@ static void Mod_LoadWorld( model_t *mod, const byte *buf )
 	Mod_PrecacheShaders();
 	Mod_ResortFaces();
 
-	if( extrahdr->id == IDEXTRAHEADER && extrahdr->version == EXTRA_VERSION )
+/*	if( extrahdr->id == IDEXTRAHEADER && extrahdr->version == EXTRA_VERSION )
 	{
 		// diffusioncubemaps
 		if( GL_Support( R_TEXTURECUBEMAP_EXT ) && !tr.lowmemory ) // loading cubemaps only when it's supported
 			Mod_LoadCubemaps( buf, &extrahdr->lumps[LUMP_CUBEMAPS] );
-	}
+	}*/
+	Mod_LoadCubemapBoxes();
 }
 
 static void Mod_FreeWorld( model_t *mod )
@@ -2674,7 +2675,7 @@ void R_DrawBrushList( void )
 	cl_entity_t *e = RI->currententity;
 	float cached_texofs[2] = { -1.0f, -1.0f };
 	int startv, endv;
-	mcubemap_t *cached_cubemap[2];
+	mcubemap_t *cached_cubemap;
 
 	if( !tr.num_draw_surfaces )
 		return;
@@ -2689,18 +2690,18 @@ void R_DrawBrushList( void )
 	r_stats.c_world_polys += tr.num_draw_surfaces;
 
 	// diffusioncubemaps
-	cached_cubemap[0] = &world->defaultCubemap;
-	cached_cubemap[1] = &world->defaultCubemap;
+	cached_cubemap = &world->defaultCubemap;
 
 	float cached_glossscale = -1.0f;
 	float cached_glosssmoothness = -1.0f;
 	float cached_embossscale = -1.0f;
 	float cached_fresnel = -1.0f;
 	float cached_reflectscale = -1.0f;
-	Vector cubemap_params[7];
+	Vector cubemap_params[3];
 	Vector4D brush_params[2];
 	Vector2D screensizeinv = Vector2D( 1.0f / (float)glState.width, 1.0f / (float)glState.height );
 	float waveHeight = 0.0f;
+	bool apply_cubemap = false;
 
 	int i;
 	gl_bmodelface_t *entry;
@@ -2729,6 +2730,9 @@ void R_DrawBrushList( void )
 			flush_buffer = true;
 
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
+			flush_buffer = true;
+
+		if( cached_cubemap != es->cubemap )
 			flush_buffer = true;
 
 		if( flush_buffer )
@@ -2777,8 +2781,8 @@ void R_DrawBrushList( void )
 			cached_mirror = -1;
 
 			// diffusioncubemaps
-			cached_cubemap[0] = 0;
-			cached_cubemap[1] = 0;
+			cached_cubemap = &world->defaultCubemap;
+			apply_cubemap = false;
 
 			cached_glossscale = -1.0f;
 			cached_glosssmoothness = -1.0f;
@@ -2889,6 +2893,12 @@ void R_DrawBrushList( void )
 				cached_fresnel = tr.materials[es->gl_texturenum].Fresnel;
 			}
 
+			if( tr.materials[es->gl_texturenum].ReflectScale != cached_reflectscale )
+			{
+				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale );
+				cached_reflectscale = tr.materials[es->gl_texturenum].ReflectScale;
+			}
+
 			// diffusion - refracted water!!!
 			if( !tr.lowmemory && FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
 			{
@@ -2919,50 +2929,6 @@ void R_DrawBrushList( void )
 				GL_Bind( GL_TEXTURE5, tex->gl_texturenum ); // u_WaterTex - mix turbulency texture and reflection
 			}
 
-			if( CVAR_TO_BOOL( gl_cubemaps ) && (es->cubemap[0] != cached_cubemap[0] || es->cubemap[1] != cached_cubemap[1]) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
-			{
-				int cubemap_tex_unit[2] = { GL_TEXTURE6, GL_TEXTURE7 };
-				if( FBitSet( s->flags, SURF_WATER ) )
-				{
-					cubemap_tex_unit[0] = GL_TEXTURE2;
-				}
-				
-				if( es->cubemap[0] != NULL )
-					GL_Bind( cubemap_tex_unit[0], es->cubemap[0]->texture );
-				else
-					GL_Bind( cubemap_tex_unit[0], tr.whiteCubeTexture );
-
-				if( es->cubemap[1] != NULL )
-					GL_Bind( cubemap_tex_unit[1], es->cubemap[1]->texture );
-				else
-					GL_Bind( cubemap_tex_unit[1], tr.whiteCubeTexture );
-
-				// box mins
-				cubemap_params[0] = es->cubemap[0]->mins;
-				cubemap_params[1] = es->cubemap[1]->mins;
-				// box maxs
-				cubemap_params[2] = es->cubemap[0]->maxs;
-				cubemap_params[3] = es->cubemap[1]->maxs;
-				// origins
-				cubemap_params[4] = es->cubemap[0]->origin;
-				cubemap_params[5] = es->cubemap[1]->origin;
-				// lod bias - 8 is cv_cube_lod_bias->value UNDONE
-				cubemap_params[6].x = Q_max( 1, es->cubemap[0]->numMips - 8 );
-				cubemap_params[6].y = Q_max( 1, es->cubemap[1]->numMips - 8 );
-				cubemap_params[6].z = es->lerpFactor;
-				// send through one call!
-				pglUniform3fvARB( RI->currentshader->u_Cubemap, 7, &cubemap_params[0][0] );
-
-				if( tr.materials[es->gl_texturenum].ReflectScale != cached_reflectscale )
-				{
-					pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale );
-					cached_reflectscale = tr.materials[es->gl_texturenum].ReflectScale;
-				}
-
-				cached_cubemap[0] = es->cubemap[0];
-				cached_cubemap[1] = es->cubemap[1];
-			}
-
 			// diffusion - apply custom color to a specific texture
 			if( tr.materials[es->gl_texturenum].ApplyColor && (e->index > 0) )
 			{
@@ -2979,6 +2945,9 @@ void R_DrawBrushList( void )
 			}
 			else
 				R_SetRenderColor( RI->currententity );
+
+			if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
+				apply_cubemap = true;
 
 			cached_mirror = es->subtexture[glState.stack_position];
 			cached_texture = es->gl_texturenum;
@@ -2998,6 +2967,36 @@ void R_DrawBrushList( void )
 			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
 			cached_texofs[0] = es->texofs[0];
 			cached_texofs[1] = es->texofs[1];
+		}
+
+		if( apply_cubemap ) // diffusioncubemaps
+		{
+			int cubemap_tex_unit = GL_TEXTURE6;
+			if( FBitSet( s->flags, SURF_WATER ) )
+				cubemap_tex_unit = GL_TEXTURE2;
+
+			if( es->cubemap != NULL )
+			{
+				GL_Bind( cubemap_tex_unit, es->cubemap->texture );
+				// box mins
+				cubemap_params[0] = es->cubemap->mins;
+				// box maxs
+				cubemap_params[1] = es->cubemap->maxs;
+				// origin
+				cubemap_params[2] = es->cubemap->origin;
+			}
+			else
+			{
+				GL_Bind( cubemap_tex_unit, tr.blackCubeTexture );
+				cubemap_params[0] = g_vecZero;
+				cubemap_params[1] = g_vecZero;
+				cubemap_params[2] = g_vecZero;
+			}
+
+			// send through one call!
+			pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
+
+			cached_cubemap = es->cubemap;
 		}
 
 		if( es->firstvertex < startv )

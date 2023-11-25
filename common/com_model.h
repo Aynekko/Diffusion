@@ -284,7 +284,7 @@ typedef struct mextrasurf_s
 	word		glsl_sequence_omni[2];		// same as above but for omnilights
 	word		glsl_sequence_proj[2];	// same as above but for projlights
 	float		texofs[2];		// conveyor offsets
-	mcubemap_t *cubemap[2];	// for environment reflective bump-mapping
+	mcubemap_t *cubemap;	// for environment reflective bump-mapping
 	float		lerpFactor;
 	int		cached_frame;
 

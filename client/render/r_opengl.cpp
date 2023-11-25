@@ -830,9 +830,9 @@ static void R_InitAlphaContrast( void )
 R_InitWhiteCubemap
 ==================
 */
-static void R_InitWhiteCubemap( void )
+static void R_InitStubCubemaps( void )
 {
-	byte	dataCM[4*4*6*4];
+	byte dataCM[4*4*6*4];
 	int	size = 4;
 
 	if( !GL_Support( R_TEXTURECUBEMAP_EXT ))
@@ -840,8 +840,9 @@ static void R_InitWhiteCubemap( void )
 
 	// white cubemap - just stub for pointlights
 	memset( dataCM, 0xFF, sizeof( dataCM ));
-
-	tr.whiteCubeTexture = CREATE_TEXTURE( "*whiteCube", size, size, dataCM, TF_NOMIPMAP|TF_CUBEMAP|TF_CLAMP ); 
+	tr.whiteCubeTexture = CREATE_TEXTURE( "*whiteCube", size, size, dataCM, TF_NOMIPMAP|TF_CUBEMAP|TF_CLAMP );
+	memset( dataCM, 0x00, sizeof( dataCM ) );
+	tr.blackCubeTexture = CREATE_TEXTURE( "*blackCube", size, size, dataCM, TF_NOMIPMAP|TF_CUBEMAP|TF_CLAMP );
 }
 
 static void GL_InitTextures( void )
@@ -853,7 +854,7 @@ static void GL_InitTextures( void )
 	tr.grayTexture = FIND_TEXTURE( "*gray" );
 	tr.depthTexture = CREATE_TEXTURE( "*depth", 8, 8, NULL, TF_SHADOW ); 
 
-	R_InitWhiteCubemap();
+	R_InitStubCubemaps();
 
 	R_CreateSpotLightTexture();
 
