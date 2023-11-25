@@ -1442,10 +1442,9 @@ void CTalkMonster::StartFollowing( CBaseEntity *pLeader )
 
 BOOL CTalkMonster::CanFollow( void )
 {
-//	if ( m_MonsterState == MONSTERSTATE_SCRIPT )
 	if( m_MonsterState == MONSTERSTATE_SCRIPT || m_IdealMonsterState == MONSTERSTATE_SCRIPT ) // diffusion - https://github.com/SamVanheer/halflife-updated/commit/3f68a771cab28ceea7c50871aefd4e473407799b
 	{
-		if ( !m_pCine->CanInterrupt() )
+		if( !m_pCine || !m_pCine->CanInterrupt() ) // diffusion - https://github.com/SamVanheer/halflife-updated/commit/3c7d4ed35f0954139de1242a9db63414dc1fbcc0
 			return FALSE;
 	}
 	
