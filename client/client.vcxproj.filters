@@ -224,9 +224,6 @@
     <ClCompile Include="render\r_studiodecal.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
-    <ClCompile Include="render\r_bloom.cpp">
-      <Filter>Source Files\render</Filter>
-    </ClCompile>
     <ClCompile Include="render\r_quakeparticle.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>

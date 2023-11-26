@@ -1638,10 +1638,6 @@ void R_DrawTranslucentEntities(void)
 		GL_Setup2D();
 		Bloom();
 		GL_Setup3D();
-
-	//	GL_Setup2D();
-	//	R_BloomBlend();
-	//	GL_Setup3D();
 	}
 
 	// sprites:
@@ -1763,10 +1759,7 @@ void R_DrawPostEffects(void)
 	if( RP_NORMALPASS() )
 	{
 		if( r_bloom_sprites->value > 0 )
-		{
 			Bloom();
-		//	R_BloomBlend();
-		}
 	}
 
 	// diffusionFIXME - this looks bad and I have no idea why it works like this,

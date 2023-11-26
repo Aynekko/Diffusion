@@ -214,7 +214,6 @@
     <ClCompile Include="motd.cpp" />
     <ClCompile Include="parsemsg.cpp" />
     <ClCompile Include="render\r_backend.cpp" />
-    <ClCompile Include="render\r_bloom.cpp" />
     <ClCompile Include="render\r_brushdecals.cpp" />
     <ClCompile Include="render\r_cubemaps.cpp" />
     <ClCompile Include="render\r_cull.cpp" />

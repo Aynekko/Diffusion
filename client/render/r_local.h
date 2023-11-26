@@ -932,10 +932,4 @@ void R_CheckSkyPortal( cl_entity_t *skyPortal );
 void R_DrawSkyPortal( cl_entity_t *skyPortal );
 void R_AddSkyBoxSurface( msurface_t *fa );
 
-//
-// r_bloom.cpp
-//
-void R_InitBloomTextures( void );
-void R_BloomBlend(void);
-
 #endif//R_LOCAL_H

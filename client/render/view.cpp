@@ -113,12 +113,6 @@ cvar_t	*r_show_normals;
 cvar_t	*r_show_lightprobes;
 cvar_t	*r_fade_props;
 cvar_t	*r_show_cubemaps;
-cvar_t *r_bloom_sample_size;
-cvar_t *r_bloom_fast_sample;
-cvar_t *r_bloom_darken;
-cvar_t *r_bloom_alpha;
-cvar_t *r_bloom_diamond_size;
-cvar_t *r_bloom_intensity;
 cvar_t *r_bloom_sprites;
 cvar_t *r_bloom;
 cvar_t	*thirdperson;
@@ -356,12 +350,6 @@ void V_Init( void )
 
 	r_fade_props = CVAR_REGISTER( "r_fade_props", "1", FCVAR_ARCHIVE );
 	r_show_cubemaps = CVAR_REGISTER("r_show_cubemaps", "0", FCVAR_ARCHIVE);
-	r_bloom_alpha = CVAR_REGISTER( "r_bloom_alpha", "1", FCVAR_ARCHIVE );
-	r_bloom_sample_size = CVAR_REGISTER( "r_bloom_sample_size", "32", FCVAR_ARCHIVE );
-	r_bloom_fast_sample = CVAR_REGISTER( "r_bloom_fast_sample", "1", FCVAR_ARCHIVE );
-	r_bloom_darken = CVAR_REGISTER( "r_bloom_darken", "0", FCVAR_ARCHIVE );
-	r_bloom_diamond_size = CVAR_REGISTER( "r_bloom_diamond_size", "5", FCVAR_ARCHIVE );
-	r_bloom_intensity = CVAR_REGISTER( "r_bloom_intensity", "2", FCVAR_ARCHIVE );
 	r_bloom_sprites = CVAR_REGISTER( "r_bloom_sprites", "0", FCVAR_ARCHIVE );
 	r_bloom = CVAR_REGISTER( "r_bloom", "0", FCVAR_ARCHIVE );
 	thirdperson = CVAR_REGISTER("thirdperson", "0", FCVAR_CHEAT);
