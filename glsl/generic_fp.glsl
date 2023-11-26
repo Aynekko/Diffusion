@@ -29,6 +29,9 @@ void main( void )
 {
 	vec4 diffuse = texture2D( u_ColorMap, var_TexCoord );
 
+	if( diffuse.a < 0.5 )
+		discard;
+
 #if defined( GENERIC_FOG_EXP )
 	diffuse.rgb *= var_VertexColor;
 	float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));

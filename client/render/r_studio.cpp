@@ -3917,7 +3917,6 @@ void CStudioModelRenderer::StudioSetRenderMode( const int rendermode )
 	{
 	case kRenderNormal:
 	case kRenderTransAlpha:
-		GL_AlphaTest( GL_FALSE );
 		GL_Blend( GL_FALSE );
 		break;
 	case kRenderTransColor:
@@ -4323,7 +4322,6 @@ StudioSetupRenderer
 void CStudioModelRenderer::StudioSetupRenderer( int rendermode )
 {
 	pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-	GL_AlphaTest( GL_FALSE );
 	pglShadeModel( GL_SMOOTH );
 }
 
@@ -5095,7 +5093,6 @@ void CStudioModelRenderer::RenderDynLightList( void )
 		return;
 
 	GL_Blend( GL_TRUE );
-	GL_AlphaTest( GL_FALSE );
 	GL_DepthMask( GL_FALSE );
 	GL_BlendFunc( GL_ONE, GL_ONE );
 	pglEnable( GL_SCISSOR_TEST );
@@ -5171,7 +5168,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
 	//	R_LoadIdentity();
 	GL_Blend( GL_FALSE );
-	GL_AlphaTest( GL_FALSE );
 	GL_DepthMask( GL_TRUE );
 
 	// sorting list to reduce shader switches
@@ -5307,8 +5303,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 			if( FBitSet( mat->flags, STUDIO_NF_MASKED ) || FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) )
 			{
-				GL_AlphaFunc( GL_GREATER, 0.5f );
-				GL_AlphaTest( GL_TRUE );
+
 			}
 			else if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) )
 			{
@@ -5435,10 +5430,8 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	GL_SelectTexture( glConfig.max_texture_units - 1 ); // force to cleanup all the units
 	GL_CleanUpTextureUnits( 0 );
 
-	GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	GL_DepthMask( GL_TRUE );
 	GL_Blend( GL_FALSE );
-	GL_AlphaTest( GL_FALSE );
 	GL_Cull( GL_FRONT );
 
 	RenderDynLightList();
@@ -5467,7 +5460,6 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
 	//	R_LoadIdentity();
 	GL_Blend( GL_FALSE );
-	GL_AlphaTest( GL_FALSE );
 	GL_DepthMask( GL_TRUE );
 
 	// sorting list to reduce shader switches
@@ -5544,8 +5536,7 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 
 			if( FBitSet( mat->flags, STUDIO_NF_MASKED ) || FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) )
 			{
-				GL_AlphaFunc( GL_GREATER, 0.5f );
-				GL_AlphaTest( GL_TRUE );
+
 			}
 			else if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) ) // diffusion - fixed shadows from additive textures from projected light...
 			{
@@ -5560,8 +5551,6 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 				GL_Blend( GL_TRUE );
 				GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 			}
-			else
-				GL_AlphaTest( GL_FALSE );
 
 			cached_material = mat;
 		}
@@ -5572,7 +5561,6 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 	GL_SelectTexture( glConfig.max_texture_units - 1 ); // force to cleanup all the units
 	GL_CleanUpTextureUnits( 0 );
 	GL_DepthMask( GL_TRUE );
-	GL_AlphaTest( GL_FALSE );
 	GL_Blend( GL_FALSE );
 	GL_Cull( GL_FRONT );
 

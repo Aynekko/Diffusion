@@ -507,14 +507,11 @@ construct and rendering the grass
 */
 void R_RenderGrassOnList( void )
 {
-	word	hCachedMatrix = -1;
-	word	hLastShader = -1;
+	word hCachedMatrix = -1;
+	word hLastShader = -1;
 
 	if( !FBitSet( world->features, WORLD_HAS_GRASS ))
 		return; // don't waste time
-
-	GL_AlphaTest( GL_TRUE );
-	GL_AlphaFunc( GL_GREATER, r_grass_alpha->value );
 	
 	GL_Cull( GL_NONE );	// grass is double-sided poly
 	
@@ -523,8 +520,9 @@ void R_RenderGrassOnList( void )
 		for( grass_t *g = grass_surfaces[i]; g != NULL; g = g->chain )
 			R_DrawGrassMesh( g, i, hLastShader, hCachedMatrix );
 	}
+
 	pglBindVertexArray( world->vertex_array_object ); // restore old binding
-	GL_AlphaTest( GL_FALSE ); // diffusion - fix
+
 	GL_Cull( GL_FRONT );
 }
 
@@ -608,9 +606,6 @@ void R_DrawLightForGrass( plight_t *pl )
 	word hLastShader = -1;
 
 	if( !tr.num_light_grass ) return; // don't waste time
-
-	GL_AlphaTest( GL_TRUE );
-	GL_AlphaFunc( GL_GREATER, r_grass_alpha->value );
 	
 	GL_Cull( GL_NONE );
 
@@ -621,7 +616,7 @@ void R_DrawLightForGrass( plight_t *pl )
 	}
 
 	pglBindVertexArray( world->vertex_array_object ); // restore old binding
-	GL_AlphaTest( GL_FALSE ); // diffusion - fix
+
 	GL_Cull( GL_FRONT );
 }
 
@@ -642,9 +637,6 @@ void R_RenderShadowGrassOnList( void )
 
 	if( !FBitSet( world->features, WORLD_HAS_GRASS ))
 		return; // don't waste time
-
-	GL_AlphaTest( GL_TRUE );
-	GL_AlphaFunc( GL_GREATER, r_grass_alpha->value );
 	
 	GL_Cull( GL_NONE );	// grass is double-sided poly
 	GL_BindShader( glsl.grassDepthFill );
@@ -662,8 +654,7 @@ void R_RenderShadowGrassOnList( void )
 		for( grass_t *g = grass_surfaces[i]; g != NULL; g = g->chain )
 			R_DrawGrassShadowMesh( g, i, hCachedMatrix );
 	}
-	
-	GL_AlphaTest( GL_FALSE ); //diffusion - fix
+
 	GL_Cull( GL_FRONT );
 }
 
@@ -1563,8 +1554,6 @@ void R_DrawGrass( qboolean lightpass )
 	}
 
 	GL_Cull( GL_NONE );
-	GL_AlphaTest( GL_TRUE );
-	GL_AlphaFunc( GL_GREATER, bound( 0.0f, r_grass_alpha->value, 1.0f ));
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 	GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 
@@ -1617,7 +1606,6 @@ void R_DrawGrass( qboolean lightpass )
 	pglDisableClientState( GL_VERTEX_ARRAY );
 	tr.num_draw_grass = tr.num_light_grass = 0;
 
-	GL_AlphaTest( GL_FALSE );
 	GL_Cull( GL_FRONT );
 }
 

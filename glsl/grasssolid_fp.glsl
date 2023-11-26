@@ -31,6 +31,9 @@ void main( void )
 
 	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
 
+	if( diffuse.a < 0.5 )
+		discard;
+
 #if !defined( GRASS_FULLBRIGHT )
 	diffuse.rgb *= var_VertexLight;
 #endif//GRASS_FULLBRIGHT

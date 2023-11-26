@@ -76,6 +76,9 @@ void main( void )
 
 	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
 
+	if( diffuse.a < 0.5 )
+		discard;
+
 	vec3 light = vec3( 1.0 );
 	float shadow = 1.0;
 

@@ -103,7 +103,6 @@ cvar_t	*r_lightstyle_lerping;
 cvar_t	*r_recursive_world_node;
 cvar_t	*r_polyoffset;
 cvar_t	*r_grass;
-cvar_t	*r_grass_alpha;
 cvar_t	*r_grass_lighting;
 cvar_t	*r_grass_shadows;
 cvar_t	*r_grass_fade_start;
@@ -343,7 +342,6 @@ void V_Init( void )
 	r_drawmodels = CVAR_REGISTER( "r_drawmodels", "1", FCVAR_CHEAT );
 
 	r_grass = CVAR_REGISTER( "r_grass", "1", FCVAR_ARCHIVE );
-	r_grass_alpha = CVAR_REGISTER( "r_grass_alpha", "0.5", FCVAR_ARCHIVE );
 	r_grass_lighting = CVAR_REGISTER( "r_grass_lighting", "1", FCVAR_ARCHIVE );
 	r_grass_shadows = CVAR_REGISTER( "r_grass_shadows", "1", FCVAR_ARCHIVE );
 	r_grass_fade_start = CVAR_REGISTER( "r_grass_fade_start", "2048", FCVAR_ARCHIVE );

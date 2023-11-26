@@ -1508,6 +1508,7 @@ void R_DrawSolidEntities(void)
 	glState.drawTrans = false;
 	GL_CheckForErrors();
 	tr.blend = 1.0f;
+	GL_AlphaTest( GL_FALSE ); // just in case
 	
 	// 1: brush entities
 	for( i = 0; i < tr.num_solid_entities; i++ )
@@ -1571,6 +1572,7 @@ void R_DrawTranslucentEntities(void)
 	int i;
 	
 	glState.drawTrans = true;
+	GL_AlphaTest( GL_FALSE ); // just in case
 
 	// brushes:
 	for( i = 0; i < tr.num_trans_entities; i++ )

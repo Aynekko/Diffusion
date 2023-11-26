@@ -52,7 +52,6 @@ extern cvar_t	*r_lighting_extended;
 extern cvar_t	*r_recursive_world_node;
 extern cvar_t	*r_polyoffset;
 extern cvar_t	*r_grass;
-extern cvar_t	*r_grass_alpha;
 extern cvar_t	*r_grass_lighting;
 extern cvar_t	*r_grass_shadows;
 extern cvar_t	*r_grass_fade_start;

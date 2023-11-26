@@ -2480,7 +2480,6 @@ void R_RenderDynLightList( void )
 		return;
 
 	GL_Blend( GL_TRUE );
-	GL_AlphaTest( GL_FALSE );
 	GL_DepthMask( GL_FALSE );
 	pglEnable( GL_SCISSOR_TEST );
 	pglBindVertexArray( world->vertex_array_object );
@@ -2605,13 +2604,6 @@ void R_DrawShadowBrushList( void )
 		{
 			GL_Bind( GL_TEXTURE0, curtex );
 			cached_texture = curtex;
-			if( RENDER_GET_PARM( PARM_TEX_FLAGS, curtex ) & TF_HAS_ALPHA )
-			{
-				GL_AlphaFunc( GL_GREATER, 0.25f );
-				GL_AlphaTest( GL_TRUE );
-			}
-			else
-				GL_AlphaTest( GL_FALSE );
 
 			if( es->culltype == CULL_OTHER ) // probably a twoside texture
 				GL_Cull( GL_NONE );
@@ -2658,7 +2650,6 @@ void R_DrawShadowBrushList( void )
 		R_DrawGrass();
 
 	GL_Cull( GL_FRONT );
-	GL_AlphaTest( GL_FALSE );
 }
 
 /*
@@ -3036,7 +3027,6 @@ void R_DrawBrushList( void )
 
 	pglBindVertexArray( GL_FALSE );
 	GL_BindShader( NULL );
-	GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	DrawWireFrame();
 
 	// clear the subview pointers after normalpass
@@ -3120,7 +3110,6 @@ static int R_TransSurfaceCompare( const gl_bmodelface_t *a, const gl_bmodelface_
 
 void R_SetRenderMode( cl_entity_t *e )
 {
-	GL_AlphaTest( GL_FALSE );
 	GL_DepthMask( GL_TRUE );
 
 	switch( e->curstate.rendermode )
@@ -3144,11 +3133,9 @@ void R_SetRenderMode( cl_entity_t *e )
 		GL_Blend( GL_TRUE );
 		break;
 	case kRenderTransAlpha:
-		GL_AlphaTest( GL_TRUE );
 		pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 		GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 		GL_Blend( GL_FALSE );
-		GL_AlphaFunc( GL_GREATER, 0.25f );
 		break;
 	default:
 		pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
@@ -3273,7 +3260,6 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 
 	R_DrawBrushList();
 
-	GL_AlphaTest( GL_FALSE );
 	GL_DepthMask( GL_TRUE );
 	GL_Blend( GL_FALSE );
 
@@ -3713,7 +3699,6 @@ void R_DrawWorld( void )
 	start = Sys_DoubleTime();
 
 	GL_DepthMask( GL_TRUE );
-	GL_AlphaTest( GL_FALSE );
 	GL_Blend( GL_FALSE );
 
 	R_DrawBrushList();
