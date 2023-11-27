@@ -73,4 +73,4 @@ void main( void )
     f = mix( InColor, f, Transparency );
 
     gl_FragColor = f;
-};
+}

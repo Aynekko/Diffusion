@@ -872,12 +872,6 @@ static void GL_InitTextures( void )
 	}
 }
 
-static void APIENTRY MessageCallback( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLcharARB *message, GLvoid *userParam )
-{
-	//	fprintf( stderr, "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", (type == GL_DEBUG_TYPE_ERROR_ARB ? "** GL ERROR **" : ""), type, severity, message );
-	ConPrintf( "GL CALLBACK: %s type = 0x%x, severity = 0x%x, message = %s\n", (type == GL_DEBUG_TYPE_ERROR_ARB ? "** GL ERROR **" : ""), type, severity, message );
-}
-
 /*
 ==================
 R_Init
@@ -900,7 +894,7 @@ bool R_Init( void )
 		tr.lowmemory = true;
 		ConPrintf( "^3Warning:^7 low memory mode is active!\n" );
 	}
-
+	
 	GL_InitGPUShaders();
 	GL_InitTextures();
 	GL_InitRandomTable();
@@ -909,11 +903,8 @@ bool R_Init( void )
 	R_InitWeather();
 	R_GrassInit();
 	InitPostEffects();
-
+	
 	pglPointSize( 10.0f );
-
-	pglEnable( GL_DEBUG_OUTPUT_SYNCHRONOUS_ARB );
-	pglDebugMessageCallbackARB( MessageCallback, 0 );
 
 	return true;
 }
