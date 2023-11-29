@@ -61,9 +61,13 @@ void SetupFlashlight( cl_entity_t *pEnt )
 	Vector forward, right, up;
 	int FlashlightFOV = 65;
 	int FlashlightRadius = 600;
-	static int FlashlightTexture = 0;
-	if( !FlashlightTexture )
+	static int FlashlightTexture = -1;
+	if( FlashlightTexture == -1 )
+	{
 		FlashlightTexture = LOAD_TEXTURE( "gfx/flashlight.dds", NULL, 0, TF_SPOTLIGHT );
+		if( !FlashlightTexture ) // not found or not supported by hardware
+			FlashlightTexture = tr.spotlightTexture;
+	}
 
 	// do not multiply flashlights if game is paused
 	if( tr.time == tr.oldtime )

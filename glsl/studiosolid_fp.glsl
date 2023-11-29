@@ -34,7 +34,6 @@ uniform float		u_GlossScale;
 uniform float		u_GlossSmoothness;
 uniform float		u_EmbossScale;
 uniform float		u_ReflectScale;
-uniform float		u_Fresnel;
 uniform vec3		u_MeshParams[3];
 uniform vec4		u_StudioParams[3];
 #define u_ViewOrigin	u_StudioParams[0].xyz
@@ -55,6 +54,10 @@ varying vec3		var_Normal;
 #if defined( REFLECTION_CUBEMAP ) || defined( STUDIO_INTERIOR )
 varying vec3		var_Position;
 varying mat3		var_MatrixTBN;
+#endif
+
+#if defined( REFLECTION_CUBEMAP )
+uniform float		u_Fresnel;
 #endif
 
 void main( void )

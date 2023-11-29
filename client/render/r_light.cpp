@@ -239,7 +239,6 @@ void R_SetupLightProjectionTexture( plight_t *pl, cl_entity_t *pEnt )
 			if( !pl->projectionTexture )
 			{
 				ALERT( at_error, "couldn't find texture %s\n", txname );
-				gEngfuncs.Con_NPrintf(1, "%i\n", pEnt->curstate.sequence);
 				pl->projectionTexture = tr.spotlightTexture;
 			}
 		}

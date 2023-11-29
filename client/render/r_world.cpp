@@ -2666,7 +2666,7 @@ void R_DrawBrushList( void )
 	cl_entity_t *e = RI->currententity;
 	float cached_texofs[2] = { -1.0f, -1.0f };
 	int startv, endv;
-	mcubemap_t *cached_cubemap;
+	mcubemap_t *cached_cubemap = NULL;
 
 	if( !tr.num_draw_surfaces )
 		return;
@@ -2679,9 +2679,6 @@ void R_DrawBrushList( void )
 
 	pglBindVertexArray( world->vertex_array_object );
 	r_stats.c_world_polys += tr.num_draw_surfaces;
-
-	// diffusioncubemaps
-	cached_cubemap = &world->defaultCubemap;
 
 	float cached_glossscale = -1.0f;
 	float cached_glosssmoothness = -1.0f;
@@ -2763,7 +2760,7 @@ void R_DrawBrushList( void )
 			// view origin + waveheight
 			brush_params[1] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, waveHeight );
 			pglUniform4fvARB( RI->currentshader->u_BrushParams, 2, &brush_params[0][0] );
-			
+
 			// reset cache
 			cached_texofs[0] = -1.0f;
 			cached_texofs[1] = -1.0f;
@@ -2772,7 +2769,7 @@ void R_DrawBrushList( void )
 			cached_mirror = -1;
 
 			// diffusioncubemaps
-			cached_cubemap = &world->defaultCubemap;
+			cached_cubemap = NULL;
 			apply_cubemap = false;
 
 			cached_glossscale = -1.0f;
@@ -2786,6 +2783,7 @@ void R_DrawBrushList( void )
 		{
 			mtexinfo_t *tx = s->texinfo;
 			mfaceinfo_t *land = tx->faceinfo;
+			apply_cubemap = false;
 
 			if( FBitSet( s->flags, SURF_REFLECT | SURF_PORTAL | SURF_SCREEN ) && es->subtexture[glState.stack_position] )
 			{
@@ -2841,7 +2839,7 @@ void R_DrawBrushList( void )
 				}
 				cached_lightmap = es->lightmaptexturenum;
 			}
-			
+
 			if( FBitSet( s->flags, SURF_LANDSCAPE ) )
 			{
 				if( land && land->terrain )
@@ -2882,12 +2880,6 @@ void R_DrawBrushList( void )
 			{
 				pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[es->gl_texturenum].Fresnel );
 				cached_fresnel = tr.materials[es->gl_texturenum].Fresnel;
-			}
-
-			if( tr.materials[es->gl_texturenum].ReflectScale != cached_reflectscale )
-			{
-				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale );
-				cached_reflectscale = tr.materials[es->gl_texturenum].ReflectScale;
 			}
 
 			// diffusion - refracted water!!!
@@ -2938,7 +2930,15 @@ void R_DrawBrushList( void )
 				R_SetRenderColor( RI->currententity );
 
 			if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
+			{
+				if( tr.materials[es->gl_texturenum].ReflectScale != cached_reflectscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale );
+					cached_reflectscale = tr.materials[es->gl_texturenum].ReflectScale;
+				}
+
 				apply_cubemap = true;
+			}
 
 			cached_mirror = es->subtexture[glState.stack_position];
 			cached_texture = es->gl_texturenum;

@@ -108,6 +108,8 @@ void R_ResetShadowTextures( void )
 		char txName[16];
 		Q_snprintf( txName, sizeof( txName ), "*shadowCM0" );
 		tr.shadowCubemaps[0] = CREATE_TEXTURE( txName, ShadowViewport, ShadowViewport, NULL, TF_SHADOW_CUBEMAP );
+		if( !tr.shadowCubemaps[0] )
+			tr.omni_shadows_notsupport = true; // texture not supported
 	}
 
 	ConPrintf( "Shadow textures reset to quality %i (%ip)\n", ShadowQualityLevel, ShadowViewport );
@@ -198,6 +200,8 @@ int R_AllocateShadowFramebuffer( plight_t *pl, int side = 0 )
 		}
 
 		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, framebuffer[i] );
+		pglDrawBuffer( GL_NONE );
+		pglReadBuffer( GL_NONE );
 		pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, texture ), 0 );
 	}
 
@@ -603,6 +607,9 @@ void R_RenderShadowmaps(void)
 			continue;
 
 		if( R_CullBox( pl->absmin, pl->absmax ) )
+			continue;
+
+		if( pl->pointlight && tr.omni_shadows_notsupport )
 			continue;
 
 		if( pl->pointlight )

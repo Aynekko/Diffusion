@@ -393,6 +393,7 @@ typedef struct
 	bool		params_changed;		// some cvars are toggled, shaders needs to recompile and resort
 	bool		local_client_added;		// indicate what a local client already been added into renderlist
 	bool		shadows_notsupport;		// no shadow textures
+	bool		omni_shadows_notsupport; // can draw projected light shadows, but not omni (intel bitch)
 	int		glsl_valid_sequence;	// reloads shaders while some render cvars was changed
 	bool		show_uniforms_peak;		// print the maxcount of used uniforms
 	int		num_draw_grass;		// number of bushes per normal or shadow pass

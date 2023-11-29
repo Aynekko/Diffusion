@@ -881,7 +881,6 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 	shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
 	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
 	shader->u_ColorMask = pglGetUniformLocationARB( shader->handle, "u_ColorMask" );
-	shader->u_Fresnel = pglGetUniformLocationARB( shader->handle, "u_Fresnel" );
 	shader->u_MeshParams = pglGetUniformLocationARB( shader->handle, "u_MeshParams" );
 	shader->u_StudioLighting = pglGetUniformLocationARB( shader->handle, "u_StudioLighting" );
 
@@ -890,6 +889,7 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 		shader->u_CubemapBox = pglGetUniformLocationARB( shader->handle, "u_CubemapBox" );
 		shader->u_Cubemap = pglGetUniformLocationARB( shader->handle, "u_Cubemap" );
 		shader->u_ReflectScale = pglGetUniformLocationARB( shader->handle, "u_ReflectScale" );
+		shader->u_Fresnel = pglGetUniformLocationARB( shader->handle, "u_Fresnel" );
 	}
 	
 	if( GL_FindShaderDirective( shader, "STUDIO_INTERIOR" ) )
@@ -1603,6 +1603,13 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool translucent )
 {
 	bool shadows = (!FBitSet( pl->flags, CF_NOSHADOWS )) ? true : false;
+
+	if( tr.shadows_notsupport || !CVAR_TO_BOOL(r_shadows) )
+		shadows = false;
+
+	if( pl->pointlight && tr.omni_shadows_notsupport )
+		shadows = false;
+
 	char glname[64];
 	char options[MAX_OPTIONS_LENGTH];
 	mextrasurf_t *es = s->info;
@@ -1694,11 +1701,8 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 	if( tr.materials[tx->gl_texturenum].gl_interiormap_id > 0 )
 		GL_AddShaderDirective( options, "BMODEL_INTERIOR" );
 
-	if( CVAR_TO_BOOL( r_shadows ) && !tr.shadows_notsupport )
-	{
-		if( shadows )
-			GL_AddShaderDirective( options, "BMODEL_HAS_SHADOWS" );
-	}
+	if( shadows )
+		GL_AddShaderDirective( options, "BMODEL_HAS_SHADOWS" );
 
 	glsl_program_t *shader = GL_FindUberShader( glname, options, &GL_InitBmodelDlightUniforms );
 	if( !shader )
@@ -1767,6 +1771,13 @@ word GL_UberShaderForGrassSolid( msurface_t *s, grass_t *g )
 word GL_UberShaderForGrassDlight( plight_t *pl, struct grass_s *g )
 {
 	bool shadows = (!FBitSet( pl->flags, CF_NOSHADOWS )) ? true : false;
+
+	if( tr.shadows_notsupport || !CVAR_TO_BOOL( r_shadows ) )
+		shadows = false;
+
+	if( pl->pointlight && tr.omni_shadows_notsupport )
+		shadows = false;
+
 	char glname[64];
 	char options[MAX_OPTIONS_LENGTH];
 
@@ -1778,7 +1789,7 @@ word GL_UberShaderForGrassDlight( plight_t *pl, struct grass_s *g )
 	else
 		GL_AddShaderDirective( options, "GRASS_LIGHT_PROJECTION" );
 
-	if( CVAR_TO_BOOL( r_shadows ) && shadows && !tr.shadows_notsupport )
+	if( shadows )
 		GL_AddShaderDirective( options, "GRASS_HAS_SHADOWS" );
 
 	if( tr.fogEnabled )
@@ -1967,6 +1978,13 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat, bool bone_weighting, int numbones )
 {
 	bool shadows = (!FBitSet( pl->flags, CF_NOSHADOWS )) ? true : false;
+
+	if( tr.shadows_notsupport || !CVAR_TO_BOOL( r_shadows ) )
+		shadows = false;
+
+	if( pl->pointlight && tr.omni_shadows_notsupport )
+		shadows = false;
+
 	char glname[64];
 	char options[MAX_OPTIONS_LENGTH];
 
@@ -2035,11 +2053,8 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 	if( tr.fogEnabled )
 		GL_AddShaderDirective( options, "STUDIO_FOG_EXP" );
 
-	if( CVAR_TO_BOOL( r_shadows ) && !tr.shadows_notsupport )
-	{
-		if( shadows )
-			GL_AddShaderDirective( options, "STUDIO_HAS_SHADOWS" );
-	}
+	if( shadows )
+		GL_AddShaderDirective( options, "STUDIO_HAS_SHADOWS" );
 
 	glsl_program_t *shader = GL_FindUberShader( glname, options, &GL_InitStudioDlightUniforms );
 	if( !shader )
@@ -2098,6 +2113,12 @@ word GL_UberShaderForDlightGeneric( const plight_t *pl )
 {
 	bool shadows = (!FBitSet( pl->flags, CF_NOSHADOWS )) ? true : false;
 
+	if( tr.shadows_notsupport || !CVAR_TO_BOOL( r_shadows ) )
+		shadows = false;
+
+	if( pl->pointlight && tr.omni_shadows_notsupport )
+		shadows = false;
+
 	if( pl->pointlight )
 	{
 		if( tr.omniLightShaderNum[shadows] && tr.glsl_sequence_omni[shadows] == tr.glsl_valid_sequence )
@@ -2123,7 +2144,7 @@ word GL_UberShaderForDlightGeneric( const plight_t *pl )
 	if( tr.fogEnabled )
 		GL_AddShaderDirective( options, "GENERIC_FOG_EXP" );
 
-	if( CVAR_TO_BOOL( r_shadows ) && shadows && !tr.shadows_notsupport )
+	if( shadows )
 		GL_AddShaderDirective( options, "GENERIC_HAS_SHADOWS" );
 
 	glsl_program_t *shader = GL_FindUberShader( glname, options, &GL_InitGenericDlightUniforms );
@@ -2278,6 +2299,7 @@ void GL_InitGPUShaders( void )
 
 	// fog processing
 	glsl.genericFog = shader = GL_InitGPUShader( "GenericFog", "generic", "generic", "#define GENERIC_FOG_EXP\n" );
+	GL_InitGenericFogUniforms( shader );
 
 	// HACKHACK: precache generic light shaders
 	GL_UberShaderForDlightGeneric( &pl );

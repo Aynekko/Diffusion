@@ -489,7 +489,7 @@ void CStudioModelRenderer::ClearInstanceData( bool create )
 	m_pModelInstance->radius = 0.0f;
 	m_pModelInstance->info_flags = 0;
 	m_pModelInstance->lerpFactor = 0.0f;
-	m_pModelInstance->cubemap = &world->defaultCubemap;
+	m_pModelInstance->cubemap = NULL;
 
 	m_boneSetup.SetStudioPointers( m_pStudioHeader, m_pModelInstance->m_poseparameter );
 
@@ -5153,8 +5153,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	Vector right = m_pModelInstance->m_plightmatrix.VectorIRotate( RI->vright );
 
 	// diffusioncubemaps
-	mcubemap_t *cached_cubemap;
-	cached_cubemap = &world->defaultCubemap;
+	mcubemap_t *cached_cubemap = NULL;
 
 	float cached_glossscale = -1.0f;
 	float cached_glosssmoothness = -1.0f;
@@ -5222,7 +5221,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			cached_model = NULL;
 
 			// diffusioncubemaps
-			cached_cubemap = 0;
+			cached_cubemap = NULL;
 
 			cached_glossscale = -1.0f;
 			cached_glosssmoothness = -1.0f;
@@ -5356,6 +5355,12 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				cached_reflectscale = tr.materials[mat->gl_diffuse_id].ReflectScale;
 
 				cached_cubemap = m_pModelInstance->cubemap;
+
+				if( tr.materials[mat->gl_diffuse_id].Fresnel != cached_fresnel )
+				{
+					pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[mat->gl_diffuse_id].Fresnel );
+					cached_fresnel = tr.materials[mat->gl_diffuse_id].Fresnel;
+				}
 			}
 
 			if( tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 )
@@ -5391,12 +5396,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			{
 				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
 				cached_embossscale = tr.materials[mat->gl_diffuse_id].EmbossScale;
-			}
-
-			if( tr.materials[mat->gl_diffuse_id].Fresnel != cached_fresnel )
-			{
-				pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[mat->gl_diffuse_id].Fresnel );
-				cached_fresnel = tr.materials[mat->gl_diffuse_id].Fresnel;
 			}
 
 			// diffusion - apply custom color to a specific texture

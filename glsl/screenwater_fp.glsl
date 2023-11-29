@@ -26,4 +26,4 @@ void main( void )
 
     // Output to screen
     gl_FragColor = outputColor;
-};
+}
