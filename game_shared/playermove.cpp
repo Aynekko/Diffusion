@@ -428,7 +428,7 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 #ifdef CLIENT_DLL
 		// make dust particles
-		if( fvol > 0.2f )
+		if( !pmove->waterlevel && fvol > 0.2f )
 			g_pParticles.Smoke( 0, 1/*sand particle*/, pmove->origin - Vector( 0, 0, height - 2 ), Vector( 0, 0, 5 ), 1, 0.15f, 10, 1 );
 #endif
 		break;
@@ -598,7 +598,7 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 #ifdef CLIENT_DLL
 		// make dust particles
-		if( fvol > 0.2f )
+		if( !pmove->waterlevel && fvol > 0.2f )
 			g_pParticles.Smoke( 0, 1/*sand particle*/, pmove->origin - Vector( 0, 0, height - 2 ), Vector( 0, 0, 5 ), 1, 0.15f, 10, 1 );
 #endif
 		break;
