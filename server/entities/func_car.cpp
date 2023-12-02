@@ -22,6 +22,7 @@
 #define SF_CAR_GEARWHINE		BIT(4) // whining transmission sound, like a race car (hello NFS MW)
 #define SF_CAR_ELECTRIC			BIT(5) // for now this only makes different sounds
 #define SF_CAR_CANTBEDIRTY		BIT(6) // don't accumulate dirt or wetness
+#define SF_CAR_TURNREARWHEELS	BIT(7) // rear wheels will turn too
 
 // fuser2 is used for both body and wheels' models to control the amount of dirt on the car
 
@@ -869,53 +870,64 @@ void CCar::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Col
 	// bring back the car vectors
 	UTIL_MakeVectors( GetAbsAngles() );
 
-	// 4 collision points from wheels.
-	Vector ColPointWFR = g_vecZero;
-	Vector ColPointWFL = g_vecZero;
-	Vector ColPointWRR = g_vecZero;
-	Vector ColPointWRL = g_vecZero;
-
 	bool hit_carblocker = false;
 
 	if( Forward == 1 )
 	{
 		// front right wheel
 		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 + ChassisRight * FrontSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 + ChassisRight * FrontSuspWidth * 0.5 + ChassisForw * (FrontSuspDist + FrontBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWFR = trCol.vecEndPos;
 		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
 			hit_carblocker = true;
 		if( trCol.flFraction < 1.0f )
 		{
 			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
 			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct); // slide along the plane
-			*ColPoint = ColPointWFR;
+			*ColPoint = trCol.vecEndPos;
 			if( *ColDotProduct < 0.6 )
 				*ColDotProduct *= -1;
 		}
 		else if( hit_carblocker )
 		{
 			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
-			*ColPoint = ColPointWFR;
+			*ColPoint = trCol.vecEndPos;
 		}
 		hit_carblocker = false;
 
 		// front left wheel
 		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 - ChassisRight * FrontSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 - ChassisRight * FrontSuspWidth * 0.5 + ChassisForw * (FrontSuspDist + FrontBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWFL = trCol.vecEndPos;
 		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
 			hit_carblocker = true;
 		if( trCol.flFraction < 1.0f )
 		{
 			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
 			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
-			*ColPoint = ColPointWFL;
+			*ColPoint = trCol.vecEndPos;
 			if( *ColDotProduct < 0.6 )
 				*ColDotProduct *= -1;
 		}
 		else if( hit_carblocker )
 		{
 			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
-			*ColPoint = ColPointWFL;
+			*ColPoint = trCol.vecEndPos;
+		}
+		hit_carblocker = false;
+
+		// front center
+		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5, GetAbsOrigin() + ChassisUp * FrontWheelRadius * 1.5 + ChassisForw * (FrontSuspDist + FrontBumperLength), ignore_monsters, edict(), &trCol );
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f )
+		{
+			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
+			*ColPoint = trCol.vecEndPos;
+			if( *ColDotProduct < 0.6 )
+				*ColDotProduct *= -1;
+		}
+		else if( hit_carblocker )
+		{
+			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*ColPoint = trCol.vecEndPos;
 		}
 		hit_carblocker = false;
 	}
@@ -924,37 +936,52 @@ void CCar::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Col
 	{
 		// rear right wheel
 		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 + ChassisRight * RearSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 + ChassisRight * RearSuspWidth * 0.5 - ChassisForw * (RearSuspDist + RearBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWRR = trCol.vecEndPos;
 		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
 			hit_carblocker = true;
 		if( trCol.flFraction < 1.0f )
 		{
 			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
 			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
-			*ColPoint = ColPointWRR;
+			*ColPoint = trCol.vecEndPos;
 		}
 		else if( hit_carblocker )
 		{
 			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
-			*ColPoint = ColPointWRR;
+			*ColPoint = trCol.vecEndPos;
 		}
 		hit_carblocker = false;
 
 		// rear left wheel
 		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 - ChassisRight * RearSuspWidth * 0.5, GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 - ChassisRight * RearSuspWidth * 0.5 - ChassisForw * (RearSuspDist + RearBumperLength), ignore_monsters, edict(), &trCol );
-		ColPointWRL = trCol.vecEndPos;
 		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
 			hit_carblocker = true;
 		if( trCol.flFraction < 1.0f )
 		{
 			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
 			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
-			*ColPoint = ColPointWRL;
+			*ColPoint = trCol.vecEndPos;
 		}
 		else if( hit_carblocker )
 		{
 			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
-			*ColPoint = ColPointWRL;
+			*ColPoint = trCol.vecEndPos;
+		}
+		hit_carblocker = false;
+
+		// rear center
+		UTIL_TraceLine( GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5, GetAbsOrigin() + ChassisUp * RearWheelRadius * 1.5 - ChassisForw * (RearSuspDist + RearBumperLength), ignore_monsters, edict(), &trCol );
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f )
+		{
+			*ColDotProduct = -DotProduct( ChassisForw, trCol.vecPlaneNormal ) * Forward;
+			*Collision += trCol.vecPlaneNormal * AbsCarSpeed * (*ColDotProduct);
+			*ColPoint = trCol.vecEndPos;
+		}
+		else if( hit_carblocker )
+		{
+			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*ColPoint = trCol.vecEndPos;
 		}
 		hit_carblocker = false;
 	}
@@ -1364,47 +1391,9 @@ void CCar::Drive( void )
 
 	FrontWheelAng.y = bound( -MaxTurn, FrontWheelAng.y, MaxTurn );
 
-	/* old code
-	OpposeTurn = 1.0f;
-	if( bRight() )
-	{
-		if( Forward == -1 )
-		{
-			if( Turning > 0 ) OpposeTurn = (TurningRate * 3) / (0.1 + AbsCarSpeed);
-		}
-		else if( Forward == 1 )
-		{
-			if( Turning < 0 ) OpposeTurn = (TurningRate * 3) / (0.1 + AbsCarSpeed);
-		}
-		OpposeTurn = bound( 1, OpposeTurn, 10 );
-		FrontWheelAng.y -= 50 * OpposeTurn * gpGlobals->frametime;
-	}
-	else if( bLeft() )
-	{
-		if( Forward == -1 )
-		{
-			if( Turning < 0 ) OpposeTurn = (TurningRate * 3) / (0.1 + AbsCarSpeed);
-		}
-		else if( Forward == 1 )
-		{
-			if( Turning > 0 ) OpposeTurn = (TurningRate * 3) / (0.1 + AbsCarSpeed);
-		}
-		OpposeTurn = bound( 1, OpposeTurn, 10 );
-		FrontWheelAng.y += 50 * OpposeTurn * gpGlobals->frametime;
-	}
-
-	// no turning buttons pressed, go to zero
-	if( !(bLeft()) && !(bRight()) )
-	{
-		FrontWheelAng.y = UTIL_Approach( 0, FrontWheelAng.y, 100 * gpGlobals->frametime );
-		if( fabs( FrontWheelAng.y ) <= 0.01f )
-			FrontWheelAng.y = 0;
-	}
-
-	float MaxWheelTurn = MaxTurn * (150 / (1 + AbsCarSpeed));
-	if( MaxWheelTurn > MaxTurn ) MaxWheelTurn = MaxTurn;
-	FrontWheelAng.y = bound( -MaxWheelTurn, FrontWheelAng.y, MaxWheelTurn );
-	*/
+	// rear wheels can turn too if specified
+	if( HasSpawnFlags(SF_CAR_TURNREARWHEELS) )
+		RearWheelAng.y = -FrontWheelAng.y * 0.25f;
 
 	//----------------------------
 	// wheels' rotation (visual effect)
@@ -1555,11 +1544,14 @@ void CCar::Drive( void )
 			WRITE_BYTE( Gear );
 		MESSAGE_END();
 
-		switch( RANDOM_LONG( 1, 3 ) )
+		if( !HasSpawnFlags( SF_CAR_ELECTRIC ) )
 		{
-		case 1: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear1.wav", 0.35, ATTN_NORM ); break;
-		case 2: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear2.wav", 0.35, ATTN_NORM ); break;
-		case 3: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear3.wav", 0.35, ATTN_NORM ); break;
+			switch( RANDOM_LONG( 1, 3 ) )
+			{
+			case 1: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear1.wav", 0.35, ATTN_NORM ); break;
+			case 2: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear2.wav", 0.35, ATTN_NORM ); break;
+			case 3: EMIT_SOUND( edict(), CHAN_BODY, "func_car/gear3.wav", 0.35, ATTN_NORM ); break;
+			}
 		}
 
 		if( Upshifting && bForward() ) // shake body only when upshifting and gas pressed
