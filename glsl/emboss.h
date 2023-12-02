@@ -3,13 +3,13 @@
 
 #define KERNEL_SIZE 9
 
-float kernel[KERNEL_SIZE] = float[KERNEL_SIZE](
+const float kernel[KERNEL_SIZE] = float[KERNEL_SIZE](
     2.0, 0.0, 0.0,
     0.0, -1.0, 0.0,
     0.0, 0.0, -1.0
     );
 
-vec2 offset[KERNEL_SIZE] = vec2[KERNEL_SIZE](
+const vec2 offset[KERNEL_SIZE] = vec2[KERNEL_SIZE](
     vec2( -0.5, -0.5 ), vec2( 0.0, -0.5 ), vec2( 0.5, -0.5 ),
     vec2( -0.5, 0.0 ), vec2( 0.0, 0.0 ), vec2( 0.5, 0.0 ),
     vec2( -0.5, 0.5 ), vec2( 0.0, 0.5 ), vec2( 0.5, 0.5 )

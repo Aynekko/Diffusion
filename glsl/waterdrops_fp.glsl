@@ -11,7 +11,7 @@ uniform vec3 u_WaterDrops[2];
 
 vec2 rand( vec2 c )
 {
-    mat2 m = mat2( 12.9898, 0.16180, 78.233, 0.31415 );
+    const mat2 m = mat2( 12.9898, 0.16180, 78.233, 0.31415 );
     return fract( sin( m * c ) * vec2( 43758.5453, 14142.1 ));
 }
 

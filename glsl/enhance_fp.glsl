@@ -43,13 +43,13 @@ vec4 sharpen( in sampler2D tex, in vec2 coords )
 void main( void )
 {
     vec4 color = texture2D( u_ColorMap, var_TexCoord, 0.0 );
-	bool Saturate = true;
-	bool Sharpen = true;
+	const bool Saturate = true;
+	const bool Sharpen = true;
 	
     // saturate
     if( Saturate )
     {
-		float Saturation = 0.55f;
+		const float Saturation = 0.55f;
 		vec3 col_hsv = RGBtoHSV( color.rgb );
 		col_hsv.y *= ( Saturation * 2.0 );
 		vec3 col_rgb = HSVtoRGB( col_hsv.rgb );

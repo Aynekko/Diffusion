@@ -50,9 +50,9 @@ void main( void )
 	float fShaftsMask = saturate( 1.00001 - accum.w );
 	float fBlend = accum.w * Brightness;	// shaft brightness
 
-	int Steps = 32;
-	float step = 8.0 / Steps;
-	for( int i = 1; i < Steps; i++ )
+	const int Steps = 32;
+	const float step = 8.0 / Steps;
+	for( int i = 1; i <= Steps; i++ )
 	{	
 		accum += texture2D( u_ColorMap, tc + sunVec.xy * (0.5 + step * i) ) * (1.0 - (0.5 + step * i) / 8.0);
 	}

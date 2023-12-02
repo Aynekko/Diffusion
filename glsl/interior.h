@@ -26,8 +26,8 @@ vec4 InteriorMapping( vec4 diffuse, vec2 TexDiffuse, vec3 N, float Time, vec3 Vi
 
 	vec2 blockNums = floor(TexDiffuse * gridSize);
 
-	float staticSeed = 500; // room positions
-	float randomSeed = staticSeed;//don't change          floor(Time * SEED_CHANGING_FREQ); // lighting change
+	const float staticSeed = 500; // room positions
+	const float randomSeed = staticSeed;//don't change          floor(Time * SEED_CHANGING_FREQ); // lighting change
 
 	float staticVal = randomFunction2(staticSeed, blockNums);
     float randomVal = staticVal;   //randomFunction(randomSeed, blockNums);

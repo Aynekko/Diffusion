@@ -7,7 +7,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "client", "client\client.vcx
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "server", "server\server.vcxproj", "{98B17940-4298-4B12-BA7F-F6870DF5C042}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "NewFolder1", "NewFolder1", "{76F81493-9648-41FD-B7CF-5558EB5444CE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "glsl", "glsl", "{76F81493-9648-41FD-B7CF-5558EB5444CE}"
 	ProjectSection(SolutionItems) = preProject
 		glsl\alpha2coverage.h = glsl\alpha2coverage.h
 		glsl\bloom_fp.glsl = glsl\bloom_fp.glsl

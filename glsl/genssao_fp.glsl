@@ -7,15 +7,7 @@ uniform sampler2D   u_RotateMap;
 varying vec2        var_TexCoord;
 uniform float       u_zFar;
 
-void main( void )
-{
-    float znear = 1.0;	        // camera clipping start
-    float zfar = u_zFar;	// camera clipping end	
-    float radius = 0.5;
-    float distScale = 2.0;
-    vec2 tx = var_TexCoord;
-    
-    vec4 rndTable[8] = vec4[8] 
+const vec4 rndTable[8] = vec4[8] 
     (
 	vec4 ( -0.5, -0.5, -0.5, 0.0 ),
 	vec4 (  0.5, -0.5, -0.5, 0.0 ),
@@ -26,6 +18,15 @@ void main( void )
 	vec4 ( -0.5,  0.5,  0.5, 0.0 ),
 	vec4 (  0.5,  0.5,  0.5, 0.0 )
     );
+
+const float znear = 1.0; // camera clipping start
+const float distScale = 2.0;
+
+void main( void )
+{
+    float zfar = u_zFar;	// camera clipping end	
+    vec2 tx = var_TexCoord;
+    float radius = 0.5;
 
     float fSampledDepth = texture2D( u_DepthMap, tx ).r;
     fSampledDepth = linearizeDepth( fSampledDepth, znear, zfar ); // get z-eye

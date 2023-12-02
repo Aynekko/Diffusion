@@ -16,10 +16,16 @@ GNU General Public License for more details.
 #include "const.h"
 #include "mathlib.h"
 #include "texfetch.h"
+#if defined( STUDIO_EMBOSS )
 #include "emboss.h"
+#endif
 #include "specular.h"
+#if defined( REFLECTION_CUBEMAP )
 #include "cubemap.h"
+#endif
+#if defined( STUDIO_INTERIOR )
 #include "interior.h"
+#endif
 #include "alpha2coverage.h"
 
 uniform sampler2D	u_ColorMap;

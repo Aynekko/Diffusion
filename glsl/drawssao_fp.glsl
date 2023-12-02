@@ -13,7 +13,7 @@ void main( void )
     vec3 color = texture2D( u_ScreenMap, tx ).rgb;
     vec3 ssao = texture2D( u_AOMap, tx ).rgb;
 
-    float lumInfluence = 1.0;   
+    const float lumInfluence = 1.0;   
     float lum = GetLuminance( color.rgb );
     vec3 luminance = vec3( lum, lum, lum );    
    

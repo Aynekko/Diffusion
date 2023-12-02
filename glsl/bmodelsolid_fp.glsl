@@ -17,11 +17,17 @@ GNU General Public License for more details.
 #include "mathlib.h"
 #include "texfetch.h"
 #include "terrain.h"
+#if defined( BMODEL_EMBOSS )
 #include "emboss.h"
+#endif
 #include "specular.h"
 #include "deluxemap.h"
+#if defined( REFLECTION_CUBEMAP )
 #include "cubemap.h"
+#endif
+#if defined( BMODEL_INTERIOR )
 #include "interior.h"
+#endif
 #include "alpha2coverage.h"
 #if defined( BMODEL_WATER ) && defined( BMODEL_WATER_REFRACTION )
 #include "screen.h"
