@@ -5447,6 +5447,8 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 	mstudiomaterial_t *cached_material = NULL;
 	model_t *cached_model = NULL;
 	int i;
+	int cached_masked = -1;
+	int masked = -1;
 
 	if( !m_nNumDrawMeshes )
 		return;
@@ -5460,6 +5462,7 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 	//	R_LoadIdentity();
 	GL_Blend( GL_FALSE );
 	GL_DepthMask( GL_TRUE );
+	bool Additive = false; // watch for depth mask/blend switches
 
 	// sorting list to reduce shader switches
 	if( !CVAR_TO_BOOL( r_nosort ) ) QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
@@ -5521,46 +5524,53 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 			cached_model = m_pRenderModel;
 		}
 
-		if( cached_material != mat )
+		masked = FBitSet( mat->flags, STUDIO_NF_MASKED ) ? 1 : 0;
+
+		if( cached_masked != masked )
 		{
-			if( FBitSet( mat->flags, STUDIO_NF_MASKED ) )
+			if( masked )
 				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
 			else
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 
-			if( mat->flags & STUDIO_NF_TWOSIDE || (m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide) )
-				GL_Cull( GL_NONE );
+			if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) ) // diffusion - fixed shadows from additive textures from projected light...
+			{
+				if( !Additive )
+				{
+					GL_DepthMask( GL_FALSE );
+					GL_Blend( GL_TRUE );
+					GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+					Additive = true;
+				}
+			}
 			else
-				GL_Cull( GL_FRONT );
-
-			if( FBitSet( mat->flags, STUDIO_NF_MASKED ) || FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) )
 			{
-
-			}
-			else if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) ) // diffusion - fixed shadows from additive textures from projected light...
-			{
-			//	if( R_ModelOpaque( RI->currententity->curstate.rendermode, RI->currententity->curstate.renderamt ) )
-			//	{
-			//		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
-			//		GL_DepthMask( GL_FALSE );
-			//		GL_Blend( GL_TRUE );
-			//	}
-			//	else GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
-				GL_DepthMask( GL_FALSE );
-				GL_Blend( GL_TRUE );
-				GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+				if( Additive )
+				{
+					GL_DepthMask( GL_TRUE );
+					GL_Blend( GL_FALSE );
+					Additive = false;
+				}
 			}
 
-			cached_material = mat;
+			cached_masked = masked;
 		}
+
+		if( mat->flags & STUDIO_NF_TWOSIDE || (m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide) )
+			GL_Cull( GL_NONE );
+		else
+			GL_Cull( GL_FRONT );
 
 		DrawMeshFromBuffer( pMesh );
 	}
 
 	GL_SelectTexture( glConfig.max_texture_units - 1 ); // force to cleanup all the units
 	GL_CleanUpTextureUnits( 0 );
-	GL_DepthMask( GL_TRUE );
-	GL_Blend( GL_FALSE );
+	if( Additive )
+	{
+		GL_DepthMask( GL_TRUE );
+		GL_Blend( GL_FALSE );
+	}
 	GL_Cull( GL_FRONT );
 
 	pglBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
