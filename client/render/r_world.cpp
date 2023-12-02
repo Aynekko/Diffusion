@@ -2604,12 +2604,12 @@ void R_DrawShadowBrushList( void )
 		{
 			GL_Bind( GL_TEXTURE0, curtex );
 			cached_texture = curtex;
-
-			if( es->culltype == CULL_OTHER ) // probably a twoside texture
-				GL_Cull( GL_NONE );
-			else
-				GL_Cull( GL_FRONT );
 		}
+
+		if( es->culltype == CULL_OTHER ) // probably a twoside texture
+			GL_Cull( GL_NONE );
+		else
+			GL_Cull( GL_FRONT );
 
 		if( es->firstvertex < startv )
 			startv = es->firstvertex;
