@@ -912,6 +912,18 @@ void CBaseEntity :: UnlinkAllChildren( void )
 	}
 }
 
+void CBaseEntity::DeleteAllChildren( void )
+{
+	CBaseEntity *pChild = m_hChild;
+
+	while( pChild )
+	{
+		CBaseEntity *pNext = pChild->m_hNextChild;
+		UTIL_Remove( pChild, true ); // delete the whole parent tree
+		pChild = pNext;
+	}
+}
+
 CBaseEntity *CBaseEntity :: GetRootParent( void )
 {
 	CBaseEntity *pEntity = this;

@@ -279,11 +279,12 @@ public:
 	void		CheckAngles( void );
 
 	// link operations
-	void		UnlinkFromParent( void );
-	void		UnlinkAllChildren( void );
-	void		UnlinkChild( CBaseEntity *pParent );
-	void		LinkChild( CBaseEntity *pParent );
-	CBaseEntity*	GetRootParent( void );
+	void UnlinkFromParent( void );
+	void UnlinkAllChildren( void );
+	void UnlinkChild( CBaseEntity *pParent );
+	void LinkChild( CBaseEntity *pParent );
+	CBaseEntity* GetRootParent( void );
+	void DeleteAllChildren( void );
 
 	// Invalidates the abs state of the entity and all children
 	// Specify the second flag if you want additional flags applied to all children

@@ -2466,10 +2466,13 @@ void UTIL_SetMovedir( CBaseEntity *pEnt )
 	}
 }
 
-void UTIL_Remove( CBaseEntity *pEntity )
+void UTIL_Remove( CBaseEntity *pEntity, bool remove_children )
 {
 	if ( !pEntity )
 		return;
+
+	if( remove_children )
+		pEntity->DeleteAllChildren();
 
 	pEntity->UpdateOnRemove();
 	pEntity->pev->flags |= FL_KILLME;

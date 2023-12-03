@@ -1397,19 +1397,19 @@ void CBoat::ClearEffects( void )
 	DontThink();
 
 	if( pChassis )
-		UTIL_Remove( pChassis );
+		UTIL_Remove( pChassis, true );
 	if( pChassisMdl )
-		UTIL_Remove( pChassisMdl );
+		UTIL_Remove( pChassisMdl, true );
 	if( pCamera1 )
-		UTIL_Remove( pCamera1 );
+		UTIL_Remove( pCamera1, true );
 	if( pCamera2 )
-		UTIL_Remove( pCamera2 );
+		UTIL_Remove( pCamera2, true );
 	if( pFreeCam )
-		UTIL_Remove( pFreeCam );
+		UTIL_Remove( pFreeCam, true );
 	if( pCarHurt )
-		UTIL_Remove( pCarHurt );
+		UTIL_Remove( pCarHurt, true );
 	if( pDriverMdl )
-		UTIL_Remove( pDriverMdl );
+		UTIL_Remove( pDriverMdl, true );
 }
 
 bool CBoat::ExitCar( CBaseEntity *pPlayer )

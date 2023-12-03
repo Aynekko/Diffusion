@@ -2571,27 +2571,27 @@ void CCar::ClearEffects( void )
 	DontThink();
 	
 	if( pWheel1 )
-		UTIL_Remove( pWheel1 );
+		UTIL_Remove( pWheel1, true );
 	if( pWheel2 )
-		UTIL_Remove( pWheel2 );
+		UTIL_Remove( pWheel2, true );
 	if( pWheel3 )
-		UTIL_Remove( pWheel3 );
+		UTIL_Remove( pWheel3, true );
 	if( pWheel4 )
-		UTIL_Remove( pWheel4 );
+		UTIL_Remove( pWheel4, true );
 	if( pChassis )
-		UTIL_Remove( pChassis );
+		UTIL_Remove( pChassis, true );
 	if( pChassisMdl )
-		UTIL_Remove( pChassisMdl );
+		UTIL_Remove( pChassisMdl, true );
 	if( pCamera1 )
-		UTIL_Remove( pCamera1 );
+		UTIL_Remove( pCamera1, true );
 	if( pCamera2 )
-		UTIL_Remove( pCamera2 );
+		UTIL_Remove( pCamera2, true );
 	if( pFreeCam )
-		UTIL_Remove( pFreeCam );
+		UTIL_Remove( pFreeCam, true );
 	if( pCarHurt )
-		UTIL_Remove( pCarHurt );
+		UTIL_Remove( pCarHurt, true );
 	if( pDriverMdl )
-		UTIL_Remove( pDriverMdl );
+		UTIL_Remove( pDriverMdl, true );
 
 	pWheel1 = NULL;
 	pWheel2 = NULL;

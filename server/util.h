@@ -44,7 +44,7 @@ extern globalvars_t	*gpGlobals;
 
 class CBaseEntity;
 
-extern void	UTIL_Remove( CBaseEntity *pEntity );
+extern void UTIL_Remove( CBaseEntity *pEntity, bool remove_children = false );
 extern CBaseEntity	*CreateEntityByName( const char *className, entvars_t *pev = NULL );
 
 #define NULL_STRING		0
