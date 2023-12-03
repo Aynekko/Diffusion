@@ -1392,6 +1392,13 @@ void CBoat::Idle( void )
 	SetNextThink( thinktime );
 }
 
+void CBoat::OnRemove( void )
+{
+	// if car is somehow deleted during drive, we need to remove the driver to prevent game crash
+	if( hDriver != NULL )
+		Use( hDriver, hDriver, USE_OFF, 0 );
+}
+
 void CBoat::ClearEffects( void )
 {
 	DontThink();

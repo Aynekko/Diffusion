@@ -2606,6 +2606,13 @@ void CCar::ClearEffects( void )
 	pDriverMdl = NULL;
 }
 
+void CCar::OnRemove(void)
+{
+	// if car is somehow deleted during drive, we need to remove the driver to prevent game crash
+	if( hDriver != NULL )
+		Use( hDriver, hDriver, USE_OFF, 0 );
+}
+
 bool CCar::ExitCar( CBaseEntity *pPlayer )
 {
 	// set player position

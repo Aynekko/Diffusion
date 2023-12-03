@@ -17,6 +17,7 @@ public:
 	void Camera( void );
 	int ObjectCaps( void );
 	void ClearEffects( void );
+	void OnRemove( void );
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	bool ExitCar( CBaseEntity *pPlayer );
 	void TryUnstick( void );
@@ -166,6 +167,7 @@ public:
 	void Idle( void );
 	int ObjectCaps( void );
 	void ClearEffects( void );
+	void OnRemove( void );
 	bool ExitCar( CBaseEntity *pPlayer );
 	Vector SafeSpawnPosition( void );
 	void GetCollision( const float AbsCarSpeed, const int Forward, Vector *Collision, float *ColDotProduct, Vector *ColPoint );
@@ -194,6 +196,7 @@ public:
 	void Idle( void );
 	int ObjectCaps( void );
 	void ClearEffects( void );
+	void OnRemove( void );
 	bool ExitCar( CBaseEntity *pPlayer );
 	void CarExplode( void );
 

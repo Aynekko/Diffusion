@@ -1454,6 +1454,13 @@ bool CHelicopter::ExitCar( CBaseEntity *pPlayer )
 	return false;
 }
 
+void CHelicopter::OnRemove( void )
+{
+	// if car is somehow deleted during drive, we need to remove the driver to prevent game crash
+	if( hDriver != NULL )
+		Use( hDriver, hDriver, USE_OFF, 0 );
+}
+
 void CHelicopter::ClearEffects( void )
 {
 	DontThink();
