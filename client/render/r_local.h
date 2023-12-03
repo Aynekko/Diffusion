@@ -797,7 +797,7 @@ bool IsBuildingCubemaps( void );
 void R_NewMap( void );
 void Mod_ThrowModelInstances( void );
 void Mod_PrepareModelInstances( void );
-int Mod_SampleSizeForFace( msurface_t *surf );
+int Mod_SampleSizeForFace( const msurface_t *surf );
 void R_LoadLandscapes( const char *filename );
 terrain_t *R_FindTerrain( const char *texname );
 void R_FreeLandscapes( void );
