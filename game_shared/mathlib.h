@@ -179,19 +179,95 @@ void SetPlane( struct mplane_s *plane, const Vector &vecNormal, float flDist );
 //
 // bounds operations
 //
-void ClearBounds( Vector &mins, Vector &maxs );
-void ClearBounds( Vector2D &mins, Vector2D &maxs );
-bool BoundsIsCleared( const Vector &mins, const Vector &maxs );
-void ExpandBounds( Vector &mins, Vector &maxs, float offset );
+static inline void ClearBounds( Vector & mins, Vector & maxs )
+{
+	// make bogus range
+	mins.x = mins.y = mins.z = 999999;
+	maxs.x = maxs.y = maxs.z = -999999;
+}
+
+static inline void ClearBounds( Vector2D &mins, Vector2D &maxs )
+{
+	// make bogus range
+	mins.x = mins.y = 999999;
+	maxs.x = maxs.y = -999999;
+}
+
+static inline bool BoundsIsCleared( const Vector &mins, const Vector &maxs )
+{
+	if( mins.x <= maxs.x || mins.y <= maxs.y || mins.z <= maxs.z )
+		return false;
+	return true;
+}
+
+static inline void ExpandBounds( Vector &mins, Vector &maxs, float offset )
+{
+	mins[0] -= offset;
+	mins[1] -= offset;
+	mins[2] -= offset;
+	maxs[0] += offset;
+	maxs[1] += offset;
+	maxs[2] += offset;
+}
+
 void AddPointToBounds( const Vector &v, Vector &mins, Vector &maxs, float limit = 0.0f );
 void AddPointToBounds( const Vector2D &v, Vector2D &mins, Vector2D &maxs );
-bool BoundsIntersect( const Vector &mins1, const Vector &maxs1, const Vector &mins2, const Vector &maxs2 );
-bool BoundsIntersect( const Vector2D &mins1, const Vector2D &maxs1, const Vector2D &mins2, const Vector2D &maxs2 );
-bool BoundsAndSphereIntersect( const Vector &mins, const Vector &maxs, const Vector &origin, float radius );
-bool BoundsAndSphereIntersect( const Vector2D &mins, const Vector2D &maxs, const Vector2D &origin, float radius );
-bool PointInBounds( const Vector& pt, const Vector& boxMin, const Vector& boxMax );
+
+static inline bool BoundsIntersect( const Vector &mins1, const Vector &maxs1, const Vector &mins2, const Vector &maxs2 )
+{
+	if( mins1.x > maxs2.x || mins1.y > maxs2.y || mins1.z > maxs2.z )
+		return false;
+	if( maxs1.x < mins2.x || maxs1.y < mins2.y || maxs1.z < mins2.z )
+		return false;
+	return true;
+}
+
+static inline bool BoundsIntersect( const Vector2D &mins1, const Vector2D &maxs1, const Vector2D &mins2, const Vector2D &maxs2 )
+{
+	if( mins1.x > maxs2.x || mins1.y > maxs2.y )
+		return false;
+	if( maxs1.x < mins2.x || maxs1.y < mins2.y )
+		return false;
+	return true;
+}
+
+static inline bool BoundsAndSphereIntersect( const Vector &mins, const Vector &maxs, const Vector &origin, float radius )
+{
+	if( mins.x > origin.x + radius || mins.y > origin.y + radius || mins.z > origin.z + radius )
+		return false;
+	if( maxs.x < origin.x - radius || maxs.y < origin.y - radius || maxs.z < origin.z - radius )
+		return false;
+	return true;
+}
+
+static inline bool BoundsAndSphereIntersect( const Vector2D &mins, const Vector2D &maxs, const Vector2D &origin, float radius )
+{
+	if( mins.x > origin.x + radius || mins.y > origin.y + radius )
+		return false;
+	if( maxs.x < origin.x - radius || maxs.y < origin.y - radius )
+		return false;
+	return true;
+}
+
+static inline bool PointInBounds( const Vector &pt, const Vector &boxMin, const Vector &boxMax )
+{
+	if( (pt[0] > boxMax[0]) || (pt[0] < boxMin[0]) )
+		return false;
+	if( (pt[1] > boxMax[1]) || (pt[1] < boxMin[1]) )
+		return false;
+	if( (pt[2] > boxMax[2]) || (pt[2] < boxMin[2]) )
+		return false;
+	return true;
+}
+
 float RadiusFromBounds( const Vector &mins, const Vector &maxs );
-bool BoundsIsNull( const Vector &mins, const Vector &maxs );
+
+static inline bool BoundsIsNull( const Vector &mins, const Vector &maxs )
+{
+	if( mins.x != maxs.x || mins.y != maxs.y || mins.z != maxs.z )
+		return false;
+	return true;
+}
 
 //
 // quaternion operations
