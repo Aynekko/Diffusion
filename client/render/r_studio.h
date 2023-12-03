@@ -319,7 +319,7 @@ private:
 
 	inline void DrawMeshFromBuffer( const vbomesh_t *mesh );
 
-	inline void QSortStudioMeshes( gl_studiomesh_t *meshes, int Li, int Ri );
+//	inline void QSortStudioMeshes( gl_studiomesh_t *meshes, int Li, int Ri );
 
 	// Setup the rendermode, smooth model etc
 	virtual void StudioSetupRenderer( int rendermode );

@@ -155,6 +155,16 @@ CStudioModelRenderer::CStudioModelRenderer( void )
 	m_pRenderModel = NULL;
 }
 
+static int SortSolidMeshes( gl_studiomesh_t *a, gl_studiomesh_t *b )
+{
+	if( a->hProgram > b->hProgram )
+		return -1;
+	if( a->hProgram < b->hProgram )
+		return 1;
+
+	return 0;
+}
+
 /*
 ====================
 ~CStudioModelRenderer
@@ -1902,6 +1912,7 @@ R_QSortStudioMeshes
 Quick sort
 ================
 */
+/*
 void CStudioModelRenderer::QSortStudioMeshes( gl_studiomesh_t *meshes, int Li, int Ri )
 {
 	int lstack[QSORT_MAX_STACKDEPTH], rstack[QSORT_MAX_STACKDEPTH];
@@ -1980,7 +1991,7 @@ mark0:
 		if( li != ri + 1 )
 			R_MeshCopy( tempbuf, meshes[ri + 1] );
 	}
-}
+}*/
 
 /*
 ================
@@ -4887,7 +4898,8 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 
 	// sorting list to reduce shader switches
 	if( !CVAR_TO_BOOL( r_nosort ) )
-		QSortStudioMeshes( m_LightMeshes, 0, m_nNumLightMeshes - 1 );
+//		QSortStudioMeshes( m_LightMeshes, 0, m_nNumLightMeshes - 1 );
+		qsort( m_LightMeshes, m_nNumLightMeshes - 1, sizeof( gl_studiomesh_t ), (cmpfunc)SortSolidMeshes );
 
 	m_pModelInstance = &m_ModelInstances[RI->currententity->modelhandle];
 
@@ -5175,7 +5187,9 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	GL_DepthMask( GL_TRUE );
 
 	// sorting list to reduce shader switches
-	if( !CVAR_TO_BOOL( r_nosort ) ) QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
+	if( !CVAR_TO_BOOL( r_nosort ) ) 
+	//	QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
+		qsort( m_DrawMeshes, m_nNumDrawMeshes - 1, sizeof( gl_studiomesh_t ), (cmpfunc)SortSolidMeshes );
 
 	// sorting list to reduce shader switches
 	for( i = 0; i < m_nNumDrawMeshes; i++ )
@@ -5451,7 +5465,9 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 	bool Additive = false; // watch for depth mask/blend switches
 
 	// sorting list to reduce shader switches
-	if( !CVAR_TO_BOOL( r_nosort ) ) QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
+	if( !CVAR_TO_BOOL( r_nosort ) ) 
+//		QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
+		qsort( m_DrawMeshes, m_nNumDrawMeshes - 1, sizeof( gl_studiomesh_t ), (cmpfunc)SortSolidMeshes );
 
 	// sorting list to reduce shader switches
 	for( i = 0; i < m_nNumDrawMeshes; i++ )
