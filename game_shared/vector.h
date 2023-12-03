@@ -17,6 +17,7 @@
 #define DIST_EPSILON	(1.0f / 32.0f)
 #define STOP_EPSILON	0.1f
 #define ON_EPSILON		0.1f
+#define DIST_EPSILON	0.125f // Max error from network coordinate quantization
 
 #define M_EPSILON		1.192092896e-07f
 #define M_INFINITY		1e30f
