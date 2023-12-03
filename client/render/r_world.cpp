@@ -3701,6 +3701,8 @@ void R_DrawWorld( void )
 	GL_DepthMask( GL_TRUE );
 	GL_Blend( GL_FALSE );
 
+	qsort( tr.draw_surfaces, tr.num_draw_surfaces, sizeof( gl_bmodelface_t ), (cmpfunc)R_SolidSurfaceCompare );
+
 	R_DrawBrushList();
 
 	end = Sys_DoubleTime();

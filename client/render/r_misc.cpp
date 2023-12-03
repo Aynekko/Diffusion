@@ -1978,7 +1978,7 @@ void R_NewMap( void )
 		ClearBits( surf->flags, SURF_NODRAW | SURF_NODLIGHT );
 
 		memset( info->subtexture, 0, sizeof( info->subtexture ) );
-		info->cubemap = &world->defaultCubemap;
+		info->cubemap = NULL;
 		info->checkcount = -1;
 	}
 

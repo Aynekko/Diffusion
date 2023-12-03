@@ -3918,6 +3918,7 @@ void CStudioModelRenderer::StudioSetRenderMode( const int rendermode )
 	case kRenderNormal:
 	case kRenderTransAlpha:
 		GL_Blend( GL_FALSE );
+		GL_DepthMask( GL_TRUE );
 		break;
 	case kRenderTransColor:
 		if( RI->currententity->curstate.renderamt != 255 || tr.fadeblend[RI->currententity->index] < 1.0f ) // diffusion - fix, otherwise it was possible to look through them
@@ -4710,7 +4711,8 @@ AddMeshToDrawList
 */
 void CStudioModelRenderer::AddMeshToDrawList( studiohdr_t *phdr, const vbomesh_t *mesh, bool lightpass, bool cached_materials )
 {
-	int m_skinnum = bound( 0, m_pCurrentEntity->curstate.skin, phdr->numskinfamilies - 1 );
+	cl_entity_t *e = m_pCurrentEntity;
+	int m_skinnum = bound( 0, e->curstate.skin, phdr->numskinfamilies - 1 );
 	short *pskinref = (short *)((byte *)phdr + phdr->skinindex);
 	pskinref += (m_skinnum * phdr->numskinref);
 
@@ -4729,8 +4731,11 @@ void CStudioModelRenderer::AddMeshToDrawList( studiohdr_t *phdr, const vbomesh_t
 		if( FBitSet( mat->flags, STUDIO_NF_FULLBRIGHT ) )
 			return; // can't light fullbrights
 
-		if( (m_pCurrentEntity->curstate.renderfx == kRenderFxFullbright) || (m_pCurrentEntity->curstate.renderfx == kRenderFxFullbrightNoShadows) )
+		if( (e->curstate.renderfx == kRenderFxFullbright) || (e->curstate.renderfx == kRenderFxFullbrightNoShadows) )
 			return;
+
+		if( e->curstate.rendermode == kRenderFade )
+			return; // don't light fading entities
 
 		if( FBitSet( mat->flags, STUDIO_NF_NODLIGHT ) )
 			return; // shader was failed to compile
@@ -4765,7 +4770,7 @@ void CStudioModelRenderer::AddMeshToDrawList( studiohdr_t *phdr, const vbomesh_t
 
 	entry->mesh = (vbomesh_t *)mesh;
 	entry->hProgram = hProgram;
-	entry->parent = m_pCurrentEntity;
+	entry->parent = e;
 	entry->model = m_pRenderModel;
 	entry->additive = FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) ? true : false;
 }
@@ -5300,33 +5305,14 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			else
 				GL_Cull( GL_FRONT );
 
-			if( FBitSet( mat->flags, STUDIO_NF_MASKED ) || FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) )
+			if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) )
 			{
-
-			}
-			else if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) )
-			{
-			//	if( R_ModelOpaque( m_pCurrentEntity->curstate.rendermode, m_pCurrentEntity->curstate.renderamt ) )
-			//	{
-			//		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
-			//		GL_DepthMask( GL_FALSE );
-			//		GL_Blend( GL_TRUE );
-			//	}
-			//	else GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 				GL_DepthMask( GL_FALSE );
 				GL_Blend( GL_TRUE );
 				GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 			}
 			else
-			{
-			//	if( R_ModelOpaque( m_pCurrentEntity->curstate.rendermode, m_pCurrentEntity->curstate.renderamt ) )
-			//	{
-			//		GL_DepthMask( GL_TRUE );
-			//		GL_Blend( GL_FALSE );
-			//	}
-
 				StudioSetRenderMode( m_pCurrentEntity->curstate.rendermode );
-			}
 
 			if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[mat->gl_diffuse_id].ReflectScale != cached_reflectscale) && (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
 			{
