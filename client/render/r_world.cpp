@@ -537,6 +537,64 @@ static void Mod_LoadWorldMaterials( void )
 	}
 }
 
+//=====================================================================
+// R_SolidSurfaceCompare: compare solid surfaces.
+// Sorts surfaces to reduce state switches
+//=====================================================================
+static int R_SolidSurfaceCompare( const gl_bmodelface_t *a, const gl_bmodelface_t *b )
+{
+	msurface_t *surf1 = (msurface_t *)a->surface;
+	msurface_t *surf2 = (msurface_t *)b->surface;
+	mextrasurf_t *esrf1 = surf1->info;
+	mextrasurf_t *esrf2 = surf2->info;
+
+	// sort priority
+	// 1. shaders
+	if( esrf1->shaderNum[0] > esrf2->shaderNum[0] )
+		return 1;
+
+	if( esrf1->shaderNum[0] < esrf2->shaderNum[0] )
+		return -1;
+
+	// 2. texture number
+	if( esrf1->gl_texturenum > esrf2->gl_texturenum )
+		return 1;
+
+	if( esrf1->gl_texturenum < esrf2->gl_texturenum )
+		return -1;
+
+	// 3. lightmap texture number
+	if( esrf1->lightmaptexturenum > esrf2->lightmaptexturenum )
+		return 1;
+
+	if( esrf1->lightmaptexturenum < esrf2->lightmaptexturenum )
+		return -1;
+
+	return 0;
+}
+
+//=====================================================================
+// R_TransSurfaceCompare: compare translucent surfaces.
+// Sorts surfaces from far to near
+//=====================================================================
+static int R_TransSurfaceCompare( const gl_bmodelface_t *a, const gl_bmodelface_t *b )
+{
+	msurface_t *surf1 = (msurface_t *)a->surface;
+	msurface_t *surf2 = (msurface_t *)b->surface;
+	Vector org1 = RI->currententity->origin + surf1->info->origin;
+	Vector org2 = RI->currententity->origin + surf2->info->origin;
+	float len1 = DotProduct( org1, RI->vforward ) - RI->viewplanedist;
+	float len2 = DotProduct( org2, RI->vforward ) - RI->viewplanedist;
+
+	// compare by plane dists
+	if( len1 > len2 )
+		return -1;
+	if( len1 < len2 )
+		return 0;
+
+	return 0;
+}
+
 /*
 =================
 Mod_SetParent
@@ -2198,7 +2256,7 @@ setup light projection for each
 */
 void R_DrawLightForSurfList( plight_t *pl )
 {
-	texture_t *cached_texture = NULL;
+	int cached_texture = -1;
 	qboolean flush_buffer = false;
 	cl_entity_t *e = RI->currententity;
 	gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
@@ -2224,7 +2282,6 @@ void R_DrawLightForSurfList( plight_t *pl )
 	gl_bmodelface_t *entry;
 	mextrasurf_t *es;
 	msurface_t *s;
-	texture_t *tex;
 	Vector4D light_params[6];
 	float waveHeight = 0.0f;
 
@@ -2234,12 +2291,10 @@ void R_DrawLightForSurfList( plight_t *pl )
 		es = entry->surface->info;
 		s = entry->surface;
 
-		tex = R_TextureAnimation( s );
-
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 			flush_buffer = true;
 
-		if( cached_texture != tex )
+		if( cached_texture != es->gl_texturenum )
 			flush_buffer = true;
 
 		if( flush_buffer )
@@ -2301,14 +2356,14 @@ void R_DrawLightForSurfList( plight_t *pl )
 			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
 
 			// reset cache
-			cached_texture = NULL;
+			cached_texture = -1;
 			cached_dynlightscale = -1.0f;
 			cached_glossscale = -1.0f;
 			cached_glosssmoothness = -1.0f;
 			cached_embossscale = -1.0f;
 		}
 
-		if( cached_texture != tex )
+		if( cached_texture != es->gl_texturenum )
 		{
 			mtexinfo_t *tx = s->texinfo;
 			mfaceinfo_t *land = tx->faceinfo;
@@ -2331,22 +2386,22 @@ void R_DrawLightForSurfList( plight_t *pl )
 				if( land && land->terrain && land->terrain->layermap.gl_diffuse_id > 0 )
 					GL_Bind( GL_TEXTURE0, land->terrain->layermap.gl_diffuse_id );
 				else 
-					GL_Bind( GL_TEXTURE0, tex->gl_texturenum );
+					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
 			}
 			else
 			{
 				if( FBitSet( s->flags, SURF_LANDSCAPE ) )
-					GL_Bind( GL_TEXTURE0, tex->gl_texturenum );
-				else if( tr.materials[tex->gl_texturenum].gl_fallbacktex_id > 0 )
-					GL_Bind( GL_TEXTURE0, tr.materials[tex->gl_texturenum].gl_fallbacktex_id );
-				else if( tex->gl_texturenum != tr.defaultTexture && tr.materials[tex->gl_texturenum].animation_id >= 0 )
+					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
+				else if( tr.materials[es->gl_texturenum].gl_fallbacktex_id > 0 )
+					GL_Bind( GL_TEXTURE0, tr.materials[es->gl_texturenum].gl_fallbacktex_id );
+				else if( es->gl_texturenum != tr.defaultTexture && tr.materials[es->gl_texturenum].animation_id >= 0 )
 				{
-					int anim_id = tr.materials[tex->gl_texturenum].animation_id;
+					int anim_id = tr.materials[es->gl_texturenum].animation_id;
 					GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
 				}
 				else
-					GL_Bind( GL_TEXTURE0, tex->gl_texturenum );
+					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
 			}
 
@@ -2372,48 +2427,48 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 			else
 			{
-				float newdynlightscale = pl->brightness * tr.materials[tex->gl_texturenum].DynlightScale;
+				float newdynlightscale = pl->brightness * tr.materials[es->gl_texturenum].DynlightScale;
 				if( newdynlightscale != cached_dynlightscale )
 				{
 					pglUniform1fARB( RI->currentshader->u_DynLightBrightness, newdynlightscale );
 					cached_dynlightscale = newdynlightscale;
 				}
 
-				if( tr.materials[tex->gl_texturenum].GlossSmoothness != cached_glosssmoothness )
+				if( tr.materials[es->gl_texturenum].GlossSmoothness != cached_glosssmoothness )
 				{
-					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[tex->gl_texturenum].GlossSmoothness );
-					cached_glosssmoothness = tr.materials[tex->gl_texturenum].GlossSmoothness;
+					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[es->gl_texturenum].GlossSmoothness );
+					cached_glosssmoothness = tr.materials[es->gl_texturenum].GlossSmoothness;
 				}
 
-				if( tr.materials[tex->gl_texturenum].GlossScale != cached_glossscale )
+				if( tr.materials[es->gl_texturenum].GlossScale != cached_glossscale )
 				{
-					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[tex->gl_texturenum].GlossScale );
-					cached_glossscale = tr.materials[tex->gl_texturenum].GlossScale;
+					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[es->gl_texturenum].GlossScale );
+					cached_glossscale = tr.materials[es->gl_texturenum].GlossScale;
 				}
 
-				if( tr.materials[tex->gl_texturenum].EmbossScale != cached_embossscale )
+				if( tr.materials[es->gl_texturenum].EmbossScale != cached_embossscale )
 				{
-					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[tex->gl_texturenum].EmbossScale );
-					cached_embossscale = tr.materials[tex->gl_texturenum].EmbossScale;
+					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[es->gl_texturenum].EmbossScale );
+					cached_embossscale = tr.materials[es->gl_texturenum].EmbossScale;
 				}
 
-				if( tr.materials[tex->gl_texturenum].gl_normalmap_id > 0 )
-					GL_Bind( GL_TEXTURE6, tr.materials[tex->gl_texturenum].gl_normalmap_id );
+				if( tr.materials[es->gl_texturenum].gl_normalmap_id > 0 )
+					GL_Bind( GL_TEXTURE6, tr.materials[es->gl_texturenum].gl_normalmap_id );
 			}
 
 			if( !tr.lowmemory && FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
 				GL_Bind( GL_TEXTURE6, tr.waterTextures[(int)(tr.time * 20.0f) % WATER_TEXTURES] ); // u_NormalMap
 
 			// diffusion - interior mapping
-			if( tr.materials[tex->gl_texturenum].gl_interiormap_id > 0 )
+			if( tr.materials[es->gl_texturenum].gl_interiormap_id > 0 )
 			{
 			//	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[tex->gl_texturenum].InteriorGrid.x, tr.materials[tex->gl_texturenum].InteriorGrid.y, (float)tr.materials[tex->gl_texturenum].InteriorLightState );
-				GL_Bind( GL_TEXTURE7, tr.materials[tex->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
+				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[es->gl_texturenum].InteriorGrid.x, tr.materials[es->gl_texturenum].InteriorGrid.y, (float)tr.materials[es->gl_texturenum].InteriorLightState );
+				GL_Bind( GL_TEXTURE7, tr.materials[es->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
 			}
 
 			// diffusion - apply custom color to a specific texture
-			if( tr.materials[tex->gl_texturenum].ApplyColor && (e->index > 0) )
+			if( tr.materials[es->gl_texturenum].ApplyColor && (e->index > 0) )
 			{
 				pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
 			}
@@ -2425,7 +2480,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			else
 				GL_Cull( GL_FRONT );
 
-			cached_texture = tex;
+			cached_texture = es->gl_texturenum;
 		}
 
 		if( es->firstvertex < startv )
@@ -2546,7 +2601,6 @@ void R_DrawShadowBrushList( void )
 	gl_bmodelface_t *entry;
 	mextrasurf_t *es;
 	msurface_t *s;
-	texture_t *tex;
 	int curtex;
 
 	for( int i = 0; i < tr.num_draw_surfaces; i++ )
@@ -2559,9 +2613,8 @@ void R_DrawShadowBrushList( void )
 			continue;
 
 		curtex = tr.whiteTexture;
-		tex = R_TextureAnimation( s );
 		if( FBitSet( s->flags, SURF_TRANSPARENT ) )
-			curtex = tex->gl_texturenum;
+			curtex = es->gl_texturenum;
 
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 			flush_buffer = true;
@@ -3040,72 +3093,6 @@ void R_DrawBrushList( void )
 
 	// render all decals on world and opaque bmodels
 	DrawDecalsBatch();
-}
-
-/*
-=================
-R_SolidSurfaceCompare
-compare solid surfaces
-sorts surfaces to reduce state switches
-=================
-*/
-static int R_SolidSurfaceCompare( const gl_bmodelface_t *a, const gl_bmodelface_t *b )
-{
-	msurface_t *surf1 = (msurface_t *)a->surface;
-	msurface_t *surf2 = (msurface_t *)b->surface;
-	texture_t *tx1 = R_TextureAnimation( surf1 );
-	texture_t *tx2 = R_TextureAnimation( surf2 );
-	mextrasurf_t *esrf1 = surf1->info;
-	mextrasurf_t *esrf2 = surf2->info;
-
-	// sort priority
-	// 1. shaders
-	if( esrf1->shaderNum[0] > esrf2->shaderNum[0] )
-		return 1;
-
-	if( esrf1->shaderNum[0] < esrf2->shaderNum[0] )
-		return -1;
-
-	// 2. texture number
-	if( tx1->gl_texturenum > tx2->gl_texturenum )
-		return 1;
-
-	if( tx1->gl_texturenum < tx2->gl_texturenum )
-		return -1;
-
-	// 3. lightmap texture number
-	if( esrf1->lightmaptexturenum > esrf2->lightmaptexturenum )
-		return 1;
-
-	if( esrf1->lightmaptexturenum < esrf2->lightmaptexturenum )
-		return -1;
-
-	return 0;
-}
-
-/*
-=================
-R_TransSurfaceCompare
-compare translucent surfaces
-sorts surfaces from far to near
-=================
-*/
-static int R_TransSurfaceCompare( const gl_bmodelface_t *a, const gl_bmodelface_t *b )
-{
-	msurface_t *surf1 = (msurface_t *)a->surface;
-	msurface_t *surf2 = (msurface_t *)b->surface;
-	Vector org1 = RI->currententity->origin + surf1->info->origin;
-	Vector org2 = RI->currententity->origin + surf2->info->origin;
-	float len1 = DotProduct( org1, RI->vforward ) - RI->viewplanedist;
-	float len2 = DotProduct( org2, RI->vforward ) - RI->viewplanedist;
-
-	// compare by plane dists
-	if( len1 > len2 )
-		return -1;
-	if( len1 < len2 )
-		return 0;
-
-	return 0;
 }
 
 void R_SetRenderMode( cl_entity_t *e )
