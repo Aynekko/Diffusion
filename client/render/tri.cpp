@@ -192,6 +192,8 @@ void R_DrawCable( cl_entity_t *e )
 		tr.cableSwayPhase[e->index] += g_fFrametime * tr.cableSwayIntensity[e->index];
 
 	float falldepth = e->curstate.fuser1;
+	if( falldepth <= 0.0f )
+		falldepth = 0.001f;
 	if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
 		falldepth += sin( tr.cableSwayPhase[e->index] * ((float( (e->index % 4) + 1 ) * 2.0f / 4.0f)) ) * ((falldepth * tr.cableSwayIntensity[e->index]) / 10.0f);
 
