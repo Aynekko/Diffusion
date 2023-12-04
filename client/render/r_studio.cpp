@@ -5444,11 +5444,10 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 {
-	mstudiomaterial_t *cached_material = NULL;
+	int cached_texture = -1;
+	int cur_texture = -1;
 	model_t *cached_model = NULL;
 	int i;
-	int cached_masked = -1;
-	int masked = -1;
 
 	if( !m_nNumDrawMeshes )
 		return;
@@ -5493,8 +5492,8 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 			ASSERT( RI->currentshader != NULL );
 
 			// reset cache
-			cached_material = NULL;
 			cached_model = NULL;
+			cached_texture = -1;
 		}
 
 		if( cached_model != m_pRenderModel )
@@ -5517,16 +5516,14 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 			cached_model = m_pRenderModel;
 		}
 
-		masked = FBitSet( mat->flags, STUDIO_NF_MASKED ) ? 1 : 0;
+		int cur_texture = tr.whiteTexture;
+		if( FBitSet( mat->flags, STUDIO_NF_MASKED ) )
+			cur_texture = mat->gl_diffuse_id;
 
-		if( cached_masked != masked )
+		if( cached_texture != cur_texture )
 		{
-			if( masked )
-				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
-			else
-				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
-
-			cached_masked = masked;
+			GL_Bind( GL_TEXTURE0, cur_texture );
+			cached_texture = cur_texture;
 		}
 
 		if( mat->flags & STUDIO_NF_TWOSIDE || (m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide) )
