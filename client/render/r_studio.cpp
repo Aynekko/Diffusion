@@ -5016,7 +5016,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 		}
 
 		if( cached_material != mat )
-		{
+		{		
 			if( r_lightmap->value && !r_fullbright->value )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 			else if( tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id > 0 )
@@ -5459,10 +5459,9 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 	m_pModelInstance = &m_ModelInstances[m_pCurrentEntity->modelhandle];
 
 	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
-	//	R_LoadIdentity();
-	GL_Blend( GL_FALSE );
+
 	GL_DepthMask( GL_TRUE );
-	bool Additive = false; // watch for depth mask/blend switches
+	bool Additive = false; // watch for depth mask switches
 
 	// sorting list to reduce shader switches
 	if( !CVAR_TO_BOOL( r_nosort ) ) 
@@ -5492,14 +5491,6 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 			GL_BindShader( &glsl_programs[entry->hProgram] );
 
 			ASSERT( RI->currentshader != NULL );
-
-			float scale = m_pCurrentEntity->curstate.scale;
-			if( scale <= 0.0f ) scale = 1.0f;
-			Vector meshparams[3];
-			meshparams[0] = m_pCurrentEntity->origin;
-			meshparams[1] = m_pCurrentEntity->angles;
-			meshparams[2] = Vector( scale, 0, 0 );
-			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
 
 			// reset cache
 			cached_material = NULL;
@@ -5535,26 +5526,6 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 			else
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 
-			if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) ) // diffusion - fixed shadows from additive textures from projected light...
-			{
-				if( !Additive )
-				{
-					GL_DepthMask( GL_FALSE );
-					GL_Blend( GL_TRUE );
-					GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
-					Additive = true;
-				}
-			}
-			else
-			{
-				if( Additive )
-				{
-					GL_DepthMask( GL_TRUE );
-					GL_Blend( GL_FALSE );
-					Additive = false;
-				}
-			}
-
 			cached_masked = masked;
 		}
 
@@ -5563,16 +5534,32 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 		else
 			GL_Cull( GL_FRONT );
 
+		if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) )
+		{
+			if( !Additive )
+			{
+				GL_DepthMask( GL_FALSE );
+				Additive = true;
+			}
+		}
+		else
+		{
+			if( Additive )
+			{
+				GL_DepthMask( GL_TRUE );
+				Additive = false;
+			}
+		}
+
 		DrawMeshFromBuffer( pMesh );
 	}
 
 	GL_SelectTexture( glConfig.max_texture_units - 1 ); // force to cleanup all the units
 	GL_CleanUpTextureUnits( 0 );
+
 	if( Additive )
-	{
 		GL_DepthMask( GL_TRUE );
-		GL_Blend( GL_FALSE );
-	}
+
 	GL_Cull( GL_FRONT );
 
 	pglBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
