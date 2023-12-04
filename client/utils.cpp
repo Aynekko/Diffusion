@@ -392,6 +392,9 @@ bool Mod_CheckBoxVisible( const Vector &absmin, const Vector &absmax )
 	if( IsBuildingCubemaps() )
 		return true;
 
+	if( RI->currententity == GET_VIEWMODEL() )
+		return true;
+
 	return Mod_BoxVisible( absmin, absmax, Mod_GetCurrentVis( ));
 }
 

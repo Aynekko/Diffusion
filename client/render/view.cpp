@@ -1922,13 +1922,6 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 		view->origin.z += GunPosZCurrent;
 	else
 		view->origin.z -= GunPosZCurrent;
-	
-	// for zoom! change the model visibility
-	if( gHUD.IsZoomed )
-	{
-		GET_VIEWMODEL()->curstate.rendermode = kRenderTransTexture;
-		GET_VIEWMODEL()->curstate.renderamt = 0;
-	}
 
 	// and move the gun in the direction opposite to movement
 	float VelX = -pparams->simvel[0] * 0.004;
@@ -1950,16 +1943,19 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 		view->origin[2] += 0.5;
 
 	// move weapon back if there's an obstacle
-	pmtrace_t ptr;
-	Vector VecEnd, Forward;
-	gEngfuncs.pfnAngleVectors( view->angles, Forward, NULL, NULL );
-	VecEnd = view->origin + Forward * 32;
-	gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-	gEngfuncs.pEventAPI->EV_PlayerTrace( view->origin, VecEnd, PM_NORMAL, -1, &ptr );
-	static float move_back_dist = 0.0f;
-	float move_back_speed = (ptr.fraction < 1.0f) ? 35 : 15;
-	move_back_dist = CL_UTIL_Approach( ((1 / (1 + ptr.fraction) - 0.5f)) * 25, move_back_dist, gHUD.m_flTimeDelta * move_back_speed );
-	view->origin -= Forward * move_back_dist;
+	if( !RP_OUTSIDE( RI->viewleaf ) )
+	{
+		pmtrace_t ptr;
+		Vector VecEnd, Forward;
+		gEngfuncs.pfnAngleVectors( view->angles, Forward, NULL, NULL );
+		VecEnd = view->origin + Forward * 32;
+		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( view->origin, VecEnd, PM_NORMAL, -1, &ptr );
+		static float move_back_dist = 0.0f;
+		float move_back_speed = (ptr.fraction < 1.0f) ? 35 : 15;
+		move_back_dist = CL_UTIL_Approach( ((1 / (1 + ptr.fraction) - 0.5f)) * 25, move_back_dist, gHUD.m_flTimeDelta * move_back_speed );
+		view->origin -= Forward * move_back_dist;
+	}
 
 	V_CalcViewModelLag( pparams, view->origin, view->angles, lastAngles );
 	
