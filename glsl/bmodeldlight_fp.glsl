@@ -17,9 +17,15 @@ GNU General Public License for more details.
 #include "mathlib.h"
 #include "texfetch.h"
 #include "terrain.h"
+#if defined( BMODEL_EMBOSS )
 #include "emboss.h"
+#endif
+#if defined( BMODEL_SPECULAR )
 #include "specular.h"
+#endif
+#if defined( BMODEL_INTERIOR )
 #include "interior.h"
+#endif
 #include "alpha2coverage.h"
 
 #if defined( BMODEL_MULTI_LAYERS )

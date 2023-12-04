@@ -17,9 +17,15 @@ GNU General Public License for more details.
 #include "mathlib.h"
 #include "texfetch.h"
 #include "matrix.h"
+#if defined( STUDIO_EMBOSS )
 #include "emboss.h"
+#endif
+#if defined( STUDIO_SPECULAR )
 #include "specular.h"
+#endif
+#if defined( STUDIO_INTERIOR )
 #include "interior.h"
+#endif
 
 uniform sampler2D	u_ColorMap;
 uniform sampler2D	u_NormalMap;
