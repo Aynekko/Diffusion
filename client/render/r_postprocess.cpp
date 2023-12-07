@@ -459,6 +459,7 @@ void GaussBlur( void )
 	{
 		screenblur = 0;
 		waterblur = 0;
+		skyblur = 0;
 	}
 
 	// blur when paused (menu is shown)
@@ -507,6 +508,9 @@ void GaussBlur( void )
 
 		if( !tr.bSkySurfFound )
 			return; // no sky surface was found this frame, don't waste time tracing
+
+		if( !AllowBlur )
+			return; // performance for old cards
 		
 		pmtrace_t ptr;
 		Vector PlayerOrg, PlayerAngles, VecEnd, Forward;
