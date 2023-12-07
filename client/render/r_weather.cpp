@@ -29,6 +29,8 @@ GNU General Public License for more details.
 void WaterLandingEffect( cl_drip *drip );
 void ParseRainFile( void );
 
+int RainTexture = 0;
+
 struct
 {
 	int	dripsPerSecond;
@@ -419,6 +421,8 @@ void R_InitWeather( void )
 	gHUD.ScreenDrips_CurVisibility = 0.0f;
 	gHUD.ScreenDrips_DripIntensity = 0.0f;
 	gHUD.ScreenDrips_OverrideTime = 0.0f;
+
+	RainTexture = LOAD_TEXTURE( "gfx/particles/raindrop", NULL, 0, 0 );
 }
 
 /*
@@ -554,16 +558,13 @@ void DrawRain( void )
 	SpriteHandle hsprTexture = 0;
 
 	if( Rain.weatherMode == MODE_RAIN )
-		hsprTexture = LoadSprite( "sprites/raindrop.spr" ); // load rain sprite
+		GL_Bind( GL_TEXTURE0, RainTexture );
 	else if( Rain.weatherMode == MODE_SNOW )
+	{
 		hsprTexture = LoadSprite( "sprites/snowflake.spr" ); // load snow sprite
-
-	if( !hsprTexture ) return;
-
-	// usual triapi stuff
-	const model_s *pTexture = gEngfuncs.GetSpritePointer( hsprTexture );
-	if( !gEngfuncs.pTriAPI->SpriteTexture(( struct model_s *)pTexture, 0 ))
-		return;
+		const model_s *pTexture = gEngfuncs.GetSpritePointer( hsprTexture );
+		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pTexture, 0 );
+	}
 
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 	

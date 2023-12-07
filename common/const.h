@@ -835,6 +835,7 @@ enum
 	kRenderFxNoRefraction,		// diffusion - don't apply refraction (water only - it's always with refraction anyway)
 	kRenderFxParticle,			// diffusion - quakeparticle
 	kRenderFxOnlyShadows,		// diffusion - draw shadows only
+	kRenderFxParticleLine,		// diffusion - env_particle_line
 };
 
 typedef int		string_t;

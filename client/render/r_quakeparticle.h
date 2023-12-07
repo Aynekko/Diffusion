@@ -57,6 +57,7 @@ enum
 	TYPE_BLOOD,
 	TYPE_BUBBLES,
 	TYPE_BEAMRING,
+	TYPE_WATERDRIP_LINE,
 	TYPE_CUSTOM,
 };
 
@@ -168,6 +169,7 @@ public:
 	int m_hExplosion;
 	int m_hBubble;
 	int m_hBeamRing;
+	int m_hRainDrop;
 
 	CQuakePart *m_pActiveParticles;
 
@@ -197,6 +199,7 @@ public:
 	void WaterSplashParticle( int EntIndex, const Vector &pos );
 	void SmokeVolume( int EntIndex, int Particle, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, float Scale, float Alpha = 0.1f, int Distance = 666 );
 	void BloodParticle( int EntIndex, const Vector &pos, float Scale, Vector Color, Vector Direction );
+	void WaterDripLine( const Vector &start, const Vector &end );
 
 	int ParticleCountPerEnt[8192]; // MAX_ENTITIES?
 

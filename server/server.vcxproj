@@ -193,6 +193,7 @@
     <ClCompile Include="entities\env_controller_adjuster.cpp" />
     <ClCompile Include="entities\env_holdable.cpp" />
     <ClCompile Include="entities\env_particle.cpp" />
+    <ClCompile Include="entities\env_particle_line.cpp" />
     <ClCompile Include="entities\env_rain.cpp" />
     <ClCompile Include="entities\env_beverage.cpp" />
     <ClCompile Include="entities\env_blood.cpp" />

@@ -14,7 +14,6 @@
 #define YAW		1
 #define ROLL		2
 
-#define DIST_EPSILON	(1.0f / 32.0f)
 #define STOP_EPSILON	0.1f
 #define ON_EPSILON		0.1f
 #define DIST_EPSILON	0.125f // Max error from network coordinate quantization

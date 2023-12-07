@@ -438,6 +438,15 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				break;
 			}
 		}
+
+		if( ent->curstate.renderfx == kRenderFxParticleLine )
+		{
+			if( ent->curstate.renderamt > 0 && tr.time > tr.ParticleTime[ent->index] )
+			{
+				g_pParticles.WaterDripLine( ent->curstate.origin, ent->curstate.vuser1 );
+				tr.ParticleTime[ent->index] = tr.time + ( 1.0f / (1.0f + (ent->curstate.renderamt * 0.1f)) );
+			}
+		}
 		
 		// add dimlight
 		if( ent->curstate.effects & EF_DIMLIGHT )

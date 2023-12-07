@@ -782,6 +782,9 @@
     <ClCompile Include="user_messages.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
+    <ClCompile Include="entities\env_particle_line.cpp">
+      <Filter>Source Files\entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="monsters\activity.h">

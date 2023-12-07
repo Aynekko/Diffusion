@@ -50,6 +50,7 @@ MemBlock<CQuakePart>ParticleArray_Fireball( MAX_PARTICLES ); // TYPE_FIREBALL
 MemBlock<CQuakePart>ParticleArray_Blood( MAX_PARTICLES ); // TYPE_BLOOD
 MemBlock<CQuakePart>ParticleArray_Bubbles( MAX_PARTICLES ); // TYPE_BUBBLES
 MemBlock<CQuakePart>ParticleArray_Beamring( MAX_PARTICLES ); // TYPE_BEAMRING
+MemBlock<CQuakePart>ParticleArray_WaterDripLine( MAX_PARTICLES ); // TYPE_WATERDRIP_LINE
 int partcounter = 0;
 
 //===============================================================================
@@ -126,6 +127,8 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		GL_Cull( GL_NONE );
 	else
 		GL_Cull( GL_FRONT );
+
+	bool UseAdditive = FBitSet( curParticle->m_iFlags, FPART_ADDITIVE );
 
 	m_iNumVerts = m_iNumIndex = 0;
 
@@ -577,15 +580,21 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 
 	GL_Blend( GL_TRUE );
 
-	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
-
-	if( !glState.drawTrans )
+	if( glState.drawTrans )
 	{
+		if( UseAdditive )
+			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+		else
+			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	}
+	else
+	{
+		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 		GL_AlphaTest( GL_TRUE );
 		GL_AlphaFunc( GL_GREATER, 0.25f );
 	}
+
+	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
 	if( m_iNumVerts && m_iNumIndex )
 	{
@@ -608,7 +617,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	}
 
-//	gEngfuncs.pTriAPI->CullFace( TRI_FRONT );
+	GL_Blend( GL_FALSE );
 }
 
 bool CQuakePart::Evaluate( float gravity )
@@ -1038,6 +1047,8 @@ bool CQuakePart::Evaluate( float gravity )
 		GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	}
 
+	GL_Blend( GL_FALSE );
+
 	return true;
 }
 
@@ -1060,6 +1071,7 @@ CQuakePartSystem :: CQuakePartSystem( void )
 	ParticleArray_Blood.Clear();
 	ParticleArray_Bubbles.Clear();
 	ParticleArray_Beamring.Clear();
+	ParticleArray_WaterDripLine.Clear();
 
 	partcounter = 0;
 
@@ -1098,6 +1110,7 @@ void CQuakePartSystem :: Clear( void )
 	m_hExplosion = LOAD_TEXTURE( "gfx/particles/explosion", NULL, 0, TF_CLAMP );
 	m_hBubble = LOAD_TEXTURE( "gfx/particles/bubble", NULL, 0, TF_CLAMP );
 	m_hBeamRing = LOAD_TEXTURE( "gfx/particles/beamring", NULL, 0, TF_CLAMP );
+	m_hRainDrop = LOAD_TEXTURE( "gfx/particles/raindrop", NULL, 0, 0 );
 
 	ParsePartInfos( "data/particles.txt" );
 
@@ -1112,6 +1125,7 @@ void CQuakePartSystem :: Clear( void )
 	ParticleArray_Blood.Clear();
 	ParticleArray_Bubbles.Clear();
 	ParticleArray_Beamring.Clear();
+	ParticleArray_WaterDripLine.Clear();
 
 	partcounter = 0;
 
@@ -1628,6 +1642,7 @@ void CQuakePartSystem :: Update( void )
 	DrawParticles( ParticleArray_Blood );
 	DrawParticles( ParticleArray_Bubbles );
 	DrawParticles( ParticleArray_Beamring );
+	DrawParticles( ParticleArray_WaterDripLine );
 
 	// draw particles from txt-file (through glbegin-end...)
 	CQuakePart *pCur, *pNext;
@@ -1731,6 +1746,10 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 		break;
 	case TYPE_BEAMRING:
 		dst = ParticleArray_Beamring.Allocate();
+		break;
+	case TYPE_WATERDRIP_LINE:
+		dst = ParticleArray_WaterDripLine.Allocate();
+		break;
 	case TYPE_CUSTOM:
 		dst = AllocParticle();
 		break;
@@ -2429,4 +2448,25 @@ void CQuakePartSystem::Beamring( int EntIndex, const Vector &start, const Vector
 
 		AddParticle( &src, m_hBeamRing, flags );
 	}
+}
+
+void CQuakePartSystem::WaterDripLine( const Vector &start, const Vector &end )
+{
+	if( !g_fRenderInitialized )
+		return;
+
+	// get direction and distance
+	Vector ViewVec;
+	Vector forward;
+	VectorAngles( end - start, ViewVec );
+	gEngfuncs.pfnAngleVectors( ViewVec, forward, NULL, NULL );
+	float dist = (start - end).Length();
+
+	CQuakePart src = InitializeParticle();
+	src.ParticleType = TYPE_WATERDRIP_LINE;
+	src.m_vecOrigin = start + forward * RANDOM_FLOAT( 0.0f, dist );
+	src.m_vecAccel = Vector( 0, 0, -tr.movevars->gravity );
+	int flags = FPART_NOTINSOLID | FPART_ADDITIVE;
+
+	AddParticle( &src, m_hRainDrop, flags );
 }
