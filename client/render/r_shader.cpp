@@ -455,14 +455,12 @@ void GL_BindShader( glsl_program_t *shader )
 {
 	if( !shader && RI->currentshader )
 	{
-		pglUseProgramObjectARB( GL_NONE );
-	//	pglUseProgram( GL_NONE );
+		pglUseProgram( GL_NONE );
 		RI->currentshader = NULL;
 	}
 	else if( shader != RI->currentshader && shader != NULL && shader->handle )
 	{
-		pglUseProgramObjectARB( shader->handle );
-	//	pglUseProgram( shader->handle );
+		pglUseProgram( shader->handle );
 		r_stats.num_shader_binds++;
 		RI->currentshader = shader;
 	}
