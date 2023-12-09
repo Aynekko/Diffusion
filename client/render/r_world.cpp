@@ -3564,12 +3564,10 @@ void R_WorldMarkVisibleFaces( void )
 				surf = worldmodel->surfaces + facenum;
 				esrf = surf->info;
 
-				if( CVAR_TO_BOOL( r_grass ) )
-					R_AddGrassToChain( surf, NULL, false, leaf ); // update leaf bounds
+				R_AddGrassToChain( surf, NULL, false, leaf ); // update leaf bounds
 
 				// in some cases surface is invisible but grass is visible
-				if( CVAR_TO_BOOL( r_grass ) )
-					force = R_AddGrassToChain( surf, &RI->frustum );
+				force = R_AddGrassToChain( surf, &RI->frustum );
 #if 1
 				if( !force )
 				{

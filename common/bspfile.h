@@ -57,6 +57,7 @@ BRUSH MODELS
 #define SURF_LANDSCAPE		BIT( 13 )		// this is multi-layered texture surface
 #define SURF_NODRAW			BIT( 14 )		// failed to create shader for this surface
 #define SURF_NODLIGHT		BIT( 15 )		// failed to create dlight shader for this surface
+#define SURF_HASGRASS		BIT( 16 )
 
 #define SURF_FULLBRIGHT		BIT( 25 )		// completely ignore lighting on this brush
 #define SURF_OF_SUBMODEL		BIT( 26 )		// this face is owned by submodel (to differentiate from world faces)

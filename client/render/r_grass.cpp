@@ -349,7 +349,7 @@ void R_ConstructGrassVBO( msurface_t *surf )
 	mextrasurf_t *es = surf->info;
 
 	// already init or not specified?
-	if( es->grass || !es->grasscount )
+	if( es->grass || !(surf->flags & SURF_HASGRASS) )
 		return;
 
 	pglBindVertexArray( GL_FALSE );
@@ -384,6 +384,8 @@ void R_ConstructGrassVBO( msurface_t *surf )
 		Mem_Free( es->grass );
 		es->grasscount = 0;
 		es->grass = NULL;
+		if( surf->flags & SURF_HASGRASS )
+			surf->flags &= ~SURF_HASGRASS;
 	}
 
 	pglBindVertexArray( world->vertex_array_object ); // restore old binding
@@ -895,7 +897,13 @@ void R_GrassInitForSurface( msurface_t *surf )
 	}
 
 	if( es->grasscount > 0 )
-		SetBits( world->features, WORLD_HAS_GRASS );
+	{
+		if( !FBitSet(world->features, WORLD_HAS_GRASS) )
+			SetBits( world->features, WORLD_HAS_GRASS );
+
+		if( !(surf->flags & SURF_HASGRASS) )
+			surf->flags |= SURF_HASGRASS;
+	}
 
 	// restore normal randomization
 	RANDOM_SEED( 0 );
@@ -975,7 +983,7 @@ void R_ConstructGrass( msurface_t *psurf )
 	int total = 0;
 
 	// already init or not specified?
-	if( es->grass || !es->grasscount )
+	if( es->grass || !(psurf->flags & SURF_HASGRASS) )
 		return;
 
 	for( int i = 0; i < grassInfo.Count(); i++ )
@@ -1306,15 +1314,15 @@ bool R_AddGrassToChain( msurface_t *surf, CFrustum *frustum, bool lightpass, mwo
 	if( !FBitSet( world->features, WORLD_HAS_GRASS ) || FBitSet( RI->params, RP_NOGRASS ) )
 		return false; // don't waste time
 
+	if( !(surf->flags & SURF_HASGRASS) || leaf )
+		return false;
+
 	mextrasurf_t *es = surf->info;
+
 	grasshdr_t *hdr = es->grass;
 	bool normalpass = false;
 	float fadestart, fadedist, fadeend;
-
-	if (leaf || !es->grasscount) 
-		return false;
-
-	bool shadowpass = FBitSet( RI->params, RP_SHADOWPASS ) ? true : false;
+	bool shadowpass = FBitSet( RI->params, RP_SHADOWPASS );
 	
 	if(( shadowpass && !CVAR_TO_BOOL( r_grass_shadows )) || ( lightpass && !CVAR_TO_BOOL( r_grass_lighting )))
 		return false;
