@@ -439,11 +439,15 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 			}
 		}
 
+		// env_particle_line
 		if( ent->curstate.renderfx == kRenderFxParticleLine )
 		{
 			if( ent->curstate.renderamt > 0 && tr.time > tr.ParticleTime[ent->index] )
 			{
-				g_pParticles.WaterDripLine( ent->curstate.origin, ent->curstate.vuser1 );
+				if( ent->curstate.iuser2 > 0 ) // particle allowed distance
+					g_pParticles.WaterDripLine( ent->curstate.origin, ent->curstate.vuser1, ent->curstate.iuser2 );
+				else
+					g_pParticles.WaterDripLine( ent->curstate.origin, ent->curstate.vuser1 );
 				tr.ParticleTime[ent->index] = tr.time + ( 1.0f / (1.0f + (ent->curstate.renderamt * 0.1f)) );
 			}
 		}
@@ -2118,14 +2122,19 @@ void R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 	if( len <= 1 )
 	{
 		vecTemp.z += 4; // !!! have to do this or particle won't spawn...
-		g_pParticles.WaterSplashParticle( 0, vecTemp );
 
-		if( Type == 0 )
-			g_pParticles.CreateEffect( 0, "very_small_splash", vecTemp, g_vecZero );
-		else if( Type == 1 )
-			g_pParticles.CreateEffect( 0, "small_splash", vecTemp, g_vecZero );
-		else
+		switch( Type )
 		{
+		case 0:
+			g_pParticles.WaterSplashParticle( 0, vecTemp );
+			g_pParticles.CreateEffect( 0, "very_small_splash", vecTemp, g_vecZero );
+			break;
+		case 1:
+			g_pParticles.WaterSplashParticle( 0, vecTemp );
+			g_pParticles.CreateEffect( 0, "small_splash", vecTemp, g_vecZero );
+			break;
+		case 2:
+			g_pParticles.WaterSplashParticle( 0, vecTemp );
 			g_pParticles.CreateEffect( 0, "big_splash", vecTemp, g_vecZero );
 
 			if( (tr.viewparams.vieworg - vecTemp).Length() < 200 )
@@ -2135,6 +2144,10 @@ void R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 				gHUD.ScreenDrips_DripIntensity = 0.75f;
 				gHUD.ScreenDrips_Visible = true;
 			}
+			break;
+		case 3: // small drip
+			g_pParticles.WaterSplashParticle( 0, vecTemp, 0.25f );
+			break;
 		}
 	}
 	else

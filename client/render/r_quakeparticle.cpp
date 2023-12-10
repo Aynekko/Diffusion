@@ -249,6 +249,11 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			// can't have particles in solids
 			if( curParticle->EntIndex > 0 )
 				ParticleCountPerEnt[curParticle->EntIndex]--;
+
+			// special case
+			if( curParticle->ParticleType == TYPE_WATERDRIP_LINE )
+				g_pParticles.CreateEffect( 0, "water_spit", curParticle->m_vecLastOrg, g_vecZero );
+
 			ParticleArray.DeleteCurrent();
 			partcounter--;
 			goto skip_particle;
@@ -272,6 +277,14 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		{
 			if( curParticle->EntIndex > 0 )
 				ParticleCountPerEnt[curParticle->EntIndex]--;
+
+			// special case
+			if( curParticle->ParticleType == TYPE_WATERDRIP_LINE )
+			{
+				R_MakeWaterSplash( curParticle->m_vecOrigin, org, 3 );
+				g_pParticles.CreateEffect( 0, "water_spit", curParticle->m_vecLastOrg, g_vecZero );
+			}
+
 			// not underwater
 			ParticleArray.DeleteCurrent();
 			partcounter--;
@@ -377,7 +390,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		}
 
 		// save current origin if needed
-		if( FBitSet( curParticle->m_iFlags, (FPART_BOUNCE | FPART_STRETCH) ) )
+		if( 1 )//FBitSet( curParticle->m_iFlags, (FPART_BOUNCE | FPART_STRETCH) ) )
 		{
 			org2 = curParticle->m_vecLastOrg;
 			curParticle->m_vecLastOrg = org;
@@ -833,7 +846,7 @@ bool CQuakePart::Evaluate( float gravity )
 	}
 
 	// save current origin if needed
-	if( FBitSet( m_iFlags, (FPART_BOUNCE | FPART_STRETCH) ) )
+	if( 1 )//FBitSet( m_iFlags, (FPART_BOUNCE | FPART_STRETCH) ) )
 	{
 		org2 = m_vecLastOrg;
 		m_vecLastOrg = org;
@@ -1796,7 +1809,7 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 //	dst->AlphaDownScale = 1.0f;
 
 	// needs to save old origin
-	if( FBitSet( flags, (FPART_BOUNCE | FPART_FRICTION) ) )
+	if( 1 )//FBitSet( flags, (FPART_BOUNCE | FPART_FRICTION) ) )
 		dst->m_vecLastOrg = dst->m_vecOrigin;
 
 	partcounter++;
@@ -2319,7 +2332,7 @@ void CQuakePartSystem :: BulletParticles( int EntIndex, const Vector &org, const
 	}
 }
 
-void CQuakePartSystem::WaterSplashParticle( int EntIndex, const Vector &pos )
+void CQuakePartSystem::WaterSplashParticle( int EntIndex, const Vector &pos, float size )
 {
 	if( !g_fRenderInitialized )
 		return;
@@ -2331,8 +2344,8 @@ void CQuakePartSystem::WaterSplashParticle( int EntIndex, const Vector &pos )
 
 	src.m_vecOrigin = pos;
 	src.m_flAlphaVelocity = -0.75;
-	src.m_flRadius = RANDOM_FLOAT(10,20);
-	src.m_flRadiusVelocity = 25 + RANDOM_FLOAT( 0, 10 );
+	src.m_flRadius = RANDOM_FLOAT(10,20) * size;
+	src.m_flRadiusVelocity = (25 + RANDOM_FLOAT( 0, 10 )) * size;
 	src.m_flRotation = RANDOM_LONG( 0, 359 );
 	src.m_flRotationVelocity = RANDOM_FLOAT(-25.0,25.0);
 	src.ParticleType = TYPE_WATERSPLASH;
@@ -2450,7 +2463,7 @@ void CQuakePartSystem::Beamring( int EntIndex, const Vector &start, const Vector
 	}
 }
 
-void CQuakePartSystem::WaterDripLine( const Vector &start, const Vector &end )
+void CQuakePartSystem::WaterDripLine( const Vector &start, const Vector &end, int Distance )
 {
 	if( !g_fRenderInitialized )
 		return;
@@ -2466,7 +2479,8 @@ void CQuakePartSystem::WaterDripLine( const Vector &start, const Vector &end )
 	src.ParticleType = TYPE_WATERDRIP_LINE;
 	src.m_vecOrigin = start + forward * RANDOM_FLOAT( 0.0f, dist );
 	src.m_vecAccel = Vector( 0, 0, -tr.movevars->gravity );
-	int flags = FPART_NOTINSOLID | FPART_ADDITIVE;
+	src.m_flDistance = Distance;
+	int flags = FPART_NOTINSOLID | FPART_NOTWATER | FPART_ADDITIVE;
 
 	AddParticle( &src, m_hRainDrop, flags );
 }

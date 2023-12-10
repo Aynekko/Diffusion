@@ -7,6 +7,7 @@
 // renderamt - intensity (0 - 255)
 // iuser1 - particle type:
 // 0: rain drips
+// iuser2 - particle allowed distance
 //========================================================================================
 
 #define SF_ENVPARTLINE_STARTOFF BIT(0)
@@ -16,6 +17,7 @@ class CEnvParticleLine : public CBaseDelay
 	DECLARE_CLASS( CEnvParticleLine, CBaseDelay );
 public:
 	void Spawn( void );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void FindSecondPoint( void );
 
 	DECLARE_DATADESC();
@@ -53,4 +55,15 @@ void CEnvParticleLine::FindSecondPoint(void)
 
 	if( !HasSpawnFlags( SF_ENVPARTLINE_STARTOFF ) )
 		pev->renderfx = kRenderFxParticleLine;
+}
+
+void CEnvParticleLine::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if( IsLockedByMaster() )
+		return;
+
+	if( pev->renderfx == 0 )
+		pev->renderfx = kRenderFxParticleLine;
+	else
+		pev->renderfx = 0;
 }
