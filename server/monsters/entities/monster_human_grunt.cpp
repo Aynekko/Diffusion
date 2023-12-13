@@ -88,10 +88,10 @@ extern DLL_GLOBAL int		g_iSkillLevel;
 #define HGRUNT_MINIMUM_HEADSHOT_DAMAGE	15 // must do at least this much damage in one shot to head to score a headshot kill  //not used?
 #define HGRUNT_SENTENCE_VOLUME			(float)0.35 // volume of grunt sentences
 
-#define HGRUNT_9MMAR				1//( 1 << 0)
-#define HGRUNT_HANDGRENADE			2//( 1 << 1)
-#define HGRUNT_GRENADELAUNCHER		3//( 1 << 2)
-#define HGRUNT_SHOTGUN				4//( 1 << 3)
+#define HGRUNT_9MMAR				BIT(0)
+#define HGRUNT_HANDGRENADE			BIT(1)
+#define HGRUNT_GRENADELAUNCHER		BIT(2)
+#define HGRUNT_SHOTGUN				BIT(3)
 
 #define HEAD_GROUP					1
 
@@ -171,6 +171,7 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD(CombatWaitTime, FIELD_TIME),
 	DEFINE_FIELD(GruntShotgunDamage, FIELD_INTEGER),
 	DEFINE_FIELD(FlashlightSpr, FIELD_CLASSPTR),
+	DEFINE_KEYFIELD(Silent, FIELD_BOOLEAN, "silent"),
 
 	// monster_alien_soldier:
 	DEFINE_FIELD(AlternateShoot, FIELD_INTEGER),
@@ -1610,7 +1611,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				else
 				{
 					UTIL_MakeVectors( GetAbsAngles() );
-					CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5 );
+					CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5, Silent );
 					EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM );
 					m_fThrowGrenade = FALSE;
 					m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(8,15);// wait few seconds
@@ -1619,7 +1620,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			else // I can't (army guy), so throw a grenade
 			{
 				UTIL_MakeVectors( GetAbsAngles() );
-				CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5 );
+				CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5, Silent );
 				EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM );
 				m_fThrowGrenade = FALSE;
 				m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(8,15);// wait few seconds
@@ -1643,7 +1644,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		case HGRUNT_AE_GREN_DROP:
 		{
 			UTIL_MakeVectors( GetAbsAngles() );
-			CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 17 - gpGlobals->v_right * 27 + gpGlobals->v_up * 6, g_vecZero, 3 );
+			CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 17 - gpGlobals->v_right * 27 + gpGlobals->v_up * 6, g_vecZero, 3, Silent );
 		}
 		break;
 
@@ -4467,7 +4468,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 			if (fabs((vecStart - tracer.vecEndPos).Length()) < 180) // not enough space. throw a grenade instead
 			{
 				UTIL_MakeVectors(GetAbsAngles());
-				CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5);
+				CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5, Silent );
 				EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM);
 				m_fThrowGrenade = FALSE;
 				m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(6, 12);// wait few seconds for the next try
@@ -4493,7 +4494,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 		else
 		{
 			UTIL_MakeVectors(GetAbsAngles());
-			CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5);
+			CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5, Silent );
 			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM);
 			m_fThrowGrenade = FALSE;
 			m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(6, 12);// wait few seconds
@@ -5031,45 +5032,45 @@ void CHGruntSecurity::Spawn()
 
 	m_HackedGunPos = Vector(0, 0, 55);
 
+	CanSpawnDrone = false;
+
 	if (FStrEq(STRING(wpns), "9mmar"))
 	{
 		AddWeapon(HGRUNT_9MMAR);
-		CanSpawnDrone = false;
 	}
 	else if (FStrEq(STRING(wpns), "9mmar_hg"))
 	{
 		AddWeapon(HGRUNT_9MMAR);
-		AddWeapon(HGRUNT_HANDGRENADE);
-		CanSpawnDrone = false;
+		AddWeapon( HGRUNT_HANDGRENADE );
 	}
 	else if (FStrEq(STRING(wpns), "9mmar_hg_drone"))
 	{
 		AddWeapon(HGRUNT_9MMAR);
-		AddWeapon(HGRUNT_HANDGRENADE);
-		CanSpawnDrone = true;
+		AddWeapon( HGRUNT_HANDGRENADE );
+		if( !Silent )
+			CanSpawnDrone = true;
 	}
 	else if (FStrEq(STRING(wpns), "9mmar_gl"))
 	{
 		AddWeapon(HGRUNT_9MMAR);
-		AddWeapon(HGRUNT_GRENADELAUNCHER);
-		CanSpawnDrone = false;
+		if( !Silent )
+			AddWeapon(HGRUNT_GRENADELAUNCHER);
 	}
 	else if (FStrEq(STRING(wpns), "shotgun"))
 	{
 		AddWeapon(HGRUNT_SHOTGUN);
-		CanSpawnDrone = false;
 	}
 	else if (FStrEq(STRING(wpns), "shotgun_hg"))
 	{
 		AddWeapon(HGRUNT_SHOTGUN);
-		AddWeapon(HGRUNT_HANDGRENADE);
-		CanSpawnDrone = false;
+		AddWeapon( HGRUNT_HANDGRENADE );
 	}
 	else if (FStrEq(STRING(wpns), "shotgun_hg_drone"))
 	{
 		AddWeapon(HGRUNT_SHOTGUN);
-		AddWeapon(HGRUNT_HANDGRENADE);
-		CanSpawnDrone = true;
+		AddWeapon( HGRUNT_HANDGRENADE );
+		if( !Silent )
+			CanSpawnDrone = true;
 	}
 	else
 	{
@@ -5077,31 +5078,36 @@ void CHGruntSecurity::Spawn()
 		{
 		case 0:
 			AddWeapon(HGRUNT_9MMAR);
-			AddWeapon(HGRUNT_HANDGRENADE);
-			switch (RANDOM_LONG(0, 2)) // diffusion - 60% chance that a grunt with handgrenade also has a drone
+			AddWeapon( HGRUNT_HANDGRENADE );
+			if( !Silent )
 			{
-			case 0:	CanSpawnDrone = true; break;
-			case 1:	CanSpawnDrone = true; break;
-			case 2:	CanSpawnDrone = false; break;
+				switch( RANDOM_LONG( 0, 2 ) ) // diffusion - 60% chance that a grunt with handgrenade also has a drone
+				{
+				case 0:	CanSpawnDrone = true; break;
+				case 1:	CanSpawnDrone = true; break;
+				case 2:	CanSpawnDrone = false; break;
+				}
 			}
 			break;
 		case 1:
 			AddWeapon(HGRUNT_SHOTGUN);
-			CanSpawnDrone = false;
 			break;
 		case 2:
 			AddWeapon(HGRUNT_9MMAR);
-			AddWeapon(HGRUNT_GRENADELAUNCHER);
-			CanSpawnDrone = false;
+			if( !Silent )
+				AddWeapon(HGRUNT_GRENADELAUNCHER);
 			break;
 		case 3:
 			AddWeapon(HGRUNT_SHOTGUN);
-			AddWeapon(HGRUNT_HANDGRENADE);
-			switch (RANDOM_LONG(0, 2)) // diffusion - 60% chance that a grunt with handgrenade also has a drone
+			AddWeapon( HGRUNT_HANDGRENADE );
+			if( !Silent )
 			{
-			case 0:	CanSpawnDrone = true; break;
-			case 1:	CanSpawnDrone = true; break;
-			case 2:	CanSpawnDrone = false; break;
+				switch( RANDOM_LONG( 0, 2 ) ) // diffusion - 60% chance that a grunt with handgrenade also has a drone
+				{
+				case 0:	CanSpawnDrone = true; break;
+				case 1:	CanSpawnDrone = true; break;
+				case 2:	CanSpawnDrone = false; break;
+				}
 			}
 			break;
 		}

@@ -119,6 +119,8 @@ public:
 
 	static const char *pGruntSentences[];
 
+	bool Silent; // can't use loud weapons - no drone, and HG replaced with EMP
+
 	// monster_andrew_grunt
 	float AndrewLastHurt;
 	bool AndrewDash;
