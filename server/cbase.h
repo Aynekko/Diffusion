@@ -762,6 +762,7 @@ public:
 	virtual void ClearEffects(void); // diffusion - add this to your entity to clear sprites/beams etc. when the entity is killed through "killtarget"
 	bool IsOnFire;
 	float m_flCaughtFireTime;
+	bool CanTakeEMPDamage;
 
 	void MakeWaterSplash( Vector vecEnd, Vector vecSrc, int Type = 0 ); // watersplash
 

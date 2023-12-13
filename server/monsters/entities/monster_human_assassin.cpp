@@ -1025,24 +1025,6 @@ void CHAssassin :: RunAI( void )
 				pev->rendermode = kRenderNormal;
 		}
 	}
-	// diffusion - now it's in the anim :)
-	/*
-	if (m_Activity == ACT_RUN)
-	{
-		static int iStep = 0;
-		iStep = ! iStep;
-		if (iStep)
-		{
-			switch( RANDOM_LONG( 0, 3 ) )
-			{
-			case 0:	EMIT_SOUND( ENT(pev), CHAN_BODY, "footsteps/step1.wav", 0.5, ATTN_NORM);	break;
-			case 1:	EMIT_SOUND( ENT(pev), CHAN_BODY, "footsteps/step3.wav", 0.5, ATTN_NORM);	break;
-			case 2:	EMIT_SOUND( ENT(pev), CHAN_BODY, "footsteps/step2.wav", 0.5, ATTN_NORM);	break;
-			case 3:	EMIT_SOUND( ENT(pev), CHAN_BODY, "footsteps/step4.wav", 0.5, ATTN_NORM);	break;
-			}
-		}
-	}
-	*/
 }
 
 
@@ -1403,9 +1385,21 @@ void SecAss :: Precache()
 	PRECACHE_SOUND("weapons/assassin_tmp02.wav");
 	PRECACHE_SOUND("weapons/assassin_tmp03.wav");
 //	PRECACHE_SOUND("weapons/assassin_reload.wav");
+	PRECACHE_SOUND( "weapons/punch1.wav" );
+	PRECACHE_SOUND( "weapons/punch2.wav" );
+	PRECACHE_SOUND( "weapons/punch3.wav" );
+
+	PRECACHE_SOUND( "assassin/ass_death.wav" );
+	PRECACHE_SOUND( "assassin/ass_death2.wav" );
+	PRECACHE_SOUND( "assassin/ass_death3.wav" );
+	PRECACHE_SOUND( "assassin/ass_jump.wav" );
+	PRECACHE_SOUND( "assassin/ass_kicking.wav" );
+	PRECACHE_SOUND( "assassin/ass_kicking2.wav" );
+	PRECACHE_SOUND( "assassin/ass_kicking3.wav" );
 
 	PRECACHE_SOUND("scripts/cloak.wav"); //new cloak sound for Diffusion
 	PRECACHE_SOUND( "weapons/smoke_grenade.wav" );
+	PRECACHE_SOUND( "weapons/emp_explode.wav" );
 
 	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 }
@@ -1501,7 +1495,7 @@ void SecAss::HandleAnimEvent( MonsterEvent_t *pEvent )
 			LastSmokeGrenadeTime = gpGlobals->time;
 		}
 		else
-			CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 34 + Vector( 0, 0, 32 ), m_vecTossVelocity, 2.0 );
+			CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 34 + Vector( 0, 0, 32 ), m_vecTossVelocity, 2.0, true ); // EMP
 
 		m_flNextGrenadeCheck = gpGlobals->time + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
 		m_fThrowGrenade = FALSE;

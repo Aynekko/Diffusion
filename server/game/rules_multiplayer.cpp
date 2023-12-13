@@ -932,6 +932,7 @@ void CHalfLifeMultiplay :: PlayerSpawn( CBasePlayer *pPlayer )
 	CBaseEntity	*pWeaponEntity = NULL;
 
 	pPlayer->AddWeapon( WEAPON_SUIT );
+	pPlayer->CanTakeEMPDamage = true;
 
 	pPlayer->m_iBonusWeaponID = 0;
 	

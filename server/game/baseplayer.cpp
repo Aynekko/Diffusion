@@ -569,6 +569,24 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 	if ( bitsDamageType & DMG_BLAST ) // diffusion - screen shakes from explosions, "true" - in air also
 		UTIL_ScreenShakeLocal( this, GetAbsOrigin(), 10.0, 150.0, 1.0, 1200, true );
 
+	// shield doesn't protect from EMP, so this goes first
+	if( bitsDamageType & DMG_EMP )
+	{
+		float OriginalDamage = flDamage;
+		// 20% of this damages the HP, 80% goes to deplete the stamina
+		flDamage = OriginalDamage * 0.2f;
+		m_flStaminaValue -= OriginalDamage * 0.8f;
+		if( m_flStaminaValue < 0 )
+			m_flStaminaValue = 0;
+		m_flStaminaWait = gpGlobals->time + 3;
+		// add glitch effect
+		MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
+			WRITE_BYTE( TE_PLAYER_GLITCH );
+			WRITE_BYTE( 3 );
+		MESSAGE_END();
+		goto skip_shield;
+	}
+
 	// diffusion - shield absorbs half of the damage if we have enough stamina.
 	if( ShieldOn )
 	{
@@ -590,7 +608,8 @@ skip_shield:
 
 	if( flDamage > 15 ) // diffusion
 	{
-		UTIL_ScreenFade( this, Vector( 128, 0, 0 ), 2, 0, 150, FFADE_IN );
+		if( !(bitsDamageType & DMG_EMP) )
+			UTIL_ScreenFade( this, Vector( 128, 0, 0 ), 2, 0, 150, FFADE_IN );
 		// also monochrome effect is applied on client
 	}
 
@@ -3421,10 +3440,10 @@ void CBasePlayer::ManageElectroBlast( void )
 			WRITE_BYTE( TE_BEAMCYLINDER );
 			WRITE_COORD( vecOrigin.x );
 			WRITE_COORD( vecOrigin.y );
-			WRITE_COORD( vecOrigin.z + 32 );
+			WRITE_COORD( vecOrigin.z + 4 );
 			WRITE_COORD( vecOrigin.x );
 			WRITE_COORD( vecOrigin.y );
-			WRITE_COORD( vecOrigin.z + 400 ); // reach damage radius over .4 seconds
+			WRITE_COORD( vecOrigin.z + 666 ); // reach damage radius over .4 seconds
 			WRITE_SHORT( g_sBlastTexture );
 			WRITE_BYTE( 0 ); // startframe
 			WRITE_BYTE( 0 ); // framerate
@@ -4534,7 +4553,7 @@ void CBasePlayer::ManageStamina(void)
 			15 stamina: 50/15 = 3.33 sec (will be limited to 3 sec)
 			*/
 
-			m_flStaminaWait = gpGlobals->time + (50 / m_flStaminaValue);
+			m_flStaminaWait = gpGlobals->time + (50 / (1 + m_flStaminaValue));
 
 			if (m_afButtonPressed & IN_JUMP) // faster recover from jumps
 				m_flStaminaWait -= 0.5;

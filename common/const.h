@@ -665,6 +665,7 @@
 #define TE_CLIENTEVENT 138 // force client studio event from server...
 #define TE_BEAMPARTICLES 139 // gausniper beam rings
 #define TE_STEP_PARTICLE 140
+#define TE_PLAYER_GLITCH 141
 
 #define MSG_BROADCAST		0	// unreliable to all
 #define MSG_ONE			1	// reliable to one (msg_entity)

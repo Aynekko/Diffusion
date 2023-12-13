@@ -85,8 +85,11 @@ edict_t *CGameRules :: GetPlayerSpawnSpot( CBasePlayer *pPlayer )
 	pPlayer->SetAbsAngles( pSpawnSpot->GetAbsAngles() );
 	pPlayer->pev->punchangle = g_vecZero;
 
-	if( FBitSet( pSpawnSpot->pev->spawnflags, 1 )) // the START WITH SUIT flag
+	if( FBitSet( pSpawnSpot->pev->spawnflags, 1 ) ) // the START WITH SUIT flag
+	{
 		pPlayer->AddWeapon( WEAPON_SUIT );
+		pPlayer->CanTakeEMPDamage = true;
+	}
 
 	if( FBitSet( pSpawnSpot->pev->spawnflags, 2 ))
 		pPlayer->SetFlag(F_PLAYER_MENU);

@@ -17,19 +17,20 @@ GNU General Public License for more details.
 #define DMG_TYPES_H
 
 #define DMG_GENERIC			0	// generic damage was done
-#define DMG_CRUSH			(1 << 0)	// crushed by falling or moving object
-#define DMG_BULLET			(1 << 1)	// shot
-#define DMG_SLASH			(1 << 2)	// cut, clawed, stabbed
-#define DMG_BURN			(1 << 3)	// heat burned
-#define DMG_FREEZE			(1 << 4)	// frozen
-#define DMG_FALL			(1 << 5)	// fell too far
-#define DMG_BLAST			(1 << 6)	// explosive blast damage
-#define DMG_CLUB			(1 << 7)	// crowbar, punch, headbutt
-#define DMG_SHOCK			(1 << 8)	// electric shock
-#define DMG_SONIC			(1 << 9)	// sound pulse shockwave
-#define DMG_ENERGYBEAM		(1 << 10)	// laser or other high energy beam
-#define DMG_NEVERGIB		(1 << 12)	// with this bit OR'd in, no damage type will be able to gib victims upon death
-#define DMG_ALWAYSGIB		(1 << 13)	// with this bit OR'd in, any damage type can be made to gib victims upon death.
+#define DMG_CRUSH			BIT(0)	// crushed by falling or moving object
+#define DMG_BULLET			BIT(1)	// shot
+#define DMG_SLASH			BIT(2)	// cut, clawed, stabbed
+#define DMG_BURN			BIT(3)	// heat burned
+#define DMG_FREEZE			BIT(4)	// frozen
+#define DMG_FALL			BIT(5)	// fell too far
+#define DMG_BLAST			BIT(6)	// explosive blast damage
+#define DMG_CLUB			BIT(7)	// crowbar, punch, headbutt
+#define DMG_SHOCK			BIT(8)	// electric shock
+#define DMG_SONIC			BIT(9)	// sound pulse shockwave
+#define DMG_ENERGYBEAM		BIT(10)	// laser or other high energy beam
+#define DMG_NEVERGIB		BIT(12)	// with this bit OR'd in, no damage type will be able to gib victims upon death
+#define DMG_ALWAYSGIB		BIT(13)	// with this bit OR'd in, any damage type can be made to gib victims upon death.
+#define DMG_EMP				BIT(14) // diffusion - EMP
 
 #define DMG_TIMEBASED		(~(0xff003fff))	// mask for time-based damage
 

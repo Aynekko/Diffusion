@@ -31,6 +31,7 @@
 //===================grenade
 
 LINK_ENTITY_TO_CLASS( grenade, CGrenade );
+LINK_ENTITY_TO_CLASS( grenade_emp, CGrenade );
 
 // Grenades flagged with this will be triggered when the owner calls detonateSatchelCharges
 #define SF_DETONATE		0x0001
@@ -48,6 +49,7 @@ BEGIN_DATADESC( CGrenade )
 	DEFINE_FUNCTION( SmokeGrenadeThink ),
 	DEFINE_FIELD( LastBounceSoundTime, FIELD_TIME ),
 	DEFINE_FIELD( SendWaterSplash, FIELD_BOOLEAN ),
+	DEFINE_FIELD( IsEMPGrenade, FIELD_BOOLEAN ),
 END_DATADESC()
 
 //
@@ -64,8 +66,6 @@ void CGrenade::Explode( Vector vecSrc, Vector vecAim )
 // UNDONE: temporary scorching for PreAlpha - find a less sleazy permenant solution.
 void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 {
-	float		flRndSound;// sound randomizer
-
 	pev->model = iStringNull;//invisible
 	pev->solid = SOLID_NOT;// intangible
 
@@ -85,24 +85,27 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 
 	int iContents = UTIL_PointContents ( absOrigin );
 	
-	MESSAGE_BEGIN( MSG_PAS, gmsgTempEnt, absOrigin );
-		WRITE_BYTE( TE_EXPLOSION );	// This makes a dynamic light and the explosion sprites/sound
-		WRITE_COORD( absOrigin.x );	// Send to PAS because of the sound
-		WRITE_COORD( absOrigin.y );
-		WRITE_COORD( absOrigin.z );
+	if( !IsEMPGrenade )
+	{
+		MESSAGE_BEGIN( MSG_PAS, gmsgTempEnt, absOrigin );
+			WRITE_BYTE( TE_EXPLOSION );	// This makes a dynamic light and the explosion sprites/sound
+			WRITE_COORD( absOrigin.x );	// Send to PAS because of the sound
+			WRITE_COORD( absOrigin.y );
+			WRITE_COORD( absOrigin.z );
 
-		if( iContents != CONTENTS_WATER )
-			WRITE_SHORT( g_sModelIndexFireball );
-		else
-			WRITE_SHORT( g_sModelIndexWExplosion );
+			if( iContents != CONTENTS_WATER )
+				WRITE_SHORT( g_sModelIndexFireball );
+			else
+				WRITE_SHORT( g_sModelIndexWExplosion );
 
-		int spritescale = (pev->dmg - 50) * .60;
-		if( spritescale < 20 )
-			spritescale = 20;
-		WRITE_BYTE( spritescale ); // scale * 10
-		WRITE_BYTE( 15  ); // framerate
-		WRITE_BYTE( TE_EXPLFLAG_NONE );
-	MESSAGE_END();
+			int spritescale = (pev->dmg - 50) * .60;
+			if( spritescale < 20 )
+				spritescale = 20;
+			WRITE_BYTE( spritescale ); // scale * 10
+			WRITE_BYTE( 15 ); // framerate
+			WRITE_BYTE( TE_EXPLFLAG_NONE );
+		MESSAGE_END();
+	}
 
 	// diffusion - throw a piece of metal
 	if( iContents != CONTENTS_WATER )
@@ -152,20 +155,23 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 
 	CBaseEntity *pEntity = CBaseEntity::Instance( pTrace->pHit );
 
-	if ( RANDOM_FLOAT( 0 , 1 ) < 0.5 )
+	if( !IsEMPGrenade )
 	{
-		if( pEntity && UTIL_GetModelType( pEntity->pev->modelindex ) == mod_studio )
-			UTIL_StudioDecalTrace( pTrace, DECAL_SCORCH1 );
-		else UTIL_DecalTrace( pTrace, DECAL_SCORCH1 );
+		if( RANDOM_FLOAT( 0, 1 ) < 0.5 )
+		{
+			if( pEntity && UTIL_GetModelType( pEntity->pev->modelindex ) == mod_studio )
+				UTIL_StudioDecalTrace( pTrace, DECAL_SCORCH1 );
+			else UTIL_DecalTrace( pTrace, DECAL_SCORCH1 );
+		}
+		else
+		{
+			if( pEntity && UTIL_GetModelType( pEntity->pev->modelindex ) == mod_studio )
+				UTIL_StudioDecalTrace( pTrace, DECAL_SCORCH2 );
+			else UTIL_DecalTrace( pTrace, DECAL_SCORCH2 );
+		}
 	}
 	else
-	{
-		if( pEntity && UTIL_GetModelType( pEntity->pev->modelindex ) == mod_studio )
-			UTIL_StudioDecalTrace( pTrace, DECAL_SCORCH2 );
-		else UTIL_DecalTrace( pTrace, DECAL_SCORCH2 );
-	}
-
-	flRndSound = RANDOM_FLOAT( 0 , 1 );
+		EMIT_SOUND( ENT( pev ), CHAN_BODY, "weapons/emp_explode.wav", 1.0, ATTN_NORM );
 
 	switch ( RANDOM_LONG( 0, 2 ) )
 	{
@@ -180,15 +186,6 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 
 	SetAbsVelocity( g_vecZero );
 	SetNextThink(0.3);
-	// diffusion - I did particles
-/*
-	if (iContents != CONTENTS_WATER)
-	{
-		int sparkCount = RANDOM_LONG(0,3);
-		for ( int i = 0; i < sparkCount; i++ )
-			Create( "spark_shower", absOrigin, pTrace->vecPlaneNormal, NULL );
-	}
-*/
 }
 
 
@@ -196,24 +193,51 @@ void CGrenade :: Smoke( void )
 {
 	Vector absOrigin = GetAbsOrigin();
 
-	if( UTIL_PointContents( absOrigin ) == CONTENTS_WATER )
+	if( IsEMPGrenade )
 	{
-		UTIL_Bubbles( absOrigin - Vector( 64, 64, 64 ), absOrigin + Vector( 64, 64, 64 ), 100 );
+		Vector vecOrigin = GetAbsOrigin();
+		MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, vecOrigin );
+			WRITE_BYTE( TE_BEAMCYLINDER );
+			WRITE_COORD( vecOrigin.x );
+			WRITE_COORD( vecOrigin.y );
+			WRITE_COORD( vecOrigin.z + 4 );
+			WRITE_COORD( vecOrigin.x );
+			WRITE_COORD( vecOrigin.y );
+			WRITE_COORD( vecOrigin.z + 512 ); // reach damage radius over .4 seconds
+			WRITE_SHORT( g_sBlastTexture );
+			WRITE_BYTE( 0 ); // startframe
+			WRITE_BYTE( 0 ); // framerate
+			WRITE_BYTE( 4 ); // life
+			WRITE_BYTE( 32 );  // width
+			WRITE_BYTE( 16 );   // noise
+			WRITE_BYTE( 0 ); // R
+			WRITE_BYTE( 140 ); // G
+			WRITE_BYTE( 255 ); // B
+			WRITE_BYTE( 200 ); //brightness
+			WRITE_BYTE( 0 ); // speed
+		MESSAGE_END();
 	}
 	else
 	{
-/*		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, absOrigin );
-			WRITE_BYTE( TE_SMOKE );
-			WRITE_COORD( absOrigin.x );
-			WRITE_COORD( absOrigin.y );
-			WRITE_COORD( absOrigin.z );
-			WRITE_SHORT( g_sModelIndexSmoke );
-			int spritescale = (pev->dmg - 50) * 0.80;
-			if( spritescale < 20 )
-				spritescale = 20;
-			WRITE_BYTE( spritescale ); // scale * 10
-			WRITE_BYTE( 12  ); // framerate
-		MESSAGE_END();*/
+		if( UTIL_PointContents( absOrigin ) == CONTENTS_WATER )
+		{
+			UTIL_Bubbles( absOrigin - Vector( 64, 64, 64 ), absOrigin + Vector( 64, 64, 64 ), 100 );
+		}
+		else
+		{
+			/*		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, absOrigin );
+						WRITE_BYTE( TE_SMOKE );
+						WRITE_COORD( absOrigin.x );
+						WRITE_COORD( absOrigin.y );
+						WRITE_COORD( absOrigin.z );
+						WRITE_SHORT( g_sModelIndexSmoke );
+						int spritescale = (pev->dmg - 50) * 0.80;
+						if( spritescale < 20 )
+							spritescale = 20;
+						WRITE_BYTE( spritescale ); // scale * 10
+						WRITE_BYTE( 12  ); // framerate
+					MESSAGE_END();*/
+		}
 	}
 
 	UTIL_Remove( this );
@@ -251,12 +275,14 @@ void CGrenade::PreDetonate( void )
 void CGrenade::Detonate( void )
 {
 	TraceResult tr;
-	Vector		vecSpot;// trace starts here!
-
-	vecSpot = GetAbsOrigin() + Vector ( 0 , 0 , 8 );
+	// trace starts here!
+	Vector vecSpot = GetAbsOrigin() + Vector ( 0 , 0 , 8 );
 	UTIL_TraceLine ( vecSpot, vecSpot + Vector ( 0, 0, -40 ),  ignore_monsters, ENT(pev), & tr);
 
-	Explode( &tr, DMG_BLAST );
+	if( IsEMPGrenade )
+		Explode( &tr, DMG_EMP );
+	else
+		Explode( &tr, DMG_BLAST );
 }
 
 
@@ -468,12 +494,18 @@ void CGrenade :: TumbleThink( void )
 void CGrenade:: Spawn( void )
 {
 	pev->movetype = MOVETYPE_BOUNCE;
-	pev->classname = MAKE_STRING( "grenade" );
+	if( IsEMPGrenade )
+		pev->classname = MAKE_STRING( "grenade_emp" );
+	else
+		pev->classname = MAKE_STRING( "grenade" );
 	SetFlag(F_NOBACKCULL);
 	
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL(ENT(pev), "models/grenade.mdl");
+	if( IsEMPGrenade )
+		SET_MODEL( ENT( pev ), "models/w_battery.mdl" );
+	else
+		SET_MODEL(ENT(pev), "models/grenade.mdl");
 	UTIL_SetSize(pev, Vector( 0, 0, 0), Vector(0, 0, 0));
 
 	pev->dmg = 100;
@@ -604,9 +636,10 @@ void CGrenade::SmokeGrenadeExplode( void )
 	SetNextThink( 30 );
 }
 
-CGrenade * CGrenade:: ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time )
+CGrenade * CGrenade:: ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, bool IsEMP )
 {
 	CGrenade *pGrenade = GetClassPtr( (CGrenade *)NULL );
+	pGrenade->IsEMPGrenade = IsEMP;
 	pGrenade->Spawn();
 
 	UTIL_SetOrigin( pGrenade, vecStart );
@@ -637,7 +670,6 @@ CGrenade * CGrenade:: ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector v
 	pGrenade->pev->gravity = 0.5;
 	pGrenade->pev->friction = 0.8;
 
-	SET_MODEL( pGrenade->edict(), "models/w_grenade.mdl" );
 	pGrenade->pev->dmg = 125;
 	pGrenade->pev->scale = 0.75; // diffusion - the grenade was too big
 

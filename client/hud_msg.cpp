@@ -925,7 +925,12 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		sprintf_s( pevent.options, "50" );
 		pevent.event = Value;
 		HUD_StudioEvent( &pevent, ent );
-		break;
+	}
+	break;
+
+	case TE_PLAYER_GLITCH:
+	{
+		gHUD.GlitchAmount = READ_BYTE();
 	}
 	break;
 

@@ -36,7 +36,7 @@ public:
 
 	typedef enum { SATCHEL_DETONATE = 0, SATCHEL_RELEASE } SATCHELCODE;
 
-	static CGrenade *ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time );
+	static CGrenade *ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity, float time, bool IsEMP = false );
 	static CGrenade *ShootContact( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
 	static CGrenade *ShootSmoke( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
 	static CGrenade *ShootSatchelCharge( entvars_t *pevOwner, Vector vecStart, Vector vecVelocity );
@@ -71,6 +71,8 @@ public:
 
 	bool SendWaterSplash;
 	Vector OrgAboveWater; // last not-in-water valid position
+
+	bool IsEMPGrenade;
 };
 
 #define MAX_NORMAL_BATTERY	100

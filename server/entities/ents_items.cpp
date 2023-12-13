@@ -219,6 +219,8 @@ class CItemSuit : public CItem
 		// force resend to update HUD
 		pPlayer->m_iClientHealth = -1;
 		pPlayer->m_iClientStamina = -1;
+
+		pPlayer->CanTakeEMPDamage = true;
 		return TRUE;
 	}
 };
