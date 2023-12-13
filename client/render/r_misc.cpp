@@ -448,7 +448,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 					g_pParticles.WaterDripLine( ent->curstate.origin, ent->curstate.vuser1, ent->curstate.iuser2 );
 				else
 					g_pParticles.WaterDripLine( ent->curstate.origin, ent->curstate.vuser1 );
-				tr.ParticleTime[ent->index] = tr.time + ( 1.0f / (1.0f + (ent->curstate.renderamt * 0.1f)) );
+				tr.ParticleTime[ent->index] = tr.time + ( 1.0f / (0.1f + (ent->curstate.renderamt * 0.2f)) );
 			}
 		}
 		
