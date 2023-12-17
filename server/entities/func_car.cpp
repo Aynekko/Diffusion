@@ -1474,7 +1474,7 @@ void CCar::Drive( void )
 	bool GearUpdate = false;
 	bool Upshifting = false;
 
-	if( CarSpeed <= 0 || (CarSpeed > 0 && !bBack() && !bUp()) ) // do not mess with gears during braking
+	if( CarSpeed <= 0 || (CarSpeed > 0 && !bBack() && !bUp() && bForward()) ) // do not mess with gears during braking, only shift when gas is pressed
 	{
 		if( !HasSpawnFlags( SF_CAR_ELECTRIC ) )
 		{
