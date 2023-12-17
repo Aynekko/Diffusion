@@ -23,6 +23,7 @@
 #define SF_CAR_ELECTRIC			BIT(5) // for now this only makes different sounds
 #define SF_CAR_CANTBEDIRTY		BIT(6) // don't accumulate dirt or wetness
 #define SF_CAR_TURNREARWHEELS	BIT(7) // rear wheels will turn too
+#define SF_CAR_SQUEAKYBRAKES	BIT(8) // brakes make squeaky sound
 
 // fuser2 is used for both body and wheels' models to control the amount of dirt on the car
 
@@ -424,6 +425,8 @@ void CCar::Precache( void )
 		PRECACHE_SOUND( "func_car/gear_whine.wav" );
 	if( HasSpawnFlags( SF_CAR_TURBO ) )
 		PRECACHE_SOUND( "func_car/turbo.wav" );
+	if( HasSpawnFlags( SF_CAR_SQUEAKYBRAKES ))
+		PRECACHE_SOUND( "func_car/brakes.wav" );
 
 	for( int i = 0; i < SIZEOFARRAY( pTireSounds ); i++ )
 		PRECACHE_SOUND( (char *)pTireSounds[i] );;
@@ -505,6 +508,7 @@ void CCar::Spawn( void )
 	GearStep = MaxCarSpeed / MaxGears;
 	TurboAccum = 0.0f;
 	CameraBrakeOffsetX = 0.0f;
+	BrakeSqueak = 0.0f;
 
 	if( HasSpawnFlags( SF_CAR_STARTSILENT ) )
 		StartSilent = true;
@@ -613,6 +617,9 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			EMIT_SOUND( pWheel2->edict(), CHAN_ITEM, "common/null.wav", 0, 3.0 );
 			EMIT_SOUND( pWheel3->edict(), CHAN_ITEM, "common/null.wav", 0, 3.0 );
 			EMIT_SOUND( pWheel4->edict(), CHAN_ITEM, "common/null.wav", 0, 3.0 );
+			// clear brake squeak
+			if( HasSpawnFlags( SF_CAR_SQUEAKYBRAKES ))
+				EMIT_SOUND( pWheel3->edict(), CHAN_BODY, "common/null.wav", 0, 3.0 );
 			// clear particles (speed is stored here)
 			pWheel1->pev->fuser1 = 0;
 			pWheel2->pev->fuser1 = 0;
@@ -1780,6 +1787,8 @@ void CCar::Drive( void )
 		}
 	}
 
+	bool DoBrakeSqueak = false;
+
 	if( !Collision.IsNull() )
 	{
 		// can't accelerate if we are colliding
@@ -1848,11 +1857,17 @@ void CCar::Drive( void )
 				CarSpeed -= 300 * gpGlobals->frametime;
 			else if( !IsShifting )
 				CarSpeed += ActualAccelRate * (1 - fabs( Turning ) * 0.5) * WaterVelocityMult * surf_CurrentMult * gpGlobals->frametime;
+
+			if( CarSpeed < 0 )
+				DoBrakeSqueak = true;
 		}
 		else if( bBack() )
 		{
 			if( CarSpeed > 0 )
+			{
 				CarSpeed -= BrakeRate * gpGlobals->frametime;
+				DoBrakeSqueak = true;
+			}
 			else
 			{
 				if( CarSpeed < 0 && CarSpeed < -ActualMaxCarSpeedBackwards && ActualMaxCarSpeedBackwards != MaxCarSpeedBackwards )
@@ -1860,6 +1875,30 @@ void CCar::Drive( void )
 				else
 					CarSpeed -= ActualBackAccelRate * (1 - fabs( Turning ) * 0.5) * WaterVelocityMult * surf_CurrentMult * gpGlobals->frametime;
 			}
+		}
+	}
+
+	if( HasSpawnFlags( SF_CAR_SQUEAKYBRAKES ) )
+	{
+		if( DoBrakeSqueak )
+		{
+			BrakeSqueak = UTIL_Approach( 1.0f, BrakeSqueak, gpGlobals->frametime );
+			if( AbsCarSpeed < 200 )
+				BrakeSqueak *= (AbsCarSpeed / 200);
+			if( BrakeSqueak > 0.1f )
+			{
+				EMIT_SOUND_DYN( pWheel3->edict(), CHAN_BODY, "func_car/brakes.wav", BrakeSqueak, 1.0f, SND_CHANGE_PITCH | SND_CHANGE_VOL, PITCH_NORM );
+			}
+		}
+		else if( BrakeSqueak > 0.0f ) // this way we shouldn't overspam the sounds...ugh
+		{
+			BrakeSqueak = UTIL_Approach( 0.0f, BrakeSqueak, gpGlobals->frametime * 2.0f );
+			if( AbsCarSpeed < 200 )
+				BrakeSqueak *= (AbsCarSpeed / 200);
+			if( BrakeSqueak <= 0.0f )
+				EMIT_SOUND( pWheel3->edict(), CHAN_BODY, "common/null.wav", 0, 3.0 );
+			else
+				EMIT_SOUND_DYN( pWheel3->edict(), CHAN_BODY, "func_car/brakes.wav", BrakeSqueak, 1.0f, SND_CHANGE_PITCH | SND_CHANGE_VOL, PITCH_NORM );
 		}
 	}
 
