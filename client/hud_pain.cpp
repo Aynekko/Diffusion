@@ -27,7 +27,6 @@ DECLARE_MESSAGE( m_Health, Health )
 DECLARE_MESSAGE( m_Health, Damage )
 
 #define PAIN_NAME	"sprites/640_pain.spr"
-#define DAMAGE_NAME	"sprites/%d_dmg.spr"
 
 int giDmgHeight, giDmgWidth;
 
@@ -40,7 +39,7 @@ int giDmgFlags[NUM_DMG_TYPES] =
 	DMG_BURN|DMG_SLOWBURN,
 	DMG_NERVEGAS, 
 	DMG_RADIATION,
-	DMG_SHOCK,
+	DMG_SHOCK|DMG_EMP,
 	DMG_NUCLEAR
 };
 

@@ -930,7 +930,8 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 
 	case TE_PLAYER_GLITCH:
 	{
-		gHUD.GlitchAmount = READ_BYTE();
+		gHUD.GlitchAmount = READ_BYTE() * 0.1f;
+		gHUD.GlitchHoldTime = tr.time + READ_BYTE();
 	}
 	break;
 

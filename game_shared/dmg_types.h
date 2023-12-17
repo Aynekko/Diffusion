@@ -30,26 +30,26 @@ GNU General Public License for more details.
 #define DMG_ENERGYBEAM		BIT(10)	// laser or other high energy beam
 #define DMG_NEVERGIB		BIT(12)	// with this bit OR'd in, no damage type will be able to gib victims upon death
 #define DMG_ALWAYSGIB		BIT(13)	// with this bit OR'd in, any damage type can be made to gib victims upon death.
-#define DMG_EMP				BIT(14) // diffusion - EMP
 
 #define DMG_TIMEBASED		(~(0xff003fff))	// mask for time-based damage
 
-#define DMG_DROWN			(1 << 14)	// Drowning
-#define DMG_PARALYZE		(1 << 15)	// slows affected creature down
-#define DMG_NERVEGAS		(1 << 16)	// nerve toxins, very bad
-#define DMG_POISON			(1 << 17)	// blood poisioning
-#define DMG_RADIATION		(1 << 18)	// radiation exposure
-#define DMG_DROWNRECOVER		(1 << 19)	// drowning recovery
-#define DMG_ACID			(1 << 20)	// toxic chemicals or acid burns
-#define DMG_SLOWBURN		(1 << 21)	// in an oven
-#define DMG_SLOWFREEZE		(1 << 22)	// in a subzero freezer
-#define DMG_NUCLEAR			(1 << 23) // dmg by nuclear explode
-#define DMG_MORTAR			(1 << 24)	// Hit by air raid (done to distinguish grenade from mortar)
+#define DMG_DROWN			BIT(14)	// Drowning
+#define DMG_PARALYZE		BIT(15)	// slows affected creature down
+#define DMG_NERVEGAS		BIT(16)	// nerve toxins, very bad
+#define DMG_POISON			BIT(17)	// blood poisioning
+#define DMG_RADIATION		BIT(18)	// radiation exposure
+#define DMG_DROWNRECOVER	BIT(19)	// drowning recovery
+#define DMG_ACID			BIT(20)	// toxic chemicals or acid burns
+#define DMG_SLOWBURN		BIT(21)	// in an oven
+#define DMG_SLOWFREEZE		BIT(22)	// in a subzero freezer
+#define DMG_NUCLEAR			BIT(23) // dmg by nuclear explode
+#define DMG_MORTAR			BIT(24)	// Hit by air raid (done to distinguish grenade from mortar)
+#define DMG_EMP				BIT(25) // diffusion - EMP
 
 // these are the damage types that are allowed to gib corpses
 #define DMG_GIB_CORPSE		(DMG_CRUSH|DMG_FALL|DMG_BLAST|DMG_SONIC|DMG_CLUB|DMG_NUCLEAR )
 
 // these are the damage types that have client hud art
-#define DMG_SHOWNHUD		(DMG_POISON|DMG_ACID|DMG_FREEZE|DMG_SLOWFREEZE|DMG_DROWN|DMG_BURN|DMG_SLOWBURN|DMG_NERVEGAS|DMG_RADIATION|DMG_SHOCK|DMG_NUCLEAR)
+#define DMG_SHOWNHUD		(DMG_POISON|DMG_ACID|DMG_FREEZE|DMG_SLOWFREEZE|DMG_DROWN|DMG_BURN|DMG_SLOWBURN|DMG_NERVEGAS|DMG_RADIATION|DMG_SHOCK|DMG_EMP|DMG_NUCLEAR)
 
 #endif//DMG_TYPES_H

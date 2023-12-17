@@ -712,7 +712,7 @@ void ScreenWater(void)
 
 void Glitch( void )
 {
-	if( gHUD.GlitchAmount > 0.0f )
+	if( gHUD.GlitchAmount > 0.0f && tr.time > gHUD.GlitchHoldTime )
 		gHUD.GlitchAmount = CL_UTIL_Approach( 0.0f, gHUD.GlitchAmount, g_fFrametime );
 	
 	if( gHUD.GlitchAmount <= 0.0f )

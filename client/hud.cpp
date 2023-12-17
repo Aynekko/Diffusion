@@ -205,6 +205,7 @@ void CHud :: VidInit( void )
 	memset( &gHUD.shake, 0.0f, sizeof( gHUD.shake ) ); // diffusion - reset screen shake
 
 	gHUD.GlitchAmount = 0.0f;
+	gHUD.GlitchHoldTime = 0.0f;
 }
 
 void CHud::AddHudElem( CHudBase *phudelem )

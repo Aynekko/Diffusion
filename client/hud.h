@@ -905,6 +905,7 @@ public:
 
 	// glitch shader
 	float GlitchAmount;
+	float GlitchHoldTime;
 
 	// diffusion - client screen shake
 	typedef struct

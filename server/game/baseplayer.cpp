@@ -579,11 +579,15 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 		if( m_flStaminaValue < 0 )
 			m_flStaminaValue = 0;
 		m_flStaminaWait = gpGlobals->time + 3;
-		// add glitch effect
-		MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
-			WRITE_BYTE( TE_PLAYER_GLITCH );
-			WRITE_BYTE( 3 );
-		MESSAGE_END();
+		// add glitch effect for the emp grenade
+		if( FClassnameIs( pevInflictor, "grenade_emp" ) )
+		{
+			MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
+				WRITE_BYTE( TE_PLAYER_GLITCH );
+				WRITE_BYTE( 15 ); // x0.1
+				WRITE_BYTE( 2 ); // hold for 2 seconds
+			MESSAGE_END();
+		}
 		goto skip_shield;
 	}
 
@@ -2882,10 +2886,16 @@ void CBasePlayer::PreThink( void )
 	//	if( !(g_pGameRules->IsMultiplayer()) )
 	//		PlayWallSlideSound( 1 );
 
-	if( (BrokenSuit == true) && (gpGlobals->time > NextBrokenDmgTime) && HasWeapon( WEAPON_SUIT ) )
+	if( HasWeapon( WEAPON_SUIT ) && BrokenSuit && (gpGlobals->time > NextBrokenDmgTime) )
 	{
 		TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), RANDOM_LONG( 3, 15 ), DMG_SHOCK );
 		UTIL_DoSpark( pev, GetAbsOrigin() );
+		// add glitch effect
+		MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
+			WRITE_BYTE( TE_PLAYER_GLITCH );
+			WRITE_BYTE( 10 ); // x0.1
+			WRITE_BYTE( 0 ); // don't hold
+		MESSAGE_END();
 		NextBrokenDmgTime = gpGlobals->time + RANDOM_LONG( 45, 75 );
 	}
 
