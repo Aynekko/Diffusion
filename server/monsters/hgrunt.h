@@ -120,6 +120,7 @@ public:
 	static const char *pGruntSentences[];
 
 	bool Silent; // can't use loud weapons - no drone, and HG replaced with EMP
+	bool ForceEMPGrenade; // use EMP nade when handgrenade is specified
 
 	// monster_andrew_grunt
 	float AndrewLastHurt;

@@ -172,6 +172,7 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD(GruntShotgunDamage, FIELD_INTEGER),
 	DEFINE_FIELD(FlashlightSpr, FIELD_CLASSPTR),
 	DEFINE_KEYFIELD(Silent, FIELD_BOOLEAN, "silent"),
+	DEFINE_KEYFIELD( ForceEMPGrenade, FIELD_BOOLEAN, "forceemp"),
 
 	// monster_alien_soldier:
 	DEFINE_FIELD(AlternateShoot, FIELD_INTEGER),
@@ -882,6 +883,16 @@ void CHGrunt::KeyValue( KeyValueData *pkvd )
 	else if (FStrEq(pkvd->szKeyName, "flashlight"))
 	{
 		m_iFlashlightCap = Q_atoi(pkvd->szValue);
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "silent" ) )
+	{
+		Silent = (Q_atoi( pkvd->szValue ) > 0 );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "forceemp" ) )
+	{
+		ForceEMPGrenade = (Q_atoi( pkvd->szValue ) > 0);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -1611,7 +1622,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				else
 				{
 					UTIL_MakeVectors( GetAbsAngles() );
-					CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5, Silent );
+					CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
 					EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM );
 					m_fThrowGrenade = FALSE;
 					m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(8,15);// wait few seconds
@@ -1620,7 +1631,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			else // I can't (army guy), so throw a grenade
 			{
 				UTIL_MakeVectors( GetAbsAngles() );
-				CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5, Silent );
+				CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
 				EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM );
 				m_fThrowGrenade = FALSE;
 				m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(8,15);// wait few seconds
@@ -1644,7 +1655,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		case HGRUNT_AE_GREN_DROP:
 		{
 			UTIL_MakeVectors( GetAbsAngles() );
-			CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 17 - gpGlobals->v_right * 27 + gpGlobals->v_up * 6, g_vecZero, 3, Silent );
+			CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 17 - gpGlobals->v_right * 27 + gpGlobals->v_up * 6, g_vecZero, 3, ForceEMPGrenade );
 		}
 		break;
 
@@ -4468,7 +4479,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 			if (fabs((vecStart - tracer.vecEndPos).Length()) < 180) // not enough space. throw a grenade instead
 			{
 				UTIL_MakeVectors(GetAbsAngles());
-				CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5, Silent );
+				CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
 				EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM);
 				m_fThrowGrenade = FALSE;
 				m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(6, 12);// wait few seconds for the next try
@@ -4494,7 +4505,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 		else
 		{
 			UTIL_MakeVectors(GetAbsAngles());
-			CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5, Silent );
+			CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
 			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM);
 			m_fThrowGrenade = FALSE;
 			m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(6, 12);// wait few seconds
@@ -5174,6 +5185,9 @@ void CHGruntSecurity::Spawn()
 		if( m_iFlashlightCap == 2 )
 			pev->effects |= EF_MONSTERFLASHLIGHT; // start ON
 	}
+
+	if( Silent )
+		ForceEMPGrenade = true;
 
 	MonsterInit();
 }
