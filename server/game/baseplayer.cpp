@@ -584,7 +584,7 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 		{
 			MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
 				WRITE_BYTE( TE_PLAYER_GLITCH );
-				WRITE_BYTE( 15 ); // x0.1
+				WRITE_BYTE( (int)flDamage ); // x0.1
 				WRITE_BYTE( 2 ); // hold for 2 seconds
 			MESSAGE_END();
 		}
