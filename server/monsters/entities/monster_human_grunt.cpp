@@ -2713,12 +2713,18 @@ void CHGruntRepel::Use ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	*/
 
 	CBaseEntity *pEntity = Create( "monster_human_grunt", GetAbsOrigin(), GetAbsAngles() );
+	if( !pEntity )
+		return;
 	CBaseMonster *pGrunt = pEntity->MyMonsterPointer( );
 	pGrunt->pev->movetype = MOVETYPE_FLY;
 	pGrunt->SetAbsVelocity( Vector( 0, 0, RANDOM_FLOAT( -196, -128 ) ));
 	pGrunt->SetActivity( ACT_GLIDE );
 	// UNDONE: position?
 	pGrunt->m_vecLastPosition = tr.vecEndPos;
+	// diffusion - pass trigger conditions too
+	pGrunt->m_iTriggerCondition = m_iTriggerCondition;
+	pGrunt->m_iTriggerCondition2 = m_iTriggerCondition2;
+	pGrunt->m_iTriggerCondition3 = m_iTriggerCondition3;
 
 	CBeam *pBeam = CBeam::BeamCreate( "sprites/rope.spr", 10 );
 	pBeam->PointEntInit( GetAbsOrigin() + Vector( 0, 0, 112 ), pGrunt->entindex() );
