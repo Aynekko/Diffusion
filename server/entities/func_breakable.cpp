@@ -554,6 +554,16 @@ void CBreakable::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 //=========================================================
 int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
+	// damage amount is below the set threshold
+	if( pev->frags > 0 && flDamage < pev->frags )
+		return 0;
+
+	if( HasSpawnFlags( SF_BREAK_NOBULLET ) && (bitsDamageType & DMG_BULLET) )
+		return 0;
+
+	if( HasSpawnFlags( SF_BREAK_NOEXPLOSIONS ) && ((bitsDamageType & DMG_BLAST) || (bitsDamageType & DMG_MORTAR) || (bitsDamageType & DMG_EMP)) ) // EMP also included here just in case!
+		return 0;
+	
 	Vector vecTemp;
 	CBaseEntity *pAttacker = NULL;
 	CBasePlayer *pPlayer = NULL;
