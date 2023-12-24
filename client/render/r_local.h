@@ -459,6 +459,8 @@ typedef struct
 
 	int DroneViewTex;
 	cl_entity_t *pDrone;
+
+	mstudioevent_t studioevent[8192];
 } ref_globals_t;
 
 typedef struct

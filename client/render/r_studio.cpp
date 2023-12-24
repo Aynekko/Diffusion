@@ -3891,6 +3891,17 @@ StudioClientEvents
 
 void CStudioModelRenderer::StudioClientEvents( void )
 {
+	// forced events from server
+	if( tr.studioevent[m_pCurrentEntity->index].event > 0 )
+	{
+		HUD_StudioEvent( &tr.studioevent[m_pCurrentEntity->index], m_pCurrentEntity );
+		// cleanup
+		tr.studioevent[m_pCurrentEntity->index].event = 0;
+		tr.studioevent[m_pCurrentEntity->index].frame = 0;
+		memset( tr.studioevent[m_pCurrentEntity->index].options, 0, sizeof( tr.studioevent[m_pCurrentEntity->index].options ) );
+		tr.studioevent[m_pCurrentEntity->index].type = 0;
+	}
+	
 	mstudioseqdesc_t *pseqdesc;
 	mstudioevent_t *pevent;
 

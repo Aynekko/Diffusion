@@ -918,13 +918,11 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 	{
 		Value = 5000 + READ_BYTE();
 		entityIndex = READ_SHORT();
-		mstudioevent_t pevent;
 		cl_entity_s *ent = GET_ENTITY( entityIndex );
 		if( !ent )
 			break;
-		sprintf_s( pevent.options, "50" );
-		pevent.event = Value;
-		HUD_StudioEvent( &pevent, ent );
+		sprintf_s( tr.studioevent[entityIndex].options, "50" );
+		tr.studioevent[entityIndex].event = Value;
 	}
 	break;
 
