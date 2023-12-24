@@ -718,15 +718,30 @@ void CCineMonster :: CancelScript( void )
 // find all the cinematic entities with my targetname and tell them to wait before starting
 void CCineMonster :: DelayStart( int state )
 {
-	edict_t *pentCine = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(pev->targetname));
+	edict_t *pentCine;
+	int count = 0;
 
+	// first, count how many sequences with such name we have
+	pentCine = FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->targetname ) );
+	while( !FNullEnt( pentCine ) )
+	{
+		if( FClassnameIs( pentCine, "scripted_sequence" ) )
+			count++;
+
+		pentCine = FIND_ENTITY_BY_TARGETNAME( pentCine, STRING( pev->targetname ) );
+	}
+
+	pentCine = FIND_ENTITY_BY_TARGETNAME( NULL, STRING( pev->targetname ) );
 	while (!FNullEnt(pentCine))
 	{
 		if (FClassnameIs( pentCine, "scripted_sequence" ))
 		{
 			CCineMonster *pTarget = GetClassPtr((CCineMonster *)VARS(pentCine));
-			if (state)
-				pTarget->m_iDelay++;
+			if( state )
+			{
+				if( pTarget->m_iDelay < count )
+					pTarget->m_iDelay++;
+			}
 			else
 			{
 				pTarget->m_iDelay--;
