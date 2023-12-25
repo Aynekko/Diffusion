@@ -2020,9 +2020,9 @@ void PM_CategorizePosition (void)
 			point[2] = pmove->origin[2] - 2;
 	}
 
-	if (pmove->velocity[2] > 180 && !(pmove->effects & EF_UPSIDEDOWN))   // Shooting up really fast.  Definitely not on ground.
+	if (pmove->velocity[2] > 250 && !(pmove->effects & EF_UPSIDEDOWN))   // Shooting up really fast.  Definitely not on ground. // 250 is just a bit less than jumping velocity (270)
 		pmove->onground = -1;
-	else if( pmove->velocity[2] < -180 && (pmove->effects & EF_UPSIDEDOWN) )   // Shooting up really fast.  Definitely not on ground.
+	else if( pmove->velocity[2] < -250 && (pmove->effects & EF_UPSIDEDOWN) )   // Shooting up really fast.  Definitely not on ground.
 		pmove->onground = -1;
 	else
 	{
@@ -2968,20 +2968,20 @@ void PM_Jump (void)
 			for (i =0; i < 2; i++)
 				pmove->velocity[i] = pmove->forward[i] * PLAYER_LONGJUMP_SPEED * 1.6;
 		
-			pmove->velocity[2] = sqrt(2 * 800 * 56.0);
+			pmove->velocity[2] = 300;// sqrt( 2 * 800 * 56.0 );
 			if( pmove->effects & EF_UPSIDEDOWN )
 				pmove->velocity[2] *= -1;
 		}
 		else
 		{
-			pmove->velocity[2] = sqrt( 2 * 800 * 45.0 );
+			pmove->velocity[2] = 270;// sqrt( 2 * 800 * 45.0 );
 			if( pmove->effects & EF_UPSIDEDOWN )
 				pmove->velocity[2] *= -1;
 		}
 	}
 	else
 	{
-		pmove->velocity[2] = sqrt(2 * 800 * 45.0);
+		pmove->velocity[2] = 270;// sqrt( 2 * 800 * 45.0 );
 		if( pmove->effects & EF_UPSIDEDOWN )
 			pmove->velocity[2] *= -1;
 
