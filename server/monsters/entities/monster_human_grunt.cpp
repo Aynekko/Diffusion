@@ -2678,7 +2678,6 @@ Schedule_t* CHGrunt :: GetScheduleOfType ( int Type )
 // CHGruntRepel - when triggered, spawns a monster_human_grunt
 // repelling down a line.
 //=========================================================
-
 class CHGruntRepel : public CBaseMonster
 {
 	DECLARE_CLASS( CHGruntRepel, CBaseMonster );
@@ -2712,7 +2711,12 @@ void CHGruntRepel::Use ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		return NULL;
 	*/
 
-	CBaseEntity *pEntity = Create( "monster_human_grunt", GetAbsOrigin(), GetAbsAngles() );
+	CBaseEntity *pEntity = NULL;
+	if( value == 1.0f )
+		pEntity = Create( "monster_security_soldier", GetAbsOrigin(), GetAbsAngles() );
+	else
+		pEntity = Create( "monster_human_grunt", GetAbsOrigin(), GetAbsAngles() );
+
 	if( !pEntity )
 		return;
 	CBaseMonster *pGrunt = pEntity->MyMonsterPointer( );
@@ -2737,7 +2741,34 @@ void CHGruntRepel::Use ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	UTIL_Remove( this );
 }
 
+class CSecuritySoldierRepel : public CHGruntRepel
+{
+	DECLARE_CLASS( CSecuritySoldierRepel, CHGruntRepel );
+public:
+	void Spawn( void );
+	void Precache( void );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	int m_iSpriteTexture;	// Don't save, precache
+};
 
+LINK_ENTITY_TO_CLASS( monster_security_repel, CSecuritySoldierRepel );
+
+void CSecuritySoldierRepel::Spawn( void )
+{
+	Precache();
+	pev->solid = SOLID_NOT;
+}
+
+void CSecuritySoldierRepel::Precache( void )
+{
+	UTIL_PrecacheOther( "monster_security_soldier" );
+	m_iSpriteTexture = PRECACHE_MODEL( "sprites/rope.spr" );
+}
+
+void CSecuritySoldierRepel::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	BaseClass::Use( pActivator, pCaller, useType, 1.0f );
+}
 
 //=========================================================
 // DEAD HGRUNT PROP
