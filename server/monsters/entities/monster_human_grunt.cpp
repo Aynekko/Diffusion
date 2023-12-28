@@ -169,7 +169,6 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD(CanInvestigate, FIELD_INTEGER),
 	DEFINE_FIELD(AttackStartTime, FIELD_TIME),
 	DEFINE_FIELD(CombatWaitTime, FIELD_TIME),
-	DEFINE_FIELD(GruntShotgunDamage, FIELD_INTEGER),
 	DEFINE_FIELD(FlashlightSpr, FIELD_CLASSPTR),
 	DEFINE_KEYFIELD(Silent, FIELD_BOOLEAN, "silent"),
 	DEFINE_KEYFIELD( ForceEMPGrenade, FIELD_BOOLEAN, "forceemp"),
@@ -1522,7 +1521,7 @@ void CHGrunt :: Shotgun ( void )
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass ( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, m_iShotgunShell, TE_BOUNCE_SHOTSHELL); 
-	FireBullets(gSkillData.hgruntShotgunPellets, vecShootOrigin, vecShootDir, VECTOR_CONE_7DEGREES, 4096, BULLET_PLAYER_BUCKSHOT, 0, GruntShotgunDamage ); // shoot +-7.5 degrees // diffusion 4096, was 2048
+	FireBullets(gSkillData.hgruntShotgunPellets, vecShootOrigin, vecShootDir, VECTOR_CONE_7DEGREES, 4096, BULLET_PLAYER_BUCKSHOT, 0, GruntShotgunDamage[g_iSkillLevel] ); // shoot +-7.5 degrees // diffusion 4096, was 2048
 
 	pev->effects |= EF_MUZZLEFLASH;
 	
@@ -1609,8 +1608,8 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 							// even if the drone didn't see him at the moment of spawn.
 							if( m_hEnemy != NULL )
 							{
-								Vector EnemyOrigin = m_hEnemy->GetAbsOrigin();
-								pDrone->PushEnemy( m_hEnemy, EnemyOrigin );
+								pDrone->SetEnemy( m_hEnemy );
+								pDrone->SetConditions( bits_COND_NEW_ENEMY );
 							}
 						}
 
@@ -1839,18 +1838,12 @@ void CHGrunt::Spawn(void)
 	if (HasWeapon( HGRUNT_SHOTGUN ))
 	{
 		SetBodygroup( GUN_GROUP, GUN_SHOTGUN );
-		m_cClipSize		= 8;
-		if( g_iSkillLevel == SKILL_EASY )
-			GruntShotgunDamage = 6;
-		else if( g_iSkillLevel == SKILL_MEDIUM )
-			GruntShotgunDamage = 8;
-		else if( g_iSkillLevel == SKILL_HARD )
-			GruntShotgunDamage = 10;
+		m_cClipSize = 8;
 	}
 	else
 		m_cClipSize = GRUNT_CLIP_SIZE;
 
-	m_cAmmoLoaded		= m_cClipSize;
+	m_cAmmoLoaded = m_cClipSize;
 
 	if (RANDOM_LONG( 0, 99 ) < 80)
 		pev->skin = 0;	// light skin
@@ -1876,12 +1869,7 @@ void CHGrunt::Spawn(void)
 
 	CTalkMonster::g_talkWaitTime = 0;
 
-	if( g_iSkillLevel == SKILL_EASY )
-		CombatWaitTime = 0.8;
-	else if( g_iSkillLevel == SKILL_MEDIUM )
-		CombatWaitTime = 0.5;
-	else if( g_iSkillLevel == SKILL_HARD )
-		CombatWaitTime = 0.3;
+	CombatWaitTime = HGruntCombatWaitTime[g_iSkillLevel];
 
 	if( m_iFlashlightCap > 0 )
 	{
@@ -3061,12 +3049,7 @@ void CHGruntAlien :: Spawn()
 	else
 		CanInvestigate = 0;
 
-	if( g_iSkillLevel == SKILL_EASY )
-		CombatWaitTime = 0.6;
-	else if( g_iSkillLevel == SKILL_MEDIUM )
-		CombatWaitTime = 0.4;
-	else if( g_iSkillLevel == SKILL_HARD )
-		CombatWaitTime = 0.2;
+	CombatWaitTime = AlienCombatWaitTime[g_iSkillLevel];
 
 	SetFlag(F_METAL_MONSTER);
 
@@ -4289,12 +4272,7 @@ void CHGruntSecurityGeneral::Spawn()
 
 //	pev->scale = 1.15; // bigger than other grunts //scaled in the model itself
 
-	if (g_iSkillLevel == SKILL_EASY)
-		CombatWaitTime = 0.4;
-	else if (g_iSkillLevel == SKILL_MEDIUM)
-		CombatWaitTime = 0.25;
-	else if (g_iSkillLevel == SKILL_HARD)
-		CombatWaitTime = 0.1;
+	CombatWaitTime = SecurityGeneralCombatWaitTime[g_iSkillLevel];
 
 	SetFlag(F_MONSTER_CANT_LOSE_ENEMY);
 
@@ -5166,12 +5144,6 @@ void CHGruntSecurity::Spawn()
 	{
 		SetBodygroup(GUN_GROUP, GUN_SHOTGUN);
 		m_cClipSize = 8;
-		if (g_iSkillLevel == SKILL_EASY)
-			GruntShotgunDamage = 6;
-		else if (g_iSkillLevel == SKILL_MEDIUM)
-			GruntShotgunDamage = 8;
-		else if (g_iSkillLevel == SKILL_HARD)
-			GruntShotgunDamage = 10;
 	}
 	else
 	{
@@ -5201,12 +5173,7 @@ void CHGruntSecurity::Spawn()
 
 	CTalkMonster::g_talkWaitTime = 0;
 
-	if (g_iSkillLevel == SKILL_EASY)
-		CombatWaitTime = 0.7;
-	else if (g_iSkillLevel == SKILL_MEDIUM)
-		CombatWaitTime = 0.5;
-	else if (g_iSkillLevel == SKILL_HARD)
-		CombatWaitTime = 0.2;
+	CombatWaitTime = SecurityGruntCombatWaitTime[g_iSkillLevel];
 
 	if( m_iFlashlightCap > 0 )
 	{
@@ -5392,14 +5359,8 @@ void CAndrewGrunt::Spawn()
 	pev->effects = 0;
 
 	if( !pev->health )
-	{
-		if( g_iSkillLevel == SKILL_EASY )
-			pev->health = 2500;
-		else if( g_iSkillLevel == SKILL_MEDIUM )
-			CombatWaitTime = 3000;
-		else if( g_iSkillLevel == SKILL_HARD )
-			CombatWaitTime = 3500;
-	}
+		pev->health = AndrewHealth[g_iSkillLevel];
+
 	pev->max_health = pev->health;
 
 	m_flFieldOfView = -1;   // 360
@@ -5433,12 +5394,7 @@ void CAndrewGrunt::Spawn()
 	CanSpawnDrone = false; // no drones
 	AndrewEscapeTime = AndrewDashTime = gpGlobals->time;
 
-	if( g_iSkillLevel == SKILL_EASY )
-		CombatWaitTime = 0.3;
-	else if( g_iSkillLevel == SKILL_MEDIUM )
-		CombatWaitTime = 0.2;
-	else if( g_iSkillLevel == SKILL_HARD )
-		CombatWaitTime = 0.1;
+	CombatWaitTime = AndrewCombatWaitTime[g_iSkillLevel];
 
 	SetFlag( F_MONSTER_CANT_LOSE_ENEMY );
 

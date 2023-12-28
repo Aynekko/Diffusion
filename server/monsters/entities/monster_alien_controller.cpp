@@ -44,6 +44,22 @@
 
 #define CONTROLLER_FLINCH_DELAY	2		// at most one flinch every n secs
 
+const float DroneDmg[] =
+{
+	0.0f,
+	0.8f, // easy
+	1.0f, // medium
+	1.2f // hard
+};
+
+const int ProjectileVelocity[] =
+{
+	0,
+	2000,
+	2500,
+	3000
+};
+
 class CController : public CSquadMonster
 {
 	DECLARE_CLASS( CController, CSquadMonster );
@@ -2511,7 +2527,7 @@ void CDrone :: RunTask ( Task_t *pTask )
 				Vector vecShootOrigin = GetGunPosition();
 				Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 
-				FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 3 ); // 3 hp damage
+				FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, DroneDmg[g_iSkillLevel] );
 				m_iCounter--;
 
 				// it's a loud weapon
@@ -3206,12 +3222,7 @@ void CDroneAlien :: RunTask ( Task_t *pTask )
 					if( pShock )
 					{
 						pShock->pev->scale = 0.5;
-						if( g_iSkillLevel == SKILL_EASY )
-							pShock->pev->velocity = vecShootDir * 2000;
-						else if( g_iSkillLevel == SKILL_MEDIUM )
-							pShock->pev->velocity = vecShootDir * 3000;
-						else if( g_iSkillLevel == SKILL_HARD )
-							pShock->pev->velocity = vecShootDir * 4000;
+						pShock->pev->velocity = vecShootDir * ProjectileVelocity[g_iSkillLevel];
 
 						Vector AddVelocity = g_vecZero;
 						if( g_iSkillLevel == SKILL_HARD )
@@ -3859,8 +3870,8 @@ void CAlienShip :: RunTask ( Task_t *pTask )
 							// even if the drone didn't see him at the moment of spawn.
 							if( m_hEnemy != NULL )
 							{
-								Vector EnemyOrigin = m_hEnemy->GetAbsOrigin();
-								pDrone->PushEnemy( m_hEnemy, EnemyOrigin );
+								pDrone->SetEnemy( m_hEnemy );
+								pDrone->SetConditions( bits_COND_NEW_ENEMY );
 							}
 							pDrone->m_flDistTooFar = 4096; // those drones can shoot from afar
 							DroneSpawnTime = gpGlobals->time + RANDOM_LONG( 20, 30 );

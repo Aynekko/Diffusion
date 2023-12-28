@@ -23,6 +23,63 @@
 #define ACCUMULATED_DMG_THRESHOLD 500
 #define ANDREW_GRUNT_MODEL "models/npc/andrewgrunt.mdl"
 
+const int GruntShotgunDamage[] =
+{
+	0,
+	6,
+	8,
+	10
+};
+
+const float HGruntCombatWaitTime[] =
+{
+	0.0f,
+	0.8f,
+	0.5f,
+	0.3f
+};
+
+const float AlienCombatWaitTime[] =
+{
+	0.0f,
+	0.6f,
+	0.4f,
+	0.2f
+};
+
+const float SecurityGruntCombatWaitTime[] =
+{
+	0.0f,
+	0.7f,
+	0.5f,
+	0.2f
+};
+
+
+const float SecurityGeneralCombatWaitTime[] =
+{
+	0.0f,
+	0.4f,
+	0.25f,
+	0.1f
+};
+
+const int AndrewHealth[] =
+{
+	0,
+	2500,
+	3000,
+	3500
+};
+
+const float AndrewCombatWaitTime[] =
+{
+	0.0f,
+	0.3f,
+	0.2f,
+	0.1f
+};
+
 //=========================================================
 // hgrunt
 //=========================================================
@@ -66,8 +123,6 @@ public:
 
 	float AttackStartTime; // once the enemy is in sight, grunt began range attack, but he needs to wait, so...
 	float CombatWaitTime; // ...grunt waits for # seconds before shooting.
-
-	int GruntShotgunDamage;
 
 	string_t	wpns;
 	bool CanSpawnDrone;
