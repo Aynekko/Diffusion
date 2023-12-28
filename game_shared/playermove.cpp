@@ -2020,9 +2020,9 @@ void PM_CategorizePosition (void)
 			point[2] = pmove->origin[2] - 2;
 	}
 
-	if (pmove->velocity[2] > 250 && !(pmove->effects & EF_UPSIDEDOWN))   // Shooting up really fast.  Definitely not on ground. // 250 is just a bit less than jumping velocity (270)
+	if (pmove->velocity[2] > 180 && !(pmove->effects & EF_UPSIDEDOWN))   // Shooting up really fast.  Definitely not on ground.
 		pmove->onground = -1;
-	else if( pmove->velocity[2] < -250 && (pmove->effects & EF_UPSIDEDOWN) )   // Shooting up really fast.  Definitely not on ground.
+	else if( pmove->velocity[2] < -180 && (pmove->effects & EF_UPSIDEDOWN) )   // Shooting up really fast.  Definitely not on ground.
 		pmove->onground = -1;
 	else
 	{
