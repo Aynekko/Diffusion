@@ -816,6 +816,7 @@ BOOL CBaseMonster :: CineCleanup( void )
 		pev->movetype = m_pCine->m_saved_movetype;
 		pev->solid = m_pCine->m_saved_solid;
 		pev->effects = m_pCine->m_saved_effects;
+		m_pCine->m_iDelay = 0; // https://github.com/FreeSlave/halflife-featureful/commit/9fd77c98a7a970ea8ca60540f15875b154f96cf6
 	}
 	else
 	{
