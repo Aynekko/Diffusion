@@ -453,7 +453,6 @@ public:
 	void IgniteThink( void );
 	void RocketTouch( CBaseEntity *pOther );
 	void RocketExplode( TraceResult *pTrace, int bitsDamageType );
-//	static CRoboRocket2 *CreateRpgRocket( Vector vecOrigin, Vector vecAngles, CBaseEntity *pOwner, CRpg *pLauncher );
 	void CreateTrail( void );
 	virtual void OnTeleport( void );
 
@@ -461,40 +460,18 @@ public:
 
 	int m_iTrail;
 	float m_flIgniteTime;
-//	CRpg *m_pLauncher;// pointer back to the launcher that fired me. 
 };
 
 LINK_ENTITY_TO_CLASS( robo_rocket2, CRoboRocket2 );
 
 BEGIN_DATADESC( CRoboRocket2 )
 	DEFINE_FIELD( m_flIgniteTime, FIELD_TIME ),
-//	DEFINE_FIELD( m_pLauncher, FIELD_CLASSPTR ),
 	DEFINE_FUNCTION( FollowThink ),
 	DEFINE_FUNCTION( IgniteThink ),
 	DEFINE_FUNCTION( RocketTouch ),
 	DEFINE_FUNCTION( RocketExplode ),
 END_DATADESC()
 
-//=========================================================
-//=========================================================
-/*
-CRoboRocket2 *CRoboRocket2::CreateRpgRocket( Vector vecOrigin, Vector vecAngles, CBaseEntity *pOwner, CRpg *pLauncher )
-{
-	CRoboRocket2 *pRocket = GetClassPtr( (CRoboRocket2 *)NULL );
-
-	UTIL_SetOrigin( pRocket, vecOrigin );
-	pRocket->SetLocalAngles( vecAngles );
-	pRocket->Spawn();
-	pRocket->SetTouch( CRoboRocket2::RocketTouch );
-	pRocket->m_pLauncher = pLauncher;// remember what RPG fired me. 
-	pRocket->m_pLauncher->m_cActiveRockets++;// register this missile as active for the launcher
-	pRocket->pev->owner = pOwner->edict();
-
-	return pRocket;
-} */
-
-//=========================================================
-//=========================================================
 void CRoboRocket2 :: Spawn( void )
 {
 	Precache( );
@@ -506,8 +483,6 @@ void CRoboRocket2 :: Spawn( void )
 	SET_MODEL(ENT(pev), "models/rpgrocket.mdl");
 	UTIL_SetSize(pev, Vector( 0, 0, 0), Vector(0, 0, 0));
 	RelinkEntity( TRUE );
-
-//	pev->classname = MAKE_STRING("rpg_rocket");
 
 	SetThink( &CRoboRocket2::IgniteThink );
 	SetTouch(&CRoboRocket2::RocketTouch );
@@ -540,12 +515,6 @@ void CRoboRocket2 :: Spawn( void )
 //=========================================================
 void CRoboRocket2 :: RocketTouch ( CBaseEntity *pOther )
 {
-//	if ( m_pLauncher )
-//	{
-//		// my launcher is still around, tell it I'm dead.
-//		m_pLauncher->m_cActiveRockets--;
-//	}
-
 	STOP_SOUND( edict(), CHAN_VOICE, "weapons/rocket1.wav" );
 	TraceResult tr;
 	Vector		vecSpot;// trace starts here!
@@ -558,8 +527,6 @@ void CRoboRocket2 :: RocketTouch ( CBaseEntity *pOther )
 // diffusion - all this work just to make custom explosion radius, lolz
 void CRoboRocket2::RocketExplode( TraceResult *pTrace, int bitsDamageType )
 {
-	float		flRndSound;// sound randomizer
-
 	pev->model = iStringNull;//invisible
 	pev->solid = SOLID_NOT;// intangible
 
@@ -628,8 +595,6 @@ void CRoboRocket2::RocketExplode( TraceResult *pTrace, int bitsDamageType )
 			UTIL_StudioDecalTrace( pTrace, DECAL_SCORCH2 );
 		else UTIL_DecalTrace( pTrace, DECAL_SCORCH2 );
 	}
-
-	flRndSound = RANDOM_FLOAT( 0 , 1 );
 
 	switch ( RANDOM_LONG( 0, 2 ) )
 	{
@@ -798,7 +763,291 @@ void CRoboRocket2 :: FollowThink( void  )
 
 //----------------------------------------------------------------------------------------
 
+// rocket for heavy drone
 
+const int DroneRocketDamage[] =
+{
+	0,
+	20,
+	25,
+	30
+};
+
+class CDroneRocket: public CGrenade
+{
+	DECLARE_CLASS( CDroneRocket, CGrenade );
+public:
+	void Spawn( void );
+	void Precache( void );
+	void FlyThink( void );
+	void IgniteThink( void );
+	void RocketTouch( CBaseEntity *pOther );
+	void RocketExplode( TraceResult *pTrace, int bitsDamageType );
+	void CreateTrail( void );
+	virtual void OnTeleport( void );
+
+	DECLARE_DATADESC();
+
+	int m_iTrail;
+	float m_flIgniteTime;
+};
+
+LINK_ENTITY_TO_CLASS( drone_rocket, CDroneRocket );
+
+BEGIN_DATADESC( CDroneRocket )
+	DEFINE_FIELD( m_flIgniteTime, FIELD_TIME ),
+	DEFINE_FUNCTION( FlyThink ),
+	DEFINE_FUNCTION( IgniteThink ),
+	DEFINE_FUNCTION( RocketTouch ),
+	DEFINE_FUNCTION( RocketExplode ),
+END_DATADESC()
+
+void CDroneRocket::Spawn( void )
+{
+	Precache();
+	// motor
+	pev->movetype = MOVETYPE_BOUNCE;
+	pev->solid = SOLID_BBOX;
+	SetFlag( F_NOBACKCULL );
+
+	SET_MODEL( ENT( pev ), "models/rpgrocket.mdl" );
+	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
+	RelinkEntity( TRUE );
+
+	pev->scale = 0.5;
+
+	SetThink( &CDroneRocket::IgniteThink );
+	SetTouch( &CDroneRocket::RocketTouch );
+
+	Vector angles = GetLocalAngles();
+
+	angles.x -= 30;
+	UTIL_MakeVectors( angles );
+
+	SetLocalVelocity( gpGlobals->v_forward * 250 );
+	pev->gravity = 0.5;
+
+	SetNextThink( 0.4 );
+
+	pev->dmg = DroneRocketDamage[g_iSkillLevel];
+
+	if( pev->owner )
+	{
+		m_hOwner = Instance( pev->owner );
+		m_iClass = m_hOwner->Classify();
+	}
+}
+
+void CDroneRocket::RocketTouch( CBaseEntity *pOther )
+{
+	STOP_SOUND( edict(), CHAN_VOICE, "weapons/rocket1.wav" );
+	TraceResult tr;
+	pev->enemy = pOther->edict();
+	Vector vecSpot = GetAbsOrigin() - GetAbsVelocity().Normalize() * 32;
+	UTIL_TraceLine( vecSpot, vecSpot + GetAbsVelocity().Normalize() * 64, ignore_monsters, edict(), &tr );
+	RocketExplode( &tr, DMG_BLAST );
+}
+
+void CDroneRocket::RocketExplode( TraceResult *pTrace, int bitsDamageType )
+{
+	pev->model = iStringNull;//invisible
+	pev->solid = SOLID_NOT;// intangible
+
+	pev->takedamage = DAMAGE_NO;
+
+	// Pull out of the wall a bit
+	if( pTrace->flFraction != 1.0 )
+	{
+		float vecPlaneScale = (pev->dmg - 24) * 0.6f;
+		if( vecPlaneScale < 1 )
+			vecPlaneScale = 1;
+		SetAbsOrigin( pTrace->vecEndPos + (pTrace->vecPlaneNormal * vecPlaneScale) );
+	}
+
+	Vector absOrigin = GetAbsOrigin();
+
+	int iContents = UTIL_PointContents( absOrigin );
+
+	MESSAGE_BEGIN( MSG_PAS, gmsgTempEnt, absOrigin );
+	WRITE_BYTE( TE_EXPLOSION );		// This makes a dynamic light and the explosion sprites/sound
+	WRITE_COORD( absOrigin.x );	// Send to PAS because of the sound
+	WRITE_COORD( absOrigin.y );
+	WRITE_COORD( absOrigin.z );
+
+	if( iContents != CONTENTS_WATER )
+	{
+		WRITE_SHORT( g_sModelIndexFireball );
+	}
+	else
+	{
+		WRITE_SHORT( g_sModelIndexWExplosion );
+	}
+	int spritescale = (pev->dmg - 50) * .60;
+	if( spritescale < 20 )
+		spritescale = 20;
+	WRITE_BYTE( spritescale ); // scale * 10
+	WRITE_BYTE( 15 ); // framerate
+	WRITE_BYTE( TE_EXPLFLAG_NONE );
+	MESSAGE_END();
+
+	int sndentindex = 0;
+	if( pev->owner )
+		sndentindex = ENTINDEX( pev->owner );
+	CSoundEnt::InsertSound( bits_SOUND_COMBAT, absOrigin, NORMAL_EXPLOSION_VOLUME, 3.0, sndentindex );
+	entvars_t *pevOwner;
+	if( pev->owner )
+		pevOwner = VARS( pev->owner );
+	else
+		pevOwner = NULL;
+
+	pev->owner = NULL; // can't traceline attack owner if this is set
+
+	RadiusDamage( pev, pevOwner, pev->dmg, 400, m_iClass, bitsDamageType );
+
+	CBaseEntity *pEntity = CBaseEntity::Instance( pTrace->pHit );
+
+	if( RANDOM_FLOAT( 0, 1 ) < 0.5 )
+	{
+		if( pEntity && UTIL_GetModelType( pEntity->pev->modelindex ) == mod_studio )
+			UTIL_StudioDecalTrace( pTrace, DECAL_SCORCH1 );
+		else UTIL_DecalTrace( pTrace, DECAL_SCORCH1 );
+	}
+	else
+	{
+		if( pEntity && UTIL_GetModelType( pEntity->pev->modelindex ) == mod_studio )
+			UTIL_StudioDecalTrace( pTrace, DECAL_SCORCH2 );
+		else UTIL_DecalTrace( pTrace, DECAL_SCORCH2 );
+	}
+
+	switch( RANDOM_LONG( 0, 2 ) )
+	{
+	case 0:	EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/debris1.wav", 0.55, ATTN_NORM );	break;
+	case 1:	EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/debris2.wav", 0.55, ATTN_NORM );	break;
+	case 2:	EMIT_SOUND( ENT( pev ), CHAN_VOICE, "weapons/debris3.wav", 0.55, ATTN_NORM );	break;
+	}
+
+	pev->effects |= EF_NODRAW;
+	SetThink( &CGrenade::Smoke );
+	SetAbsVelocity( g_vecZero );
+	pev->nextthink = gpGlobals->time + 0.3;
+
+	if( iContents != CONTENTS_WATER )
+	{
+		int sparkCount = RANDOM_LONG( 0, 3 );
+		for( int i = 0; i < sparkCount; i++ )
+			Create( "spark_shower", absOrigin, pTrace->vecPlaneNormal, NULL );
+	}
+}
+
+void CDroneRocket::Precache( void )
+{
+	PRECACHE_MODEL( "models/rpgrocket.mdl" );
+	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
+	PRECACHE_SOUND( "weapons/rocket1.wav" );
+}
+
+void CDroneRocket::CreateTrail( void )
+{
+	// rocket trail
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		WRITE_BYTE( TE_BEAMFOLLOW );
+		WRITE_SHORT( entindex() );	// entity
+		WRITE_SHORT( m_iTrail );	// model
+		WRITE_BYTE( 25 ); // life
+		WRITE_BYTE( 2 );  // width
+		WRITE_BYTE( 224 );   // r, g, b
+		WRITE_BYTE( 224 );   // r, g, b
+		WRITE_BYTE( 255 );   // r, g, b
+		WRITE_BYTE( 255 );	// brightness
+	MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
+}
+
+void CDroneRocket::IgniteThink( void )
+{
+	pev->movetype = MOVETYPE_FLY;
+	pev->effects |= EF_LIGHT;
+
+	// make rocket sound
+	EMIT_SOUND_DYN( edict(), CHAN_VOICE, "weapons/rocket1.wav", 0.6, 0.5, 0, 130 ); // higher pitch
+
+	CreateTrail();
+
+	m_flIgniteTime = gpGlobals->time;
+
+	SetThink( &CDroneRocket::FlyThink );
+	SetNextThink( 0 );
+}
+
+void CDroneRocket::OnTeleport( void )
+{
+	// re-aiming the projectile
+	SetLocalAngles( UTIL_VecToAngles( GetLocalVelocity() ) );
+
+	MESSAGE_BEGIN( MSG_ALL, SVC_TEMPENTITY );
+		WRITE_BYTE( TE_KILLBEAM );
+		WRITE_ENTITY( entindex() );
+	MESSAGE_END();
+
+	CreateTrail();
+}
+
+void CDroneRocket::FlyThink( void )
+{
+	Vector vecTarget;
+	Vector vecDir;
+
+	float flDist, flMax, flDot;
+	TraceResult tr;
+
+	Vector angles = GetLocalAngles();
+	UTIL_MakeVectors( angles );
+
+	vecTarget = gpGlobals->v_forward;
+
+	SetLocalAngles( UTIL_VecToAngles( vecTarget ) );
+
+	// this acceleration and turning math is totally wrong, but it seems to respond well so don't change it.
+	float flSpeed = GetLocalVelocity().Length();
+
+	if( gpGlobals->time - m_flIgniteTime < 1.0 )
+	{
+		SetLocalVelocity( vecTarget * 1000 );
+		if( pev->waterlevel == 3 )
+		{
+			// go slow underwater
+			if( GetLocalVelocity().Length() > 300 )
+			{
+				SetLocalVelocity( GetLocalVelocity().Normalize() * 300 );
+			}
+			UTIL_BubbleTrail( GetAbsOrigin() - GetAbsVelocity() * 0.1, GetAbsOrigin(), 4 );
+		}
+		else
+		{
+			if( GetLocalVelocity().Length() > 2000 )
+			{
+				SetLocalVelocity( GetLocalVelocity().Normalize() * 2000 );
+			}
+		}
+	}
+	else
+	{
+		if( pev->effects & EF_LIGHT )
+		{
+			pev->effects = 0;
+			STOP_SOUND( ENT( pev ), CHAN_VOICE, "weapons/rocket1.wav" );
+		}
+
+		SetLocalVelocity( GetLocalVelocity() * 0.2 + vecTarget * flSpeed * 0.798 );
+
+		if( pev->waterlevel == 0 && GetLocalVelocity().Length() < 800 )
+		{
+			Detonate();
+		}
+	}
+	// ALERT( at_console, "%.0f\n", flSpeed );
+
+	SetNextThink( 0.1 );
+}
 
 
 

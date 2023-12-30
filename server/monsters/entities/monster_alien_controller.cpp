@@ -60,6 +60,14 @@ const int ProjectileVelocity[] =
 	3000
 };
 
+const int RocketDroneHealth[] =
+{
+	0,
+	250,
+	325,
+	400
+};
+
 class CController : public CSquadMonster
 {
 	DECLARE_CLASS( CController, CSquadMonster );
@@ -2122,7 +2130,10 @@ public:
 	CSprite *AlienEye;
 	bool CriticalDamage;
 	int m_iShell;
-	bool CanBeGrabbed; // can player get the drone back right now? make the drone busy for 5 seconds after spawn
+
+	bool IsRocketDrone; // monster_security_heavydrone
+	float NextRocketAttack; // monster_security_heavydrone
+
 	float SpawnTime; // player's drone only
 
 	DECLARE_DATADESC();
@@ -2130,6 +2141,7 @@ public:
 
 LINK_ENTITY_TO_CLASS( monster_security_drone, CDrone);
 LINK_ENTITY_TO_CLASS( _playerdrone, CDrone);
+LINK_ENTITY_TO_CLASS( monster_security_heavydrone, CDrone );
 
 BEGIN_DATADESC( CDrone )
 	DEFINE_FIELD( AlienEye, FIELD_CLASSPTR ),
@@ -2137,8 +2149,9 @@ BEGIN_DATADESC( CDrone )
 	DEFINE_FIELD( m_vecEstVelocity, FIELD_VECTOR ),
 	DEFINE_FIELD( CanInvestigate, FIELD_INTEGER ),
 	DEFINE_FIELD( LastSparkTime, FIELD_TIME ),
-	DEFINE_FIELD( CanBeGrabbed, FIELD_BOOLEAN ),
+	DEFINE_FIELD( IsRocketDrone, FIELD_BOOLEAN ),
 	DEFINE_FIELD( SpawnTime, FIELD_TIME ),
+	DEFINE_FIELD( NextRocketAttack, FIELD_TIME ),
 END_DATADESC()
 
 int	CDrone :: Classify ( void )
@@ -2166,11 +2179,28 @@ void CDrone :: Spawn()
 		SET_MODEL(ENT(pev), "models/npc/drone_security.mdl");
 	UTIL_SetSize( pev, Vector( -16, -16, -8 ), Vector( 16, 16, 8 ) );
 
+	if( FClassnameIs( pev, "monster_security_heavydrone" ) )
+		IsRocketDrone = true;
+
+	if( IsRocketDrone )
+	{
+		pev->body = 1;
+		NextRocketAttack = 0;
+		m_iCounter = 3; // loaded rockets
+		if( !pev->rendercolor || ( pev->rendercolor == g_vecZero ) )
+			pev->rendercolor = Vector( 25, 25, 25 );
+	}
+
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_FLY;
 	pev->flags			|= FL_FLY;
 	m_bloodColor		= DONT_BLEED;
-	if (!pev->health) pev->health	= 75;
+	if( !pev->health )
+	{
+		pev->health = 75;
+		if( IsRocketDrone )
+			pev->health = RocketDroneHealth[g_iSkillLevel];
+	}
 	pev->view_ofs		= Vector( 0, 0, -2 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_WIDE;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -2194,20 +2224,20 @@ void CDrone :: Spawn()
 
 	CriticalDamage = false; // didn't say "critical damage" yet
 
-	if( FClassnameIs(pev,"_playerdrone") )
+	if( FClassnameIs( pev, "_playerdrone" ) )
 	{
 		// UNDONE only player drone for now. it follows the grunts too but it's very buggy
 		// ...is it really needed though?
-		m_hOwner = Instance(pev->owner);
+		m_hOwner = Instance( pev->owner );
 		m_hTargetEnt = m_hOwner;
-		
+
 		// tell player that I'm here
-		CBasePlayer* pPlayer = (CBasePlayer*)GET_PRIVATE(pev->owner);
+		CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE( pev->owner );
 		if( pPlayer )
 			pPlayer->DroneDeployed = true;
 
 		SpawnTime = gpGlobals->time + 5;
-		SetFlag(F_ENTITY_BUSY); // drone can't be grabbed back right now.
+		SetFlag( F_ENTITY_BUSY ); // drone can't be grabbed back right now.
 		ObjectCaps(); // refresh just in case
 	}
 
@@ -2379,7 +2409,7 @@ void CDrone :: RunAI( void )
 
 		if( m_iCounter <= 0 )
 		{
-			TakeDamage( pev, pev, 500, DMG_SHOCK );
+			TakeDamage( pev, pev, pev->health + 50, DMG_SHOCK );
 			return;
 		}
 	}
@@ -2520,53 +2550,62 @@ void CDrone :: RunTask ( Task_t *pTask )
 		while (m_flShootTime < m_flShootEnd && m_flShootTime < gpGlobals->time)
 		{
 			Vector vecSrc = vecHand + GetAbsVelocity() * (m_flShootTime - gpGlobals->time);
-			Vector vecDir;
 			
-			if (m_hEnemy != NULL)
+			if( m_hEnemy != NULL )
 			{
 				Vector vecShootOrigin = GetGunPosition();
 				Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 
-				FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, DroneDmg[g_iSkillLevel] );
-				m_iCounter--;
-
-				// it's a loud weapon
-				if( FClassnameIs( pev, "_playerdrone" ) )
+				if( IsRocketDrone && gpGlobals->time > NextRocketAttack )
 				{
-					if( pev->owner )
+					Vector rocket_ang = UTIL_VecToAngles( vecShootDir );
+					CBaseMonster *pRocket = (CBaseMonster *)Create( "drone_rocket", vecShootOrigin, rocket_ang, edict() );
+
+					m_iCounter--; // at max 3 rockets
+					if( m_iCounter <= 0 )
 					{
-						CBasePlayer *pPlayerOwner = (CBasePlayer *)CBaseEntity::Instance( pev->owner );
-						if( pPlayerOwner && pPlayerOwner->LoudWeaponsRestricted )
-							pPlayerOwner->FireLoudWeaponRestrictionEntity();
+						m_iCounter = 3;
+						NextRocketAttack = gpGlobals->time + 8;
+						m_flShootTime += m_flShootEnd + 999; // make it stop and go into reload mode (use bullets)
 					}
+					m_flShootTime += 0.4;
 				}
+				else
+				{
+					FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, DroneDmg[g_iSkillLevel] );
 
-			//	switch(RANDOM_LONG(0,2))
-			//	{
-			//		case 0: EMIT_SOUND(ENT(pev), CHAN_WEAPON, "drone/drone_shoot1.wav", 1, ATTN_NORM); break;
-			//		case 1: EMIT_SOUND(ENT(pev), CHAN_WEAPON, "drone/drone_shoot2.wav", 1, ATTN_NORM); break;
-			//		case 2: EMIT_SOUND(ENT(pev), CHAN_WEAPON, "drone/drone_shoot3.wav", 1, ATTN_NORM); break;
-			//	}
-				PlayClientSound( this, 253 );
+					// it's a loud weapon
+					if( FClassnameIs( pev, "_playerdrone" ) )
+					{
+						m_iCounter--; // player's drone keeps track of bullets
+						if( pev->owner )
+						{
+							CBasePlayer *pPlayerOwner = (CBasePlayer *)CBaseEntity::Instance( pev->owner );
+							if( pPlayerOwner && pPlayerOwner->LoudWeaponsRestricted )
+								pPlayerOwner->FireLoudWeaponRestrictionEntity();
+						}
+					}
 
-				pev->effects |= EF_MUZZLEFLASH;
+					PlayClientSound( this, 253 );
 
-				Vector	vecShellVelocity = pev->velocity 
-							 + gpGlobals->v_right * RANDOM_FLOAT(50,70) 
-							 + gpGlobals->v_up * RANDOM_FLOAT(100,150) 
-							 + gpGlobals->v_forward * 25;
-				
-				Vector ShellPos = GetAbsOrigin();
-				ShellPos.z += 30;
-				EjectBrass ( ShellPos
-					+ gpGlobals->v_up * -(RANDOM_LONG(10,15)) 
-					+ gpGlobals->v_forward * RANDOM_LONG(15,25) 
-					+ gpGlobals->v_right * RANDOM_LONG(2,6), vecShellVelocity,
-					pev->angles.y, m_iShell, TE_BOUNCE_SHELL);
+					pev->effects |= EF_MUZZLEFLASH;
 
+					Vector	vecShellVelocity = pev->velocity
+						+ gpGlobals->v_right * RANDOM_FLOAT( 50, 70 )
+						+ gpGlobals->v_up * RANDOM_FLOAT( 100, 150 )
+						+ gpGlobals->v_forward * 25;
+
+					Vector ShellPos = GetAbsOrigin();
+					ShellPos.z += 30;
+					EjectBrass( ShellPos
+						+ gpGlobals->v_up * -(RANDOM_LONG( 10, 15 ))
+						+ gpGlobals->v_forward * RANDOM_LONG( 15, 25 )
+						+ gpGlobals->v_right * RANDOM_LONG( 2, 6 ), vecShellVelocity,
+						pev->angles.y, m_iShell, TE_BOUNCE_SHELL );
+
+					m_flShootTime += 0.1;
+				}
 			}
-			
-			m_flShootTime += 0.1;
 		}
 
 		if (m_flShootTime > m_flShootEnd)
