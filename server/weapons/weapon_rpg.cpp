@@ -902,7 +902,7 @@ void CDroneRocket::RocketExplode( TraceResult *pTrace, int bitsDamageType )
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
 
-	RadiusDamage( pev, pevOwner, pev->dmg, 400, m_iClass, bitsDamageType );
+	RadiusDamage( pev, pevOwner, pev->dmg, 500, m_iClass, bitsDamageType );
 
 	CBaseEntity *pEntity = CBaseEntity::Instance( pTrace->pHit );
 
@@ -1011,7 +1011,7 @@ void CDroneRocket::FlyThink( void )
 
 	if( gpGlobals->time - m_flIgniteTime < 1.0 )
 	{
-		SetLocalVelocity( vecTarget * 1000 );
+		SetLocalVelocity( vecTarget * 3000 );
 		if( pev->waterlevel == 3 )
 		{
 			// go slow underwater

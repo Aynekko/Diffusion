@@ -2566,9 +2566,9 @@ void CDrone :: RunTask ( Task_t *pTask )
 					{
 						m_iCounter = 3;
 						NextRocketAttack = gpGlobals->time + 8;
-						m_flShootTime += m_flShootEnd + 999; // make it stop and go into reload mode (use bullets)
+						m_flShootTime = m_flShootEnd + 999; // make it stop and go into reload mode (use bullets)
 					}
-					m_flShootTime += 0.4;
+					m_flShootTime += 0.75;
 				}
 				else
 				{
