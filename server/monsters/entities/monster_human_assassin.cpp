@@ -131,7 +131,7 @@ public:
 	int ProjectileCount; // count the bullets, then disable the attack (not saved)
 
 	// secass
-	float LastSmokeGrenadeTime; // drop a smoke once in 30 sec, instead of grenade
+	bool SmokeDropped; // drop a smoke only once, then use EMP grenades
 };
 
 LINK_ENTITY_TO_CLASS( monster_human_assassin, CHAssassin );
@@ -149,7 +149,7 @@ BEGIN_DATADESC( CHAssassin )
 //	DEFINE_FIELD( m_iClipSize, FIELD_INTEGER ),
 //	DEFINE_FIELD( IdleTime, FIELD_TIME ),
 	DEFINE_FIELD( NextAttackTime, FIELD_TIME ),
-	DEFINE_FIELD( LastSmokeGrenadeTime, FIELD_TIME ),
+	DEFINE_FIELD( SmokeDropped, FIELD_BOOLEAN ),
 END_DATADESC()
 
 //=========================================================
@@ -1368,7 +1368,7 @@ void SecAss :: Spawn()
 //	m_cAmmoLoaded = m_iClipSize;
 //	IdleTime = 0;
 
-	LastSmokeGrenadeTime = gpGlobals->time - 30;
+	SmokeDropped = false;
 
 	MonsterInit();
 }
@@ -1420,7 +1420,7 @@ BOOL SecAss::CheckRangeAttack2( float flDot, float flDist )
 	if( !FBitSet( m_hEnemy->pev->flags, FL_ONGROUND ) )
 		return FALSE; // don't throw grenades at anything that isn't on the ground!
 
-	if (gpGlobals->time > LastSmokeGrenadeTime + 30) // time to throw smoke
+	if( !SmokeDropped ) // time to throw smoke
 	{
 		if( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 512 )
 		{
@@ -1479,7 +1479,7 @@ void SecAss::HandleAnimEvent( MonsterEvent_t *pEvent )
 	{
 		UTIL_MakeVectors( GetAbsAngles() );
 		// diffusion - throw a smoke!
-		if( gpGlobals->time > LastSmokeGrenadeTime + 30 )
+		if( !SmokeDropped )
 		{
 			Vector org = GetAbsOrigin() + gpGlobals->v_forward * 40 + Vector( 0, 0, 32 );
 			MESSAGE_BEGIN( MSG_PAS, gmsgTempEnt, GetAbsOrigin() );
@@ -1492,7 +1492,7 @@ void SecAss::HandleAnimEvent( MonsterEvent_t *pEvent )
 				WRITE_BYTE( 50 ); // scale
 				WRITE_BYTE( 50 ); // randomize position offset of each sprite (+/- 50 here)
 			MESSAGE_END();
-			LastSmokeGrenadeTime = gpGlobals->time;
+			SmokeDropped = true;
 		}
 		else
 			CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 34 + Vector( 0, 0, 32 ), m_vecTossVelocity, 2.0, true ); // EMP
