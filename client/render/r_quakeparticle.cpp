@@ -50,7 +50,7 @@ MemBlock<CQuakePart>ParticleArray_Fireball( MAX_PARTICLES ); // TYPE_FIREBALL
 MemBlock<CQuakePart>ParticleArray_Blood( MAX_PARTICLES ); // TYPE_BLOOD
 MemBlock<CQuakePart>ParticleArray_Bubbles( MAX_PARTICLES ); // TYPE_BUBBLES
 MemBlock<CQuakePart>ParticleArray_Beamring( MAX_PARTICLES ); // TYPE_BEAMRING
-MemBlock<CQuakePart>ParticleArray_WaterDripLine( MAX_PARTICLES ); // TYPE_WATERDRIP_LINE
+MemBlock<CQuakePart>ParticleArray_WaterDrop( MAX_PARTICLES ); // TYPE_WATERDROP
 int partcounter = 0;
 
 //===============================================================================
@@ -251,7 +251,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 				ParticleCountPerEnt[curParticle->EntIndex]--;
 
 			// special case
-			if( curParticle->ParticleType == TYPE_WATERDRIP_LINE )
+			if( curParticle->ParticleType == TYPE_WATERDROP )
 				g_pParticles.CreateEffect( 0, "water_spit", curParticle->m_vecLastOrg, g_vecZero );
 
 			ParticleArray.DeleteCurrent();
@@ -279,7 +279,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 				ParticleCountPerEnt[curParticle->EntIndex]--;
 
 			// special case
-			if( curParticle->ParticleType == TYPE_WATERDRIP_LINE )
+			if( curParticle->ParticleType == TYPE_WATERDROP )
 			{
 				R_MakeWaterSplash( curParticle->m_vecOrigin, org, 3 );
 				g_pParticles.CreateEffect( 0, "water_spit", curParticle->m_vecLastOrg, g_vecZero );
@@ -1084,7 +1084,7 @@ CQuakePartSystem :: CQuakePartSystem( void )
 	ParticleArray_Blood.Clear();
 	ParticleArray_Bubbles.Clear();
 	ParticleArray_Beamring.Clear();
-	ParticleArray_WaterDripLine.Clear();
+	ParticleArray_WaterDrop.Clear();
 
 	partcounter = 0;
 
@@ -1138,7 +1138,7 @@ void CQuakePartSystem :: Clear( void )
 	ParticleArray_Blood.Clear();
 	ParticleArray_Bubbles.Clear();
 	ParticleArray_Beamring.Clear();
-	ParticleArray_WaterDripLine.Clear();
+	ParticleArray_WaterDrop.Clear();
 
 	partcounter = 0;
 
@@ -1655,7 +1655,7 @@ void CQuakePartSystem :: Update( void )
 	DrawParticles( ParticleArray_Blood );
 	DrawParticles( ParticleArray_Bubbles );
 	DrawParticles( ParticleArray_Beamring );
-	DrawParticles( ParticleArray_WaterDripLine );
+	DrawParticles( ParticleArray_WaterDrop );
 
 	// draw particles from txt-file (through glbegin-end...)
 	CQuakePart *pCur, *pNext;
@@ -1760,8 +1760,8 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 	case TYPE_BEAMRING:
 		dst = ParticleArray_Beamring.Allocate();
 		break;
-	case TYPE_WATERDRIP_LINE:
-		dst = ParticleArray_WaterDripLine.Allocate();
+	case TYPE_WATERDROP:
+		dst = ParticleArray_WaterDrop.Allocate();
 		break;
 	case TYPE_CUSTOM:
 		dst = AllocParticle();
@@ -2476,10 +2476,25 @@ void CQuakePartSystem::WaterDripLine( const Vector &start, const Vector &end, in
 	float dist = (start - end).Length();
 
 	CQuakePart src = InitializeParticle();
-	src.ParticleType = TYPE_WATERDRIP_LINE;
+	src.ParticleType = TYPE_WATERDROP;
 	src.m_vecOrigin = start + forward * RANDOM_FLOAT( 0.0f, dist );
 	src.m_vecAccel = Vector( 0, 0, -tr.movevars->gravity );
 	src.m_flDistance = Distance;
+	int flags = FPART_NOTINSOLID | FPART_NOTWATER | FPART_ADDITIVE;
+
+	AddParticle( &src, m_hRainDrop, flags );
+}
+
+void CQuakePartSystem::WaterDrop( int EntIndex, const Vector &pos )
+{
+	if( !g_fRenderInitialized )
+		return;
+
+	CQuakePart src = InitializeParticle();
+	src.ParticleType = TYPE_WATERDROP;
+	src.m_vecOrigin = pos;
+	src.m_vecAccel = Vector( 0, 0, -tr.movevars->gravity );
+	src.EntIndex = EntIndex;
 	int flags = FPART_NOTINSOLID | FPART_NOTWATER | FPART_ADDITIVE;
 
 	AddParticle( &src, m_hRainDrop, flags );

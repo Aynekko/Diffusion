@@ -57,7 +57,7 @@ enum
 	TYPE_BLOOD,
 	TYPE_BUBBLES,
 	TYPE_BEAMRING,
-	TYPE_WATERDRIP_LINE,
+	TYPE_WATERDROP,
 	TYPE_CUSTOM,
 };
 
@@ -200,6 +200,7 @@ public:
 	void SmokeVolume( int EntIndex, int Particle, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, float Scale, float Alpha = 0.1f, int Distance = 666 );
 	void BloodParticle( int EntIndex, const Vector &pos, float Scale, Vector Color, Vector Direction );
 	void WaterDripLine( const Vector &start, const Vector &end, int Distance = 666 );
+	void WaterDrop( int EntIndex, const Vector &pos );
 
 	int ParticleCountPerEnt[8192]; // MAX_ENTITIES?
 
