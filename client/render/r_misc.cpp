@@ -442,6 +442,12 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				g_pParticles.WaterDrop( ParticleEntIndex, ent->curstate.origin );
 				tr.ParticleTime[ParticleEntIndex] = tr.time + ent->curstate.fuser1;
 				break;
+			case 8: // clouds_night
+				if( tr.time < tr.ParticleTime[ParticleEntIndex] )
+					break;
+				g_pParticles.CreateEffect( ParticleEntIndex, "clouds_night", ent->curstate.origin, g_vecZero );
+				tr.ParticleTime[ParticleEntIndex] = tr.time + ent->curstate.fuser1;
+				break;
 			}
 		}
 
