@@ -511,6 +511,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				float SmV_Alpha = ent->curstate.renderamt / 255.0f;
 				int SmV_Distance = ent->curstate.iuser2;
 				float SmV_Scale = ent->curstate.fuser1;
+				Vector Color = Vector( ent->curstate.rendercolor.r, ent->curstate.rendercolor.g, ent->curstate.rendercolor.b ) / 255.0f;
 
 				if( SmV_Alpha <= 0.0f )
 					SmV_Alpha = 0.1f;
@@ -541,7 +542,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 							continue;
 					}
 
-					g_pParticles.SmokeVolume( ParticleEntIndex, ent->curstate.iuser1, vecSpot, ent->curstate.vuser1, ent->curstate.vuser2, SmV_Scale, SmV_Alpha, SmV_Distance );
+					g_pParticles.SmokeVolume( ParticleEntIndex, ent->curstate.iuser1, vecSpot, ent->curstate.vuser1, ent->curstate.vuser2, Color, SmV_Scale, SmV_Alpha, SmV_Distance );
 				}
 
 				tr.ParticleTime[ParticleEntIndex] = tr.time + ent->curstate.fuser3;

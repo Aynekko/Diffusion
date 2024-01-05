@@ -7,6 +7,8 @@
 /*
 iuser1 0 = smoke
 iuser1 1 = dustmotes
+iuser1 2 = smoke (fullbright)
+iuser1 3 = dustmotes (fullbright)
 iuser2 = particle visible distance
 fuser1 = particle size
 fuser2 = density

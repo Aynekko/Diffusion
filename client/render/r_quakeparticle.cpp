@@ -2101,14 +2101,14 @@ void CQuakePartSystem::Smoke( int EntIndex, int Particle, const Vector &pos, con
 	}
 }
 
-void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, float Scale, float Alpha, int Distance )
+void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, const Vector &Color, float Scale, float Alpha, int Distance )
 {
 	if( !g_fRenderInitialized )
 		return;
 	
 	CQuakePart src = InitializeParticle();
 
-	int flags = FPART_VERTEXLIGHT | FPART_FADEIN;
+	int flags = FPART_FADEIN;
 	float posRand = 20.0f;
 	float ScaleRand = 0.0f;
 
@@ -2117,11 +2117,22 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 	default:
 	case 0:
 		Particle = m_hSmoke;
+		flags |= FPART_VERTEXLIGHT;
 		break;
 	case 1:
 		Particle = m_hDustMote;
+		flags |= FPART_VERTEXLIGHT;
+		break;
+	case 2: // fullbright
+		Particle = m_hSmoke;
+		break;
+	case 3: // fullbright
+		Particle = m_hDustMote;
 		break;
 	}
+
+	if( !Color.IsNull() )
+		src.m_vecColor = Color;
 
 	if( Particle == m_hSmoke )
 	{

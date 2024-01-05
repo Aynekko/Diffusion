@@ -197,7 +197,7 @@ public:
 	void Smoke( int EntIndex, int Particle, const Vector &pos, const Vector &vel, int count, float speed = 0.15, float scale = 30, float posRand = 0, float velRand = 0, Vector Color = Vector(1,1,1), float Distance = 0.0f, float Alpha = 0.5f );
 	void GunSmoke( int EntIndex, const Vector &pos, Vector vel, int WeaponID );
 	void WaterSplashParticle( int EntIndex, const Vector &pos, float size = 1.0f );
-	void SmokeVolume( int EntIndex, int Particle, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, float Scale, float Alpha = 0.1f, int Distance = 666 );
+	void SmokeVolume( int EntIndex, int Particle, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, const Vector &Color, float Scale, float Alpha = 0.1f, int Distance = 666 );
 	void BloodParticle( int EntIndex, const Vector &pos, float Scale, Vector Color, Vector Direction );
 	void WaterDripLine( const Vector &start, const Vector &end, int Distance = 666 );
 	void WaterDrop( int EntIndex, const Vector &pos );
