@@ -226,6 +226,8 @@ public:
 	int m_iUseIcon; // 0 no icon, 1 - blue icon (useable), 2 - green icon (pressed), 3 - busy icon, 4 - denied icon
 	float LastUseCheckTime; // we are always looking for an object to use, don't do this every frame
 	EHANDLE m_hCachedUseObject; // cache last found object because we don't do check every frame
+	Vector UseEntOrg; // useable entity origin
+	Vector ClientUseEntOrg;
 
 	float m_flFOV;	// field of view // diffusion - changed to float
 	int m_iClientFOV;	// client's known FOV

@@ -1,6 +1,6 @@
-
 #include "hud.h"
 #include "utils.h"
+#include "r_local.h"
 #include "parsemsg.h"
 #include "triangleapi.h"
 
@@ -15,15 +15,24 @@ int CUseIcon::Init( void )
 
 int CUseIcon::VidInit( void )
 {
+	UseableEntOrigin = g_vecZero;
 	return 1;
 }
 
 int CUseIcon::Draw( float flTime )
 {	
 	int r, g, b;
+
+	if( UseableEntOrigin.IsNull() )
+		return 1;
 	
-	x = (ScreenWidth / 2) - 32;  // 64x64 icon, drawing on top of crosshair
-	y = (ScreenHeight / 2) - 80;
+//	x = (ScreenWidth / 2) - 32;  // 64x64 icon, drawing on top of crosshair
+//	y = (ScreenHeight / 2) - 80;
+
+	Vector screen;
+	R_WorldToScreen( UseableEntOrigin, screen );
+	x = XPROJECT( screen[0] );
+	y = YPROJECT( screen[1] );
 
 	if( UsePressed == 2 )
 		UnpackRGB(r,g,b,0x0046FF71); // green
@@ -50,15 +59,20 @@ int CUseIcon::MsgFunc_UseIcon( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pszName, pbuf, iSize );
 
 	UsePressed = READ_BYTE();
-//	UseableEntIndex = READ_SHORT();
 
 	if( UsePressed > 0 )
 	{
+		UseableEntOrigin.x = READ_COORD();
+		UseableEntOrigin.y = READ_COORD();
+		UseableEntOrigin.z = READ_COORD();
 		EnableIcon( UsePressed );
 		m_iFlags |= HUD_ACTIVE;
 	}
 	else
+	{
+		UseableEntOrigin = g_vecZero;
 		m_iFlags &= ~HUD_ACTIVE;
+	}
 
 	END_READ();
 

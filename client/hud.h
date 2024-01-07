@@ -825,7 +825,7 @@ public:
 	int MsgFunc_UseIcon( const char *pszName, int iSize, void *pbuf );
 	int UseIconSprite;
 	void EnableIcon( int UsePressed );
-	int UseableEntIndex;
+	Vector UseableEntOrigin;
 private:
 	typedef struct
 	{

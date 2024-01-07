@@ -2975,6 +2975,15 @@ void CBasePlayer::PreThink( void )
 			TraceResult tracer;
 			UTIL_MakeVectors( pev->v_angle );
 			UTIL_TraceLine( EyePosition(), EyePosition() + (gpGlobals->v_forward * PLAYER_SEARCH_RADIUS), dont_ignore_monsters, edict(), &tracer );
+
+			if( tracer.pHit )
+			{
+				pUseObject = CBaseEntity::Instance( tracer.pHit );
+				if( !pUseObject || !(pUseObject->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE | FCAP_HOLDABLE_ITEM)) )
+					pUseObject = NULL;
+				else
+					m_hCachedUseObject = pUseObject;
+			}
 			
 			Vector vecLOS;
 			float flDot;
@@ -3032,19 +3041,36 @@ void CBasePlayer::PreThink( void )
 			}
 			else
 				m_iUseIcon = USEICON_CANUSE;
+
+			UseEntOrg = VecBModelOrigin( pUseObject->pev );
 		}
 	}
 	else // found nothing?
+	{
 		m_iUseIcon = USEICON_NOICON;
+		UseEntOrg = g_vecZero;
+	}
 
-	if( m_iClientUseIcon != m_iUseIcon )
+	if( m_iClientUseIcon != m_iUseIcon || ClientUseEntOrg != UseEntOrg )
 	{
 		MESSAGE_BEGIN( MSG_ONE, gmsgUseIcon, NULL, pev );
 			WRITE_BYTE( m_iUseIcon );
-		//	WRITE_SHORT( pUseObject ? pUseObject->entindex() : 0 );
+			if( pUseObject )
+			{
+				WRITE_COORD( UseEntOrg.x );
+				WRITE_COORD( UseEntOrg.y );
+				WRITE_COORD( UseEntOrg.z );
+			}
+			else
+			{
+				WRITE_COORD( 0 );
+				WRITE_COORD( 0 );
+				WRITE_COORD( 0 );
+			}
 		MESSAGE_END();
 
 		m_iClientUseIcon = m_iUseIcon;
+		ClientUseEntOrg = UseEntOrg;
 	}
 
 	// objectives - simply showing a titles.txt message on pressing +score
