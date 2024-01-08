@@ -209,7 +209,7 @@ void ProcessRain( void )
 			// find a point at bottom of map
 			vecEnd[0] = falltime * xDelta;
 			vecEnd[1] = falltime * yDelta;
-			vecEnd[2] = -4096;
+			vecEnd[2] = -8192;
 
 			pmtrace_t pmtrace;
 			int contents = CONTENTS_EMPTY;
