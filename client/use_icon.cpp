@@ -6,6 +6,9 @@
 
 DECLARE_MESSAGE( m_UseIcon, UseIcon );
 
+int UseIconImage = 0;
+float Rotation = 0.0f;
+
 int CUseIcon::Init( void )
 {
 	HOOK_MESSAGE( UseIcon );
@@ -16,6 +19,9 @@ int CUseIcon::Init( void )
 int CUseIcon::VidInit( void )
 {
 	UseableEntOrigin = g_vecZero;
+	if( !UseIconImage )
+		UseIconImage = LOAD_TEXTURE( "sprites/use.dds", NULL, 0, 0 );
+	Rotation = 0.0f;
 	return 1;
 }
 
@@ -33,23 +39,48 @@ int CUseIcon::Draw( float flTime )
 	R_WorldToScreen( UseableEntOrigin, screen );
 	x = XPROJECT( screen[0] );
 	y = YPROJECT( screen[1] );
-
-	if( UsePressed == 2 )
-		UnpackRGB(r,g,b,0x0046FF71); // green
-	else if( UsePressed == 3 )
-		UnpackRGB(r,g,b,0x00FF8A14); // orange
-	else if( UsePressed == 4 )
-		UnpackRGB(r,g,b,0x00FF3232); // red
-	else
-		UnpackRGB(r,g,b,0x0046A9FF); // blue
+		
+	switch( UsePressed )
+	{
+		case 2: UnpackRGB( r, g, b, 0x0046FF71 ); // green
+			break;
+		case 3: UnpackRGB( r, g, b, 0x00FF8A14 ); // orange
+			break;
+		case 4: UnpackRGB( r, g, b, 0x00FF3232 ); // red
+			break;
+		default:
+			UnpackRGB( r, g, b, 0x0046A9FF ); // blue
+			break;
+	}
 
 	ScaleColors(r,g,b,150); 
 
-	SPR_Set( m_UseIcon.spr, r, g, b );
-			
-	SPR_DrawAdditive( 0, x, y, &m_UseIcon.rc );
+	// for "can use" and "pressed" I use dds image
+	if( UsePressed == 1 || UsePressed == 2 )
+	{
+		if( UseIconImage )
+		{
+			GL_Bind( 0, UseIconImage );
+			pglPushMatrix();
+			pglTranslatef( x, y, 0 );
+			pglRotatef( Rotation, 0, 0, 1 );
+			gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+			GL_Color4f( r / 255.0f, g / 255.0f, b / 255.0f, 1.0f );
+			DrawQuad( -32, -32, 32, 32 );
+			gEngfuncs.pTriAPI->End();
+			pglPopMatrix();
+			Rotation += 100 * g_fFrametime;
+			if( Rotation >= 360 )
+				Rotation = 0;
+		}
+	}
+	else
+	{
+		SPR_Set( m_UseIcon.spr, r, g, b );
+		SPR_DrawAdditive( 0, x - m_UseIcon.rc.right * 0.5f, y - m_UseIcon.rc.bottom * 0.5f, &m_UseIcon.rc );
+	}
 
-	//	gEngfuncs.Con_NPrintf( 1, "%i %i\n", x, y );
 	return 1;
 }
 
