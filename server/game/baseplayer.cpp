@@ -3019,7 +3019,7 @@ void CBasePlayer::PreThink( void )
 	if( pUseObject == NULL ) // use cached object between checks, so the icon won't flicker
 		pUseObject = m_hCachedUseObject;
 
-	if( pUseObject && CanUse && !DroneControl && !m_pHoldableItem )
+	if( pUseObject && !pUseObject->IsMonster() && CanUse && !DroneControl && !m_pHoldableItem )
 	{
 		if( pUseObject->HasFlag( F_ENTITY_BUSY ) )
 			m_iUseIcon = USEICON_BUSY;
