@@ -4,6 +4,8 @@
 
 // =================== FUNC_SMOKEVOLUME ==============================================
 
+#define SF_SMOKEVOL_STARTOFF BIT(0)
+
 /*
 iuser1 0 = smoke
 iuser1 1 = dustmotes
@@ -24,6 +26,7 @@ class CFuncSmokeVolume : public CBaseEntity
 public:
 	virtual int ObjectCaps( void ) { return BaseClass::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
 	void Spawn( void );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 };
 
 LINK_ENTITY_TO_CLASS( func_smokevolume, CFuncSmokeVolume );
@@ -32,8 +35,6 @@ void CFuncSmokeVolume::Spawn( void )
 {
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_TRIGGER;
-	pev->effects |= EF_DIMLIGHT;
-	pev->iuser3 = -660; // this entity is distinguished on client by "dimlight + iuser3"
 	pev->rendermode = kRenderTransTexture; // otherwise renderamt is always 255
 
 	if( !pev->fuser3 || pev->fuser3 <= 0.0f )
@@ -48,4 +49,31 @@ void CFuncSmokeVolume::Spawn( void )
 	}
 
 	SET_MODEL( edict(), GetModel() );
+
+	if( !HasSpawnFlags( SF_SMOKEVOL_STARTOFF ) )
+	{
+		pev->effects |= EF_DIMLIGHT;
+		pev->iuser3 = -660; // this entity is distinguished on client by "dimlight + iuser3"
+	}
+	else
+		pev->effects |= EF_NODRAW;
+}
+
+void CFuncSmokeVolume::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if( IsLockedByMaster() )
+		return;
+
+	if( pev->effects & EF_NODRAW ) // off, turn on
+	{
+		pev->effects |= EF_DIMLIGHT;
+		pev->iuser3 = -660; // this entity is distinguished on client by "dimlight + iuser3"
+		pev->effects &= ~EF_NODRAW;
+	}
+	else // turn off
+	{
+		pev->effects &= ~EF_DIMLIGHT;
+		pev->effects |= EF_NODRAW;
+		pev->iuser3 = 0;
+	}
 }
