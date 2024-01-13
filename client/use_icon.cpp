@@ -34,6 +34,20 @@ int CUseIcon::VidInit( void )
 
 int CUseIcon::Draw( float flTime )
 {	
+	if( cl_useicon->value <= 0 )
+	{
+		UseableEntOrigin = g_vecZero;
+		InteractPos = g_vecZero;
+		alpha = 0.0f;
+		if( m_iFlags & HUD_ACTIVE )
+			m_iFlags &= ~HUD_ACTIVE;
+
+		return 1;
+	}
+
+	if( tr.time == tr.oldtime ) // paused
+		return 1;
+	
 	int r, g, b;
 	Vector blue;
 	Vector screen;
