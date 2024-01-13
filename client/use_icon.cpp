@@ -8,6 +8,9 @@ DECLARE_MESSAGE( m_UseIcon, UseIcon );
 
 int UseIconImage = 0;
 float Rotation = 0.0f;
+int UseInteractImage = 0;
+float alpha = 0;
+Vector InteractPos = g_vecZero;
 
 int CUseIcon::Init( void )
 {
@@ -19,23 +22,53 @@ int CUseIcon::Init( void )
 int CUseIcon::VidInit( void )
 {
 	UseableEntOrigin = g_vecZero;
+	InteractPos = g_vecZero;
 	if( !UseIconImage )
 		UseIconImage = LOAD_TEXTURE( "sprites/use.dds", NULL, 0, 0 );
+	if( !UseInteractImage )
+		UseInteractImage = LOAD_TEXTURE( "sprites/use_interact.dds", NULL, 0, 0 );
 	Rotation = 0.0f;
+	alpha = 0.0f;
 	return 1;
 }
 
 int CUseIcon::Draw( float flTime )
 {	
 	int r, g, b;
-
+	Vector blue;
+	Vector screen;
+	
+	// decay the alpha
+	if( alpha > 0.0f )
+	{
+		UnpackRGB( r, g, b, 0x0046A9FF );
+		blue = Vector( r, g, b );
+		// draw interactive circle
+		if( UseInteractImage )
+		{
+			R_WorldToScreen( InteractPos, screen );
+			x = XPROJECT( screen[0] );
+			y = YPROJECT( screen[1] );
+			pglPushMatrix();
+			pglTranslatef( x, y, 0 );
+			float scale = 100.0f / (1.0f + alpha);
+			GL_Bind( 0, UseInteractImage );
+			gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+			GL_Color4f( blue.x / 255.0f, blue.y / 255.0f, blue.z / 255.0f, alpha );
+			DrawQuad( -scale, -scale, scale, scale );
+			gEngfuncs.pTriAPI->End();
+			pglPopMatrix();
+		}
+		alpha -= 2.0f * g_fFrametime;
+	}
+	
 	if( UseableEntOrigin.IsNull() )
 		return 1;
 	
 //	x = (ScreenWidth / 2) - 32;  // 64x64 icon, drawing on top of crosshair
 //	y = (ScreenHeight / 2) - 80;
 
-	Vector screen;
 	R_WorldToScreen( UseableEntOrigin, screen );
 	x = XPROJECT( screen[0] );
 	y = YPROJECT( screen[1] );
@@ -93,15 +126,28 @@ int CUseIcon::MsgFunc_UseIcon( const char *pszName, int iSize, void *pbuf )
 
 	if( UsePressed > 0 )
 	{
-		UseableEntOrigin.x = READ_COORD();
-		UseableEntOrigin.y = READ_COORD();
-		UseableEntOrigin.z = READ_COORD();
-		EnableIcon( UsePressed );
+		if( UsePressed == 5 ) // interaction circle
+		{
+			InteractPos.x = READ_COORD();
+			InteractPos.y = READ_COORD();
+			InteractPos.z = READ_COORD();
+			alpha = 1.0f;
+		}
+		else
+		{
+			UseableEntOrigin.x = READ_COORD();
+			UseableEntOrigin.y = READ_COORD();
+			UseableEntOrigin.z = READ_COORD();
+			EnableIcon( UsePressed );
+		}
+		
 		m_iFlags |= HUD_ACTIVE;
 	}
 	else
 	{
 		UseableEntOrigin = g_vecZero;
+		InteractPos = g_vecZero;
+		alpha = 0.0f;
 		m_iFlags &= ~HUD_ACTIVE;
 	}
 

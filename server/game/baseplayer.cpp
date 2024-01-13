@@ -2107,7 +2107,16 @@ void CBasePlayer::PlayerUse ( void )
 			{
 				// don't play sounds for NPCs, because NPCs will allow respond with speech.
 				if( !pObject->MyMonsterPointer() )
+				{
 					EMIT_SOUND( ENT( pev ), CHAN_ITEM, "common/use.wav", 0.4, ATTN_NORM );
+					Vector ObjectOrg = VecBModelOrigin( pObject->pev );
+					MESSAGE_BEGIN( MSG_ONE, gmsgUseIcon, NULL, pev );
+						WRITE_BYTE( USEICON_INTERACTION );
+						WRITE_COORD( ObjectOrg.x );
+						WRITE_COORD( ObjectOrg.y );
+						WRITE_COORD( ObjectOrg.z );
+					MESSAGE_END();
+				}
 			}
 
 			if ( ( (pev->button & IN_USE) && (caps & FCAP_CONTINUOUS_USE) ) ||

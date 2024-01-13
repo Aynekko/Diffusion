@@ -34,6 +34,7 @@ class CBotCam;
 #define USEICON_PRESSED 2
 #define USEICON_BUSY 3
 #define USEICON_LOCKED 4
+#define USEICON_INTERACTION 5 // animated circle when pressing button
 
 //
 // Player PHYSICS FLAGS bits
