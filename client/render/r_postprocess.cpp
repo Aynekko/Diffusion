@@ -481,7 +481,7 @@ void GaussBlur( void )
 
 	if( RP_NORMALPASS() && AllowBlur )
 	{
-		if( tr.viewparams.waterlevel > 2 )
+		if( tr.viewparams.waterlevel > 2 || (gHUD.InCar && (POINT_CONTENTS( tr.viewparams.vieworg ) == CONTENTS_WATER)) )
 			waterblur += 0.1 * g_fFrametime;
 		else
 			waterblur -= 0.1 * g_fFrametime;
@@ -682,6 +682,10 @@ void HorizontalBlur( void )
 void ScreenWater(void)
 {
 	float Speed = gEngfuncs.GetLocalPlayer()->curstate.vuser1.x;
+
+	// special condition...
+	if( gHUD.InCar && (POINT_CONTENTS( tr.viewparams.vieworg ) == CONTENTS_WATER) )
+		Speed = 0.5f;
 
 	if( tr.time == tr.oldtime ) // paused
 		Speed = 0.0f;
