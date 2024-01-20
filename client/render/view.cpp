@@ -2064,6 +2064,7 @@ void V_CalcRefdef( struct ref_params_s *pparams )
 		car_roll_ang = CL_UTIL_Approach( gHUD.CarSpeed * 0.05 * roll_dir, car_roll_ang, 3 * g_fFrametime );
 		pparams->viewangles[ROLL] += car_roll_ang;
 
+		/*
 		// shake of sorts...
 		static float next_car_shake = 0.0f;
 		static Vector org_add = g_vecZero;
@@ -2092,6 +2093,7 @@ void V_CalcRefdef( struct ref_params_s *pparams )
 		org_add[1] = CL_UTIL_Approach( org_target[1], org_add[1], addspeed );
 		org_add[2] = CL_UTIL_Approach( org_target[2], org_add[2], addspeed );
 		pparams->vieworg += Vector( org_add[0], org_add[1], org_add[2] );
+		*/
 	}
 
 	// diffusion - play this sound when underwater
