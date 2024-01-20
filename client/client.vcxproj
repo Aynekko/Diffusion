@@ -193,6 +193,7 @@
     <ClCompile Include="death.cpp" />
     <ClCompile Include="healthbars.cpp" />
     <ClCompile Include="hud_codeinput.cpp" />
+    <ClCompile Include="hud_dronebars.cpp" />
     <ClCompile Include="hud_flashlight.cpp" />
     <ClCompile Include="geiger.cpp" />
     <ClCompile Include="hud_blasticon.cpp" />

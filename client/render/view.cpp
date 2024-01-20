@@ -1218,45 +1218,54 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 		pparams->vieworg = view->origin;
 		pparams->viewangles = view->angles;
 
-		studiohdr_t *viewmonster = (studiohdr_t *)IEngineStudio.Mod_Extradata( view->model );
-
-		if( viewmonster && view->curstate.eflags & EFLAG_SLERP )
+		if( view == tr.pDrone )
 		{
 			Vector forward;
 			AngleVectors( pparams->viewangles, forward, NULL, NULL );
-
-			Vector viewpos = viewmonster->eyeposition;
-
-			if( viewpos == g_vecZero )
-				viewpos = Vector( 0, 0, 8 );	// monster_cockroach
-
-			pparams->vieworg += viewpos + forward * 8;	// best value for humans
-			// NOTE: fov computation moved into r_main.cpp
-		}
-
-		// this is smooth stair climbing in thirdperson mode but not affected for client model :(
-		if( !pparams->smoothing && pparams->onground && view->origin[2] - oldz > 0.0f && viewmonster != NULL )
-		{
-			float steptime;
-		
-			steptime = pparams->time - lasttime;
-			if( steptime < 0 ) steptime = 0;
-
-			oldz += steptime * 150.0f;
-
-			if( oldz > view->origin[2] )
-				oldz = view->origin[2];
-			if( view->origin[2] - oldz > pparams->movevars->stepsize )
-				oldz = view->origin[2] - pparams->movevars->stepsize;
-
-			pparams->vieworg[2] += oldz - view->origin[2];
+			pparams->vieworg += forward * 4;
 		}
 		else
 		{
-			oldz = view->origin[2];
-		}
+			studiohdr_t *viewmonster = (studiohdr_t *)IEngineStudio.Mod_Extradata( view->model );
 
-		lasttime = pparams->time;                 	
+			if( viewmonster && view->curstate.eflags & EFLAG_SLERP )
+			{
+				Vector forward;
+				AngleVectors( pparams->viewangles, forward, NULL, NULL );
+
+				Vector viewpos = viewmonster->eyeposition;
+
+				if( viewpos == g_vecZero )
+					viewpos = Vector( 0, 0, 8 );	// monster_cockroach
+
+				pparams->vieworg += viewpos + forward * 8;	// best value for humans
+				// NOTE: fov computation moved into r_main.cpp
+			}
+
+			// this is smooth stair climbing in thirdperson mode but not affected for client model :(
+			if( !pparams->smoothing && pparams->onground && view->origin[2] - oldz > 0.0f && viewmonster != NULL )
+			{
+				float steptime;
+
+				steptime = pparams->time - lasttime;
+				if( steptime < 0 ) steptime = 0;
+
+				oldz += steptime * 150.0f;
+
+				if( oldz > view->origin[2] )
+					oldz = view->origin[2];
+				if( view->origin[2] - oldz > pparams->movevars->stepsize )
+					oldz = view->origin[2] - pparams->movevars->stepsize;
+
+				pparams->vieworg[2] += oldz - view->origin[2];
+			}
+			else
+			{
+				oldz = view->origin[2];
+			}
+
+			lasttime = pparams->time;
+		}        	
 
 		if( view->curstate.effects & EF_NUKE_ROCKET )
 			pparams->viewangles.x = -pparams->viewangles.x; // stupid quake bug!

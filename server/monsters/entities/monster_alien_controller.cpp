@@ -2115,6 +2115,7 @@ public:
 	int ObjectCaps(void);
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	float LastSparkTime;
+	bool IsPlayerDrone;
 
 	void PainSound(void);
 	void AlertSound(void);
@@ -2152,6 +2153,7 @@ BEGIN_DATADESC( CDrone )
 	DEFINE_FIELD( IsRocketDrone, FIELD_BOOLEAN ),
 	DEFINE_FIELD( SpawnTime, FIELD_TIME ),
 	DEFINE_FIELD( NextRocketAttack, FIELD_TIME ),
+	DEFINE_FIELD( IsPlayerDrone, FIELD_BOOLEAN ),
 END_DATADESC()
 
 int	CDrone :: Classify ( void )
@@ -2181,6 +2183,9 @@ void CDrone :: Spawn()
 
 	if( FClassnameIs( pev, "monster_security_heavydrone" ) )
 		IsRocketDrone = true;
+
+	if( FClassnameIs( pev, "_playerdrone" ) )
+		IsPlayerDrone = true;
 
 	if( IsRocketDrone )
 	{
@@ -2224,7 +2229,7 @@ void CDrone :: Spawn()
 
 	CriticalDamage = false; // didn't say "critical damage" yet
 
-	if( FClassnameIs( pev, "_playerdrone" ) )
+	if( IsPlayerDrone )
 	{
 		// UNDONE only player drone for now. it follows the grunts too but it's very buggy
 		// ...is it really needed though?
@@ -2301,6 +2306,7 @@ void CDrone :: Precache()
 	PRECACHE_SOUND( "drone/drone_shoot1_d.wav" );
 	PRECACHE_SOUND( "drone/drone_shoot2_d.wav" );
 	PRECACHE_SOUND( "drone/drone_shoot3_d.wav" );
+	PRECACHE_SOUND( "drone/drone_emptyclip.wav" );
 
 	PRECACHE_MODEL( ALIEN_EYE );
 	m_iShell = PRECACHE_MODEL ("models/shell.mdl");
@@ -2402,16 +2408,29 @@ void CDrone :: RunAI( void )
 	if( AlienEye ) // diffusion - !!! the origin is not being updated, have to do this, otherwise distance culling issues
 		AlienEye->pev->origin = pev->origin;
 	
-	if( FClassnameIs(pev,"_playerdrone") )
+	if( IsPlayerDrone )
 	{
 		if( gpGlobals->time > SpawnTime )
 			RemoveFlag( F_ENTITY_BUSY );
 
+		/*
 		if( m_iCounter <= 0 )
 		{
-			TakeDamage( pev, pev, pev->health + 50, DMG_SHOCK );
+			CBaseEntity *pEntity = CBaseEntity::Instance( pev->owner );
+			CBasePlayer *pPlayer = (CBasePlayer *)pEntity;
+
+			if( pPlayer )
+			{
+				// "retrieve" the drone (give the new one, technically)
+				pPlayer->DroneHealth = pev->health;
+				pPlayer->DroneAmmo = 0;
+				pPlayer->DroneDeployed = false;
+				pPlayer->GiveAmmo( 1, "drone", 1 );
+				UTIL_ShowMessage( "UTIL_DRONEAMMOOUT", pPlayer );
+			}
+			UTIL_Remove( this );
 			return;
-		}
+		}*/
 	}
 	
 	if( IsAlive() && (pev->health <= 30) )
@@ -2561,6 +2580,21 @@ void CDrone :: RunTask ( Task_t *pTask )
 					Vector rocket_ang = UTIL_VecToAngles( vecShootDir );
 					CBaseMonster *pRocket = (CBaseMonster *)Create( "drone_rocket", vecShootOrigin, rocket_ang, edict() );
 
+					MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecShootOrigin );
+					WRITE_BYTE( TE_DLIGHT );
+					WRITE_COORD( vecShootOrigin.x );		// origin
+					WRITE_COORD( vecShootOrigin.y );
+					WRITE_COORD( vecShootOrigin.z );
+					WRITE_BYTE( 15 );	// radius
+					WRITE_BYTE( 255 );	// R
+					WRITE_BYTE( 255 );	// G
+					WRITE_BYTE( 180 );	// B
+					WRITE_BYTE( 0 );	// life * 10
+					WRITE_BYTE( 0 ); // decay
+					WRITE_BYTE( 125 ); // brightness
+					WRITE_BYTE( 0 ); // shadows
+					MESSAGE_END();
+
 					m_iCounter--; // at max 3 rockets
 					if( m_iCounter <= 0 )
 					{
@@ -2570,21 +2604,62 @@ void CDrone :: RunTask ( Task_t *pTask )
 					}
 					m_flShootTime += 0.75;
 				}
-				else
+				else if( IsPlayerDrone )
 				{
-					FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, DroneDmg[g_iSkillLevel] );
-
-					// it's a loud weapon
-					if( FClassnameIs( pev, "_playerdrone" ) )
+					if( m_iCounter > 0 )
 					{
+						FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 1.5f ); // 1.5 fixed damage
+
 						m_iCounter--; // player's drone keeps track of bullets
+
+						// it's a loud weapon
 						if( pev->owner )
 						{
 							CBasePlayer *pPlayerOwner = (CBasePlayer *)CBaseEntity::Instance( pev->owner );
 							if( pPlayerOwner && pPlayerOwner->LoudWeaponsRestricted )
 								pPlayerOwner->FireLoudWeaponRestrictionEntity();
 						}
+
+						PlayClientSound( this, 253 );
+
+						pev->effects |= EF_MUZZLEFLASH;
+
+						Vector	vecShellVelocity = pev->velocity
+							+ gpGlobals->v_right * RANDOM_FLOAT( 50, 70 )
+							+ gpGlobals->v_up * RANDOM_FLOAT( 100, 150 )
+							+ gpGlobals->v_forward * 25;
+
+						Vector ShellPos = GetAbsOrigin();
+						ShellPos.z += 30;
+						EjectBrass( ShellPos
+							+ gpGlobals->v_up * -(RANDOM_LONG( 10, 15 ))
+							+ gpGlobals->v_forward * RANDOM_LONG( 15, 25 )
+							+ gpGlobals->v_right * RANDOM_LONG( 2, 6 ), vecShellVelocity,
+							pev->angles.y, m_iShell, TE_BOUNCE_SHELL );
+
+						MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecShootOrigin );
+						WRITE_BYTE( TE_DLIGHT );
+						WRITE_COORD( vecShootOrigin.x );		// origin
+						WRITE_COORD( vecShootOrigin.y );
+						WRITE_COORD( vecShootOrigin.z );
+						WRITE_BYTE( 15 );	// radius
+						WRITE_BYTE( 255 );	// R
+						WRITE_BYTE( 255 );	// G
+						WRITE_BYTE( 180 );	// B
+						WRITE_BYTE( 0 );	// life * 10
+						WRITE_BYTE( 0 ); // decay
+						WRITE_BYTE( 125 ); // brightness
+						WRITE_BYTE( 0 ); // shadows
+						MESSAGE_END();
 					}
+					else
+						EMIT_SOUND( edict(), CHAN_WEAPON, "drone/drone_emptyclip.wav", 1, ATTN_NORM );
+
+					m_flShootTime += 0.1;
+				}
+				else
+				{
+					FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, DroneDmg[g_iSkillLevel] );
 
 					PlayClientSound( this, 253 );
 
@@ -2603,9 +2678,26 @@ void CDrone :: RunTask ( Task_t *pTask )
 						+ gpGlobals->v_right * RANDOM_LONG( 2, 6 ), vecShellVelocity,
 						pev->angles.y, m_iShell, TE_BOUNCE_SHELL );
 
+					MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecShootOrigin );
+					WRITE_BYTE( TE_DLIGHT );
+					WRITE_COORD( vecShootOrigin.x );		// origin
+					WRITE_COORD( vecShootOrigin.y );
+					WRITE_COORD( vecShootOrigin.z );
+					WRITE_BYTE( 15 );	// radius
+					WRITE_BYTE( 255 );	// R
+					WRITE_BYTE( 255 );	// G
+					WRITE_BYTE( 180 );	// B
+					WRITE_BYTE( 0 );	// life * 10
+					WRITE_BYTE( 0 ); // decay
+					WRITE_BYTE( 125 ); // brightness
+					WRITE_BYTE( 0 ); // shadows
+					MESSAGE_END();
+
 					m_flShootTime += 0.1;
 				}
 			}
+			else
+				m_flShootTime += 0.5;
 		}
 
 		if (m_flShootTime > m_flShootEnd)
@@ -2664,7 +2756,7 @@ void CDrone :: RunTask ( Task_t *pTask )
 		break;
 	case TASK_MOVE_TO_TARGET_RANGE: // diffusion - only for player's drone
 	{
-		if( !FClassnameIs( pev, "_playerdrone" ) )
+		if( !IsPlayerDrone )
 		{
 			CSquadMonster::RunTask( pTask );
 			break;
@@ -2874,16 +2966,18 @@ void CDrone::Killed( entvars_t *pevAttacker, int iGib )
 	FCheckAITrigger();
 	
 	// inform the player that I died
-	if( FClassnameIs( pev, "_playerdrone" ) )
+	if( IsPlayerDrone )
 	{
 		CBaseEntity *pEntity = CBaseEntity::Instance( pev->owner );
 		CBasePlayer *pPlayer = (CBasePlayer *)pEntity;
 
 		if( pPlayer )
 		{
-			pPlayer->DroneHealth = 0; // I died, so next drone will be new with full health
-			pPlayer->DroneAmmo = 0; // and full ammo (reset to 500)
+			// "retrieve" the drone (give the new one, technically)
+			pPlayer->DroneHealth = 0;
+			pPlayer->DroneAmmo = 0;
 			pPlayer->DroneDeployed = false;
+			pPlayer->GiveAmmo( 1, "drone", 1 );
 		}
 	}
 	

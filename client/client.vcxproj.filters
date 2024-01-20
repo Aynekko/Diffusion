@@ -254,6 +254,9 @@
     <ClCompile Include="animatex.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="hud_dronebars.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ammo.h">

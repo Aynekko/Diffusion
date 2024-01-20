@@ -1024,7 +1024,7 @@ void CBaseMonster :: StartTask ( Task_t *pTask )
 			{
 				TaskComplete();
 			}
-			else if (BuildNearestRoute( pEnemy->GetAbsOrigin(), pEnemy->pev->view_ofs, 0, (pEnemy->GetAbsOrigin() - GetLocalOrigin()).Length() ))
+			else if (BuildNearestRoute( pEnemy->GetAbsOrigin(), pEnemy->pev->view_ofs, pTask->flData, (pEnemy->GetAbsOrigin() - GetLocalOrigin()).Length() ))
 			{
 				TaskComplete();
 			}

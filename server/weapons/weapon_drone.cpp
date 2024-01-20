@@ -47,12 +47,12 @@ public:
 	void Holster( void );
 	void WeaponIdle( void );
 	float m_flNextAnimTime;
-	BOOL CheckForDrone(void);
+	bool CheckForDrone(void);
 	int AddDuplicate( CBasePlayerItem *pOriginal );
 	bool SpawnTest( void );
 
-	int ConfirmExplosion;
-	float ConfirmationTime;
+//	int ConfirmExplosion;
+//	float ConfirmationTime;
 	bool GotNewDrone;
 	bool DroneDeployed;
 
@@ -64,8 +64,8 @@ public:
 LINK_ENTITY_TO_CLASS( weapon_drone, CWpnDrone );
 
 BEGIN_DATADESC( CWpnDrone )
-	DEFINE_FIELD( ConfirmExplosion, FIELD_INTEGER ),
-	DEFINE_FIELD( ConfirmationTime, FIELD_TIME ),
+//	DEFINE_FIELD( ConfirmExplosion, FIELD_INTEGER ),
+//	DEFINE_FIELD( ConfirmationTime, FIELD_TIME ),
 	DEFINE_FIELD( GotNewDrone, FIELD_BOOLEAN ),
 	DEFINE_FIELD( DroneDeployed, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_hTestModel, FIELD_EHANDLE ),
@@ -80,26 +80,26 @@ int CWpnDrone::SecondaryAmmoIndex( void )
 }
 */
 
-BOOL CWpnDrone::CheckForDrone(void)
+bool CWpnDrone::CheckForDrone(void)
 {
 	CBaseEntity *pDrone = NULL;
 
 	if ((pDrone = UTIL_FindEntityByClassname( pDrone, "_playerdrone" )) != NULL)
 	{
 		m_pPlayer->DroneDeployed = true;
-		return TRUE;
+		return true;
 	}
 	else
 	{
 		m_pPlayer->DroneDeployed = false;
-		return FALSE;
+		return false;
 	}
 }
 
 BOOL CWpnDrone::IsUseable(void)
 {
 	// HACKHACK if we are holding a radio stick right now and got a drone, switch to it
-	if( (GotNewDrone == false) && (m_pPlayer->m_rgAmmo[ PrimaryAmmoIndex() ] > 0) )
+	if( !GotNewDrone && (m_pPlayer->m_rgAmmo[ PrimaryAmmoIndex() ] > 0) )
 	{
 		m_pPlayer->pev->viewmodel = MAKE_STRING("models/v_drone.mdl");
 		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/p_drone.mdl");
@@ -111,12 +111,12 @@ BOOL CWpnDrone::IsUseable(void)
 	DroneDeployed = m_pPlayer->DroneDeployed;
 
 	// show test model
-	if( m_pPlayer->CanShoot && !m_pPlayer->DroneDeployed && (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0) )
+	if( m_pPlayer->CanShoot && m_pPlayer->CanUseDrone && !m_pPlayer->DroneDeployed && (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0) )
 	{
-		if( m_hTestModel == NULL )
+		if( !m_hTestModel )
 		{
 			m_hTestModel = CBaseEntity::Create( "info_target", m_pPlayer->GetAbsOrigin(), g_vecZero, 0 );
-			if( m_hTestModel != NULL )
+			if( m_hTestModel )
 			{
 				SET_MODEL( m_hTestModel->edict(), "models/npc/drone_security.mdl" );
 				m_hTestModel->pev->rendermode = kRenderTransColor;
@@ -146,7 +146,7 @@ BOOL CWpnDrone::IsUseable(void)
 	}
 	else
 	{
-		if( m_hTestModel != NULL )
+		if( m_hTestModel )
 			m_hTestModel->pev->effects |= EF_NODRAW;
 	}
 
@@ -231,17 +231,17 @@ int CWpnDrone::AddDuplicate( CBasePlayerItem *pOriginal )
 	return CBasePlayerWeapon::AddDuplicate( pOriginal );
 }
 
-BOOL CWpnDrone::Deploy( )
+BOOL CWpnDrone::Deploy( void )
 {
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + DRONE_DEPLOY_TIME;
 
-	ConfirmExplosion = 0;
+//	ConfirmExplosion = 0;
 
 	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 )
 		GotNewDrone = true;
 
 	// perform a check for an active drone to determine what we should deploy
-	if( CheckForDrone() == TRUE )
+	if( CheckForDrone() )
 		return DefaultDeploy( "models/v_drone_radio.mdl", "models/p_drone_radio.mdl", DRONERADIO_DEPLOY, "default" );
 	else
 	{
@@ -253,7 +253,7 @@ BOOL CWpnDrone::Deploy( )
 			m_flTimeWeaponIdle = -1;
 			return DefaultDeploy( "models/v_drone.mdl", "models/p_drone.mdl", DRONE_DEPLOY, "default");
 		}
-	}	
+	}
 }
 
 void CWpnDrone::Holster(void)
@@ -264,12 +264,14 @@ void CWpnDrone::Holster(void)
 	BaseClass::Holster();
 }
 
-void CWpnDrone::PrimaryAttack()
+void CWpnDrone::PrimaryAttack( void )
 {	
-	if( m_pPlayer->pev->waterlevel == 3 )
+	if( m_pPlayer->pev->waterlevel == 3 || !m_pPlayer->CanUseDrone )
 	{
 		EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/gauss_overcharge.wav", 1.0, ATTN_NORM, 0, 100 );
 		m_flNextPrimaryAttack = gpGlobals->time + 1;
+		if( !m_pPlayer->CanUseDrone )
+			UTIL_ShowMessage( "UTIL_CANTSPAWN", m_pPlayer );
 		return;
 	}
 	
@@ -310,19 +312,20 @@ void CWpnDrone::PrimaryAttack()
 			// player gets this value when he picks up his flying drone.
 			// when drone dies, or player loses all weapons, it's reset to 0
 			float DroneHealth = m_pPlayer->DroneHealth;
-			int DroneAmmo = m_pPlayer->DroneAmmo;
+			int DroneAmmo = (int)m_pPlayer->DroneAmmo;
 			if( DroneAmmo == 0 )
 				DroneAmmo = 500;
 
 			if( DroneHealth == 0 )
 				DroneHealth = 500;
-			else if( DroneHealth < 30 )
-				DroneHealth = 30; // let it live for a bit
+			else if( DroneHealth < 25 )
+				DroneHealth = 25; // let it live for a bit
 
 			pDrone->pev->health = DroneHealth;
 			pDrone->pev->max_health = 500;
 			pDrone->m_iCounter = DroneAmmo;
 			pDrone->pev->iuser3 = -662; // a flag so we can render drone's camera in viewmodel screen
+			pDrone->pev->rendercolor = m_pPlayer->DroneColor; // apply custom color
 
 			m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 			if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
@@ -343,10 +346,8 @@ void CWpnDrone::PrimaryAttack()
 		{
 			CBaseEntity *pTarget = NULL;
 
-		//	if( (pTarget = UTIL_FindEntityByClassname( pTarget, "_playerdrone" )) != NULL )
 			if( m_pPlayer->m_hDrone != NULL )
 			{
-			//	CBaseMonster *pDrone = pTarget->MyMonsterPointer();
 				CBaseMonster *pDrone = m_pPlayer->m_hDrone->MyMonsterPointer();
 				if( pDrone )
 				{
@@ -360,7 +361,7 @@ void CWpnDrone::PrimaryAttack()
 			else
 			{
 				//			ALERT(at_console, "Can't find the drone!\n");
-							// no one responded to our call, drone absent, switch state and viewmodel
+				// no one responded to our call, drone absent, switch state and viewmodel
 				m_pPlayer->DroneDeployed = false;
 				if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 )
 				{

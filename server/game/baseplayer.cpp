@@ -200,9 +200,16 @@ BEGIN_DATADESC( CBasePlayer )
 	// drone
 	DEFINE_FIELD( DroneDeployed, FIELD_BOOLEAN ),
 	DEFINE_FIELD( DroneHealth, FIELD_FLOAT ),
-	DEFINE_FIELD( DroneAmmo, FIELD_INTEGER ),
+	DEFINE_FIELD( DroneAmmo, FIELD_FLOAT ),
 	DEFINE_FIELD( m_hDrone, FIELD_EHANDLE ),
 	DEFINE_FIELD( DroneControl, FIELD_BOOLEAN ),
+	DEFINE_FIELD( DroneColor, FIELD_VECTOR ),
+	DEFINE_FIELD( CanUseDrone, FIELD_BOOLEAN ),
+	DEFINE_FIELD( DroneTarget_OnDeploy, FIELD_STRING ),
+	DEFINE_FIELD( DroneTarget_OnReturn, FIELD_STRING ),
+	DEFINE_FIELD( DroneTarget_OnEnteringFirstPerson, FIELD_STRING ),
+	DEFINE_FIELD( DroneTarget_OnLeavingFirstPerson, FIELD_STRING ),
+	DEFINE_FIELD( DroneDistance, FIELD_INTEGER ),
 
 	DEFINE_ARRAY( m_DroneTextParms, FIELD_CHARACTER, sizeof(hudtextparms_t) ),
 	DEFINE_ARRAY( m_AliceTextParms, FIELD_CHARACTER, sizeof(hudtextparms_t) ),
@@ -1962,7 +1969,7 @@ void CBasePlayer::StartDeathCam(void)
 
 void CBasePlayer::PlayerUse ( void )
 {
-	if (IsObserver() || DroneControl )
+	if( IsObserver() )
 		return;
 
 	if( !CanUse )
@@ -2049,26 +2056,36 @@ void CBasePlayer::PlayerUse ( void )
 
 	// LRC- try to get an exact entity to use.
 	// (is this causing "use-buttons-through-walls" problems? Surely not!)
-	UTIL_TraceLine( EyePosition(), EyePosition() + (gpGlobals->v_forward * PLAYER_SEARCH_RADIUS), dont_ignore_monsters, edict(), &tr );
+	Vector EyePos = (m_hDrone && DroneControl) ? m_hDrone->EyePosition() : EyePosition();
+	UTIL_TraceLine( EyePos, EyePos + (gpGlobals->v_forward * PLAYER_SEARCH_RADIUS), dont_ignore_monsters, edict(), &tr );
 
 	if( tr.pHit )
 	{
 		pObject = CBaseEntity::Instance( tr.pHit );
-		if( !pObject || !(pObject->ObjectCaps() & ( FCAP_IMPULSE_USE|FCAP_CONTINUOUS_USE|FCAP_ONOFF_USE|FCAP_HOLDABLE_ITEM )))
-			pObject = NULL;
+
+		if( m_hDrone && DroneControl )
+		{
+			if( !pObject || !(pObject->ObjectCaps() & FCAP_DRONE_USE) )
+				pObject = NULL;
+		}
+		else
+		{
+			if( !pObject || !(pObject->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE | FCAP_HOLDABLE_ITEM)) )
+				pObject = NULL;
+		}
 	}
 
 	if( !pObject ) //LRC- couldn't find a direct solid object to use, try the normal method
 	{	
-		while(( pObject = UTIL_FindEntityInSphere( pObject, GetAbsOrigin(), PLAYER_SEARCH_RADIUS )) != NULL )
+		while(( pObject = UTIL_FindEntityInSphere( pObject, (m_hDrone && DroneControl) ? m_hDrone->GetAbsOrigin() : GetAbsOrigin(), PLAYER_SEARCH_RADIUS )) != NULL )
 		{
 			int caps = pObject->ObjectCaps();
-			if( caps & (FCAP_IMPULSE_USE|FCAP_CONTINUOUS_USE|FCAP_ONOFF_USE|FCAP_HOLDABLE_ITEM) && !( caps & FCAP_ONLYDIRECT_USE ))
+			if( ((m_hDrone && DroneControl) ? (caps & FCAP_DRONE_USE) : 1) && (caps & (FCAP_IMPULSE_USE|FCAP_CONTINUOUS_USE|FCAP_ONOFF_USE|FCAP_HOLDABLE_ITEM)) && !( caps & FCAP_ONLYDIRECT_USE ))
 			{
 				// !!!PERFORMANCE- should this check be done on a per case basis AFTER we've determined that
 				// this object is actually usable? This dot is being done for every object within PLAYER_SEARCH_RADIUS
 				// when player hits the use key. How many objects can be in that area, anyway? (sjb)
-				vecLOS = (VecBModelOrigin( pObject->pev ) - EyePosition());
+				vecLOS = (VecBModelOrigin( pObject->pev ) - EyePos);
 			
 				// This essentially moves the origin of the target to the corner nearest the player to test to see 
 				// if it's "hull" is in the view cone
@@ -2106,7 +2123,7 @@ void CBasePlayer::PlayerUse ( void )
 			if( m_afButtonPressed & IN_USE )
 			{
 				// don't play sounds for NPCs, because NPCs will allow respond with speech.
-				if( !pObject->MyMonsterPointer() )
+				if( !pObject->MyMonsterPointer() && pObject != m_hDrone )
 				{
 					EMIT_SOUND( ENT( pev ), CHAN_ITEM, "common/use.wav", 0.4, ATTN_NORM );
 					Vector ObjectOrg = VecBModelOrigin( pObject->pev );
@@ -2974,7 +2991,7 @@ void CBasePlayer::PreThink( void )
 	// diffusion - USE icon
 	CBaseEntity *pUseObject = NULL;
 
-	if( (CanUse == false) || (pev->flags & FL_FROZEN) || pCar )
+	if( !CanUse || (pev->flags & FL_FROZEN) || pCar )
 		m_iUseIcon = USEICON_NOICON;
 	else
 	{
@@ -2983,15 +3000,26 @@ void CBasePlayer::PreThink( void )
 		{
 			TraceResult tracer;
 			UTIL_MakeVectors( pev->v_angle );
-			UTIL_TraceLine( EyePosition(), EyePosition() + (gpGlobals->v_forward * PLAYER_SEARCH_RADIUS), dont_ignore_monsters, edict(), &tracer );
+			Vector EyePos = (m_hDrone && DroneControl) ? m_hDrone->EyePosition() : EyePosition();
+			UTIL_TraceLine( EyePos, EyePos + (gpGlobals->v_forward * PLAYER_SEARCH_RADIUS), dont_ignore_monsters, edict(), &tracer );
 
 			if( tracer.pHit )
 			{
 				pUseObject = CBaseEntity::Instance( tracer.pHit );
-				if( !pUseObject || !(pUseObject->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE | FCAP_HOLDABLE_ITEM)) )
-					pUseObject = NULL;
+				if( m_hDrone && DroneControl )
+				{
+					if( !pUseObject || !(pUseObject->ObjectCaps() & FCAP_DRONE_USE) )
+						pUseObject = NULL;
+					else
+						m_hCachedUseObject = pUseObject;
+				}
 				else
-					m_hCachedUseObject = pUseObject;
+				{
+					if( !pUseObject || !(pUseObject->ObjectCaps() & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE | FCAP_HOLDABLE_ITEM)) )
+						pUseObject = NULL;
+					else
+						m_hCachedUseObject = pUseObject;
+				}
 			}
 			
 			Vector vecLOS;
@@ -3001,12 +3029,13 @@ void CBasePlayer::PreThink( void )
 
 			if( !pUseObject )
 			{
-				while( (pUseObject = UTIL_FindEntityInSphere( pUseObject, GetAbsOrigin(), PLAYER_SEARCH_RADIUS )) != NULL )
+				while( (pUseObject = UTIL_FindEntityInSphere( pUseObject, ( m_hDrone && DroneControl ) ? m_hDrone->GetAbsOrigin() : GetAbsOrigin(), PLAYER_SEARCH_RADIUS )) != NULL )
 				{
 					int caps = pUseObject->ObjectCaps();
-					if( caps & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE | FCAP_HOLDABLE_ITEM) && !(caps & FCAP_ONLYDIRECT_USE) )
+
+					if( ((m_hDrone && DroneControl) ? (caps & FCAP_DRONE_USE) : 1) && (caps & (FCAP_IMPULSE_USE | FCAP_CONTINUOUS_USE | FCAP_ONOFF_USE | FCAP_HOLDABLE_ITEM)) && !(caps & FCAP_ONLYDIRECT_USE) )
 					{
-						vecLOS = (VecBModelOrigin( pUseObject->pev ) - EyePosition());
+						vecLOS = (VecBModelOrigin( pUseObject->pev ) - EyePos);
 						vecLOS = UTIL_ClampVectorToBox( vecLOS, pUseObject->pev->size * 0.5 );
 						flDot = DotProduct( vecLOS, gpGlobals->v_forward );
 						if( flDot > flMaxDot )
@@ -3028,7 +3057,7 @@ void CBasePlayer::PreThink( void )
 	if( pUseObject == NULL ) // use cached object between checks, so the icon won't flicker
 		pUseObject = m_hCachedUseObject;
 
-	if( pUseObject && !pUseObject->IsMonster() && CanUse && !DroneControl && !m_pHoldableItem )
+	if( pUseObject && (!pUseObject->IsMonster() || pUseObject == m_hDrone) && CanUse && !m_pHoldableItem )
 	{
 		if( pUseObject->HasFlag( F_ENTITY_BUSY ) )
 			m_iUseIcon = USEICON_BUSY;
@@ -3050,9 +3079,9 @@ void CBasePlayer::PreThink( void )
 			}
 			else
 				m_iUseIcon = USEICON_CANUSE;
-
-			UseEntOrg = VecBModelOrigin( pUseObject->pev );
 		}
+
+		UseEntOrg = VecBModelOrigin( pUseObject->pev );
 	}
 	else // found nothing?
 	{
@@ -3144,6 +3173,11 @@ void CBasePlayer::ManageDrone( void )
 					m_hDrone = pDrone;
 					CBaseMonster *pDroneMonster = pDrone->MyMonsterPointer();
 					pDroneMonster->m_hEnemy = NULL;
+					// apply custom color
+					m_hDrone->pev->rendercolor = DroneColor;
+					// fire target if set
+					if( !FStringNull(DroneTarget_OnDeploy) )
+						UTIL_FireTargets( DroneTarget_OnDeploy, this, this, USE_TOGGLE, 0 );
 					break;
 				}
 			}
@@ -3153,25 +3187,28 @@ void CBasePlayer::ManageDrone( void )
 		}
 		else // manage an active pointer
 		{
-			if( (pev->button & IN_RELOAD) && (m_pActiveItem->m_iId == WEAPON_DRONE) ) // retrieve the drone instantly
+			if( !CanUseDrone || (m_pActiveItem && (pev->button & IN_RELOAD) && (m_pActiveItem->m_iId == WEAPON_DRONE)) ) // retrieve the drone instantly
 			{
 				m_hDrone->Use( this, this, USE_TOGGLE, 0 );
+				// fire target if set
+				if( !FStringNull( DroneTarget_OnReturn ) )
+					UTIL_FireTargets( DroneTarget_OnReturn, this, this, USE_TOGGLE, 0 );
 				return;
 			}
-
-			float Distance = (m_hDrone->GetAbsOrigin() - GetAbsOrigin()).Length();
-
+			
+			DroneDistance = (int)((m_hDrone->GetAbsOrigin() - GetAbsOrigin()).Length() * 0.0254f);
 			// show drone health (and maybe other info)
+			/*
 			if( (gpGlobals->time > HUDtextTime + HUD_TEXT_DELAY) && !m_iHideHUD )
 			{
 				char msg[64];
-				if( DroneControl )
-					sprintf( msg, "Drone HP: %i\n\nDistance: %i m\n\nAmmo: %i\n", (int)m_hDrone->pev->health, (int)(Distance * 0.0254f), m_hDrone->m_iCounter );
-				else
-					sprintf( msg, "Drone active!" );
+				sprintf( msg, "Drone HP: %i\n\nDistance: %i m\n\nAmmo: %i\n", (int)m_hDrone->pev->health, (int)(Distance * 0.0254f), m_hDrone->m_iCounter );
 				UTIL_HudMessage( this, m_DroneTextParms, msg );
 				HUDtextTime = gpGlobals->time;
 			}
+			*/
+			DroneHealth = m_hDrone->pev->health;
+			DroneAmmo = m_hDrone->m_iCounter;
 
 			if( DroneControl ) // drone is in 1st person mode - this sets by weapon_drone
 			{
@@ -3185,10 +3222,13 @@ void CBasePlayer::ManageDrone( void )
 					pev->effects |= EF_PLAYERDRONECONTROL;
 					DroneCrosshairUpdate = true;
 					m_hDrone->pev->effects &= ~EF_MERGE_VISIBILITY;
+					// fire target if set
+					if( !FStringNull( DroneTarget_OnEnteringFirstPerson ) )
+						UTIL_FireTargets( DroneTarget_OnEnteringFirstPerson, this, this, USE_TOGGLE, 0 );
 					// we are all set and controlling the drone.
 				}
 
-				if( !strcmp( STRING( CameraEntity ), "_friendlydrone" ) )
+				if( !Q_strcmp( STRING( CameraEntity ), "_friendlydrone" ) )
 				{
 					// copy the view parameters for correct distance-culling
 					CameraOrigin = m_hDrone->GetAbsOrigin();
@@ -3267,25 +3307,45 @@ void CBasePlayer::ManageDrone( void )
 					drone_Speed *= drone_DirChange;
 
 					// shooting will be also updated here
-					if( (pev->button & IN_ATTACK) && (m_hDrone->m_iCounter > 0) )
+					if( pev->button & IN_ATTACK )
 					{
-						Vector vecShootOrigin = m_hDrone->GetAbsOrigin();
-
-						FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 5 ); // 5 dmg (drone monster has 3)
-						m_hDrone->m_iCounter--;
-						CSoundEnt::InsertSound( bits_SOUND_COMBAT, m_hDrone->pev->origin, 384, 0.3 );
-
-						switch( RANDOM_LONG( 0, 2 ) )
+						if( m_hDrone->m_iCounter > 0 )
 						{
-						case 0: EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "drone/drone_shoot1.wav", 1, ATTN_NORM ); break;
-						case 1: EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "drone/drone_shoot2.wav", 1, ATTN_NORM ); break;
-						case 2: EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "drone/drone_shoot3.wav", 1, ATTN_NORM ); break;
+							Vector vecShootOrigin = m_hDrone->GetAbsOrigin();
+
+							FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 5 );
+							m_hDrone->m_iCounter--;
+							CSoundEnt::InsertSound( bits_SOUND_COMBAT, m_hDrone->pev->origin, 384, 0.3 );
+
+							switch( RANDOM_LONG( 0, 2 ) )
+							{
+							case 0: EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "drone/drone_shoot1.wav", 1, ATTN_NORM ); break;
+							case 1: EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "drone/drone_shoot2.wav", 1, ATTN_NORM ); break;
+							case 2: EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "drone/drone_shoot3.wav", 1, ATTN_NORM ); break;
+							}
+
+							m_hDrone->pev->effects |= EF_MUZZLEFLASH;
+
+							MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecShootOrigin );
+								WRITE_BYTE( TE_DLIGHT );
+								WRITE_COORD( vecShootOrigin.x );		// origin
+								WRITE_COORD( vecShootOrigin.y );
+								WRITE_COORD( vecShootOrigin.z );
+								WRITE_BYTE( 15 );	// radius
+								WRITE_BYTE( 255 );	// R
+								WRITE_BYTE( 255 );	// G
+								WRITE_BYTE( 180 );	// B
+								WRITE_BYTE( 0 );	// life * 10
+								WRITE_BYTE( 0 ); // decay
+								WRITE_BYTE( 125 ); // brightness
+								WRITE_BYTE( 0 ); // shadows
+							MESSAGE_END();
+
+							if( LoudWeaponsRestricted )
+								FireLoudWeaponRestrictionEntity();
 						}
-
-						m_hDrone->pev->effects |= EF_MUZZLEFLASH;
-
-						if( LoudWeaponsRestricted )
-							FireLoudWeaponRestrictionEntity();
+						else
+							EMIT_SOUND( m_hDrone->edict(), CHAN_WEAPON, "drone/drone_emptyclip.wav", 1, ATTN_NORM );
 
 						// UNDONE brass shell?
 					}
@@ -3298,8 +3358,6 @@ void CBasePlayer::ManageDrone( void )
 			}
 			else // player has left 1st person mode
 			{
-				pev->effects &= ~EF_PLAYERDRONECONTROL;
-			
 				// make sure that we were looking through the drone camera
 				// (maybe some other camera took our view)
 				if( !strcmp( STRING( CameraEntity ), "_friendlydrone" ) )
@@ -3309,23 +3367,31 @@ void CBasePlayer::ManageDrone( void )
 					UTIL_ScreenFade( this, g_vecZero, 0.5, 0, 255, FFADE_IN );
 				}
 
-				pev->flags &= ~FL_ONTRAIN;
-				m_hDrone->pev->angles.x = 0; // reset vertical turn
-				m_hDrone->SetAbsAngles( m_hDrone->GetAbsAngles() );
-				m_hDrone->pev->velocity = g_vecZero;
-				m_hDrone->RemoveFlag( F_PLAYER_CONTROL );
-				m_hDrone->SetAbsVelocity( g_vecZero );
-				m_hDrone->pev->effects |= EF_MERGE_VISIBILITY;
-				drone_Speed = 0;
-				drone_forwmove = drone_sidemove = drone_upmove = 0;
+				if( pev->effects & EF_PLAYERDRONECONTROL )
+				{
+					pev->effects &= ~EF_PLAYERDRONECONTROL;
+					pev->flags &= ~FL_ONTRAIN;
+					m_hDrone->pev->angles.x = 0; // reset vertical turn
+					m_hDrone->SetAbsAngles( m_hDrone->GetAbsAngles() );
+					m_hDrone->pev->velocity = g_vecZero;
+					m_hDrone->RemoveFlag( F_PLAYER_CONTROL );
+					m_hDrone->SetAbsVelocity( g_vecZero );
+					m_hDrone->pev->effects |= EF_MERGE_VISIBILITY;
+					drone_Speed = 0;
+					drone_forwmove = drone_sidemove = drone_upmove = 0;
 
-				DroneCrosshairUpdate = true;
+					DroneCrosshairUpdate = true;
+
+					// fire target if set
+					if( !FStringNull( DroneTarget_OnLeavingFirstPerson ) )
+						UTIL_FireTargets( DroneTarget_OnLeavingFirstPerson, this, this, USE_TOGGLE, 0 );
+				}
 			}
 		}
 	}
 	else // drone not deployed? we get this state if drone dies, disappears from the world, or grabbed by +use
 	{
-		if( DroneControl && !strcmp( STRING( CameraEntity ), "_friendlydrone" ) ) // were we in 1st person at the moment?
+		if( DroneControl && !Q_strcmp( STRING( CameraEntity ), "_friendlydrone" ) ) // were we in 1st person at the moment?
 		{
 			SET_VIEW( edict(), edict() );
 			CameraEntity = NULL;
@@ -3339,6 +3405,40 @@ void CBasePlayer::ManageDrone( void )
 		}
 
 		m_hDrone = NULL;
+	}
+
+	// update HUD
+	if( HasWeapon( WEAPON_DRONE ) )
+	{
+		if( gpGlobals->time > DroneInfoUpdateTime )
+		{
+			if( DroneColor != DroneColor_CL 
+				|| (int)DroneHealth != DroneHealth_CL
+				|| (int)DroneAmmo != DroneAmmo_CL
+				|| DroneDeployed != DroneDeployed_CL
+				|| DroneDistance != DroneDistance_CL 
+				)
+			{
+				MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
+				WRITE_BYTE( TE_DRONEPARAMS );
+				WRITE_BYTE( DroneColor.x );
+				WRITE_BYTE( DroneColor.y );
+				WRITE_BYTE( DroneColor.z );
+				WRITE_SHORT( (short)DroneHealth );
+				WRITE_SHORT( (short)DroneAmmo );
+				WRITE_BYTE( (int)DroneDeployed );
+				WRITE_SHORT( (short)DroneDistance );
+				MESSAGE_END();
+
+				DroneColor_CL = DroneColor;
+				DroneHealth_CL = DroneHealth;
+				DroneAmmo_CL = DroneAmmo;
+				DroneDeployed_CL = DroneDeployed;
+				DroneDistance_CL = DroneDistance;
+			}
+
+			DroneInfoUpdateTime = gpGlobals->time + 0.2;
+		}
 	}
 }
 
@@ -4240,6 +4340,19 @@ void CBasePlayer::PostThink()
 		UTIL_SetOrigin( m_pFlashlightMonster, newposition );
 	}
 
+	if( m_hDrone == NULL )
+	{
+		// regenerate drone hp and ammo when it's not active
+		if( DroneHealth < 500 )
+			DroneHealth += 5 * gpGlobals->frametime;
+		// ammo regenerating speed depends on health
+		if( DroneAmmo < 500 )
+			DroneAmmo += DroneHealth * 0.1f * gpGlobals->frametime;
+		DroneHealth = bound( 0, DroneHealth, 500 );
+		DroneAmmo = bound( 1, DroneAmmo, 500 );
+	//	ALERT( at_console, "hp %f ammo %f\n", DroneHealth, DroneAmmo );
+	}
+
 	LookAtPlayers();
 
 	// do weapon stuff
@@ -5065,6 +5178,11 @@ void CBasePlayer::Spawn( void )
 	ConfirmedHit = 0;
 	IsShowingObjective = false;
 
+	CanUseDrone = false; // drone can be used only in special zones defined by game
+	DroneHealth = 500;
+	DroneAmmo = 500;
+	DroneDistance = 0;
+
 	KillingSpreeLevel = 0;
 	ConsecutiveKills = 0;
 	LastConsecutiveKillTime = gpGlobals->time - 10;
@@ -5107,6 +5225,10 @@ void CBasePlayer::Spawn( void )
 	}
 
 	RefreshScore();
+
+	DroneColor = Vector( 255, 255, 255 );
+	DroneAmmo = 500;
+	DroneHealth = 500;
 }
 
 void CBasePlayer::SetHUDTexts(void)
@@ -6481,6 +6603,7 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_BYTE( WeaponLowered );
 			WRITE_BYTE( CanShoot );
 			WRITE_BYTE( DrunkLevel );
+			WRITE_BYTE( CanUseDrone );
 		MESSAGE_END();
 		CanJump_CL = CanJump;
 		CanSprint_CL = CanSprint;
@@ -6495,6 +6618,7 @@ void CBasePlayer :: UpdateClientData( void )
 		WeaponLowered_CL = WeaponLowered;
 		CanShoot_CL = CanShoot;
 		DrunkLevel_CL = DrunkLevel;
+		CanUseDrone_CL = CanUseDrone;
 		
 		// update zoom state
 		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, pev );
@@ -6575,6 +6699,7 @@ void CBasePlayer :: UpdateClientData( void )
 		|| (WeaponLowered != WeaponLowered_CL)
 		|| (DrunkLevel != DrunkLevel_CL)
 		|| (CanShoot != CanShoot_CL)
+		|| (CanUseDrone != CanUseDrone_CL)
 		)
 	{
 		// HACKHACK I send this through tempent :)
@@ -6593,6 +6718,7 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_BYTE( WeaponLowered );
 			WRITE_BYTE( CanShoot );
 			WRITE_BYTE( DrunkLevel );
+			WRITE_BYTE( CanUseDrone );
 		MESSAGE_END();
 
 		CanJump_CL = CanJump;
@@ -6608,6 +6734,7 @@ void CBasePlayer :: UpdateClientData( void )
 		WeaponLowered_CL = WeaponLowered;
 		CanShoot_CL = CanShoot;
 		DrunkLevel_CL = DrunkLevel;
+		CanUseDrone_CL = CanUseDrone;
 	}
 
 	// diffusion - setup c-c-c-crosshair!!!

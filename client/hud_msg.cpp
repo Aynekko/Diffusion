@@ -568,6 +568,7 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		gHUD.WeaponLowered = (READ_BYTE() > 0);
 		gHUD.CanShoot = (READ_BYTE() > 0);
 		gHUD.DrunkLevel = READ_BYTE();
+		gHUD.m_DroneBars.CanUseDrone = (READ_BYTE() > 0);
 
 		if( gHUD.ShieldOn ) // play turn on sound
 			gEngfuncs.pEventAPI->EV_PlaySound( gEngfuncs.GetLocalPlayer()->index, NULL, CHAN_STATIC, "player/shield_on.wav", VOL_NORM, 0, 0, PITCH_NORM );
@@ -600,6 +601,18 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 			gHUD.CarAddFovMult = 0.5f;
 
 		oldgear = gHUD.m_ScreenEffects.Gear;
+	}
+	break;
+
+	case TE_DRONEPARAMS:
+	{
+		gHUD.DroneColor.x = READ_BYTE();
+		gHUD.DroneColor.y = READ_BYTE();
+		gHUD.DroneColor.z = READ_BYTE();
+		gHUD.m_DroneBars.DroneHealth = READ_SHORT();
+		gHUD.m_DroneBars.DroneAmmo = READ_SHORT();
+		gHUD.m_DroneBars.DroneDeployed = (READ_BYTE() > 0);
+		gHUD.m_DroneBars.DroneDistance = READ_SHORT();
 	}
 	break;
 

@@ -34,6 +34,7 @@ void CHud :: Init( void )
 	m_Stamina.Init();  //DiffusionSprint
 	m_HealthVisual.Init(); // diffusion health visual
 	m_BlastIcons.Init();
+	m_DroneBars.Init();
 	m_UseIcon.Init();
 	m_Zoom.Init();
 	m_Healthbars.Init();
@@ -193,6 +194,7 @@ void CHud :: VidInit( void )
 	m_StatusIconsAchievement.VidInit();
 	m_Stamina.VidInit();   //DiffusionSprint
 	m_HealthVisual.VidInit(); // diffusion health visual
+	m_DroneBars.VidInit();
 	m_UseIcon.VidInit();  // use icons
 	m_BlastIcons.VidInit(); // electro-blast icons
 	m_Healthbars.VidInit();

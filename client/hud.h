@@ -497,6 +497,28 @@ private:
   int	  m_iBarWidth;
 };
 
+class CHudDroneBars: public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw( float flTime );
+	bool CanUseDrone;
+	int DroneAmmo;
+	int DroneHealth;
+	bool DroneDeployed;
+	int DroneDistance;
+private:
+	SpriteHandle m_hBarFrame;
+	SpriteHandle m_hBarHealth;
+	SpriteHandle m_hBarAmmo;
+	SpriteHandle m_hDroneIcon;
+	wrect_t *m_prc_barframe;
+	wrect_t *m_prc_barhealth;
+	wrect_t *m_prc_barammo;
+	wrect_t *m_prc_droneicon;
+};
+
 //
 //-----------------------------------------------------
 //
@@ -892,6 +914,7 @@ public:
 	bool WigglingEffect;
 	bool ShieldOn;
 	float NextDrawingOfflineHUDTime; // time in the future when we are allowed to draw "offline" again
+	Vector DroneColor;
 
 	// saved cursor movement
 	Vector2D MxMy;
@@ -954,6 +977,7 @@ public:
 	CHudMOTD		m_MOTD;
 	CHudStamina		m_Stamina; //DiffusionSprintRegister
 	CHudHealthVisual		m_HealthVisual; // diffusion health visual
+	CHudDroneBars m_DroneBars;
 	CHudCrosshairStatic	m_CrosshairStatic;
 	CHudCrosshairStatic	m_GaussHUD;
 	CZoom m_Zoom;

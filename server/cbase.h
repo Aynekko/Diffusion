@@ -29,19 +29,20 @@ CBaseEntity
 #define		MAX_PATH_SIZE	10 // max number of nodes available for a path.
 
 // These are caps bits to indicate what an object's capabilities (currently used for save/restore and level transitions)
-#define FCAP_SET_MOVEDIR		0x00000001	// convert initial angles into direction (doors used)
-#define FCAP_ACROSS_TRANSITION	0x00000002	// should transfer between transitions
-#define FCAP_MUST_SPAWN		0x00000004	// Spawn after restore
-#define FCAP_IMPULSE_USE		0x00000008	// can be used by the player
-#define FCAP_CONTINUOUS_USE		0x00000010	// can be used by the player
-#define FCAP_ONOFF_USE		0x00000020	// can be used by the player
-#define FCAP_DIRECTIONAL_USE		0x00000040	// Player sends +/- 1 when using (currently only tracktrains)
-#define FCAP_FORCE_TRANSITION		0x00000080	// ALWAYS goes across transitions
-#define FCAP_ONLYDIRECT_USE		0x00000100	// Can't use this entity through a wall.
-#define FCAP_HOLDABLE_ITEM		0x00000200	// Item that can be picked up by player
-#define FCAP_HOLD_ANGLES		0x00000400	// hold angles at spawn to let parent system right attach the child
-#define FCAP_NOT_MASTER		0x00000800	// this entity can't be used as master directly (only through multi_watcher)
-#define FCAP_IGNORE_PARENT		0x00001000	// this entity won't to attached
+#define FCAP_SET_MOVEDIR		BIT(0)	// convert initial angles into direction (doors used)
+#define FCAP_ACROSS_TRANSITION	BIT(1)	// should transfer between transitions
+#define FCAP_MUST_SPAWN			BIT(2)	// Spawn after restore
+#define FCAP_IMPULSE_USE		BIT(3)	// can be used by the player
+#define FCAP_CONTINUOUS_USE		BIT(4)	// can be used by the player
+#define FCAP_ONOFF_USE			BIT(5)	// can be used by the player
+#define FCAP_DIRECTIONAL_USE	BIT(6)	// Player sends +/- 1 when using (currently only tracktrains)
+#define FCAP_FORCE_TRANSITION	BIT(7)	// ALWAYS goes across transitions
+#define FCAP_ONLYDIRECT_USE		BIT(8)	// Can't use this entity through a wall.
+#define FCAP_HOLDABLE_ITEM		BIT(9)	// Item that can be picked up by player
+#define FCAP_HOLD_ANGLES		BIT(10)	// hold angles at spawn to let parent system right attach the child
+#define FCAP_NOT_MASTER			BIT(11)	// this entity can't be used as master directly (only through multi_watcher)
+#define FCAP_IGNORE_PARENT		BIT(12)	// this entity won't to attached
+#define FCAP_DRONE_USE			BIT(13) // can be used by drone only
 
 // UNDONE: This will ignore transition volumes (trigger_transition), but not the PVS!!!
 

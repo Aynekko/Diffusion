@@ -37,6 +37,11 @@ public:
 	int LoudWeaponsRestricted;
 	int PlayingDrums;
 	int DrunkLevel;
+	int CanUseDrone;
+	string_t DroneTarget_OnDeploy;
+	string_t DroneTarget_OnReturn;
+	string_t DroneTarget_OnEnteringFirstPerson;
+	string_t DroneTarget_OnLeavingFirstPerson;
 	void KeyValue(KeyValueData* pkvd);
 	void Affect( CBasePlayer *pPlayer );
 
@@ -66,6 +71,11 @@ BEGIN_DATADESC(CPlayerCustomize)
 	DEFINE_KEYFIELD( LoudWeaponsRestricted, FIELD_INTEGER, "loudwep"),
 	DEFINE_KEYFIELD( PlayingDrums, FIELD_INTEGER, "drums" ),
 	DEFINE_KEYFIELD( DrunkLevel, FIELD_INTEGER, "drunklevel"),
+	DEFINE_KEYFIELD( CanUseDrone, FIELD_INTEGER, "canusedrone" ),
+	DEFINE_KEYFIELD( DroneTarget_OnDeploy, FIELD_STRING, "ondeploydrone" ),
+	DEFINE_KEYFIELD( DroneTarget_OnReturn, FIELD_STRING, "onreturndrone" ),
+	DEFINE_KEYFIELD( DroneTarget_OnEnteringFirstPerson, FIELD_STRING, "onentering1stperson" ),
+	DEFINE_KEYFIELD( DroneTarget_OnLeavingFirstPerson, FIELD_STRING, "onleaving1stperson" ),
 END_DATADESC()
 
 void CPlayerCustomize::KeyValue(KeyValueData* pkvd)
@@ -168,6 +178,31 @@ void CPlayerCustomize::KeyValue(KeyValueData* pkvd)
 	else if( FStrEq( pkvd->szKeyName, "drunklevel" ) )
 	{
 		DrunkLevel = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "canusedrone" ) )
+	{
+		CanUseDrone = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "ondeploydrone" ) )
+	{
+		DroneTarget_OnDeploy = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "onreturndrone" ) )
+	{
+		DroneTarget_OnReturn = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "onentering1stperson" ) )
+	{
+		DroneTarget_OnEnteringFirstPerson = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "onleaving1stperson" ) )
+	{
+		DroneTarget_OnLeavingFirstPerson = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -415,5 +450,48 @@ void CPlayerCustomize::Affect( CBasePlayer *pPlayer )
 	case 2: if( pPlayer->DrunkLevel > 0 ) pPlayer->DrunkLevel--; break; // decrease
 	case 3: pPlayer->DrunkLevel = 5; break; // full drunk
 	case 4: pPlayer->DrunkLevel = 0; break; // sober
+	}
+
+	switch( CanUseDrone )
+	{
+	case 1: pPlayer->CanUseDrone = !pPlayer->CanUseDrone; break; // toggle
+	case 2: pPlayer->CanUseDrone = true; break; // on
+	case 3: pPlayer->CanUseDrone = false; break; // off
+	}
+
+	// apply drone new color
+	if( !pev->rendercolor.IsNull() )
+		pPlayer->DroneColor = pev->rendercolor;
+
+	if( !FStringNull( DroneTarget_OnDeploy) )
+	{
+		if( FStrEq( STRING( DroneTarget_OnDeploy ), "_666" ) ) // this clears target
+			pPlayer->DroneTarget_OnDeploy = NULL;
+		else
+			pPlayer->DroneTarget_OnDeploy = DroneTarget_OnDeploy;
+	}
+
+	if( !FStringNull( DroneTarget_OnReturn ) )
+	{
+		if( FStrEq( STRING( DroneTarget_OnReturn ), "_666" ) ) // this clears target
+			pPlayer->DroneTarget_OnReturn = NULL;
+		else
+			pPlayer->DroneTarget_OnReturn = DroneTarget_OnReturn;
+	}
+
+	if( !FStringNull( DroneTarget_OnEnteringFirstPerson ) )
+	{
+		if( FStrEq( STRING( DroneTarget_OnEnteringFirstPerson ), "_666" ) ) // this clears target
+			pPlayer->DroneTarget_OnEnteringFirstPerson = NULL;
+		else
+			pPlayer->DroneTarget_OnEnteringFirstPerson = DroneTarget_OnEnteringFirstPerson;
+	}
+
+	if( !FStringNull( DroneTarget_OnLeavingFirstPerson ) )
+	{
+		if( FStrEq( STRING( DroneTarget_OnLeavingFirstPerson ), "_666" ) ) // this clears target
+			pPlayer->DroneTarget_OnLeavingFirstPerson = NULL;
+		else
+			pPlayer->DroneTarget_OnLeavingFirstPerson = DroneTarget_OnLeavingFirstPerson;
 	}
 }

@@ -5639,6 +5639,13 @@ void CStudioModelRenderer::DrawViewModel( void )
 
 	SET_CURRENT_ENTITY( RI->currententity );
 
+	if( gHUD.m_Ammo.WeaponID == WEAPON_DRONE )
+	{
+		RI->currententity->curstate.rendercolor.r = gHUD.DroneColor.x;
+		RI->currententity->curstate.rendercolor.g = gHUD.DroneColor.y;
+		RI->currententity->curstate.rendercolor.b = gHUD.DroneColor.z;
+	}
+
 	tr.blend = CL_FxBlend( RI->currententity ) / 255.0f;
 
 	if( !R_ModelOpaque( RI->currententity->curstate.rendermode, RI->currententity->curstate.renderamt ) && tr.blend <= 0.0f )

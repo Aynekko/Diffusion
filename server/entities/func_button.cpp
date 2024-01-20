@@ -481,14 +481,15 @@ void CMultiSource :: Register( void )
 
 #define SF_BUTTON_DONTMOVE		BIT( 0 )
 
-#define SF_BUTTON_ONLYDIRECT		BIT( 4 )	// LRC - button can't be used through walls.
+#define SF_BUTTON_ONLYDIRECT	BIT( 4 )	// LRC - button can't be used through walls.
 #define SF_BUTTON_TOGGLE		BIT( 5 )	// button stays pushed until reactivated
 #define SF_BUTTON_SPARK_IF_OFF	BIT( 6 )	// button sparks in OFF state
 #define SF_BUTTON_DAMAGED_AT_LASER	BIT( 7 )	// if health is set can be damaged only at env_laser or gauss
-#define SF_BUTTON_TOUCH_ONLY		BIT( 8 )	// button only fires as a result of USE key.
+#define SF_BUTTON_TOUCH_ONLY	BIT( 8 )	// button only fires as a result of USE key.
 #define SF_BUTTON_SAMEDIR		BIT(9)      // diffusion
 #define SF_BUTTON_SECRET		BIT(10)  // secret button, do not show hud icons
-#define SF_BUTTON_FREEZEPLAYER BIT(11) // freeze the player. note: this is NOT fl_freeze! it's F_PLAYER_BUTTONFREEZED
+#define SF_BUTTON_FREEZEPLAYER	BIT(11) // freeze the player. note: this is NOT fl_freeze! it's F_PLAYER_BUTTONFREEZED
+#define SF_BUTTON_DRONEUSE		BIT(12) // drone can press this button
 
 class CBaseButton : public CBaseToggle
 {
@@ -527,8 +528,10 @@ public:
 		int flags = FCAP_SET_MOVEDIR;
 		if( pev->takedamage == DAMAGE_NO )
 			flags |= FCAP_IMPULSE_USE;
-		if( FBitSet( pev->spawnflags, SF_BUTTON_ONLYDIRECT ))
+		if( HasSpawnFlags(SF_BUTTON_ONLYDIRECT) )
 			flags |= FCAP_ONLYDIRECT_USE;
+		if( HasSpawnFlags( SF_BUTTON_DRONEUSE ) )
+			flags |= FCAP_DRONE_USE;
 		return (BaseClass :: ObjectCaps() & (~FCAP_ACROSS_TRANSITION) | flags);
 	}
 

@@ -873,7 +873,7 @@ static void R_RenderDroneView( void )
 	if( tr.pDrone == GET_ENTITY( RI->viewentity ) )
 		return;
 
-	Vector origin, angles, forward;
+	Vector origin, angles;
 
 	if( FBitSet( RI->params, RP_OVERVIEW ) )
 		return;
@@ -905,6 +905,9 @@ static void R_RenderDroneView( void )
 	origin = tr.pDrone->origin;
 	angles = tr.pDrone->angles;
 	angles.x += 15;
+	Vector forward;
+	AngleVectors( angles, forward, NULL, NULL );
+	origin += forward * 4;
 
 	// setup the screen fov
 	float fov = 100;

@@ -312,7 +312,7 @@ Task_t tlGruntRunAndFire[] =
 {
 			{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_GRUNT_ELOF_FAIL	},
 
-			{ TASK_GET_PATH_TO_ENEMY,	(float)0						},
+			{ TASK_GET_PATH_TO_ENEMY,	(float)128						},
 			{ TASK_GRUNT_SPEAK_SENTENCE,(float)0						},
 			{ TASK_RUN_PATH,			(float)0						},
 			{ TASK_WAIT_FOR_MOVEMENT,	(float)0						},
@@ -2349,7 +2349,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 
 				if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 				{
-					if( m_hEnemy && (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 400 )
+					if( m_hEnemy && (m_hEnemy->pev->movetype != MOVETYPE_FLY) && (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 400 )
 						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
 
 					return GetScheduleOfType( SCHED_GRUNT_SUPPRESS );
@@ -2460,7 +2460,10 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 						//JustSpoke();
 					}
 
-					return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
+					if( m_hEnemy && (m_hEnemy->pev->movetype != MOVETYPE_FLY) )
+						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
+					else
+						return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 				}
 				else
 				{
@@ -3445,7 +3448,7 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 
 				if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 				{
-					if( m_hEnemy && (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 400 )
+					if( m_hEnemy && (m_hEnemy->pev->movetype != MOVETYPE_FLY) && (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 400 )
 						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
 
 					return GetScheduleOfType( SCHED_GRUNT_SUPPRESS );
@@ -3552,7 +3555,10 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 						//JustSpoke();
 					}
 					
-					return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
+					if( m_hEnemy && (m_hEnemy->pev->movetype != MOVETYPE_FLY) )
+						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
+					else
+						return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 				}
 				else
 				{

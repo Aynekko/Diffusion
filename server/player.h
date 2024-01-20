@@ -540,12 +540,29 @@ public:
 
 	// weapon_drone
 	bool DroneDeployed; // true if a friendly drone is present on the map
+	bool DroneDeployed_CL;
 	float DroneHealth;  // when we pick up our flying drone, we need to remember its health for future spawn
-	int DroneAmmo; // for player-controlled drone: max 500
+	int DroneHealth_CL;
+	float DroneAmmo; // for player-controlled drone: max 500; float for regenerating purposes
+	int DroneAmmo_CL;
 	EHANDLE m_hDrone; // pointer to our drone
 	bool DroneControl; // true when the player controls drone in 1st person mode
 	void ManageDrone( void ); // pre-think function
 	bool DroneCrosshairUpdate; // force update crosshair when switching to 1st person and back (not saved)
+	int drone_forwmove, drone_sidemove, drone_upmove;
+	float drone_Speed, drone_UpdateTime, drone_DirChange;
+	Vector drone_currentdir;
+	Vector DroneColor;
+	Vector DroneColor_CL;
+	bool CanUseDrone;
+	bool CanUseDrone_CL;
+	float DroneInfoUpdateTime;
+	string_t DroneTarget_OnDeploy;
+	string_t DroneTarget_OnReturn;
+	string_t DroneTarget_OnEnteringFirstPerson;
+	string_t DroneTarget_OnLeavingFirstPerson;
+	int DroneDistance;
+	int DroneDistance_CL;
 
 	hudtextparms_t	m_DroneTextParms; // hud text for weapon_drone (shown when the drone is active)
 	hudtextparms_t	m_AliceTextParms; // Alice HP shown on screen  // UNDONE decided to leave this unused right now
@@ -634,11 +651,6 @@ public:
 	float gtbdPrev; // for CheckTimeBasedDamage()
 
 	bool IsShowingObjective; // not saved
-
-	// drone stuff
-	int drone_forwmove, drone_sidemove, drone_upmove;
-	float drone_Speed, drone_UpdateTime, drone_DirChange;
-	Vector drone_currentdir;
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025
