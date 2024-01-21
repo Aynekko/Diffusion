@@ -180,6 +180,7 @@ void CFlare::Ignite(void)
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( RANDOM_LONG( 3, 8 ) ); // scale x1.0
 			WRITE_BYTE( RANDOM_LONG( 30, 50 ) ); // framerate
+			WRITE_BYTE( 2 ); // pos randomize
 		MESSAGE_END();
 	}
 

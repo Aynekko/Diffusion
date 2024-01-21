@@ -802,7 +802,6 @@ public:
 private:
 	int Vignette;
 	int VignetteShield;
-	int DroneScreen;
 	int Speedometer;
 	int SpeedometerArrow;
 	CAnimatex SpeedometerGears;

@@ -265,12 +265,13 @@ void CApache :: DyingThink( void )
 		// lots of smoke
 		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecOrigin );
 			WRITE_BYTE( TE_SMOKE );
-			WRITE_COORD( vecOrigin.x + RANDOM_FLOAT( -150, 150 ));
-			WRITE_COORD( vecOrigin.y + RANDOM_FLOAT( -150, 150 ));
-			WRITE_COORD( vecOrigin.z + RANDOM_FLOAT( -150, -50 ));
+			WRITE_COORD( vecOrigin.x );
+			WRITE_COORD( vecOrigin.y );
+			WRITE_COORD( vecOrigin.z );
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( 100 ); // scale * 10
 			WRITE_BYTE( 10  ); // framerate
+			WRITE_BYTE( 100 ); // pos randomize
 		MESSAGE_END();
 
 		Vector vecSpot = vecOrigin + (pev->mins + pev->maxs) * 0.5;
@@ -351,6 +352,7 @@ void CApache :: DyingThink( void )
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( 250 ); // scale * 10
 			WRITE_BYTE( 5  ); // framerate
+			WRITE_BYTE( 10 ); // pos randomize
 		MESSAGE_END();
 
 		// blast circle
@@ -839,6 +841,7 @@ void CApache :: FireRocket( void )
 		WRITE_SHORT( g_sModelIndexSmoke );
 		WRITE_BYTE( 20 ); // scale * 10
 		WRITE_BYTE( 12 ); // framerate
+		WRITE_BYTE( 2 ); // pos randomize
 		MESSAGE_END();
 
 		pRocket->SetAbsVelocity( GetAbsVelocity() + gpGlobals->v_forward * 100 );
@@ -947,6 +950,7 @@ void CApache :: ShowDamage( void )
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( RANDOM_LONG(0,9) + 20 ); // scale * 10
 			WRITE_BYTE( 12 ); // framerate
+			WRITE_BYTE( 2 ); // pos randomize
 		MESSAGE_END();
 	}
 	if (m_iDoSmokePuff > 0)

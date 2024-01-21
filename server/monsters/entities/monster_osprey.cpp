@@ -557,12 +557,13 @@ void COsprey :: DyingThink( void )
 		// lots of smoke
 		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecSpot );
 			WRITE_BYTE( TE_SMOKE );
-			WRITE_COORD( vecSpot.x + RANDOM_FLOAT( -150, 150 ));
-			WRITE_COORD( vecSpot.y + RANDOM_FLOAT( -150, 150 ));
-			WRITE_COORD( vecSpot.z + RANDOM_FLOAT( -150, -50 ));
+			WRITE_COORD( vecSpot.x );
+			WRITE_COORD( vecSpot.y );
+			WRITE_COORD( vecSpot.z );
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( 100 ); // scale * 10
-			WRITE_BYTE( 10  ); // framerate
+			WRITE_BYTE( 10  ); // framerate.
+			WRITE_BYTE( 100 ); // pos randomize
 		MESSAGE_END();
 
 
@@ -731,6 +732,7 @@ void COsprey :: ShowDamage( void )
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( RANDOM_LONG(0,9) + 20 ); // scale * 10
 			WRITE_BYTE( 12 ); // framerate
+			WRITE_BYTE( 2 ); // pos randomize
 		MESSAGE_END();
 		if (m_iDoLeftSmokePuff > 0)
 			m_iDoLeftSmokePuff--;
@@ -746,6 +748,7 @@ void COsprey :: ShowDamage( void )
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( RANDOM_LONG(0,9) + 20 ); // scale * 10
 			WRITE_BYTE( 12 ); // framerate
+			WRITE_BYTE( 2 ); // pos randomize
 		MESSAGE_END();
 		if (m_iDoRightSmokePuff > 0)
 			m_iDoRightSmokePuff--;

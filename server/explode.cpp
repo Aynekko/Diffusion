@@ -216,6 +216,7 @@ void CEnvExplosion::Smoke( void )
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( (BYTE)m_spriteScale ); // scale * 10
 			WRITE_BYTE( 12  ); // framerate
+			WRITE_BYTE( 10 ); // pos randomize
 		MESSAGE_END();
 	}
 	

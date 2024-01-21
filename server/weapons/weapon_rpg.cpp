@@ -256,6 +256,7 @@ void CRpgRocket::AugerThink( void )
 		WRITE_SHORT( g_sModelIndexSmoke );
 		WRITE_BYTE( RANDOM_LONG( 30, 40 ) ); // scale x1.0
 		WRITE_BYTE( 0 ); // framerate
+		WRITE_BYTE( 2 ); // pos randomize
 	MESSAGE_END();
 
 	SetNextThink( 0.05f );

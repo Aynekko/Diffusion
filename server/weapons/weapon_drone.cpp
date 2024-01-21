@@ -55,6 +55,7 @@ public:
 //	float ConfirmationTime;
 	bool GotNewDrone;
 	bool DroneDeployed;
+	float NextSmokeTime;
 
 	EHANDLE m_hTestModel;
 
@@ -111,7 +112,7 @@ BOOL CWpnDrone::IsUseable(void)
 	DroneDeployed = m_pPlayer->DroneDeployed;
 
 	// show test model
-	if( m_pPlayer->CanShoot && m_pPlayer->CanUseDrone && !m_pPlayer->DroneDeployed && (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0) )
+	if( m_pPlayer->CanShoot && m_pPlayer->CanUseDrone && (gpGlobals->time >= m_flNextPrimaryAttack) && !m_pPlayer->DroneDeployed && (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0) )
 	{
 		if( !m_hTestModel )
 		{
@@ -128,7 +129,7 @@ BOOL CWpnDrone::IsUseable(void)
 		}
 		else
 		{
-			if( (m_hTestModel->pev->effects & EF_NODRAW) && (gpGlobals->time > m_flNextPrimaryAttack) )
+			if( m_hTestModel->pev->effects & EF_NODRAW )
 				m_hTestModel->pev->effects &= ~EF_NODRAW;
 
 			Vector anglesAim = m_pPlayer->pev->v_angle;
@@ -137,8 +138,26 @@ BOOL CWpnDrone::IsUseable(void)
 			Vector SpawnPos = m_pPlayer->GetAbsOrigin() + gpGlobals->v_forward * 50 + gpGlobals->v_up * 20;
 			m_hTestModel->SetAbsOrigin( SpawnPos );
 			m_hTestModel->RelinkEntity( FALSE );
-
-			if( !SpawnTest() || (m_pPlayer->pev->waterlevel == 3) )
+			
+			if( m_pPlayer->DroneHealth < 50.0f )
+			{
+				m_hTestModel->pev->rendercolor = Vector( 5, 5, 5 );
+				if( gpGlobals->time > NextSmokeTime )
+				{
+					MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, m_hTestModel->pev->origin );
+						WRITE_BYTE( TE_SMOKE );
+						WRITE_COORD( m_hTestModel->pev->origin.x );
+						WRITE_COORD( m_hTestModel->pev->origin.y );
+						WRITE_COORD( m_hTestModel->pev->origin.z );
+						WRITE_SHORT( 0 );
+						WRITE_BYTE( 10 ); // scale x1.0
+						WRITE_BYTE( 10 ); // framerate
+						WRITE_BYTE( 2 ); // pos randomize
+					MESSAGE_END();
+					NextSmokeTime = gpGlobals->time + 0.25;
+				}
+			}
+			else if( !SpawnTest() || (m_pPlayer->pev->waterlevel == 3) )
 				m_hTestModel->pev->rendercolor = Vector( 255, 50, 50 );
 			else
 				m_hTestModel->pev->rendercolor = Vector( 50, 255, 50 );
@@ -266,6 +285,10 @@ void CWpnDrone::Holster(void)
 
 void CWpnDrone::PrimaryAttack( void )
 {	
+	// don't hold the button if not shooting
+	if( !m_pPlayer->DroneControl )
+		CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
+	
 	if( m_pPlayer->pev->waterlevel == 3 || !m_pPlayer->CanUseDrone )
 	{
 		EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/gauss_overcharge.wav", 1.0, ATTN_NORM, 0, 100 );
@@ -286,6 +309,17 @@ void CWpnDrone::PrimaryAttack( void )
 			m_flNextPrimaryAttack = gpGlobals->time + 1;
 			return;
 		}
+
+		// player gets this value when he picks up his flying drone.
+		float DroneHealth = m_pPlayer->DroneHealth;
+		int DroneAmmo = (int)m_pPlayer->DroneAmmo;
+
+		if( DroneHealth < 50.0f )
+		{
+			UTIL_ShowMessage( "UTIL_DRONEHPLOW", m_pPlayer );
+			m_flNextPrimaryAttack = gpGlobals->time + 0.2;
+			return;
+		}
 		
 		// we have a drone in the backpack, try to spawn it
 		if( !SpawnTest() ) // not enough space
@@ -300,7 +334,7 @@ void CWpnDrone::PrimaryAttack( void )
 		UTIL_MakeVectors( anglesAim );
 		Vector SpawnPos = m_pPlayer->GetAbsOrigin() + gpGlobals->v_forward * 50 + gpGlobals->v_up * 20;
 		CBaseMonster *pDrone = (CBaseMonster*)Create( "_playerdrone", SpawnPos, g_vecZero, m_pPlayer->edict() );
-		if(pDrone)
+		if( pDrone )
 		{
 			pDrone->m_iClass = CLASS_PLAYER_ALLY;
 		//	pDrone->pev->targetname = MAKE_STRING( "testdrone" );
@@ -308,19 +342,6 @@ void CWpnDrone::PrimaryAttack( void )
 			// this is important, so the monsters could see the drone if the player is outside their PVS
 			// see CBaseMonster :: RunAI for details
 			pDrone->pev->effects |= EF_MERGE_VISIBILITY;
-
-			// player gets this value when he picks up his flying drone.
-			// when drone dies, or player loses all weapons, it's reset to 0
-			float DroneHealth = m_pPlayer->DroneHealth;
-			int DroneAmmo = (int)m_pPlayer->DroneAmmo;
-			if( DroneAmmo == 0 )
-				DroneAmmo = 500;
-
-			if( DroneHealth == 0 )
-				DroneHealth = 500;
-			else if( DroneHealth < 25 )
-				DroneHealth = 25; // let it live for a bit
-
 			pDrone->pev->health = DroneHealth;
 			pDrone->pev->max_health = 500;
 			pDrone->m_iCounter = DroneAmmo;
@@ -338,6 +359,10 @@ void CWpnDrone::PrimaryAttack( void )
 			m_pPlayer->DroneDeployed = true;
 			m_flTimeWeaponIdle = gpGlobals->time;
 			m_flNextSecondaryAttack = gpGlobals->time + 1;
+
+			// hide test model right now
+			if( m_hTestModel )
+				m_hTestModel->pev->effects |= EF_NODRAW;
 		}
 	}
 	else // we have an active drone, try to call it to our location
@@ -379,10 +404,6 @@ void CWpnDrone::PrimaryAttack( void )
 			}
 		}
 	}
-
-	// don't hold the button if not shooting
-	if( !m_pPlayer->DroneControl )
-		CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
 
 	m_flNextPrimaryAttack = gpGlobals->time + 1;
 }
@@ -491,7 +512,7 @@ void CWpnDrone::WeaponIdle( void )
 		return;
 	
 	// HACKHACK if our drone died and we have some in the backpack, switch to it
-	if((m_pPlayer->m_rgAmmo[ PrimaryAmmoIndex() ] > 0) && (m_pPlayer->DroneDeployed == false) )
+	if((m_pPlayer->m_rgAmmo[ PrimaryAmmoIndex() ] > 0) && !m_pPlayer->DroneDeployed )
 	{
 		m_pPlayer->pev->viewmodel = MAKE_STRING("models/v_drone.mdl");
 		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/p_drone.mdl");

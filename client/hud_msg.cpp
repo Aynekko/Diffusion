@@ -682,7 +682,8 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		Model = READ_SHORT();
 		Scale = READ_BYTE() * 0.1;
 		Framerate = READ_BYTE();
-		g_pParticles.SmokeParticles( 0, pos, 1, 0, Scale * 2 );
+		Value = READ_BYTE(); // pos rand
+		g_pParticles.SmokeParticles( 0, pos, 1, 0, Scale * 2, Value );
 		// old
 	//	pTemp = gEngfuncs.pEfxAPI->R_DefaultSprite( pos, Model, Framerate );
 	//	R_Sprite_Smoke( pTemp, Scale, 0 );

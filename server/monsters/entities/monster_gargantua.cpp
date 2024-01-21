@@ -1335,6 +1335,7 @@ void CSmoker::Think( void )
 		WRITE_SHORT( g_sModelIndexSmoke );
 		WRITE_BYTE( RANDOM_LONG( pev->scale, pev->scale * 1.1 ));
 		WRITE_BYTE( RANDOM_LONG( 8, 14 ) ); // framerate
+		WRITE_BYTE( 2 ); // pos randomize
 	MESSAGE_END();
 
 	pev->health--;

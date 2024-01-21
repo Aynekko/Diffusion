@@ -66,6 +66,7 @@ int RotateMap = 0;
 int LuminanceTex = 0;
 int exposure_storage_texture[2];
 uint exposure_storage_fbo[2];
+int noise_texture = 0;
 
 void InitAutoExposure(void)
 {
@@ -261,6 +262,15 @@ void InitPostTextures( void )
 	// -----------------------------------------
 
 	InitAutoExposure();
+
+	if( noise_texture )
+	{
+		FREE_TEXTURE( noise_texture );
+		noise_texture = 0;
+	}
+
+	if( !noise_texture )
+		noise_texture = LOAD_TEXTURE( "gfx/noise.dds", NULL, 0, 0 );
 }
 
 void RenderFSQ( int wide, int tall )
@@ -1183,4 +1193,33 @@ void WaterDrops( void )
 	GL_CleanUpTextureUnits( 0 );
 
 	r_stats.sh_waterdrops_pass++;
+}
+
+void DroneScreenShader( void )
+{
+	if( !(gEngfuncs.GetLocalPlayer()->curstate.effects & EF_PLAYERDRONECONTROL) )
+		return;
+
+	if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_PLAYERUSINGCAMERA )
+		return;
+
+	float out_amount = 1.5f - (gHUD.m_DroneBars.DroneHealth / 500.0f);
+
+	// capture screen
+	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+
+	GL_Bind( GL_TEXTURE1, noise_texture );
+
+	pglViewport( 0, 0, glState.width, glState.height );
+
+	GL_BindShader( glsl.DroneScreen );
+	ASSERT( RI->currentshader != NULL );
+
+	pglUniform4fARB( RI->currentshader->u_DroneScreen, (float)(glState.width), (float)(glState.height), tr.time, out_amount );
+
+	RenderFSQ( glState.width, glState.height );
+
+	GL_BindShader( NULL );
+	GL_CleanUpTextureUnits( 0 );
 }

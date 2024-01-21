@@ -1785,6 +1785,7 @@ void R_DrawPostEffects(void)
 		ScreenWater();
 		WaterDrops();
 		Glitch();
+		DroneScreenShader();
 		Monochrome();
 		MotionBlur();
 		Enhance();

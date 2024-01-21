@@ -2007,7 +2007,7 @@ void CQuakePartSystem :: RicochetSparks( int EntIndex, const Vector &org, float 
 	}
 }
 
-void CQuakePartSystem :: SmokeParticles( int EntIndex, const Vector &pos, int count, float speed, float scale )
+void CQuakePartSystem :: SmokeParticles( int EntIndex, const Vector &pos, int count, float speed, float scale, float pos_rand )
 {
 	if( !g_fRenderInitialized )
 		return;
@@ -2025,9 +2025,9 @@ void CQuakePartSystem :: SmokeParticles( int EntIndex, const Vector &pos, int co
 
 	for( int i = 0; i < count; i++ )
 	{
-		src.m_vecOrigin.x = pos.x + RANDOM_FLOAT( -10, 10 );
-		src.m_vecOrigin.y = pos.y + RANDOM_FLOAT( -10, 10 );
-		src.m_vecOrigin.z = pos.z + RANDOM_FLOAT( -10, 10 );
+		src.m_vecOrigin.x = pos.x + RANDOM_FLOAT( -pos_rand, pos_rand );
+		src.m_vecOrigin.y = pos.y + RANDOM_FLOAT( -pos_rand, pos_rand );
+		src.m_vecOrigin.z = pos.z + RANDOM_FLOAT( -pos_rand, pos_rand );
 		src.m_vecVelocity.x = RANDOM_FLOAT( -10, 10 );
 		src.m_vecVelocity.y = RANDOM_FLOAT( -10, 10 );
 		src.m_vecVelocity.z = RANDOM_FLOAT( -10, 10 ) + RANDOM_FLOAT( -5, 5 ) + 25;

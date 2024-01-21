@@ -2941,6 +2941,7 @@ int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( 10 ); // scale x1.0
 			WRITE_BYTE( 10 ); // framerate
+			WRITE_BYTE( 3 ); // pos randomize
 		MESSAGE_END();
 
 		if( !CriticalDamage )
@@ -3567,6 +3568,7 @@ int CDroneAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( 10 ); // scale x1.0
 			WRITE_BYTE( 10 ); // framerate
+			WRITE_BYTE( 3 ); // pos randomize
 		MESSAGE_END();
 
 		if( !CriticalDamage )
@@ -4203,6 +4205,7 @@ int CAlienShip::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( 100 ); // scale x1.0
 			WRITE_BYTE( 10 ); // framerate
+			WRITE_BYTE( 30 ); // pos randomize
 		MESSAGE_END();
 
 		if( (gpGlobals->time > CriticalHitTime) && (pev->health > 500) )

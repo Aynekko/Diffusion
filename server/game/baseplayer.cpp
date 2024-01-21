@@ -3193,6 +3193,8 @@ void CBasePlayer::ManageDrone( void )
 				// fire target if set
 				if( !FStringNull( DroneTarget_OnReturn ) )
 					UTIL_FireTargets( DroneTarget_OnReturn, this, this, USE_TOGGLE, 0 );
+				CBasePlayerWeapon *gun = (CBasePlayerWeapon *)m_pActiveItem->GetWeaponPtr();
+				gun->m_flNextPrimaryAttack = gun->m_flNextSecondaryAttack = gpGlobals->time + DRONE_DEPLOY_TIME;
 				return;
 			}
 			

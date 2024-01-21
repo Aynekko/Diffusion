@@ -503,5 +503,6 @@ void CWreckage::Think( void )
 		WRITE_SHORT( g_sModelIndexSmoke );
 		WRITE_BYTE( RANDOM_LONG(0,49) + 50 ); // scale * 10
 		WRITE_BYTE( RANDOM_LONG(0, 3) + 8  ); // framerate
+		WRITE_BYTE( 10 ); // pos randomize
 	MESSAGE_END();
 }

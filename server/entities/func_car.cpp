@@ -2832,6 +2832,7 @@ void CCar::CarExplode( void )
 	WRITE_SHORT( g_sModelIndexSmoke );
 	WRITE_BYTE( 250 ); // scale * 10
 	WRITE_BYTE( 5 ); // framerate
+	WRITE_BYTE( 10 ); // pos randomize
 	MESSAGE_END();
 
 	// blast circle

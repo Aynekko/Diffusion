@@ -1117,6 +1117,7 @@ void CBaseTurret ::	TurretDeath( void )
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( 25 ); // scale * 10
 			WRITE_BYTE( 10 - m_iOrientation * 5); // framerate
+			WRITE_BYTE( 2 ); // pos randomize
 		MESSAGE_END();
 	}
 	
@@ -1617,6 +1618,7 @@ void CSentry :: SentryDeath( void )
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( 15 ); // scale * 10
 			WRITE_BYTE( 8 ); // framerate
+			WRITE_BYTE( 2 ); // pos randomize
 		MESSAGE_END();
 	}
 	

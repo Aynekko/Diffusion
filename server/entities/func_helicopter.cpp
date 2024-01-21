@@ -918,6 +918,7 @@ void CHelicopter::Drive( void )
 			WRITE_SHORT( g_sModelIndexSmoke );
 			WRITE_BYTE( 20 ); // scale * 10
 			WRITE_BYTE( 12 ); // framerate
+			WRITE_BYTE( 10 ); // pos randomize
 			MESSAGE_END();
 
 			pRocket->SetAbsVelocity( ChassisForw * (500 + AbsCarSpeed) );
@@ -1345,6 +1346,7 @@ void CHelicopter::CarExplode(void)
 	WRITE_SHORT( g_sModelIndexSmoke );
 	WRITE_BYTE( 250 ); // scale * 10
 	WRITE_BYTE( 5 ); // framerate
+	WRITE_BYTE( 10 ); // pos randomize
 	MESSAGE_END();
 
 	// blast circle

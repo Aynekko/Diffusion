@@ -1368,6 +1368,23 @@ static void GL_InitGlitchUniforms( glsl_program_t *shader )
 	GL_ShowProgramUniforms( shader );
 }
 
+static void GL_InitDroneScreenUniforms( glsl_program_t *shader )
+{
+	ASSERT( shader != NULL );
+
+	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
+	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
+	shader->u_DroneScreen = pglGetUniformLocationARB( shader->handle, "u_DroneScreen" );
+
+	GL_BindShader( shader );
+	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
+	pglUniform1iARB( shader->u_NormalMap, GL_TEXTURE1 );
+	GL_BindShader( GL_NONE );
+
+	GL_ValidateProgram( shader );
+	GL_ShowProgramUniforms( shader );
+}
+
 static void GL_InitWaterDropsUniforms( glsl_program_t *shader )
 {
 	ASSERT( shader != NULL );
@@ -2247,6 +2264,10 @@ void GL_InitGPUShaders( void )
 	// glitch effect
 	glsl.Glitch = shader = GL_InitGPUShader( "Glitch", "generic", "glitch" );
 	GL_InitGlitchUniforms( shader );
+
+	// drone screen effect
+	glsl.DroneScreen = shader = GL_InitGPUShader( "DroneScreen", "generic", "dronescreen" );
+	GL_InitDroneScreenUniforms( shader );
 
 	// water drops on screen
 	glsl.WaterDrops = shader = GL_InitGPUShader( "WaterDrops", "generic", "waterdrops" );
