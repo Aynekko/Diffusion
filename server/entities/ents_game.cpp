@@ -822,8 +822,8 @@ void CGamePlayerEquip::EquipPlayer( CBaseEntity *pEntity )
 	if ( pEntity->IsPlayer() )
 		pPlayer = (CBasePlayer *)pEntity;
 
-	if ( !pPlayer )
-		return;
+	if( !pPlayer )
+		pPlayer = (CBasePlayer*)UTIL_PlayerByIndex( 1 );
 
 	for ( int i = 0; i < MAX_EQUIP; i++ )
 	{
