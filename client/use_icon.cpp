@@ -133,9 +133,9 @@ int CUseIcon::Draw( float flTime )
 
 int CUseIcon::MsgFunc_UseIcon( const char *pszName, int iSize, void *pbuf )
 {
-
 	BEGIN_READ( pszName, pbuf, iSize );
 
+	int LastUsePressed = UsePressed;
 	UsePressed = READ_BYTE();
 
 	if( UsePressed > 0 )
@@ -146,6 +146,7 @@ int CUseIcon::MsgFunc_UseIcon( const char *pszName, int iSize, void *pbuf )
 			InteractPos.y = READ_COORD();
 			InteractPos.z = READ_COORD();
 			alpha = 1.0f;
+			UsePressed = LastUsePressed; // do not override it, so icon would not change the color...
 		}
 		else
 		{
