@@ -2606,54 +2606,55 @@ void CDrone :: RunTask ( Task_t *pTask )
 				}
 				else if( IsPlayerDrone )
 				{
-					if( m_iCounter > 0 )
+					// can I shoot?
+					bool DroneCanShoot = true;
+					CBasePlayer *pPlayerOwner = (CBasePlayer *)CBaseEntity::Instance( pev->owner );
+					if( pPlayerOwner && pPlayerOwner->LoudWeaponsRestricted )
+						DroneCanShoot = false;
+					
+					if( DroneCanShoot )
 					{
-						FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 1.5f ); // 1.5 fixed damage
-
-						m_iCounter--; // player's drone keeps track of bullets
-
-						// it's a loud weapon
-						if( pev->owner )
+						if( m_iCounter > 0 )
 						{
-							CBasePlayer *pPlayerOwner = (CBasePlayer *)CBaseEntity::Instance( pev->owner );
-							if( pPlayerOwner && pPlayerOwner->LoudWeaponsRestricted )
-								pPlayerOwner->FireLoudWeaponRestrictionEntity();
+							FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 1.5f ); // 1.5 fixed damage
+
+							m_iCounter--; // player's drone keeps track of bullets
+
+							PlayClientSound( this, 253 );
+
+							pev->effects |= EF_MUZZLEFLASH;
+
+							Vector	vecShellVelocity = pev->velocity
+								+ gpGlobals->v_right * RANDOM_FLOAT( 50, 70 )
+								+ gpGlobals->v_up * RANDOM_FLOAT( 100, 150 )
+								+ gpGlobals->v_forward * 25;
+
+							Vector ShellPos = GetAbsOrigin();
+							ShellPos.z += 30;
+							EjectBrass( ShellPos
+								+ gpGlobals->v_up * -(RANDOM_LONG( 10, 15 ))
+								+ gpGlobals->v_forward * RANDOM_LONG( 15, 25 )
+								+ gpGlobals->v_right * RANDOM_LONG( 2, 6 ), vecShellVelocity,
+								pev->angles.y, m_iShell, TE_BOUNCE_SHELL );
+
+							MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecShootOrigin );
+							WRITE_BYTE( TE_DLIGHT );
+							WRITE_COORD( vecShootOrigin.x );		// origin
+							WRITE_COORD( vecShootOrigin.y );
+							WRITE_COORD( vecShootOrigin.z );
+							WRITE_BYTE( 15 );	// radius
+							WRITE_BYTE( 255 );	// R
+							WRITE_BYTE( 255 );	// G
+							WRITE_BYTE( 180 );	// B
+							WRITE_BYTE( 0 );	// life * 10
+							WRITE_BYTE( 0 ); // decay
+							WRITE_BYTE( 125 ); // brightness
+							WRITE_BYTE( 0 ); // shadows
+							MESSAGE_END();
 						}
-
-						PlayClientSound( this, 253 );
-
-						pev->effects |= EF_MUZZLEFLASH;
-
-						Vector	vecShellVelocity = pev->velocity
-							+ gpGlobals->v_right * RANDOM_FLOAT( 50, 70 )
-							+ gpGlobals->v_up * RANDOM_FLOAT( 100, 150 )
-							+ gpGlobals->v_forward * 25;
-
-						Vector ShellPos = GetAbsOrigin();
-						ShellPos.z += 30;
-						EjectBrass( ShellPos
-							+ gpGlobals->v_up * -(RANDOM_LONG( 10, 15 ))
-							+ gpGlobals->v_forward * RANDOM_LONG( 15, 25 )
-							+ gpGlobals->v_right * RANDOM_LONG( 2, 6 ), vecShellVelocity,
-							pev->angles.y, m_iShell, TE_BOUNCE_SHELL );
-
-						MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecShootOrigin );
-						WRITE_BYTE( TE_DLIGHT );
-						WRITE_COORD( vecShootOrigin.x );		// origin
-						WRITE_COORD( vecShootOrigin.y );
-						WRITE_COORD( vecShootOrigin.z );
-						WRITE_BYTE( 15 );	// radius
-						WRITE_BYTE( 255 );	// R
-						WRITE_BYTE( 255 );	// G
-						WRITE_BYTE( 180 );	// B
-						WRITE_BYTE( 0 );	// life * 10
-						WRITE_BYTE( 0 ); // decay
-						WRITE_BYTE( 125 ); // brightness
-						WRITE_BYTE( 0 ); // shadows
-						MESSAGE_END();
+						else
+							EMIT_SOUND( edict(), CHAN_WEAPON, "drone/drone_emptyclip.wav", 1, ATTN_NORM );
 					}
-					else
-						EMIT_SOUND( edict(), CHAN_WEAPON, "drone/drone_emptyclip.wav", 1, ATTN_NORM );
 
 					m_flShootTime += 0.1;
 				}
