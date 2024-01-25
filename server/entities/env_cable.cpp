@@ -1,7 +1,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-//#include "player.h"
 
 //==========================================================================
 // diffusion - cables
@@ -64,8 +63,8 @@ void CEnvCable::Spawn( void )
 	pev->iuser2 = bound( 3, pev->iuser2, 49 );
 
 	// fall depth
-	if( !pev->fuser1 )
-		pev->fuser1 = 50.0f;
+	if( !pev->fuser1 || pev->fuser1 <= 0.0f )
+		pev->fuser1 = 0.0001f;
 
 	// width
 	if( !pev->fuser2 )
@@ -123,7 +122,7 @@ void CEnvCable::CalcBox( void )
 
 void CEnvCable::CalcBoxThink( void )
 {
-	SetNextThink( 1.0f );
+	SetNextThink( 0.2f );
 
 	if( m_hTarget != NULL )
 	{

@@ -183,7 +183,7 @@ void R_DrawCable( cl_entity_t *e )
 	
 	// origin of the cable can move when parented. if so, add shaking
 	float Speed = (e->curstate.origin - e->prevstate.origin).Length() / g_fFrametime;
-	TargetSway += Speed * 0.01;
+	TargetSway *= 1.0f + (Speed * 0.05f);
 
 	// approach faster when shaking starts, but slower when coming to a halt
 	float ApproachSpeed = (e->curstate.fuser3 > tr.cableSwayIntensity[e->index]) ? g_fFrametime * (0.1f + 0.5f * fabs( tr.cableSwayIntensity[e->index] - e->curstate.fuser3 )) : (g_fFrametime * 0.1f);
