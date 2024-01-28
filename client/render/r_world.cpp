@@ -3241,7 +3241,8 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 	if( translucent )
 	{
 		if( !FBitSet( clmodel->flags, MODEL_LIQUID ) )
-			qsort( tr.draw_surfaces, tr.num_draw_surfaces, sizeof( gl_bmodelface_t ), (cmpfunc)R_TransSurfaceCompare );
+			qsort( tr.draw_surfaces, tr.num_draw_surfaces, sizeof( gl_bmodelface_t ), (cmpfunc)R_SolidSurfaceCompare ); // use solid?
+		//	qsort( tr.draw_surfaces, tr.num_draw_surfaces, sizeof( gl_bmodelface_t ), (cmpfunc)R_TransSurfaceCompare );
 	}
 	else
 		qsort( tr.draw_surfaces, tr.num_draw_surfaces, sizeof( gl_bmodelface_t ), (cmpfunc)R_SolidSurfaceCompare );
