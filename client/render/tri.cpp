@@ -216,12 +216,18 @@ void R_DrawCable( cl_entity_t *e )
 	VectorMA( vposition1, 0.5, vdirection, vmidpoint );
 	vdroppoint = Vector( vmidpoint[0], vmidpoint[1], vmidpoint[2] - falldepth );
 
+	bool bMakeWaterDrops = (e->curstate.vuser2.x > 0.01f); // rate: 0 - 255
+	Vector vParticlePoint = g_vecZero;
+	int ParticlePointNum = RANDOM_LONG( 1, isegments );
+
 	for( int i = 0; i < inumpoints; i++ )
 	{
 		float f = (float)i / (float)isegments;
 		vpoints[i][0] = vposition1[0] * ((1 - f) * (1 - f)) + vdroppoint[0] * ((1 - f) * f * 2) + vposition2[0] * (f * f);
 		vpoints[i][1] = vposition1[1] * ((1 - f) * (1 - f)) + vdroppoint[1] * ((1 - f) * f * 2) + vposition2[1] * (f * f);
 		vpoints[i][2] = vposition1[2] * ((1 - f) * (1 - f)) + vdroppoint[2] * ((1 - f) * f * 2) + vposition2[2] * (f * f);
+		if( i == ParticlePointNum ) // randomly choosen point for water drop particle
+			vParticlePoint = vpoints[i];
 	}
 
 	Vector vTangent, vDir, vRight, vVertex;
@@ -263,6 +269,16 @@ void R_DrawCable( cl_entity_t *e )
 		pglVertex3fv( vVertex );
 	}
 	pglEnd();
+
+	// is it time to create water particle?
+	if( bMakeWaterDrops ) // rate: 0 - 255
+	{
+		if( tr.time >= tr.ParticleTime[e->index] )
+		{
+			g_pParticles.WaterDrop( e->index, vParticlePoint );
+			tr.ParticleTime[e->index] = tr.time + (1.0f / (0.1f + (e->curstate.vuser2.x * 0.2f)));
+		}
+	}
 
 	r_stats.c_cables++;
 }

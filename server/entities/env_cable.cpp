@@ -9,6 +9,7 @@
 // env_cable + env_cable_manager
 
 // pev->message = cable group
+// vuser2.x = water drip intensity (0 - 255)
 
 class CEnvCable : public CPointEntity
 {
@@ -20,6 +21,8 @@ public:
 	void CalcBoxThink( void );
 	void CollectTarget( void );
 	EHANDLE m_hTarget; // 2nd point (optional)
+	void KeyValue( KeyValueData *pkvd );
+	int WaterDropIntensity;
 
 	DECLARE_DATADESC();
 };
@@ -30,7 +33,19 @@ BEGIN_DATADESC( CEnvCable )
 	DEFINE_FUNCTION( CalcBoxThink ),
 	DEFINE_FUNCTION( CollectTarget ),
 	DEFINE_FIELD( m_hTarget, FIELD_EHANDLE ),
+	DEFINE_KEYFIELD( WaterDropIntensity, FIELD_INTEGER, "waterdrops" ),
 END_DATADESC()
+
+void CEnvCable::KeyValue( KeyValueData *pkvd )
+{
+	if( FStrEq( pkvd->szKeyName, "waterdrops" ) )
+	{
+		WaterDropIntensity = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else
+		CPointEntity::KeyValue( pkvd );
+}
 
 void CEnvCable::Spawn( void )
 {
@@ -79,6 +94,9 @@ void CEnvCable::Spawn( void )
 
 	if( !pev->rendercolor || (pev->rendercolor.x == 0.0f && pev->rendercolor.y == 0.0f && pev->rendercolor.z == 0.0f) )
 		pev->rendercolor = Vector( 1,1,1 ); // it becomes white if 0, Xash does this
+
+	// bound particle rate
+	pev->vuser2.x = bound( 0, WaterDropIntensity, 255 );
 }
 
 void CEnvCable::CalcBox( void )
