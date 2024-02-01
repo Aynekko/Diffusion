@@ -218,7 +218,9 @@ void R_DrawCable( cl_entity_t *e )
 
 	bool bMakeWaterDrops = (e->curstate.vuser2.x > 0.01f); // rate: 0 - 255
 	Vector vParticlePoint = g_vecZero;
-	int ParticlePointNum = RANDOM_LONG( 1, isegments );
+	int ParticlePointNum = -1; 
+	if( bMakeWaterDrops )
+		ParticlePointNum = RANDOM_LONG( 1, isegments );
 
 	for( int i = 0; i < inumpoints; i++ )
 	{
