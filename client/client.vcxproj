@@ -184,7 +184,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\temp\client\!release\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client.dll"</Command>
+      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\temp\client\!release\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client_amd64.dll"</Command>
     </PostBuildEvent>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>

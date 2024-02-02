@@ -43,6 +43,7 @@ void CEnvBonus::Spawn( void )
 	pev->solid = SOLID_TRIGGER;
 	pev->movetype = MOVETYPE_NONE;
 	pev->framerate = 1.0;
+	pev->renderfx = kRenderFxFullbright;
 	SetTouch( &CEnvBonus::BonusTouch );
 	UTIL_DropToFloor( this );
 	EquipmentRandom = RANDOM_LONG( 0, 8 );
