@@ -71,15 +71,25 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "glsl", "glsl", "{76F81493-9
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x64 = Debug|x64
 		Debug|x86 = Debug|x86
+		Release|x64 = Release|x64
 		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Debug|x64.ActiveCfg = Debug|x64
+		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Debug|x64.Build.0 = Debug|x64
 		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Debug|x86.ActiveCfg = Debug|Win32
 		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Debug|x86.Build.0 = Debug|Win32
+		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Release|x64.ActiveCfg = Release|x64
+		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Release|x64.Build.0 = Release|x64
 		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Release|x86.ActiveCfg = Release|Win32
 		{CDA7A4B9-EE49-4476-98D1-FC596AC58084}.Release|x86.Build.0 = Release|Win32
+		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Debug|x64.ActiveCfg = Debug|x64
+		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Debug|x64.Build.0 = Debug|x64
 		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Debug|x86.ActiveCfg = Debug|Win32
+		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Release|x64.ActiveCfg = Release|x64
+		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Release|x64.Build.0 = Release|x64
 		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Release|x86.ActiveCfg = Release|Win32
 		{98B17940-4298-4B12-BA7F-F6870DF5C042}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
