@@ -124,6 +124,27 @@ void CHud::Think( void )
 
 		lastbreathtime = tr.time;
 	}
+
+	// in multiplayer, change default names (check every 5 seconds)
+	if( tr.viewparams.maxclients > 1 )
+	{
+		static float next_name_check = 0;
+		if( next_name_check > tr.time + 5 )
+			next_name_check = 0;
+		if( tr.time >= next_name_check )
+		{
+			char *name = (char *)CVAR_GET_STRING( "name" );
+			if( !Q_strnicmp( name, "player", 6 ) || !Q_strnicmp( name, "unnamed", 7 ) )
+			{
+				char NewName[15] = "";
+				char Cmd[20] = "";
+				sprintf( NewName, "Newbie N%i", RANDOM_LONG( 0, 9999 ) );
+				sprintf( Cmd, "name \"%s\"\n", NewName );
+				ClientCmd( Cmd );
+			}
+			next_name_check = tr.time + 5;
+		}
+	}
 }
 
 int CHud :: Redraw( float flTime, int intermission )

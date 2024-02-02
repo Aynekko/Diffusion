@@ -2868,23 +2868,6 @@ void CBasePlayer::PreThink( void )
 		return;
 	}
 
-	// diffusion - change "Player" name
-	if( g_pGameRules->IsMultiplayer() )
-	{
-		char *CurName = (char *)STRING( pev->netname );
-
-	//	if( FStrEq( CurName, "Player" ) || FStrEq( CurName, "unnamed" ) || FStrEq( CurName, "player" ) || FStrEq( CurName, "Unnamed" ) )
-		if( !strnicmp( CurName, "player", 6) || !strnicmp( CurName, "unnamed", 7 ) )
-		{
-			char NewName[15] = "";
-			char Cmd[20] = "";
-			sprintf( NewName, "Newbie N%i", RANDOM_LONG( 0, 9999 ) );
-			sprintf( Cmd, "name \"%s\"\n", NewName );
-			CLIENT_COMMAND( edict(), Cmd );
-			pev->netname = MAKE_STRING( NewName );
-		}
-	}
-
 	// Welcome cam buttons handling
 	if( m_bInWelcomeCam )
 	{
