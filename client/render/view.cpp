@@ -323,7 +323,7 @@ void V_Init( void )
 
 	r_fullbright	= CVAR_GET_POINTER( "r_fullbright" );
 	r_drawentities	= CVAR_GET_POINTER( "r_drawentities" );
-	r_lighting_modulate	= CVAR_GET_POINTER( "r_lighting_modulate" );
+	r_lighting_modulate	= CVAR_REGISTER( "r_lighting_modulate", "0.6", FCVAR_ARCHIVE );
 	r_lightstyle_lerping= CVAR_GET_POINTER( "cl_lightstyle_lerping" );
 	r_lighting_extended	= CVAR_GET_POINTER( "r_lighting_extended" );
 
