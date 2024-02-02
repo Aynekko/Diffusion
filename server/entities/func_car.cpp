@@ -26,6 +26,7 @@
 #define SF_CAR_SQUEAKYBRAKES	BIT(8) // brakes make squeaky sound
 
 // fuser2 is used for both body and wheels' models to control the amount of dirt on the car
+// fuser3 on wheels is used to desync the sounds...thanks to FWGS update I have to do this, otherwise I'd need to use 4 different sounds :|
 
 BEGIN_DATADESC( CCar )
 	DEFINE_KEYFIELD( wheel1, FIELD_STRING, "wheel1" ),
@@ -625,6 +626,11 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			pWheel2->pev->fuser1 = 0;
 			pWheel3->pev->fuser1 = 0;
 			pWheel4->pev->fuser1 = 0;
+			// clear sound desync
+			pWheel1->pev->fuser3 = 0;
+			pWheel2->pev->fuser3 = 0;
+			pWheel3->pev->fuser3 = 0;
+			pWheel4->pev->fuser3 = 0;
 
 			IsShifting = false;
 			ShiftStartTime = 0;
@@ -852,6 +858,12 @@ void CCar::Setup( void )
 	}
 
 	pev->flags &= ~FL_ONGROUND; // !!! this resets position so the vehicle won't hang in air...
+
+	// clear sound desync
+	pWheel1->pev->fuser3 = 0;
+	pWheel2->pev->fuser3 = 0;
+	pWheel3->pev->fuser3 = 0;
+	pWheel4->pev->fuser3 = 0;
 
 	SetThink( &CCar::Idle );
 	SetNextThink( RANDOM_FLOAT( 0.2f, 0.5f ) );
@@ -1104,8 +1116,8 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 //		Type = 3;
 //	}
 
-	float tirevolume = AbsCarSpeed * 0.001 * 0.5f;
-	int tirepitch = 60 + ((AbsCarSpeed - wheelnum) * 0.03) + (2 - wheelnum); // move the pitch slightly, using wheelnum :)
+	float tirevolume = AbsCarSpeed * 0.001f * 0.5f;
+	int tirepitch = 60 + ((AbsCarSpeed - ((2 - wheelnum) * 1000.0f)) * 0.03f); // move the pitch slightly, using wheelnum :)
 
 	if( (HeatingTires || HeatingMult > 1.0f ) && wheelnum > 2 )
 	{
@@ -1121,7 +1133,7 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 	}
 	else if( bUp() ) // handbrake
 	{
-		tirepitch += 120;
+		tirepitch += 130 + (2 - wheelnum);
 		soundtype = handbrakesoundtype;
 		if( (pev->flags & FL_ONGROUND) && !Particle ) // assume all wheels on ground, and no particle was set, so it's asphalt...
 		{
@@ -1137,7 +1149,12 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 	
 	if( tirevolume > 0.01f && (TexTr.flFraction < 1.0f) )
 	{
-		EMIT_SOUND_DYN( pWheelX->edict(), CHAN_ITEM, pTireSounds[soundtype], tirevolume, ATTN_NORM, SND_CHANGE_VOL | SND_CHANGE_PITCH, tirepitch );
+		// desync using time
+		if( gpGlobals->time >= pWheelX->pev->fuser3 )
+		{
+			EMIT_SOUND_DYN( pWheelX->edict(), CHAN_ITEM, pTireSounds[soundtype], tirevolume, ATTN_NORM, SND_CHANGE_VOL | SND_CHANGE_PITCH, tirepitch );
+			pWheelX->pev->fuser3 = gpGlobals->time + RANDOM_FLOAT( 0.025f, 0.1f );
+		}
 	}
 	else
 	{
