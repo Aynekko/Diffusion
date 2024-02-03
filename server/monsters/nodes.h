@@ -56,8 +56,8 @@ public:
 	float   m_flClosestSoFar; // Used in finding the shortest path.
 	int		m_iPreviousNode;
 
-	short	m_sHintType;// there is something interesting in the world at this node's position
-	short	m_sHintActivity;// there is something interesting in the world at this node's position
+	int16_t	m_sHintType;// there is something interesting in the world at this node's position
+	int16_t	m_sHintActivity;// there is something interesting in the world at this node's position
 	float	m_flHintYaw;// monster on this node should face this yaw to face the hint.
 };
 
@@ -120,7 +120,7 @@ public:
 
 	CNode	*m_pNodes;// pointer to the memory block that contains all node info
 	CLink	*m_pLinkPool;// big list of all node connections
-	char    *m_pRouteInfo; // compressed routing information the nodes use.
+	int8_t *m_pRouteInfo; // compressed routing information the nodes use.
 
 	int		m_cNodes;// total number of nodes
 	int		m_cLinks;// total number of links
