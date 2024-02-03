@@ -138,8 +138,8 @@ void CHud::Think( void )
 			{
 				char NewName[15] = "";
 				char Cmd[20] = "";
-				sprintf( NewName, "Newbie N%i", RANDOM_LONG( 0, 9999 ) );
-				sprintf( Cmd, "name \"%s\"\n", NewName );
+				Q_sprintf( NewName, "Newbie N%i", RANDOM_LONG( 0, 9999 ) );
+				Q_sprintf( Cmd, "name \"%s\"\n", NewName );
 				ClientCmd( Cmd );
 			}
 			next_name_check = tr.time + 5;

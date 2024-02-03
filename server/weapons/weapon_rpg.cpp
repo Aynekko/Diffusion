@@ -997,7 +997,6 @@ void CDroneRocket::FlyThink( void )
 	Vector vecTarget;
 	Vector vecDir;
 
-	float flDist, flMax, flDot;
 	TraceResult tr;
 
 	Vector angles = GetLocalAngles();

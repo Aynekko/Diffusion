@@ -280,7 +280,7 @@ void PM_InitTextureTypes()
 		// null-terminate name and save in sentences array
 		j = min (j, CBTEXTURENAMEMAX - 1 + i);
 		buffer[j] = 0;
-		strcpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]));
+		Q_strcpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]));
 //		pmove->Con_Printf( "%c %s\n", grgchTextureType[gcTextures-1], grgszTextureName[gcTextures-1] );
 	}
 	
@@ -357,8 +357,6 @@ void PM_PlayStepSound( int step, float fvol )
 	static int iSkipStep = 0;
 	int irand;
 	Vector hvel;
-	const char* szValue;
-	int iType;
 
 	pmove->iStepLeft = !pmove->iStepLeft;
 
@@ -784,7 +782,7 @@ CategorizeContinue:
 		pTextureName++;
 	// '}}'
 	
-	strcpy( pmove->sztexturename, pTextureName);
+	Q_strcpy( pmove->sztexturename, pTextureName);
 	pmove->sztexturename[ CBTEXTURENAMEMAX - 1 ] = 0;
 		
 	// get texture type
@@ -2189,14 +2187,6 @@ PM_SpectatorMove
 */
 void PM_SpectatorMove (void)
 {
-	float	speed, drop, friction, control, newspeed;
-	//float   accel;
-	float	currentspeed, addspeed, accelspeed;
-	int			i;
-	Vector		wishvel;
-	float		fmove, smove;
-	Vector		wishdir;
-	float		wishspeed;
 	// this routine keeps track of the spectators psoition
 	// there a two different main move types : track player or moce freely (OBS_ROAMING)
 	// doesn't need excate track position, only to generate PVS, so just copy
@@ -2204,68 +2194,6 @@ void PM_SpectatorMove (void)
 	
 	if ( pmove->iuser1 == OBS_ROAMING)
 	{
-		// Move around in normal spectator method
-		/*speed = pmove->velocity.Length();
-
-		if (speed < 1)
-			pmove->velocity = g_vecZero;
-		else
-		{
-			drop = 0;
-
-			friction = pmove->movevars->friction*1.5;	// extra friction
-			control = speed < pmove->movevars->stopspeed ? pmove->movevars->stopspeed : speed;
-			drop += control*friction*pmove->frametime;
-
-			// scale the velocity
-			newspeed = speed - drop;
-			if (newspeed < 0)
-				newspeed = 0;
-			newspeed /= speed;
-
-			pmove->velocity *= newspeed;
-		}
-
-		// accelerate
-		fmove = pmove->cmd.forwardmove;
-		smove = pmove->cmd.sidemove;
-		
-		pmove->forward = pmove->forward.Normalize();
-		pmove->right = pmove->right.Normalize();
-
-		for (i=0 ; i<3 ; i++)
-		{
-			wishvel[i] = pmove->forward[i]*fmove + pmove->right[i]*smove;
-		}
-		wishvel[2] += pmove->cmd.upmove;
-
-		wishdir = wishvel;
-		wishspeed = wishdir.Length();
-		wishdir = wishdir.Normalize();
-
-		//
-		// clamp to server defined max speed
-		//
-		if (wishspeed > pmove->movevars->spectatormaxspeed)
-		{
-			wishvel *= ( pmove->movevars->spectatormaxspeed / wishspeed );
-			wishspeed = pmove->movevars->spectatormaxspeed;
-		}
-
-		currentspeed = DotProduct(pmove->velocity, wishdir);
-		addspeed = wishspeed - currentspeed;
-		if (addspeed <= 0)
-			return;
-
-		accelspeed = pmove->movevars->accelerate*pmove->frametime*wishspeed;
-		if (accelspeed > addspeed)
-			accelspeed = addspeed;
-		
-		pmove->velocity += wishdir * accelspeed;	
-
-		// move
-		pmove->origin += pmove->velocity * pmove->frametime;*/
-
 		// diffusion - use this.
 		PM_NoClip();
 	}

@@ -456,7 +456,8 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 	char c_skin[BOT_SKIN_LEN+1];
 	char c_name[BOT_NAME_LEN+1];
 	char c_index[3];
-	int i, j, length;
+	int i, j;
+	size_t length;
 	int index;  // index into array of predefined names
 	BOOL found = FALSE;
 	

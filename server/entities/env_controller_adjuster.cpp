@@ -108,7 +108,7 @@ void CEnvControllerAdjuster::Use( CBaseEntity *pActivator, CBaseEntity *pCaller,
 	ctrl2 = bound( 0, ctrl2, 255 );
 	ctrl3 = bound( 0, ctrl3, 255 );
 
-	CBaseEntity *pEntity = UTIL_FindEntityByTargetname( pEntity, STRING( Entity ) );
+	CBaseEntity *pEntity = UTIL_FindEntityByTargetname( NULL, STRING( Entity ) );
 
 	if( !pEntity )
 	{
