@@ -62,7 +62,7 @@ uniform vec4		u_BrushParams[2];
 #define u_ViewOrigin	u_BrushParams[1].xyz
 
 #if defined( BMODEL_WATER ) && defined( BMODEL_WATER_REFRACTION )
-uniform float u_zFar;
+//uniform float u_zFar;
 #endif
 
 uniform float       u_Fresnel;
@@ -148,9 +148,11 @@ void main( void )
 	// compute the diffuse, specular and emboss term
 #if defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR ) || defined( BMODEL_PORTAL )
 	#if defined( BMODEL_WATER_PLANAR )
-		diffuse = colormap2D( u_WaterTex, var_TexDiffuse );
-		planar_reflection = texture2DProj( u_ColorMap, var_TexMirror );
-		diffuse.rgb = Q_mix( planar_reflection.rgb, diffuse.rgb, u_PlanarReflectScale );
+		diffuse = texture2D( u_WaterTex, var_TexDiffuse );
+		#if !defined( BMODEL_WATER_REFRACTION ) // will be calc-ed later
+			planar_reflection = texture2DProj( u_ColorMap, var_TexMirror );
+			diffuse.rgb = Q_mix( planar_reflection.rgb, diffuse.rgb, u_PlanarReflectScale );
+		#endif
 		glossmap = vec3( 0.5 );
 	#elif defined( BMODEL_PORTAL )
 		diffuse = texture2DProj( u_ColorMap, var_TexMirror );
@@ -248,17 +250,22 @@ void main( void )
 	
 	float WaterBorderFactor = 1.0, WaterAbsorbFactor = 1.0, WaterRefractFactor = 1.0;
 	float RefractScale = 0.25;
-	alpha *= 0.015;
+	const float u_zFar = -4096; // for consistency
+
+	// alpha works well between 67-135~... so I need to remap 0-255 to 67-135~. how to fix this?
+	alpha = RemapVal( alpha, 0.0, 1.0, 0.263, 0.500 );
+	alpha *= 0.015; // magic as well...
 
 	float fOwnDepth = gl_FragCoord.z;
 	fOwnDepth = linearizeDepth( u_zFar, fOwnDepth );
 	fOwnDepth = RemapVal( fOwnDepth, Z_NEAR, u_zFar, 0.0, 1.0 );
+	fOwnDepth = clamp( fOwnDepth, 0.0, 1.0 );
 
 	float fSampledDepth = texture2D( u_DepthMap, gl_FragCoord.xy * u_ScreenSizeInv ).r;
 	fSampledDepth = linearizeDepth( u_zFar, fSampledDepth );
 	fSampledDepth = RemapVal( fSampledDepth, Z_NEAR, u_zFar, 0.0, 1.0 );
 
-	float depthDelta = fOwnDepth - fSampledDepth;
+	float depthDelta = abs(fOwnDepth - fSampledDepth);
 	float WaterAbsorbScale = clamp( alpha - (1.0 / 255.0), 0.0, 1.0 ) * 50.0;
 	WaterBorderFactor = 1.0 - saturate( exp2( -768.0 * 100.0 * depthDelta ));
 	WaterRefractFactor = 1.0 - saturate( exp2( -768.0 * 5.0 * depthDelta ));
@@ -273,22 +280,16 @@ void main( void )
 	screenmap = GetScreenColorForRefraction( N, WaterRefractFactor, RefractScale );
 	vec4 WaterColor = u_RenderColor;
 
-	#if defined( REFLECTION_CUBEMAP ) && (!defined( BMODEL_REFLECTION_PLANAR ) && !defined( BMODEL_WATER_PLANAR ))
+	#if defined( REFLECTION_CUBEMAP ) && !defined( BMODEL_WATER_PLANAR )
 		cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, N, glossmap, 0.5 ) * u_ReflectScale; 
-                fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale );
-                diffuse.rgb = mix( diffuse.rgb, cubemap_reflection, fresnel );
+		fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale );
+		diffuse.rgb = mix( diffuse.rgb, cubemap_reflection, fresnel );
 
-	#elif (defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR )) && !defined( REFLECTION_CUBEMAP )
+	#elif defined( BMODEL_WATER_PLANAR )
 		planar_reflection = reflectmap2D( u_ColorMap, var_TexMirror, N, gl_FragCoord.xyz, 0.15 ) * u_PlanarReflectScale;
-                fresnel = GetFresnel( V, N, u_Fresnel, u_PlanarReflectScale );
-                diffuse.rgb = mix( diffuse.rgb, planar_reflection.rgb, fresnel );
+		fresnel = GetFresnel( V, N, u_Fresnel, u_PlanarReflectScale );
+		diffuse.rgb = mix( diffuse.rgb, planar_reflection.rgb, fresnel );
 
-	#elif (defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR )) && defined( REFLECTION_CUBEMAP )
-		cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, N, glossmap, 0.5 ) * u_ReflectScale; 
-		planar_reflection = reflectmap2D( u_ColorMap, var_TexMirror, N, gl_FragCoord.xyz, 0.15 ) * u_PlanarReflectScale;
-                fresnel = GetFresnel( V, N, u_Fresnel, u_PlanarReflectScale );
-                vec3 average_reflection = mix( cubemap_reflection, planar_reflection.rgb, 0.5 );
-                diffuse.rgb = mix( diffuse.rgb, average_reflection, fresnel );
 	#endif
 
 	#if defined( BMODEL_FOG_EXP )
@@ -318,7 +319,7 @@ void main( void )
 	#endif
         fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale );
 	cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, NW, glossmap, GlossSmoothness ) * u_ReflectScale;
-								//	vec3 testmix = mix( diffuse.rgb, cubemap_reflection.rgb, 0.25 );
+								//	vec3 testmix = mix( diffuse.rgb, cubemap_reflection.rgb, 0.85 );
 								//	gl_FragColor = vec4( testmix, 1.0 );
 								//	return;
 	diffuse.rgb += cubemap_reflection * fresnel;

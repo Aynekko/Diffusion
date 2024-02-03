@@ -2951,8 +2951,8 @@ void R_DrawBrushList( void )
 
 				GL_Bind( GL_TEXTURE4, tr.waterTextures[(int)(tr.time * 20.0f) % WATER_TEXTURES] ); // u_NormalMap
 
-				float brushbounds = 2.0f * (e->curstate.mins - e->curstate.maxs).Length();
-				pglUniform1fARB( RI->currentshader->u_zFar, -brushbounds );
+			//	float brushbounds = 4096.0f;// 2.0f * (e->curstate.mins - e->curstate.maxs).Length();
+			//	pglUniform1fARB( RI->currentshader->u_zFar, -brushbounds );
 				pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, screensizeinv.x, screensizeinv.y );
 			}
 

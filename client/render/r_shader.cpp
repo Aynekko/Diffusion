@@ -724,7 +724,7 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 	if( GL_FindShaderDirective( shader, "BMODEL_WATER" ) && GL_FindShaderDirective( shader, "BMODEL_WATER_REFRACTION" ) )
 	{
 		shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
-		shader->u_zFar = pglGetUniformLocationARB( shader->handle, "u_zFar" );
+	//	shader->u_zFar = pglGetUniformLocationARB( shader->handle, "u_zFar" );
 	}
 	shader->u_DeluxeMap = pglGetUniformLocationARB( shader->handle, "u_DeluxeMap" );
 	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
