@@ -1894,6 +1894,7 @@ void HUD_PrintStats( void )
 		{
 			glsl_program_t *cur = &glsl_programs[surf->info->shaderNum[0]];
 			R_Speeds_Printf( "Surf: ^1%s^7\n", surf->texinfo->texture->name );
+			R_Speeds_Printf( "Origin: %.2f %.2f %.2f\n", surf->info->origin.x, surf->info->origin.y, surf->info->origin.z );
 			R_Speeds_Printf( "Shader: ^3#%i %s^7\n", surf->info->shaderNum[0], cur->name );
 			R_Speeds_Printf( "List Options:\n" ); 
 			R_Speeds_Printf( "%s\n", GL_PretifyListOptions( cur->options, true ));
