@@ -1489,7 +1489,7 @@ void CHGrunt :: Shoot ( void )
 	UTIL_MakeVectors ( GetAbsAngles() );
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
-	EjectBrass ( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, m_iBrassShell, TE_BOUNCE_SHELL);
+	EjectBrass ( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_556, TE_BOUNCE_SHELL);
 
 	if( !m_fStanding )
 		FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_4DEGREES, 4096, BULLET_MONSTER_MP5 );
@@ -1520,7 +1520,7 @@ void CHGrunt :: Shotgun ( void )
 	UTIL_MakeVectors ( GetAbsAngles() );
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
-	EjectBrass ( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, m_iShotgunShell, TE_BOUNCE_SHOTSHELL); 
+	EjectBrass ( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL); 
 	FireBullets(gSkillData.hgruntShotgunPellets, vecShootOrigin, vecShootDir, VECTOR_CONE_7DEGREES, 4096, BULLET_PLAYER_BUCKSHOT, 0, GruntShotgunDamage[g_iSkillLevel] ); // shoot +-7.5 degrees // diffusion 4096, was 2048
 
 	pev->effects |= EF_MUZZLEFLASH;
@@ -1926,9 +1926,6 @@ void CHGrunt :: Precache()
 
 	// get voice pitch
 	m_voicePitch = 97 + RANDOM_LONG(0,6);
-
-	m_iBrassShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
-	m_iShotgunShell = PRECACHE_MODEL ("models/shotgunshell.mdl");
 
 	PRECACHE_SOUND( "weapons/punch1.wav" );
 	PRECACHE_SOUND( "weapons/punch2.wav" );
@@ -3100,9 +3097,6 @@ void CHGruntAlien :: Precache()
 
 	// get voice pitch
 	m_voicePitch = 97 + RANDOM_LONG(0,6);
-
-	m_iBrassShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
-//	m_iShotgunShell = PRECACHE_MODEL ("models/shotgunshell.mdl");
 
 	PRECACHE_MODEL( "sprites/xspark4.spr");
 	PRECACHE_MODEL( ALIEN_EYE );
@@ -4319,9 +4313,6 @@ void CHGruntSecurityGeneral::Precache()
 
 	// get voice pitch
 	m_voicePitch = 94 + RANDOM_LONG(0, 6); // a bit lower
-
-	m_iBrassShell = PRECACHE_MODEL("models/shell.mdl");// brass shell
-	m_iShotgunShell = PRECACHE_MODEL("models/shotgunshell.mdl");
 }
 
 int	CHGruntSecurityGeneral::Classify(void)
@@ -4419,7 +4410,7 @@ void CHGruntSecurityGeneral::Shoot(void)
 	UTIL_MakeVectors(GetAbsAngles());
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90) + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
-	EjectBrass(vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, m_iBrassShell, TE_BOUNCE_SHELL);
+	EjectBrass(vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_556, TE_BOUNCE_SHELL);
 	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 4096, BULLET_MONSTER_MP5, 1, 7); // 7 dmg per bullet
 
 	pev->effects |= EF_MUZZLEFLASH;
@@ -5237,9 +5228,6 @@ void CHGruntSecurity::Precache()
 	// get voice pitch
 	m_voicePitch = 97 + RANDOM_LONG(0, 6);
 
-	m_iBrassShell = PRECACHE_MODEL("models/shell.mdl");// brass shell
-	m_iShotgunShell = PRECACHE_MODEL("models/shotgunshell.mdl");
-
 	UTIL_PrecacheOther("monster_security_drone");
 }
 
@@ -5438,9 +5426,6 @@ void CAndrewGrunt::Precache()
 	PRECACHE_SOUND( "zombie/claw_miss2.wav" );// because we use the basemonster SWIPE animation event
 
 	m_voicePitch = 100;
-
-	m_iBrassShell = PRECACHE_MODEL( "models/shell.mdl" );// brass shell
-	m_iShotgunShell = PRECACHE_MODEL( "models/shotgunshell.mdl" );
 }
 
 int	CAndrewGrunt::Classify( void )
@@ -5568,7 +5553,7 @@ void CAndrewGrunt::Shoot( void )
 	UTIL_MakeVectors( GetAbsAngles() );
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT( 40, 90 ) + gpGlobals->v_up * RANDOM_FLOAT( 75, 200 ) + gpGlobals->v_forward * RANDOM_FLOAT( -40, 40 );
-	EjectBrass( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, m_iBrassShell, TE_BOUNCE_SHELL );
+	EjectBrass( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_556, TE_BOUNCE_SHELL );
 	FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 4096, BULLET_MONSTER_MP5, 1, 7 ); // 7 dmg per bullet
 
 	pev->effects |= EF_MUZZLEFLASH;

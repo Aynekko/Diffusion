@@ -48,8 +48,6 @@ public:
 
 	float m_iShotsFired;
 	bool m_bDelayFire;
-
-	int m_iShell;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_sniper, CSniperRifle );
@@ -102,8 +100,6 @@ void CSniperRifle::Precache( void )
 	PRECACHE_MODEL( "models/v_sniper.mdl" );
 	PRECACHE_MODEL( "models/w_sniper.mdl" );
 	PRECACHE_MODEL( "models/p_sniper.mdl" );
-
-	m_iShell = PRECACHE_MODEL( "models/shell.mdl" );// brass shell TE_MODEL
 
 	PRECACHE_MODEL( "models/w_9mmARclip.mdl" );
 	
@@ -203,10 +199,10 @@ void CSniperRifle::PrimaryAttack()
 		+ gpGlobals->v_forward * 25;
 
 	EjectBrass( m_pPlayer->EyePosition()
-		+ gpGlobals->v_up * -12
-		+ gpGlobals->v_forward * 20
+		+ gpGlobals->v_up * -14
+		+ gpGlobals->v_forward * 23
 		+ gpGlobals->v_right * 4, vecShellVelocity,
-		m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHELL );
+		m_pPlayer->GetAbsAngles().y, SHELL_50BMG, TE_BOUNCE_SHELL );
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );

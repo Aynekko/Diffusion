@@ -466,4 +466,17 @@ enum beretta_e
 #define SNIPER_RELOAD_TIME		4.5
 #define SNIPER_RELOADEMPTY_TIME 5.5
 
+//====================================================================
+// shell models (body)
+//====================================================================
+enum gun_shells
+{
+	SHELL_9MM = 0,
+	SHELL_57,
+	SHELL_50AE,
+	SHELL_556,
+	SHELL_50BMG,
+	SHELL_12GAUGE,
+};
+
 #endif//WEAPONINFO_H

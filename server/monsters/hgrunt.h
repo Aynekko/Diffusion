@@ -164,12 +164,7 @@ public:
 	BOOL	m_fStanding;
 	BOOL	m_fFirstEncounter;// only put on the handsign show in the squad's first encounter.
 	int		m_cClipSize;
-
 	int		m_voicePitch;
-
-	int		m_iBrassShell;
-	int		m_iShotgunShell;
-
 	int		m_iSentence;
 
 	static const char *pGruntSentences[];

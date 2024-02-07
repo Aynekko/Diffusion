@@ -559,8 +559,6 @@ void CStrooper::Precache()
 		m_voicePitch = 109 + RANDOM_LONG(0, 7);
 	else
 		m_voicePitch = 100;
-
-	m_iBrassShell = PRECACHE_MODEL("models/shell.mdl");// brass shell
 }
 
 

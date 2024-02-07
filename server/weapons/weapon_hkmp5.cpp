@@ -41,8 +41,6 @@ public:
 
 	float m_iShotsFired;
 	bool m_bDelayFire;
-
-	int m_iShell;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_hkmp5, CWeaponHKMP5 );
@@ -64,8 +62,6 @@ void CWeaponHKMP5::Precache( void )
 	PRECACHE_MODEL("models/v_mp5.mdl");
 	PRECACHE_MODEL("models/w_mp5.mdl");
 	PRECACHE_MODEL("models/p_mp5.mdl");
-
-	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shellTE_MODEL
 
 	PRECACHE_MODEL("models/w_9mmARclip.mdl");
 	PRECACHE_SOUND("items/9mmclip1.wav");              
@@ -170,9 +166,9 @@ void CWeaponHKMP5::PrimaryAttack()
 
 	EjectBrass ( m_pPlayer->EyePosition()
 					+ gpGlobals->v_up * -12 
-					+ gpGlobals->v_forward * 20 
-					+ gpGlobals->v_right * 6, vecShellVelocity,
-					m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHELL); 
+					+ gpGlobals->v_forward * 23 
+					+ gpGlobals->v_right * 8, vecShellVelocity,
+					m_pPlayer->GetAbsAngles().y, SHELL_9MM, TE_BOUNCE_SHELL); 
 	
 	Vector vecSrc = m_pPlayer->GetGunPosition( );
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );

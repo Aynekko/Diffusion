@@ -120,8 +120,6 @@ public:
 	bool ZoomedIn; // are we fully zoomed in? if so, we will be zooming out
 	int ZoomState; // 0 not zoomed, 1 zooming in, 2 zoomed, 3 zooming out
 
-	int m_iShell;
-
 	int m_iBeam; // diffusion - only for debuggin'
 
 protected:
@@ -355,8 +353,6 @@ void CBaseTank :: Precache( void )
 	
 	if( m_iszReloadSound )
 		PRECACHE_SOUND( (char *)STRING(m_iszReloadSound) );
-
-	m_iShell = PRECACHE_MODEL ("models/shell.mdl");
 
 	m_iBeam = PRECACHE_MODEL( "sprites/smoke.spr" );
 }
@@ -1498,7 +1494,7 @@ void CFuncTankGun::Fire( const Vector &barrelEnd, const Vector &forward, entvars
 			}
 
 			Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(70,90) + gpGlobals->v_up * RANDOM_FLOAT(125,175) + gpGlobals->v_forward * 25;
-			EjectBrass ( GetAbsOrigin(), vecShellVelocity, GetAbsAngles().y, m_iShell, TE_BOUNCE_SHELL ); 
+			EjectBrass ( GetAbsOrigin(), vecShellVelocity, GetAbsAngles().y, SHELL_9MM, TE_BOUNCE_SHELL ); 
 
 			BaseClass::Fire( barrelEnd, forward, pevAttacker );
 		}

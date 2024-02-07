@@ -46,8 +46,6 @@ public:
 	float m_iShotsFired;
 	bool m_bDelayFire;
 
-	int m_iShell;
-
 	void ResetZoom( void );
 	int m_fInZoom;
 	int m_fZoomInUse;
@@ -78,8 +76,6 @@ void CWeaponG36C::Precache( void )
 	PRECACHE_MODEL("models/v_g36c.mdl");
 	PRECACHE_MODEL("models/w_g36c.mdl");
 	PRECACHE_MODEL("models/p_g36c.mdl");
-
-	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shellTE_MODEL
 
 	PRECACHE_MODEL("models/w_9mmARclip.mdl");
 	PRECACHE_SOUND("items/9mmclip1.wav");              
@@ -201,7 +197,7 @@ void CWeaponG36C::PrimaryAttack()
 					+ gpGlobals->v_up * -12 
 					+ gpGlobals->v_forward * 20 
 					+ gpGlobals->v_right * 6, vecShellVelocity,
-					m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHELL); 
+					m_pPlayer->GetAbsAngles().y, SHELL_556, TE_BOUNCE_SHELL); 
 	
 	Vector vecSrc = m_pPlayer->GetGunPosition( );
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );

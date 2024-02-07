@@ -37,8 +37,6 @@ public:
 	BOOL Deploy( void );
 	void Reload( void );
 	void WeaponIdle( void );
-private:
-	int m_iShell;
 
 	bool ResetSilencer; // saverestore issues
 };
@@ -63,8 +61,6 @@ void CBeretta::Precache( void )
 	PRECACHE_MODEL("models/v_9mmhandgun.mdl");
 	PRECACHE_MODEL("models/w_9mmhandgun.mdl");
 	PRECACHE_MODEL("models/p_9mmhandgun.mdl");
-
-	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 
 	PRECACHE_SOUND("items/9mmclip1.wav");
 	PRECACHE_SOUND("items/9mmclip2.wav");
@@ -157,8 +153,8 @@ void CBeretta::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 							 + gpGlobals->v_right * RANDOM_FLOAT(50,70) 
 							 + gpGlobals->v_up * RANDOM_FLOAT(100,150) 
 							 + gpGlobals->v_forward * 25;
-	EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -12 + gpGlobals->v_forward * 32 + gpGlobals->v_right * 10,
-	vecShellVelocity, m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHELL ); 
+	EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -12 + gpGlobals->v_forward * 24 + gpGlobals->v_right * 6,
+	vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_9MM, TE_BOUNCE_SHELL ); 
 
 	// silenced
 	if (pev->body == 1)

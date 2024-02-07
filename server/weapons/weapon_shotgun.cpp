@@ -45,7 +45,6 @@ public:
 	void WeaponIdle( void );
 	int m_fInReload;
 	float m_flNextReload;
-	int m_iShell;
 	int PostShell; // diffusion - this value will decide whether to eject 1 or 2 shells
 };
 
@@ -74,8 +73,6 @@ void CShotgun::Precache( void )
 	PRECACHE_MODEL("models/v_shotgun.mdl");
 	PRECACHE_MODEL("models/w_shotgun.mdl");
 	PRECACHE_MODEL("models/p_shotgun.mdl");
-
-	m_iShell = PRECACHE_MODEL ("models/shotgunshell.mdl");// shotgun shell
 
 	PRECACHE_SOUND("items/9mmclip1.wav");              
 
@@ -394,14 +391,14 @@ void CShotgun::WeaponIdle( void )
 		if (PostShell == 1)
 		{
 			EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -10 + gpGlobals->v_forward * 25 + gpGlobals->v_right * 12,
-			vecShellVelocity, m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHOTSHELL );
+			vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL );
 		}
 		else if (PostShell == 2)
 		{
 			EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -10 + gpGlobals->v_forward * 25 + gpGlobals->v_right * 12,
-			vecShellVelocity, m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHOTSHELL );
+			vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL );
 			EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -12 + gpGlobals->v_forward * 30 + gpGlobals->v_right * 14,
-			vecShellVelocity, m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHOTSHELL );
+			vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL );
 		}
 
 		m_flPumpTime = 0;

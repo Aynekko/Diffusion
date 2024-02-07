@@ -527,7 +527,7 @@ void DCL( int index )
 int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 {
 	Vector pos, pos2, pos3, ang;
-	int Message, Model, Color, Value, Count;
+	int Message, Model, Color, Value, Count, Body;
 	int entityIndex, decalIndex;
 	TEMPENTITY *pTemp;
 	int Mode, Flags, Weapon, Startframe;
@@ -997,7 +997,7 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 	}
 	break;
 
-	case TE_MODEL:
+	case TE_MODEL: // this is literally only being used for gun shells
 	{
 		pos.x = READ_COORD();
 		pos.y = READ_COORD();
@@ -1011,12 +1011,8 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		Model = READ_SHORT();
 		Flags = READ_BYTE();	// sound flags
 		Life = (float)(READ_BYTE() * 0.1f);
-		pTemp = gEngfuncs.pEfxAPI->R_TempModel( pos, pos2, ang, Life, Model, Flags );
-		if( pTemp && pTemp->entity.model && Q_strstr( pTemp->entity.model->name, "shell" ) )
-		{
-			pTemp->entity.baseline.renderfx = kRenderFxNoShadows;
-			pTemp->entity.curstate.renderfx = kRenderFxNoShadows;
-		}
+		Body = READ_BYTE(); // shell type
+		pTemp = R_GunShell( pos, pos2, ang, Life, Model, Body, Flags );
 	}
 	break;
 

@@ -2130,7 +2130,6 @@ public:
 	int SpriteExplosion;
 	CSprite *AlienEye;
 	bool CriticalDamage;
-	int m_iShell;
 
 	bool IsRocketDrone; // monster_security_heavydrone
 	float NextRocketAttack; // monster_security_heavydrone
@@ -2309,7 +2308,6 @@ void CDrone :: Precache()
 	PRECACHE_SOUND( "drone/drone_emptyclip.wav" );
 
 	PRECACHE_MODEL( ALIEN_EYE );
-	m_iShell = PRECACHE_MODEL ("models/shell.mdl");
 
 	SpriteExplosion = PRECACHE_MODEL( "sprites/white.spr" );
 
@@ -2635,7 +2633,7 @@ void CDrone :: RunTask ( Task_t *pTask )
 								+ gpGlobals->v_up * -(RANDOM_LONG( 10, 15 ))
 								+ gpGlobals->v_forward * RANDOM_LONG( 15, 25 )
 								+ gpGlobals->v_right * RANDOM_LONG( 2, 6 ), vecShellVelocity,
-								pev->angles.y, m_iShell, TE_BOUNCE_SHELL );
+								pev->angles.y, SHELL_9MM, TE_BOUNCE_SHELL );
 
 							MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecShootOrigin );
 							WRITE_BYTE( TE_DLIGHT );
@@ -2677,7 +2675,7 @@ void CDrone :: RunTask ( Task_t *pTask )
 						+ gpGlobals->v_up * -(RANDOM_LONG( 10, 15 ))
 						+ gpGlobals->v_forward * RANDOM_LONG( 15, 25 )
 						+ gpGlobals->v_right * RANDOM_LONG( 2, 6 ), vecShellVelocity,
-						pev->angles.y, m_iShell, TE_BOUNCE_SHELL );
+						pev->angles.y, SHELL_9MM, TE_BOUNCE_SHELL );
 
 					MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecShootOrigin );
 					WRITE_BYTE( TE_DLIGHT );

@@ -25,7 +25,6 @@ public:
 	void WeaponIdle( void );
 	int m_fInReload;
 	float m_flNextReload;
-	int m_iShell;
 
 	bool bUseAfterReloadEmpty;
 };
@@ -54,8 +53,6 @@ void CShotgunXM::Precache( void )
 	PRECACHE_MODEL( "models/v_m1014.mdl" );
 	PRECACHE_MODEL( "models/w_m1014.mdl" );
 	PRECACHE_MODEL( "models/p_m1014.mdl" );
-
-	m_iShell = PRECACHE_MODEL( "models/shotgunshell.mdl" );// shotgun shell
 
 	PRECACHE_SOUND( "items/9mmclip1.wav" );
 
@@ -204,8 +201,8 @@ void CShotgunXM::PrimaryAttack()
 			+ gpGlobals->v_up * RANDOM_LONG( 50, 75 )
 			+ gpGlobals->v_forward * 25;
 
-		EjectBrass( m_pPlayer->EyePosition() + gpGlobals->v_up * -10 + gpGlobals->v_forward * 25 + gpGlobals->v_right * 12,
-			vecShellVelocity, m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHOTSHELL );
+		EjectBrass( m_pPlayer->EyePosition() + gpGlobals->v_up * -10 + gpGlobals->v_forward * 28 + gpGlobals->v_right * 12,
+			vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL );
 	}
 
 	if( !m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )

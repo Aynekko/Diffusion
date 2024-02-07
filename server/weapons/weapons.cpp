@@ -46,6 +46,7 @@ DLL_GLOBAL short	g_sModelIndexBloodDrop;// holds the sprite index for the initia
 //DLL_GLOBAL short	g_sModelIndexBloodSpray;// holds the sprite index for splattered blood
 DLL_GLOBAL short	g_sModelIndexFire;
 DLL_GLOBAL short	g_sModelIndexMetalGibs;
+DLL_GLOBAL short	g_sShellsModel;
 
 DLL_GLOBAL	short g_sModelIndexSpore1; // holds the index for the spore explosion 1
 DLL_GLOBAL	short g_sModelIndexSpore2; // holds the index for the spore explosion 2
@@ -290,7 +291,7 @@ void DecalGunshot( TraceResult *pTrace, int iBulletType )
 //=================================================================================
 // EjectBrass: tosses a brass shell from passed origin at passed velocity
 //=================================================================================
-void EjectBrass ( const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int model, int soundtype )
+void EjectBrass ( const Vector &vecOrigin, const Vector &vecVelocity, float rotation, int body, int soundtype )
 {
 	// FIX: when the player shoots, their gun isn't in the same position as it is on the model other players see.
 
@@ -303,9 +304,10 @@ void EjectBrass ( const Vector &vecOrigin, const Vector &vecVelocity, float rota
 		WRITE_COORD( vecVelocity.y);
 		WRITE_COORD( vecVelocity.z);
 		WRITE_ANGLE( rotation );
-		WRITE_SHORT( model );
+		WRITE_SHORT( g_sShellsModel );
 		WRITE_BYTE ( soundtype);
-		WRITE_BYTE ( 100 );// 10 seconds
+		WRITE_BYTE ( 100 ); // 10 seconds
+		WRITE_BYTE( body ); // shell type
 	MESSAGE_END();
 }
 
@@ -475,6 +477,7 @@ void W_Precache(void)
 	g_sModelIndexBloodDrop = PRECACHE_MODEL ("sprites/blood.spr"); // splattered blood 
 	g_sModelIndexFire = PRECACHE_MODEL("sprites/fire3.spr"); // caught fire
 	g_sModelIndexMetalGibs = PRECACHE_MODEL( "models/npc/dronegibs.mdl" );
+	g_sShellsModel = PRECACHE_MODEL( "models/shells.mdl" );
 
 	g_sModelIndexLaser = PRECACHE_MODEL( (char *)g_pModelNameLaser );
 	g_sModelIndexLaserDot = PRECACHE_MODEL("sprites/laserdot.spr");

@@ -43,8 +43,6 @@ public:
 
 	float m_iShotsFired;
 	bool m_bDelayFire;
-
-	int m_iShell;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_mrc, CMRC );
@@ -76,8 +74,6 @@ void CMRC::Precache( void )
 	PRECACHE_MODEL("models/v_9mmAR.mdl");
 	PRECACHE_MODEL("models/w_9mmAR.mdl");
 	PRECACHE_MODEL("models/p_9mmAR.mdl");
-
-	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shellTE_MODEL
 
 	PRECACHE_MODEL("models/grenade.mdl");	// grenade
 
@@ -183,11 +179,7 @@ void CMRC::PrimaryAttack()
 							 + gpGlobals->v_up * RANDOM_FLOAT(100,150) 
 							 + gpGlobals->v_forward * 25;
 
-	EjectBrass ( m_pPlayer->EyePosition()
-					+ gpGlobals->v_up * -12 
-					+ gpGlobals->v_forward * 20 
-					+ gpGlobals->v_right * 6, vecShellVelocity,
-					m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHELL); 
+	// MRC doesn't have gun shells - no EjectBrass
 	
 	Vector vecSrc = m_pPlayer->GetGunPosition( );
 	Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );

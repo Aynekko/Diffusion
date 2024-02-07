@@ -35,8 +35,6 @@ public:
 	void Holster( void );
 	void Reload( void );
 	void WeaponIdle( void );
-
-	int m_iShell;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_python, CDeagle );
@@ -102,8 +100,6 @@ void CDeagle::Precache( void )
 	PRECACHE_SOUND( "weapons/de_slide.wav" );
 	PRECACHE_SOUND( "weapons/de_draw.wav" );
 	PRECACHE_SOUND( "weapons/de_back.wav" );
-
-	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 }
 
 BOOL CDeagle::Deploy( )
@@ -203,8 +199,8 @@ void CDeagle::PrimaryAttack()
 							 + gpGlobals->v_right * RANDOM_FLOAT(70,90) 
 							 + gpGlobals->v_up * RANDOM_FLOAT(125,175) 
 							 + gpGlobals->v_forward * 25;
-	EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -12 + gpGlobals->v_forward * 32 + gpGlobals->v_right * 6,
-	vecShellVelocity, m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHELL ); 
+	EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -12 + gpGlobals->v_forward * 24 + gpGlobals->v_right * 4,
+	vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_50AE, TE_BOUNCE_SHELL ); 
 }
 
 

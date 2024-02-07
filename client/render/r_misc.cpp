@@ -2581,3 +2581,52 @@ void PlayLowAmmoSound( int entindex, Vector origin, int Volume )
 
 	gEngfuncs.pEventAPI->EV_PlaySound( entindex, origin, CHAN_STATIC, "weapons/lowammo.wav", vol, 1.75, 0, RANDOM_LONG( 98, 103 ) );
 }
+
+TEMPENTITY *R_GunShell( const Vector pos, const Vector dir, const Vector angles, float life, int modelIndex, int body, int soundtype )
+{
+	// alloc a new tempent
+	TEMPENTITY *pTemp;
+	model_t *pmodel;
+
+	if( (pmodel = MOD_HANDLE( modelIndex )) == NULL )
+		return NULL;
+
+	pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( (float*)&pos, pmodel );
+	if( !pTemp ) return NULL;
+
+	pTemp->flags = (FTENT_COLLIDEWORLD | FTENT_GRAVITY);
+	pTemp->entity.baseline.origin = dir;
+	pTemp->entity.angles = angles;
+
+	// keep track of shell type
+	switch( soundtype )
+	{
+	case TE_BOUNCE_SHELL:
+		pTemp->hitSound = BOUNCE_SHELL;
+		pTemp->entity.baseline.angles[0] = RANDOM_FLOAT( -512, 511 );
+		pTemp->entity.baseline.angles[1] = RANDOM_FLOAT( -255, 255 );
+		pTemp->entity.baseline.angles[2] = RANDOM_FLOAT( -255, 255 );
+		pTemp->flags |= FTENT_ROTATE;
+		break;
+	case TE_BOUNCE_SHOTSHELL:
+		pTemp->hitSound = BOUNCE_SHOTSHELL;
+		pTemp->entity.baseline.angles[0] = RANDOM_FLOAT( -512, 511 );
+		pTemp->entity.baseline.angles[1] = RANDOM_FLOAT( -255, 255 );
+		pTemp->entity.baseline.angles[2] = RANDOM_FLOAT( -255, 255 );
+		pTemp->flags |= FTENT_ROTATE | FTENT_SLOWGRAVITY;
+		break;
+	}
+
+	pTemp->entity.curstate.body = body;
+
+	// disable shadows for gunshells
+	pTemp->entity.baseline.renderfx = kRenderFxNoShadows;
+	pTemp->entity.curstate.renderfx = kRenderFxNoShadows;
+
+	// fade distance
+	pTemp->entity.curstate.iuser4 = 500;
+
+	pTemp->die = tr.time + life;
+
+	return pTemp;
+}

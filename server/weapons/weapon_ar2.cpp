@@ -43,8 +43,6 @@ public:
 
 	float m_iShotsFired;
 	bool m_bDelayFire;
-
-	int m_iShell;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_ar2, C_AR2 );

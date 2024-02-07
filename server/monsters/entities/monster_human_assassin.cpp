@@ -120,7 +120,6 @@ public:
 
 	int	m_iTargetRanderamt;
 	int	m_iFrustration;
-	int	m_iShell;
 
 //	int m_iClipSize;
 
@@ -639,7 +638,7 @@ void CHAssassin :: Shoot ( void )
 	{
 		UTIL_MakeVectors ( GetAbsAngles() );
 		Vector vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
-		EjectBrass( GetAbsOrigin() + gpGlobals->v_up * 32 + gpGlobals->v_forward * 12, vecShellVelocity, GetAbsAngles().y, m_iShell, TE_BOUNCE_SHELL); 
+		EjectBrass( GetAbsOrigin() + gpGlobals->v_up * 32 + gpGlobals->v_forward * 12, vecShellVelocity, GetAbsAngles().y, SHELL_9MM, TE_BOUNCE_SHELL);
 		FireBullets(1, vecShootOrigin, vecShootDir, Vector( m_flDiviation, m_flDiviation, m_flDiviation ), 2048, BULLET_MONSTER_9MM, 1, RANDOM_FLOAT(3, 5) ); // shoot +-8 degrees, ~4 dmg
 		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/assassin_pistol.wav", RANDOM_FLOAT(0.6, 0.8), ATTN_NORM);
 	}
@@ -647,7 +646,7 @@ void CHAssassin :: Shoot ( void )
 	{
 		UTIL_MakeVectors ( GetAbsAngles() );
 		Vector vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
-		EjectBrass( GetAbsOrigin() + gpGlobals->v_up * 32 + gpGlobals->v_forward * 12, vecShellVelocity, GetAbsAngles().y, m_iShell, TE_BOUNCE_SHELL); 
+		EjectBrass( GetAbsOrigin() + gpGlobals->v_up * 32 + gpGlobals->v_forward * 12, vecShellVelocity, GetAbsAngles().y, SHELL_9MM, TE_BOUNCE_SHELL);
 		FireBullets(1, vecShootOrigin, vecShootDir, Vector( m_flDiviation, m_flDiviation, m_flDiviation ), 2048, BULLET_MONSTER_9MM, 1, RANDOM_FLOAT(2, 3) ); // shoot +-8 degrees, ~3 dmg
 
 		switch(RANDOM_LONG(0,2))
@@ -806,8 +805,6 @@ void CHAssassin :: Precache()
 		PRECACHE_MODEL("models/npc/hassassin.mdl");
 
 	PRECACHE_SOUND("scripts/cloak.wav"); //new cloak sound for Diffusion
-
-	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 
 	PRECACHE_SOUND("weapons/assassin_pistol.wav");
 	PRECACHE_SOUND("weapons/assassin_tmp01.wav");
@@ -1400,8 +1397,6 @@ void SecAss :: Precache()
 	PRECACHE_SOUND("scripts/cloak.wav"); //new cloak sound for Diffusion
 	PRECACHE_SOUND( "weapons/smoke_grenade.wav" );
 	PRECACHE_SOUND( "weapons/emp_explode.wav" );
-
-	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 }
 
 int	SecAss :: Classify ( void )

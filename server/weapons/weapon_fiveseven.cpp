@@ -36,8 +36,6 @@ public:
 	BOOL Deploy( void );
 	void Reload( void );
 	void WeaponIdle( void );
-private:
-	int m_iShell;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_fiveseven, CWpnFiveSeven );
@@ -59,8 +57,6 @@ void CWpnFiveSeven::Precache( void )
 	PRECACHE_MODEL("models/v_fiveseven.mdl");
 	PRECACHE_MODEL("models/w_fiveseven.mdl");
 	PRECACHE_MODEL("models/p_fiveseven.mdl");
-
-	m_iShell = PRECACHE_MODEL ("models/shell.mdl");// brass shell
 
 	PRECACHE_SOUND("items/9mmclip1.wav");
 	PRECACHE_SOUND("items/9mmclip2.wav");
@@ -146,8 +142,8 @@ void CWpnFiveSeven::FiveSevenFire( float flSpread , float flCycleTime, BOOL fUse
 							 + gpGlobals->v_right * RANDOM_FLOAT(50,70) 
 							 + gpGlobals->v_up * RANDOM_FLOAT(100,150) 
 							 + gpGlobals->v_forward * 25;
-	EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -12 + gpGlobals->v_forward * 32 + gpGlobals->v_right * 10,
-	vecShellVelocity, m_pPlayer->GetAbsAngles().y, m_iShell, TE_BOUNCE_SHELL ); 
+	EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -12 + gpGlobals->v_forward * 24 + gpGlobals->v_right * 6,
+	vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_57, TE_BOUNCE_SHELL ); 
 
 	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;

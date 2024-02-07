@@ -390,6 +390,7 @@ extern DLL_GLOBAL	short	g_sModelIndexBloodDrop;// holds the sprite index for blo
 //extern DLL_GLOBAL	short	g_sModelIndexBloodSpray;// holds the sprite index for blood spray (bigger)
 extern DLL_GLOBAL	short	g_sModelIndexFire;
 extern DLL_GLOBAL short g_sModelIndexMetalGibs;
+extern DLL_GLOBAL short g_sShellsModel;
 
 extern DLL_GLOBAL	short	g_sModelIndexSpore1;  //shocktrooper
 extern DLL_GLOBAL	short	g_sModelIndexSpore2;

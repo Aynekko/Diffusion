@@ -44,8 +44,6 @@ public:
 	float m_iShotsFired;
 	bool m_bDelayFire;
 
-	int m_iShell;
-
 	bool SpawnTest( void );
 
 	EHANDLE m_hTestModel;
