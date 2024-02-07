@@ -201,7 +201,7 @@ void CSniperRifle::PrimaryAttack()
 	EjectBrass( m_pPlayer->EyePosition()
 		+ gpGlobals->v_up * -14
 		+ gpGlobals->v_forward * 23
-		+ gpGlobals->v_right * 4, vecShellVelocity,
+		+ gpGlobals->v_right * 8, vecShellVelocity,
 		m_pPlayer->GetAbsAngles().y, SHELL_50BMG, TE_BOUNCE_SHELL );
 
 	Vector vecSrc = m_pPlayer->GetGunPosition();

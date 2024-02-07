@@ -1019,13 +1019,15 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 		{
 			origin = origin + forward * (-(pitch + 180) * 0.015f);  // diffusion - was 0.035f
 			origin = origin + right * (-(pitch + 180) * 0.01f);    // was 0.03f
-			origin = origin + up * (-(pitch + 180) * 0.02f);
+			if( pitch > -180.0f )
+				origin = origin + up * (-(pitch + 180) * 0.02f);
 		}
 		else
 		{
 			origin = origin + forward * (-pitch * 0.015f);  // diffusion - was 0.035f
 			origin = origin + right * (-pitch * 0.01f);    // was 0.03f
-			origin = origin + up * (-pitch * 0.02f);
+			if( pitch > 0.0f ) // by Lev's request - lower weapon when looking down, but don't move it when looking up
+				origin = origin + up * (-pitch * 0.02f);
 		}
 	}
 
