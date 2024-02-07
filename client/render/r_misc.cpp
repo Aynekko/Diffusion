@@ -2596,7 +2596,7 @@ TEMPENTITY *R_GunShell( const Vector pos, const Vector dir, const Vector angles,
 
 	pTemp->flags = (FTENT_COLLIDEWORLD | FTENT_GRAVITY);
 	pTemp->entity.baseline.origin = dir;
-	pTemp->entity.angles = angles;
+	pTemp->entity.angles = tr.cached_viewangles;
 
 	// keep track of shell type
 	switch( soundtype )
@@ -2604,14 +2604,12 @@ TEMPENTITY *R_GunShell( const Vector pos, const Vector dir, const Vector angles,
 	case TE_BOUNCE_SHELL:
 		pTemp->hitSound = BOUNCE_SHELL;
 		pTemp->entity.baseline.angles[0] = RANDOM_FLOAT( -512, 511 );
-		pTemp->entity.baseline.angles[1] = RANDOM_FLOAT( -255, 255 );
 		pTemp->entity.baseline.angles[2] = RANDOM_FLOAT( -255, 255 );
 		pTemp->flags |= FTENT_ROTATE;
 		break;
 	case TE_BOUNCE_SHOTSHELL:
 		pTemp->hitSound = BOUNCE_SHOTSHELL;
 		pTemp->entity.baseline.angles[0] = RANDOM_FLOAT( -512, 511 );
-		pTemp->entity.baseline.angles[1] = RANDOM_FLOAT( -255, 255 );
 		pTemp->entity.baseline.angles[2] = RANDOM_FLOAT( -255, 255 );
 		pTemp->flags |= FTENT_ROTATE | FTENT_SLOWGRAVITY;
 		break;
