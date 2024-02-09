@@ -1345,6 +1345,8 @@ void HUD_StudioEvent( const struct mstudioevent_s* event, const struct cl_entity
 		R_MuzzleFlash( entity, 0, Q_atoi( event->options ));
 		R_MuzzleDynLight( entity, (float *)&entity->attachment[0], WeaponID );
 		g_pParticles.GunSmoke( 0, (float *)&entity->attachment[0], velocity, WeaponID );
+		if( WeaponID == WEAPON_SHOTGUN || WeaponID == WEAPON_SHOTGUN_XM )
+			g_pParticles.CreateEffect( 0, "env_spark.part2", entity->attachment[0], g_vecZero );
 		break;
 	case 5002:
 		if( !(RI->params & RP_SHADOWPASS) )
