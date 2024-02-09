@@ -486,7 +486,7 @@ void W_Precache(void)
 	g_sBlastTexture = PRECACHE_MODEL( "sprites/shockwave.spr" );
 
 	// used by explosions
-	PRECACHE_MODEL ("models/grenade.mdl");
+	PRECACHE_MODEL ("models/weapons/grenade.mdl");
 	PRECACHE_MODEL ("sprites/explode1.spr");
 
 	PRECACHE_SOUND ("weapons/debris1.wav");// explosion aftermaths

@@ -61,7 +61,7 @@ void CShotgun::Spawn( void )
 {
 	Precache( );
 	m_iId = WEAPON_SHOTGUN;
-	SET_MODEL(ENT(pev), "models/w_shotgun.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_shotgun.mdl");
 
 	m_iDefaultAmmo = SHOTGUN_DEFAULT_GIVE;
 
@@ -70,9 +70,9 @@ void CShotgun::Spawn( void )
 
 void CShotgun::Precache( void )
 {
-	PRECACHE_MODEL("models/v_shotgun.mdl");
-	PRECACHE_MODEL("models/w_shotgun.mdl");
-	PRECACHE_MODEL("models/p_shotgun.mdl");
+	PRECACHE_MODEL("models/weapons/v_shotgun.mdl");
+	PRECACHE_MODEL("models/weapons/w_shotgun.mdl");
+	PRECACHE_MODEL("models/weapons/p_shotgun.mdl");
 
 	PRECACHE_SOUND("items/9mmclip1.wav");              
 
@@ -128,7 +128,7 @@ BOOL CShotgun::Deploy( )
 	m_fInReload = 0; // reset any reloading
 	m_flNextPrimaryAttack = gpGlobals->time + SHOTGUN_DEPLOY_TIME;
 	m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_shotgun.mdl", "models/p_shotgun.mdl", SHOTGUN_DRAW, "shotgun" );
+	return DefaultDeploy( "models/weapons/v_shotgun.mdl", "models/weapons/p_shotgun.mdl", SHOTGUN_DRAW, "shotgun" );
 }
 
 void CShotgun::PrimaryAttack()
@@ -456,12 +456,12 @@ class CShotgunAmmo : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/w_shotbox.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_shotbox.mdl");
 		BaseClass :: Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/w_shotbox.mdl");
+		PRECACHE_MODEL ("models/weapons/w_shotbox.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 

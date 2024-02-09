@@ -43,8 +43,8 @@ LINK_ENTITY_TO_CLASS( weapon_357, CDeagle );
 int CDeagle::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "357";
-	p->iMaxAmmo1 = _357_MAX_CARRY;
+	p->pszAmmo1 = "deagle";
+	p->iMaxAmmo1 = DEAGLE_MAX_CARRY;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = DEAGLE_MAX_CLIP;
@@ -74,7 +74,7 @@ void CDeagle::Spawn( void )
 	pev->classname = MAKE_STRING("weapon_357"); // hack to allow for old names
 	Precache( );
 	m_iId = WEAPON_DEAGLE;
-	SET_MODEL(ENT(pev), "models/w_357.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_deagle.mdl");
 
 	m_iDefaultAmmo = DEAGLE_DEFAULT_GIVE;
 
@@ -84,11 +84,11 @@ void CDeagle::Spawn( void )
 
 void CDeagle::Precache( void )
 {
-	PRECACHE_MODEL("models/v_357.mdl");
-	PRECACHE_MODEL("models/w_357.mdl");
-	PRECACHE_MODEL("models/p_357.mdl");
+	PRECACHE_MODEL("models/weapons/v_deagle.mdl");
+	PRECACHE_MODEL("models/weapons/w_deagle.mdl");
+	PRECACHE_MODEL("models/weapons/p_deagle.mdl");
 
-	PRECACHE_MODEL("models/w_357ammobox.mdl");
+//	PRECACHE_MODEL("models/weapons/w_357ammobox.mdl");
 	PRECACHE_SOUND("items/9mmclip1.wav");              
 
 	PRECACHE_SOUND ("weapons/357_cock1.wav");
@@ -106,7 +106,7 @@ BOOL CDeagle::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + DEAGLE_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_357.mdl", "models/p_357.mdl", DEAGLE_DRAW, "python" );
+	return DefaultDeploy( "models/weapons/v_deagle.mdl", "models/weapons/p_deagle.mdl", DEAGLE_DRAW, "python" );
 }
 
 
@@ -229,17 +229,17 @@ class CDeagleAmmo : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/w_357ammobox.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_357ammobox.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/w_357ammobox.mdl");
+		PRECACHE_MODEL ("models/weapons/w_357ammobox.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
-		if (pOther->GiveAmmo( AMMO_357BOX_GIVE, "357", _357_MAX_CARRY ) != -1)
+		if (pOther->GiveAmmo( AMMO_DEAGLEBOX_GIVE, "deagle", DEAGLE_MAX_CARRY ) != -1)
 		{
 		//	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
 			PlayPickupSound( pOther );
@@ -250,3 +250,4 @@ class CDeagleAmmo : public CBasePlayerAmmo
 };
 
 LINK_ENTITY_TO_CLASS( ammo_357, CDeagleAmmo );
+LINK_ENTITY_TO_CLASS( ammo_deagle, CDeagleAmmo );

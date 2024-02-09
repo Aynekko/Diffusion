@@ -548,7 +548,7 @@
     <ClCompile Include="util.cpp" />
     <ClCompile Include="weapons\weapons.cpp" />
     <ClCompile Include="weapons\weapon_ar2.cpp" />
-    <ClCompile Include="weapons\weapon_assaultrifle.cpp" />
+    <ClCompile Include="weapons\weapon_mrc.cpp" />
     <ClCompile Include="weapons\weapon_crossbow.cpp" />
     <ClCompile Include="weapons\weapon_deagle.cpp" />
     <ClCompile Include="weapons\weapon_drone.cpp" />
@@ -558,7 +558,7 @@
     <ClCompile Include="weapons\weapon_handgrenade.cpp" />
     <ClCompile Include="weapons\weapon_hkmp5.cpp" />
     <ClCompile Include="weapons\weapon_knife.cpp" />
-    <ClCompile Include="weapons\weapon_pistol.cpp" />
+    <ClCompile Include="weapons\weapon_beretta.cpp" />
     <ClCompile Include="weapons\weapon_sentry.cpp" />
     <ClCompile Include="weapons\weapon_shotgun.cpp" />
     <ClCompile Include="weapons\weapon_shotgun_xm.cpp" />

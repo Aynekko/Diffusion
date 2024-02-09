@@ -49,7 +49,7 @@ LINK_ENTITY_TO_CLASS( weapon_hkmp5, CWeaponHKMP5 );
 void CWeaponHKMP5::Spawn( void )
 {
 	Precache( );
-	SET_MODEL(ENT(pev), "models/w_mp5.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_mp5.mdl");
 	m_iId = WEAPON_HKMP5;
 
 	m_iDefaultAmmo = MP5_DEFAULT_GIVE; // two rounds
@@ -59,11 +59,11 @@ void CWeaponHKMP5::Spawn( void )
 
 void CWeaponHKMP5::Precache( void )
 {
-	PRECACHE_MODEL("models/v_mp5.mdl");
-	PRECACHE_MODEL("models/w_mp5.mdl");
-	PRECACHE_MODEL("models/p_mp5.mdl");
+	PRECACHE_MODEL("models/weapons/v_mp5.mdl");
+	PRECACHE_MODEL("models/weapons/w_mp5.mdl");
+	PRECACHE_MODEL("models/weapons/p_mp5.mdl");
 
-	PRECACHE_MODEL("models/w_9mmARclip.mdl");
+	PRECACHE_MODEL("models/weapons/w_9mmARclip.mdl");
 	PRECACHE_SOUND("items/9mmclip1.wav");              
 
 	PRECACHE_SOUND("weapons/mp5_clipin.wav");
@@ -113,7 +113,7 @@ BOOL CWeaponHKMP5::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + HKMP5_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_mp5.mdl", "models/p_mp5.mdl", HKMP5_DRAW, "mp5" );
+	return DefaultDeploy( "models/weapons/v_mp5.mdl", "models/weapons/p_mp5.mdl", HKMP5_DRAW, "mp5" );
 }
 
 void CWeaponHKMP5::PrimaryAttack()
@@ -225,7 +225,7 @@ void CWeaponHKMP5::Reload( void )
 void CWeaponHKMP5::WeaponIdle( void )
 {
 	ResetEmptySound( );
-
+/*
 	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
 	if (m_flTimeWeaponIdle > gpGlobals->time)
@@ -234,6 +234,7 @@ void CWeaponHKMP5::WeaponIdle( void )
 	SendWeaponAnim( HKMP5_IDLE );
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );// how long till we do this again.
+*/
 }
 
 class CHKMP5AmmoClip : public CBasePlayerAmmo
@@ -243,12 +244,12 @@ class CHKMP5AmmoClip : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/w_9mmARclip.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_9mmARclip.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/w_9mmARclip.mdl");
+		PRECACHE_MODEL ("models/weapons/w_9mmARclip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 

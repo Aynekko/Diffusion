@@ -503,9 +503,9 @@ void CGrenade:: Spawn( void )
 	pev->solid = SOLID_BBOX;
 
 	if( IsEMPGrenade )
-		SET_MODEL( ENT( pev ), "models/w_battery.mdl" );
+		SET_MODEL( ENT( pev ), "models/weapons/w_battery.mdl" );
 	else
-		SET_MODEL(ENT(pev), "models/w_grenade.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_grenade.mdl");
 	UTIL_SetSize(pev, Vector( 0, 0, 0), Vector(0, 0, 0));
 
 	pev->dmg = 100;
@@ -558,7 +558,7 @@ CGrenade *CGrenade::ShootSmoke( entvars_t *pevOwner, Vector vecStart, Vector vec
 	pGrenade->SetThink( &CGrenade::SmokeGrenadeThink );
 	pGrenade->SetNextThink( 0 );
 
-	SET_MODEL( pGrenade->edict(), "models/w_smoke.mdl" );
+	SET_MODEL( pGrenade->edict(), "models/weapons/w_smoke.mdl" );
 
 	pGrenade->pev->sequence = RANDOM_LONG( 3, 5 );
 	pGrenade->pev->body = 1;
@@ -684,7 +684,7 @@ CGrenade * CGrenade :: ShootSatchelCharge( entvars_t *pevOwner, Vector vecStart,
 	
 	pGrenade->pev->solid = SOLID_BBOX;
 
-	SET_MODEL(ENT(pGrenade->pev), "models/grenade.mdl");	// Change this to satchel charge model
+	SET_MODEL(ENT(pGrenade->pev), "models/weapons/grenade.mdl");	// Change this to satchel charge model
 
 	UTIL_SetSize(pGrenade->pev, Vector( 0, 0, 0), Vector(0, 0, 0));
 
@@ -764,7 +764,7 @@ void CAPCProjectile::Spawn( void )
 	pev->gravity = 0.45;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL( ENT( pev ), "models/grenade.mdl" );
+	SET_MODEL( ENT( pev ), "models/weapons/grenade.mdl" );
 	UTIL_SetSize( pev, Vector( 0, 0, 0 ), Vector( 0, 0, 0 ) );
 	RelinkEntity( TRUE );
 	
@@ -782,7 +782,7 @@ void CAPCProjectile::Spawn( void )
 
 void CAPCProjectile::Precache( void )
 {
-	PRECACHE_MODEL( "models/grenade.mdl" );
+	PRECACHE_MODEL( "models/weapons/grenade.mdl" );
 	PRECACHE_SOUND( "car/apc_fire.wav" );
 	PRECACHE_SOUND( "car/apc_fire_d.wav" );
 }

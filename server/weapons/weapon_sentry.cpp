@@ -71,7 +71,7 @@ int CWpnSentry::SecondaryAmmoIndex( void )
 void CWpnSentry::Spawn( void )
 {
 	Precache( );
-	SET_MODEL(ENT(pev), "models/w_sentry.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_sentry.mdl");
 	m_iId = WEAPON_SENTRY;
 
 	m_iDefaultAmmo = 1;
@@ -82,9 +82,9 @@ void CWpnSentry::Spawn( void )
 
 void CWpnSentry::Precache( void )
 {
-	PRECACHE_MODEL("models/v_sentry.mdl");
-	PRECACHE_MODEL("models/w_sentry.mdl");
-	PRECACHE_MODEL("models/p_sentry.mdl");
+	PRECACHE_MODEL("models/weapons/v_sentry.mdl");
+	PRECACHE_MODEL("models/weapons/w_sentry.mdl");
+	PRECACHE_MODEL("models/weapons/p_sentry.mdl");
 
 //	PRECACHE_SOUND("items/clipinsert1.wav");
 //	PRECACHE_SOUND("items/cliprelease1.wav");
@@ -129,7 +129,7 @@ BOOL CWpnSentry::Deploy( )
 {
 	m_flNextPrimaryAttack = gpGlobals->time + SENTRY_DEPLOY_TIME;
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	return DefaultDeploy( "models/v_sentry.mdl", "models/p_sentry.mdl", SENTRY_DEPLOY, "trip" );
+	return DefaultDeploy( "models/weapons/v_sentry.mdl", "models/weapons/p_sentry.mdl", SENTRY_DEPLOY, "trip" );
 }
 
 void CWpnSentry::Holster(void)

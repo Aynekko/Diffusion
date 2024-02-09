@@ -98,7 +98,7 @@ void CGauss::Spawn( void )
 {
 	Precache( );
 	m_iId = WEAPON_GAUSS;
-	SET_MODEL(ENT(pev), "models/w_gausniper.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_gausniper.mdl");
 
 	m_iDefaultAmmo = GAUSS_DEFAULT_GIVE;
 
@@ -109,9 +109,9 @@ void CGauss::Spawn( void )
 
 void CGauss::Precache( void )
 {
-	PRECACHE_MODEL("models/w_gausniper.mdl");
-	PRECACHE_MODEL("models/v_gausniper.mdl");
-	PRECACHE_MODEL("models/p_gausniper.mdl");
+	PRECACHE_MODEL("models/weapons/w_gausniper.mdl");
+	PRECACHE_MODEL("models/weapons/v_gausniper.mdl");
+	PRECACHE_MODEL("models/weapons/p_gausniper.mdl");
 
 	PRECACHE_SOUND( "weapons/crystal_reload.wav" ); // Precaching reloading sound
 	PRECACHE_SOUND("items/9mmclip1.wav");
@@ -181,7 +181,7 @@ BOOL CGauss::Deploy( void )
 
 	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
 
-	return DefaultDeploy( "models/v_gausniper.mdl", "models/p_gausniper.mdl", GAUSS_DRAW, "gauss" );
+	return DefaultDeploy( "models/weapons/v_gausniper.mdl", "models/weapons/p_gausniper.mdl", GAUSS_DRAW, "gauss" );
 }
 
 void CGauss::Holster( void )
@@ -615,12 +615,12 @@ class CGaussAmmo : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/w_gaussammo.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_gaussammo.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/w_gaussammo.mdl");
+		PRECACHE_MODEL ("models/weapons/w_gaussammo.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 

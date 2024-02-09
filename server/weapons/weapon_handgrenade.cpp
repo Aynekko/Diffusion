@@ -61,7 +61,7 @@ void CHandGrenade::Spawn( void )
 {
 	Precache( );
 	m_iId = WEAPON_HANDGRENADE;
-	SET_MODEL(ENT(pev), "models/w_grenade.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_grenade.mdl");
 
 	pev->dmg = 100;
 	m_iDefaultAmmo = HANDGRENADE_DEFAULT_GIVE;
@@ -71,9 +71,9 @@ void CHandGrenade::Spawn( void )
 
 void CHandGrenade::Precache( void )
 {
-	PRECACHE_MODEL("models/w_grenade.mdl");
-	PRECACHE_MODEL("models/v_grenade.mdl");
-	PRECACHE_MODEL("models/p_grenade.mdl");
+	PRECACHE_MODEL("models/weapons/w_grenade.mdl");
+	PRECACHE_MODEL("models/weapons/v_grenade.mdl");
+	PRECACHE_MODEL("models/weapons/p_grenade.mdl");
 	PRECACHE_SOUND("weapons/gren_throw.wav");  // diffusion - new sounds
 	PRECACHE_SOUND("weapons/gren_pull.wav");
 	PRECACHE_SOUND("weapons/gauss_overcharge.wav");
@@ -101,7 +101,7 @@ BOOL CHandGrenade::Deploy( )
 	m_flReleaseThrow = -1;
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_grenade.mdl", "models/p_grenade.mdl", HANDGRENADE_DRAW, "crowbar" );
+	return DefaultDeploy( "models/weapons/v_grenade.mdl", "models/weapons/p_grenade.mdl", HANDGRENADE_DRAW, "crowbar" );
 }
 
 BOOL CHandGrenade::CanHolster( void )

@@ -45,7 +45,7 @@ void CSmokeGrenade::Spawn( void )
 {
 	Precache();
 	m_iId = WEAPON_SMOKEGRENADE;
-	SET_MODEL( ENT( pev ), "models/w_smoke.mdl" );
+	SET_MODEL( ENT( pev ), "models/weapons/w_smoke.mdl" );
 
 	m_iDefaultAmmo = HANDGRENADE_DEFAULT_GIVE;
 
@@ -54,9 +54,9 @@ void CSmokeGrenade::Spawn( void )
 
 void CSmokeGrenade::Precache( void )
 {
-	PRECACHE_MODEL( "models/w_smoke.mdl" );
-	PRECACHE_MODEL( "models/v_smoke.mdl" );
-	PRECACHE_MODEL( "models/p_smoke.mdl" );
+	PRECACHE_MODEL( "models/weapons/w_smoke.mdl" );
+	PRECACHE_MODEL( "models/weapons/v_smoke.mdl" );
+	PRECACHE_MODEL( "models/weapons/p_smoke.mdl" );
 	PRECACHE_SOUND( "weapons/gren_throw.wav" );
 	PRECACHE_SOUND( "weapons/gren_pull.wav" );
 	PRECACHE_SOUND( "weapons/smoke_grenade.wav" );
@@ -84,7 +84,7 @@ BOOL CSmokeGrenade::Deploy()
 	m_flReleaseThrow = -1;
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_smoke.mdl", "models/p_smoke.mdl", HANDGRENADE_DRAW, "crowbar" );
+	return DefaultDeploy( "models/weapons/v_smoke.mdl", "models/weapons/p_smoke.mdl", HANDGRENADE_DRAW, "crowbar" );
 }
 
 BOOL CSmokeGrenade::CanHolster( void )

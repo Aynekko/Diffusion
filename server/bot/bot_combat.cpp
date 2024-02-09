@@ -132,7 +132,7 @@ ammo_check_t ammo_check[] = {
    {"ammo_ARgrenades", "ARgrenades", M203_GRENADE_MAX_CARRY},
    {"ammo_buckshot", "buckshot", BUCKSHOT_MAX_CARRY},
    {"ammo_crossbow", "bolts", BOLT_MAX_CARRY},
-   {"ammo_357", "357", _357_MAX_CARRY},
+   {"ammo_357", "deagle", DEAGLE_MAX_CARRY},
    {"ammo_rpgclip", "rockets", ROCKET_MAX_CARRY},
    {"ammo_egonclip", "uranium", URANIUM_MAX_CARRY},
    {"ammo_gaussclip", "uranium", URANIUM_MAX_CARRY},

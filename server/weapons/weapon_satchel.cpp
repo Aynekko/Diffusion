@@ -68,7 +68,7 @@ void CSatchelCharge :: Spawn( void )
 	pev->movetype = MOVETYPE_BOUNCE;
 	pev->solid = SOLID_BBOX;
 
-	SET_MODEL(ENT(pev), "models/w_satchel.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_satchel.mdl");
 	UTIL_SetSize(pev, Vector( -4, -4, -4), Vector(4, 4, 4));	// Uses point-sized, and can be stepped over
 
 	SetTouch( &CSatchelCharge::SatchelSlide );
@@ -161,7 +161,7 @@ void CSatchelCharge :: SatchelThink( void )
 
 void CSatchelCharge :: Precache( void )
 {
-	PRECACHE_MODEL("models/w_satchel.mdl");
+	PRECACHE_MODEL("models/weapons/w_satchel.mdl");
 	PRECACHE_SOUND("weapons/g_bounce1.wav");
 	PRECACHE_SOUND("weapons/g_bounce2.wav");
 	PRECACHE_SOUND("weapons/g_bounce3.wav");
@@ -252,7 +252,7 @@ void CSatchel::Spawn( void )
 {
 	Precache( );
 	m_iId = WEAPON_SATCHEL;
-	SET_MODEL(ENT(pev), "models/w_satchel.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_satchel.mdl");
 
 	m_iDefaultAmmo = SATCHEL_DEFAULT_GIVE;
 		
@@ -262,11 +262,11 @@ void CSatchel::Spawn( void )
 
 void CSatchel::Precache( void )
 {
-	PRECACHE_MODEL("models/v_satchel.mdl");
-	PRECACHE_MODEL("models/v_satchel_radio.mdl");
-	PRECACHE_MODEL("models/w_satchel.mdl");
-	PRECACHE_MODEL("models/p_satchel.mdl");
-	PRECACHE_MODEL("models/p_satchel_radio.mdl");
+	PRECACHE_MODEL("models/weapons/v_satchel.mdl");
+	PRECACHE_MODEL("models/weapons/v_satchel_radio.mdl");
+	PRECACHE_MODEL("models/weapons/w_satchel.mdl");
+	PRECACHE_MODEL("models/weapons/p_satchel.mdl");
+	PRECACHE_MODEL("models/weapons/p_satchel_radio.mdl");
 
 	UTIL_PrecacheOther( "monster_satchel" );
 }
@@ -341,9 +341,9 @@ BOOL CSatchel::Deploy( void )
 	m_flTimeWeaponIdle = gpGlobals->time + 4.0;
 
 	if ( m_chargeReady )
-		return DefaultDeploy( "models/v_satchel_radio.mdl", "models/p_satchel_radio.mdl", SATCHEL_RADIO_DRAW, "hive" );
+		return DefaultDeploy( "models/vweapons/_satchel_radio.mdl", "models/weapons/p_satchel_radio.mdl", SATCHEL_RADIO_DRAW, "hive" );
 
-	return DefaultDeploy( "models/v_satchel.mdl", "models/p_satchel.mdl", SATCHEL_DRAW, "trip" );
+	return DefaultDeploy( "models/weapons/v_satchel.mdl", "models/weapons/p_satchel.mdl", SATCHEL_DRAW, "trip" );
 }
 
 void CSatchel::Holster( void )
@@ -454,8 +454,8 @@ void CSatchel::Throw( void )
 		vecAvelocity.y = 400;
 		pSatchel->SetLocalAvelocity( vecAvelocity );
 
-		m_pPlayer->pev->viewmodel = MAKE_STRING("models/v_satchel_radio.mdl");
-		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/p_satchel_radio.mdl");
+		m_pPlayer->pev->viewmodel = MAKE_STRING("models/weapons/v_satchel_radio.mdl");
+		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/weapons/p_satchel_radio.mdl");
 		SendWeaponAnim( SATCHEL_RADIO_DRAW );
 
 		// player "shoot" animation
@@ -492,8 +492,8 @@ void CSatchel::WeaponIdle( void )
 			return;
 		}
 
-		m_pPlayer->pev->viewmodel = MAKE_STRING("models/v_satchel.mdl");
-		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/p_satchel.mdl");
+		m_pPlayer->pev->viewmodel = MAKE_STRING("models/weapons/v_satchel.mdl");
+		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/weapons/p_satchel.mdl");
 		SendWeaponAnim( SATCHEL_DRAW );
 
 		// use tripmine animations

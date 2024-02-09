@@ -115,6 +115,8 @@ bool CheckForLocalWeaponShootAnimation( int seq )
 	case WEAPON_FIVESEVEN:
 		if( seq == WPN57_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = tr.time + WPN57_RELOAD_TIME;
+		else if( seq == WPN57_RELOAD_EMPTY ) // caught reload_empty anim!
+			localanim_NextPAttackTime = tr.time + WPN57_RELOADEMPTY_TIME;
 		else if( seq == WPN57_DEPLOY ) // caught deploy anim!
 			localanim_NextPAttackTime = tr.time + WPN57_DEPLOY_TIME;
 

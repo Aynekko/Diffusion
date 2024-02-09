@@ -237,7 +237,7 @@ class CItemBattery : public CItem
 		if (pev->model)
 			SET_MODEL(ENT(pev), STRING(pev->model)); //LRC
 		else
-			SET_MODEL(ENT(pev), "models/w_battery.mdl");
+			SET_MODEL(ENT(pev), "models/weapons/w_battery.mdl");
 
 		CItem::Spawn( );
 	}
@@ -246,7 +246,7 @@ class CItemBattery : public CItem
 		if (pev->model)
 			PRECACHE_MODEL((char*)STRING(pev->model)); //LRC
 		else
-			PRECACHE_MODEL ("models/w_battery.mdl");
+			PRECACHE_MODEL ("models/weapons/w_battery.mdl");
 
 		if (pev->noise)
 			PRECACHE_SOUND( (char*)STRING(pev->noise) ); //LRC

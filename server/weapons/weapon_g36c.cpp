@@ -63,7 +63,7 @@ END_DATADESC()
 void CWeaponG36C::Spawn( void )
 {
 	Precache( );
-	SET_MODEL(ENT(pev), "models/w_g36c.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_g36c.mdl");
 	m_iId = WEAPON_G36C;
 
 	m_iDefaultAmmo = MP5_DEFAULT_GIVE; // two rounds
@@ -73,11 +73,11 @@ void CWeaponG36C::Spawn( void )
 
 void CWeaponG36C::Precache( void )
 {
-	PRECACHE_MODEL("models/v_g36c.mdl");
-	PRECACHE_MODEL("models/w_g36c.mdl");
-	PRECACHE_MODEL("models/p_g36c.mdl");
+	PRECACHE_MODEL("models/weapons/v_g36c.mdl");
+	PRECACHE_MODEL("models/weapons/w_g36c.mdl");
+	PRECACHE_MODEL("models/weapons/p_g36c.mdl");
 
-	PRECACHE_MODEL("models/w_9mmARclip.mdl");
+	PRECACHE_MODEL("models/weapons/w_9mmARclip.mdl");
 	PRECACHE_SOUND("items/9mmclip1.wav");              
 
 	PRECACHE_SOUND( "weapons/g36c_magout.wav" );
@@ -125,7 +125,7 @@ BOOL CWeaponG36C::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + G36C_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_g36c.mdl", "models/p_g36c.mdl", G36C_DRAW, "mp5" );
+	return DefaultDeploy( "models/weapons/v_g36c.mdl", "models/weapons/p_g36c.mdl", G36C_DRAW, "mp5" );
 }
 
 void CWeaponG36C::Holster( void )
@@ -318,12 +318,12 @@ class CG36CAmmoClip : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/w_9mmARclip.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_9mmARclip.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/w_9mmARclip.mdl");
+		PRECACHE_MODEL ("models/weapons/w_9mmARclip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 

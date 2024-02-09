@@ -116,7 +116,7 @@
     <ClCompile Include="weapons\weapon_sentry.cpp">
       <Filter>Source Files\weapons</Filter>
     </ClCompile>
-    <ClCompile Include="weapons\weapon_pistol.cpp">
+    <ClCompile Include="weapons\weapon_beretta.cpp">
       <Filter>Source Files\weapons</Filter>
     </ClCompile>
     <ClCompile Include="weapons\weapon_knife.cpp">
@@ -146,7 +146,7 @@
     <ClCompile Include="weapons\weapon_crossbow.cpp">
       <Filter>Source Files\weapons</Filter>
     </ClCompile>
-    <ClCompile Include="weapons\weapon_assaultrifle.cpp">
+    <ClCompile Include="weapons\weapon_mrc.cpp">
       <Filter>Source Files\weapons</Filter>
     </ClCompile>
     <ClCompile Include="weapons\weapon_ar2.cpp">

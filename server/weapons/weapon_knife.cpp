@@ -43,7 +43,7 @@ void CKnife::Spawn( void )
 {
 	Precache( );
 	m_iId = WEAPON_KNIFE;
-	SET_MODEL(ENT(pev), "models/w_crowbar.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_knife.mdl");
 	m_iClip = -1;
 
 	FallInit();// get ready to fall down.
@@ -51,9 +51,9 @@ void CKnife::Spawn( void )
 
 void CKnife::Precache( void )
 {
-	PRECACHE_MODEL("models/v_crowbar.mdl");
-	PRECACHE_MODEL("models/w_crowbar.mdl");
-	PRECACHE_MODEL("models/p_crowbar.mdl");
+	PRECACHE_MODEL("models/weapons/v_knife.mdl");
+	PRECACHE_MODEL("models/weapons/w_knife.mdl");
+	PRECACHE_MODEL("models/weapons/p_knife.mdl");
 	PRECACHE_SOUND("weapons/cbar_hitbod1.wav");
 	PRECACHE_SOUND("weapons/cbar_hitbod2.wav");
 	PRECACHE_SOUND("weapons/cbar_hitbod3.wav");
@@ -80,7 +80,7 @@ BOOL CKnife::Deploy( )
 	m_flNextPrimaryAttack = gpGlobals->time + KNIFE_DEPLOY_TIME;
 	m_flNextSecondaryAttack = gpGlobals->time + KNIFE_DEPLOY_TIME;
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	return DefaultDeploy( "models/v_crowbar.mdl", "models/p_crowbar.mdl", KNIFE_DRAW, "crowbar" );
+	return DefaultDeploy( "models/weapons/v_knife.mdl", "models/weapons/p_knife.mdl", KNIFE_DRAW, "crowbar" );
 }
 
 void CKnife::Holster( void )

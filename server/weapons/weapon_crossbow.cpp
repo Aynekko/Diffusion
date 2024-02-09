@@ -77,7 +77,7 @@ void CCrossbowBolt::Spawn( void )
 
 	pev->gravity = 0.35; // was 0.5 when movetype_fly
 
-	SET_MODEL( edict(), "models/crossbow_bolt.mdl");
+	SET_MODEL( edict(), "models/weapons/crossbow_bolt.mdl");
 
 	UTIL_SetSize( this, Vector( -2, -2, -2 ), Vector( 2, 2, 2 ) );
 	RelinkEntity( TRUE );
@@ -91,7 +91,7 @@ void CCrossbowBolt::Spawn( void )
 
 void CCrossbowBolt::Precache( )
 {
-	PRECACHE_MODEL ("models/crossbow_bolt.mdl");
+	PRECACHE_MODEL ("models/weapons/crossbow_bolt.mdl");
 	PRECACHE_SOUND("weapons/xbow_hitbod1.wav");
 	PRECACHE_SOUND("weapons/xbow_hitbod2.wav");
 	PRECACHE_SOUND("weapons/xbow_hitmetal.wav");
@@ -355,7 +355,7 @@ void CCrossbow::Spawn( void )
 {
 	Precache( );
 	m_iId = WEAPON_CROSSBOW;
-	SET_MODEL(ENT(pev), "models/w_crossbow.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_crossbow.mdl");
 
 	m_iDefaultAmmo = CROSSBOW_DEFAULT_GIVE;
 
@@ -376,9 +376,9 @@ int CCrossbow::AddToPlayer( CBasePlayer *pPlayer )
 
 void CCrossbow::Precache( void )
 {
-	PRECACHE_MODEL("models/w_crossbow.mdl");
-	PRECACHE_MODEL("models/v_crossbow.mdl");
-	PRECACHE_MODEL("models/p_crossbow.mdl");
+	PRECACHE_MODEL("models/weapons/w_crossbow.mdl");
+	PRECACHE_MODEL("models/weapons/v_crossbow.mdl");
+	PRECACHE_MODEL("models/weapons/p_crossbow.mdl");
 
 	PRECACHE_SOUND("weapons/xbow_fire1.wav");
 	PRECACHE_SOUND("weapons/xbow_reload1.wav");
@@ -409,8 +409,8 @@ BOOL CCrossbow::Deploy( )
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
 	if (m_iClip)
-		return DefaultDeploy( "models/v_crossbow.mdl", "models/p_crossbow.mdl", CROSSBOW_DRAW1, "bow" );
-	return DefaultDeploy( "models/v_crossbow.mdl", "models/p_crossbow.mdl", CROSSBOW_DRAW2, "bow" );
+		return DefaultDeploy( "models/weapons/v_crossbow.mdl", "models/weapons/p_crossbow.mdl", CROSSBOW_DRAW1, "bow" );
+	return DefaultDeploy( "models/weapons/v_crossbow.mdl", "models/weapons/p_crossbow.mdl", CROSSBOW_DRAW2, "bow" );
 }
 
 void CCrossbow::Holster( void )
@@ -724,12 +724,12 @@ class CCrossbowAmmo : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/w_crossbow_clip.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_crossbow_clip.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/w_crossbow_clip.mdl");
+		PRECACHE_MODEL ("models/weapons/w_crossbow_clip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 

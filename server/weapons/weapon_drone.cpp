@@ -102,8 +102,8 @@ BOOL CWpnDrone::IsUseable(void)
 	// HACKHACK if we are holding a radio stick right now and got a drone, switch to it
 	if( !GotNewDrone && (m_pPlayer->m_rgAmmo[ PrimaryAmmoIndex() ] > 0) )
 	{
-		m_pPlayer->pev->viewmodel = MAKE_STRING("models/v_drone.mdl");
-		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/p_drone.mdl");
+		m_pPlayer->pev->viewmodel = MAKE_STRING("models/weapons/v_drone.mdl");
+		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/weapons/p_drone.mdl");
 		SendWeaponAnim( DRONE_DEPLOY );
 		GotNewDrone = true;
 	}
@@ -175,7 +175,7 @@ BOOL CWpnDrone::IsUseable(void)
 void CWpnDrone::Spawn( void )
 {
 	Precache( );
-	SET_MODEL(ENT(pev), "models/w_drone.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_drone.mdl");
 	m_iId = WEAPON_DRONE;
 
 	m_iDefaultAmmo = 1;
@@ -187,11 +187,11 @@ void CWpnDrone::Spawn( void )
 
 void CWpnDrone::Precache( void )
 {
-	PRECACHE_MODEL("models/v_drone.mdl");
-	PRECACHE_MODEL("models/w_drone.mdl");
-	PRECACHE_MODEL("models/p_drone.mdl");
-	PRECACHE_MODEL("models/v_drone_radio.mdl");
-	PRECACHE_MODEL("models/p_drone_radio.mdl");
+	PRECACHE_MODEL("models/weapons/v_drone.mdl");
+	PRECACHE_MODEL("models/weapons/w_drone.mdl");
+	PRECACHE_MODEL("models/weapons/p_drone.mdl");
+	PRECACHE_MODEL("models/weapons/v_drone_radio.mdl");
+	PRECACHE_MODEL("models/weapons/p_drone_radio.mdl");
 	PRECACHE_SOUND("weapons/gauss_overcharge.wav");
 	PRECACHE_SOUND("weapons/drone_call.wav");
 	PRECACHE_SOUND("buttons_hl2/button17.wav");
@@ -261,16 +261,16 @@ BOOL CWpnDrone::Deploy( void )
 
 	// perform a check for an active drone to determine what we should deploy
 	if( CheckForDrone() )
-		return DefaultDeploy( "models/v_drone_radio.mdl", "models/p_drone_radio.mdl", DRONERADIO_DEPLOY, "default" );
+		return DefaultDeploy( "models/weapons/v_drone_radio.mdl", "models/weapons/p_drone_radio.mdl", DRONERADIO_DEPLOY, "default" );
 	else
 	{
 		// do we have a drone at all? if not, just draw the radio 
 		if ( m_pPlayer->m_rgAmmo[ PrimaryAmmoIndex() ] <= 0 )
-			return DefaultDeploy( "models/v_drone_radio.mdl", "models/p_drone_radio.mdl", DRONERADIO_DEPLOY, "default" );
+			return DefaultDeploy( "models/weapons/v_drone_radio.mdl", "models/weapons/p_drone_radio.mdl", DRONERADIO_DEPLOY, "default" );
 		else
 		{
 			m_flTimeWeaponIdle = -1;
-			return DefaultDeploy( "models/v_drone.mdl", "models/p_drone.mdl", DRONE_DEPLOY, "default");
+			return DefaultDeploy( "models/weapons/v_drone.mdl", "models/weapons/p_drone.mdl", DRONE_DEPLOY, "default");
 		}
 	}
 }
@@ -353,8 +353,8 @@ void CWpnDrone::PrimaryAttack( void )
 				GotNewDrone = false;
 
 			// drone spawned, switch to radio
-			m_pPlayer->pev->viewmodel = MAKE_STRING("models/v_drone_radio.mdl");
-			m_pPlayer->pev->weaponmodel = MAKE_STRING("models/p_drone_radio.mdl");
+			m_pPlayer->pev->viewmodel = MAKE_STRING("models/weapons/v_drone_radio.mdl");
+			m_pPlayer->pev->weaponmodel = MAKE_STRING("models/weapons/p_drone_radio.mdl");
 			SendWeaponAnim( DRONERADIO_DEPLOY );
 			m_pPlayer->DroneDeployed = true;
 			m_flTimeWeaponIdle = gpGlobals->time;
@@ -390,8 +390,8 @@ void CWpnDrone::PrimaryAttack( void )
 				m_pPlayer->DroneDeployed = false;
 				if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 )
 				{
-					m_pPlayer->pev->viewmodel = MAKE_STRING( "models/v_drone.mdl" );
-					m_pPlayer->pev->weaponmodel = MAKE_STRING( "models/p_drone.mdl" );
+					m_pPlayer->pev->viewmodel = MAKE_STRING( "models/weapons/v_drone.mdl" );
+					m_pPlayer->pev->weaponmodel = MAKE_STRING( "models/weapons/p_drone.mdl" );
 					SendWeaponAnim( DRONE_DEPLOY );
 				}
 				else
@@ -514,8 +514,8 @@ void CWpnDrone::WeaponIdle( void )
 	// HACKHACK if our drone died and we have some in the backpack, switch to it
 	if((m_pPlayer->m_rgAmmo[ PrimaryAmmoIndex() ] > 0) && !m_pPlayer->DroneDeployed )
 	{
-		m_pPlayer->pev->viewmodel = MAKE_STRING("models/v_drone.mdl");
-		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/p_drone.mdl");
+		m_pPlayer->pev->viewmodel = MAKE_STRING("models/weapons/v_drone.mdl");
+		m_pPlayer->pev->weaponmodel = MAKE_STRING("models/weapons/p_drone.mdl");
 		SendWeaponAnim( DRONE_DEPLOY );
 		m_flTimeWeaponIdle = -1;
 	}

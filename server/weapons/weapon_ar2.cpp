@@ -57,7 +57,7 @@ int C_AR2::SecondaryAmmoIndex( void )
 void C_AR2::Spawn( void )
 {
 	Precache( );
-	SET_MODEL(ENT(pev), "models/w_ar2.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_ar2.mdl");
 	m_iId = WEAPON_AR2;
 
 	m_iDefaultAmmo = AR2_DEFAULT_GIVE;
@@ -68,9 +68,9 @@ void C_AR2::Spawn( void )
 
 void C_AR2::Precache( void )
 {
-	PRECACHE_MODEL("models/v_ar2.mdl");
-	PRECACHE_MODEL("models/w_ar2.mdl");
-	PRECACHE_MODEL("models/p_ar2.mdl");
+	PRECACHE_MODEL("models/weapons/v_ar2.mdl");
+	PRECACHE_MODEL("models/weapons/w_ar2.mdl");
+	PRECACHE_MODEL("models/weapons/p_ar2.mdl");
 
 	PRECACHE_SOUND("items/clipinsert1.wav");
 	PRECACHE_SOUND("items/cliprelease1.wav");
@@ -124,7 +124,7 @@ BOOL C_AR2::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + AR2_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_ar2.mdl", "models/p_ar2.mdl", AR2_DEPLOY, "mp5" );
+	return DefaultDeploy( "models/weapons/v_ar2.mdl", "models/weapons/p_ar2.mdl", AR2_DEPLOY, "mp5" );
 }
 
 void C_AR2::PrimaryAttack()
@@ -306,12 +306,12 @@ class CAR2Ammo : public CBasePlayerAmmo
 	void Spawn( void )
 	{
 		Precache();
-		SET_MODEL( ENT( pev ), "models/w_9mmARclip.mdl" );
+		SET_MODEL( ENT( pev ), "models/weapons/w_9mmARclip.mdl" );
 		CBasePlayerAmmo::Spawn();
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL( "models/w_9mmARclip.mdl" );
+		PRECACHE_MODEL( "models/weapons/w_9mmARclip.mdl" );
 		PRECACHE_SOUND( "items/9mmclip1.wav" );
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
@@ -338,12 +338,12 @@ class CAR2Ball : public CBasePlayerAmmo
 	void Spawn( void )
 	{
 		Precache();
-		SET_MODEL( ENT( pev ), "models/w_ARgrenade.mdl" );
+		SET_MODEL( ENT( pev ), "models/weapons/w_ARgrenade.mdl" );
 		CBasePlayerAmmo::Spawn();
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL( "models/w_ARgrenade.mdl" );
+		PRECACHE_MODEL( "models/weapons/w_ARgrenade.mdl" );
 		PRECACHE_SOUND( "items/9mmclip1.wav" );
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )

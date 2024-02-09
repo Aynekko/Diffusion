@@ -87,7 +87,7 @@ void CSniperRifle::Holster(void)
 void CSniperRifle::Spawn( void )
 {
 	Precache();
-	SET_MODEL( ENT( pev ), "models/w_sniper.mdl" );
+	SET_MODEL( ENT( pev ), "models/weapons/w_sniper.mdl" );
 	m_iId = WEAPON_SNIPER;
 
 	m_iDefaultAmmo = SNIPER_DEFAULT_GIVE; // two rounds
@@ -97,11 +97,11 @@ void CSniperRifle::Spawn( void )
 
 void CSniperRifle::Precache( void )
 {
-	PRECACHE_MODEL( "models/v_sniper.mdl" );
-	PRECACHE_MODEL( "models/w_sniper.mdl" );
-	PRECACHE_MODEL( "models/p_sniper.mdl" );
+	PRECACHE_MODEL( "models/weapons/v_sniper.mdl" );
+	PRECACHE_MODEL( "models/weapons/w_sniper.mdl" );
+	PRECACHE_MODEL( "models/weapons/p_sniper.mdl" );
 
-	PRECACHE_MODEL( "models/w_9mmARclip.mdl" );
+	PRECACHE_MODEL( "models/weapons/w_9mmARclip.mdl" );
 	
 	PRECACHE_SOUND( "weapons/g36c_deploy.wav" );
 	PRECACHE_SOUND( "weapons/g36c_safety.wav" );
@@ -148,7 +148,7 @@ BOOL CSniperRifle::Deploy()
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = gpGlobals->time + SNIPER_DEPLOY_TIME;
 	m_flNextSecondaryAttack = gpGlobals->time + SNIPER_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_sniper.mdl", "models/p_sniper.mdl", SNIPER_DRAW, "bow" );
+	return DefaultDeploy( "models/weapons/v_sniper.mdl", "models/weapons/p_sniper.mdl", SNIPER_DRAW, "bow" );
 }
 
 void CSniperRifle::PrimaryAttack()
@@ -338,12 +338,12 @@ class CSniperAmmo : public CBasePlayerAmmo
 	void Spawn( void )
 	{
 		Precache();
-		SET_MODEL( ENT( pev ), "models/w_9mmARclip.mdl" );
+		SET_MODEL( ENT( pev ), "models/weapons/w_9mmARclip.mdl" );
 		CBasePlayerAmmo::Spawn();
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL( "models/w_9mmARclip.mdl" );
+		PRECACHE_MODEL( "models/weapons/w_9mmARclip.mdl" );
 		PRECACHE_SOUND( "items/9mmclip1.wav" );
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )

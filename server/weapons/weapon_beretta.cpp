@@ -49,7 +49,7 @@ void CBeretta::Spawn( )
 	pev->classname = MAKE_STRING( "weapon_9mmhandgun" ); // hack to allow for old names
 	Precache( );
 	m_iId = WEAPON_BERETTA;
-	SET_MODEL( edict(), "models/w_9mmhandgun.mdl" );
+	SET_MODEL( edict(), "models/weapons/w_beretta.mdl" );
 
 	m_iDefaultAmmo = BERETTA_DEFAULT_GIVE;
 
@@ -58,9 +58,9 @@ void CBeretta::Spawn( )
 
 void CBeretta::Precache( void )
 {
-	PRECACHE_MODEL("models/v_9mmhandgun.mdl");
-	PRECACHE_MODEL("models/w_9mmhandgun.mdl");
-	PRECACHE_MODEL("models/p_9mmhandgun.mdl");
+	PRECACHE_MODEL("models/weapons/v_beretta.mdl");
+	PRECACHE_MODEL("models/weapons/w_beretta.mdl");
+	PRECACHE_MODEL("models/weapons/p_beretta.mdl");
 
 	PRECACHE_SOUND("items/9mmclip1.wav");
 	PRECACHE_SOUND("items/9mmclip2.wav");
@@ -102,7 +102,7 @@ BOOL CBeretta::Deploy( )
 
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + BERETTA_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_9mmhandgun.mdl", "models/p_9mmhandgun.mdl", BERETTA_DRAW, "onehanded" );
+	return DefaultDeploy( "models/weapons/v_beretta.mdl", "models/weapons/p_beretta.mdl", BERETTA_DRAW, "onehanded" );
 }
 
 void CBeretta::SecondaryAttack( void )
@@ -298,12 +298,12 @@ class CBerettaAmmo : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_9mmclip.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/w_9mmclip.mdl");
+		PRECACHE_MODEL ("models/weapons/w_9mmclip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 

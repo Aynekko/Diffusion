@@ -45,7 +45,7 @@ void CWpnFiveSeven::Spawn( )
 	pev->classname = MAKE_STRING( "weapon_fiveseven" );
 	Precache( );
 	m_iId = WEAPON_FIVESEVEN;
-	SET_MODEL( edict(), "models/w_fiveseven.mdl" );
+	SET_MODEL( edict(), "models/weapons/w_fiveseven.mdl" );
 
 	m_iDefaultAmmo = FIVESEVEN_MAX_CLIP * 2; // 2 rounds
 
@@ -54,9 +54,9 @@ void CWpnFiveSeven::Spawn( )
 
 void CWpnFiveSeven::Precache( void )
 {
-	PRECACHE_MODEL("models/v_fiveseven.mdl");
-	PRECACHE_MODEL("models/w_fiveseven.mdl");
-	PRECACHE_MODEL("models/p_fiveseven.mdl");
+	PRECACHE_MODEL("models/weapons/v_fiveseven.mdl");
+	PRECACHE_MODEL("models/weapons/w_fiveseven.mdl");
+	PRECACHE_MODEL("models/weapons/p_fiveseven.mdl");
 
 	PRECACHE_SOUND("items/9mmclip1.wav");
 	PRECACHE_SOUND("items/9mmclip2.wav");
@@ -86,7 +86,7 @@ BOOL CWpnFiveSeven::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + WPN57_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_fiveseven.mdl", "models/p_fiveseven.mdl", WPN57_DEPLOY, "onehanded" );
+	return DefaultDeploy( "models/weapons/v_fiveseven.mdl", "models/weapons/p_fiveseven.mdl", WPN57_DEPLOY, "onehanded" );
 }
 
 void CWpnFiveSeven::PrimaryAttack( void )
@@ -191,7 +191,10 @@ void CWpnFiveSeven::Reload( void )
 
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
 
-	DefaultReload( FIVESEVEN_MAX_CLIP, WPN57_RELOAD, 3.0 );
+	if( m_iClip )
+		DefaultReload( FIVESEVEN_MAX_CLIP, WPN57_RELOAD, WPN57_RELOAD_TIME );
+	else
+		DefaultReload( FIVESEVEN_MAX_CLIP, WPN57_RELOAD_EMPTY, WPN57_RELOADEMPTY_TIME );
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 }
@@ -217,12 +220,12 @@ class CWpnFiveSevenAmmo : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/w_9mmclip.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_9mmclip.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/w_9mmclip.mdl");
+		PRECACHE_MODEL ("models/weapons/w_9mmclip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 

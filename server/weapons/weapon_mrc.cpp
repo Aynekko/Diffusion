@@ -60,7 +60,7 @@ void CMRC::Spawn( void )
 {
 	pev->classname = MAKE_STRING("weapon_9mmAR"); // hack to allow for old names
 	Precache( );
-	SET_MODEL(ENT(pev), "models/w_9mmAR.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_mrc.mdl");
 	m_iId = WEAPON_MRC;
 
 	m_iDefaultAmmo = MRC_DEFAULT_GIVE;
@@ -71,13 +71,13 @@ void CMRC::Spawn( void )
 
 void CMRC::Precache( void )
 {
-	PRECACHE_MODEL("models/v_9mmAR.mdl");
-	PRECACHE_MODEL("models/w_9mmAR.mdl");
-	PRECACHE_MODEL("models/p_9mmAR.mdl");
+	PRECACHE_MODEL("models/weapons/v_mrc.mdl");
+	PRECACHE_MODEL("models/weapons/w_mrc.mdl");
+	PRECACHE_MODEL("models/weapons/p_mrc.mdl");
 
-	PRECACHE_MODEL("models/grenade.mdl");	// grenade
+	PRECACHE_MODEL("models/weapons/grenade.mdl");	// grenade
 
-	PRECACHE_MODEL("models/w_9mmARclip.mdl");
+	PRECACHE_MODEL("models/weapons/w_9mmARclip.mdl");
 	PRECACHE_SOUND("items/9mmclip1.wav");              
 
 	PRECACHE_SOUND("items/clipinsert1.wav");
@@ -128,7 +128,7 @@ BOOL CMRC::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + MRC_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_9mmAR.mdl", "models/p_9mmAR.mdl", MRC_DEPLOY, "mp5" );
+	return DefaultDeploy( "models/weapons/v_mrc.mdl", "models/weapons/p_mrc.mdl", MRC_DEPLOY, "mp5" );
 }
 
 void CMRC::PrimaryAttack()
@@ -325,12 +325,12 @@ class CMRCAmmoClip : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/w_9mmARclip.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_9mmARclip.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/w_9mmARclip.mdl");
+		PRECACHE_MODEL ("models/weapons/w_9mmARclip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
@@ -356,12 +356,12 @@ class CMRCChainammo : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/w_chainammo.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_chainammo.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/w_chainammo.mdl");
+		PRECACHE_MODEL ("models/weapons/w_chainammo.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
@@ -385,12 +385,12 @@ class CMRCAmmoGrenade : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/w_ARgrenade.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_ARgrenade.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/w_ARgrenade.mdl");
+		PRECACHE_MODEL ("models/weapons/w_ARgrenade.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 

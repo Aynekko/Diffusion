@@ -450,7 +450,7 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 				Ratio[WEAPON_BERETTA] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "9mm" ) ) / _9MM_MAX_CARRY;
 				break;
 			case WEAPON_DEAGLE:
-				Ratio[WEAPON_DEAGLE] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "357" ) ) / _357_MAX_CARRY;
+				Ratio[WEAPON_DEAGLE] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "357" ) ) / DEAGLE_MAX_CARRY;
 				break;
 			case WEAPON_MRC:
 				Ratio[WEAPON_MRC] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "mrcbullets" ) ) / _9MM_MAX_CARRY;
@@ -548,7 +548,7 @@ void CAmmoCrate::GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float Curr
 		pPlayer->GiveAmmo( (int)((_9MM_MAX_CARRY - (_9MM_MAX_CARRY * CurrentRatio)) * 0.5), "9mm", _9MM_MAX_CARRY );
 		break;
 	case WEAPON_DEAGLE:
-		pPlayer->GiveAmmo( (int)((_357_MAX_CARRY - (_357_MAX_CARRY * CurrentRatio)) * 0.5), "357", _357_MAX_CARRY );
+		pPlayer->GiveAmmo( (int)((DEAGLE_MAX_CARRY - (DEAGLE_MAX_CARRY * CurrentRatio)) * 0.5), "357", DEAGLE_MAX_CARRY );
 		break;
 	case WEAPON_MRC:
 		pPlayer->GiveAmmo( (int)((_9MM_MAX_CARRY - (_9MM_MAX_CARRY * CurrentRatio)) * 0.5), "mrcbullets", _9MM_MAX_CARRY );

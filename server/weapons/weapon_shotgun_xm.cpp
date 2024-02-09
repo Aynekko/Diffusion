@@ -41,7 +41,7 @@ void CShotgunXM::Spawn( void )
 {
 	Precache();
 	m_iId = WEAPON_SHOTGUN_XM;
-	SET_MODEL( ENT( pev ), "models/w_m1014.mdl" );
+	SET_MODEL( ENT( pev ), "models/weapons/w_m1014.mdl" );
 
 	m_iDefaultAmmo = SHOTGUN_DEFAULT_GIVE;
 
@@ -50,9 +50,9 @@ void CShotgunXM::Spawn( void )
 
 void CShotgunXM::Precache( void )
 {
-	PRECACHE_MODEL( "models/v_m1014.mdl" );
-	PRECACHE_MODEL( "models/w_m1014.mdl" );
-	PRECACHE_MODEL( "models/p_m1014.mdl" );
+	PRECACHE_MODEL( "models/weapons/v_m1014.mdl" );
+	PRECACHE_MODEL( "models/weapons/w_m1014.mdl" );
+	PRECACHE_MODEL( "models/weapons/p_m1014.mdl" );
 
 	PRECACHE_SOUND( "items/9mmclip1.wav" );
 
@@ -108,7 +108,7 @@ BOOL CShotgunXM::Deploy()
 	m_flTimeWeaponIdle = gpGlobals->time + 2.0;
 	m_fInReload = 0; // reset any reloading
 	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
-	return DefaultDeploy( "models/v_m1014.mdl", "models/p_m1014.mdl", SHOTGUNXM_DRAW, "shotgun" );
+	return DefaultDeploy( "models/weapons/v_m1014.mdl", "models/weapons/p_m1014.mdl", SHOTGUNXM_DRAW, "shotgun" );
 }
 
 void CShotgunXM::PrimaryAttack()
