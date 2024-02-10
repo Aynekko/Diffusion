@@ -266,7 +266,7 @@ void main( void )
 			gloss *= emboss;
 		#endif
 		#if defined( BMODEL_WATER_REFRACTION ) 
-			gloss *= 1.0 - exp( -WaterAbsorbFactor * 0.5 );       
+			gloss *= RenderModeModifier;       
 		#endif
 		diffuse.rgb += gloss * shadow;
 	#endif
