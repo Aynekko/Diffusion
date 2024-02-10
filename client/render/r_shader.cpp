@@ -785,8 +785,12 @@ static void GL_InitBmodelDlightUniforms( glsl_program_t *shader )
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
 	shader->u_ProjectMap = pglGetUniformLocationARB( shader->handle, "u_ProjectMap" );
 	shader->u_ShadowMap = pglGetUniformLocationARB( shader->handle, "u_ShadowMap" ); // shadow2D or shadowCube
-//	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
 	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
+	if( GL_FindShaderDirective( shader, "BMODEL_WATER_REFRACTION" ) )
+	{
+		shader->u_DepthMap = pglGetUniformLocationARB( shader->handle, "u_DepthMap" );
+		shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
+	}
 
 	if( GL_FindShaderDirective( shader, "BMODEL_MULTI_LAYERS" ))
 		shader->u_LayerMap = pglGetUniformLocationARB( shader->handle, "u_LayerMap" );
@@ -813,7 +817,8 @@ static void GL_InitBmodelDlightUniforms( glsl_program_t *shader )
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
 	pglUniform1iARB( shader->u_ProjectMap, GL_TEXTURE2 );	// projection lights only
 	pglUniform1iARB( shader->u_ShadowMap, GL_TEXTURE3 );	// shadowmap or cubemap
-//	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE4 );
+	if( GL_FindShaderDirective( shader, "BMODEL_WATER_REFRACTION" ) )
+		pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE4 );
 
 	if( GL_FindShaderDirective( shader, "BMODEL_MULTI_LAYERS" ))
 		pglUniform1iARB( shader->u_LayerMap, GL_TEXTURE5 );

@@ -2457,7 +2457,15 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 
 			if( !tr.lowmemory && FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
+			{
 				GL_Bind( GL_TEXTURE6, tr.waterTextures[(int)(tr.time * 20.0f) % WATER_TEXTURES] ); // u_NormalMap
+
+				// request screen depth
+				GL_Bind( GL_TEXTURE4, tr.screen_depth ); // u_DepthMap
+				pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+				Vector2D screensizeinv = Vector2D( 1.0f / (float)glState.width, 1.0f / (float)glState.height );
+				pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, screensizeinv.x, screensizeinv.y );
+			}
 
 			// diffusion - interior mapping
 			if( tr.materials[es->gl_texturenum].gl_interiormap_id > 0 )

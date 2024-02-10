@@ -44,7 +44,10 @@ uniform float		u_GlossScale;
 uniform float		u_EmbossScale;
 #endif
 
-//uniform sampler2D	u_ScreenMap;	// screen copy
+#if defined( BMODEL_WATER_REFRACTION )
+uniform sampler2D	u_DepthMap;
+uniform vec2		u_ScreenSizeInv;
+#endif
 
 #if defined( BMODEL_LIGHT_PROJECTION )
 uniform sampler2D	u_ProjectMap;
@@ -68,7 +71,6 @@ uniform vec4			u_LightParams[6];
 #define u_FogParams		u_LightParams[5]
 
 uniform vec4		u_RenderColor;
-//uniform vec2		u_ScreenSizeInv;
 
 #if defined( BMODEL_LIGHT_PROJECTION )
 varying vec4		var_ProjCoord;
@@ -81,7 +83,7 @@ varying vec4		var_ShadowCoord;
 varying vec2		var_TexDiffuse;
 varying vec2		var_TexGlobal;
 varying vec3		var_LightVec;
-varying vec3		var_ViewVec; 
+varying vec3		var_ViewVec;
 varying vec3		var_Normal;
 varying mat3		var_MatrixTBN;
 varying vec3		var_Position;
@@ -166,11 +168,11 @@ void main( void )
 #else
 	diffuse = texture2D( u_ColorMap, var_TexDiffuse );
 	#if defined( BMODEL_SPECULAR )
-            #if defined( BMODEL_WATER ) && defined( BMODEL_WATER_REFRACTION )
-		glossmap = vec3( 0.5 );
-            #else
-		glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
-            #endif
+		#if defined( BMODEL_WATER ) && defined( BMODEL_WATER_REFRACTION )
+			glossmap = vec3( 0.5 );
+		#else
+			glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
+		#endif
 	#endif
 	#if defined( BMODEL_EMBOSS )
 		emboss = EmbossFilter( u_ColorMap, var_TexDiffuse, EmbossScale );
@@ -193,12 +195,38 @@ void main( void )
 	N = normalize( var_MatrixTBN * N );
 #endif
 
+#if defined( BMODEL_WATER_REFRACTION )
+	
+	float alpha = u_RenderColor.a;
+	alpha = RemapVal( alpha, 0.0, 1.0, 0.263, 0.500 );
+	alpha *= 0.015; // magic as well...
+
+	float WaterAbsorbFactor = 1.0;
+	const float u_zFar = -4096; // for consistency
+
+	float fOwnDepth = gl_FragCoord.z;
+	fOwnDepth = linearizeDepth( u_zFar, fOwnDepth );
+	fOwnDepth = RemapVal( fOwnDepth, Z_NEAR, u_zFar, 0.0, 1.0 );
+
+	float fSampledDepth = texture2D( u_DepthMap, gl_FragCoord.xy * u_ScreenSizeInv ).r;
+	fSampledDepth = linearizeDepth( u_zFar, fSampledDepth );
+	fSampledDepth = RemapVal( fSampledDepth, Z_NEAR, u_zFar, 0.0, 1.0 );
+
+	float depthDelta = abs( fOwnDepth - fSampledDepth );
+	float WaterAbsorbScale = clamp( alpha - (1.0 / 255.0), 0.0, 1.0 ) * 50.0;
+	WaterAbsorbFactor = 1.0 - saturate( exp2( -768.0 * WaterAbsorbScale * depthDelta ));
+#endif 
+
 	vec3 light = vec3( 1.0 );
 	float shadow = 1.0;
 	float RenderModeModifier = 1.0;
 
 #if defined( BMODEL_KRENDERTRANSTEXTURE )
-	RenderModeModifier = 0.2;
+	#if defined( BMODEL_WATER_REFRACTION ) 
+		RenderModeModifier = 1.0 - exp( -WaterAbsorbFactor * 0.5 );
+	#else 
+		RenderModeModifier = 0.2;     
+	#endif
 #endif
 
 #if defined( BMODEL_LIGHT_PROJECTION )
@@ -206,7 +234,6 @@ void main( void )
 
 	// texture or procedural spotlight
 	light *= 2 * Brightness * RenderModeModifier * texture2DProj( u_ProjectMap, var_ProjCoord ).rgb;
-
 	#if defined( BMODEL_HAS_SHADOWS )
 		shadow = ShadowProj( var_ShadowCoord, u_ShadowParams.xy, dot( N, L ));
 		if( shadow <= 0.0 ) discard; // fast reject
@@ -238,16 +265,12 @@ void main( void )
 		#if defined( BMODEL_EMBOSS )
 			gloss *= emboss;
 		#endif
+		#if defined( BMODEL_WATER_REFRACTION ) 
+			gloss *= 1.0 - exp( -WaterAbsorbFactor * 0.5 );       
+		#endif
 		diffuse.rgb += gloss * shadow;
 	#endif
 
-/* not used
-#if defined( BMODEL_TRANSLUCENT )
-	vec3 screenmap = texture2D( u_ScreenMap, gl_FragCoord.xy * u_ScreenSizeInv ).xyz;
-	screenmap.rgb *= light.rgb * NdotL * atten;
-	diffuse.rgb = Q_mix( screenmap, diffuse.rgb, u_RenderColor.a );
-#endif
-*/
 	// compute final color
 	gl_FragColor = diffuse;
 }
