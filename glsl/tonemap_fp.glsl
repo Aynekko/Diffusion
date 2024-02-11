@@ -15,8 +15,9 @@ GNU General Public License for more details.
 
 uniform sampler2D	u_ScreenMap;
 uniform sampler2D	u_HDRExposure;
+uniform float		u_GenericCondition;
 
-varying vec2	        var_TexCoord;
+varying vec2		var_TexCoord;
 
 void main( void )
 {
@@ -24,6 +25,15 @@ void main( void )
 
     float exposure = texture2D( u_HDRExposure, vec2( 0.5 )).r;
     float gamma = 1.5 * exposure;
+
+	if( bool( u_GenericCondition == 1.0f ))
+	{
+		const vec2 lum = vec2( 0.7, 0.7 );   // fixed constant instead of adaptation curve
+        float Lp = ( 8.0 / lum.x ) * max( color.x, max( color.y, color.z ));
+        float LmSqr = ( lum.y + 8.0 * lum.y ) * ( lum.y + 8.0 * lum.y );
+        float toneScalar = ( Lp * ( 1.0 + ( Lp / ( LmSqr )))) / ( 1.0 + Lp );
+		color *= toneScalar;
+	}
 
     gl_FragColor = color * gamma;
 }

@@ -1094,7 +1094,6 @@ void ToneMap(void)
 	GL_CleanUpTextureUnits( 0 );
 	pglViewport( 0, 0, glState.width, glState.height );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
-	GL_BindShader( NULL );
 
 	// capture screen
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
@@ -1106,9 +1105,9 @@ void ToneMap(void)
 	ASSERT( RI->currentshader != NULL );
 
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	GL_Bind( GL_TEXTURE1, ExposureTexture ); // u_HDRExposure	
-	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height) );
-	pglUniform1fARB( RI->currentshader->u_MipLod, (float)(mipmap_count - 1) );
+	GL_Bind( GL_TEXTURE1, ExposureTexture ); // u_HDRExposure
+	float UseTonemap = (gl_tonemap->value > 0) ? 1.0f : 0.0f;
+	pglUniform1fARB( RI->currentshader->u_GenericCondition, UseTonemap );
 
 	RenderFSQ( glState.width, glState.height );
 

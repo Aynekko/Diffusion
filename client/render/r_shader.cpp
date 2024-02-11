@@ -1278,8 +1278,7 @@ static void GL_InitTonemapUniforms( glsl_program_t *shader )
 
 	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
 	shader->u_HDRExposure = pglGetUniformLocationARB( shader->handle, "u_HDRExposure" );
-	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
-	shader->u_MipLod = pglGetUniformLocationARB( shader->handle, "u_MipLod" );
+	shader->u_GenericCondition = pglGetUniformLocationARB( shader->handle, "u_GenericCondition" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE0 );

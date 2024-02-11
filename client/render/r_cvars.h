@@ -75,6 +75,7 @@ extern cvar_t *gl_sunshafts_blur;
 extern cvar_t *gl_sunshafts_brightness;
 extern cvar_t *gl_ssao;
 extern cvar_t *gl_ssao_debug;
+extern cvar_t *gl_tonemap;
 extern cvar_t	*thirdperson;
 extern cvar_t	*r_sun_allowed;
 extern cvar_t *cl_showmsgs;

@@ -130,6 +130,7 @@ cvar_t *gl_sunshafts_blur;
 cvar_t *gl_sunshafts_brightness;
 cvar_t *gl_ssao;
 cvar_t *gl_ssao_debug;
+cvar_t *gl_tonemap;
 cvar_t *gl_lensflare;
 cvar_t *gl_water_refraction;
 cvar_t *gl_water_planar;
@@ -364,6 +365,7 @@ void V_Init( void )
 	gl_sunshafts_brightness = CVAR_REGISTER( "gl_sunshafts_brightness", "0", FCVAR_ARCHIVE );
 	gl_ssao = CVAR_REGISTER( "gl_ssao", "1", FCVAR_ARCHIVE );
 	gl_ssao_debug = CVAR_REGISTER( "gl_ssao_debug", "0", FCVAR_CHEAT );
+	gl_tonemap = CVAR_REGISTER( "gl_tonemap", "0", FCVAR_ARCHIVE );
 	r_shadowquality = CVAR_REGISTER( "r_shadowquality", "0", FCVAR_ARCHIVE );
 	r_mirrorquality = CVAR_REGISTER( "r_mirrorquality", "0", FCVAR_ARCHIVE );
 	r_testdlight = CVAR_REGISTER( "r_testdlight", "0", FCVAR_CHEAT );
