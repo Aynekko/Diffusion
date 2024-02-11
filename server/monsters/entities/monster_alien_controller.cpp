@@ -2869,13 +2869,16 @@ void CDrone :: IdleSound(void)
 
 void CDrone::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if( pActivator )
+	if( !IsPlayerDrone )
+		return;
+	
+	if( pActivator && pActivator->IsPlayer() )
 	{
 		if( pev->owner != pActivator->edict() )
 			return; // you can't steal someone else's drone! (lol)
 	}
 	
-	CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
+	CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pev->owner );
 
 	if( pPlayer )
 	{
@@ -2883,6 +2886,12 @@ void CDrone::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTyp
 		pPlayer->DroneHealth = pev->health;
 		pPlayer->DroneAmmo = m_iCounter;
 		pPlayer->DroneDeployed = false;
+
+		// fire target if set
+		if( !FStringNull( pPlayer->DroneTarget_OnReturn ) )
+			UTIL_FireTargets( pPlayer->DroneTarget_OnReturn, pPlayer, pPlayer, USE_TOGGLE, 0 );
+		CBasePlayerWeapon *gun = (CBasePlayerWeapon *)pPlayer->m_pActiveItem->GetWeaponPtr();
+		gun->m_flNextPrimaryAttack = gun->m_flNextSecondaryAttack = gpGlobals->time + DRONE_DEPLOY_TIME;
 	}
 
 	// very important to do this!!!
@@ -2968,8 +2977,7 @@ void CDrone::Killed( entvars_t *pevAttacker, int iGib )
 	// inform the player that I died
 	if( IsPlayerDrone )
 	{
-		CBaseEntity *pEntity = CBaseEntity::Instance( pev->owner );
-		CBasePlayer *pPlayer = (CBasePlayer *)pEntity;
+		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pev->owner );
 
 		if( pPlayer )
 		{

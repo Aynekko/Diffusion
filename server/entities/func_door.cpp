@@ -967,9 +967,14 @@ void CBaseDoor::Blocked( CBaseEntity *pOther )
 	if( pev->dmg )
 		pOther->TakeDamage( pev, pev, pev->dmg, DMG_CRUSH );
 
+	if( !pOther )
+		return;
+
 	// diffusion - remove the satchels and tripmines
 	if( FClassnameIs( pOther, "monster_satchel" ) || FClassnameIs( pOther, "monster_tripmine" ) )
 		UTIL_Remove( pOther );
+	else if( FClassnameIs( pOther, "_playerdrone" ) )
+		pOther->Use( NULL, NULL, USE_TOGGLE, 0 );
 
 	// if a door has a negative wait, it would never come back if blocked,
 	// so let it just squash the object to death real fast
