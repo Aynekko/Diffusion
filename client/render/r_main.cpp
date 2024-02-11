@@ -411,10 +411,6 @@ void R_CheckChanges( void )
 	static float waveheight_old;
 	bool settings_changed = false;
 
-	// Hack: I have to cache these, because new FWGS engine version (Feb 2024) clears flags before they get here 
-	static float brightness_old = 0.0f;
-	static float gamma_old = 0.0f;
-
 	if( FBitSet( r_recursion_depth->flags, FCVAR_CHANGED ))
 	{
 		float depth = bound( 0.0f, r_recursion_depth->value, MAX_REF_STACK - 2 );
@@ -571,14 +567,12 @@ void R_CheckChanges( void )
 		settings_changed = true;
 	}
 
-	if( FBitSet( vid_gamma->flags, FCVAR_CHANGED ) || FBitSet( vid_brightness->flags, FCVAR_CHANGED ) || (vid_brightness->value != brightness_old) || (vid_gamma->value != gamma_old) )
+	if( FBitSet( vid_gamma->flags, FCVAR_CHANGED ) || FBitSet( vid_brightness->flags, FCVAR_CHANGED ) )
 	{
 		for( int i = 0; i < worldmodel->numsurfaces; i++ )
 			SetBits( worldmodel->surfaces[i].flags, SURF_LM_UPDATE );
 		R_StudioClearLightCache();
 		settings_changed = true;
-		brightness_old = vid_brightness->value;
-		gamma_old = vid_gamma->value;
 	}
 
 	if( tr.fogEnabled != fog_enabled_old )

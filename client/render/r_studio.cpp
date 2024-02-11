@@ -3857,7 +3857,7 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 	r_dynamic->value = 0.0f; // ignore dlights
 	IEngineStudio.StudioDynamicLight( ent, &lighting );
 	r_dynamic->value = dynamic;
-
+	
 	if( !FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) )
 	{
 		if( FBitSet( ent->curstate.iuser1, CF_STATIC_ENTITY ) )

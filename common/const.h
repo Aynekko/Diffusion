@@ -827,7 +827,7 @@ enum
 	kRenderFxExplode,			// Scale up really big!
 	kRenderFxGlowShell,			// Glowing Shell
 	kRenderFxClampMinScale,		// Keep this sprite from getting very small (SPRITES only!)
-	kRenderFxAurora,			// set particle trail for this entity
+	kRenderFxAurora,			// set particle trail for this entity // this is also used in engine as kRenderFxLightMultiplier...FIXME
 	kRenderFxNoShadows,			// diffusion - no dynamic shadow cast
 	kRenderFxFrontDissolve,		// diffusion - when you get very close to sprite, it will fade (glow sprites only) (kinda like reverse fade distance - maybe need to apply to models in future) // TODO make it better
 	kRenderFxFullbright,		// diffusion - self-explanatory

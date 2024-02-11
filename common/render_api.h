@@ -226,8 +226,8 @@ typedef struct render_api_s
 	// Misc renderer functions
 	void		(*GL_DrawParticles)( const struct ref_viewpass_s *rvp, qboolean trans_pass, float frametime );
 	void		(*EnvShot)( const float *vieworg, const char *name, qboolean skyshot, int shotsize ); // store skybox into gfx\env folder
-	int		(*SPR_LoadExt)( const char *szPicName, unsigned int texFlags ); // extended version of SPR_Load
-	colorVec		(*LightVec)( const float *start, const float *end, float *lightspot );
+	int			(*SPR_LoadExt)( const char *szPicName, unsigned int texFlags ); // extended version of SPR_Load
+	colorVec	(*LightVec)(const float *start, const float *end, float *lightspot, float *lightvec);
 	struct mstudiotex_s *( *StudioGetTexture )( struct cl_entity_s *e );
 	const struct ref_overview_s *( *GetOverviewParms )( void );
 	const char	*( *GetFileByIndex )( int fileindex );
