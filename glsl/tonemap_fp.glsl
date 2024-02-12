@@ -24,16 +24,18 @@ void main( void )
     vec4 color = texture2DLod( u_ScreenMap, var_TexCoord, 0.0 );
 
     float exposure = texture2D( u_HDRExposure, vec2( 0.5 )).r;
-    float gamma = 1.5 * exposure;
+    float gamma = 1.5;
 
 	if( bool( u_GenericCondition == 1.0f ))
 	{
-		const vec2 lum = vec2( 0.7, 0.7 );   // fixed constant instead of adaptation curve
-        float Lp = ( 8.0 / lum.x ) * max( color.x, max( color.y, color.z ));
-        float LmSqr = ( lum.y + 8.0 * lum.y ) * ( lum.y + 8.0 * lum.y );
-        float toneScalar = ( Lp * ( 1.0 + ( Lp / ( LmSqr )))) / ( 1.0 + Lp );
+		const vec2 lum = vec2( 0.6, 1.2 );   // fixed constant instead of adaptation curve
+		float Lp = ( 5.0 / lum.x ) * min( color.x, min( color.y, color.z ));
+		float LmSqr = ( lum.y + 5.0 * lum.y ) * ( lum.y + 5.0 * lum.y );
+		float toneScalar = ( Lp * ( 1.0 + ( Lp / ( LmSqr )))) / ( 1.0 + Lp );
 		color *= toneScalar;
+		gamma += 0.5 * exposure;
 	}
 
+    gamma *= exposure;
     gl_FragColor = color * gamma;
 }
