@@ -2115,7 +2115,6 @@ public:
 	int ObjectCaps(void);
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	float LastSparkTime;
-	bool IsPlayerDrone;
 
 	void PainSound(void);
 	void AlertSound(void);
@@ -2152,7 +2151,6 @@ BEGIN_DATADESC( CDrone )
 	DEFINE_FIELD( IsRocketDrone, FIELD_BOOLEAN ),
 	DEFINE_FIELD( SpawnTime, FIELD_TIME ),
 	DEFINE_FIELD( NextRocketAttack, FIELD_TIME ),
-	DEFINE_FIELD( IsPlayerDrone, FIELD_BOOLEAN ),
 END_DATADESC()
 
 int	CDrone :: Classify ( void )
@@ -2184,7 +2182,7 @@ void CDrone :: Spawn()
 		IsRocketDrone = true;
 
 	if( FClassnameIs( pev, "_playerdrone" ) )
-		IsPlayerDrone = true;
+		SetFlag( F_PLAYER_DRONE );
 
 	if( IsRocketDrone )
 	{
@@ -2228,7 +2226,7 @@ void CDrone :: Spawn()
 
 	CriticalDamage = false; // didn't say "critical damage" yet
 
-	if( IsPlayerDrone )
+	if( HasFlag( F_PLAYER_DRONE ) )
 	{
 		// UNDONE only player drone for now. it follows the grunts too but it's very buggy
 		// ...is it really needed though?
@@ -2406,7 +2404,7 @@ void CDrone :: RunAI( void )
 	if( AlienEye ) // diffusion - !!! the origin is not being updated, have to do this, otherwise distance culling issues
 		AlienEye->pev->origin = pev->origin;
 	
-	if( IsPlayerDrone )
+	if( HasFlag( F_PLAYER_DRONE ) )
 	{
 		if( gpGlobals->time > SpawnTime )
 			RemoveFlag( F_ENTITY_BUSY );
@@ -2602,7 +2600,7 @@ void CDrone :: RunTask ( Task_t *pTask )
 					}
 					m_flShootTime += 0.75;
 				}
-				else if( IsPlayerDrone )
+				else if( HasFlag( F_PLAYER_DRONE ) )
 				{
 					// can I shoot?
 					bool DroneCanShoot = true;
@@ -2755,7 +2753,7 @@ void CDrone :: RunTask ( Task_t *pTask )
 		break;
 	case TASK_MOVE_TO_TARGET_RANGE: // diffusion - only for player's drone
 	{
-		if( !IsPlayerDrone )
+		if( !HasFlag( F_PLAYER_DRONE ) )
 		{
 			CSquadMonster::RunTask( pTask );
 			break;
@@ -2869,7 +2867,7 @@ void CDrone :: IdleSound(void)
 
 void CDrone::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if( !IsPlayerDrone )
+	if( !HasFlag( F_PLAYER_DRONE ) )
 		return;
 	
 	if( pActivator && pActivator->IsPlayer() )
@@ -2975,7 +2973,7 @@ void CDrone::Killed( entvars_t *pevAttacker, int iGib )
 	FCheckAITrigger();
 	
 	// inform the player that I died
-	if( IsPlayerDrone )
+	if( HasFlag( F_PLAYER_DRONE ) )
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pev->owner );
 

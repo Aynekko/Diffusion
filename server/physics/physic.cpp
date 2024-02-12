@@ -570,6 +570,9 @@ bool CPhysicsPushedEntities::SpeculativelyCheckPush( PhysicsPushedInfo_t &info, 
 				{
 					ALERT( at_warning, "Interpenetrating entities! (%s and %s)\n",
 					pBlocker->GetClassname(), m_rgPusher[0].m_pEntity->GetClassname() );
+					// diffusion - drone hack!!!
+					if( pBlocker->HasFlag( F_PLAYER_DRONE ) )
+						pBlocker->Use( NULL, NULL, USE_TOGGLE, 0 );
 				}
 			}
 			return true;
@@ -1952,7 +1955,7 @@ void SV_Physics_Toss( CBaseEntity *pEntity )
 
 	if( trace.fAllSolid )
 	{
-		if( pEntity->HasFlag( F_PLAYER_CONTROL ) )
+		if( pEntity->HasFlag( F_PLAYER_DRONE ) )
 		{
 			// diffusion - drone hack!!! - the drone getting stuck in brush entities if it touches them at the bottom
 			// fuck this shit, just do this:
@@ -1976,7 +1979,7 @@ void SV_Physics_Toss( CBaseEntity *pEntity )
 	else
 	{
 		// diffusion - drone hack!!! - fucked fucking fuckery
-		if( pEntity->HasFlag( F_PLAYER_CONTROL ) )
+		if( pEntity->HasFlag( F_PLAYER_DRONE ) )
 		{
 			// not in solid? remember valid origin
 			pEntity->pev->vuser4 = pEntity->GetAbsOrigin();
@@ -2003,7 +2006,7 @@ void SV_Physics_Toss( CBaseEntity *pEntity )
 	pEntity->SetAbsVelocity( vecAbsVelocity );
 
 	// stop if on ground
-	if( trace.vecPlaneNormal[2] > 0.7f && !pEntity->HasFlag(F_PLAYER_CONTROL) ) // diffusion - drone hack!!! - disable this: controlled drone is getting stuck in the floor (make sure nothing else is broken)
+	if( trace.vecPlaneNormal[2] > 0.7f && !pEntity->HasFlag( F_PLAYER_DRONE ) ) // diffusion - drone hack!!! - disable this: controlled drone is getting stuck in the floor (make sure nothing else is broken)
 	{		
 		move = pEntity->GetAbsVelocity() + pEntity->GetBaseVelocity();
 

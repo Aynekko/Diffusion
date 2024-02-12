@@ -77,7 +77,7 @@
 #define F_NOBACKCULL			BIT(18) // NOT CURRENTLY USED disable server back-culling for this entity (monsters, env_sky, etc.) - sv_fade_props_backcull
 #define F_MONSTER_BIGNODE				BIT(19) // is a monster, which uses separate, big nodes. (alien ship, robo)
 #define F_PLAYER_BUTTONFREEZED		BIT(20) // a button has indicated to freeze the player in place for 2 seconds
-//	BIT(21) // unused
+#define F_PLAYER_DRONE			BIT(21) // it's a _playerdrone
 #define F_MONSTER_CAN_SEE_THROUGH BIT(22) // monsters can now see through transparent brushes, this is a workaround for mapper's purposes
 #define F_PLAYER_CONTROL BIT(23) // this entity is controlled by player (i.e. drone)
 
