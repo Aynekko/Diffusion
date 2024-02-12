@@ -3275,12 +3275,12 @@ void CBasePlayer::ManageDrone( void )
 				if( gpGlobals->time > drone_UpdateTime + 0.1 )
 				{
 					// record current movement direction
-					drone_currentdir = m_hDrone->pev->velocity.Normalize();
+					drone_currentdir = m_hDrone->GetAbsVelocity().Normalize();
 					// update direction
-					m_hDrone->pev->velocity += (gpGlobals->v_forward * drone_forwmove + gpGlobals->v_right * drone_sidemove + gpGlobals->v_up * drone_upmove) * drone_Speed;
+					m_hDrone->SetAbsVelocity( m_hDrone->GetAbsVelocity() + (gpGlobals->v_forward * drone_forwmove + gpGlobals->v_right * drone_sidemove + gpGlobals->v_up * drone_upmove) * drone_Speed );
 					// calculate difference between directions, this will affect the velocity
 					// I don't know math so it will have to do :(
-					drone_DirChange = DotProduct( drone_currentdir, m_hDrone->pev->velocity.Normalize() );
+					drone_DirChange = DotProduct( drone_currentdir, m_hDrone->GetAbsVelocity().Normalize() );
 					if( drone_DirChange <= 0.4f )
 						drone_DirChange = 0.4f;
 
@@ -3334,7 +3334,7 @@ void CBasePlayer::ManageDrone( void )
 				}
 
 				// update velocity and direction
-				m_hDrone->pev->velocity = m_hDrone->pev->velocity.Normalize() * drone_Speed * drone_DirChange;
+				m_hDrone->SetAbsVelocity( m_hDrone->GetAbsVelocity().Normalize() * drone_Speed * drone_DirChange );
 			}
 			else // player has left 1st person mode
 			{
@@ -3353,7 +3353,6 @@ void CBasePlayer::ManageDrone( void )
 					pev->flags &= ~FL_ONTRAIN;
 					m_hDrone->pev->angles.x = 0; // reset vertical turn
 					m_hDrone->SetAbsAngles( m_hDrone->GetAbsAngles() );
-					m_hDrone->pev->velocity = g_vecZero;
 					m_hDrone->RemoveFlag( F_PLAYER_CONTROL );
 					m_hDrone->SetAbsVelocity( g_vecZero );
 					m_hDrone->pev->effects |= EF_MERGE_VISIBILITY;

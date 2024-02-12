@@ -1952,13 +1952,35 @@ void SV_Physics_Toss( CBaseEntity *pEntity )
 
 	if( trace.fAllSolid )
 	{
-		if( pEntity->m_iActorType == ACTOR_CHARACTER )
-			WorldPhysic->MoveCharacter( pEntity );
+		if( pEntity->HasFlag( F_PLAYER_CONTROL ) )
+		{
+			// diffusion - drone hack!!! - the drone getting stuck in brush entities if it touches them at the bottom
+			// fuck this shit, just do this:
+			pEntity->SetAbsOrigin( pEntity->pev->vuser4 ); // vuser4 of the drone is remembered valid origin (being out of any solids)
+			Vector newvel = pEntity->GetAbsVelocity();
+			newvel.z = 0; // reset Z, don't go upwards inside brush entity
+			pEntity->SetAbsVelocity( newvel );
+			// it now SLIDES along the brush entity as INTENDED and not getting STUCK
+		}
+		else // regular unchanged stuff
+		{
+			if( pEntity->m_iActorType == ACTOR_CHARACTER )
+				WorldPhysic->MoveCharacter( pEntity );
 
-		// entity is trapped in another solid
-		pEntity->SetLocalAvelocity( g_vecZero );
-		pEntity->SetLocalVelocity( g_vecZero );
-		return;
+			// entity is trapped in another solid
+			pEntity->SetLocalAvelocity( g_vecZero );
+			pEntity->SetLocalVelocity( g_vecZero );
+			return;
+		}
+	}
+	else
+	{
+		// diffusion - drone hack!!! - fucked fucking fuckery
+		if( pEntity->HasFlag( F_PLAYER_CONTROL ) )
+		{
+			// not in solid? remember valid origin
+			pEntity->pev->vuser4 = pEntity->GetAbsOrigin();
+		}
 	}
 
 	if( trace.flFraction == 1.0f )
@@ -1981,7 +2003,7 @@ void SV_Physics_Toss( CBaseEntity *pEntity )
 	pEntity->SetAbsVelocity( vecAbsVelocity );
 
 	// stop if on ground
-	if( trace.vecPlaneNormal[2] > 0.7f )
+	if( trace.vecPlaneNormal[2] > 0.7f && !pEntity->HasFlag(F_PLAYER_CONTROL) ) // diffusion - drone hack!!! - disable this: controlled drone is getting stuck in the floor (make sure nothing else is broken)
 	{		
 		move = pEntity->GetAbsVelocity() + pEntity->GetBaseVelocity();
 
