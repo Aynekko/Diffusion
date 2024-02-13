@@ -2011,7 +2011,7 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 	bool flagMasked = FBitSet( mat->flags, STUDIO_NF_MASKED ) ? true : false;
 	bool texTransparent = flagAdditive || flagMasked;
 	bool texAlphaToCoverage = true;// FBitSet( mat->flags, STUDIO_NF_ALPHATOCOVERAGE );
-	bool usingAlphaBlend = texTransparent &&FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) && !texAlphaToCoverage;
+	bool usingAlphaBlend = texTransparent && FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) && !texAlphaToCoverage;
 
 	Q_strncpy( glname, "StudioDlight", sizeof( glname ));
 	memset( options, 0, sizeof( options ));

@@ -2101,7 +2101,7 @@ word R_ChooseBmodelProgram( msurface_t *surf, cl_entity_t *e, bool lightpass )
 		translucent = true;
 		break;
 	}
-
+	
 	// diffusion - shader must be reset when model changes appearance
 	// UPD#1: doesn't work if the model was outside of pvs when the change occured!!!
 	if( (e->curstate.renderfx != e->prevstate.renderfx) || (e->curstate.rendermode != e->prevstate.rendermode) )
@@ -2124,7 +2124,7 @@ bool R_AddSurfaceToDrawList( msurface_t *surf, bool lightpass )
 	cl_entity_t *e = RI->currententity;
 	word hProgram;
 	gl_bmodelface_t *entry;
-
+	
 	if( FBitSet( RI->params, RP_SHADOWPASS ) )
 		lightpass = false;
 
@@ -2219,7 +2219,7 @@ void R_BuildFaceListForLight( plight_t *pl )
 		psurf = entry->surface;
 		es = entry->surface->info;
 		
-		if( es->subtexture[glState.stack_position] && !(es->surf->flags & SURF_WATER) )
+		if( es->subtexture[glState.stack_position] && !(es->surf->flags & SURF_WATER) && !(es->surf->flags & SURF_SCREEN) )
 			continue; // don't light the mirrors, portals etc // diffusion - except water
 
 		if( (e->curstate.rendermode == kRenderTransAdd) && (e->model->type == mod_brush) )
@@ -2388,6 +2388,12 @@ void R_DrawLightForSurfList( plight_t *pl )
 				else 
 					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
+			}
+			else if( FBitSet( s->flags, SURF_SCREEN ) && es->subtexture[glState.stack_position] )
+			{
+				int handle = es->subtexture[glState.stack_position];
+				GL_Bind( GL_TEXTURE0, tr.subviewTextures[handle - 1].texturenum );
+				GL_LoadTexMatrix( tr.subviewTextures[handle - 1].matrix );
 			}
 			else
 			{

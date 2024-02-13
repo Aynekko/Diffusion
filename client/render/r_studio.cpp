@@ -4755,7 +4755,7 @@ void CStudioModelRenderer::AddMeshToDrawList( studiohdr_t *phdr, const vbomesh_t
 	{
 		if( FBitSet( mat->flags, STUDIO_NF_FULLBRIGHT ) )
 			return; // can't light fullbrights
-
+		
 		if( (e->curstate.renderfx == kRenderFxFullbright) || (e->curstate.renderfx == kRenderFxFullbrightNoShadows) )
 			return;
 
@@ -4763,7 +4763,7 @@ void CStudioModelRenderer::AddMeshToDrawList( studiohdr_t *phdr, const vbomesh_t
 			return; // don't light fading entities
 
 		if( FBitSet( mat->flags, STUDIO_NF_NODLIGHT ) )
-			return; // shader was failed to compile
+			return; // shader has failed to compile
 
 		if( m_nNumLightMeshes >= MAX_MODEL_MESHES )
 		{
@@ -5042,6 +5042,8 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			}
 			else if( tr.materials[mat->gl_diffuse_id].drone_view )
 				GL_Bind( GL_TEXTURE0, tr.DroneViewTex );
+			else if( (m_pCurrentEntity->curstate.iuser3 == -670) && tr.materials[mat->gl_diffuse_id].monitor && tr.studio_screen_tex[m_pCurrentEntity->index] )
+				GL_Bind( GL_TEXTURE0, tr.studio_screen_tex[m_pCurrentEntity->index] );
 			else
 				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
 

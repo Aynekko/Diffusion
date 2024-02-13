@@ -26,7 +26,7 @@ void main( void )
 {
     float zfar = u_zFar;	// camera clipping end	
     vec2 tx = var_TexCoord;
-    float radius = 0.5;
+    float radius = 0.4;
 
     float fSampledDepth = texture2D( u_DepthMap, tx ).r;
     fSampledDepth = linearizeDepth( fSampledDepth, znear, zfar ); // get z-eye
