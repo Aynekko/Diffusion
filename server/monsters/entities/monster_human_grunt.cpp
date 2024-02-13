@@ -312,7 +312,7 @@ Task_t tlGruntRunAndFire[] =
 {
 			{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_GRUNT_ELOF_FAIL	},
 
-			{ TASK_GET_PATH_TO_ENEMY,	(float)128						},
+			{ TASK_GET_PATH_TO_ENEMY,	(float)256						},
 			{ TASK_GRUNT_SPEAK_SENTENCE,(float)0						},
 			{ TASK_RUN_PATH,			(float)0						},
 			{ TASK_WAIT_FOR_MOVEMENT,	(float)0						},
@@ -327,7 +327,11 @@ Schedule_t slGruntRunAndFire[] =
 		bits_COND_ENEMY_DEAD |
 		bits_COND_ENEMY_LOST |
 		bits_COND_CAN_MELEE_ATTACK1 |
-		bits_COND_CAN_MELEE_ATTACK2,
+		bits_COND_CAN_MELEE_ATTACK2 |
+		bits_COND_NO_AMMO_LOADED |
+		bits_COND_HEAVY_DAMAGE |
+		bits_COND_LOW_HEALTH |
+		bits_COND_HEAR_SOUND,
 
 		bits_SOUND_DANGER,
 		"GruntRunAndFire"
@@ -1494,7 +1498,7 @@ void CHGrunt :: Shoot ( void )
 	if( !m_fStanding )
 		FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_4DEGREES, 4096, BULLET_MONSTER_MP5 );
 	else if( RunningShooting )
-		FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_10DEGREES, 4096, BULLET_MONSTER_MP5 );
+		FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_20DEGREES, 4096, BULLET_MONSTER_MP5 );
 	else
 		FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_6DEGREES, 4096, BULLET_MONSTER_MP5 );
 
@@ -1521,7 +1525,7 @@ void CHGrunt :: Shotgun ( void )
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass ( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL); 
-	FireBullets(gSkillData.hgruntShotgunPellets, vecShootOrigin, vecShootDir, VECTOR_CONE_7DEGREES, 4096, BULLET_PLAYER_BUCKSHOT, 0, GruntShotgunDamage[g_iSkillLevel] ); // shoot +-7.5 degrees // diffusion 4096, was 2048
+	FireBullets(gSkillData.hgruntShotgunPellets, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_15DEGREES : VECTOR_CONE_7DEGREES, 4096, BULLET_PLAYER_BUCKSHOT, 0, GruntShotgunDamage[g_iSkillLevel] ); // shoot +-7.5 degrees // diffusion 4096, was 2048
 
 	pev->effects |= EF_MUZZLEFLASH;
 	
@@ -2346,7 +2350,15 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 
 				if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 				{
-					if( m_hEnemy && (m_hEnemy->pev->movetype != MOVETYPE_FLY) && (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 400 )
+					if( m_hEnemy 
+						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY) 
+						&& (
+							(m_hEnemy->IsMonster() && !FClassnameIs(m_hEnemy, "monster_target")) 
+							|| m_hEnemy->IsPlayer()
+							) 
+						&& (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 666
+						&& pev->health > HGRUNT_LIMP_HEALTH
+						)
 						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
 
 					return GetScheduleOfType( SCHED_GRUNT_SUPPRESS );
@@ -2457,10 +2469,16 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 						//JustSpoke();
 					}
 
-					if( m_hEnemy && (m_hEnemy->pev->movetype != MOVETYPE_FLY) )
+					if( m_hEnemy
+						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
+						&& (
+							(m_hEnemy->IsMonster() && !FClassnameIs( m_hEnemy, "monster_target" ))
+							|| m_hEnemy->IsPlayer()
+							)
+						)
 						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
-					else
-						return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
+
+					return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 				}
 				else
 				{
@@ -3442,7 +3460,15 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 
 				if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 				{
-					if( m_hEnemy && (m_hEnemy->pev->movetype != MOVETYPE_FLY) && (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 400 )
+					if( m_hEnemy
+						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
+						&& (
+							(m_hEnemy->IsMonster() && !FClassnameIs( m_hEnemy, "monster_target" ))
+							|| m_hEnemy->IsPlayer()
+							)
+						&& (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 666
+						&& pev->health > HGRUNT_LIMP_HEALTH
+						)
 						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
 
 					return GetScheduleOfType( SCHED_GRUNT_SUPPRESS );
@@ -3549,10 +3575,16 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 						//JustSpoke();
 					}
 					
-					if( m_hEnemy && (m_hEnemy->pev->movetype != MOVETYPE_FLY) )
+					if( m_hEnemy
+						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
+						&& (
+							(m_hEnemy->IsMonster() && !FClassnameIs( m_hEnemy, "monster_target" ))
+							|| m_hEnemy->IsPlayer()
+							)
+						)
 						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
-					else
-						return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
+
+					return GetScheduleOfType( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 				}
 				else
 				{
@@ -4411,7 +4443,7 @@ void CHGruntSecurityGeneral::Shoot(void)
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40, 90) + gpGlobals->v_up * RANDOM_FLOAT(75, 200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass(vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_556, TE_BOUNCE_SHELL);
-	FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 4096, BULLET_MONSTER_MP5, 1, 7); // 7 dmg per bullet
+	FireBullets(1, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_10DEGREES : VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 7); // 7 dmg per bullet
 
 	pev->effects |= EF_MUZZLEFLASH;
 
@@ -5554,7 +5586,7 @@ void CAndrewGrunt::Shoot( void )
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT( 40, 90 ) + gpGlobals->v_up * RANDOM_FLOAT( 75, 200 ) + gpGlobals->v_forward * RANDOM_FLOAT( -40, 40 );
 	EjectBrass( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_556, TE_BOUNCE_SHELL );
-	FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 4096, BULLET_MONSTER_MP5, 1, 7 ); // 7 dmg per bullet
+	FireBullets( 1, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_10DEGREES : VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 7 ); // 7 dmg per bullet
 
 	pev->effects |= EF_MUZZLEFLASH;
 

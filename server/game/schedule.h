@@ -281,6 +281,7 @@ struct WayPoint_t
 #define bits_COND_ENEMY_LOST			BIT( 23 ) // did not observe an enemy for a while  // freeslave
 #define bits_COND_ENEMY_TOOCLOSE		BIT( 24 ) // diffusion - too close, run away
 #define bits_COND_SEETHROUGHWALL		BIT( 25 ) // diffusion - can see through func_wall (if wall has such properties)
+#define bits_COND_LOW_HEALTH			BIT( 26 ) // diffusion - interrupt schedule if health below 25%
 
 #define bits_COND_SPECIAL1				BIT( 28 ) // Defined by individual monster
 #define bits_COND_SPECIAL2				BIT( 29 ) // Defined by individual monster

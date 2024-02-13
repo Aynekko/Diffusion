@@ -92,6 +92,15 @@ void CBaseMonster :: RunAI ( void )
 			Look( m_flDistLook );
 			Listen();// check for audible sounds. 
 
+			// check for low health
+			if( pev->max_health > 0 ) // make sure this is valid
+			{
+				if( !HasConditions( bits_COND_LOW_HEALTH ) && (pev->health <= (pev->max_health * 0.25f)) )
+					SetConditions( bits_COND_LOW_HEALTH );
+				else if( HasConditions( bits_COND_LOW_HEALTH ) && (pev->health > (pev->max_health * 0.25f)) )
+					ClearConditions( bits_COND_LOW_HEALTH ); // regenerated? clear condition
+			}
+
 			// now filter conditions.
 			ClearConditions( IgnoreConditions() );
 
