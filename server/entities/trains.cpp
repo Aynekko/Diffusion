@@ -25,6 +25,7 @@
 #include "cbase.h"
 #include "entities/trains.h"
 #include "game/saverestore.h"
+#include "game/game.h"
 
 BEGIN_DATADESC( CBasePlatTrain )
 	DEFINE_KEYFIELD( m_iMoveSnd, FIELD_STRING, "movesnd" ),
@@ -922,7 +923,8 @@ void CFuncTrain :: Next( void )
 	{
 		// don't copy speed from target if it is 0 (uninitialized)
 		pev->speed = m_hCurrentTarget->pev->speed;
-		ALERT( at_aiconsole, "Train %s speed to %4.2f\n", GetTargetname(), pev->speed );
+		if( sv_train_debug.value > 0 )
+			ALERT( at_aiconsole, "Train %s speed to %4.2f\n", GetTargetname(), pev->speed );
 	}
 
 	m_hCurrentTarget = pTarg;	// keep track of this since path corners change our target for us.
@@ -1498,7 +1500,8 @@ void CFuncTrackTrain :: SetSpeed( float flSpeed, float flAccel )
 		}
 	}
 
-	ALERT( at_aiconsole, "TRAIN(%s), speed to %.2f\n", GetDebugName(), pev->speed );
+	if( sv_train_debug.value > 0 )
+		ALERT( at_aiconsole, "TRAIN(%s), speed to %.2f\n", GetDebugName(), pev->speed );
 }
 
 void CFuncTrackTrain :: SetSpeedExternal( float flSpeed )
@@ -1528,7 +1531,8 @@ void CFuncTrackTrain :: SetSpeedExternal( float flSpeed )
 		}
 	}
 
-	ALERT( at_aiconsole, "TRAIN(%s), speed to %.2f\n", GetDebugName(), pev->speed );
+	if( sv_train_debug.value > 0 )
+		ALERT( at_aiconsole, "TRAIN(%s), speed to %.2f\n", GetDebugName(), pev->speed );
 }
 
 //-----------------------------------------------------------------------------
@@ -1581,7 +1585,9 @@ void CFuncTrackTrain :: Blocked( CBaseEntity *pOther )
 			return;
 	}
 
-	ALERT( at_aiconsole, "TRAIN(%s): Blocked by %s (dmg:%.2f)\n", GetDebugName(), pOther->GetClassname(), pev->dmg );
+	if( sv_train_debug.value > 0 )
+		ALERT( at_aiconsole, "TRAIN(%s): Blocked by %s (dmg:%.2f)\n", GetDebugName(), pOther->GetClassname(), pev->dmg );
+
 	if( pev->dmg <= 0 ) return;
 
 	// we can't hurt this thing, so we're not concerned with it
@@ -1661,7 +1667,8 @@ void CFuncTrackTrain :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 		delta = fabs( delta );
 		SetSpeed( m_maxSpeed * delta, accel );
 
-		ALERT( at_aiconsole, "TRAIN( %s ), speed to %.2f\n", GetTargetname(), pev->speed );
+		if( sv_train_debug.value > 0 )
+			ALERT( at_aiconsole, "TRAIN( %s ), speed to %.2f\n", GetTargetname(), pev->speed );
 	}
 }
 
@@ -1767,7 +1774,8 @@ void CFuncTrackTrain :: ArriveAtNode( CPathTrack *pNode )
 		{
 			// don't copy speed from target if it is 0 (uninitialized)
 			SetSpeed( pNode->pev->speed );
-			ALERT( at_aiconsole, "TrackTrain %s arrived at %s, speed to %4.2f\n", GetDebugName(), pNode->GetDebugName(), pNode->pev->speed );
+			if( sv_train_debug.value > 0 )
+				ALERT( at_aiconsole, "TrackTrain %s arrived at %s, speed to %4.2f\n", GetDebugName(), pNode->GetDebugName(), pNode->pev->speed );
 		}
 	}
 }
@@ -2167,7 +2175,8 @@ void CFuncTrackTrain :: DeadEnd( void )
 
 	pTrack = m_ppath;
 
-	ALERT( at_aiconsole, "TRAIN(%s): Dead end ", GetDebugName() );
+	if( sv_train_debug.value > 0 )
+		ALERT( at_aiconsole, "TRAIN(%s): Dead end ", GetDebugName() );
 	// Find the dead end path node
 	// HACKHACK -- This is bugly, but the train can actually stop moving at a different node depending on it's speed
 	// so we have to traverse the list to it's end.
@@ -2201,12 +2210,16 @@ void CFuncTrackTrain :: DeadEnd( void )
 
 	if ( pTrack )
 	{
-		ALERT( at_aiconsole, "at %s\n", pTrack->GetDebugName() );
+		if( sv_train_debug.value > 0 )
+			ALERT( at_aiconsole, "at %s\n", pTrack->GetDebugName() );
 		if ( pTrack->pev->netname )
 			UTIL_FireTargets( pTrack->GetNetname(), this, this, USE_TOGGLE, 0 );
 	}
 	else
-		ALERT( at_aiconsole, "\n" );
+	{
+		if( sv_train_debug.value > 0 )
+			ALERT( at_aiconsole, "\n" );
+	}
 }
 
 void CFuncTrackTrain :: SetControls( CBaseEntity *pControls )
@@ -2302,7 +2315,8 @@ void CFuncTrackTrain :: NearestPath( void )
 		return;
 	}
 
-	ALERT( at_aiconsole, "TRAIN: %s, Nearest track is %s\n", GetDebugName(), pNearest->GetDebugName() );
+	if( sv_train_debug.value > 0 )
+		ALERT( at_aiconsole, "TRAIN: %s, Nearest track is %s\n", GetDebugName(), pNearest->GetDebugName() );
 	// If I'm closer to the next path_track on this path, then it's my real path
 	pTrack = ((CPathTrack *)pNearest)->GetNext();
 	if ( pTrack )
