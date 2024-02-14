@@ -799,6 +799,9 @@ void CBot::Spawn( )
 
 	IsHoldingAttackButton = false;
 	stop_hold_attack_button_time = 0;
+
+	if( g_pGameRules->IsTeamplay() ) // is team play enabled?
+		SetUse( &CBot::BotUse );
 }
 
 
@@ -868,46 +871,36 @@ int CBot::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker,
 }
 
 
-void CBot::Use( CBaseEntity *pActivator, CBaseEntity *pCaller,
-				USE_TYPE useType, float value )
+void CBot::BotUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-   if (g_pGameRules->IsTeamplay())  // is team play enabled?
-   {
-	  // check the bot and player are on the same team...
-
-	  if (UTIL_TeamsMatch(g_pGameRules->GetTeamID(this),
-						  g_pGameRules->GetTeamID(pActivator)))
-	  {
-		 if (pBotEnemy == NULL)  // is bot NOT currently engaged in combat?
-		 {
+	// check the bot and player are on the same team...
+	if (UTIL_TeamsMatch(g_pGameRules->GetTeamID(this),
+						g_pGameRules->GetTeamID(pActivator)))
+	{
+		if (pBotEnemy == NULL)  // is bot NOT currently engaged in combat?
+		{
 			if (pBotUser == NULL)  // does bot NOT have a "user"
 			{
-			   // tell teammate that bot will cover them...
+				// tell teammate that bot will cover them...
+				EMIT_SOUND(ENT(pActivator->pev), CHAN_VOICE, USE_TEAMPLAY_SND, 1.0, ATTN_NORM);
 
-			   EMIT_SOUND(ENT(pActivator->pev), CHAN_VOICE, USE_TEAMPLAY_SND,
-						  1.0, ATTN_NORM);
-
-			   pBotUser = pActivator;
-			   f_bot_use_time = gpGlobals->time;
+				pBotUser = pActivator;
+				f_bot_use_time = gpGlobals->time;
 			}
 			else
 			{
-			   // tell teammate that you'll see them later..
+				// tell teammate that you'll see them later..
+				EMIT_SOUND(ENT(pActivator->pev), CHAN_VOICE, USE_TEAMPLAY_LATER_SND, 1.0, ATTN_NORM);
 
-			   EMIT_SOUND(ENT(pActivator->pev), CHAN_VOICE, USE_TEAMPLAY_LATER_SND,
-						  1.0, ATTN_NORM);
-
-			   pBotUser = NULL;
-			   f_bot_use_time = 0;
+				pBotUser = NULL;
+				f_bot_use_time = 0;
 			}
-		 }
-		 else
-		 {
-			EMIT_SOUND(ENT(pActivator->pev), CHAN_VOICE, USE_TEAMPLAY_ENEMY_SND, 1.0,
-					   ATTN_NORM);
-		 }
-	  }
-   }
+		}
+		else
+		{
+			EMIT_SOUND(ENT(pActivator->pev), CHAN_VOICE, USE_TEAMPLAY_ENEMY_SND, 1.0, ATTN_NORM);
+		}
+	}
 }
 
 int CBot::BotInFieldOfView(Vector dest)

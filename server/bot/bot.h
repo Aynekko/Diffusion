@@ -139,8 +139,7 @@ class CBot : public CBasePlayer //Derive a bot class from CBasePlayer
 
       int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
       int ObjectCaps() { return FCAP_IMPULSE_USE; };
-      void Use( CBaseEntity *pActivator, CBaseEntity *pCaller,
-                USE_TYPE useType, float value );
+      void BotUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
       int BotInFieldOfView( Vector dest );
       BOOL BotEntityIsVisible( Vector dest );

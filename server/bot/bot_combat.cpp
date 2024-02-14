@@ -153,7 +153,6 @@ char scientist_taunt[][30] = { SC_TNT1, SC_TNT2, SC_TNT3, SC_TNT4, SC_TNT5 };
 CBaseEntity * CBot::BotFindEnemy( void )
 {
    Vector vecEnd;
-   static bool flag = true;
 
    if (pBotEnemy != NULL)  // does the bot already have an enemy?
    {
@@ -164,23 +163,6 @@ CBaseEntity * CBot::BotFindEnemy( void )
 	  {
 		 if (!pBotEnemy->IsAlive())  // is the enemy dead?, assume bot killed it
 		 {
-			// check if this player is not a bot (i.e. not fake client)...
-			if (pBotEnemy->IsNetClient() && !IS_DEDICATED_SERVER())
-			{
-			   // speak taunt sounds about 10% of the time
-				/*
-			   if (RANDOM_LONG(1, 100) <= 10)
-			   {
-				  if (bot_model == MODEL_BARNEY)
-					 strcpy( sound, barney_taunt[RANDOM_LONG(0,4)] );
-				  else if (bot_model == MODEL_SCIENTIST)
-					 strcpy( sound, scientist_taunt[RANDOM_LONG(0,4)] );
-
-				  EMIT_SOUND(ENT(pBotEnemy->pev), CHAN_VOICE, sound,
-							 RANDOM_FLOAT(0.9, 1.0), ATTN_NORM);
-			   }*/
-			}
-
 			// stay here longer. I'm having a good time here!
 			if( IsCamping )
 				camping_end_time += RANDOM_LONG(15,30);
