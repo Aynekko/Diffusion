@@ -256,13 +256,13 @@ void CHandGrenade::WeaponIdle( void )
 
 		CBaseEntity *pGrenade = NULL;
 		
-		if( SecondaryAttackPressed )
-			pGrenade = CGrenade::ShootTimed( m_pPlayer->pev, vecSrc, vecThrow, 3 );
-		else
-			pGrenade = CGrenade::ShootTimed( m_pPlayer->pev, vecSrc, vecThrow, time );
+		pGrenade = CGrenade::ShootTimed( m_pPlayer->pev, vecSrc, vecThrow, SecondaryAttackPressed ? 3.0f : time );
 
 		if( pGrenade )
+		{
+			SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
 			pGrenade->pev->body = 1; // change to body without pin
+		}
 
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );

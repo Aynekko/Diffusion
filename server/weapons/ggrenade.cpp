@@ -505,7 +505,7 @@ void CGrenade:: Spawn( void )
 	if( IsEMPGrenade )
 		SET_MODEL( ENT( pev ), "models/weapons/w_battery.mdl" );
 	else
-		SET_MODEL(ENT(pev), "models/weapons/w_grenade.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/grenade.mdl");
 	UTIL_SetSize(pev, Vector( 0, 0, 0), Vector(0, 0, 0));
 
 	pev->dmg = 100;
