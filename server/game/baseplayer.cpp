@@ -6243,7 +6243,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 int CBasePlayer::AddPlayerItem( CBasePlayerItem *pItem )
 {
 	CBasePlayerItem *pInsert;
-	
+
 	pInsert = m_rgpPlayerItems[pItem->iItemSlot()];
 
 	while (pInsert)
@@ -7692,10 +7692,10 @@ void CBasePlayer::DropPlayerItem(char* pszItemName)
 BOOL CBasePlayer::HasPlayerItem( CBasePlayerItem *pCheckItem )
 {
 	CBasePlayerItem *pItem = m_rgpPlayerItems[pCheckItem->iItemSlot()];
-
+	
 	while (pItem)
 	{
-		if (FClassnameIs( pItem->pev, STRING( pCheckItem->pev->classname) ))
+		if( FClassnameIs( pItem->pev, STRING(pCheckItem->pev->classname) ))
 			return TRUE;
 
 		pItem = pItem->m_pNext;

@@ -278,10 +278,10 @@ void CSaveRestoreBuffer :: BufferRewind( int size )
 
 #ifndef _WIN32
 extern "C" {
-unsigned _rotr ( unsigned val, int shift)
+uint32_t _rotr ( uint32_t val, int shift)
 {
-        register unsigned lobit;        /* non-zero means lo bit set */
-        register unsigned num = val;    /* number to rotate */
+		uint32_t lobit;        /* non-zero means lo bit set */
+		uint32_t num = val;    /* number to rotate */
 
         shift &= 0x1f;                  /* modulo 32 -- this will also make
                                            negative shifts work */
@@ -762,9 +762,6 @@ int CSave :: WriteFields( const char *pname, const void *pBaseData, DATAMAP *pMa
 		case FIELD_FUNCTION:
 			WriteFunction( pMap, pTest->fieldName, (void **)pOutputData, pTest->fieldSize );
 			break;
-		case FIELD_INT64:
-			WriteData( pTest->fieldName, sizeof( std::uint64_t ) * pTest->fieldSize, ((char *)pOutputData) );
-			break;
 		default:
 			ALERT( at_error, "Bad field type\n" );
 			break;
@@ -970,9 +967,6 @@ int CRestore::ReadField( const void *pBaseData, DATAMAP *pMap, TYPEDESCRIPTION *
 					case FIELD_FUNCTION:
 						ReadFunction( pMap, (void **)pOutputData, (const char *)pInputData );
 						break;
-					case FIELD_INT64:
-						*((std::uint64_t *)pOutputData) = *(std::uint64_t *)pInputData;
-						break;
 					default:
 						ALERT( at_error, "Bad field type\n" );
 					}
@@ -992,9 +986,9 @@ int CRestore::ReadEntVars( const char *pname, DATAMAP *pMap, entvars_t *pev )
 
 int CRestore::ReadFields( const char *pname, const void *pBaseData, DATAMAP *pMap, TYPEDESCRIPTION *pFields, int fieldCount )
 {
-	unsigned short	i, token;
-	int		lastField, fileCount;
-	HEADER	header;
+	unsigned short i, token;
+	int lastField, fileCount;
+	HEADER header;
 
 	i = ReadShort();
 	ASSERT( i == sizeof(int) );			// First entry should be an int
