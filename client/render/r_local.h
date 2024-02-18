@@ -813,6 +813,7 @@ void PlayLowAmmoSound( int entindex, Vector origin, int Volume );
 void R_BubbleTrail( const Vector start, const Vector end, float height, int count, float speed );
 void R_Bubbles( const Vector mins, const Vector maxs, float height, int count, float speed );
 TEMPENTITY *R_GunShell( const Vector pos, const Vector dir, const Vector angles, float life, int modelIndex, int body, int soundtype );
+TEMPENTITY *R_EmptyClip( int WeaponID );
 
 //
 // r_movie.cpp

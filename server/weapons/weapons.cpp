@@ -1135,6 +1135,7 @@ BOOL CBasePlayerWeapon :: DefaultReload( int iClipSize, int iAnim, float fDelay,
 	m_fInReload = TRUE;
 
 	m_flTimeWeaponIdle = gpGlobals->time + 3;
+
 	return TRUE;
 }
 

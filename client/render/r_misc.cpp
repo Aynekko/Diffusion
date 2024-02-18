@@ -1407,6 +1407,9 @@ void HUD_StudioEvent( const struct mstudioevent_s* event, const struct cl_entity
 	case 5060:
 		HUD_EjectShell( event, entity );
 		break;
+	case 5070:
+		R_EmptyClip( WeaponID );
+		break;
 	default:
 		ALERT( at_aiconsole, "Unknown event %i with options %i\n", event->event, event->options );
 		break;
@@ -2627,6 +2630,61 @@ TEMPENTITY *R_GunShell( const Vector pos, const Vector dir, const Vector angles,
 	pTemp->entity.curstate.iuser4 = 500;
 
 	pTemp->die = tr.time + life;
+
+	return pTemp;
+}
+
+TEMPENTITY *R_EmptyClip( int WeaponID )
+{
+	// alloc a new tempent
+	TEMPENTITY *pTemp;
+	model_t *pmodel;
+	int modelIndex = 0;
+
+	// make sure the clip model is precached on server in the weapon code
+	switch( WeaponID )
+	{
+	case WEAPON_G36C:
+		modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/weapons/w_g36c_clip.mdl" );
+		break;
+	default:
+		break;
+	}
+
+	if( modelIndex <= 0 )
+		return NULL;
+
+	if( (pmodel = MOD_HANDLE( modelIndex )) == NULL )
+		return NULL;
+
+	Vector pos, vel, forward, right, up;
+	AngleVectors( tr.cached_viewangles, forward, right, up );
+	pos = tr.viewparams.vieworg - up * 20 + forward * 10;
+	vel = up * -100 + forward * 25;
+
+	pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( (float *)&pos, pmodel );
+	if( !pTemp ) return NULL;
+
+	pTemp->flags = (FTENT_COLLIDEWORLD | FTENT_GRAVITY | FTENT_ROTATE );
+	pTemp->entity.baseline.origin = vel;
+	pTemp->entity.angles = tr.cached_viewangles;
+
+	pTemp->hitSound = BOUNCE_EMPTYCLIP;
+	pTemp->entity.baseline.angles[0] = RANDOM_FLOAT( -512, 511 );
+	pTemp->entity.baseline.angles[2] = RANDOM_FLOAT( -255, 255 );
+
+	pTemp->entity.curstate.body = 1; // empty clip
+
+	// disable shadows for gun clips
+	pTemp->entity.baseline.renderfx = kRenderFxNoShadows;
+	pTemp->entity.curstate.renderfx = kRenderFxNoShadows;
+
+	// fade distance
+	pTemp->entity.curstate.iuser4 = 500;
+
+	pTemp->die = tr.time + 180; // 3 minutes
+
+	pTemp->entity.baseline.effects = -10; // this is a hack specified for dropped clip sound - see CL_TempEntPlaySound
 
 	return pTemp;
 }

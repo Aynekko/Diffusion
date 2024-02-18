@@ -1410,6 +1410,7 @@ void ClientPrecache( void )
 	PRECACHE_SOUND("player/electroblast.wav");
 	PRECACHE_SOUND( "player/shield_on.wav" );
 	PRECACHE_SOUND( "weapons/lowammo.wav" );
+	PRECACHE_SOUND( "weapons/clip_drop.wav" );
 
 //------------------------------------------------------------------------------------	
 	

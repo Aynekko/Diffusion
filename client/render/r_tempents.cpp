@@ -25,6 +25,120 @@
 #include "pm_defs.h"
 #include "r_local.h"
 
+const char *cl_ricochet_sounds[] =
+{
+	"weapons/ric1.wav",
+	"weapons/ric2.wav",
+	"weapons/ric3.wav",
+	"weapons/ric4.wav",
+	"weapons/ric5.wav",
+};
+
+const char *cl_weapon_shell_sounds[] =
+{
+	"weapons/sshell1.wav",
+	"weapons/sshell2.wav",
+	"weapons/sshell3.wav",
+};
+
+const char *cl_player_shell_sounds[] =
+{
+	"player/pl_shell1.wav",
+	"player/pl_shell2.wav",
+	"player/pl_shell3.wav",
+};
+
+/*
+==============
+CL_TempEntPlaySound
+
+play collide sound
+==============
+*/
+void CL_TempEntPlaySound( TEMPENTITY *pTemp, float damp )
+{
+	float fvol = 0.8f;
+	char soundname[32];
+	bool isshellcasing = false;
+	int	zvel;
+
+	ASSERT( pTemp != NULL );
+
+	switch( pTemp->hitSound )
+	{
+	case BOUNCE_GLASS:
+		Q_snprintf( soundname, sizeof( soundname ), "debris/glass%i.wav", RANDOM_LONG( 1, 4 ) );
+		break;
+	case BOUNCE_METAL:
+		Q_snprintf( soundname, sizeof( soundname ), "debris/metal%i.wav", RANDOM_LONG( 1, 6 ) );
+		break;
+	case BOUNCE_FLESH:
+		Q_snprintf( soundname, sizeof( soundname ), "debris/flesh%i.wav", RANDOM_LONG( 1, 7 ) );
+		break;
+	case BOUNCE_WOOD:
+		Q_snprintf( soundname, sizeof( soundname ), "debris/wood%i.wav", RANDOM_LONG( 1, 4 ) );
+		break;
+	case BOUNCE_SHRAP:
+		Q_strncpy( soundname, cl_ricochet_sounds[RANDOM_LONG( 0, 4 )], sizeof( soundname ) );
+		break;
+	case BOUNCE_SHOTSHELL:
+		Q_strncpy( soundname, cl_weapon_shell_sounds[RANDOM_LONG( 0, 2 )], sizeof( soundname ) );
+		isshellcasing = true; // shell casings have different playback parameters
+		fvol = 0.5f;
+		break;
+	case BOUNCE_SHELL:
+		Q_strncpy( soundname, cl_player_shell_sounds[RANDOM_LONG( 0, 2 )], sizeof( soundname ) );
+		isshellcasing = true; // shell casings have different playback parameters
+		break;
+	case BOUNCE_CONCRETE:
+		Q_snprintf( soundname, sizeof( soundname ), "debris/concrete%i.wav", RANDOM_LONG( 1, 3 ) );
+		break;
+	case BOUNCE_EMPTYCLIP:
+		Q_snprintf( soundname, sizeof( soundname ), "weapons/clip_drop.wav" );
+		break;
+	default:	// null sound
+		return;
+	}
+
+	zvel = fabs( pTemp->entity.baseline.origin[2] );
+
+	// only play one out of every n
+	if( isshellcasing )
+	{
+		// play first bounce, then 1 out of 3
+		if( zvel < 200 && RANDOM_LONG( 0, 3 ) )
+			return;
+	}
+	else
+	{
+		if( RANDOM_LONG( 0, 5 ) )
+			return;
+	}
+	
+	// dropped clip specific
+	if( (pTemp->hitSound & BOUNCE_EMPTYCLIP) && pTemp->entity.baseline.effects == -10 )
+	{
+		// first drop always plays at audible volume, the rest let the code figure out
+		gEngfuncs.pEventAPI->EV_PlaySound( pTemp->entity.index, pTemp->entity.origin, CHAN_BODY, soundname, 0.8, ATTN_NORM, SND_STOP_LOOPING, RANDOM_LONG( 95, 105 ) );
+		pTemp->entity.baseline.effects = 0;
+	}
+	else if( damp > 0.0f )
+	{
+		int	pitch;
+
+		if( isshellcasing )
+			fvol *= Q_min( 1.0f, ((float)zvel) / 350.0f );
+		else
+			fvol *= Q_min( 1.0f, ((float)zvel) / 450.0f );
+
+		if( !RANDOM_LONG( 0, 3 ) && !isshellcasing )
+			pitch = RANDOM_LONG( 95, 105 );
+		else pitch = PITCH_NORM;
+
+		gEngfuncs.pEventAPI->EV_PlaySound( pTemp->entity.index, pTemp->entity.origin, CHAN_BODY, soundname, fvol, ATTN_NORM, SND_STOP_LOOPING, pitch );
+	}
+}
+
 /*
 =================
 CL_UpdateTEnts
@@ -306,7 +420,7 @@ void HUD_TempEntUpdate(
 
 					if( pTemp->hitSound )
 					{
-						Callback_TempEntPlaySound( pTemp, damp );
+						CL_TempEntPlaySound( pTemp, damp );
 					}
 
 					if( pTemp->flags & FTENT_COLLIDEKILL )

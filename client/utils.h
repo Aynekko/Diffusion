@@ -36,6 +36,10 @@ extern BOOL g_fRenderInitialized;
 #define SND_STOP			(1<<5)		// stop sound
 #define SND_CHANGE_VOL		(1<<6)		// change sound vol
 #define SND_CHANGE_PITCH	(1<<7)		// change sound pitch
+#define SND_LOCALSOUND		(1<<9)	// not paused, not looped, for internal use
+#define SND_STOP_LOOPING		(1<<10)	// stop all looping sounds on the entity.
+#define SND_FILTER_CLIENT		(1<<11)	// don't send sound from local player if prediction was enabled
+#define SND_RESTORE_POSITION		(1<<12)	// passed playing position and the forced end
 
 enum
 {

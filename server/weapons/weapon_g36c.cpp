@@ -77,7 +77,7 @@ void CWeaponG36C::Precache( void )
 	PRECACHE_MODEL("models/weapons/w_g36c.mdl");
 	PRECACHE_MODEL("models/weapons/p_g36c.mdl");
 
-	PRECACHE_MODEL("models/weapons/w_9mmARclip.mdl");
+	PRECACHE_MODEL("models/weapons/w_g36c_clip.mdl");
 	PRECACHE_SOUND("items/9mmclip1.wav");              
 
 	PRECACHE_SOUND( "weapons/g36c_magout.wav" );
@@ -318,12 +318,12 @@ class CG36CAmmoClip : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/weapons/w_9mmARclip.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_g36c_clip.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/weapons/w_9mmARclip.mdl");
+		PRECACHE_MODEL ("models/weapons/w_g36c_clip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
@@ -331,7 +331,6 @@ class CG36CAmmoClip : public CBasePlayerAmmo
 		int bResult = (pOther->GiveAmmo( AMMO_G36C_GIVE, "g36cammo", _9MM_MAX_CARRY) != -1);
 
 		if (bResult)
-		//	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
 			PlayPickupSound( pOther );
 
 		return bResult;

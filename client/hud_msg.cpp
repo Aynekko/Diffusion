@@ -1012,7 +1012,7 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		Flags = READ_BYTE();	// sound flags
 		Life = (float)(READ_BYTE() * 0.1f);
 		Body = READ_BYTE(); // shell type
-		pTemp = R_GunShell( pos, pos2, ang, Life, Model, Body, Flags );
+		R_GunShell( pos, pos2, ang, Life, Model, Body, Flags );
 	}
 	break;
 

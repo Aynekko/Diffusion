@@ -763,24 +763,25 @@
 
 // Break Model Defines
 #define BREAK_TYPEMASK		0x4F
-#define BREAK_GLASS			0x01
-#define BREAK_METAL			0x02
-#define BREAK_FLESH			0x04
-#define BREAK_WOOD			0x08
-#define BREAK_SMOKE			0x10
-#define BREAK_TRANS			0x20
-#define BREAK_CONCRETE		0x40
-#define BREAK_2			0x80
+#define BREAK_GLASS			BIT(0)
+#define BREAK_METAL			BIT(1)
+#define BREAK_FLESH			BIT(2)
+#define BREAK_WOOD			BIT(3)
+#define BREAK_SMOKE			BIT(4)
+#define BREAK_TRANS			BIT(5)
+#define BREAK_CONCRETE		BIT(6)
+#define BREAK_2				BIT(7)
 
 // Colliding temp entity sounds
 #define BOUNCE_GLASS		BREAK_GLASS
 #define BOUNCE_METAL		BREAK_METAL
 #define BOUNCE_FLESH		BREAK_FLESH
 #define BOUNCE_WOOD			BREAK_WOOD
-#define BOUNCE_SHRAP		0x10
-#define BOUNCE_SHELL		0x20
+#define BOUNCE_SHRAP		BIT(4)
+#define BOUNCE_SHELL		BIT(5)
 #define BOUNCE_CONCRETE		BREAK_CONCRETE
-#define BOUNCE_SHOTSHELL		0x80
+#define BOUNCE_SHOTSHELL	BIT(7)
+#define BOUNCE_EMPTYCLIP	BIT(8)
 
 // Temp entity bounce sound types
 #define TE_BOUNCE_NULL		0
