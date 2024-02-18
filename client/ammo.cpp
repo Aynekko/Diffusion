@@ -631,6 +631,9 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 	m_iFlags |= HUD_ACTIVE;
 
 	END_READ();
+
+	if( iClip > 0 )
+		gHUD.emptyclipspawned[WeaponID] = false; // we were reloaded to some extent which means we can spawn an empty clip again for this weapon
 	
 	return 1;
 }

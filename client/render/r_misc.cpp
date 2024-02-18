@@ -2636,6 +2636,10 @@ TEMPENTITY *R_GunShell( const Vector pos, const Vector dir, const Vector angles,
 
 TEMPENTITY *R_EmptyClip( int WeaponID )
 {
+	// can't spawn anymore empty clips until we reload.
+	if( gHUD.emptyclipspawned[WeaponID] )
+		return NULL;
+	
 	// alloc a new tempent
 	TEMPENTITY *pTemp;
 	model_t *pmodel;
@@ -2685,6 +2689,9 @@ TEMPENTITY *R_EmptyClip( int WeaponID )
 	pTemp->die = tr.time + 180; // 3 minutes
 
 	pTemp->entity.baseline.effects = -10; // this is a hack specified for dropped clip sound - see CL_TempEntPlaySound
+
+	// clip has been spawned. make sure we don't spam them by skipping animation
+	gHUD.emptyclipspawned[WeaponID] = true;
 
 	return pTemp;
 }

@@ -1042,6 +1042,8 @@ public:
 	void AddWeapon( int weaponnum ) { SetBits( m_iWeaponBits[weaponnum >> 3], BIT( weaponnum & 7 )); }
 
 	void DrumsInput( int Slot );
+
+	bool emptyclipspawned[TOTAL_WEAPONS];
 };
 
 extern CHud	gHUD;

@@ -208,6 +208,8 @@ void CHud :: VidInit( void )
 
 	gHUD.GlitchAmount = 0.0f;
 	gHUD.GlitchHoldTime = 0.0f;
+
+	memset( emptyclipspawned, 0, sizeof( emptyclipspawned ) );
 }
 
 void CHud::AddHudElem( CHudBase *phudelem )
