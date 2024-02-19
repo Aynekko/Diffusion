@@ -327,6 +327,7 @@
     <ClCompile Include="..\game_shared\vector.cpp" />
     <ClCompile Include="bot\bot.cpp" />
     <ClCompile Include="bot\bot_combat.cpp" />
+    <ClCompile Include="ehandle.cpp" />
     <ClCompile Include="entities\achievement_handler.cpp" />
     <ClCompile Include="entities\ammocrate.cpp" />
     <ClCompile Include="entities\ammoprinter.cpp" />
