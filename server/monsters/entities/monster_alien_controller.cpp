@@ -2135,6 +2135,8 @@ public:
 
 	float SpawnTime; // player's drone only
 
+	float snd_pitch;
+
 	DECLARE_DATADESC();
 };
 
@@ -2250,6 +2252,8 @@ void CDrone :: Spawn()
 	MonsterInit();
 
 	m_afCapability &= ~bits_CAP_CANSEEFLASHLIGHT;
+
+	snd_pitch = 100;
 }
 
 //=========================================================
@@ -2450,22 +2454,19 @@ void CDrone :: RunAI( void )
 			m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
 		else
 		{
-			static float pitch = 100;
-			const int lim = 115;
-
 			if( HasFlag( F_PLAYER_CONTROL ) )
-				pitch = 90 + GetAbsVelocity().Length() * 0.07;
+				snd_pitch = 90 + GetAbsVelocity().Length() * 0.07;
 			else
 			{
 				if( m_velocity.Length() > 50 || GetAbsVelocity().Length() > 50 )
-					pitch += 2;
+					snd_pitch += 2;
 				else
-					pitch -= 3;
+					snd_pitch -= 3;
 			}
 
-			pitch = bound( 90, pitch, lim );
+			snd_pitch = bound( 90, snd_pitch, 115 );
 
-			EMIT_SOUND_DYN( edict(), CHAN_STATIC, "drone/drone_running.wav", 0.5, 1.5, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch ); //0.5 volume, 1.5 radius
+			EMIT_SOUND_DYN( edict(), CHAN_STATIC, "drone/drone_running.wav", 0.5, 1.5, SND_CHANGE_PITCH | SND_CHANGE_VOL, snd_pitch ); //0.5 volume, 1.5 radius
 		}
 	}
 
@@ -3147,6 +3148,7 @@ public:
 	CSprite *AlienEye;
 	bool CriticalDamage;
 	float SecondaryAttackTime;
+	float snd_pitch;
 
 	DECLARE_DATADESC();
 
@@ -3206,6 +3208,8 @@ void CDroneAlien :: Spawn()
 	MonsterInit();
 
 	m_afCapability &= ~bits_CAP_CANSEEFLASHLIGHT; // robots can't recognize player's flashlight
+
+	snd_pitch = 100;
 }
 
 //=========================================================
@@ -3280,17 +3284,14 @@ void CDroneAlien :: RunTask ( Task_t *pTask )
 			m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
 		else
 		{
-			static float pitch = 100;
-			const int lim = 115;
-
 			if( m_velocity.Length() > 50 )
-				pitch++;
+				snd_pitch++;
 			else
-				pitch--;
+				snd_pitch--;
 
-			pitch = bound( 90, pitch, lim );
+			snd_pitch = bound( 90, snd_pitch, 115 );
 
-			EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "drone/aliendrone_loop.wav", 0.5, 1.5, SND_CHANGE_PITCH | SND_CHANGE_VOL, pitch); //0.5 volume, 1.5 radius
+			EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "drone/aliendrone_loop.wav", 0.5, 1.5, SND_CHANGE_PITCH | SND_CHANGE_VOL, snd_pitch ); //0.5 volume, 1.5 radius
 		}
 	}
 //----------------------------------------------------------------------------------------

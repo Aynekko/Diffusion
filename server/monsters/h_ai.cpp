@@ -19,18 +19,16 @@
 */
 
 
-#include	"extdll.h"
-#include	"util.h"
-#include	"cbase.h"
-#include	"monsters.h"
-#include	"game/game.h"
+#include "extdll.h"
+#include "util.h"
+#include "cbase.h"
+#include "monsters.h"
+#include "game/game.h"
 	
 #define		NUM_LATERAL_CHECKS		13  // how many checks are made on each side of a monster looking for lateral cover
 #define		NUM_LATERAL_LOS_CHECKS		6  // how many checks are made on each side of a monster looking for lateral cover
 
-//float flRandom = RANDOM_FLOAT(0,1);
-
-DLL_GLOBAL	BOOL	g_fDrawLines = FALSE;
+DLL_GLOBAL BOOL g_fDrawLines = FALSE;
 
 //=========================================================
 // 
@@ -53,7 +51,7 @@ BOOL FBoxVisible ( entvars_t *pevLooker, entvars_t *pevTarget, Vector &vecTarget
 		return FALSE;
 
 	TraceResult tr;
-	Vector	vecLookerOrigin = pevLooker->origin + pevLooker->view_ofs;//look through the monster's 'eyes'
+	Vector vecLookerOrigin = pevLooker->origin + pevLooker->view_ofs; // look through the monster's 'eyes'
 	for (int i = 0; i < 5; i++)
 	{
 		Vector vecTarget = pevTarget->origin;

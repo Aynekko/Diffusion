@@ -293,7 +293,6 @@ int CHud :: MsgFunc_WeaponAnim( const char *pszName, int iSize, void *pbuf )
 
 	int sequence = READ_BYTE();
 	int body = READ_BYTE();
-	float framerate = 1.0f;// READ_BYTE() * 0.125f;
 	localanim_WeaponID = READ_BYTE();
 
 	END_READ();
@@ -306,9 +305,7 @@ int CHud :: MsgFunc_WeaponAnim( const char *pszName, int iSize, void *pbuf )
 	if( !CheckForLocalWeaponShootAnimation( sequence ) )
 		gEngfuncs.pfnWeaponAnim( sequence, body );
 
-	if( framerate > 0.0f )
-		view->curstate.framerate = framerate;
-	else view->curstate.framerate = 1.0f;
+	view->curstate.framerate = 1.0f;
 #if 0
 	// just for test Glow Shell effect
 	view->curstate.renderfx = kRenderFxGlowShell;
