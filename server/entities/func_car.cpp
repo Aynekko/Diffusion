@@ -2307,12 +2307,14 @@ void CCar::Camera(void)
 	if( !(hDriver->pev->flags & FL_CLIENT) )
 		return;
 
+	float max_camera_lean = CarSpeed * 0.025f;
+
 	if( CarSpeed > 0.01f && (bBack() || bUp()) ) // braking
 	{	
 		if( bUp() && FClassnameIs( this, "func_boat") ) // boats don't have handbrake
 			CameraBrakeOffsetX = UTIL_Approach( 0, CameraBrakeOffsetX, 9 * gpGlobals->frametime );
 		else
-			CameraBrakeOffsetX = UTIL_Approach( 25, CameraBrakeOffsetX, bound( 3, CarSpeed * 0.01f, 9 ) * gpGlobals->frametime );
+			CameraBrakeOffsetX = UTIL_Approach( max_camera_lean, CameraBrakeOffsetX, bound( 3, CarSpeed * 0.01f, 9 ) * gpGlobals->frametime );
 	}
 	else
 		CameraBrakeOffsetX = UTIL_Approach( 0, CameraBrakeOffsetX, bound( 3, CarSpeed * 0.01f, 9 ) * gpGlobals->frametime );

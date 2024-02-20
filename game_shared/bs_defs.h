@@ -122,7 +122,7 @@ public:
 
 	const float *pBoneweight( const mstudioseqdesc_t *pseqdesc )
 	{
-	//	if( !pseqdesc || pseqdesc->weightlistindex <= 0 )
+		if( !pseqdesc || pseqdesc->weightlistindex <= 0 )
 		{
 			if( m_flCustomBoneWeight != NULL )
 				return m_flCustomBoneWeight;
