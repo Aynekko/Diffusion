@@ -2447,24 +2447,30 @@ void CDrone :: RunAI( void )
 		}
 	}
 
+	Vector velocity = GetAbsVelocity();
+
 	// diffusion - don't update the sound if killed or being removed.
 	if( (pev->deadflag == DEAD_NO) && !(pev->flags & FL_KILLME) )
 	{
+		float new_pitch = 100;
 		if( m_iSoundState == 0 )
 			m_iSoundState = SND_CHANGE_PITCH; // hack for going through level transitions
 		else
 		{
 			if( HasFlag( F_PLAYER_CONTROL ) )
-				snd_pitch = 90 + GetAbsVelocity().Length() * 0.07;
+				new_pitch = 90 + velocity.Length() * 0.07;
 			else
-			{
-				if( m_velocity.Length() > 50 || GetAbsVelocity().Length() > 50 )
-					snd_pitch += 2;
-				else
-					snd_pitch -= 3;
-			}
+				new_pitch = 90 + m_velocity.Length() * 0.07;
 
-			snd_pitch = bound( 90, snd_pitch, 115 );
+			if( velocity.z < 0.01f ) // descending
+				new_pitch += velocity.z * 0.1f;
+
+			new_pitch = bound( 60, new_pitch, 115 );
+
+			if( !snd_pitch ) // saverestore issue
+				snd_pitch = new_pitch;
+			else
+				snd_pitch = UTIL_Approach( new_pitch, snd_pitch, 300 * gpGlobals->frametime );
 
 			EMIT_SOUND_DYN( edict(), CHAN_STATIC, "drone/drone_running.wav", 0.5, 1.5, SND_CHANGE_PITCH | SND_CHANGE_VOL, snd_pitch ); //0.5 volume, 1.5 radius
 		}
@@ -2487,10 +2493,13 @@ void CDrone :: RunAI( void )
 	}
 
 	// diffusion - could be pushed by trigger but never slows down after, fix?
-	if( pev->velocity.Length() > 0.1 )
-		pev->velocity *= 0.8;
-	else
-		pev->velocity = g_vecZero;
+	if( !HasFlag( F_PLAYER_CONTROL ) )
+	{
+		if( pev->velocity.Length() > 0.1 )
+			pev->velocity *= 0.8;
+		else
+			pev->velocity = g_vecZero;
+	}
 	
 	CBaseMonster :: RunAI();
 }
