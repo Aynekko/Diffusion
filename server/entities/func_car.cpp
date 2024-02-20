@@ -1931,7 +1931,7 @@ void CCar::Drive( void )
 		CarSpeed = bound( (-MaxCarSpeedBackwards + (MaxCarSpeedBackwards * fabs( Turning ) * 0.5) ), CarSpeed, (MaxCarSpeed - (MaxCarSpeed * fabs( Turning ) * 0.75)) );
 	else
 		// also slow down the car if turning too much
-		CarSpeed = bound( -MaxCarSpeedBackwards + (MaxCarSpeedBackwards * fabs(Turning) * 0.5) + RANDOM_LONG(-1,1), CarSpeed, MaxCarSpeed - (MaxCarSpeed * fabs( Turning ) * 0.75) + RANDOM_LONG( -1, 1 ) );
+		CarSpeed = bound( -MaxCarSpeedBackwards + (MaxCarSpeedBackwards * fabs(Turning) * 0.25) + RANDOM_LONG(-1,1), CarSpeed, MaxCarSpeed - (MaxCarSpeed * fabs( Turning ) * 0.75) + RANDOM_LONG( -1, 1 ) );
 
 	// -------- apply main movement  --------
 	float AngleDiff = pWheel1->GetLocalAngles().y - pChassis->GetLocalAngles().y;
