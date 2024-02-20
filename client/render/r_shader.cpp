@@ -1227,6 +1227,23 @@ static void GL_InitHorizontalBlurUniforms( glsl_program_t *shader )
 	GL_ShowProgramUniforms( shader );
 }
 
+static void GL_InitHeatDistortionUniforms( glsl_program_t *shader )
+{
+	ASSERT( shader != NULL );
+
+	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
+	shader->u_DepthMap = pglGetUniformLocationARB( shader->handle, "u_DepthMap" );
+	shader->u_GenericCondition = pglGetUniformLocationARB( shader->handle, "u_GenericCondition" );
+
+	GL_BindShader( shader );
+	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
+	pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE1 );
+	GL_BindShader( GL_NONE );
+
+	GL_ValidateProgram( shader );
+	GL_ShowProgramUniforms( shader );
+}
+
 static void GL_InitMonochromeUniforms( glsl_program_t *shader )
 {
 	ASSERT( shader != NULL );
@@ -2272,6 +2289,10 @@ void GL_InitGPUShaders( void )
 	// drone screen effect
 	glsl.DroneScreen = shader = GL_InitGPUShader( "DroneScreen", "generic", "dronescreen" );
 	GL_InitDroneScreenUniforms( shader );
+
+	// heat distortion effect
+	glsl.HeatDistortion = shader = GL_InitGPUShader( "HeatDistortion", "generic", "heat" );
+	GL_InitHeatDistortionUniforms( shader );
 
 	// water drops on screen
 	glsl.WaterDrops = shader = GL_InitGPUShader( "WaterDrops", "generic", "waterdrops" );

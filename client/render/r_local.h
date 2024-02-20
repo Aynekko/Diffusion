@@ -844,6 +844,7 @@ void Bloom( void );
 void Enhance( void );
 void WaterDrops( void );
 void DroneScreenShader( void );
+void HeatDistortionShader( void );
 
 //
 // r_shadows.cpp

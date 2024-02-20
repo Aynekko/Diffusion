@@ -1782,6 +1782,7 @@ void R_DrawPostEffects(void)
 	if( RP_NORMALPASS() )
 	{
 		ToneMap();
+		HeatDistortionShader();
 		ScreenWater();
 		WaterDrops();
 		Glitch();

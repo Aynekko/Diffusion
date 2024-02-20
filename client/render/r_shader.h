@@ -188,6 +188,7 @@ typedef struct
 	glsl_program_t *Enhance;
 	glsl_program_t *WaterDrops;
 	glsl_program_t *DroneScreen;
+	glsl_program_t *HeatDistortion;
 } ref_shaders_t;
 
 void GL_AddShaderDirective( char *options, const char *directive );

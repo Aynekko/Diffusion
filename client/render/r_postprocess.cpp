@@ -1222,3 +1222,42 @@ void DroneScreenShader( void )
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
 }
+
+void HeatDistortionShader( void )
+{
+	if( gl_heateffect_force->value <= 0 )
+	{
+		if( tr.viewparams.waterlevel == 3 )
+			return;
+
+		if( !tr.shader_modifier || tr.shader_modifier->curstate.sequence <= 0 )
+			return;
+	}
+
+	// do not allow this effect if we look too much up or down
+	if( (tr.viewparams.viewangles.x < -45) || (tr.viewparams.viewangles.x > 45) )
+		return;
+
+	// otherwise scale it
+	float scale = 1.0f - (fabs(tr.viewparams.viewangles.x) / 45.0f);
+	
+	// capture screen
+	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+
+	// request screen depth
+	GL_Bind( GL_TEXTURE1, tr.screen_depth );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+
+	pglViewport( 0, 0, glState.width, glState.height );
+
+	GL_BindShader( glsl.HeatDistortion );
+	ASSERT( RI->currentshader != NULL );
+
+	pglUniform4fARB( RI->currentshader->u_GenericCondition, (float)(glState.width), (float)(glState.height), tr.time, scale );
+
+	RenderFSQ( glState.width, glState.height );
+
+	GL_BindShader( NULL );
+	GL_CleanUpTextureUnits( 0 );
+}

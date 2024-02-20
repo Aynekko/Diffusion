@@ -11,6 +11,7 @@
 		iuser1 = disable blur of 3D sky
 		iuser2 = disable lensflare
 		iuser3 = enable sun disk
+		sequence = enable heat distortion effect
 */
 
 class CInfoShaderParams : public CPointEntity

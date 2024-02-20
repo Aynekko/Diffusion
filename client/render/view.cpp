@@ -139,6 +139,7 @@ cvar_t *gl_emboss;
 cvar_t *gl_specular;
 cvar_t *gl_cubemaps;
 cvar_t *gl_bump;
+cvar_t *gl_heateffect_force;
 cvar_t *cubeshot; // advanced envshot :)
 cvar_t *cl_notbn;
 cvar_t *r_show_tbn;
@@ -378,6 +379,7 @@ void V_Init( void )
 	gl_bump = CVAR_REGISTER( "gl_bump", "1", FCVAR_ARCHIVE );
 	cubeshot = CVAR_REGISTER( "cubeshot", "0", FCVAR_UNLOGGED );
 	r_flashlightlockposition = CVAR_REGISTER( "r_flashlightlockposition", "0", FCVAR_CHEAT );
+	gl_heateffect_force = CVAR_REGISTER( "gl_heateffect_force", "0", FCVAR_CHEAT );
 
 	// cubemaps
 	gEngfuncs.pfnAddCommand( "buildcubemaps", CL_BuildCubemaps_f );
