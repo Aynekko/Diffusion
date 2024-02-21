@@ -217,6 +217,9 @@ void CWeaponG36C::PrimaryAttack()
 			Cone = 0.02;
 	}
 
+	if( m_fInZoom )
+		Cone *= 0.75;
+
 	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, Vector(Cone,Cone,Cone), 8192, BULLET_PLAYER_MP5, 0 );
 	m_iClip--;
 
