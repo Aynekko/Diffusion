@@ -27,6 +27,7 @@ public:
 	float m_flNextReload;
 
 	bool bUseAfterReloadEmpty;
+	bool bNeedPump;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_shotgun_xm, CShotgunXM );
@@ -93,7 +94,7 @@ int CShotgunXM::GetItemInfo( ItemInfo *p )
 	p->iMaxAmmo1 = BUCKSHOT_MAX_CARRY;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
-	p->iMaxClip = SHOTGUN_MAX_CLIP;
+	p->iMaxClip = SHOTGUNXM_MAX_CLIP;
 	p->iSlot = WPN_SLOT_SHOTGUN_XM;
 	p->iPosition = WPN_POS_SHOTGUN_XM;
 	p->iFlags = 0;
@@ -107,7 +108,13 @@ BOOL CShotgunXM::Deploy()
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 2.0;
 	m_fInReload = 0; // reset any reloading
-	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
+	m_flNextPrimaryAttack = gpGlobals->time + SHOTGUNXM_DEPLOY_TIME;
+	if( bUseAfterReloadEmpty )
+	{
+		bUseAfterReloadEmpty = false;
+		bNeedPump = true;
+		m_flNextPrimaryAttack = gpGlobals->time + SHOTGUNXM_RELOADEMPTY_FINISH_TIME;
+	}
 	return DefaultDeploy( "models/weapons/v_m1014.mdl", "models/weapons/p_m1014.mdl", SHOTGUNXM_DRAW, "shotgun" );
 }
 
@@ -184,7 +191,7 @@ void CShotgunXM::PrimaryAttack()
 		Vector vecSrc = m_pPlayer->GetGunPosition();
 		Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
-		m_pPlayer->FireBullets( 6, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0, DMG_WEAPON_SHOTGUN_XM );
+		m_pPlayer->FireBullets( 6, vecSrc, vecAiming, VECTOR_CONE_8DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0, DMG_WEAPON_SHOTGUN_XM );
 
 		MakeWeaponShake( m_pPlayer, WEAPON_SHOTGUN_XM, 0 );
 
@@ -194,7 +201,7 @@ void CShotgunXM::PrimaryAttack()
 	//	m_pPlayer->AchievementStats[ACH_BULLETSFIRED]++;
 		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 6, 0 );
 
-		m_pPlayer->pev->punchangle.x -= 5;
+		m_pPlayer->pev->punchangle.x -= 7;
 
 		Vector	vecShellVelocity = m_pPlayer->GetAbsVelocity()
 			+ gpGlobals->v_right * RANDOM_LONG( 70, 90 )
@@ -218,7 +225,7 @@ void CShotgunXM::Reload( void )
 {
 	//	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n"); // diffusion - no need to hold the button
 
-	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == SHOTGUN_MAX_CLIP )
+	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 || m_iClip == SHOTGUNXM_MAX_CLIP )
 		return;
 
 	if( m_flNextReload > gpGlobals->time )
@@ -274,15 +281,22 @@ void CShotgunXM::WeaponIdle( void )
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
-	if( m_flTimeWeaponIdle < gpGlobals->time )
+	if( bNeedPump )
 	{
+		SendWeaponAnim( SHOTGUNXM_END_RELOAD_EMPTY );
+		bNeedPump = false;
+		m_flNextPrimaryAttack = m_flTimeWeaponIdle = gpGlobals->time + SHOTGUNXM_RELOADEMPTY_FINISH_TIME;
+	}
+
+	if( m_flTimeWeaponIdle < gpGlobals->time )
+	{		
 		if( m_iClip == 0 && m_fInReload == 0 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
 		{
 			Reload();
 		}
 		else if( m_fInReload > 0 )
 		{
-			if( m_iClip < SHOTGUN_MAX_CLIP && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
+			if( m_iClip < SHOTGUNXM_MAX_CLIP && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
 			{
 				Reload();
 			}
@@ -290,7 +304,10 @@ void CShotgunXM::WeaponIdle( void )
 			{
 				// reload debounce has timed out
 				if( bUseAfterReloadEmpty )
+				{
 					SendWeaponAnim( SHOTGUNXM_END_RELOAD_EMPTY );
+					bUseAfterReloadEmpty = false;
+				}
 				else
 					SendWeaponAnim( SHOTGUNXM_END_RELOAD );
 

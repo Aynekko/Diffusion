@@ -120,7 +120,8 @@ public:
 #define MRC_MAX_CLIP			50
 #define MP5_MAX_CLIP			30
 #define MP5_DEFAULT_AMMO		50  // 25? What were they smoking in Valve?
-#define SHOTGUN_MAX_CLIP		8
+#define SHOTGUN_MAX_CLIP		12
+#define SHOTGUNXM_MAX_CLIP		8
 #define CROSSBOW_MAX_CLIP		5
 #define RPG_MAX_CLIP			1
 #define GAUSS_MAX_CLIP			50

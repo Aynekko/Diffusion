@@ -46,6 +46,7 @@ public:
 	int m_fInReload;
 	float m_flNextReload;
 	int PostShell; // diffusion - this value will decide whether to eject 1 or 2 shells
+	bool bUseAfterReloadEmpty;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_shotgun, CShotgun );
@@ -61,7 +62,7 @@ void CShotgun::Spawn( void )
 {
 	Precache( );
 	m_iId = WEAPON_SHOTGUN;
-	SET_MODEL(ENT(pev), "models/weapons/w_shotgun.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_ksg.mdl");
 
 	m_iDefaultAmmo = SHOTGUN_DEFAULT_GIVE;
 
@@ -90,7 +91,7 @@ void CShotgun::Precache( void )
 //	PRECACHE_SOUND ("weapons/sshell3.wav");	// shotgun reload - played on client
 	
 	PRECACHE_SOUND ("weapons/357_cock1.wav"); // gun empty sound
-	PRECACHE_SOUND ("weapons/scock1.wav");	// cock gun
+	PRECACHE_SOUND( "weapons/shotgun_pump.wav" );
 }
 
 int CShotgun::AddToPlayer( CBasePlayer *pPlayer )
@@ -124,11 +125,30 @@ int CShotgun::GetItemInfo(ItemInfo *p)
 
 BOOL CShotgun::Deploy( )
 {
-	m_flTimeWeaponIdle = gpGlobals->time + 2.0;
 	m_fInReload = 0; // reset any reloading
-	m_flNextPrimaryAttack = gpGlobals->time + SHOTGUN_DEPLOY_TIME;
-	m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_DEPLOY_TIME;
-	return DefaultDeploy( "models/weapons/v_shotgun.mdl", "models/weapons/p_shotgun.mdl", SHOTGUN_DRAW, "shotgun" );
+	if( m_flPumpTime && m_flPumpTime < gpGlobals->time )
+	{
+		m_flTimeWeaponIdle = m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOADEMPTY_FINISH_TIME;
+		if( m_iClip <= 0 )
+			m_flNextReload = gpGlobals->time + 1.5;
+		return DefaultDeploy( "models/weapons/v_shotgun.mdl", "models/weapons/p_shotgun.mdl", SHOTGUN_END_RELOAD_EMPTY, "shotgun" );
+	}
+	else
+	{
+		if( bUseAfterReloadEmpty )
+		{
+			m_flTimeWeaponIdle = m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOADEMPTY_FINISH_TIME;
+			m_flPumpTime = -1; // need to do shell-less pump after reloading
+			return DefaultDeploy( "models/weapons/v_shotgun.mdl", "models/weapons/p_shotgun.mdl", SHOTGUN_END_RELOAD_EMPTY, "shotgun" );
+		}
+		else
+		{
+			m_flPumpTime = 0;
+			m_flTimeWeaponIdle = gpGlobals->time + 2.0;
+			m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_DEPLOY_TIME;
+			return DefaultDeploy( "models/weapons/v_shotgun.mdl", "models/weapons/p_shotgun.mdl", SHOTGUN_DRAW, "shotgun" );
+		}
+	}
 }
 
 void CShotgun::PrimaryAttack()
@@ -140,9 +160,26 @@ void CShotgun::PrimaryAttack()
 	// stop reloading, move the gun
 	if( m_fInReload > 0 )
 	{
-		SendWeaponAnim( SHOTGUN_END_RELOAD );
-		m_fInReload = 0;
-		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOAD_FINISH_TIME;
+		// don't stop reload if didn't load anything yet
+		if( m_iClip <= 0 )
+		{
+			CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
+			return;
+		}
+
+		if( bUseAfterReloadEmpty )
+		{
+			SendWeaponAnim( SHOTGUN_END_RELOAD_EMPTY );
+			m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOADEMPTY_FINISH_TIME;
+			m_flPumpTime = gpGlobals->time + 0.6;
+		}
+		else
+		{
+			SendWeaponAnim( SHOTGUN_END_RELOAD );
+			m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOAD_FINISH_TIME;
+		}
+		
+		m_fInReload = 0;		
 		m_flTimeWeaponIdle = gpGlobals->time + 1.5;
 		return;
 	}
@@ -196,11 +233,11 @@ void CShotgun::PrimaryAttack()
 	//	m_pPlayer->AchievementStats[ACH_BULLETSFIRED]++;
 		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 6, 0 );
 
-		m_pPlayer->pev->punchangle.x -= 5;
+		m_pPlayer->pev->punchangle.x -= 4;
 
 		PostShell = 1;
 
-		m_flPumpTime = gpGlobals->time + 0.5;
+		m_flPumpTime = gpGlobals->time + 0.4;
 
 		MakeWeaponShake( m_pPlayer, WEAPON_SHOTGUN, 0 );
 
@@ -225,9 +262,19 @@ void CShotgun::SecondaryAttack( void )
 	// stop reloading, move the gun
 	if( m_fInReload > 0 )
 	{
-		SendWeaponAnim( SHOTGUN_END_RELOAD );
+		if( bUseAfterReloadEmpty )
+		{
+			SendWeaponAnim( SHOTGUN_END_RELOAD_EMPTY );
+			m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOADEMPTY_FINISH_TIME;
+			m_flPumpTime = gpGlobals->time + 0.6;
+		}
+		else
+		{
+			SendWeaponAnim( SHOTGUN_END_RELOAD );
+			m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOAD_FINISH_TIME;
+		}
+
 		m_fInReload = 0;
-		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOAD_FINISH_TIME;
 		m_flTimeWeaponIdle = gpGlobals->time + 1.5;
 		return;
 	}
@@ -306,7 +353,7 @@ void CShotgun::SecondaryAttack( void )
 
 		PostShell = 2;
 
-		m_flPumpTime = gpGlobals->time + 0.95;
+		m_flPumpTime = gpGlobals->time + 0.4;
 	}
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
@@ -338,10 +385,11 @@ void CShotgun::Reload( void )
 	{
 		SendWeaponAnim( SHOTGUN_START_RELOAD );
 		m_fInReload = 1;
-		m_pPlayer->m_flNextAttack = gpGlobals->time + 0.6;
-		m_flTimeWeaponIdle = gpGlobals->time + SHOTGUN_RELOAD_TIME;
+		m_pPlayer->m_flNextAttack = gpGlobals->time + SHOTGUN_STARTRELOAD_TIME;
+		m_flTimeWeaponIdle = gpGlobals->time + SHOTGUN_STARTRELOAD_TIME;
 		m_flNextPrimaryAttack = gpGlobals->time + 1.5;
 		m_flNextSecondaryAttack = gpGlobals->time + 1.5;
+		bUseAfterReloadEmpty = (m_iClip <= 0);
 		return;
 	}
 	else if (m_fInReload == 1)
@@ -374,33 +422,37 @@ void CShotgun::Reload( void )
 
 void CShotgun::WeaponIdle( void )
 {
-	ResetEmptySound( );
+	ResetEmptySound();
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
 	if (m_flPumpTime && m_flPumpTime < gpGlobals->time)
 	{
 		// play pumping sound
-		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/scock1.wav", 1, ATTN_NORM, 0, 95 + RANDOM_LONG(0,0x1f));
+		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/shotgun_pump.wav", 1, ATTN_NORM, 0, 95 + RANDOM_LONG(0,0x1f));
 		
-		// diffusion - eject shell moved here
-		Vector	vecShellVelocity = m_pPlayer->GetAbsVelocity() 
-							 + gpGlobals->v_right * RANDOM_LONG(70,90)
-							 + gpGlobals->v_up * RANDOM_LONG(125,175)
-							 + gpGlobals->v_forward * 25;
-		if (PostShell == 1)
+		if( !bUseAfterReloadEmpty )
 		{
-			EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -10 + gpGlobals->v_forward * 25 + gpGlobals->v_right * 12,
-			vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL );
-		}
-		else if (PostShell == 2)
-		{
-			EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -10 + gpGlobals->v_forward * 25 + gpGlobals->v_right * 12,
-			vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL );
-			EjectBrass ( m_pPlayer->EyePosition() + gpGlobals->v_up * -12 + gpGlobals->v_forward * 30 + gpGlobals->v_right * 14,
-			vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL );
+			// diffusion - eject shell moved here
+			Vector	vecShellVelocity = m_pPlayer->GetAbsVelocity()
+				+ gpGlobals->v_right * RANDOM_LONG( 70, 90 )
+				+ gpGlobals->v_up * RANDOM_LONG( 125, 175 )
+				+ gpGlobals->v_forward * 25;
+			if( PostShell == 1 )
+			{
+				EjectBrass( m_pPlayer->EyePosition() + gpGlobals->v_up * -10 + gpGlobals->v_forward * 25 + gpGlobals->v_right * 12,
+					vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL );
+			}
+			else if( PostShell == 2 )
+			{
+				EjectBrass( m_pPlayer->EyePosition() + gpGlobals->v_up * -10 + gpGlobals->v_forward * 25 + gpGlobals->v_right * 12,
+					vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL );
+				EjectBrass( m_pPlayer->EyePosition() + gpGlobals->v_up * -12 + gpGlobals->v_forward * 30 + gpGlobals->v_right * 14,
+					vecShellVelocity, m_pPlayer->GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL );
+			}
 		}
 
+		bUseAfterReloadEmpty = false;
 		m_flPumpTime = 0;
 	}
 
@@ -412,39 +464,26 @@ void CShotgun::WeaponIdle( void )
 		}
 		else if (m_fInReload != 0)
 		{
-			if (m_iClip != 8 && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType])
-				Reload( );
+			if( m_iClip < SHOTGUN_MAX_CLIP && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
+			{
+				Reload();
+			}
 			else
 			{
 				// reload debounce has timed out
-				SendWeaponAnim( SHOTGUN_END_RELOAD );
+				if( bUseAfterReloadEmpty )
+				{
+					SendWeaponAnim( SHOTGUN_END_RELOAD_EMPTY );
+					m_flPumpTime = gpGlobals->time + 0.6;
+				}
+				else
+					SendWeaponAnim( SHOTGUN_END_RELOAD );
 				
 				// play cocking sound
 			//	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/scock1.wav", 1, ATTN_NORM, 0, 95 + RANDOM_LONG(0,0x1f));
 				m_fInReload = 0;
 				m_flTimeWeaponIdle = gpGlobals->time + 1.5;
 			}
-		}
-		else
-		{
-			int iAnim;
-			float flRand = RANDOM_FLOAT(0, 1);
-			if (flRand <= 0.8)
-			{
-				iAnim = SHOTGUN_IDLE_DEEP;
-				m_flTimeWeaponIdle = gpGlobals->time + (60.0/12.0);// * RANDOM_LONG(2, 5);
-			}
-			else if (flRand <= 0.95)
-			{
-				iAnim = SHOTGUN_IDLE;
-				m_flTimeWeaponIdle = gpGlobals->time + (20.0/9.0);
-			}
-			else
-			{
-				iAnim = SHOTGUN_IDLE4;
-				m_flTimeWeaponIdle = gpGlobals->time + (20.0/9.0);
-			}
-			SendWeaponAnim( iAnim );
 		}
 	}
 }

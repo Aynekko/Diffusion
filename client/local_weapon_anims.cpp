@@ -165,12 +165,16 @@ bool CheckForLocalWeaponShootAnimation( int seq )
 			return true;
 		break;
 	case WEAPON_SHOTGUN:
-		if( seq == SHOTGUN_RELOAD || seq == SHOTGUN_START_RELOAD ) // caught reload anim!
+		if( seq == SHOTGUN_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUN_RELOAD_TIME + 1.0f; // !!! slightly pushed forward so we don't have an accidental shot between animations
+		else if( seq == SHOTGUN_START_RELOAD ) // caught reload anim!
+			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUN_STARTRELOAD_TIME + 1.0f; // !!! slightly pushed forward so we don't have an accidental shot between animations
 		else if( seq == SHOTGUN_DRAW ) // caught deploy anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUN_DEPLOY_TIME;
 		else if( seq == SHOTGUN_END_RELOAD ) // caught finish reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUN_RELOAD_FINISH_TIME;
+		else if( seq == SHOTGUN_END_RELOAD_EMPTY ) // caught finish reload anim!
+			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUN_RELOADEMPTY_FINISH_TIME;
 
 		if( seq != SHOTGUN_FIRE && seq != SHOTGUN_FIRE2 ) // only interested in FIRE animations
 			return false;
@@ -183,7 +187,7 @@ bool CheckForLocalWeaponShootAnimation( int seq )
 		else if( seq == SHOTGUN_START_RELOAD )
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUNXM_STARTRELOAD_TIME + 1.0f; // !!! slightly pushed forward so we don't have an accidental shot between animations
 		else if( seq == SHOTGUNXM_DRAW ) // caught deploy anim!
-			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + DEFAULT_DEPLOY_TIME;
+			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUNXM_DEPLOY_TIME;
 		else if( seq == SHOTGUNXM_END_RELOAD ) // caught finish reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + SHOTGUNXM_RELOAD_FINISH_TIME;
 		else if( seq == SHOTGUNXM_END_RELOAD_EMPTY )  // caught finish reload anim!
