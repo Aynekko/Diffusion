@@ -42,6 +42,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "glsl", "glsl", "{76F81493-9
 		glsl\grassdlight_vp.glsl = glsl\grassdlight_vp.glsl
 		glsl\grasssolid_fp.glsl = glsl\grasssolid_fp.glsl
 		glsl\grasssolid_vp.glsl = glsl\grasssolid_vp.glsl
+		glsl\heat_fp.glsl = glsl\heat_fp.glsl
 		glsl\horizontalblur_fp.glsl = glsl\horizontalblur_fp.glsl
 		glsl\interior.h = glsl\interior.h
 		glsl\mathlib.h = glsl\mathlib.h

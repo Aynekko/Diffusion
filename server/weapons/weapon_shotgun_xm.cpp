@@ -191,7 +191,7 @@ void CShotgunXM::PrimaryAttack()
 		Vector vecSrc = m_pPlayer->GetGunPosition();
 		Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
-		m_pPlayer->FireBullets( 6, vecSrc, vecAiming, VECTOR_CONE_8DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0, DMG_WEAPON_SHOTGUN_XM );
+		m_pPlayer->FireBullets( 6, vecSrc, vecAiming, VECTOR_CONE_6DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0, DMG_WEAPON_SHOTGUN_XM );
 
 		MakeWeaponShake( m_pPlayer, WEAPON_SHOTGUN_XM, 0 );
 
