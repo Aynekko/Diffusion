@@ -135,7 +135,7 @@ BOOL CShotgun::Deploy( )
 	}
 	else
 	{
-		if( bUseAfterReloadEmpty )
+		if( bUseAfterReloadEmpty && (m_iClip > 0) )
 		{
 			m_flTimeWeaponIdle = m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOADEMPTY_FINISH_TIME;
 			m_flPumpTime = -1; // need to do shell-less pump after reloading
@@ -335,15 +335,16 @@ void CShotgun::SecondaryAttack( void )
 	//	m_pPlayer->AchievementStats[ACH_BULLETSFIRED]++;
 		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 12, 0 );
 
+		m_pPlayer->pev->punchangle.y -= 3.5;
+
 		switch ( RANDOM_LONG(0,1) )
 		{
 		case 0:
 			m_pPlayer->pev->punchangle.x -= RANDOM_FLOAT (7.5, 10);
-			m_pPlayer->pev->punchangle.y -= RANDOM_FLOAT (0.5, 2);
 			break;
 		case 1:
 			m_pPlayer->pev->punchangle.x += RANDOM_FLOAT (5, 7.5);
-			m_pPlayer->pev->punchangle.y -= RANDOM_FLOAT (0.5, 2);
+			break;
 		}
 	
 		MakeWeaponShake( m_pPlayer, WEAPON_SHOTGUN, 1 );
@@ -353,7 +354,7 @@ void CShotgun::SecondaryAttack( void )
 
 		PostShell = 2;
 
-		m_flPumpTime = gpGlobals->time + 0.4;
+		m_flPumpTime = gpGlobals->time + 0.7;
 	}
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)

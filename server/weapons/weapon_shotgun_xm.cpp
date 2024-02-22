@@ -27,7 +27,6 @@ public:
 	float m_flNextReload;
 
 	bool bUseAfterReloadEmpty;
-	bool bNeedPump;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_shotgun_xm, CShotgunXM );
@@ -112,10 +111,16 @@ BOOL CShotgunXM::Deploy()
 	if( bUseAfterReloadEmpty )
 	{
 		bUseAfterReloadEmpty = false;
-		bNeedPump = true;
-		m_flNextPrimaryAttack = gpGlobals->time + SHOTGUNXM_RELOADEMPTY_FINISH_TIME;
+		if( m_iClip > 0 )
+		{
+			m_flNextPrimaryAttack = gpGlobals->time + SHOTGUNXM_DRAWRELOADEMPTY_FINISH_TIME;
+			return DefaultDeploy( "models/weapons/v_m1014.mdl", "models/weapons/p_m1014.mdl", SHOTGUNXM_DRAW_AFTER_RELOAD, "shotgun" );
+		}
+		else
+			return DefaultDeploy( "models/weapons/v_m1014.mdl", "models/weapons/p_m1014.mdl", SHOTGUNXM_DRAW, "shotgun" );
 	}
-	return DefaultDeploy( "models/weapons/v_m1014.mdl", "models/weapons/p_m1014.mdl", SHOTGUNXM_DRAW, "shotgun" );
+	else
+		return DefaultDeploy( "models/weapons/v_m1014.mdl", "models/weapons/p_m1014.mdl", SHOTGUNXM_DRAW, "shotgun" );
 }
 
 void CShotgunXM::PrimaryAttack()
@@ -280,13 +285,6 @@ void CShotgunXM::WeaponIdle( void )
 	ResetEmptySound();
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
-
-	if( bNeedPump )
-	{
-		SendWeaponAnim( SHOTGUNXM_END_RELOAD_EMPTY );
-		bNeedPump = false;
-		m_flNextPrimaryAttack = m_flTimeWeaponIdle = gpGlobals->time + SHOTGUNXM_RELOADEMPTY_FINISH_TIME;
-	}
 
 	if( m_flTimeWeaponIdle < gpGlobals->time )
 	{		

@@ -341,9 +341,12 @@ void HUD_TempEntUpdate(
 				{
 					pmtrace_t pmtrace;
 					physent_t *pe;
+					int collision_flags = PM_STUDIO_BOX;
+					if( pTemp->flags & FTENT_COLLIDE_STUDIOIGNORE )
+						collision_flags = PM_STUDIO_IGNORE;
 				
 					gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-					gEngfuncs.pEventAPI->EV_PlayerTrace( pTemp->entity.prevstate.origin, pTemp->entity.origin, PM_STUDIO_BOX, -1, &pmtrace );
+					gEngfuncs.pEventAPI->EV_PlayerTrace( pTemp->entity.prevstate.origin, pTemp->entity.origin, collision_flags, -1, &pmtrace );
 
 					if( pmtrace.fraction != 1.0f )
 					{

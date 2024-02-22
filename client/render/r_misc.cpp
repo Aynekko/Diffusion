@@ -2599,7 +2599,7 @@ TEMPENTITY *R_GunShell( const Vector pos, const Vector dir, const Vector angles,
 	pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( (float*)&pos, pmodel );
 	if( !pTemp ) return NULL;
 
-	pTemp->flags = (FTENT_COLLIDEWORLD | FTENT_GRAVITY);
+	pTemp->flags = (FTENT_COLLIDEALL | FTENT_GRAVITY | FTENT_COLLIDE_STUDIOIGNORE);
 	pTemp->entity.baseline.origin = dir;
 	pTemp->entity.angles = tr.cached_viewangles;
 
@@ -2669,7 +2669,7 @@ TEMPENTITY *R_EmptyClip( int WeaponID )
 	pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( (float *)&pos, pmodel );
 	if( !pTemp ) return NULL;
 
-	pTemp->flags = (FTENT_COLLIDEWORLD | FTENT_GRAVITY | FTENT_ROTATE );
+	pTemp->flags = (FTENT_COLLIDEALL | FTENT_GRAVITY | FTENT_ROTATE | FTENT_COLLIDE_STUDIOIGNORE);
 	pTemp->entity.baseline.origin = vel;
 	pTemp->entity.angles = tr.cached_viewangles;
 
