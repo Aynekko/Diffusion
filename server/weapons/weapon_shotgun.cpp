@@ -62,7 +62,7 @@ void CShotgun::Spawn( void )
 {
 	Precache( );
 	m_iId = WEAPON_SHOTGUN;
-	SET_MODEL(ENT(pev), "models/weapons/w_ksg.mdl");
+	SET_MODEL(ENT(pev), "models/weapons/w_shotgun.mdl");
 
 	m_iDefaultAmmo = SHOTGUN_DEFAULT_GIVE;
 
