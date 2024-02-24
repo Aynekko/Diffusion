@@ -83,8 +83,8 @@ static void CubeFace(const vec3_t org, int v0, int v1, int v2, int v3, float siz
 
 void R_RenderCubemap(mcubemap_t* cube)
 {
-	float	rad = (float)cube->size * 0.1f;
-	byte	color[3] = { 127, 127, 127 };
+	float rad = (float)cube->size * 0.1f;
+	byte color[3] = { 127, 127, 127 };
 
 	pglBegin(GL_QUADS);
 
@@ -96,6 +96,8 @@ void R_RenderCubemap(mcubemap_t* cube)
 	CubeFace(cube->origin, 4, 5, 7, 6, rad, color);
 
 	pglEnd();
+
+	DBG_DrawBBox( cube->mins, cube->maxs, Vector( 40, 40, 240 ) );
 }
 
 /*
@@ -107,7 +109,7 @@ void R_DrawCubeMaps(void)
 {
 	mcubemap_t* cm;
 
-	if (!CVAR_TO_BOOL(r_show_cubemaps))
+	if( !CVAR_TO_BOOL(r_show_cubemaps) || IsBuildingCubemaps() )
 		return;
 
 	GL_Blend( GL_FALSE );
