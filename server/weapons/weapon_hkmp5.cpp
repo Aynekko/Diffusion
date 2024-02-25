@@ -63,7 +63,7 @@ void CWeaponHKMP5::Precache( void )
 	PRECACHE_MODEL("models/weapons/w_mp5.mdl");
 	PRECACHE_MODEL("models/weapons/p_mp5.mdl");
 
-	PRECACHE_MODEL("models/weapons/w_9mmARclip.mdl");
+	PRECACHE_MODEL("models/weapons/w_mp5_clip.mdl");
 	PRECACHE_SOUND("items/9mmclip1.wav");              
 
 	PRECACHE_SOUND("weapons/mp5_clipin.wav");
@@ -194,7 +194,6 @@ void CWeaponHKMP5::PrimaryAttack()
 	if( m_iClip <= 10 )
 		LowAmmoMsg( m_pPlayer );
 
-//	m_pPlayer->AchievementStats[ACH_BULLETSFIRED]++;
 	m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 1, 0 );
 
 	m_pPlayer->pev->punchangle.x += Cone * RANDOM_LONG(15,25);
@@ -244,12 +243,12 @@ class CHKMP5AmmoClip : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/weapons/w_9mmARclip.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_mp5_clip.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/weapons/w_9mmARclip.mdl");
+		PRECACHE_MODEL ("models/weapons/w_mp5_clip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
@@ -257,7 +256,6 @@ class CHKMP5AmmoClip : public CBasePlayerAmmo
 		int bResult = (pOther->GiveAmmo( AMMO_HKMP5_GIVE, "hkmp5ammo", _9MM_MAX_CARRY) != -1);
 
 		if (bResult)
-		//	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
 			PlayPickupSound( pOther );
 
 		return bResult;

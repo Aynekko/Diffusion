@@ -2651,6 +2651,9 @@ TEMPENTITY *R_EmptyClip( int WeaponID )
 	case WEAPON_G36C:
 		modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/weapons/w_g36c_clip.mdl" );
 		break;
+	case WEAPON_HKMP5:
+		modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/weapons/w_mp5_clip.mdl" );
+		break;
 	default:
 		break;
 	}
