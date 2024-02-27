@@ -1595,7 +1595,12 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 					if( fabs((vecStart - tracer.vecEndPos).Length()) < 180 ) // not enough space. throw a grenade instead
 					{
 						UTIL_MakeVectors( GetAbsAngles() );
-						CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5 );
+						CBaseEntity *pGrenade = CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5 );
+						if( pGrenade )
+						{
+							SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
+							pGrenade->pev->body = 1; // change to body without pin
+						}
 						EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM );
 						m_fThrowGrenade = FALSE;
 						m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(6,12);// wait few seconds for the next try
@@ -1625,7 +1630,12 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				else
 				{
 					UTIL_MakeVectors( GetAbsAngles() );
-					CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
+					CBaseEntity *pGrenade = CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
+					if( pGrenade )
+					{
+						SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
+						pGrenade->pev->body = 1; // change to body without pin
+					}
 					EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM );
 					m_fThrowGrenade = FALSE;
 					m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(8,15);// wait few seconds
@@ -1634,7 +1644,12 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			else // I can't (army guy), so throw a grenade
 			{
 				UTIL_MakeVectors( GetAbsAngles() );
-				CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
+				CBaseEntity *pGrenade = CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
+				if( pGrenade )
+				{
+					SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
+					pGrenade->pev->body = 1; // change to body without pin
+				}
 				EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM );
 				m_fThrowGrenade = FALSE;
 				m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(8,15);// wait few seconds
@@ -4524,7 +4539,12 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 			if (fabs((vecStart - tracer.vecEndPos).Length()) < 180) // not enough space. throw a grenade instead
 			{
 				UTIL_MakeVectors(GetAbsAngles());
-				CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
+				CBaseEntity *pGrenade = CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
+				if( pGrenade )
+				{
+					SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
+					pGrenade->pev->body = 1; // change to body without pin
+				}
 				EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM);
 				m_fThrowGrenade = FALSE;
 				m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(6, 12);// wait few seconds for the next try
@@ -4550,7 +4570,12 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 		else
 		{
 			UTIL_MakeVectors(GetAbsAngles());
-			CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
+			CBaseEntity *pGrenade = CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
+			if( pGrenade )
+			{
+				SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
+				pGrenade->pev->body = 1; // change to body without pin
+			}
 			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM);
 			m_fThrowGrenade = FALSE;
 			m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(6, 12);// wait few seconds
