@@ -58,7 +58,6 @@ DECLARE_FIELD_SIZE( FIELD_CHARACTER,	sizeof( int8_t ) )
 DECLARE_FIELD_SIZE( FIELD_TIME,			sizeof(float))
 DECLARE_FIELD_SIZE( FIELD_MODELNAME,	sizeof( int32_t ) )
 DECLARE_FIELD_SIZE( FIELD_SOUNDNAME,	sizeof( int32_t ) )
-DECLARE_FIELD_SIZE( FIELD_INT64, sizeof( std::uint64_t )) // FIELD_INT64
 
 #define _FIELD(name, fieldtype, count, flags, mapname )		{ fieldtype, #name, offsetof(classNameTypedef, name), count, flags, mapname, NULL }
 #define _EFIELD(name, fieldtype, count, flags, mapname )		{ fieldtype, #name, offsetof(entvars_t, name), count, flags, mapname, NULL }
