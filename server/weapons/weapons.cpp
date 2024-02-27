@@ -768,7 +768,6 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 	{
 		if ( (m_iClip == 0 && pszAmmo1()) || (iMaxClip() == -1 && !m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] ) )
 			m_fFireOnEmpty = TRUE;
-		
 		if( m_pPlayer->CanShoot )
 			PrimaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK;
@@ -778,7 +777,7 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		// reload when reload is pressed, or if no buttons are down and weapon is empty.
 		Reload();
 	}
-	else if ( !(m_pPlayer->pev->button & (IN_ATTACK|IN_ATTACK2) ) )
+	else //if ( !(m_pPlayer->pev->button & (IN_ATTACK|IN_ATTACK2) ) )
 	{
 		// no fire buttons down
 
