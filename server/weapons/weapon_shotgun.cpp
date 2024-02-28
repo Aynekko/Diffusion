@@ -47,6 +47,7 @@ public:
 	float m_flNextReload;
 	int PostShell; // diffusion - this value will decide whether to eject 1 or 2 shells
 	bool bUseAfterReloadEmpty;
+	bool AskToStopReload;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_shotgun, CShotgun );
@@ -126,6 +127,7 @@ int CShotgun::GetItemInfo(ItemInfo *p)
 BOOL CShotgun::Deploy( )
 {
 	m_fInReload = 0; // reset any reloading
+	AskToStopReload = false;
 	if( m_flPumpTime && m_flPumpTime < gpGlobals->time )
 	{
 		m_flTimeWeaponIdle = m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOADEMPTY_FINISH_TIME;
@@ -190,6 +192,8 @@ void CShotgun::PrimaryAttack()
 		m_flNextPrimaryAttack = gpGlobals->time + 0.15;
 		return;
 	}
+
+	AskToStopReload = false;
 	
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
@@ -285,6 +289,8 @@ void CShotgun::SecondaryAttack( void )
 		m_flNextPrimaryAttack = gpGlobals->time + 0.15;
 		return;
 	}
+
+	AskToStopReload = false;
 	
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
@@ -391,6 +397,7 @@ void CShotgun::Reload( void )
 		m_flNextPrimaryAttack = gpGlobals->time + 1.5;
 		m_flNextSecondaryAttack = gpGlobals->time + 1.5;
 		bUseAfterReloadEmpty = (m_iClip <= 0);
+		AskToStopReload = false;
 		return;
 	}
 	else if (m_fInReload == 1)
@@ -418,7 +425,31 @@ void CShotgun::Reload( void )
 		m_flTimeWeaponIdle = gpGlobals->time + SHOTGUN_RELOAD_TIME;
 	}
 	else
+	{
+		if( m_iClip > 0 )
+		{
+			if( AskToStopReload )
+			{
+				if( bUseAfterReloadEmpty )
+				{
+					SendWeaponAnim( SHOTGUN_END_RELOAD_EMPTY );
+					m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOADEMPTY_FINISH_TIME;
+					m_flPumpTime = gpGlobals->time + 0.6;
+				}
+				else
+				{
+					SendWeaponAnim( SHOTGUN_END_RELOAD );
+					m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUN_RELOAD_FINISH_TIME;
+				}
+				m_fInReload = 0;
+				m_flTimeWeaponIdle = gpGlobals->time + 1.5;
+				AskToStopReload = false;
+				return;
+			}
+		}
+
 		m_fInReload = 1;
+	}
 }
 
 void CShotgun::WeaponIdle( void )
@@ -426,6 +457,9 @@ void CShotgun::WeaponIdle( void )
 	ResetEmptySound();
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
+
+	if( !AskToStopReload && ((m_pPlayer->m_afButtonPressed & IN_ATTACK) || (m_pPlayer->m_afButtonPressed & IN_ATTACK2)) )
+		AskToStopReload = true;
 
 	if (m_flPumpTime && m_flPumpTime < gpGlobals->time)
 	{

@@ -363,6 +363,7 @@ public:
 
 	int	m_iDefaultAmmo;// how much ammo you get when you pick up this weapon as placed by a level designer.
 
+	bool AskedForReload; // player pressed reload button, but we can't do it right now. So the weapon will start reloading at the first available moment
 };
 
 class CBasePlayerAmmo : public CBaseEntity

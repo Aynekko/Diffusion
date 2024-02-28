@@ -741,7 +741,10 @@ BOOL CanAttack( float attack_time, float curtime, BOOL isPredicted )
 
 void CBasePlayerWeapon::ItemPostFrame( void )
 {
-	if ((m_fInReload) && ( m_pPlayer->m_flNextAttack <= gpGlobals->time ))
+	if( m_pPlayer->m_afButtonPressed & IN_RELOAD )
+		AskedForReload = true;
+	
+	if( m_fInReload && (m_pPlayer->m_flNextAttack <= gpGlobals->time) )
 	{
 		// complete the reload. 
 		int j = Q_min( iMaxClip() - m_iClip, m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]);	
@@ -754,15 +757,14 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 	}
 	
 	if ((m_pPlayer->pev->button & IN_ATTACK2) && CanAttack( m_flNextSecondaryAttack, gpGlobals->time, UseDecrement() ))
-	{
-		
+	{	
 		if ( pszAmmo2() && !m_pPlayer->m_rgAmmo[SecondaryAmmoIndex()] )
 			m_fFireOnEmpty = TRUE;
 
 		if( m_pPlayer->CanShoot )
 			SecondaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK2;
-		
+		AskedForReload = false; // cancel the delayed reload - player decided to attack
 	}
 	else if ((m_pPlayer->pev->button & IN_ATTACK) && CanAttack( m_flNextPrimaryAttack, gpGlobals->time, UseDecrement() ) )
 	{
@@ -771,11 +773,13 @@ void CBasePlayerWeapon::ItemPostFrame( void )
 		if( m_pPlayer->CanShoot )
 			PrimaryAttack();
 		m_pPlayer->pev->button &= ~IN_ATTACK;
+		AskedForReload = false; // cancel the delayed reload - player decided to attack
 	}
-	else if ( m_pPlayer->pev->button & IN_RELOAD && iMaxClip() != WEAPON_NOCLIP && !m_fInReload ) 
+	else if ( AskedForReload && iMaxClip() != WEAPON_NOCLIP && !m_fInReload && m_flNextPrimaryAttack < gpGlobals->time && m_flNextSecondaryAttack < gpGlobals->time )
 	{
 		// reload when reload is pressed, or if no buttons are down and weapon is empty.
 		Reload();
+		AskedForReload = false;
 	}
 	else //if ( !(m_pPlayer->pev->button & (IN_ATTACK|IN_ATTACK2) ) )
 	{
@@ -1109,6 +1113,8 @@ BOOL CBasePlayerWeapon :: DefaultDeploy( char *szViewModel, char *szWeaponModel,
 	SendWeaponAnim( iAnim, skiplocal, body );
 
 	m_pPlayer->m_flNextAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
+
+	AskedForReload = false;
 
 	return TRUE;
 }

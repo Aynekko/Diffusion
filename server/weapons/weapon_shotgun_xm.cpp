@@ -27,6 +27,7 @@ public:
 	float m_flNextReload;
 
 	bool bUseAfterReloadEmpty;
+	bool AskToStopReload;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_shotgun_xm, CShotgunXM );
@@ -107,6 +108,7 @@ BOOL CShotgunXM::Deploy()
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 2.0;
 	m_fInReload = 0; // reset any reloading
+	AskToStopReload = false;
 	m_flNextPrimaryAttack = gpGlobals->time + SHOTGUNXM_DEPLOY_TIME;
 	if( bUseAfterReloadEmpty )
 	{
@@ -127,7 +129,7 @@ void CShotgunXM::PrimaryAttack()
 {
 	// stop reloading, move the gun
 	if( m_fInReload > 0 )
-	{
+	{	
 		// don't stop reload if didn't load anything yet
 		if( m_iClip <= 0 )
 		{
@@ -158,6 +160,8 @@ void CShotgunXM::PrimaryAttack()
 		CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
 		return;
 	}
+
+	AskToStopReload = false;
 
 	// don't fire underwater
 	if( m_pPlayer->pev->waterlevel == 3 )
@@ -250,6 +254,7 @@ void CShotgunXM::Reload( void )
 		m_flNextPrimaryAttack = gpGlobals->time + 1;
 		m_flNextSecondaryAttack = gpGlobals->time + 1;
 		bUseAfterReloadEmpty = (m_iClip <= 0);
+		AskToStopReload = false;
 		return;
 	}
 	else if( m_fInReload == 1 )
@@ -277,7 +282,30 @@ void CShotgunXM::Reload( void )
 		m_flTimeWeaponIdle = gpGlobals->time + SHOTGUNXM_RELOAD_TIME;
 	}
 	else
+	{
+		if( m_iClip > 0 )
+		{
+			if( AskToStopReload )
+			{
+				if( bUseAfterReloadEmpty )
+				{
+					SendWeaponAnim( SHOTGUNXM_END_RELOAD_EMPTY );
+					m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUNXM_RELOADEMPTY_FINISH_TIME;
+				}
+				else
+				{
+					SendWeaponAnim( SHOTGUNXM_END_RELOAD );
+					m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUNXM_RELOAD_FINISH_TIME;
+				}
+				m_fInReload = 0;
+				m_flTimeWeaponIdle = gpGlobals->time + 1.5;
+				AskToStopReload = false;
+				return;
+			}
+		}
+
 		m_fInReload = 1;
+	}
 }
 
 void CShotgunXM::WeaponIdle( void )
@@ -285,6 +313,9 @@ void CShotgunXM::WeaponIdle( void )
 	ResetEmptySound();
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
+
+	if( !AskToStopReload && ((m_pPlayer->m_afButtonPressed & IN_ATTACK) || (m_pPlayer->m_afButtonPressed & IN_ATTACK2)) )
+		AskToStopReload = true;
 
 	if( m_flTimeWeaponIdle < gpGlobals->time )
 	{		
