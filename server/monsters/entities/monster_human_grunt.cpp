@@ -2485,6 +2485,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 					}
 
 					if( m_hEnemy
+						&& pev->health > HGRUNT_LIMP_HEALTH
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
 						&& (
 							(m_hEnemy->IsMonster() && !FClassnameIs( m_hEnemy, "monster_target" ))
@@ -3591,6 +3592,7 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 					}
 					
 					if( m_hEnemy
+						&& pev->health > HGRUNT_LIMP_HEALTH
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
 						&& (
 							(m_hEnemy->IsMonster() && !FClassnameIs( m_hEnemy, "monster_target" ))
