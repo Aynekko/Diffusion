@@ -28,6 +28,8 @@
 #define	HULL_STEP_SIZE 16// how far the test hull moves on each step
 #define	NODE_HEIGHT	10	// how high to lift nodes off the ground after we drop them all (make stair/ramp mapping easier)
 
+//#define USE_BSP_LUMP_AINODEGRAPH // do not use bsp lumps because it always reads as version 16, makes it impossible to use on 64-bit
+
 // to help eliminate node clutter by level designers, this is used to cap how many other nodes
 // any given node is allowed to 'see' in the first stage of graph creation "LinkVisibleNodes()".
 #define	MAX_NODE_INITIAL_LINKS	128
@@ -2342,6 +2344,7 @@ int CGraph :: FLoadGraph ( char *szMapName )
 
 	Q_snprintf( szFilename, sizeof( szFilename ), "maps/%s.bsp", szMapName );
 
+#if defined USE_BSP_LUMP_AINODEGRAPH
 	iResult = MAP_READ_LUMP( szFilename, LUMP_AINODEGRAPH, (void **)&aMemFile, &length );
 
 	if( iResult != LUMP_LOAD_OK )
@@ -2351,6 +2354,10 @@ int CGraph :: FLoadGraph ( char *szMapName )
 
 		aMemFile = LOAD_FILE( szFilename, &length );
 	}
+#else
+	Q_snprintf( szFilename, sizeof( szFilename ), "maps/graphs/%s.nod", szMapName );
+	aMemFile = LOAD_FILE( szFilename, &length );
+#endif
 
 	pMemFile = aMemFile;
 
@@ -2497,9 +2504,9 @@ NoMemory:
 //=========================================================
 int CGraph :: FSaveGraph ( char *szMapName )
 {
-	int		iVersion = GRAPH_VERSION;
-	char		szFilename[MAX_PATH];
-	CVirtualFS	file;
+	int iVersion = GRAPH_VERSION;
+	char szFilename[MAX_PATH];
+	CVirtualFS file;
 
 	if ( !m_fGraphPresent || !m_fGraphPointersSet )
 	{
@@ -2536,6 +2543,7 @@ int CGraph :: FSaveGraph ( char *szMapName )
 		file.Write( m_pHashLinks, sizeof(int16_t) * m_nHashLinks );
 	}
 
+#if defined USE_BSP_LUMP_AINODEGRAPH
 	// dump into real file
 	int iResult = MAP_SAVE_LUMP( szFilename, LUMP_AINODEGRAPH, file.GetBuffer(), file.GetSize( ));
 
@@ -2550,6 +2558,13 @@ int CGraph :: FSaveGraph ( char *szMapName )
 	}
 
 	return (iResult == LUMP_SAVE_OK) ? true : false;
+#else
+	Q_snprintf( szFilename, sizeof( szFilename ), "maps/graphs/%s.nod", szMapName );
+
+	if( SAVE_FILE( szFilename, file.GetBuffer(), file.GetSize() ) )
+		return true;
+	return false;
+#endif
 }
 
 //=========================================================

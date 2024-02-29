@@ -108,7 +108,13 @@ typedef struct
 //=========================================================
 // CGraph 
 //=========================================================
+
+#ifdef XASH_X86
 #define	GRAPH_VERSION	(int)16// !!!increment this whever graph/node/link classes change, to obsolesce older disk files.
+#else // 64-bit
+#define	GRAPH_VERSION	(int)32
+#endif
+
 class CGraph
 {
 public:
