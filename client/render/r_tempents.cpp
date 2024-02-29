@@ -135,7 +135,7 @@ void CL_TempEntPlaySound( TEMPENTITY *pTemp, float damp )
 			pitch = RANDOM_LONG( 95, 105 );
 		else pitch = PITCH_NORM;
 
-		gEngfuncs.pEventAPI->EV_PlaySound( pTemp->entity.index, pTemp->entity.origin, CHAN_BODY, soundname, fvol, ATTN_NORM, SND_STOP_LOOPING, pitch );
+		gEngfuncs.pEventAPI->EV_PlaySound( pTemp->entity.index, pTemp->entity.origin, CHAN_STATIC, soundname, fvol, ATTN_NORM, SND_STOP_LOOPING, pitch );
 	}
 }
 
