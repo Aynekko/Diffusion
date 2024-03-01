@@ -37,7 +37,10 @@ void CAnimatex::Init( char *Tex )
 		else
 		{
 			if( i == 0 )
+			{
 				ConPrintf( "^1Error:^7 CAnimatex can't load any frames for \"%s\".\n", Tex );
+				Texture[0] = tr.defaultTexture;
+			}
 
 			break;
 		}
@@ -92,14 +95,13 @@ int CAnimatex::GetCurFrame( void )
 
 void CAnimatex::SetCurFrame( int Frame )
 {
-	Frame = bound( 0, Frame, iTotalFrames - 1 );
+	Frame = bound( 0, Frame, GetTotalFrames() - 1 );
 	fCurFrame = Frame;
 }
 
 void CAnimatex::DrawFrame( int Frame )
 {
-	if( Frame >= GetTotalFrames() )
-		Frame = GetTotalFrames() - 1;
+	Frame = bound( 0, Frame, GetTotalFrames() - 1 );
 	
 	int Tex = Texture[Frame];
 	
