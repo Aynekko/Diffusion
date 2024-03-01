@@ -233,7 +233,7 @@ void CTriggerCamera::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 	// now copy the name to player who's using us
 	if( pev->targetname != NULL )
 	{
-		((CBasePlayer *)((CBaseEntity *)m_hPlayer))->CameraEntity = pev->targetname;
+		Q_strcpy( ((CBasePlayer *)((CBaseEntity *)m_hPlayer))->CameraEntity, GetTargetname() );
 		if(HasSpawnFlags(SF_CAMERA_CINEMATICBORDER))
 			m_hPlayer->pev->effects |= EF_PLAYERUSINGCAMERA;
 	}
@@ -255,7 +255,7 @@ void CTriggerCamera::FollowTarget(void)
 	// player's camera has changed, switch off
 	if ( pev->targetname )
 	{
-		if (((CBasePlayer*)((CBaseEntity*)m_hPlayer))->CameraEntity != pev->targetname)
+		if( Q_strcmp( ((CBasePlayer*)((CBaseEntity*)m_hPlayer))->CameraEntity, GetTargetname()) )
 		{
 			RemoveFlag(F_ENTITY_BUSY);
 			SetLocalVelocity(g_vecZero);
@@ -351,7 +351,7 @@ void CTriggerCamera::Stop(void)
 	{
 		SET_VIEW(m_hPlayer->edict(), m_hPlayer->edict());
 		((CBasePlayer*)((CBaseEntity*)m_hPlayer))->EnableControl(TRUE);
-		((CBasePlayer*)((CBaseEntity*)m_hPlayer))->CameraEntity = NULL;
+		((CBasePlayer*)((CBaseEntity*)m_hPlayer))->CameraEntity[0] = '\0'; // set to NULL
 	}
 
 	if (HasSpawnFlags(SF_CAMERA_PLAYER_HIDEHUD))

@@ -213,7 +213,7 @@ BEGIN_DATADESC( CBasePlayer )
 
 	DEFINE_ARRAY( m_DroneTextParms, FIELD_CHARACTER, sizeof(hudtextparms_t) ),
 	DEFINE_ARRAY( m_AliceTextParms, FIELD_CHARACTER, sizeof(hudtextparms_t) ),
-	DEFINE_FIELD( CameraEntity, FIELD_STRING ),
+	DEFINE_ARRAY( CameraEntity, FIELD_CHARACTER, 128 ),
 	DEFINE_FIELD( CameraOrigin, FIELD_VECTOR ),
 	DEFINE_FIELD( CameraAngles, FIELD_VECTOR ),
 	DEFINE_FIELD( ZoomState, FIELD_INTEGER ),
@@ -3192,10 +3192,10 @@ void CBasePlayer::ManageDrone( void )
 
 			if( DroneControl ) // drone is in 1st person mode - this sets by weapon_drone
 			{
-				if( CameraEntity == NULL )
+				if( CameraEntity[0] == '\0' )
 				{
 					SET_VIEW( edict(), m_hDrone->edict() );
-					CameraEntity = MAKE_STRING( "_friendlydrone" );
+					Q_strcpy( CameraEntity, "_friendlydrone" );
 					UTIL_ScreenFade( this, g_vecZero, 0.5, 0, 255, FFADE_IN );
 					m_hDrone->SetFlag( F_PLAYER_CONTROL );
 					pev->flags |= FL_ONTRAIN;
@@ -3208,7 +3208,7 @@ void CBasePlayer::ManageDrone( void )
 					// we are all set and controlling the drone.
 				}
 
-				if( !Q_strcmp( STRING( CameraEntity ), "_friendlydrone" ) )
+				if( !Q_strcmp( CameraEntity, "_friendlydrone" ) )
 				{
 					// copy the view parameters for correct distance-culling
 					CameraOrigin = m_hDrone->GetAbsOrigin();
@@ -3340,10 +3340,10 @@ void CBasePlayer::ManageDrone( void )
 			{
 				// make sure that we were looking through the drone camera
 				// (maybe some other camera took our view)
-				if( !strcmp( STRING( CameraEntity ), "_friendlydrone" ) )
+				if( !Q_strcmp( CameraEntity, "_friendlydrone" ) )
 				{
 					SET_VIEW( edict(), edict() );
-					CameraEntity = NULL;
+					CameraEntity[0] = '\0';
 					UTIL_ScreenFade( this, g_vecZero, 0.5, 0, 255, FFADE_IN );
 				}
 
@@ -3370,10 +3370,10 @@ void CBasePlayer::ManageDrone( void )
 	}
 	else // drone not deployed? we get this state if drone dies, disappears from the world, or grabbed by +use
 	{
-		if( DroneControl && !Q_strcmp( STRING( CameraEntity ), "_friendlydrone" ) ) // were we in 1st person at the moment?
+		if( DroneControl && !Q_strcmp( CameraEntity, "_friendlydrone" ) ) // were we in 1st person at the moment?
 		{
 			SET_VIEW( edict(), edict() );
-			CameraEntity = NULL;
+			CameraEntity[0] = '\0';
 			UTIL_ScreenFade( this, g_vecZero, 0.5, 0, 255, FFADE_IN );
 			pev->flags &= ~FL_ONTRAIN;
 			pev->effects &= ~EF_PLAYERDRONECONTROL;
@@ -4249,10 +4249,10 @@ void CBasePlayer::PostThink()
 		tm = gpGlobals->time + 3;
 	}*/
 
-	if( CameraEntity == NULL )
+	if( CameraEntity[0] == '\0' )
 	{
 		if( pev->effects & EF_PLAYERDRONECONTROL )
-			CameraEntity = MAKE_STRING( "_friendlydrone" );
+			Q_strcpy( CameraEntity, "_friendlydrone" );
 		else
 		{
 			CameraOrigin = GetAbsOrigin();
@@ -5161,6 +5161,7 @@ void CBasePlayer::Spawn( void )
 	DroneHealth = 500;
 	DroneAmmo = 500;
 	DroneDistance = 0;
+	CameraEntity[0] = '\0';
 
 	KillingSpreeLevel = 0;
 	ConsecutiveKills = 0;

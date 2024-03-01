@@ -586,7 +586,7 @@ public:
 
 	int ConfirmedHit; // an indicator to display a hit marker on the crosshair - 1: hit, 2: killed
 
-	string_t CameraEntity; // if player is using a trigger_camera, copy its name here.
+	char CameraEntity[128]; // if player is using a trigger_camera, copy its name here.
 							// if this field changes (player switched to another camera), the camera will deactivate 
 	Vector CameraOrigin; // origin and angles of the said camera
 	Vector CameraAngles;
