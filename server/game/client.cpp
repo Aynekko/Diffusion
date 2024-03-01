@@ -782,6 +782,11 @@ void ClientCommand( edict_t *pEntity )
 		else
 			CLIENT_PRINTF( pEntity, print_console, UTIL_VarArgs( "\"fov\" is \"%d\"\n", (int)pPlayer->m_flFOV ) );
 	}
+	else if( FIStrEq( pcmd, "allowdrone" ) )
+	{
+		if( Cheats && CMD_ARGC() > 1 )
+			pPlayer->CanUseDrone = (Q_atoi( CMD_ARGV(1) ) > 0);
+	}
 	else if ( FIStrEq(pcmd, "use" ) )
 	{
 		pPlayer->SelectItem((char *)CMD_ARGV(1));
