@@ -4226,7 +4226,6 @@ void CBasePlayer::LookAtPlayers( void )
 	if( !bFoundViewTarget )
 		m_vLookAtTarget = PlayerOrg + vForward * 512;
 
-	// FIXME - the head turn snaps, not slowly moving.
 	headyaw = UTIL_ApproachAngle( VecToYaw( m_vLookAtTarget - PlayerOrg ) - GetLocalAngles().y, headyaw, 130 * gpGlobals->frametime );
 
 	// turn towards vector
