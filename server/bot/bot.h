@@ -88,114 +88,120 @@ void BotGenerateWaypointFile( int LookDistance = 600 );
 
 class CBot : public CBasePlayer //Derive a bot class from CBasePlayer
 {
-   public:
-      Vector v_prev_origin;   // previous origin (i.e. location)
-      float  f_shoot_time;    // next time to shoot weapon at
-      float  f_max_speed;     // last sv_maxspeed setting
-      float  f_speed_check_time;  // check sv_maxspeed every so often
-      float  f_move_speed;    // speed at which the bot will move
-      int    ladder_dir;      // direction traveling on ladder (UP or DOWN)
-      int    wander_dir;      // randomly wander left or right
-      float  f_pause_time;    // timeout for periods when the bot pauses
-      float  f_find_item;     // timeout for not looking for items
-      char   model_name[20];
-      int    bot_model;
-      int    bot_skill;       // bot skill level (0=very good, 4=very bad)
-      float  f_pain_time;     // time when pain sound can be spoken
-      BOOL   b_use_health_station;  // set if bot should "use" health station
-      float  f_use_health_time;  // time when b_use_health_station is set
-      BOOL   b_use_HEV_station;  // set if bot should "use" HEV station
-      float  f_use_HEV_time;  // time when b_use_HEV_station is set
-      BOOL   b_use_button;    // set if bot should "use" button
-      float  f_use_button_time;  // time when b_use_button is set
-      BOOL   b_lift_moving;   // flag set when lift (elevator) is moving
-      float  f_use_ladder_time;  // time when bot sees a ladder
-      BOOL   b_see_tripmine;  // set if bot "sees" a tripmine
-      BOOL   b_shoot_tripmine;  // set if bot should shoot a tripmine
-      Vector v_tripmine_origin;  // origin of tripmine
-      float  f_fire_gauss;    // time to release secondary fire on gauss gun
-      BOOL   bot_was_paused;  // TRUE if bot was previously "paused"
-      float  f_weapon_inventory_time;  // time to check weapon inventory
-      int    respawn_index;   // index in respawn structure for this bot
-      float  f_dont_avoid_wall_time;  // time when avoiding walls is OK
-      float  f_bot_use_time;  // time the bot was "used" by player
-      float  f_wall_on_left;  // time since bot has had a wall on the left
-      float  f_wall_on_right; // time since bot has had a wall on the right
+public:
+	Vector v_prev_origin;   // previous origin (i.e. location)
+	float  f_shoot_time;    // next time to shoot weapon at
+	float  f_max_speed;     // last sv_maxspeed setting
+	float  f_speed_check_time;  // check sv_maxspeed every so often
+	float  f_move_speed;    // speed at which the bot will move
+	int    ladder_dir;      // direction traveling on ladder (UP or DOWN)
+	int    wander_dir;      // randomly wander left or right
+	float  f_pause_time;    // timeout for periods when the bot pauses
+	float  f_find_item;     // timeout for not looking for items
+	char   model_name[20];
+	int    bot_model;
+	int    bot_skill;       // bot skill level (0=very good, 4=very bad)
+	float  f_pain_time;     // time when pain sound can be spoken
+	BOOL   b_use_health_station;  // set if bot should "use" health station
+	float  f_use_health_time;  // time when b_use_health_station is set
+	BOOL   b_use_HEV_station;  // set if bot should "use" HEV station
+	float  f_use_HEV_time;  // time when b_use_HEV_station is set
+	BOOL   b_use_button;    // set if bot should "use" button
+	float  f_use_button_time;  // time when b_use_button is set
+	BOOL   b_lift_moving;   // flag set when lift (elevator) is moving
+	float  f_use_ladder_time;  // time when bot sees a ladder
+	BOOL   b_see_tripmine;  // set if bot "sees" a tripmine
+	BOOL   b_shoot_tripmine;  // set if bot should shoot a tripmine
+	Vector v_tripmine_origin;  // origin of tripmine
+	float  f_fire_gauss;    // time to release secondary fire on gauss gun
+	BOOL   bot_was_paused;  // TRUE if bot was previously "paused"
+	float  f_weapon_inventory_time;  // time to check weapon inventory
+	int    respawn_index;   // index in respawn structure for this bot
+	float  f_dont_avoid_wall_time;  // time when avoiding walls is OK
+	float  f_bot_use_time;  // time the bot was "used" by player
+	float  f_wall_on_left;  // time since bot has had a wall on the left
+	float  f_wall_on_right; // time since bot has had a wall on the right
 
-      CBaseEntity *pBotEnemy; // pointer to bot's enemy
-      CBaseEntity *pBotUser;  // pointer to player using bot
-      CBaseEntity *pBotPickupItem;  // pointer to item we are trying to get
-      CBasePlayerItem *weapon_ptr[MAX_WEAPONS];  // pointer array to weapons
-      int primary_ammo[MAX_WEAPONS];  // amount of primary ammo available
-      int secondary_ammo[MAX_WEAPONS];  // amount of secondary ammo available
+	CBaseEntity *pBotEnemy; // pointer to bot's enemy
+	CBaseEntity *pBotUser;  // pointer to player using bot
+	CBaseEntity *pBotPickupItem;  // pointer to item we are trying to get
+	CBasePlayerItem *weapon_ptr[MAX_WEAPONS];  // pointer array to weapons
+	int primary_ammo[MAX_WEAPONS];  // amount of primary ammo available
+	int secondary_ammo[MAX_WEAPONS];  // amount of secondary ammo available
 
-      char   message[256];    // buffer for debug messages
+	char   message[256];    // buffer for debug messages
 
-      void Spawn( void );
-      void BotThink( void );  // think function for the bot
+	void Spawn( void );
+	void BotThink( void );  // think function for the bot
 
-      // Bots should return FALSE for this, they can't receive NET messages
-      virtual BOOL IsNetClient( void ) { return FALSE; }
+	// Bots should return FALSE for this, they can't receive NET messages
+	virtual BOOL IsNetClient( void ) { return FALSE; }
 
-      int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
-      int ObjectCaps() { return FCAP_IMPULSE_USE; };
-      void BotUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+	int ObjectCaps()
+	{
+		if( g_pGameRules->IsTeamplay() )
+			return FCAP_IMPULSE_USE;
 
-      int BotInFieldOfView( Vector dest );
-      BOOL BotEntityIsVisible( Vector dest );
-      float BotChangeYaw( float speed );
-      void BotOnLadder( void ); //void BotOnLadder( float moved_distance );
-      void BotUnderWater( void );
-      CBaseEntity * BotFindEnemy( void );
-      Vector BotBodyTarget( CBaseEntity *pBotEnemy );
-      void BotWeaponInventory( void );
-      BOOL BotFireWeapon( Vector enemy, int weapon_choice = 0, BOOL primary = TRUE );
-      void BotShootAtEnemy( void );
-      void BotFindItem( void );
-      void BotUseLift( void ); //void BotUseLift( float moved_distance );
-      void BotTurnAtWall( TraceResult *tr );
-      BOOL BotCantMoveForward( TraceResult *tr );
-      BOOL BotCanJumpUp( void );
-      BOOL BotCanDuckUnder( void );
-      BOOL BotShootTripmine( void );
-      BOOL BotFollowUser( void );  // returns FALSE if can find "user"
-      BOOL BotCheckWallOnLeft( void );
-      BOOL BotCheckWallOnRight( void );
-      void BotFixIdealPitch( void );
-      void BotFixIdealYaw( void );
+		return 0;
+	};
+	void BotUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-      bool BotTryWaypoint( void );
-      float f_trynextwaypoint_time;
-      int last_waypoint_num;
-      float moved_distance;      // length of v_diff vector (distance bot moved)
-      float f_cantseelastwaypoint_time;
+	int BotInFieldOfView( Vector dest );
+	BOOL BotEntityIsVisible( Vector dest );
+	float BotChangeYaw( float speed );
+	void BotOnLadder( void ); //void BotOnLadder( float moved_distance );
+	void BotUnderWater( void );
+	CBaseEntity * BotFindEnemy( void );
+	Vector BotBodyTarget( CBaseEntity *pBotEnemy );
+	void BotWeaponInventory( void );
+	BOOL BotFireWeapon( Vector enemy, int weapon_choice = 0, BOOL primary = TRUE );
+	void BotShootAtEnemy( void );
+	void BotFindItem( void );
+	void BotUseLift( void ); //void BotUseLift( float moved_distance );
+	void BotTurnAtWall( TraceResult *tr );
+	BOOL BotCantMoveForward( TraceResult *tr );
+	BOOL BotCanJumpUp( void );
+	BOOL BotCanDuckUnder( void );
+	BOOL BotShootTripmine( void );
+	BOOL BotFollowUser( void );  // returns FALSE if can find "user"
+	BOOL BotCheckWallOnLeft( void );
+	BOOL BotCheckWallOnRight( void );
+	void BotFixIdealPitch( void );
+	void BotFixIdealYaw( void );
 
-      Vector vNearbyWaypoints[MAX_WAYPOINTS];
-      int iNearbyWaypoints;
-      int iNearbyWaypointNum;
-      void FindNearbyWaypoints( float Distance );
-	  int CurrentWaypointID;
-      int iWaypointHistory[2]; // IDs of recent waypoints
+	bool BotTryWaypoint( void );
+	float f_trynextwaypoint_time;
+	int last_waypoint_num;
+	float moved_distance;      // length of v_diff vector (distance bot moved)
+	float f_cantseelastwaypoint_time;
 
-      float next_dash_time;
-      float last_electroblast_time;
+	Vector vNearbyWaypoints[MAX_WAYPOINTS];
+	int iNearbyWaypoints;
+	int iNearbyWaypointNum;
+	void FindNearbyWaypoints( float Distance );
+	int CurrentWaypointID;
+	int iWaypointHistory[2]; // IDs of recent waypoints
 
-	  // arrived at a special waypoint - camp there for 30 seconds
-	  float camping_end_time;
-	  bool IsCamping;
-      float camping_turn_time;
-      float next_camping_time;
+	float next_dash_time;
+	float last_electroblast_time;
 
-	  // going to the next waypoint crouching
-	  bool CrouchMove;
+	// arrived at a special waypoint - camp there for 30 seconds
+	float camping_end_time;
+	bool IsCamping;
+	float camping_turn_time;
+	float next_camping_time;
 
-      bool IsStuck;
-      float f_stuck_time;
+	// going to the next waypoint crouching
+	bool CrouchMove;
 
-      float f_duck_release_time;
+	bool IsStuck;
+	float f_stuck_time;
 
-      bool IsHoldingAttackButton;
-      float stop_hold_attack_button_time;
+	float f_duck_release_time;
+
+	bool IsHoldingAttackButton;
+	float stop_hold_attack_button_time;
 };
 
 #endif // BOT_H

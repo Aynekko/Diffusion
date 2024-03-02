@@ -801,7 +801,10 @@ void CBot::Spawn( )
 	stop_hold_attack_button_time = 0;
 
 	if( g_pGameRules->IsTeamplay() ) // is team play enabled?
+	{
+		ObjectCaps();
 		SetUse( &CBot::BotUse );
+	}
 }
 
 
