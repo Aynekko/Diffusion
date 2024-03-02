@@ -39,7 +39,6 @@ public:
 	string_t carhurt;
 	string_t drivermdl;
 	string_t chassismdl;
-	string_t camera1;
 	string_t camera2;
 	string_t tank_tower;
 
@@ -93,14 +92,15 @@ public:
 	bool AllowCamera; // when Car is used with value 2.0, the camera toggles. this is to allow using trigger_camera while in car
 	bool CamUnlocked;
 	bool CarInAir;
-	Vector Camera1LocalOrigin; // remember camera origins and angles'
 	Vector Camera2LocalOrigin;
-	Vector Camera1LocalAngles;
 	Vector Camera2LocalAngles;
+	Vector CameraAngles;
 	float CameraBrakeOffsetX; // not saved
-	int MaxCamera1Sway;
 	int MaxCamera2Sway;
 	bool SecondaryCamera; // 2nd camera is active
+	// default camera view
+	int CameraHeight;
+	int CameraDistance;
 	float BrakeAddX; // not saved
 	float AccelAddX; // not saved
 	int DriverMdlSequence; // not saved

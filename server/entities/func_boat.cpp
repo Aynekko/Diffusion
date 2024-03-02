@@ -18,14 +18,10 @@ BEGIN_DATADESC( CBoat )
 	DEFINE_KEYFIELD( wheel4, FIELD_STRING, "wheel4" ),
 	DEFINE_KEYFIELD( chassis, FIELD_STRING, "chassis" ),
 	DEFINE_KEYFIELD( carhurt, FIELD_STRING, "carhurt" ),
-	DEFINE_KEYFIELD( camera1, FIELD_STRING, "camera1" ),
 	DEFINE_KEYFIELD( camera2, FIELD_STRING, "camera2" ),
 	DEFINE_KEYFIELD( tank_tower, FIELD_STRING, "tank_tower" ),
-	DEFINE_FIELD( Camera1LocalOrigin, FIELD_VECTOR ),
 	DEFINE_FIELD( Camera2LocalOrigin, FIELD_VECTOR ),
-	DEFINE_FIELD( Camera1LocalAngles, FIELD_VECTOR ),
 	DEFINE_FIELD( Camera2LocalAngles, FIELD_VECTOR ),
-	DEFINE_KEYFIELD( MaxCamera1Sway, FIELD_INTEGER, "maxcam1sway" ),
 	DEFINE_KEYFIELD( MaxCamera2Sway, FIELD_INTEGER, "maxcam2sway" ),
 	DEFINE_KEYFIELD( drivermdl, FIELD_STRING, "drivermdl" ),
 	DEFINE_KEYFIELD( chassismdl, FIELD_STRING, "chassismdl" ),
@@ -38,6 +34,8 @@ BEGIN_DATADESC( CBoat )
 	DEFINE_KEYFIELD( TurningRate, FIELD_INTEGER, "turningrate" ),
 	DEFINE_KEYFIELD( MaxTurn, FIELD_INTEGER, "maxturn" ),
 	DEFINE_KEYFIELD( DamageMult, FIELD_FLOAT, "damagemult" ),
+	DEFINE_KEYFIELD( CameraHeight, FIELD_INTEGER, "camheight" ),
+	DEFINE_KEYFIELD( CameraDistance, FIELD_INTEGER, "camdistance" ),
 	DEFINE_FIELD( hDriver, FIELD_EHANDLE ),
 	DEFINE_FUNCTION( Setup ),
 	DEFINE_FUNCTION( Drive ),
@@ -303,6 +301,7 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 			UTIL_FireTargets( pev->target, pPlayer, this, USE_TOGGLE, 0 );
 			time = gpGlobals->time;
 			DriverMdlSequence = -1;
+			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
 
 			MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, hDriver->pev );
 				WRITE_BYTE( TE_CARPARAMS );
@@ -334,7 +333,7 @@ void CBoat::Setup( void )
 	pCarHurt = UTIL_FindEntityByTargetname( NULL, STRING( carhurt ) );
 	pDriverMdl = (CBaseAnimating *)UTIL_FindEntityByTargetname( NULL, STRING( drivermdl ) );
 	pChassisMdl = (CBaseAnimating *)UTIL_FindEntityByTargetname( NULL, STRING( chassismdl ) );
-	pCamera1 = UTIL_FindEntityByTargetname( NULL, STRING( camera1 ) );
+	pCamera1 = CBaseEntity::Create( "info_target", GetAbsOrigin(), GetAbsAngles(), edict() );
 	pCamera2 = UTIL_FindEntityByTargetname( NULL, STRING( camera2 ) );
 
 	if( pChassisMdl )
@@ -345,13 +344,39 @@ void CBoat::Setup( void )
 		pChassisMdl->pev->spawnflags |= BIT( 31 ); // SF_ENVMODEL_OWNERDAMAGE
 		pChassisMdl->RelinkEntity( FALSE );
 	}
+	else
+		ALERT( at_warning, "func_boat \"%s\" doesn't have body model entity specified, collision won't work properly.\n", GetTargetname() );
 
 	if( pCamera1 )
 	{
-		if( !pCamera1->m_iParent )
-			pCamera1->SetParent( this );
 		pCamera1->SetNullModel();
-		Camera1LocalOrigin = pCamera1->GetLocalOrigin();
+		pCamera1->pev->effects |= EF_SKIPPVS;
+		if( !CameraDistance )
+		{
+			if( pChassisMdl )
+			{
+				// get camera distance according to model bounds
+				Vector mins = g_vecZero;
+				Vector maxs = g_vecZero;
+				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+				CameraDistance = (int)((mins - maxs).Length() * pChassisMdl->pev->scale);
+			}
+			else
+				CameraDistance = 230;
+		}
+		if( !CameraHeight )
+		{
+			if( pChassisMdl )
+			{
+				// get camera distance according to model bounds
+				Vector mins = g_vecZero;
+				Vector maxs = g_vecZero;
+				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+				CameraHeight = (int)(fabs( mins.z - maxs.z ) * pChassisMdl->pev->scale);
+			}
+			else
+				CameraHeight = 80;
+		}
 	}
 
 	if( pCamera2 )
@@ -383,6 +408,16 @@ void CBoat::Setup( void )
 	{
 		pFreeCam->SetNullModel();
 		pFreeCam->SetParent( this );
+		pFreeCam->pev->iuser1 = 0;
+		if( pChassisMdl )
+		{
+			// get camera distance according to model bounds
+			Vector mins = g_vecZero;
+			Vector maxs = g_vecZero;
+			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+			pFreeCam->pev->iuser1 = (int)((mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale);
+		}
+		pFreeCam->pev->effects |= EF_SKIPPVS;
 	}
 
 	if( pev->iuser1 ) // rotate boat
@@ -603,7 +638,7 @@ void CBoat::Drive( void )
 	if( CarSpeed == 0.0f )
 		TurnRate = 1;
 	float OpposeTurn = 1.0f;
-	int CameraSwayRate = MaxCamera1Sway;
+	int CameraSwayRate = 0;
 	if( SecondaryCamera )
 		CameraSwayRate = MaxCamera2Sway;
 
@@ -614,14 +649,16 @@ void CBoat::Drive( void )
 			if( Turning > 0 ) OpposeTurn = (3 * TurningRate) / (1 + AbsCarSpeed);
 			OpposeTurn = bound( 1, OpposeTurn, 3 );
 			Turning -= OpposeTurn * TurnRate * gpGlobals->frametime;
-			CameraMoving -= CameraSwayRate * gpGlobals->frametime;
+			if( CameraSwayRate > 0 )
+				CameraMoving -= CameraSwayRate * gpGlobals->frametime;
 		}
 		else if( bLeft() )
 		{
 			if( Turning < 0 ) OpposeTurn = (3 * TurningRate) / (1 + AbsCarSpeed);
 			OpposeTurn = bound( 1, OpposeTurn, 3 );
 			Turning += OpposeTurn * TurnRate * gpGlobals->frametime;
-			CameraMoving += CameraSwayRate * gpGlobals->frametime;
+			if( CameraSwayRate > 0 )
+				CameraMoving += CameraSwayRate * gpGlobals->frametime;
 		}
 	}
 
@@ -629,7 +666,8 @@ void CBoat::Drive( void )
 	if( !(bLeft()) && !(bRight()) )
 	{
 		Turning = UTIL_Approach( 0, Turning, fabs( TurnRate * 0.75 ) * gpGlobals->frametime );
-		CameraMoving = UTIL_Approach( 0, CameraMoving, CameraSwayRate * 0.5 * gpGlobals->frametime );
+		if( CameraSwayRate > 0 )
+			CameraMoving = UTIL_Approach( 0, CameraMoving, CameraSwayRate * 0.5 * gpGlobals->frametime );
 
 		if( fabs( Turning ) <= 0.001f )
 			Turning = 0;
@@ -643,7 +681,7 @@ void CBoat::Drive( void )
 	float max_turn_val = 1 / (1 + AbsCarSpeed * 0.0025); // magic
 	Turning = bound( -max_turn_val, Turning, max_turn_val );
 
-	int CameraMovingBound = MaxCamera1Sway;
+	int CameraMovingBound = 0;
 	if( SecondaryCamera )
 		CameraMovingBound = MaxCamera2Sway;
 

@@ -25,6 +25,7 @@
 #define SF_CAR_TURNREARWHEELS	BIT(7) // rear wheels will turn too
 #define SF_CAR_SQUEAKYBRAKES	BIT(8) // brakes make squeaky sound
 
+// iuser1 is used for car spawn angle
 // fuser2 is used for both body and wheels' models to control the amount of dirt on the car
 // fuser3 on wheels is used to desync the sounds...thanks to FWGS update I have to do this, otherwise I'd need to use 4 different sounds :|
 
@@ -35,14 +36,11 @@ BEGIN_DATADESC( CCar )
 	DEFINE_KEYFIELD( wheel4, FIELD_STRING, "wheel4" ),
 	DEFINE_KEYFIELD( chassis, FIELD_STRING, "chassis" ),
 	DEFINE_KEYFIELD( carhurt, FIELD_STRING, "carhurt" ),
-	DEFINE_KEYFIELD( camera1, FIELD_STRING, "camera1" ),
 	DEFINE_KEYFIELD( camera2, FIELD_STRING, "camera2" ),
 	DEFINE_KEYFIELD( tank_tower, FIELD_STRING, "tank_tower" ),
-	DEFINE_FIELD( Camera1LocalOrigin, FIELD_VECTOR ),
 	DEFINE_FIELD( Camera2LocalOrigin, FIELD_VECTOR ),
-	DEFINE_FIELD( Camera1LocalAngles, FIELD_VECTOR ),
 	DEFINE_FIELD( Camera2LocalAngles, FIELD_VECTOR ),
-	DEFINE_KEYFIELD( MaxCamera1Sway, FIELD_INTEGER, "maxcam1sway"),
+	DEFINE_FIELD( CameraAngles, FIELD_VECTOR ),
 	DEFINE_KEYFIELD( MaxCamera2Sway, FIELD_INTEGER, "maxcam2sway" ),
 	DEFINE_KEYFIELD( drivermdl, FIELD_STRING, "drivermdl" ),
 	DEFINE_KEYFIELD( chassismdl, FIELD_STRING, "chassismdl" ),
@@ -69,6 +67,8 @@ BEGIN_DATADESC( CCar )
 	DEFINE_KEYFIELD( surf_SnowMult, FIELD_FLOAT, "surfsnow" ),
 	DEFINE_KEYFIELD( surf_WoodMult, FIELD_FLOAT, "surfwood" ),
 	DEFINE_KEYFIELD( DamageMult, FIELD_FLOAT, "damagemult" ),
+	DEFINE_KEYFIELD( CameraHeight, FIELD_INTEGER, "camheight" ),
+	DEFINE_KEYFIELD( CameraDistance, FIELD_INTEGER, "camdistance" ),
 	DEFINE_FIELD( hDriver, FIELD_EHANDLE ),
 	DEFINE_FUNCTION( Setup ),
 	DEFINE_FUNCTION( Drive ),
@@ -233,11 +233,6 @@ void CCar::KeyValue( KeyValueData *pkvd )
 		carhurt = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
-	else if( FStrEq( pkvd->szKeyName, "camera1" ) )
-	{
-		camera1 = ALLOC_STRING( pkvd->szValue );
-		pkvd->fHandled = TRUE;
-	}
 	else if( FStrEq( pkvd->szKeyName, "camera2" ) )
 	{
 		camera2 = ALLOC_STRING( pkvd->szValue );
@@ -313,14 +308,19 @@ void CCar::KeyValue( KeyValueData *pkvd )
 		MaxTurn = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
-	else if( FStrEq( pkvd->szKeyName, "maxcam1sway" ) )
-	{
-		MaxCamera1Sway = Q_atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
-	}
 	else if( FStrEq( pkvd->szKeyName, "maxcam2sway" ) )
 	{
 		MaxCamera2Sway = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "camheight" ) )
+	{
+		CameraHeight = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "camdistance" ) )
+	{
+		CameraDistance = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "frontwheelradius" ) )
@@ -699,6 +699,7 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			TurboAccum = 0;
 			IsShifting = false;
 			ShiftStartTime = 0;
+			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
 
 			SetNextThink( 0 );
 		}
@@ -747,7 +748,7 @@ void CCar::Setup( void )
 	pCarHurt = UTIL_FindEntityByTargetname( NULL, STRING( carhurt ) );
 	pDriverMdl = (CBaseAnimating*)UTIL_FindEntityByTargetname( NULL, STRING( drivermdl ) );
 	pChassisMdl = (CBaseAnimating *)UTIL_FindEntityByTargetname( NULL, STRING( chassismdl ) );
-	pCamera1 = UTIL_FindEntityByTargetname( NULL, STRING( camera1 ) );
+	pCamera1 = CBaseEntity::Create( "info_target", GetAbsOrigin(), GetAbsAngles(), edict() );
 	pCamera2 = UTIL_FindEntityByTargetname( NULL, STRING( camera2 ) );
 	pTankTower = UTIL_FindEntityByTargetname( NULL, STRING( tank_tower ) );
 
@@ -761,11 +762,13 @@ void CCar::Setup( void )
 	if( pChassisMdl )
 	{
 		pChassisMdl->pev->owner = edict();
-		UTIL_SetSize( pChassisMdl->pev, Vector( -16, -16, 0 ), Vector( 16,16,16 ) );
+		UTIL_SetSize( pChassisMdl->pev, Vector( -16, -16, 0 ), Vector( 16, 16, 16 ) );
 		pChassisMdl->pev->takedamage = DAMAGE_YES;
 		pChassisMdl->pev->spawnflags |= BIT( 31 ); // SF_ENVMODEL_OWNERDAMAGE
 		pChassisMdl->RelinkEntity( FALSE );
 	}
+	else
+		ALERT( at_warning, "func_car \"%s\" doesn't have body model entity specified, collision won't work properly.\n", GetTargetname() );
 
 	if( pWheel1 )
 	{
@@ -790,11 +793,34 @@ void CCar::Setup( void )
 
 	if( pCamera1 )
 	{
-		if( !pCamera1->m_iParent )
-			pCamera1->SetParent( this );
 		pCamera1->SetNullModel();
-		Camera1LocalOrigin = pCamera1->GetLocalOrigin();
-		Camera1LocalAngles = pCamera1->GetLocalAngles();
+		pCamera1->pev->effects |= EF_SKIPPVS;
+		if( !CameraDistance )
+		{
+			if( pChassisMdl )
+			{
+				// get camera distance according to model bounds
+				Vector mins = g_vecZero;
+				Vector maxs = g_vecZero;
+				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+				CameraDistance = (int)((mins - maxs).Length() * pChassisMdl->pev->scale);
+			}
+			else
+				CameraDistance = 230;
+		}
+		if( !CameraHeight )
+		{
+			if( pChassisMdl )
+			{
+				// get camera distance according to model bounds
+				Vector mins = g_vecZero;
+				Vector maxs = g_vecZero;
+				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+				CameraHeight = (int)(fabs( mins.z - maxs.z ) * pChassisMdl->pev->scale);
+			}
+			else
+				CameraHeight = 80;
+		}
 	}
 
 	if( pCamera2 )
@@ -844,10 +870,9 @@ void CCar::Setup( void )
 			Vector mins = g_vecZero;
 			Vector maxs = g_vecZero;
 			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-			pFreeCam->pev->iuser1 = (int)( (mins - maxs).Length() * 0.5f * pChassisMdl->pev->scale );
+			pFreeCam->pev->iuser1 = (int)( (mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale );
 		}
-		if( !pCamera1 )
-			Camera1LocalAngles = pFreeCam->GetLocalAngles();
+		pFreeCam->pev->effects |= EF_SKIPPVS;
 	}
 
 	if( pev->iuser1 ) // rotate car
@@ -1244,23 +1269,7 @@ void CCar::Drive( void )
 	if( DriftMode )
 	{
 		float ChassisAbsAngY = pChassis->pev->angles.y;
-		float anglediff = fabs( ChassisAbsAngY - DriftAngles.y );
-		if( (ChassisAbsAngY > 0 && DriftAngles.y < 0) )
-		{
-			DriftAngles.y = DriftAngles.y + 360;
-			if( anglediff > 180 )
-				DriftAngles.y += 360;
-			if( DriftAngles.y > 180 )
-				DriftAngles.y -= 360;
-		}
-		else if( (ChassisAbsAngY < 0 && DriftAngles.y > 0) )
-		{
-			DriftAngles.y = DriftAngles.y - 360;
-			if( anglediff > 180 )
-				DriftAngles.y -= 360;
-			if( DriftAngles.y < -180 )
-				DriftAngles.y += 360;
-		}
+		float anglediff = AngleDiff( ChassisAbsAngY, DriftAngles.y );
 
 		float drift_recovery_speed = (MaxCarSpeed * 3) / (1 + AbsCarSpeed); // stability
 		drift_recovery_speed = bound( 10.0f, drift_recovery_speed, 500.0f );
@@ -1269,13 +1278,13 @@ void CCar::Drive( void )
 		if( AbsCarSpeed <= 0.1f )
 			DriftAngles.y = ChassisAbsAngY;
 		else
-			DriftAngles.y = UTIL_Approach( ChassisAbsAngY, DriftAngles.y, drift_recovery_speed * gpGlobals->frametime );
+			DriftAngles.y = UTIL_ApproachAngle( ChassisAbsAngY, DriftAngles.y, drift_recovery_speed * gpGlobals->frametime );
 
 		UTIL_MakeVectors( DriftAngles );
 		DriftForw = gpGlobals->v_forward;
 		float dot = DotProduct( DriftForw, ChassisForw );
 		DriftAmount = 1 / bound( 0.05, dot, 1 ); // 1 to 20
-		ALERT( at_console, "recovery %f, amt %f, dot %f\n", drift_recovery_speed, DriftAmount, dot );
+	//	ALERT( at_console, "recovery %f, amt %f, dot %f\n", drift_recovery_speed, DriftAmount, dot );
 	}
 	else
 		DriftAmount = 1.0f;
@@ -1332,26 +1341,29 @@ void CCar::Drive( void )
 
 	float TurnRate = TurningRate / (1 + AbsCarSpeed);
 	TurnRate = (Forward == 0 ? 1 : Forward) * bound( 0, TurnRate, 250 );
-	int CameraSwayRate = MaxCamera1Sway;
+	int CameraSwayRate = 0;
 	if( SecondaryCamera )
 		CameraSwayRate = MaxCamera2Sway;
 
 	if( bRight() )
 	{
 		Turning -= TurnRate * gpGlobals->frametime;
-		CameraMoving -= (CameraMoving > 0 ? 2 : 1) * CameraSwayRate * gpGlobals->frametime;
+		if( CameraSwayRate > 0 )
+			CameraMoving -= (CameraMoving > 0 ? 2 : 1) * CameraSwayRate * gpGlobals->frametime;
 	}
 	else if( bLeft() )
 	{
 		Turning += TurnRate * gpGlobals->frametime;
-		CameraMoving += (CameraMoving < 0 ? 2 : 1) * CameraSwayRate * gpGlobals->frametime;
+		if( CameraSwayRate > 0 )
+			CameraMoving += (CameraMoving < 0 ? 2 : 1) * CameraSwayRate * gpGlobals->frametime;
 	}
 
 	// no turning buttons pressed, go to zero slowly
 	if( (!bLeft() && !bRight()) )
 	{
 		Turning = UTIL_Approach( 0, Turning, fabs( TurnRate * 0.75 ) * gpGlobals->frametime );
-		CameraMoving = UTIL_Approach( 0, CameraMoving, CameraSwayRate * 0.5 * gpGlobals->frametime );
+		if( CameraSwayRate > 0 )
+			CameraMoving = UTIL_Approach( 0, CameraMoving, CameraSwayRate * 0.5 * gpGlobals->frametime );
 
 		if( fabs( Turning ) <= 0.001f )
 			Turning = 0;
@@ -1363,7 +1375,7 @@ void CCar::Drive( void )
 		max_turn_val = 1.0f;
 	Turning = bound( -max_turn_val, Turning, max_turn_val );
 
-	int CameraMovingBound = MaxCamera1Sway * DriftAmount * DriftAmount;
+	int CameraMovingBound = 0;
 	if( SecondaryCamera )
 		CameraMovingBound = MaxCamera2Sway;
 
@@ -2307,6 +2319,20 @@ void CCar::Camera(void)
 	if( !(hDriver->pev->flags & FL_CLIENT) )
 		return;
 
+	float ChassisAbsAngY = pChassis->pev->angles.y;
+	if( CarSpeed < -10 ) // going backwards
+		ChassisAbsAngY -= 180;
+
+	float anglediff = AngleDiff( ChassisAbsAngY, CameraAngles.y );
+	float AbsCarSpeed = fabs( CarSpeed );
+	float approach_speed = bound( 0, AbsCarSpeed * 0.005f, 2.5f );
+
+	Vector vForward, vRight;
+	g_engfuncs.pfnAngleVectors( CameraAngles, vForward, vRight, NULL );
+	CameraAngles.y = UTIL_ApproachAngle( ChassisAbsAngY, CameraAngles.y, approach_speed * anglediff * gpGlobals->frametime );
+	if( CarSpeed < -10 ) // going backwards
+		vRight = -vRight;
+
 	float max_camera_lean = CarSpeed * 0.025f;
 
 	if( CarSpeed > 0.01f && (bBack() || bUp()) ) // braking
@@ -2319,7 +2345,7 @@ void CCar::Camera(void)
 	else
 		CameraBrakeOffsetX = UTIL_Approach( 0, CameraBrakeOffsetX, bound( 3, CarSpeed * 0.01f, 9 ) * gpGlobals->frametime );
 
-	TraceResult CamTr; // !!! needs to be done better
+	TraceResult CamTr;
 
 	if( (CamUnlocked && pFreeCam) || (!pCamera1 && !SecondaryCamera) )
 	{
@@ -2341,8 +2367,6 @@ void CCar::Camera(void)
 				CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 				pFreeCam->SetAbsOrigin( CamOrg );
 			//	pFreeCam->SetAbsAngles( GetAbsAngles() );
-				if( !pCamera1 )
-					pFreeCam->SetLocalAngles( Camera1LocalAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );
 			}
 			else if( CarSpeed < -100 )
 			{
@@ -2382,12 +2406,10 @@ void CCar::Camera(void)
 		else if( pCamera1 )
 		{
 			SET_VIEW( hDriver->edict(), pCamera1->edict() );
-			CamOrg = Camera1LocalOrigin;
-			BackSway = bound( 0, BackSway, MaxCamera1Sway );
-			CamOrg.x = Camera1LocalOrigin.x - BackSway;
-			CamOrg.y = Camera1LocalOrigin.y + CameraMoving;
-			pCamera1->SetLocalOrigin( CamOrg );
-			pCamera1->SetLocalAngles( Camera1LocalAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );
+			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * CameraDistance, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+			CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
+			pCamera1->SetAbsOrigin( CamOrg );
+			pCamera1->SetAbsAngles( CameraAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );
 		}
 	}
 }

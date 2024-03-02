@@ -21,11 +21,8 @@ BEGIN_DATADESC( CHelicopter )
 	DEFINE_KEYFIELD( blade, FIELD_STRING, "blade" ),
 	DEFINE_KEYFIELD( blade2, FIELD_STRING, "blade2" ),
 	DEFINE_KEYFIELD( carhurt, FIELD_STRING, "carhurt" ),
-	DEFINE_KEYFIELD( camera1, FIELD_STRING, "camera1" ),
 	DEFINE_KEYFIELD( camera2, FIELD_STRING, "camera2" ),
-	DEFINE_FIELD( Camera1LocalOrigin, FIELD_VECTOR ),
 	DEFINE_FIELD( Camera2LocalOrigin, FIELD_VECTOR ),
-	DEFINE_KEYFIELD( MaxCamera1Sway, FIELD_INTEGER, "maxcam1sway" ),
 	DEFINE_KEYFIELD( MaxCamera2Sway, FIELD_INTEGER, "maxcam2sway" ),
 	DEFINE_KEYFIELD( drivermdl, FIELD_STRING, "drivermdl" ),
 	DEFINE_KEYFIELD( chassismdl, FIELD_STRING, "chassismdl" ),
@@ -55,6 +52,8 @@ BEGIN_DATADESC( CHelicopter )
 	DEFINE_KEYFIELD( m_iszAltTarget, FIELD_STRING, "m_iszAltTarget" ),
 	DEFINE_FIELD( VerticalVelocity, FIELD_FLOAT ),
 	DEFINE_FIELD( BladeSpeed, FIELD_FLOAT ),
+	DEFINE_KEYFIELD( CameraHeight, FIELD_INTEGER, "camheight" ),
+	DEFINE_KEYFIELD( CameraDistance, FIELD_INTEGER, "camdistance" ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( func_helicopter, CHelicopter );
@@ -298,6 +297,7 @@ void CHelicopter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 			UTIL_FireTargets( pev->target, pPlayer, this, USE_TOGGLE, 0 );
 			time = gpGlobals->time;
 			DriverMdlSequence = -1;
+			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
 
 			SetNextThink( 0 );
 		}
@@ -321,7 +321,7 @@ void CHelicopter::Setup( void )
 	pCarHurt = UTIL_FindEntityByTargetname( NULL, STRING( carhurt ) );
 	pDriverMdl = (CBaseAnimating *)UTIL_FindEntityByTargetname( NULL, STRING( drivermdl ) );
 	pChassisMdl = (CBaseAnimating *)UTIL_FindEntityByTargetname( NULL, STRING( chassismdl ) );
-	pCamera1 = UTIL_FindEntityByTargetname( NULL, STRING( camera1 ) );
+	pCamera1 = CBaseEntity::Create( "info_target", GetAbsOrigin(), GetAbsAngles(), edict() );
 	pCamera2 = UTIL_FindEntityByTargetname( NULL, STRING( camera2 ) );
 	pBlade = UTIL_FindEntityByTargetname( NULL, STRING( blade ) );
 	pBlade2 = UTIL_FindEntityByTargetname( NULL, STRING( blade2 ) );
@@ -334,13 +334,39 @@ void CHelicopter::Setup( void )
 		pChassisMdl->pev->spawnflags |= BIT( 31 ); // SF_ENVMODEL_OWNERDAMAGE
 		pChassisMdl->RelinkEntity( FALSE );
 	}
+	else
+		ALERT( at_warning, "func_helicopter \"%s\" doesn't have body model entity specified, collision won't work properly.\n", GetTargetname() );
 
 	if( pCamera1 )
 	{
-		if( !pCamera1->m_iParent )
-			pCamera1->SetParent( this );
 		pCamera1->SetNullModel();
-		Camera1LocalOrigin = pCamera1->GetLocalOrigin();
+		pCamera1->pev->effects |= EF_SKIPPVS;
+		if( !CameraDistance )
+		{
+			if( pChassisMdl )
+			{
+				// get camera distance according to model bounds
+				Vector mins = g_vecZero;
+				Vector maxs = g_vecZero;
+				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+				CameraDistance = (int)((mins - maxs).Length() * pChassisMdl->pev->scale);
+			}
+			else
+				CameraDistance = 230;
+		}
+		if( !CameraHeight )
+		{
+			if( pChassisMdl )
+			{
+				// get camera distance according to model bounds
+				Vector mins = g_vecZero;
+				Vector maxs = g_vecZero;
+				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+				CameraHeight = (int)(fabs( mins.z - maxs.z ) * pChassisMdl->pev->scale);
+			}
+			else
+				CameraHeight = 150;
+		}
 	}
 
 	if( pCamera2 )
@@ -394,7 +420,17 @@ void CHelicopter::Setup( void )
 	{
 		pFreeCam->SetNullModel();
 		pFreeCam->SetParent( this );
-		pFreeCam->pev->iuser1 = 100; // distance from heli, because it's bigger
+		if( pChassisMdl )
+		{
+			// get camera distance according to model bounds
+			Vector mins = g_vecZero;
+			Vector maxs = g_vecZero;
+			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+			pFreeCam->pev->iuser1 = (int)((mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale);
+		}
+		else
+			pFreeCam->pev->iuser1 = 100; // distance from heli, because it's bigger
+		pFreeCam->pev->effects |= EF_SKIPPVS;
 	}
 
 	if( pev->iuser1 ) // rotate vehicle
@@ -474,7 +510,7 @@ void CHelicopter::Drive( void )
 	TurnRate = Forward * bound( 0, TurnRate, 20 );
 	if( CarSpeed == 0.0f )
 		TurnRate = 1;
-	int CameraSwayRate = MaxCamera1Sway;
+	int CameraSwayRate = 0;
 	if( SecondaryCamera )
 		CameraSwayRate = MaxCamera2Sway;
 
@@ -483,19 +519,22 @@ void CHelicopter::Drive( void )
 		if( bRight() )
 		{
 			Turning -= TurnRate * gpGlobals->frametime;
-			CameraMoving -= CameraSwayRate * gpGlobals->frametime;
+			if( CameraSwayRate > 0 )
+				CameraMoving -= CameraSwayRate * gpGlobals->frametime;
 		}
 		else if( bLeft() )
 		{
 			Turning += TurnRate * gpGlobals->frametime;
-			CameraMoving += CameraSwayRate * gpGlobals->frametime;
+			if( CameraSwayRate > 0 )
+				CameraMoving += CameraSwayRate * gpGlobals->frametime;
 		}
 
 		// no turning buttons pressed, go to zero slowly
 		if( !(bLeft()) && !(bRight()) )
 		{
 			Turning = UTIL_Approach( 0, Turning, fabs(TurnRate) * gpGlobals->frametime );
-			CameraMoving = UTIL_Approach( 0, CameraMoving, CameraSwayRate * 0.5 * gpGlobals->frametime );
+			if( CameraSwayRate > 0 )
+				CameraMoving = UTIL_Approach( 0, CameraMoving, CameraSwayRate * 0.5 * gpGlobals->frametime );
 
 			if( fabs( Turning ) <= 0.001f )
 				Turning = 0;
@@ -507,7 +546,7 @@ void CHelicopter::Drive( void )
 	float max_turn_val = 1 / (1 + AbsCarSpeed * 0.01); // magic
 	Turning = bound( -max_turn_val, Turning, max_turn_val );
 
-	int CameraMovingBound = MaxCamera1Sway;
+	int CameraMovingBound = 0;
 	if( SecondaryCamera )
 		CameraMovingBound = MaxCamera2Sway;
 
