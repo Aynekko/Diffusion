@@ -2641,14 +2641,16 @@ int CGraph :: CheckNODFile ( char *szMapName )
 	char	szGraphFilename[MAX_PATH];
 
 	Q_snprintf( szBspFilename, sizeof( szBspFilename ), "maps/%s.bsp", szMapName );
+
+#if defined USE_BSP_LUMP_AINODEGRAPH
 	retValue = MAP_CHECK_LUMP( szBspFilename, LUMP_AINODEGRAPH, NULL );
 
 	if( retValue == LUMP_LOAD_OK )
 		return true;
 	else if( retValue == LUMP_LOAD_NOT_EXIST )
 		return false;
+#endif
 
-	Q_snprintf( szBspFilename, sizeof( szBspFilename ), "maps/%s.bsp", szMapName );
 	Q_snprintf( szGraphFilename, sizeof( szBspFilename ), "maps/graphs/%s.nod", szMapName );
 
 	retValue = TRUE;
