@@ -137,6 +137,8 @@ void ClientDisconnect( edict_t *pEdict )
 	// since the edict doesn't get deleted, fix it so it doesn't interfere.
 	pEntity->pev->takedamage = DAMAGE_NO;// don't attract autoaim
 	pEntity->pev->solid = SOLID_NOT;// nonsolid
+	pEntity->pev->effects = 0;// clear any effects
+	pEntity->pev->flags = 0;// clear any flags
 	pEntity->RelinkEntity( TRUE );
 
 	g_pGameRules->ClientDisconnected( pEdict );
@@ -357,9 +359,11 @@ void Host_Say( edict_t *pEntity, int teamonly )
 	else  // Raw text, need to prepend argv[0]
 	{
 		if ( CMD_ARGC() >= 2 )
-			sprintf( szTemp, "%s %s", ( char * )pcmd, (char *)CMD_ARGS() );
+			_snprintf( szTemp, sizeof( szTemp ) - 1, "%s %s", (char *)pcmd, (char *)CMD_ARGS() );
 		else
-			sprintf( szTemp, "%s", ( char * )pcmd ); // Just a one word command, use the first word...sigh
+			strncpy( szTemp, (char *)pcmd, sizeof( szTemp ) - 1 ); // Just a one word command, use the first word...sigh
+
+		szTemp[sizeof( szTemp ) - 1] = '\0';
 
 		p = szTemp;
 	}
@@ -390,11 +394,14 @@ void Host_Say( edict_t *pEntity, int teamonly )
 	if( ChatCommands( (char *)CMD_ARGV( 1 ), player ) )
 		return;
 
-// turn on color set 2  (color on,  no sound)
-	if ( teamonly )
-		sprintf( text, "%c(TEAM) %s: ", 2, STRING( pEntity->v.netname ) );
+	// turn on color set 2  (color on,  no sound)
+	if( player->IsObserver() && (teamonly) )
+		_snprintf( text, sizeof( text ) - 1, "%c(SPEC) %s: ", 2, STRING( pEntity->v.netname ) );
+	else if( teamonly )
+		_snprintf( text, sizeof( text ) - 1, "%c(TEAM) %s: ", 2, STRING( pEntity->v.netname ) );
 	else
-		sprintf( text, "%c%s: ", 2, STRING( pEntity->v.netname ) );
+		_snprintf( text, sizeof( text ) - 1, "%c%s: ", 2, STRING( pEntity->v.netname ) );
+	text[sizeof( text ) - 1] = '\0';
 
 	j = sizeof(text) - 2 - strlen(text);  // -2 for /n and null terminator
 	if ( (int)strlen(p) > j )

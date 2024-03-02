@@ -150,7 +150,7 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 		if( !m_fWaitingForMore )
 		{
 			// this is the start of a new menu
-			Q_strncpy( g_szPrelocalisedMenuString, READ_STRING(), MAX_MENU_STRING );
+			Q_strncpy( g_szPrelocalisedMenuString, READ_STRING(), MAX_MENU_STRING - 1 );
 		}
 		else
 		{
@@ -162,12 +162,14 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 		if( !NeedMore )
 		{
 			// we have the whole string, so we can localise it now
-			Q_strcpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString( g_szPrelocalisedMenuString ));
+			Q_strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString( g_szPrelocalisedMenuString ), MAX_MENU_STRING - 1 );
+			g_szMenuString[MAX_MENU_STRING - 1] = '\0';
 
 			// Swap in characters
 			if( KB_ConvertString( g_szMenuString, &temp ))
 			{
-				Q_strcpy( g_szMenuString, temp );
+				Q_strncpy( g_szMenuString, temp, MAX_MENU_STRING - 1 );
+				g_szMenuString[MAX_MENU_STRING - 1] = '\0';
 				free( temp );
 			}
 		}
