@@ -2325,7 +2325,7 @@ void CCar::Camera(void)
 
 	float anglediff = AngleDiff( ChassisAbsAngY, CameraAngles.y );
 	float AbsCarSpeed = fabs( CarSpeed );
-	float approach_speed = bound( 0, AbsCarSpeed * 0.005f, 2.5f );
+	float approach_speed = bound( 0, AbsCarSpeed * 0.005f, 3.0f );
 
 	Vector vForward, vRight;
 	g_engfuncs.pfnAngleVectors( CameraAngles, vForward, vRight, NULL );
