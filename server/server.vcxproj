@@ -84,6 +84,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
+    <OutDir>.\..\x64\Debug\server\</OutDir>
+    <IntDir>.\..\x64\Debug\server\</IntDir>
+    <TargetName>server</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>.\..\temp\server\!release\</OutDir>
@@ -100,6 +103,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
+    <TargetName>server</TargetName>
+    <OutDir>.\..\x64\Release\server\</OutDir>
+    <IntDir>.\..\x64\Release\server\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -160,20 +166,20 @@
       <Optimization>Disabled</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\phys_shared;.\monsters;.\physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
       <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
-      <AssemblerListingLocation>.\..\temp\server\!debug\</AssemblerListingLocation>
+      <AssemblerListingLocation>.\..\x64\Debug\server\</AssemblerListingLocation>
       <BrowseInformation>true</BrowseInformation>
-      <PrecompiledHeaderOutputFile>.\..\temp\server\!debug\server.pch</PrecompiledHeaderOutputFile>
-      <ObjectFileName>.\..\temp\server\!debug\</ObjectFileName>
-      <ProgramDataBaseFileName>.\..\temp\server\!debug\</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>.\..\x64\Debug\server\server.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\..\x64\Debug\server\</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\x64\Debug\server\</ProgramDataBaseFileName>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code\client-server-launcher\temp\server\!release\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server.dll"</Command>
+      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\x64\Debug\server\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server_amd64.dll"</Command>
     </PostBuildEvent>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -187,7 +193,7 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\..\temp\server\!debug\server.bsc</OutputFile>
+      <OutputFile>.\..\x64\Debug\server\server.bsc</OutputFile>
     </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -196,7 +202,7 @@
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>.\server.def</ModuleDefinitionFile>
-      <OutputFile>.\..\temp\server\!debug\server.dll</OutputFile>
+      <OutputFile>.\..\x64\Debug\server\server.dll</OutputFile>
       <ImportLibrary>.\..\temp\server\!debug\server.lib</ImportLibrary>
       <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -270,10 +276,9 @@
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\phys_shared;.\monsters;.\physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>.\..\temp\server\!release\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\..\temp\server\!release\server.pch</PrecompiledHeaderOutputFile>
-      <ObjectFileName>.\..\temp\server\!release\</ObjectFileName>
-      <ProgramDataBaseFileName>.\..\temp\server\!release\</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>.\..\x64\Release\server\server.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\..\x64\Release\server\</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\x64\Release\server\</ProgramDataBaseFileName>
       <DebugInformationFormat>
       </DebugInformationFormat>
       <MinimalRebuild>
@@ -284,9 +289,14 @@
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <AssemblerListingLocation>.\..\x64\Release\server\</AssemblerListingLocation>
+      <ModuleOutputFile>.\..\x64\Release\server\</ModuleOutputFile>
+      <ModuleDependenciesFile>.\..\x64\Release\server\</ModuleDependenciesFile>
+      <XMLDocumentationFileName>.\..\x64\Release\server\</XMLDocumentationFileName>
+      <SourceDependenciesFile>.\..\x64\Release\server\</SourceDependenciesFile>
     </ClCompile>
     <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\temp\server\!release\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server_amd64.dll"</Command>
+      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\x64\Release\server\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server_amd64.dll"</Command>
     </PostBuildEvent>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -300,7 +310,7 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\..\temp\server\!release\server.bsc</OutputFile>
+      <OutputFile>.\..\x64\Release\server\server.bsc</OutputFile>
     </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -309,9 +319,15 @@
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>.\server.def</ModuleDefinitionFile>
-      <OutputFile>.\..\temp\server\!release\server.dll</OutputFile>
-      <ImportLibrary>.\..\temp\server\!release\server.lib</ImportLibrary>
+      <OutputFile>.\..\x64\Release\server\server.dll</OutputFile>
+      <ImportLibrary>.\..\x64\Release\server\server.lib</ImportLibrary>
       <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <IncrementalLinkDatabaseFile>.\..\x64\Release\server\server.ilk</IncrementalLinkDatabaseFile>
+      <ManifestFile>.\..\x64\Release\server\server.dll.intermediate.manifest</ManifestFile>
+      <ProgramDatabaseFile>.\..\x64\Release\server\server.pdb</ProgramDatabaseFile>
+      <ProfileGuidedDatabase>.\..\x64\Release\server\server.pgd</ProfileGuidedDatabase>
+      <LinkTimeCodeGenerationObjectFile>.\..\x64\Release\server\server.iobj</LinkTimeCodeGenerationObjectFile>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

@@ -80,6 +80,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
+    <OutDir>.\..\x64\Release\client\</OutDir>
+    <IntDir>.\..\x64\Release\client\</IntDir>
+    <TargetName>client</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>.\..\temp\client\!debug\</OutDir>
@@ -96,6 +99,9 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
+    <OutDir>.\..\x64\Debug\client\</OutDir>
+    <IntDir>.\..\x64\Debug\client\</IntDir>
+    <TargetName>client</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -169,10 +175,10 @@
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
       <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;.\render;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;CLIENT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <AssemblerListingLocation>.\..\temp\client\!release\</AssemblerListingLocation>
-      <PrecompiledHeaderOutputFile>.\..\temp\client\!release\client.pch</PrecompiledHeaderOutputFile>
-      <ObjectFileName>.\..\temp\client\!release\</ObjectFileName>
-      <ProgramDataBaseFileName>.\..\temp\client\!release\</ProgramDataBaseFileName>
+      <AssemblerListingLocation>.\..\x64\Release\client\</AssemblerListingLocation>
+      <PrecompiledHeaderOutputFile>.\..\x64\Release\client\client.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\..\x64\Release\client\</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\x64\Release\client\</ProgramDataBaseFileName>
       <DebugInformationFormat>None</DebugInformationFormat>
       <MinimalRebuild>
       </MinimalRebuild>
@@ -184,7 +190,7 @@
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
     <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\temp\client\!release\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client_amd64.dll"</Command>
+      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\x64\Release\client\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client_amd64.dll"</Command>
     </PostBuildEvent>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -198,14 +204,14 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\..\temp\client\!release\client.bsc</OutputFile>
+      <OutputFile>.\..\x64\Release\client\client.bsc</OutputFile>
     </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <LinkDLL>true</LinkDLL>
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <OutputFile>.\..\temp\client\!release\client.dll</OutputFile>
+      <OutputFile>.\..\x64\Release\client\client.dll</OutputFile>
       <ImportLibrary>.\..\temp\client\!release\client.lib</ImportLibrary>
       <AdditionalLibraryDirectories>..\common\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -213,6 +219,10 @@
       </StackReserveSize>
       <StackCommitSize>
       </StackCommitSize>
+      <ManifestFile>.\..\x64\Release\client\client.dll.intermediate.manifest</ManifestFile>
+      <ProfileGuidedDatabase>.\..\x64\Release\client\client.pgd</ProfileGuidedDatabase>
+      <LinkTimeCodeGenerationObjectFile>.\..\x64\Release\client\client.iobj</LinkTimeCodeGenerationObjectFile>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -278,16 +288,17 @@
       <Optimization>Disabled</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
-      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;.\render;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;DEBUG;_DEBUG;_WINDOWS;CLIENT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
-      <AssemblerListingLocation>.\..\temp\client\!debug\</AssemblerListingLocation>
+      <AssemblerListingLocation>.\..\x64\Debug\client\</AssemblerListingLocation>
       <BrowseInformation>true</BrowseInformation>
-      <PrecompiledHeaderOutputFile>.\..\temp\client\!debug\client.pch</PrecompiledHeaderOutputFile>
-      <ObjectFileName>.\..\temp\client\!debug\</ObjectFileName>
-      <ProgramDataBaseFileName>.\..\temp\client\!debug\</ProgramDataBaseFileName>
+      <PrecompiledHeaderOutputFile>.\..\x64\Debug\client\client.pch</PrecompiledHeaderOutputFile>
+      <ObjectFileName>.\..\x64\Debug\client\</ObjectFileName>
+      <ProgramDataBaseFileName>.\..\x64\Debug\client\</ProgramDataBaseFileName>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <BrowseInformationFile>.\..\x64\Debug\client\</BrowseInformationFile>
     </ClCompile>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -301,7 +312,7 @@
     </ResourceCompile>
     <Bscmake>
       <SuppressStartupBanner>true</SuppressStartupBanner>
-      <OutputFile>.\..\temp\client\!debug\client.bsc</OutputFile>
+      <OutputFile>.\..\x64\Debug\client\client.bsc</OutputFile>
     </Bscmake>
     <Link>
       <SuppressStartupBanner>true</SuppressStartupBanner>
@@ -309,8 +320,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <OutputFile>.\..\temp\client\!debug\client.dll</OutputFile>
-      <ImportLibrary>.\..\temp\client\!debug\client.lib</ImportLibrary>
+      <OutputFile>.\..\x64\Debug\client\client.dll</OutputFile>
+      <ImportLibrary>.\..\x64\Debug\client\client.lib</ImportLibrary>
       <AdditionalLibraryDirectories>..\common\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>msvcrtd.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
@@ -321,7 +332,7 @@
       </Outputs>
     </CustomBuildStep>
     <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\temp\client\!debug\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client.dll"</Command>
+      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\x64\Debug\client\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client_amd64.dll"</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
