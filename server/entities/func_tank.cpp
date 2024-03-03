@@ -1800,7 +1800,7 @@ LINK_ENTITY_TO_CLASS( func_tankcontrols, CFuncTankControls );
 BEGIN_DATADESC( CFuncTankControls )
 	DEFINE_FIELD( m_pController, FIELD_CLASSPTR ),
 	DEFINE_FIELD( m_vecControllerUsePos, FIELD_VECTOR ),
-	DEFINE_AUTO_ARRAY( m_iTankName, FIELD_STRING ),
+	DEFINE_ARRAY( m_iTankName, FIELD_STRING, MAX_CONTROLLED_TANKS ),
 	DEFINE_FIELD( m_cTanks, FIELD_INTEGER ),
 	DEFINE_FIELD( m_fVerifyTanks, FIELD_BOOLEAN ),
 	DEFINE_KEYFIELD( TargetActivate, FIELD_STRING, "targetactivate" ),

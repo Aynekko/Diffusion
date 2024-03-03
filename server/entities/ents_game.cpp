@@ -773,8 +773,8 @@ private:
 };
 
 BEGIN_DATADESC( CGamePlayerEquip ) // diffusion - saverestore fix
-	DEFINE_AUTO_ARRAY( m_weaponCount, FIELD_INTEGER ),
-	DEFINE_AUTO_ARRAY( m_weaponNames, FIELD_STRING ),
+	DEFINE_ARRAY( m_weaponCount, FIELD_INTEGER, MAX_EQUIP ),
+	DEFINE_ARRAY( m_weaponNames, FIELD_STRING, MAX_EQUIP ),
 	DEFINE_FUNCTION( EquipPlayer ),
 END_DATADESC()
 

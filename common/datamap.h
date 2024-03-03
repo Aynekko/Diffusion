@@ -77,7 +77,7 @@ DECLARE_FIELD_SIZE( FIELD_SOUNDNAME, sizeof( int ), sizeof( int ) )
 #define DEFINE_FIELD_NULL					{ FIELD_VOID, 0, 0, 0, 0, 0, 0 }
 #define DEFINE_FIELD(name, fieldtype)				_FIELD(name, fieldtype, 1, FTYPEDESC_SAVE, NULL )
 #define DEFINE_KEYFIELD(name, fieldtype, mapname)			_FIELD(name, fieldtype, 1, FTYPEDESC_KEY|FTYPEDESC_SAVE, mapname )
-#define DEFINE_AUTO_ARRAY(name, fieldtype)			_FIELD(name, fieldtype, SIZEOFARRAY(((classNameTypedef *)0)->name), FTYPEDESC_SAVE, NULL )
+//#define DEFINE_AUTO_ARRAY(name, fieldtype)			_FIELD(name, fieldtype, SIZEOFARRAY(((classNameTypedef *)0)->name), FTYPEDESC_SAVE, NULL ) // diffusion - do not use, it fails on 64-bit
 #define DEFINE_ARRAY(name, fieldtype, count)			_FIELD(name, fieldtype, count, FTYPEDESC_SAVE, NULL )
 #define DEFINE_ENTITY_FIELD(name, fieldtype)			_EFIELD(name, fieldtype, 1, FTYPEDESC_KEY|FTYPEDESC_SAVE, #name )
 #define DEFINE_ENTITY_GLOBAL_FIELD(name, fieldtype)		_EFIELD(name, fieldtype, 1, FTYPEDESC_KEY|FTYPEDESC_SAVE|FTYPEDESC_GLOBAL, #name )

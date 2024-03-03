@@ -349,7 +349,7 @@ BEGIN_DATADESC( CLightFader )
 	DEFINE_FIELD( m_pLight, FIELD_CLASSPTR ),
 	DEFINE_FIELD( m_cFrom, FIELD_CHARACTER ),
 	DEFINE_FIELD( m_cTo, FIELD_CHARACTER ),
-	DEFINE_AUTO_ARRAY( m_szCurStyle, FIELD_CHARACTER ),
+	DEFINE_ARRAY( m_szCurStyle, FIELD_CHARACTER, 256 ),
 	DEFINE_FIELD( m_fEndTime, FIELD_TIME ),
 	DEFINE_FIELD( m_iszPattern, FIELD_STRING ),
 	DEFINE_FIELD( m_fStep, FIELD_FLOAT ),
@@ -421,7 +421,7 @@ BEGIN_DATADESC( CTriggerLightstyle )
 	DEFINE_KEYFIELD( m_iszPattern, FIELD_STRING, "pattern" ),
 	DEFINE_KEYFIELD( m_iFade, FIELD_INTEGER, "m_iFade" ),
 	DEFINE_KEYFIELD( m_iWait, FIELD_INTEGER, "m_iWait" ),
-	DEFINE_AUTO_ARRAY( m_szOldPattern, FIELD_CHARACTER ),
+	DEFINE_ARRAY( m_szOldPattern, FIELD_CHARACTER, 256 ),
 END_DATADESC()
 
 void CTriggerLightstyle::KeyValue( KeyValueData *pkvd )

@@ -524,8 +524,8 @@ END_DATADESC()
 
 // Global Savedata for Delay
 BEGIN_SIMPLE_DATADESC( globalentity_t )
-	DEFINE_AUTO_ARRAY( name, FIELD_CHARACTER ),
-	DEFINE_AUTO_ARRAY( levelName, FIELD_CHARACTER ),
+	DEFINE_ARRAY( name, FIELD_CHARACTER, 64 ),
+	DEFINE_ARRAY( levelName, FIELD_CHARACTER, 32 ),
 	DEFINE_FIELD( state, FIELD_INTEGER ),
 	DEFINE_FIELD( global_time, FIELD_FLOAT ), // to save global time instead of state
 END_DATADESC()

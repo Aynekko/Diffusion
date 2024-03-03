@@ -88,8 +88,8 @@ LINK_ENTITY_TO_CLASS(trigger_changelevel, CChangeLevel);
 
 // Global Savedata for changelevel trigger
 BEGIN_DATADESC(CChangeLevel)
-DEFINE_AUTO_ARRAY(m_szMapName, FIELD_CHARACTER),
-DEFINE_AUTO_ARRAY(m_szLandmarkName, FIELD_CHARACTER),
+DEFINE_ARRAY(m_szMapName, FIELD_CHARACTER, cchMapNameMost ),
+DEFINE_ARRAY(m_szLandmarkName, FIELD_CHARACTER, cchMapNameMost ),
 DEFINE_KEYFIELD(m_changeTarget, FIELD_STRING, "changetarget"),
 DEFINE_KEYFIELD(m_changeTargetDelay, FIELD_FLOAT, "changedelay"),
 DEFINE_FUNCTION(UseChangeLevel),

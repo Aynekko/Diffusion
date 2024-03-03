@@ -1388,7 +1388,7 @@ BEGIN_DATADESC_NO_BASE( CBaseEntity )
 	DEFINE_FIELD( m_vecAngles, FIELD_VECTOR ),
 	DEFINE_FIELD( m_vecVelocity, FIELD_VECTOR ), 
 	DEFINE_FIELD( m_vecAvelocity, FIELD_VECTOR ),
-	DEFINE_AUTO_ARRAY( m_local, FIELD_FLOAT ),		// matrix4x4
+	DEFINE_ARRAY( m_local, FIELD_FLOAT, 16 ),		// matrix4x4
 
 	DEFINE_FIELD( m_iFlags, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iFlags2, FIELD_INTEGER ), // diffusion custom flags
@@ -1410,7 +1410,7 @@ BEGIN_DATADESC_NO_BASE( CBaseEntity )
 	DEFINE_FIELD( m_isChaining, FIELD_BOOLEAN ),		// door stuff but need to set everywhere
 
 	// studio pose parameters
-	DEFINE_AUTO_ARRAY( m_flPoseParameter, FIELD_FLOAT ),
+	DEFINE_ARRAY( m_flPoseParameter, FIELD_FLOAT, MAXSTUDIOPOSEPARAM ),
 
 	// function pointers
 	DEFINE_FUNCTION( SUB_Remove ),

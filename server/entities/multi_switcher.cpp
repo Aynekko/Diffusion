@@ -39,7 +39,7 @@ LINK_ENTITY_TO_CLASS(multi_switcher, CSwitcher);
 BEGIN_DATADESC(CSwitcher)
 DEFINE_FIELD(m_index, FIELD_INTEGER),
 DEFINE_FIELD(m_cTargets, FIELD_INTEGER),
-DEFINE_AUTO_ARRAY(m_iTargetName, FIELD_STRING),
+DEFINE_ARRAY(m_iTargetName, FIELD_STRING, MAX_MULTI_TARGETS ),
 END_DATADESC()
 
 void CSwitcher::KeyValue(KeyValueData* pkvd)

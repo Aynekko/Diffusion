@@ -717,7 +717,7 @@ int CSave :: WriteFields( const char *pname, const void *pBaseData, DATAMAP *pMa
 			continue;
 
 #ifdef _DEBUG
-		// Log( pMap, pname, pTest->fieldName, pTest->fieldType, pOutputData, pTest->fieldSize );
+		Log( pMap, pname, pTest->fieldName, pTest->fieldType, pOutputData, pTest->fieldSize );
 #endif
 		switch( pTest->fieldType )
 		{
