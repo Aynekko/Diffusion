@@ -76,7 +76,6 @@ typedef int BOOL;
 #include "mathlib.h"
 
 // Header file containing definition of globalvars_t and entvars_t
-typedef int	string_t;		// from engine's pr_comp.h;
 
 #if XASH_WIN32 == 1
 typedef HMODULE dllhandle_t;

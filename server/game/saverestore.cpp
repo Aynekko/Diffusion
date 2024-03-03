@@ -910,7 +910,7 @@ int CRestore::ReadField( const void *pBaseData, DATAMAP *pMap, TYPEDESCRIPTION *
 							*((int *)pOutputData) = 0;
 						else
 						{
-							int string;
+							string_t string;
 
 							string = ALLOC_STRING( (char *)pInputData );
 							

@@ -319,8 +319,6 @@ public:
 	void		IncrementLocalTime( float flTimeDelta );
 	float		GetMoveDoneTime( ) const;
 	void		SetMoveDoneTime( float flTime );
-		
-	void		SetParent( string_t newParent, CBaseEntity *pActivator );
 	
 	// Set the movement parent. Your local origin and angles will become relative to this parent.
 	// If iAttachment is a valid attachment on the parent, then your local origin and angles 
