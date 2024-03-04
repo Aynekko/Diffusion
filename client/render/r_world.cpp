@@ -2753,7 +2753,7 @@ void R_DrawBrushList( void )
 	float cached_fresnel = -1.0f;
 	float cached_reflectscale = -1.0f;
 	Vector cubemap_params[3];
-	Vector4D brush_params[2];
+	Vector4D brush_params[3];
 	Vector2D screensizeinv = Vector2D( 1.0f / (float)glState.width, 1.0f / (float)glState.height );
 	float waveHeight = 0.0f;
 	bool apply_cubemap = false;
@@ -2829,7 +2829,9 @@ void R_DrawBrushList( void )
 			brush_params[0] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 			// view origin + waveheight
 			brush_params[1] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, waveHeight );
-			pglUniform4fvARB( RI->currentshader->u_BrushParams, 2, &brush_params[0][0] );
+			// waterlevel
+			brush_params[2] = Vector4D( tr.viewparams.waterlevel == 3 ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f );
+			pglUniform4fvARB( RI->currentshader->u_BrushParams, 3, &brush_params[0][0] );
 
 			// reset cache
 			cached_texofs[0] = -1.0f;
