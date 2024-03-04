@@ -175,6 +175,7 @@ void CPhysicNovodex :: InitPhysic( void )
 	}
 
 	// trying to load dlls from mod-folder
+#ifdef XASH_X86
 	if( !Sys_LoadLibrary( "PhysXLoader.dll", &hPhysics, NxPhysics ))
 	{
 		// NOTE: using '*' symbol to force loading dll from system path not game folder (Nvidia PhysX drivers)
@@ -185,6 +186,18 @@ void CPhysicNovodex :: InitPhysic( void )
 			return;
 		}
 	}
+#else // 64-bit
+	if( !Sys_LoadLibrary( "PhysXLoader64.dll", &hPhysics, NxPhysics ) )
+	{
+		// NOTE: using '*' symbol to force loading dll from system path not game folder (Nvidia PhysX drivers)
+		if( !Sys_LoadLibrary( "*PhysXLoader64.dll", &hPhysics, NxPhysics ) )
+		{
+			ALERT( at_console, "^3InitPhysic:^7 failed to loading NxPhysics.dll.\nPhysics abstraction layer will be disabled.\n" );
+			GameInitNullPhysics();
+			return;
+		}
+	}
+#endif
 
 	m_pPhysics = pNxCreatePhysicsSDK( NX_PHYSICS_SDK_VERSION, NULL, &m_ErrorStream, NxPhysicsSDKDesc(), NULL);
 
