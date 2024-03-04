@@ -18,7 +18,7 @@ GNU General Public License for more details.
 #include "tnbasis.h"
 
 #define u_RealTime	u_TexOffset.z
-uniform vec4 u_BrushParams[2];
+uniform vec4 u_BrushParams[3];
 #define u_WaveHeight u_BrushParams[1].w
 #define u_ViewOrigin u_BrushParams[1].xyz
 

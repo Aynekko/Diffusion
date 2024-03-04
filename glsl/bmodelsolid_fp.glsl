@@ -45,7 +45,7 @@ uniform sampler2D	u_NormalMap;
 uniform float		u_GlossSmoothness;
 uniform float		u_GlossScale;
 uniform float		u_EmbossScale;
-uniform float       u_ReflectScale;
+uniform float		u_ReflectScale;
 #endif
 
 #if defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR )
@@ -57,15 +57,16 @@ uniform sampler2D	u_DepthMap;
 uniform sampler2D	u_GlowMap;
 
 uniform vec4		u_RenderColor;
-uniform vec4		u_BrushParams[2];
-#define u_FogParams		u_BrushParams[0]
+uniform vec4		u_BrushParams[3];
+#define u_FogParams	u_BrushParams[0]
 #define u_ViewOrigin	u_BrushParams[1].xyz
+#define u_UnderWater	u_BrushParams[2].x
 
 #if defined( BMODEL_WATER ) && defined( BMODEL_WATER_REFRACTION )
 //uniform float u_zFar;
 #endif
 
-uniform float       u_Fresnel;
+uniform float           u_Fresnel;
 
 // shared variables
 varying vec2		var_TexDiffuse;
@@ -102,7 +103,7 @@ void main( void )
 	float fogFactor = 0.0f;
 	float fresnel = 0.0f;
 
-        // compute the masks for terrain
+	// compute the masks for terrain
 #if defined( BMODEL_MULTI_LAYERS )
 	vec4 mask0, mask1, mask2, mask3;
 	TerrainReadMask( var_TexGlobal, mask0, mask1, mask2, mask3 );
@@ -113,8 +114,8 @@ void main( void )
 	// compute the normal term
 #if defined( BMODEL_WATER ) 
         #if defined( BMODEL_WATER_REFRACTION )
-        	vec3 WaterNormal = normalmap2D( u_NormalMap, var_TexDiffuse * 2.5 );
-        	N = normalize( WaterNormal );
+			vec3 WaterNormal = normalmap2D( u_NormalMap, var_TexDiffuse * 2.5 );
+			N = normalize( WaterNormal );
     	#endif 
 #elif defined( BMODEL_MULTI_LAYERS )
 	#if defined( BMODEL_BUMP )
@@ -123,7 +124,7 @@ void main( void )
 #else
 	#if defined( BMODEL_BUMP )
 		#if defined( BMODEL_INTERIOR )
-			N = normalmap2D( u_NormalMap, fract(var_TexDiffuse * vec2(u_InteriorParams.x,u_InteriorParams.y)));
+			N = normalmap2D( u_NormalMap, fract( var_TexDiffuse * vec2(u_InteriorParams.x,u_InteriorParams.y )));
 		#else
 			N = normalmap2D( u_NormalMap, var_TexDiffuse );
 		#endif
@@ -181,7 +182,8 @@ void main( void )
 		emboss = EmbossFilter( u_ColorMap, var_TexDiffuse, EmbossScale );
 	#endif
 #endif
-        // apply emboss filter
+
+	// apply emboss filter
 #if defined( BMODEL_EMBOSS )
 	diffuse.rgb *= emboss;
 #endif
@@ -248,8 +250,8 @@ void main( void )
 //------------------------------------------------------------------------------------------------------
 #if defined( BMODEL_WATER ) && defined( BMODEL_WATER_REFRACTION )
 	
-	float WaterBorderFactor = 1.0, WaterAbsorbFactor = 1.0, WaterRefractFactor = 1.0;
-	float RefractScale = 0.25;
+	float WaterBorderFactor = 1.0, WaterAbsorbFactor = 1.0, WaterRefractFactor = 1.0, WaterAbsorbScale = 1.0;
+	float RefractScale = 0.25; 
 	const float u_zFar = -4096; // for consistency
 
 	// alpha works well between 67-135~... so I need to remap 0-255 to 67-135~. how to fix this?
@@ -263,12 +265,22 @@ void main( void )
 	float fSampledDepth = texture2D( u_DepthMap, gl_FragCoord.xy * u_ScreenSizeInv ).r;
 	fSampledDepth = linearizeDepth( u_zFar, fSampledDepth );
 	fSampledDepth = RemapVal( fSampledDepth, Z_NEAR, u_zFar, 0.0, 1.0 );
+	float depthDelta = abs( fOwnDepth - fSampledDepth );
 
-	float depthDelta = abs(fOwnDepth - fSampledDepth);
-	float WaterAbsorbScale = clamp( alpha - (1.0 / 255.0), 0.0, 1.0 ) * 50.0;
-	WaterBorderFactor = 1.0 - saturate( exp2( -768.0 * 100.0 * depthDelta ));
-	WaterRefractFactor = 1.0 - saturate( exp2( -768.0 * 5.0 * depthDelta ));
-	WaterAbsorbFactor = 1.0 - saturate( exp2( -768.0 * WaterAbsorbScale * depthDelta ));
+	if( bool( u_UnderWater == 1.0f ))
+	{
+		WaterAbsorbScale = clamp( alpha - ( 1.0 / 255.0 ), 0.0, 1.0 ) * 10.0;
+		WaterBorderFactor = 1.0 - saturate( exp2( -192.0 * 100.0 * depthDelta ));
+		WaterRefractFactor = 1.0 - saturate( exp2( -192.0 * 5.0 * depthDelta ));
+		WaterAbsorbFactor = 1.0 - saturate( exp2( -192.0 * WaterAbsorbScale * depthDelta ));
+	}
+	else
+	{
+		WaterAbsorbScale = clamp( alpha - ( 1.0 / 255.0 ), 0.0, 1.0 ) * 50.0;
+		WaterBorderFactor = 1.0 - saturate( exp2( -768.0 * 100.0 * depthDelta ));
+		WaterRefractFactor = 1.0 - saturate( exp2( -768.0 * 5.0 * depthDelta ));
+		WaterAbsorbFactor = 1.0 - saturate( exp2( -768.0 * WaterAbsorbScale * depthDelta ));
+	}
 
 	float fDistortedDepth = texture2D( u_DepthMap, GetDistortedTexCoords( N, WaterRefractFactor, RefractScale )).r;
 	fDistortedDepth = linearizeDepth( u_zFar, fDistortedDepth );
@@ -284,11 +296,11 @@ void main( void )
 		fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale );
 		diffuse.rgb = mix( diffuse.rgb, cubemap_reflection, fresnel );
 
-	#elif defined( BMODEL_WATER_PLANAR )
+	#elif defined( BMODEL_WATER_PLANAR ) && defined( REFLECTION_CUBEMAP ) || defined( BMODEL_WATER_PLANAR ) && !defined( REFLECTION_CUBEMAP )
+                //dont use cubemap reflections for water, if planar is active
 		planar_reflection = reflectmap2D( u_ColorMap, var_TexMirror, N, gl_FragCoord.xyz, 0.15 ) * u_PlanarReflectScale;
 		fresnel = GetFresnel( V, N, u_Fresnel, u_PlanarReflectScale );
 		diffuse.rgb = mix( diffuse.rgb, planar_reflection.rgb, fresnel );
-
 	#endif
 
 	#if defined( BMODEL_FOG_EXP )
@@ -318,9 +330,9 @@ void main( void )
 	#endif
         fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale );
 	cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, NW, glossmap, GlossSmoothness ) * u_ReflectScale;
-								//	vec3 testmix = mix( diffuse.rgb, cubemap_reflection.rgb, 0.85 );
-								//	gl_FragColor = vec4( testmix, 1.0 );
-								//	return;
+		//	vec3 testmix = mix( diffuse.rgb, cubemap_reflection.rgb, 0.85 );
+		//	gl_FragColor = vec4( testmix, 1.0 );
+		//	return;
 	diffuse.rgb += cubemap_reflection * fresnel;
 #endif
 

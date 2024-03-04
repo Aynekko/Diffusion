@@ -1362,12 +1362,12 @@ static void GL_InitScreenWaterUniforms( glsl_program_t *shader )
 	ASSERT( shader != NULL );
 
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
-	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
+	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
 	shader->u_ScreenWater = pglGetUniformLocationARB( shader->handle, "u_ScreenWater" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
-	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE1 );
+	pglUniform1iARB( shader->u_NormalMap, GL_TEXTURE1 );
 	GL_BindShader( GL_NONE );
 
 	GL_ValidateProgram( shader );
