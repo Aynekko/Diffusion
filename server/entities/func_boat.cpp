@@ -904,6 +904,7 @@ void CBoat::Drive( void )
 
 			CarSpeed *= 0.65;
 			landing_effect_time = gpGlobals->time + 1;
+			MakeWaterSplash( GetAbsOrigin() + Vector( 0, 0, 64 ), GetAbsOrigin() - Vector( 0, 0, 64 ), 3 );
 		}
 	}
 

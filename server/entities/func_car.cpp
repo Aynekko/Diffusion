@@ -2322,6 +2322,9 @@ void CCar::Camera(void)
 
 	float AbsCarSpeed = fabs( CarSpeed );
 
+	if( !NewCameraAngle )
+		NewCameraAngle = pChassis->pev->angles.y;
+
 	if( CarSpeed < -75 ) // going backwards
 	{
 		NewCameraAngle = UTIL_ApproachAngle( pChassis->pev->angles.y - 180, NewCameraAngle, 200 * gpGlobals->frametime ); // smooth it out

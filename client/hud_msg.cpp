@@ -1058,6 +1058,9 @@ int CHud::MsgFunc_WaterSplash( const char *pszName, int iSize, void *pbuf )
 	case 2:
 		g_pParticles.CreateEffect( 0, "big_splash", pos, g_vecZero );
 		break;
+	case 3:
+		g_pParticles.CreateEffect( 0, "bigger_splash", pos, g_vecZero );
+		break;
 	}
 
 	if( Type == 1 )
@@ -1070,7 +1073,7 @@ int CHud::MsgFunc_WaterSplash( const char *pszName, int iSize, void *pbuf )
 			ScreenDrips_Visible = true;
 		}
 	}
-	else if( Type == 2 )
+	else if( Type == 2 || Type == 3 )
 	{
 		if( (tr.viewparams.vieworg - pos).Length() < 200 )
 		{
