@@ -319,7 +319,7 @@ void CHudCrosshairStatic::DrawGaussZoomedHUD(void)
 
 	if( skin < 9 && GaussSound != skin )
 	{
-		gEngfuncs.pEventAPI->EV_PlaySound( 0, Vector( 0, 0, 0 ), CHAN_STATIC, "weapons/gauss_charge.wav", 1.0, 0, 0, 100 + (150/(skin + 1)) );
+		gEngfuncs.pEventAPI->EV_PlaySound( 0, Vector( 0, 0, 0 ), CHAN_STATIC, "weapons/gauss_charge.wav", 1.0, 0, 0, 75 + (100/(skin + 1)) );
 		GaussSound = skin;
 	}
 
