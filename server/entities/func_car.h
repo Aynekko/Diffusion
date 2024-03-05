@@ -101,6 +101,7 @@ public:
 	// default camera view
 	int CameraHeight;
 	int CameraDistance;
+	float NewCameraAngle;
 	float BrakeAddX; // not saved
 	float AccelAddX; // not saved
 	int DriverMdlSequence; // not saved

@@ -700,6 +700,7 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			IsShifting = false;
 			ShiftStartTime = 0;
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
+			NewCameraAngle = CameraAngles.y;
 
 			SetNextThink( 0 );
 		}
@@ -2319,17 +2320,26 @@ void CCar::Camera(void)
 	if( !(hDriver->pev->flags & FL_CLIENT) )
 		return;
 
-	float ChassisAbsAngY = pChassis->pev->angles.y;
-	if( CarSpeed < -10 ) // going backwards
-		ChassisAbsAngY -= 180;
-
-	float anglediff = AngleDiff( ChassisAbsAngY, CameraAngles.y );
 	float AbsCarSpeed = fabs( CarSpeed );
-	float approach_speed = bound( 0, AbsCarSpeed * 0.005f, 3.0f );
+
+	if( CarSpeed < -75 ) // going backwards
+	{
+		NewCameraAngle = UTIL_ApproachAngle( pChassis->pev->angles.y - 180, NewCameraAngle, 200 * gpGlobals->frametime ); // smooth it out
+	}
+	else if( CarSpeed > 25 )
+	{
+		if( AbsCarSpeed < MaxCarSpeed * 0.2f )
+			NewCameraAngle = UTIL_ApproachAngle( pChassis->pev->angles.y, NewCameraAngle, 200 * gpGlobals->frametime );
+		else
+			NewCameraAngle = pChassis->pev->angles.y;
+	}
+
+	float anglediff = AngleDiff( NewCameraAngle, CameraAngles.y );
+	float approach_speed = bound( 1.0f, AbsCarSpeed * 0.005f, 3.0f );
 
 	Vector vForward, vRight;
 	g_engfuncs.pfnAngleVectors( CameraAngles, vForward, vRight, NULL );
-	CameraAngles.y = UTIL_ApproachAngle( ChassisAbsAngY, CameraAngles.y, approach_speed * anglediff * gpGlobals->frametime );
+	CameraAngles.y = UTIL_ApproachAngle( NewCameraAngle, CameraAngles.y, approach_speed * anglediff * gpGlobals->frametime );
 	if( CarSpeed < -10 ) // going backwards
 		vRight = -vRight;
 

@@ -302,6 +302,7 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 			time = gpGlobals->time;
 			DriverMdlSequence = -1;
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
+			NewCameraAngle = CameraAngles.y;
 
 			MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, hDriver->pev );
 				WRITE_BYTE( TE_CARPARAMS );

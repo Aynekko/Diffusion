@@ -298,6 +298,7 @@ void CHelicopter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 			time = gpGlobals->time;
 			DriverMdlSequence = -1;
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
+			NewCameraAngle = CameraAngles.y;
 
 			SetNextThink( 0 );
 		}
