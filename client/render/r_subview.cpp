@@ -582,7 +582,7 @@ void R_DrawSubviewPasses( void )
 		// setup view apropriate by type
 		if( FBitSet( surf->flags, SURF_REFLECT ))
 		{
-			if( FBitSet( surf->flags, SURF_WATER ) && (gl_water_planar->value <= 0) )
+			if( FBitSet( surf->flags, SURF_WATER ) && ((gl_water_planar->value <= 0) || (tr.viewparams.waterlevel == 3)) )
 				continue;
 			
 			texFlags = R_SetupMirrorView( surf, camera, viewmatrix );
