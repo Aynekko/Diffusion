@@ -46,7 +46,7 @@ public:
 	// cull methods
 	bool CullBox( const Vector &mins, const Vector &maxs, int userClipFlags = 0 );
 	bool CullSphere( const Vector &centre, float radius, int userClipFlags = 0 );
-	bool CullFrustum( CFrustum *frustum, int userClipFlags = 0 );
+	bool Intersect( CFrustum *otherFrustum );
 
 	// plane manipulating
 	void EnablePlane( int side );

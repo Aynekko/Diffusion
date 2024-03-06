@@ -343,3 +343,70 @@ bool CFrustum :: CullSphere( const Vector &centre, float radius, int userClipFla
 
 	return false;
 }
+
+// Brute force SAT frustum intersection between two frustums
+bool CFrustum::Intersect( CFrustum *otherFrustum )
+{
+	Vector pPointsA[8];
+	bool bResult = false;
+	ComputeFrustumCorners( pPointsA );
+	const mplane_t *pPlanesA[FRUSTUM_PLANES];
+	int k;
+	for( k = 0; k < FRUSTUM_PLANES; k++ )
+		pPlanesA[k] = GetPlane( k );
+
+	Vector pPointsB[8];
+	otherFrustum->ComputeFrustumCorners( pPointsB );
+	const mplane_t *pPlanesB[FRUSTUM_PLANES];
+	for( k = 0; k < FRUSTUM_PLANES; k++ )
+		pPlanesB[k] = otherFrustum->GetPlane( k );
+
+	// See if all points in B are on one side of any plane in A
+	for( int p = 0; p < 6; ++p )
+	{
+		bool bPointsOnOutside = true;
+		for( int i = 0; i < 8; ++i )
+		{
+			float flDist = DotProduct( pPointsB[i], pPlanesA[p]->normal ) - pPlanesA[p]->dist;
+
+			// If dist is pos, we are not on the outside
+			if( flDist > 0 )
+			{
+				bPointsOnOutside = false;
+				break;
+			}
+		}
+
+		// We never hit a negative case, we have a separating axis
+		if( bPointsOnOutside )
+		{
+			return false;
+		}
+	}
+
+	// See if all points in A are on one side of any plane in B
+	for( int p = 0; p < 6; ++p )
+	{
+		bool bPointsOnOutside = true;
+		for( int i = 0; i < 8; ++i )
+		{
+			float flDist = DotProduct( pPointsA[i], pPlanesB[p]->normal ) - pPlanesB[p]->dist;
+
+			// If dist is pos, we are not on the outside
+			if( flDist > 0 )
+			{
+				bPointsOnOutside = false;
+				break;
+			}
+		}
+
+		// We never hit a negative case, we have a separating axis
+		if( bPointsOnOutside )
+		{
+			return false;
+		}
+	}
+
+	// They intersect
+	return true;
+}

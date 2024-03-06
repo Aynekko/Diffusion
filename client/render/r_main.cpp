@@ -891,7 +891,8 @@ void R_SetupFrustum( void )
 
 	if( FBitSet( RI->params, RP_OVERVIEW ))
 		RI->frustum.InitOrthogonal( cullMatrix, ov->xLeft, ov->xRight, ov->yTop, ov->yBottom, ov->zNear, ov->zFar );
-	else RI->frustum.InitProjection( cullMatrix, 0.0f, RI->farClip, RI->fov_x, RI->fov_y ); // NOTE: we ignore nearplane here (mirrors only)
+	else RI->frustum.InitProjection( cullMatrix, 0.01f, RI->farClip, RI->fov_x, RI->fov_y ); // NOTE: we ignore nearplane here (mirrors only)
+																							 // diffusion - UPD: we must have znear as non-zero, otherwise frustum-to-frustum intersection test fails
 
 	tr.lodScale = tan( DEG2RAD( RI->fov_x ) * 0.5f );
 }

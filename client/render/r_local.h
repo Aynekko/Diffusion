@@ -196,6 +196,7 @@ typedef struct plight_s
 	int entindex;
 	int dlflag; // copy from dl->flag
 	float brightness;
+	bool shadow_side_culled[6]; // cull each side of a pointlight separately
 } plight_t;
 
 // 68 bytes here

@@ -32,11 +32,12 @@ Vector( -90.0f, 180.0f, -90.0f ),	// GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB
 Vector( 90.0f,   0.0f,  90.0f ),	// GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB
 };
 
-static GLuint framebuffer[MAX_SHADOWS]; // projector
-static GLuint framebufferCM[MAX_SHADOWS]; // pointlight
-static int ShadowQualityLevel = 0;
-static int ShadowViewport = 512;
-static bool FBOsupported = false;
+GLuint framebuffer[MAX_SHADOWS]; // projector
+GLuint framebufferCM[MAX_SHADOWS]; // pointlight
+int ShadowQualityLevel = 0;
+int ShadowViewport = 512;
+bool FBOsupported = false;
+CFrustum CurrentPassFrustum;
 
 /*
 =============================================================
@@ -335,7 +336,14 @@ static void R_ShadowPassSetupFrame( plight_t *pl, int split = 0 )
 
 	// setup frustum
 	if( pl->pointlight )
+	{
 		RI->frustum.InitProjection( matrix4x4( RI->vieworg, RI->viewangles ), 0.1f, pl->radius, 90.0f, 90.0f );
+		
+		// cull each side of a pointlight separately to prevent unnecessary rendering
+		pl->shadow_side_culled[split] = false;
+		if( !RI->frustum.Intersect( &CurrentPassFrustum ))
+			pl->shadow_side_culled[split] = true;
+	}
 	else
 		RI->frustum = pl->frustum;
 
@@ -479,26 +487,6 @@ void R_ShadowPassDrawSolidEntities( plight_t *pl )
 		}
 	}
 
-	// diffusion - we draw only transalpha brushes here. but I changed them to opaque mode, so they were already drawn.
-	// draw trans entities only
-	/*
-	for( i = 0; i < tr.num_trans_entities; i++ )
-	{
-		RI->currententity = tr.trans_entities[i];
-		RI->currentmodel = RI->currententity->model;
-
-		if( RI->currentmodel->type != mod_brush )
-			continue;
-
-		if( RI->currententity->curstate.rendermode != kRenderTransAlpha )
-			continue;
-
-		// tell engine about current entity
-		SET_CURRENT_ENTITY( RI->currententity );
-
-		R_DrawBrushModelShadow( RI->currententity );
-	}*/
-
 	// solid particles
 	R_DrawParticles( false );
 }
@@ -559,14 +547,21 @@ void R_RenderShadowCubeSide( plight_t *pl, int side )
 		pl->shadowTexture[0] = R_AllocateShadowFramebuffer( pl, side );
 
 	R_ShadowPassSetupFrame( pl, side );
-	R_ShadowPassSetupGL( pl, side );
-	pglClear( GL_DEPTH_BUFFER_BIT );
 
-	R_MarkLeaves();
-	R_ShadowPassDrawWorld( pl );
-	R_ShadowPassDrawSolidEntities( pl );
-	//	R_DrawParticles( false );
-	R_ShadowPassEndGL();
+	// only render this side if it's actually in view, otherwise leave the image blank
+	if( !pl->shadow_side_culled[side] )
+	{
+		R_ShadowPassSetupGL( pl, side );
+		pglClear( GL_DEPTH_BUFFER_BIT );
+
+		R_MarkLeaves();
+		R_ShadowPassDrawWorld( pl );
+		R_ShadowPassDrawSolidEntities( pl );
+
+		//	R_DrawParticles( false );
+
+		R_ShadowPassEndGL();
+	}
 
 	if( FBOsupported )
 		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, glState.frameBuffer == -1 ? 0 : glState.frameBuffer );
@@ -584,6 +579,8 @@ void R_RenderShadowmaps(void)
 	
 	// check for dynamic lights
 	if (!R_CountPlights(true)) return;
+
+	CurrentPassFrustum = RI->frustum;
 
 	R_PushRefState();
 
