@@ -38,6 +38,7 @@ BEGIN_DATADESC( CCar )
 	DEFINE_KEYFIELD( carhurt, FIELD_STRING, "carhurt" ),
 	DEFINE_KEYFIELD( camera2, FIELD_STRING, "camera2" ),
 	DEFINE_KEYFIELD( tank_tower, FIELD_STRING, "tank_tower" ),
+	DEFINE_KEYFIELD( door_handle, FIELD_STRING, "door_handle" ),
 	DEFINE_FIELD( Camera2LocalOrigin, FIELD_VECTOR ),
 	DEFINE_FIELD( Camera2LocalAngles, FIELD_VECTOR ),
 	DEFINE_FIELD( CameraAngles, FIELD_VECTOR ),
@@ -86,6 +87,7 @@ BEGIN_DATADESC( CCar )
 	DEFINE_FIELD( pDriverMdl, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pChassisMdl, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pTankTower, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pDoorHandle, FIELD_CLASSPTR ),
 	DEFINE_KEYFIELD( m_iszEngineSnd, FIELD_STRING, "enginesnd" ),
 	DEFINE_KEYFIELD( m_iszIdleSnd, FIELD_STRING, "idlesnd" ),
 	DEFINE_FIELD( AllowCamera, FIELD_BOOLEAN ),
@@ -187,6 +189,9 @@ const char *CCar::pTireSounds[] =
 int CCar::ObjectCaps( void )
 {
 	if( HasSpawnFlags( SF_CAR_ONLYTRIGGER ) )
+		return 0;
+
+	if( pDoorHandle )
 		return 0;
 
 	return FCAP_IMPULSE_USE;
@@ -397,6 +402,11 @@ void CCar::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "tank_tower" ) )
 	{
 		tank_tower = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "door_handle" ) )
+	{
+		door_handle = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "shiftingtime" ) )
@@ -707,6 +717,7 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			ShiftStartTime = 0;
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
 			NewCameraAngle = CameraAngles.y;
+			AccelAddX = BrakeAddX = 0;
 
 			SetNextThink( 0 );
 		}
@@ -758,6 +769,7 @@ void CCar::Setup( void )
 	pCamera1 = CBaseEntity::Create( "info_target", GetAbsOrigin(), GetAbsAngles(), edict() );
 	pCamera2 = UTIL_FindEntityByTargetname( NULL, STRING( camera2 ) );
 	pTankTower = UTIL_FindEntityByTargetname( NULL, STRING( tank_tower ) );
+	pDoorHandle = UTIL_FindEntityByTargetname( NULL, STRING( door_handle ) );
 
 	if( !pWheel1 || !pWheel2 || !pWheel3 || !pWheel4 )
 	{
@@ -882,6 +894,18 @@ void CCar::Setup( void )
 		pFreeCam->pev->effects |= EF_SKIPPVS;
 		if( !FreeCameraDistance )
 			FreeCameraDistance = CameraDistance;
+	}
+
+	if( pDoorHandle )
+	{
+		// reset USE flag, car can be USE-pressed through handle only
+		ObjectCaps();
+		if( pChassisMdl )
+			pDoorHandle->SetParent( pChassisMdl );
+		else
+			pDoorHandle->SetParent( this );
+
+		pDoorHandle->pev->owner = edict();
 	}
 
 	if( pev->iuser1 ) // rotate car
@@ -2994,4 +3018,32 @@ void CCarHurt::CarHurtTouch( CBaseEntity *pOther )
 			pOther->SetAbsVelocity( vel );
 		}
 	}
+}
+
+//===============================================================================
+// a door handle - invisible point entity that can be pressed
+// it's specified by name through car entity
+// the car will automatically parent it to itself and set itself as the owner
+//===============================================================================
+class CCarDoorHandle : public CPointEntity
+{
+	DECLARE_CLASS( CCarDoorHandle, CPointEntity );
+public:
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	virtual int ObjectCaps( void ){ return FCAP_IMPULSE_USE; }
+};
+
+LINK_ENTITY_TO_CLASS( car_door_handle, CCarDoorHandle );
+
+void CCarDoorHandle::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if( !pev->owner )
+		return;
+	
+	CCar *pCar = (CCar *)CBaseEntity::Instance( pev->owner );
+
+	if( !pCar )
+		return;
+
+	pCar->Use( pActivator, pCaller, useType, value );
 }

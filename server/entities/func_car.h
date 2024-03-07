@@ -41,6 +41,7 @@ public:
 	string_t chassismdl;
 	string_t camera2;
 	string_t tank_tower;
+	string_t door_handle;
 
 	Vector pWheel1Org;
 	Vector pWheel2Org;
@@ -58,6 +59,7 @@ public:
 	CBaseAnimating *pDriverMdl;
 	CBaseAnimating *pChassisMdl;
 	CBaseEntity *pTankTower;
+	CBaseEntity *pDoorHandle;
 
 	int m_iszEngineSnd;
 	static const char *pTireSounds[];

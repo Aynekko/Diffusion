@@ -2066,41 +2066,11 @@ void V_CalcRefdef( struct ref_params_s *pparams )
 		int roll_dir = (gHUD.m_iKeyBits & IN_MOVELEFT) ? -1 : 1;
 		if( !(gHUD.m_iKeyBits & IN_MOVELEFT) && !(gHUD.m_iKeyBits & IN_MOVERIGHT) )
 			roll_dir = 0;
-		static float car_roll_ang = 0.0f;
 		car_roll_ang = CL_UTIL_Approach( gHUD.CarSpeed * 0.05 * roll_dir, car_roll_ang, 3 * g_fFrametime );
 		pparams->viewangles[ROLL] += car_roll_ang * 0.5f;
-
-		/*
-		// shake of sorts...
-		static float next_car_shake = 0.0f;
-		static Vector org_add = g_vecZero;
-		static Vector org_target = g_vecZero;
-		float ampl = bound( 0, gHUD.CarSpeed * 0.1f, 10 );
-		float addspeed = g_fFrametime * ampl;
-		float dist_to_player = (gEngfuncs.GetLocalPlayer()->origin - pparams->vieworg).Length();
-		// this is ugly. scale the amplitude if the player is using cockpit camera, measure this by distance to player (he is hidden in the car)
-		if( dist_to_player < 175.0f )
-		{
-			ampl *= 0.025f;
-			addspeed = g_fFrametime;
-		}
-		if( next_car_shake < tr.time )
-		{
-			org_target[0] = RANDOM_FLOAT( -ampl, ampl );
-			org_target[1] = RANDOM_FLOAT( -ampl, ampl );
-			org_target[2] = RANDOM_FLOAT( -ampl, ampl );
-			next_car_shake = tr.time + 0.1f;
-		}
-		else if( next_car_shake > tr.time + 0.2f )
-		{
-			next_car_shake = 0;
-		}
-		org_add[0] = CL_UTIL_Approach( org_target[0], org_add[0], addspeed );
-		org_add[1] = CL_UTIL_Approach( org_target[1], org_add[1], addspeed );
-		org_add[2] = CL_UTIL_Approach( org_target[2], org_add[2], addspeed );
-		pparams->vieworg += Vector( org_add[0], org_add[1], org_add[2] );
-		*/
 	}
+	else
+		car_roll_ang = 0.0f;
 
 	// diffusion - play this sound when underwater
 	if( pparams->waterlevel == 3 )
