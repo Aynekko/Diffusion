@@ -1653,7 +1653,7 @@ void CCar::Drive( void )
 		}
 		else if( !(bForward()) && !HasSpawnFlags( SF_CAR_ELECTRIC ) ) // no gas pressed
 		{
-			EngPitch -= (MaxCarSpeed / (1 + AbsCarSpeed * 0.1)) * gpGlobals->frametime;
+			EngPitch -= (MaxCarSpeed / (1.0f + AbsCarSpeed * 0.1f)) * gpGlobals->frametime;
 		}
 		else if( (bForward()) || HasSpawnFlags( SF_CAR_ELECTRIC ) ) // stepping on the gas
 		{
@@ -1664,13 +1664,14 @@ void CCar::Drive( void )
 			}
 			else
 			{
-				EngPitch = 80 + 150.0f * ((AbsCarSpeed / (float)(GearStep * (Gear < 1 ? 1 : Gear)))) - (Gear * 2) + (5 * HeatingMult);
+				EngPitch = UTIL_Approach( 80 + 150.0f * ((AbsCarSpeed / (float)(GearStep * (Gear < 1 ? 1 : Gear)))) - (Gear * 2) + (5 * HeatingMult), EngPitch, 1000 * gpGlobals->frametime );
 			}
 		}
 	}
 
 	// add "sound shake" on some surfaces
-	EngPitch += RANDOM_FLOAT( -ChassisShake * SuspHardness * AbsCarSpeed * 0.0002, ChassisShake * SuspHardness * AbsCarSpeed * 0.0002 );
+	float SndShake = ChassisShake * SuspHardness * AbsCarSpeed * 0.0001f;
+	EngPitch += RANDOM_FLOAT( -SndShake, SndShake );
 	EngPitch = bound( 80, EngPitch, 250 );
 	if( BrokenCar )
 		EngPitch *= 0.65;
