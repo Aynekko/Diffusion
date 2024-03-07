@@ -69,6 +69,7 @@ BEGIN_DATADESC( CCar )
 	DEFINE_KEYFIELD( DamageMult, FIELD_FLOAT, "damagemult" ),
 	DEFINE_KEYFIELD( CameraHeight, FIELD_INTEGER, "camheight" ),
 	DEFINE_KEYFIELD( CameraDistance, FIELD_INTEGER, "camdistance" ),
+	DEFINE_KEYFIELD( FreeCameraDistance, FIELD_INTEGER, "freecamdistance" ),
 	DEFINE_FIELD( hDriver, FIELD_EHANDLE ),
 	DEFINE_FUNCTION( Setup ),
 	DEFINE_FUNCTION( Drive ),
@@ -321,6 +322,11 @@ void CCar::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "camdistance" ) )
 	{
 		CameraDistance = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "freecamdistance" ) )
+	{
+		FreeCameraDistance = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "frontwheelradius" ) )
@@ -874,6 +880,8 @@ void CCar::Setup( void )
 			pFreeCam->pev->iuser1 = (int)( (mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale );
 		}
 		pFreeCam->pev->effects |= EF_SKIPPVS;
+		if( !FreeCameraDistance )
+			FreeCameraDistance = CameraDistance;
 	}
 
 	if( pev->iuser1 ) // rotate car
@@ -1394,7 +1402,7 @@ void CCar::Drive( void )
 	// handbrake pressed
 	if( bUp() )
 	{
-		CarTurnRate *= bound(1.0f, AbsCarSpeed * 0.002, 1.5f);
+		CarTurnRate *= bound(1.0f, AbsCarSpeed * 0.002, 1.5f) + fabs(Turning);
 	}
 
 	Vector CarAng = GetLocalAngles();
@@ -2325,6 +2333,9 @@ void CCar::Camera(void)
 	if( !NewCameraAngle )
 		NewCameraAngle = pChassis->pev->angles.y;
 
+	if( !CamDistAdjust )
+		CamDistAdjust = 1.0f;
+
 	if( CarSpeed < -75 ) // going backwards
 	{
 		NewCameraAngle = UTIL_ApproachAngle( pChassis->pev->angles.y - 180, NewCameraAngle, 200 * gpGlobals->frametime ); // smooth it out
@@ -2360,43 +2371,18 @@ void CCar::Camera(void)
 
 	TraceResult CamTr;
 
-	if( (CamUnlocked && pFreeCam) || (!pCamera1 && !SecondaryCamera) )
+	if( CamUnlocked && pFreeCam )
 	{
 		SET_VIEW( hDriver->edict(), pFreeCam->edict() );
 		TraceResult CamTr;
 		Vector DriverAngles = hDriver->pev->v_angle;
 		Vector CamOrg;
 
-		if( !CamUnlocked )
-		{
-			Vector ChAng = pChassis->GetAbsAngles();
-			ChAng.x *= 0.5;
-			UTIL_MakeVectors( ChAng );
-			if( CarSpeed >= -100 )
-			{
-				// pev->iuser2 - hacked default camera height offset
-				// iuser1 for freecam is hardcoded, just tune it if needed - it's the distance
-				UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 80, GetAbsOrigin() + gpGlobals->v_up * (80 + pev->iuser2) - gpGlobals->v_forward * (200 + pFreeCam->pev->iuser1) - gpGlobals->v_right * CameraMoving, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
-				CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
-				pFreeCam->SetAbsOrigin( CamOrg );
-			//	pFreeCam->SetAbsAngles( GetAbsAngles() );
-			}
-			else if( CarSpeed < -100 )
-			{
-				UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 80, GetAbsOrigin() + gpGlobals->v_up * 80 + gpGlobals->v_forward * (200 + pFreeCam->pev->iuser1) - gpGlobals->v_right * CameraMoving, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
-				CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
-				pFreeCam->SetAbsOrigin( CamOrg );
-				pFreeCam->SetAbsAngles( GetAbsAngles() + Vector( 0, 180, 0 ) );
-			}
-		}
-		else
-		{
-			UTIL_MakeVectors( DriverAngles );
-			UTIL_TraceLine( hDriver->GetAbsOrigin(), hDriver->GetAbsOrigin() - gpGlobals->v_forward * (200 + pFreeCam->pev->iuser1) + gpGlobals->v_up * pev->iuser2, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
-			CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
-			pFreeCam->SetAbsOrigin( CamOrg );
-			pFreeCam->SetAbsAngles( DriverAngles );
-		}
+		UTIL_MakeVectors( DriverAngles );
+		UTIL_TraceLine( hDriver->GetAbsOrigin(), hDriver->GetAbsOrigin() - gpGlobals->v_forward * FreeCameraDistance, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+		CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
+		pFreeCam->SetAbsOrigin( CamOrg );
+		pFreeCam->SetAbsAngles( DriverAngles );
 	}
 	else
 	{
@@ -2418,8 +2404,16 @@ void CCar::Camera(void)
 		}
 		else if( pCamera1 )
 		{
+			// just like in NFS MW, move camera closer if we don't press accelerate (car is slowing down)
+			if( AbsCarSpeed > 50 )
+			{
+				if( CarSpeed > 50 && !bForward() )
+					CamDistAdjust = UTIL_Approach( 0.65f, CamDistAdjust, (bBack() ? 0.2f : 0.1f) * gpGlobals->frametime );
+				else
+					CamDistAdjust = UTIL_Approach( 1.0f, CamDistAdjust, 0.2f * gpGlobals->frametime );
+			}
 			SET_VIEW( hDriver->edict(), pCamera1->edict() );
-			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * CameraDistance, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * CameraDistance * CamDistAdjust, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 			CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 			pCamera1->SetAbsOrigin( CamOrg );
 			pCamera1->SetAbsAngles( CameraAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );
