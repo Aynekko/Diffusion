@@ -35,8 +35,15 @@ void CFuncIllusionary::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TY
 	if( IsLockedByMaster() )
 		return;
 	
-	if (pev->effects & EF_NODRAW)
-		pev->effects &= ~EF_NODRAW;
-	else
+	if( useType == USE_OFF )
 		pev->effects |= EF_NODRAW;
+	else if( useType == USE_ON )
+		pev->effects &= ~EF_NODRAW;
+	else // toggle
+	{
+		if( pev->effects & EF_NODRAW )
+			pev->effects &= ~EF_NODRAW;
+		else
+			pev->effects |= EF_NODRAW;
+	}
 }
