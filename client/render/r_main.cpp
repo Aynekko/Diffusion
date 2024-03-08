@@ -2045,11 +2045,15 @@ void R_SetupRefParams( const ref_viewpass_t *rvp )
 	RI->viewport[3] = rvp->viewport[3];
 	RI->vieworg = rvp->vieworigin;
 
+	bool Drone_View = (GET_ENTITY( rvp->viewentity ) == tr.pDrone);
+
 	// calc FOV
-	if( GET_ENTITY(rvp->viewentity) == tr.pDrone || R_CheckMonsterView( rvp ) )
+	if( Drone_View || R_CheckMonsterView( rvp ) )
 	{
 		RI->fov_x = 100; // adjust fov for monster view
 		V_CalcFov( RI->fov_x, RI->viewport[2], RI->viewport[3] );
+		if( Drone_View )
+			RI->vieworg.z += 8.0f;
 	}
 	else
 	{
