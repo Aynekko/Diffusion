@@ -391,21 +391,6 @@ float CSpriteModelRenderer :: SpriteGlowBlend( int rendermode, int renderfx, flo
 	if( renderfx == kRenderFxNoDissipation )
 		return 1.0f;
 
-	float front_dissolve = 1.0f;
-	if( renderfx == kRenderFxFrontDissolve )
-	{
-		// diffusion - sprite disappears when you get too close
-		// 500 is the tuned distance...
-		float dissolve = ((RI->currententity->origin - tr.viewparams.vieworg).Length() / 500.0f) - 0.5f;
-		if( dissolve < 1.0f )
-		{
-			if( dissolve < 0 )
-				dissolve = 0;
-
-			front_dissolve = dissolve;
-		}
-	}
-
 	scale = m_pCurrentEntity->curstate.scale; // variable sized glow
 
 	// make the glow fixed size in screen space, taking into consideration the scale setting.
@@ -419,7 +404,7 @@ float CSpriteModelRenderer :: SpriteGlowBlend( int rendermode, int renderfx, flo
 	}
 
 	brightness = bound( 0.1f, brightness, 1.0f );
-	return brightness * front_dissolve;
+	return brightness;
 }
 
 /*
@@ -431,8 +416,19 @@ Do occlusion test for glow-sprites
 */
 int CSpriteModelRenderer :: SpriteOccluded( float &pscale )
 {
-	// always compute origin first
+	// always compute origin first (tr.modelorg)
 	SpriteComputeOrigin( m_pCurrentEntity );
+
+	if( m_pCurrentEntity->curstate.renderfx == kRenderFxFrontDissolve )
+	{
+		// diffusion - sprite disappears when you get too close
+		// 400 is the tuned distance...
+		float dissolve = ((tr.modelorg - tr.viewparams.vieworg).Length() / 400.0f) - 0.5f;
+		if( dissolve <= 0.0f )
+			return true;
+		else if( dissolve <= 1.0f )
+			tr.blend *= dissolve;
+	}
 
 	if( (m_pCurrentEntity->curstate.rendermode == kRenderGlow) || (m_pCurrentEntity->curstate.rendermode == kRenderConstantGlow) )
 	{
