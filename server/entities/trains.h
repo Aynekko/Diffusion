@@ -319,6 +319,7 @@ public:
 	virtual void Blocked( CBaseEntity *pOther );
 	virtual int ObjectCaps( void ) { return ((CBaseToggle::ObjectCaps() & ~FCAP_ACROSS_TRANSITION)) | FCAP_SET_MOVEDIR; }
 	virtual bool IsDoorControl( void ) { return !FBitSet( pev->spawnflags, SF_TRAINDOOR_OPEN_IN_MOVING ) && GetState() != STATE_OFF; }
+	void ClearEffects( void );
 
 	DECLARE_DATADESC();
 

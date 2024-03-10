@@ -71,6 +71,7 @@ public:
 	void DoorTouch( CBaseEntity *pOther );
 	void ChainTouch( CBaseEntity *pOther );
 	void ChainUse( USE_TYPE useType, float value );
+	void ClearEffects( void );
 
 	byte	m_bHealthValue;		// some doors are medi-kit doors, they give players health
 	int	m_iMoveSnd;		// sound a door makes while moving

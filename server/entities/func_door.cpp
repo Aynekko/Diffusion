@@ -1032,6 +1032,12 @@ void CBaseDoor::Blocked( CBaseEntity *pOther )
 	}
 }
 
+void CBaseDoor::ClearEffects( void )
+{
+	if( !HasSpawnFlags( SF_DOOR_SILENT ) )
+		STOP_SOUND( edict(), CHAN_STATIC, STRING( pev->noise1 ) );
+}
+
 // =================== FUNC_DOOR_ROTATING ==============================================
 
 class CRotDoor : public CBaseDoor
@@ -1185,6 +1191,7 @@ public:
 	void Blocked( CBaseEntity *pOther );
 	void StopMoveSound( void );
 	virtual void MoveDone( void );
+	void ClearEffects( void );
 
 	DECLARE_DATADESC();
 
@@ -1200,6 +1207,11 @@ BEGIN_DATADESC( CMomentaryDoor )
 	DEFINE_KEYFIELD( m_iMoveSnd, FIELD_STRING, "movesnd" ),
 	DEFINE_FUNCTION( StopMoveSound ),
 END_DATADESC()
+
+void CMomentaryDoor::ClearEffects( void )
+{
+	STOP_SOUND( edict(), CHAN_STATIC, STRING( pev->noise ) );
+}
 
 void CMomentaryDoor :: Precache( void )
 {
@@ -1854,4 +1866,9 @@ void CBaseTrainDoor::Blocked( CBaseEntity *pOther )
 	{
 		DoorSlideUp( );
 	}
+}
+
+void CBaseTrainDoor::ClearEffects( void )
+{
+	STOP_SOUND( edict(), CHAN_STATIC, STRING( pev->noise1 ) );
 }

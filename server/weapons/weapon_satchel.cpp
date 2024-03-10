@@ -341,7 +341,7 @@ BOOL CSatchel::Deploy( void )
 	m_flTimeWeaponIdle = gpGlobals->time + 4.0;
 
 	if ( m_chargeReady )
-		return DefaultDeploy( "models/vweapons/_satchel_radio.mdl", "models/weapons/p_satchel_radio.mdl", SATCHEL_RADIO_DRAW, "hive" );
+		return DefaultDeploy( "models/weapons/v_satchel_radio.mdl", "models/weapons/p_satchel_radio.mdl", SATCHEL_RADIO_DRAW, "hive" );
 
 	return DefaultDeploy( "models/weapons/v_satchel.mdl", "models/weapons/p_satchel.mdl", SATCHEL_DRAW, "trip" );
 }
