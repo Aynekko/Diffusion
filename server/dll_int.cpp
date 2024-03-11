@@ -546,23 +546,12 @@ void DispatchObjectCollsionBox( edict_t *pent )
 
 void OnFreeEntPrivateData( edict_s *pEdict )
 {
-	if( g_fPhysicInitialized )
-	{
-		if( pEdict && pEdict->pvPrivateData )
-		{
-			CBaseEntity *pEntity = CBaseEntity::Instance( pEdict );
-			pEntity->m_BodyMesh.FreeMesh(); // release all local copy of meshes
-		}
-
-		if( GET_SERVER_STATE() == SERVER_DEAD )
-			return;
-	}
-
 	if( pEdict && pEdict->pvPrivateData )
 	{
 		CBaseEntity *pEntity = CBaseEntity::Instance( pEdict );
 		pEntity->m_BodyMesh.FreeMesh();
 		pEntity->UpdateOnRemove();
+		pEntity->~CBaseEntity();
 	}
 }
 
