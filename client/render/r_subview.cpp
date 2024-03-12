@@ -890,7 +890,6 @@ static void R_RenderDroneView( void )
 	R_SetupFrustum();
 	R_MarkLeaves();
 
-	tr.modelorg = RI->vieworg;
 	RI->currententity = GET_ENTITY( 0 );
 	RI->currentmodel = RI->currententity->model;
 	RI->num_subview_faces = 0;
@@ -931,6 +930,8 @@ static void R_RenderDroneView( void )
 	RI->viewangles[2] = anglemod( angles[2] );
 	RI->pvsorigin = tr.pDrone->origin;
 	RI->vieworg = origin;
+	RI->vieworg.z += 8.0f;
+	tr.modelorg = RI->vieworg;
 
 	RI->params = RP_SCREENVIEW;
 

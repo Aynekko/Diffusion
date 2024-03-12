@@ -2205,7 +2205,7 @@ void CDrone :: Spawn()
 		if( IsRocketDrone )
 			pev->health = RocketDroneHealth[g_iSkillLevel];
 	}
-	pev->view_ofs		= Vector( 0, 0, -2 );// position of the eyes relative to monster's origin.
+	pev->view_ofs		= Vector( 0, 0, 6 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_WIDE;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 
@@ -2404,6 +2404,13 @@ Schedule_t* CDrone :: GetScheduleOfType ( int Type )
 void CDrone :: RunAI( void )
 {
 	static bool sndrestart;
+
+	if( HasFlag( F_PLAYER_DRONE ) && (pev->waterlevel > 0) )
+	{
+		// retrieve the drone instantly on water contact
+		Use( NULL, NULL, USE_TOGGLE, 0 );
+		return;
+	}
 
 	if( AlienEye ) // diffusion - !!! the origin is not being updated, have to do this, otherwise distance culling issues
 		AlienEye->pev->origin = pev->origin;

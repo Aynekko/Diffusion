@@ -2052,7 +2052,11 @@ void CBasePlayer::PlayerUse ( void )
 	Vector vecLOS;
 	float flDot;
 
-	UTIL_MakeVectors( pev->v_angle ); // so we know which way we are facing
+	// so we know which way we are facing
+	if( m_hDrone && DroneControl )
+		UTIL_MakeVectors( m_hDrone->pev->angles );
+	else
+		UTIL_MakeVectors( pev->v_angle );
 
 	// LRC- try to get an exact entity to use.
 	// (is this causing "use-buttons-through-walls" problems? Surely not!)
@@ -2982,7 +2986,10 @@ void CBasePlayer::PreThink( void )
 		if( gpGlobals->time > LastUseCheckTime + 0.2 )
 		{
 			TraceResult tracer;
-			UTIL_MakeVectors( pev->v_angle );
+			if( m_hDrone && DroneControl )
+				UTIL_MakeVectors( m_hDrone->pev->angles );
+			else
+				UTIL_MakeVectors( pev->v_angle );
 			Vector EyePos = (m_hDrone && DroneControl) ? m_hDrone->EyePosition() : EyePosition();
 			UTIL_TraceLine( EyePos, EyePos + (gpGlobals->v_forward * PLAYER_SEARCH_RADIUS), dont_ignore_monsters, edict(), &tracer );
 
