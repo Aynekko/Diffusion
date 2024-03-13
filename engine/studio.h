@@ -672,7 +672,7 @@ USER-DEFINED DATA
 typedef struct vbomesh_s
 {
 	unsigned int skinref; // skin reference
-	unsigned short numVerts; // trifan vertices count
+	unsigned int numVerts; // trifan vertices count
 	unsigned int numElems; // trifan elements count
 
 	unsigned int vbo, vao, ibo; // buffer objects

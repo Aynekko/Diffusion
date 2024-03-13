@@ -29,6 +29,7 @@ GNU General Public License for more details.
 #include "r_shader.h"
 #include "r_world.h"
 #include "features.h"
+#include <vector>
 
 // Global engine <-> studio model rendering code interface
 engine_studio_api_t IEngineStudio;
@@ -830,10 +831,11 @@ void CStudioModelRenderer::ComputeSkinMatrix( mstudioboneweight_t *boneweights, 
 
 void CStudioModelRenderer::UploadBufferBase( vbomesh_t *pOut, svert_t *arrayxvert )
 {
-	static svert_v0_t arraysvert[MAXARRAYVERTS];
+	std::vector<svert_v0_t> arraysvert;
+	arraysvert.resize( pOut->numVerts );
 
 	// convert to GLSL-compacted array
-	for( unsigned int i = 0; i < m_nNumArrayVerts; i++ )
+	for( unsigned int i = 0; i < pOut->numVerts; i++ )
 	{
 		arraysvert[i].vertex[0] = arrayxvert[i].vertex[0];
 		arraysvert[i].vertex[1] = arrayxvert[i].vertex[1];
@@ -856,7 +858,7 @@ void CStudioModelRenderer::UploadBufferBase( vbomesh_t *pOut, svert_t *arrayxver
 	}
 
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, pOut->vbo );
-	pglBufferDataARB( GL_ARRAY_BUFFER_ARB, m_nNumArrayVerts * sizeof( svert_v0_t ), &arraysvert[0], GL_STATIC_DRAW_ARB );
+	pglBufferDataARB( GL_ARRAY_BUFFER_ARB, pOut->numVerts * sizeof( svert_v0_t ), &arraysvert[0], GL_STATIC_DRAW_ARB );
 
 	pglVertexAttribPointerARB( ATTR_INDEX_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v0_t ), (void *)offsetof( svert_v0_t, vertex ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION );
@@ -876,15 +878,16 @@ void CStudioModelRenderer::UploadBufferBase( vbomesh_t *pOut, svert_t *arrayxver
 	pglVertexAttribPointerARB( ATTR_INDEX_BONE_INDEXES, 4, GL_BYTE, GL_FALSE, sizeof( svert_v0_t ), (void *)offsetof( svert_v0_t, boneid ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_BONE_INDEXES );
 
-	pOut->cacheSize = pOut->numVerts * sizeof( svert_v3_t );
+	pOut->cacheSize = pOut->numVerts * sizeof( svert_v0_t );
 }
 
 void CStudioModelRenderer::UploadBufferVLight( vbomesh_t *pOut, svert_t *arrayxvert )
 {
-	static svert_v1_t	arraysvert[MAXARRAYVERTS];
+	std::vector<svert_v1_t> arraysvert;
+	arraysvert.resize( pOut->numVerts );
 
 	// convert to GLSL-compacted array
-	for( unsigned int i = 0; i < m_nNumArrayVerts; i++ )
+	for( unsigned int i = 0; i < pOut->numVerts; i++ )
 	{
 		arraysvert[i].vertex[0] = arrayxvert[i].vertex[0];
 		arraysvert[i].vertex[1] = arrayxvert[i].vertex[1];
@@ -907,7 +910,7 @@ void CStudioModelRenderer::UploadBufferVLight( vbomesh_t *pOut, svert_t *arrayxv
 	}
 
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, pOut->vbo );
-	pglBufferDataARB( GL_ARRAY_BUFFER_ARB, m_nNumArrayVerts * sizeof( svert_v1_t ), &arraysvert[0], GL_STATIC_DRAW_ARB );
+	pglBufferDataARB( GL_ARRAY_BUFFER_ARB, pOut->numVerts * sizeof( svert_v1_t ), &arraysvert[0], GL_STATIC_DRAW_ARB );
 
 	pglVertexAttribPointerARB( ATTR_INDEX_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v1_t ), (void *)offsetof( svert_v1_t, vertex ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION );
@@ -927,15 +930,16 @@ void CStudioModelRenderer::UploadBufferVLight( vbomesh_t *pOut, svert_t *arrayxv
 	pglVertexAttribPointerARB( ATTR_INDEX_LIGHT_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof( svert_v1_t ), (void *)offsetof( svert_v1_t, light ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_LIGHT_COLOR );
 
-	pOut->cacheSize = pOut->numVerts * sizeof( svert_v3_t );
+	pOut->cacheSize = pOut->numVerts * sizeof( svert_v1_t );
 }
 
 void CStudioModelRenderer::UploadBufferWeight( vbomesh_t *pOut, svert_t *arrayxvert )
 {
-	static svert_v2_t	arraysvert[MAXARRAYVERTS];
+	std::vector<svert_v2_t> arraysvert;
+	arraysvert.resize( pOut->numVerts );
 
 	// convert to GLSL-compacted array
-	for( unsigned int i = 0; i < m_nNumArrayVerts; i++ )
+	for( unsigned int i = 0; i < pOut->numVerts; i++ )
 	{
 		arraysvert[i].vertex[0] = arrayxvert[i].vertex[0];
 		arraysvert[i].vertex[1] = arrayxvert[i].vertex[1];
@@ -962,7 +966,7 @@ void CStudioModelRenderer::UploadBufferWeight( vbomesh_t *pOut, svert_t *arrayxv
 	}
 
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, pOut->vbo );
-	pglBufferDataARB( GL_ARRAY_BUFFER_ARB, m_nNumArrayVerts * sizeof( svert_v2_t ), &arraysvert[0], GL_STATIC_DRAW_ARB );
+	pglBufferDataARB( GL_ARRAY_BUFFER_ARB, pOut->numVerts * sizeof( svert_v2_t ), &arraysvert[0], GL_STATIC_DRAW_ARB );
 
 	pglVertexAttribPointerARB( ATTR_INDEX_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v2_t ), (void *)offsetof( svert_v2_t, vertex ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION );
@@ -985,15 +989,16 @@ void CStudioModelRenderer::UploadBufferWeight( vbomesh_t *pOut, svert_t *arrayxv
 	pglVertexAttribPointerARB( ATTR_INDEX_BONE_WEIGHTS, 4, GL_UNSIGNED_BYTE, GL_FALSE, sizeof( svert_v2_t ), (void *)offsetof( svert_v2_t, weight ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_BONE_WEIGHTS );
 
-	pOut->cacheSize = pOut->numVerts * sizeof( svert_v3_t );
+	pOut->cacheSize = pOut->numVerts * sizeof( svert_v2_t );
 }
 
 void CStudioModelRenderer::UploadBufferGeneric( vbomesh_t *pOut, svert_t *arrayxvert, bool vertex_light )
 {
-	static svert_v3_t arraysvert[MAXARRAYVERTS];
+	std::vector<svert_v3_t> arraysvert;
+	arraysvert.resize( pOut->numVerts );
 
 	// convert to GLSL-compacted array
-	for( unsigned int i = 0; i < m_nNumArrayVerts; i++ )
+	for( unsigned int i = 0; i < pOut->numVerts; i++ )
 	{
 		arraysvert[i].vertex[0] = arrayxvert[i].vertex[0];
 		arraysvert[i].vertex[1] = arrayxvert[i].vertex[1];
@@ -1029,7 +1034,7 @@ void CStudioModelRenderer::UploadBufferGeneric( vbomesh_t *pOut, svert_t *arrayx
 	}
 
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, pOut->vbo );
-	pglBufferDataARB( GL_ARRAY_BUFFER_ARB, m_nNumArrayVerts * sizeof( svert_v3_t ), &arraysvert[0], GL_STATIC_DRAW_ARB );
+	pglBufferDataARB( GL_ARRAY_BUFFER_ARB, pOut->numVerts * sizeof( svert_v3_t ), &arraysvert[0], GL_STATIC_DRAW_ARB );
 
 	pglVertexAttribPointerARB( ATTR_INDEX_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v3_t ), (void *)offsetof( svert_v3_t, vertex ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION );
@@ -1083,10 +1088,10 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 	mstudioboneweight_t *pnormweight = (mstudioboneweight_t *)((byte *)m_pStudioHeader + pSubModel->blendnorminfoindex);
 	bool has_boneweights = (m_pStudioHeader->flags & STUDIO_HAS_BONEWEIGHTS) != 0;
 	bool has_vertexlight = (dml != NULL && dml->numverts > 0) ? true : false;
-	static svert_t arrayxvert[MAXARRAYVERTS];
 	matrix3x4 skinMat;
 	int	i;
-	static Vector	localverts[MAXARRAYVERTS];
+	std::vector<Vector> localverts;
+	localverts.resize( pSubModel->numverts );
 
 	float s = 1.0f / (float)ptexture->width;
 	float t = 1.0f / (float)ptexture->height;
@@ -1158,8 +1163,8 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 			}
 
 			// don't concat by matrix here - it's should be done on GPU
-			arrayxvert[m_nNumArrayVerts].vertex = pstudioverts[ptricmds[0]];
-			arrayxvert[m_nNumArrayVerts].normal = pstudionorms[ptricmds[1]];
+			m_arrayxvert[m_nNumArrayVerts].vertex = pstudioverts[ptricmds[0]];
+			m_arrayxvert[m_nNumArrayVerts].normal = pstudionorms[ptricmds[1]];
 
 			if( m_iTBNState == TBNSTATE_GENERATE )
 			{
@@ -1170,9 +1175,9 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 			if( m_iTBNState == TBNSTATE_LOADING && m_tbnverts != NULL )
 			{
 				// loading TBN from cache
-				arrayxvert[m_nNumArrayVerts].tangent = m_tbnverts->verts[m_nNumTBNVerts].tangent;
-				arrayxvert[m_nNumArrayVerts].binormal = m_tbnverts->verts[m_nNumTBNVerts].binormal;
-				arrayxvert[m_nNumArrayVerts].normal = m_tbnverts->verts[m_nNumTBNVerts].normal;
+				m_arrayxvert[m_nNumArrayVerts].tangent = m_tbnverts->verts[m_nNumTBNVerts].tangent;
+				m_arrayxvert[m_nNumArrayVerts].binormal = m_tbnverts->verts[m_nNumTBNVerts].binormal;
+				m_arrayxvert[m_nNumArrayVerts].normal = m_tbnverts->verts[m_nNumTBNVerts].normal;
 				m_nNumTBNVerts++;
 			}
 
@@ -1186,7 +1191,7 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 					//	byte r = vl->light[map][0], g = vl->light[map][1], b = vl->light[map][2];
 					//	float packDirect = (float)((double)((r << 16) | (g << 8) | b) / (double)(1 << 24));
 					//	arrayxvert[m_nNumArrayVerts].light[map] = packDirect;
-					arrayxvert[m_nNumArrayVerts].light[map] = PackColor( vl->light[map] );
+					m_arrayxvert[m_nNumArrayVerts].light[map] = PackColor( vl->light[map] );
 					//	arrayxvert[m_nNumArrayVerts].deluxe[map] = PackColor( vl->deluxe[map] );
 				}
 			}
@@ -1194,43 +1199,43 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 			if( FBitSet( ptexture->flags, STUDIO_NF_CHROME ) )
 			{
 				// probably always equal 64 (see studiomdl.c for details)
-				arrayxvert[m_nNumArrayVerts].stcoord[0] = FloatToHalf( s );
-				arrayxvert[m_nNumArrayVerts].stcoord[1] = FloatToHalf( t );
+				m_arrayxvert[m_nNumArrayVerts].stcoord[0] = FloatToHalf( s );
+				m_arrayxvert[m_nNumArrayVerts].stcoord[1] = FloatToHalf( t );
 			}
 			else if( FBitSet( ptexture->flags, STUDIO_NF_UV_COORDS ) )
 			{
-				arrayxvert[m_nNumArrayVerts].stcoord[0] = ptricmds[2];
-				arrayxvert[m_nNumArrayVerts].stcoord[1] = ptricmds[3];
+				m_arrayxvert[m_nNumArrayVerts].stcoord[0] = ptricmds[2];
+				m_arrayxvert[m_nNumArrayVerts].stcoord[1] = ptricmds[3];
 			}
 			else
 			{
-				arrayxvert[m_nNumArrayVerts].stcoord[0] = FloatToHalf( ptricmds[2] * s );
-				arrayxvert[m_nNumArrayVerts].stcoord[1] = FloatToHalf( ptricmds[3] * t );
+				m_arrayxvert[m_nNumArrayVerts].stcoord[0] = FloatToHalf( ptricmds[2] * s );
+				m_arrayxvert[m_nNumArrayVerts].stcoord[1] = FloatToHalf( ptricmds[3] * t );
 			}
 
 			if( m_pRenderModel->poseToBone != NULL && has_boneweights )
 			{
 				mstudioboneweight_t *pCurWeight = &pvertweight[ptricmds[0]];
 
-				arrayxvert[m_nNumArrayVerts].boneid[0] = pCurWeight->bone[0];
-				arrayxvert[m_nNumArrayVerts].boneid[1] = pCurWeight->bone[1];
-				arrayxvert[m_nNumArrayVerts].boneid[2] = pCurWeight->bone[2];
-				arrayxvert[m_nNumArrayVerts].boneid[3] = pCurWeight->bone[3];
-				arrayxvert[m_nNumArrayVerts].weight[0] = pCurWeight->weight[0];
-				arrayxvert[m_nNumArrayVerts].weight[1] = pCurWeight->weight[1];
-				arrayxvert[m_nNumArrayVerts].weight[2] = pCurWeight->weight[2];
-				arrayxvert[m_nNumArrayVerts].weight[3] = pCurWeight->weight[3];
+				m_arrayxvert[m_nNumArrayVerts].boneid[0] = pCurWeight->bone[0];
+				m_arrayxvert[m_nNumArrayVerts].boneid[1] = pCurWeight->bone[1];
+				m_arrayxvert[m_nNumArrayVerts].boneid[2] = pCurWeight->bone[2];
+				m_arrayxvert[m_nNumArrayVerts].boneid[3] = pCurWeight->bone[3];
+				m_arrayxvert[m_nNumArrayVerts].weight[0] = pCurWeight->weight[0];
+				m_arrayxvert[m_nNumArrayVerts].weight[1] = pCurWeight->weight[1];
+				m_arrayxvert[m_nNumArrayVerts].weight[2] = pCurWeight->weight[2];
+				m_arrayxvert[m_nNumArrayVerts].weight[3] = pCurWeight->weight[3];
 			}
 			else
 			{
-				arrayxvert[m_nNumArrayVerts].boneid[0] = pvertbone[ptricmds[0]];
-				arrayxvert[m_nNumArrayVerts].boneid[1] = -1;
-				arrayxvert[m_nNumArrayVerts].boneid[2] = -1;
-				arrayxvert[m_nNumArrayVerts].boneid[3] = -1;
-				arrayxvert[m_nNumArrayVerts].weight[0] = 255;
-				arrayxvert[m_nNumArrayVerts].weight[1] = 0;
-				arrayxvert[m_nNumArrayVerts].weight[2] = 0;
-				arrayxvert[m_nNumArrayVerts].weight[3] = 0;
+				m_arrayxvert[m_nNumArrayVerts].boneid[0] = pvertbone[ptricmds[0]];
+				m_arrayxvert[m_nNumArrayVerts].boneid[1] = -1;
+				m_arrayxvert[m_nNumArrayVerts].boneid[2] = -1;
+				m_arrayxvert[m_nNumArrayVerts].boneid[3] = -1;
+				m_arrayxvert[m_nNumArrayVerts].weight[0] = 255;
+				m_arrayxvert[m_nNumArrayVerts].weight[1] = 0;
+				m_arrayxvert[m_nNumArrayVerts].weight[2] = 0;
+				m_arrayxvert[m_nNumArrayVerts].weight[3] = 0;
 			}
 
 			m_nNumArrayVerts++;
@@ -1265,7 +1270,7 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 			for( int i = 0; i < 3; i++ )
 			{
 				v[i] = (float *)&m_arrayverts[m_arrayelems[triID * 3 + i]]; // transformed to global pose to avoid seams
-				tc[i] = (float *)&arrayxvert[m_arrayelems[triID * 3 + i]].stcoord;
+				tc[i] = (float *)&m_arrayxvert[m_arrayelems[triID * 3 + i]].stcoord;
 			}
 
 			CalcTBN( v[0], v[1], v[2], tc[0], tc[1], tc[2], triSVect[triID], triTVect[triID] );
@@ -1274,7 +1279,7 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 		// calculate an average tangent space for each vertex.
 		for( unsigned int vertID = 0; vertID < m_nNumArrayVerts; vertID++ )
 		{
-			svert_t *v = &arrayxvert[vertID];
+			svert_t *v = &m_arrayxvert[vertID];
 			const Vector &normal = v->normal;
 			Vector &finalSVect = v->tangent;
 			Vector &finalTVect = v->binormal;
@@ -1312,7 +1317,7 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 			}
 
 			// rotate tangent and binormal back to bone space
-			ComputeSkinMatrix( &arrayxvert[vertID], bones, skinMat );
+			ComputeSkinMatrix( &m_arrayxvert[vertID], bones, skinMat );
 
 			sVect = skinMat.VectorIRotate( sVect );
 			tVect = skinMat.VectorIRotate( tVect );
@@ -1360,9 +1365,9 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 		// store precomputed TBN into our cache
 		for( i = 0; i < m_nNumArrayVerts; i++ )
 		{
-			m_tbnverts->verts[m_nNumTBNVerts].tangent = arrayxvert[i].tangent;
-			m_tbnverts->verts[m_nNumTBNVerts].binormal = arrayxvert[i].binormal;
-			m_tbnverts->verts[m_nNumTBNVerts].normal = arrayxvert[i].normal;
+			m_tbnverts->verts[m_nNumTBNVerts].tangent = m_arrayxvert[i].tangent;
+			m_tbnverts->verts[m_nNumTBNVerts].binormal = m_arrayxvert[i].binormal;
+			m_tbnverts->verts[m_nNumTBNVerts].normal = m_arrayxvert[i].normal;
 			m_nNumTBNVerts++;
 		}
 	}
@@ -1380,24 +1385,24 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 	if( m_pStudioHeader->numbones <= 1 && has_vertexlight )
 	{
 		// special case for single bone vertex lighting
-		UploadBufferVLight( pOut, arrayxvert );
+		UploadBufferVLight( pOut, m_arrayxvert );
 	}
 	else if( !has_boneweights && !has_vertexlight )
 	{
 		// typical GoldSrc models without weights
-		UploadBufferBase( pOut, arrayxvert );
+		UploadBufferBase( pOut, m_arrayxvert );
 	}
 	else if( has_boneweights && !has_vertexlight )
 	{
 		// extended Xash3D models with boneweights
-		UploadBufferWeight( pOut, arrayxvert );
+		UploadBufferWeight( pOut, m_arrayxvert );
 	}
 	else
 	{
 		// all other cases
 	//	if( m_pStudioHeader->numbones > 1 && has_vertexlight )
 	//		ConPrintf( "%s vertexlit model have skeleton\n", m_pRenderModel->name );
-		UploadBufferGeneric( pOut, arrayxvert, has_vertexlight );
+		UploadBufferGeneric( pOut, m_arrayxvert, has_vertexlight );
 	}
 
 	// create index array buffer
