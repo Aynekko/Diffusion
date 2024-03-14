@@ -527,7 +527,58 @@ void ClientCommand( edict_t *pEntity )
 
 	bool Cheats = (g_flWeaponCheat != 0.0);
 	
-	if ( FIStrEq(pcmd, "give" ) ) // diffusion - created entities despawn instantly now
+	if( FIStrEq( pcmd, "use" ) )
+	{
+		pPlayer->SelectItem( (char *)CMD_ARGV( 1 ) );
+	}
+	else if( ((pstr = Q_strstr( pcmd, "weapon_" )) != NULL) && (pstr == pcmd) )
+	{
+		pPlayer->SelectItem( pcmd );
+	}
+	else if( FIStrEq( pcmd, "lastinv" ) )
+	{
+		pPlayer->SelectLastItem();
+	}
+	else if( FIStrEq( pcmd, "showobjective" ) )
+	{
+		pPlayer->IsShowingObjective = true;
+	}
+	else if( FIStrEq( pcmd, "hideobjective" ) )
+	{
+		pPlayer->IsShowingObjective = false;
+	}
+	else if( FIStrEq( pcmd, "dash" ) )
+	{
+		pPlayer->DashButton = true;
+	}
+	else if( FIStrEq( pcmd, "electroblast" ) )
+	{
+		pPlayer->ElectroblastButton = true;
+	}
+	else if( FIStrEq( pcmd, "shield" ) )
+	{
+		// in multiplayer, shield only can be picked up, not activated
+		if( !g_pGameRules->IsMultiplayer() )
+		{
+			if( pPlayer->ShieldAvailableLVL > 0 && pPlayer->IsAlive() && pPlayer->NextShieldChangeTime < gpGlobals->time )
+			{
+				pPlayer->ShieldOn = !pPlayer->ShieldOn;
+				pPlayer->NextShieldChangeTime = gpGlobals->time + 0.5;
+			}
+		}
+	}
+	else if( FIStrEq( pcmd, "code" ) )
+	{
+		if( CMD_ARGC() > 2 ) // we have entindex and a code
+		{
+			int EntIndex = Q_atoi( CMD_ARGV( 1 ) );
+			int Code = Q_atoi( CMD_ARGV( 2 ) );
+			CBaseEntity *pCodeEnt = CBaseEntity::Instance( INDEXENT( EntIndex ) );
+			if( pCodeEnt && FClassnameIs( pCodeEnt, "trigger_codeinput" ) )
+				pCodeEnt->Use( pPlayer, pPlayer, USE_ON, (float)Code );
+		}
+	}
+	else if ( FIStrEq(pcmd, "give" ) ) // diffusion - created entities despawn instantly now
 	{
 		if ( Cheats )
 		{
@@ -590,14 +641,6 @@ void ClientCommand( edict_t *pEntity )
 			else
 				pPlayer->pev->effects |= EF_UPSIDEDOWN;
 		}
-	}
-	else if( FIStrEq( pcmd, "showobjective" ) )
-	{
-		pPlayer->IsShowingObjective = true;
-	}
-	else if( FIStrEq( pcmd, "hideobjective" ) )
-	{
-		pPlayer->IsShowingObjective = false;
 	}
 	else if ( FIStrEq(pcmd, "fire") )
 	{
@@ -793,49 +836,6 @@ void ClientCommand( edict_t *pEntity )
 	{
 		if( Cheats && CMD_ARGC() > 1 )
 			pPlayer->CanUseDrone = (Q_atoi( CMD_ARGV(1) ) > 0);
-	}
-	else if ( FIStrEq(pcmd, "use" ) )
-	{
-		pPlayer->SelectItem((char *)CMD_ARGV(1));
-	}
-	else if (((pstr = Q_strstr(pcmd, "weapon_")) != NULL)  && (pstr == pcmd))
-	{
-		pPlayer->SelectItem(pcmd);
-	}
-	else if ( FIStrEq(pcmd, "lastinv" ))
-	{
-		pPlayer->SelectLastItem();
-	}
-	else if( FIStrEq(pcmd, "dash") )
-	{
-		pPlayer->DashButton = true;
-	}
-	else if( FIStrEq( pcmd, "electroblast" ) )
-	{
-		pPlayer->ElectroblastButton = true;
-	}
-	else if( FIStrEq( pcmd, "shield" ) )
-	{
-		// in multiplayer, shield only can be picked up, not activated
-		if( !g_pGameRules->IsMultiplayer() )
-		{
-			if( pPlayer->ShieldAvailableLVL > 0 && pPlayer->IsAlive() && pPlayer->NextShieldChangeTime < gpGlobals->time )
-			{
-				pPlayer->ShieldOn = !pPlayer->ShieldOn;
-				pPlayer->NextShieldChangeTime = gpGlobals->time + 0.5;
-			}
-		}
-	}
-	else if( FIStrEq( pcmd, "code" ) )
-	{
-		if( CMD_ARGC() > 2 ) // we have entindex and a code
-		{
-			int EntIndex = Q_atoi( CMD_ARGV( 1 ) );
-			int Code = Q_atoi( CMD_ARGV( 2 ) );
-			CBaseEntity *pCodeEnt = CBaseEntity::Instance( INDEXENT( EntIndex ) );
-			if( pCodeEnt && FClassnameIs(pCodeEnt,"trigger_codeinput") )
-				pCodeEnt->Use( pPlayer, pPlayer, USE_ON, (float)Code );
-		}
 	}
 	else if ( FIStrEq(pcmd, "spectate"))
 	{
