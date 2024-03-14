@@ -757,7 +757,7 @@ int UTIL_MonstersInSphere( CBaseEntity **pList, int listMax, const Vector &cente
 			continue;
 
 		pEntity = CBaseEntity::Instance(pEdict);
-		if ( !pEntity )
+		if ( !pEntity || !pEntity->IsAlive() )
 			continue;
 
 		pList[ count ] = pEntity;
