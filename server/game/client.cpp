@@ -567,6 +567,14 @@ void ClientCommand( edict_t *pEntity )
 			}
 		}
 	}
+	else if( FIStrEq( pcmd, "selectdrone" ) ) // shortcut to select the drone
+	{
+		// if the drone is already an active weapon, select the previously used weapon
+		if( pPlayer->m_pActiveItem && pPlayer->m_pActiveItem->m_iId == WEAPON_DRONE )
+			pPlayer->SelectLastItem();
+		else
+			pPlayer->SelectItem( "weapon_drone" );
+	}
 	else if( FIStrEq( pcmd, "code" ) )
 	{
 		if( CMD_ARGC() > 2 ) // we have entindex and a code

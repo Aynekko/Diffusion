@@ -356,8 +356,8 @@ public:
 	BOOL HasWeapons( void );// do I have ANY weapons?
 	void SelectPrevItem( int iItem );
 	void SelectNextItem( int iItem );
-	void SelectLastItem(void);
-	void SelectItem(const char *pstr);
+	void SelectLastItem( void );
+	void SelectItem( const char *pstr );
 	void ItemPreFrame( void );
 	void ItemPostFrame( void );
 	void GiveNamedItem( const char *szName );

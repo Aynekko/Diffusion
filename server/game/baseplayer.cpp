@@ -5628,7 +5628,7 @@ void CBasePlayer::SelectNextItem( int iItem )
 	}
 }
 
-void CBasePlayer::SelectItem(const char *pstr)
+void CBasePlayer::SelectItem( const char *pstr )
 {
 	if (!pstr)
 		return;
@@ -5677,7 +5677,7 @@ void CBasePlayer::SelectItem(const char *pstr)
 }
 
 
-void CBasePlayer::SelectLastItem(void)
+void CBasePlayer::SelectLastItem( void )
 {
 	if( InCar )
 	{
