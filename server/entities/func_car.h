@@ -158,6 +158,9 @@ public:
 
 	float BrakeSqueak; // volume of the squeaky sound (0-1), not saved
 
+	bool IsBoat;
+	bool IsHeli;
+
 	DECLARE_DATADESC();
 };
 

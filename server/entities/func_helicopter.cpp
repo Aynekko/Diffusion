@@ -54,6 +54,7 @@ BEGIN_DATADESC( CHelicopter )
 	DEFINE_FIELD( BladeSpeed, FIELD_FLOAT ),
 	DEFINE_KEYFIELD( CameraHeight, FIELD_INTEGER, "camheight" ),
 	DEFINE_KEYFIELD( CameraDistance, FIELD_INTEGER, "camdistance" ),
+	DEFINE_FIELD( IsHeli, FIELD_BOOLEAN ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( func_helicopter, CHelicopter );
@@ -129,6 +130,8 @@ void CHelicopter::Precache( void )
 void CHelicopter::Spawn( void )
 {
 	Precache();
+
+	IsHeli = true;
 
 	if( !MaxCarSpeed )
 		MaxCarSpeed = 100;

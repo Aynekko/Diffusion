@@ -56,6 +56,7 @@ BEGIN_DATADESC( CBoat )
 	DEFINE_FIELD( StartSilent, FIELD_BOOLEAN ),
 	DEFINE_FIELD( PrevOrigin, FIELD_VECTOR ),
 	DEFINE_KEYFIELD( m_iszAltTarget, FIELD_STRING, "m_iszAltTarget" ),
+	DEFINE_FIELD( IsBoat, FIELD_BOOLEAN ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( func_boat, CBoat );
@@ -124,6 +125,8 @@ void CBoat::Precache( void )
 void CBoat::Spawn( void )
 {
 	Precache();
+
+	IsBoat = true;
 
 	if( !MaxCarSpeed )
 		MaxCarSpeed = 100;

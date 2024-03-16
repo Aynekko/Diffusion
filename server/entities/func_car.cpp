@@ -2386,7 +2386,7 @@ void CCar::Camera(void)
 
 	if( CarSpeed > 0.01f && (bBack() || bUp()) ) // braking
 	{	
-		if( bUp() && FClassnameIs( this, "func_boat") ) // boats don't have handbrake
+		if( bUp() && (IsHeli || IsBoat) ) // boats don't have handbrake
 			CameraBrakeOffsetX = UTIL_Approach( 0, CameraBrakeOffsetX, 9 * gpGlobals->frametime );
 		else
 			CameraBrakeOffsetX = UTIL_Approach( max_camera_lean, CameraBrakeOffsetX, bound( 3, CarSpeed * 0.01f, 9 ) * gpGlobals->frametime );
