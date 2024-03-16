@@ -684,19 +684,25 @@ void CHAssassin :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		CSoundEnt::InsertSound ( bits_SOUND_COMBAT, GetAbsOrigin(), 192, 0.3, ENTINDEX(edict()) );
 		break;
 	case ASSASSIN_AE_GRUNT:
-		switch( RANDOM_LONG( 0, 2 ) )
+		if( !HasSpawnFlags( SF_MONSTER_GAG ) )
 		{
-		case 0: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking.wav", 1, ATTN_NORM ); break;
-		case 1: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking2.wav", 1, ATTN_NORM ); break;
-		case 2: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking3.wav", 1, ATTN_NORM ); break;
+			switch( RANDOM_LONG( 0, 2 ) )
+			{
+			case 0: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking.wav", 1, ATTN_NORM ); break;
+			case 1: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking2.wav", 1, ATTN_NORM ); break;
+			case 2: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking3.wav", 1, ATTN_NORM ); break;
+			}
 		}
 		break;
 	case ASSASSIN_AE_DEATH:
-		switch( RANDOM_LONG( 0, 2 ) )
+		if( !HasSpawnFlags( SF_MONSTER_GAG ) )
 		{
-		case 0: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death.wav", 1, ATTN_NORM, 0, RANDOM_LONG(95,105) ); break;
-		case 1: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death2.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
-		case 2: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death3.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+			switch( RANDOM_LONG( 0, 2 ) )
+			{
+			case 0: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+			case 1: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death2.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+			case 2: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death3.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+			}
 		}
 		break;
 	case ASSASSIN_AE_TOSS1:
@@ -717,7 +723,8 @@ void CHAssassin :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			pev->flags &= ~FL_ONGROUND;
 			SetAbsVelocity( m_vecJumpVelocity );
 			m_flNextJump = gpGlobals->time + 3.0;
-			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_jump.wav", 1, ATTN_NORM, 0, RANDOM_LONG(95,105) );
+			if( !HasSpawnFlags( SF_MONSTER_GAG ) )
+				EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_jump.wav", 1, ATTN_NORM, 0, RANDOM_LONG(95,105) );
 		}
 		return;
 /*	case ASSASSIN_AE_RELOAD:
@@ -790,6 +797,8 @@ void CHAssassin :: Spawn()
 //	m_iClipSize = 15;
 //	m_cAmmoLoaded = m_iClipSize;
 //	IdleTime = 0;
+
+	m_vecJumpVelocity = Vector( 0, 0, 500 );
 
 	MonsterInit();
 }
@@ -1367,6 +1376,8 @@ void SecAss :: Spawn()
 
 	SmokeDropped = false;
 
+	m_vecJumpVelocity = Vector( 0, 0, 500 );
+
 	MonsterInit();
 }
 
@@ -1455,19 +1466,25 @@ void SecAss::HandleAnimEvent( MonsterEvent_t *pEvent )
 		CSoundEnt::InsertSound( bits_SOUND_COMBAT, GetAbsOrigin(), 192, 0.3, ENTINDEX( edict() ) );
 		break;
 	case ASSASSIN_AE_GRUNT:
-		switch( RANDOM_LONG( 0, 2 ) )
+		if( !HasSpawnFlags( SF_MONSTER_GAG ) )
 		{
-		case 0: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking.wav", 1, ATTN_NORM ); break;
-		case 1: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking2.wav", 1, ATTN_NORM ); break;
-		case 2: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking3.wav", 1, ATTN_NORM ); break;
+			switch( RANDOM_LONG( 0, 2 ) )
+			{
+			case 0: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking.wav", 1, ATTN_NORM ); break;
+			case 1: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking2.wav", 1, ATTN_NORM ); break;
+			case 2: EMIT_SOUND( ENT( pev ), CHAN_VOICE, "assassin/ass_kicking3.wav", 1, ATTN_NORM ); break;
+			}
 		}
 		break;
 	case ASSASSIN_AE_DEATH:
-		switch( RANDOM_LONG( 0, 2 ) )
+		if( !HasSpawnFlags( SF_MONSTER_GAG ) )
 		{
-		case 0: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
-		case 1: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death2.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
-		case 2: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death3.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+			switch( RANDOM_LONG( 0, 2 ) )
+			{
+			case 0: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+			case 1: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death2.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+			case 2: EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_death3.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) ); break;
+			}
 		}
 		break;
 	case ASSASSIN_AE_TOSS1:
@@ -1505,7 +1522,8 @@ void SecAss::HandleAnimEvent( MonsterEvent_t *pEvent )
 		pev->flags &= ~FL_ONGROUND;
 		SetAbsVelocity( m_vecJumpVelocity );
 		m_flNextJump = gpGlobals->time + 3.0;
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_jump.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) );
+		if( !HasSpawnFlags( SF_MONSTER_GAG ) )
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_jump.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) );
 	}
 	return;
 	/*	case ASSASSIN_AE_RELOAD:
