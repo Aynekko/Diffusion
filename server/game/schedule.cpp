@@ -523,6 +523,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 			{
 				TaskComplete();
 				m_pCine->StartSequence( (CBaseMonster *)this, m_pCine->m_iszPlay, TRUE );
+				UTIL_FireTargets( m_pCine->m_iszFireOnBegin, m_pCine, m_pCine, USE_TOGGLE, 0 );
 				if ( m_fSequenceFinished )
 					ClearSchedule();
 				pev->framerate = 1.0;

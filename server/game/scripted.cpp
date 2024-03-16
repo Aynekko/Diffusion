@@ -748,7 +748,6 @@ void CCineMonster :: DelayStart( int state )
 				if (pTarget->m_iDelay <= 0)
 				{
 					pTarget->m_iState = STATE_ON;
-					UTIL_FireTargets( m_iszFireOnBegin, this, this, USE_TOGGLE, 0);
 					pTarget->m_startTime = gpGlobals->time + 0.05;
 				}
 			}
