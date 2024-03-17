@@ -26,7 +26,7 @@ attribute vec4		attr_BoneWeights;
 uniform vec4		u_BoneQuaternion[MAXSTUDIOBONES];
 uniform vec3		u_BonePosition[MAXSTUDIOBONES];
 uniform mat4		u_LightViewProjectionMatrix;		// lightProjection * lightView * modelTransform
-uniform vec4		u_LightParams[6];
+uniform vec4		u_LightParams[7];
 #define u_LightDir		u_LightParams[0] // local space of model
 #define u_LightOrigin	u_LightParams[3] // local space of model
 #define u_ViewOrigin	u_LightParams[4].xyz // local space of model

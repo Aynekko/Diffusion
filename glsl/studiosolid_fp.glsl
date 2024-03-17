@@ -159,11 +159,12 @@ void main( void )
 #endif
 
 	// apply global fog
-#if defined( STUDIO_FOG_EXP )
-	float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-	diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
-//	diffuse.a = Q_mix( 0.0, diffuse.a, fogFactor ); // comment out, this messes up models with alpha-channel textures
-#endif
+	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	{
+		float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
+		diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
+	//	diffuse.a = Q_mix( 0.0, diffuse.a, fogFactor ); // comment out, this messes up models with alpha-channel textures
+	}
 
 	// compute final color
 	gl_FragColor = vec4( diffuse.rgb, diffuse.a * u_RenderColor.a );

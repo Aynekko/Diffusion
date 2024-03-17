@@ -48,12 +48,12 @@ uniform samplerCube	u_ProjectMap;
 	#endif
 #endif
 
-uniform vec4		u_LightParams[6];
+uniform vec4		u_LightParams[7];
 #define u_LightDir		u_LightParams[0]
 #define u_LightDiffuse	u_LightParams[1]
 #define u_ShadowParams	u_LightParams[2]
 #define u_LightOrigin	u_LightParams[3]
-uniform vec4		u_FogParams;
+#define u_FogParams		u_LightParams[6]
 uniform vec4		u_RenderColor;
 uniform float	        u_GlossSmoothness;
 uniform float	        u_GlossScale;
@@ -181,10 +181,12 @@ void main( void )
 	#endif
 #endif
 
-#if defined( STUDIO_FOG_EXP )
-	float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-	atten = Q_mix( 0.0, atten, fogFactor );
-#endif
+	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	{
+		float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
+		atten = Q_mix( 0.0, atten, fogFactor );
+	}
+
 	// do modified hemisperical lighting
 	float NdotL = max(( dot( N, L ) + ( SHADE_LAMBERT - 1.0 )) / SHADE_LAMBERT, 0.0 );
 	if( NdotL <= 0.0 ) discard; // fast reject

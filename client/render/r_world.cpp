@@ -2342,7 +2342,10 @@ void R_DrawLightForSurfList( plight_t *pl )
 			// view origin + waveheight
 			light_params[4] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, waveHeight );
 			// fog params
-			light_params[5] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+			if( e->curstate.rendermode == kRenderTransAdd || e->curstate.renderfx == kRenderFxFullbright || e->curstate.renderfx == kRenderFxFullbrightNoShadows )
+				light_params[5] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f );
+			else
+				light_params[5] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 			// send through one call
 			pglUniform4fvARB( RI->currentshader->u_LightParams, 6, &light_params[0][0] );
 
@@ -2826,7 +2829,10 @@ void R_DrawBrushList( void )
 			pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
 			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 			// fog params
-			brush_params[0] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+			if( e->curstate.rendermode == kRenderTransAdd || e->curstate.renderfx == kRenderFxFullbright || e->curstate.renderfx == kRenderFxFullbrightNoShadows )
+				brush_params[0] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f ); // disable fog
+			else
+				brush_params[0] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 			// view origin + waveheight
 			brush_params[1] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, waveHeight );
 			// waterlevel

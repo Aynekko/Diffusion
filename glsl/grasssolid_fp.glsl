@@ -38,9 +38,11 @@ void main( void )
 	diffuse.rgb *= var_VertexLight;
 #endif//GRASS_FULLBRIGHT
 
-#if defined( GRASS_FOG_EXP )
-	float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-	diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
-#endif
+	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	{
+		float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
+		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
+	}
+
 	gl_FragColor = diffuse;
 }

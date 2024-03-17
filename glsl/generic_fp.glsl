@@ -18,9 +18,7 @@ GNU General Public License for more details.
 
 uniform sampler2D		u_ColorMap;
 
-#if defined( GENERIC_FOG_EXP )
 uniform vec4		u_FogParams;
-#endif
 
 varying vec2	var_TexCoord;
 varying vec3	var_VertexColor;
@@ -32,10 +30,11 @@ void main( void )
 	if( diffuse.a < 0.5 )
 		discard;
 
-#if defined( GENERIC_FOG_EXP )
-	diffuse.rgb *= var_VertexColor;
-	float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-	diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
-#endif
+	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	{
+		diffuse.rgb *= var_VertexColor;
+		float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
+		diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
+	}
 	gl_FragColor = diffuse;
 }

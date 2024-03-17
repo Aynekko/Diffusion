@@ -103,6 +103,8 @@ void main( void )
 	float fogFactor = 0.0f;
 	float fresnel = 0.0f;
 
+	bool EnableFog = bool( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 );
+
 	// compute the masks for terrain
 #if defined( BMODEL_MULTI_LAYERS )
 	vec4 mask0, mask1, mask2, mask3;
@@ -303,11 +305,12 @@ void main( void )
 		diffuse.rgb = mix( diffuse.rgb, planar_reflection.rgb, fresnel );
 	#endif
 
-	#if defined( BMODEL_FOG_EXP )
+	if( EnableFog )
+	{
 		vec4 FogParams = u_FogParams;
 		fogFactor = saturate( exp2( -FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
 		diffuse.rgb = Q_mix( FogParams.xyz, diffuse.rgb, fogFactor );
-	#endif
+	}
 
 	vec3 borderSmooth = mix( screenmap, screenmap * WaterColor.rgb, WaterBorderFactor ); // smooth transition between water and ground
 	vec3 refracted = mix( borderSmooth, diffuse.rgb * WaterColor.rgb, WaterAbsorbFactor ); // mix between refracted light and own water color
@@ -336,11 +339,12 @@ void main( void )
 	diffuse.rgb += cubemap_reflection * fresnel;
 #endif
 
-        // apply global fog
-#if defined( BMODEL_FOG_EXP )
-	fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-	diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
-#endif//BMODEL_FOG_EXP
+	// apply global fog
+	if( EnableFog )
+	{
+		fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
+		diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
+	}
 	
 	gl_FragColor = vec4( diffuse.rgb, diffuse.a * alpha );
 #endif // /not water and not refracted

@@ -4936,6 +4936,8 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 	float cached_glosssmoothness = -1.0f;
 	float cached_embossscale = -1.0f;
 
+	Vector4D light_params[7];
+
 	// sorting list to reduce shader switches
 	for( int i = 0; i < m_nNumLightMeshes; i++ )
 	{
@@ -4965,9 +4967,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
 
 			// depth scale and bias and shadowmap resolution
-			pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 		//	R_SetRenderColor( m_pCurrentEntity );
-			Vector4D light_params[6];
 			// light dir
 			light_params[0] = Vector4D( lightdir.x, lightdir.y, lightdir.z, pl->fov );
 			// light diffuse
@@ -4980,8 +4980,13 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			light_params[4] = Vector4D( tr.modelorg.x, tr.modelorg.y, tr.modelorg.z, 0.0f );
 			// view right
 			light_params[5] = Vector4D( right.x, right.y, right.z, 0.0f );
+			// fog params
+			if( m_pCurrentEntity->curstate.rendermode == kRenderTransAdd || m_pCurrentEntity->curstate.renderfx == kRenderFxFullbright || m_pCurrentEntity->curstate.renderfx == kRenderFxFullbrightNoShadows )
+				light_params[6] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f ); // disable fog
+			else
+				light_params[6] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 			// send through one call
-			pglUniform4fvARB( RI->currentshader->u_LightParams, 6, &light_params[0][0] );
+			pglUniform4fvARB( RI->currentshader->u_LightParams, 7, &light_params[0][0] );
 
 			num_bones = Q_min( m_pStudioHeader->numbones, glConfig.max_skinning_bones );
 			pglUniform4fvARB( RI->currentshader->u_BoneQuaternion, num_bones, &m_pModelInstance->m_studioquat[0][0] );

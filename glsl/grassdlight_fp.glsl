@@ -105,10 +105,12 @@ void main( void )
 	#endif
 #endif
 
-#if defined( GRASS_FOG_EXP )
-	float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-	atten = mix( 0, atten, fogFactor );
-#endif
+	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	{
+		float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
+		atten = mix( 0, atten, fogFactor );
+	}
+
 	// do modified hemisperical lighting
 	float NdotL = max( (dot( N, L ) + ( SHADE_LAMBERT - 1.0f )) / SHADE_LAMBERT, 0.0 );
 	diffuse.rgb *= light.rgb * NdotL * atten * DLIGHT_SCALE;

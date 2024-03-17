@@ -95,10 +95,11 @@ void main( void )
 		if( shadow <= 0.0 ) discard; // fast reject
 	#endif
 #endif
-#if defined( GENERIC_FOG_EXP )
-	float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-	atten = Q_mix( 0.0, atten, fogFactor );
-#endif
+	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	{
+		float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
+		atten = Q_mix( 0.0, atten, fogFactor );
+	}
 	diffuse.rgb *= light * NORMAL_FLATSHADE * atten * DLIGHT_SCALE * u_LightScale;
 
 	// compute final color

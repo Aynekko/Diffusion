@@ -1612,9 +1612,6 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 			GL_AddShaderDirective( options, "BMODEL_WATER_PLANAR" );
 	}
 
-	if( tr.fogEnabled && !translucent ) // diffusion - added !translucent because additive brushes looked bad
-		GL_AddShaderDirective( options, "BMODEL_FOG_EXP" );
-
 	glsl_program_t *shader = GL_FindUberShader( glname, options, &GL_InitSolidBmodelUniforms );
 
 	if( !shader )
@@ -1710,8 +1707,6 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 		}
 	}
 
-	if( tr.fogEnabled )
-		GL_AddShaderDirective( options, "BMODEL_FOG_EXP" );
 #if 0
 	// can't properly draw for beams particles through glass. g-cont
 	// disabled for now
@@ -1788,9 +1783,6 @@ word GL_UberShaderForGrassSolid( msurface_t *s, grass_t *g )
 			GL_AddShaderDirective( options, va( "GRASS_APPLY_STYLE%i", i ));
 	}
 
-	if( tr.fogEnabled )
-		GL_AddShaderDirective( options, "GRASS_FOG_EXP" );
-
 	glsl_program_t *shader = GL_FindUberShader( glname, options, &GL_InitGrassSolidUniforms );
 	if( !shader )
 	{
@@ -1827,9 +1819,6 @@ word GL_UberShaderForGrassDlight( plight_t *pl, struct grass_s *g )
 
 	if( shadows )
 		GL_AddShaderDirective( options, "GRASS_HAS_SHADOWS" );
-
-	if( tr.fogEnabled )
-		GL_AddShaderDirective( options, "GRASS_FOG_EXP" );
 
 	glsl_program_t *shader = GL_FindUberShader( glname, options, &GL_InitGrassDlightUniforms );
 	if( !shader )
@@ -1870,9 +1859,6 @@ word GL_UberShaderForBmodelDecal( decal_t *decal )
 
 	if( fullbright )
 		GL_AddShaderDirective( options, "DECAL_FULLBRIGHT" );
-
-	if( tr.fogEnabled )
-		GL_AddShaderDirective( options, "DECAL_FOG_EXP" );
 
 	glsl_program_t *shader = GL_FindUberShader( glname, options, &GL_InitBmodelDecalUniforms );
 	if( !shader ) return 0; // something bad happens
@@ -1988,9 +1974,6 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 	if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
 		GL_AddShaderDirective( options, "STUDIO_SWAY_FOLIAGE" );
 
-	if( tr.fogEnabled && !fullbright && !FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) ) // diffusion - added !fullbright because additive models looked bad
-		GL_AddShaderDirective( options, "STUDIO_FOG_EXP" );
-
 	glsl_program_t *shader = GL_FindUberShader( glname, options, &GL_InitSolidStudioUniforms );
 	if( !shader )
 	{
@@ -2086,9 +2069,6 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 	if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
 		GL_AddShaderDirective( options, "STUDIO_SWAY_FOLIAGE" );
 
-	if( tr.fogEnabled )
-		GL_AddShaderDirective( options, "STUDIO_FOG_EXP" );
-
 	if( shadows )
 		GL_AddShaderDirective( options, "STUDIO_HAS_SHADOWS" );
 
@@ -2125,9 +2105,6 @@ word GL_UberShaderForStudioDecal( mstudiomaterial_t *mat )
 
 	Q_strncpy( glname, "StudioDecal", sizeof( glname ));
 	memset( options, 0, sizeof( options ));
-
-	if( tr.fogEnabled )
-		GL_AddShaderDirective( options, "DECAL_FOG_EXP" );
 
 	if( FBitSet( mat->flags, STUDIO_NF_MASKED ))
 		GL_AddShaderDirective( options, "DECAL_ALPHATEST" );
@@ -2176,9 +2153,6 @@ word GL_UberShaderForDlightGeneric( const plight_t *pl )
 		GL_AddShaderDirective( options, "GENERIC_LIGHT_OMNIDIRECTIONAL" );
 	else
 		GL_AddShaderDirective( options, "GENERIC_LIGHT_PROJECTION" );
-
-	if( tr.fogEnabled )
-		GL_AddShaderDirective( options, "GENERIC_FOG_EXP" );
 
 	if( shadows )
 		GL_AddShaderDirective( options, "GENERIC_HAS_SHADOWS" );
@@ -2342,7 +2316,7 @@ void GL_InitGPUShaders( void )
 	GL_InitGrassSolidUniforms( shader );
 
 	// fog processing
-	glsl.genericFog = shader = GL_InitGPUShader( "GenericFog", "generic", "generic", "#define GENERIC_FOG_EXP\n" );
+	glsl.genericFog = shader = GL_InitGPUShader( "GenericFog", "generic", "generic" );
 	GL_InitGenericFogUniforms( shader );
 
 	// HACKHACK: precache generic light shaders

@@ -63,9 +63,11 @@ void main( void )
 	diffuse.rgb *= light;
 #endif
 
-#if defined( DECAL_FOG_EXP )
-	float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-	diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
-#endif
+	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	{
+		float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
+		diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
+	}
+
 	gl_FragColor = diffuse;
 }

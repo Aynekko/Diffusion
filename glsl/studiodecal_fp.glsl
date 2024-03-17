@@ -32,10 +32,12 @@ void main( void )
 		discard;
 #endif
 
-#if defined( DECAL_FOG_EXP )
-	float fogFactor = clamp( exp2( -gl_Fog.density * ( gl_FragCoord.z / gl_FragCoord.w )), 0.0, 1.0 );
-	diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
-	diffuse.a = Q_mix( 0, diffuse.a, fogFactor );
-#endif
+	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	{
+		float fogFactor = clamp( exp2( -gl_Fog.density * ( gl_FragCoord.z / gl_FragCoord.w )), 0.0, 1.0 );
+		diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
+		diffuse.a = Q_mix( 0, diffuse.a, fogFactor );
+	}
+
 	gl_FragColor = diffuse * var_VertexColor;
 }
