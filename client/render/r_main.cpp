@@ -1257,23 +1257,6 @@ void R_CheckFog( void )
 
 /*
 =============
-R_DrawFog
-
-=============
-*/
-void R_DrawFog( void )
-{
-	if( !tr.fogEnabled ) return;
-
-	pglEnable( GL_FOG );
-	pglFogi( GL_FOG_MODE, GL_EXP );
-	pglFogf( GL_FOG_DENSITY, tr.fogDensity );
-	pglFogfv( GL_FOG_COLOR, tr.fogColor );
-	pglHint( GL_FOG_HINT, GL_NICEST );
-}
-
-/*
-=============
 R_DrawParticles
 
 NOTE: particles are drawing with engine methods
