@@ -21,21 +21,24 @@ varying vec2		var_TexCoord;
 
 void main( void )
 {
-    vec4 color = texture2DLod( u_ScreenMap, var_TexCoord, 0.0 );
+	vec4 color = texture2DLod( u_ScreenMap, var_TexCoord, 0.0 );
 
-    float exposure = texture2D( u_HDRExposure, vec2( 0.5 )).r;
-    float gamma = 1.5;
+	float exposure = texture2D( u_HDRExposure, vec2( 0.5 )).r;
+	float brightness = 1.5;
 
 	if( bool( u_GenericCondition == 1.0f ))
 	{
-		const vec2 lum = vec2( 0.6, 1.2 );   // fixed constant instead of adaptation curve
-		float Lp = ( 5.0 / lum.x ) * min( color.x, min( color.y, color.z ));
-		float LmSqr = ( lum.y + 5.0 * lum.y ) * ( lum.y + 5.0 * lum.y );
-		float toneScalar = ( Lp * ( 1.0 + ( Lp / ( LmSqr )))) / ( 1.0 + Lp );
+		float tonemap_exposure = exposure * brightness;
+		const vec2 lum = vec2( 0.8, 0.8 );   // fixed constant instead of adaptation curve
+		float Lp = ( 8.0 / lum.x ) * min( color.x, min( color.y, color.z ));
+		float LmSqr = ( lum.y + 8.0 * lum.y ) * ( lum.y + 8.0 * lum.y ) * ( lum.y + 8.0 * lum.y );
+		float toneScalar = ( Lp * ( 1.0 + ( Lp / ( LmSqr )))) / ( 1.0 + Lp ) * tonemap_exposure;
 		color *= toneScalar;
-		gamma += 0.5 * exposure;
+	}
+	else
+	{
+		brightness *= exposure;
 	}
 
-    gamma *= exposure;
-    gl_FragColor = color * gamma;
+	gl_FragColor = color * brightness;
 }
