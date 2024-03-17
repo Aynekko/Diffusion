@@ -234,24 +234,6 @@ static int R_RankForRenderMode( int rendermode )
 	return 0;
 }
 
-void R_AllowFog( int allowed )
-{
-	static int	isFogEnabled;
-
-	if( allowed )
-	{
-		if( isFogEnabled )
-			pglEnable( GL_FOG );
-	}
-	else
-	{
-		isFogEnabled = pglIsEnabled( GL_FOG );
-
-		if( isFogEnabled )
-			pglDisable( GL_FOG );
-	}
-}
-
 /*
 ===============
 R_OpaqueEntity
@@ -1490,9 +1472,7 @@ void R_DrawEntitiesOnList( void )
 
 	GL_CheckForErrors();
 
-	R_AllowFog( false );
 	R_DrawParticles( true );
-	R_AllowFog( true );
 	
 	GL_CheckForErrors();
 

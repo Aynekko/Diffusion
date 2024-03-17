@@ -782,7 +782,6 @@ void R_RotateForEntity( cl_entity_t *e );
 void R_TranslateForEntity( cl_entity_t *e );
 void R_TransformForEntity( const matrix4x4 &transform );
 const char *R_GetNameForView( void );
-void R_AllowFog( int allowed );
 void R_FindViewLeaf( void );
 void R_SetupFrustum( void );
 void R_InitRefState( void );
