@@ -477,10 +477,6 @@ void R_UpdateSurfaceParams( msurface_t *surf )
 	{
 		esrf->gl_texturenum = tr.cinTextures[esrf->cintexturenum-1];
 	}
-	else if( r_lightmap->value )
-	{
-		esrf->gl_texturenum = tr.whiteTexture;
-	}
 	else if( FBitSet( surf->flags, SURF_LANDSCAPE ) )
 	{
 		if( land && land->terrain )
