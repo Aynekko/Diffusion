@@ -5117,6 +5117,8 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 					if( tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
 						GL_Bind( GL_TEXTURE5, tr.materials[mat->gl_diffuse_id].gl_colormask_id ); // u_ColorMask
 				}
+				else
+					R_SetRenderColor( m_pCurrentEntity );
 			}
 			else
 				R_SetRenderColor( RI->currententity );
@@ -5447,6 +5449,8 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 					if( tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
 						GL_Bind( GL_TEXTURE5, tr.materials[mat->gl_diffuse_id].gl_colormask_id ); // u_ColorMask
 				}
+				else
+					R_SetRenderColor( m_pCurrentEntity );
 			}
 			else
 				R_SetRenderColor( m_pCurrentEntity );
