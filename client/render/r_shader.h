@@ -152,7 +152,6 @@ typedef struct glsl_prog_s
 	GLint u_DroneScreen;
 
 	GLint u_AOMap;
-	GLint u_RotateMap;
 	GLint u_MipLod;
 	GLint u_TexCoordClamp;
 	GLint u_TimeDelta;

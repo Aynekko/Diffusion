@@ -1168,12 +1168,10 @@ static void GL_InitGenSSAOUniforms( glsl_program_t *shader )
 	ASSERT( shader != NULL );
 
 	shader->u_DepthMap = pglGetUniformLocationARB( shader->handle, "u_DepthMap" );
-	shader->u_RotateMap = pglGetUniformLocationARB( shader->handle, "u_RotateMap" );
 	shader->u_zFar = pglGetUniformLocationARB( shader->handle, "u_zFar" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE0 );
-	pglUniform1iARB( shader->u_RotateMap, GL_TEXTURE1 );
 	GL_BindShader( GL_NONE );
 
 	GL_ValidateProgram( shader );

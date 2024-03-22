@@ -62,7 +62,6 @@ bool ApplyGaussBlur = false;
 bool ApplyDamageMonochrome = false;
 int ScreenWaterTexture = 0;
 int ScreenAO = 0;
-int RotateMap = 0;
 int LuminanceTex = 0;
 int exposure_storage_texture[2];
 uint exposure_storage_fbo[2];
@@ -218,15 +217,6 @@ void InitPostTextures( void )
 		ScreenWaterTexture = LOAD_TEXTURE( "sprites/effects/screenwater.dds", NULL, 0, 0 );
 
 	InitSSAO();
-
-	if( RotateMap )
-	{
-		FREE_TEXTURE( RotateMap );
-		RotateMap = 0;
-	}
-
-	if( !RotateMap )
-		RotateMap = LOAD_TEXTURE( "sprites/effects/rotate.tga", NULL, 0, 0 );	
 
 	// ----------------- bloom -------------------
 	if( tr.screen_fbo_texture_color )
@@ -885,14 +875,34 @@ void SSAO( void )
 
 	pglUniform1fARB( RI->currentshader->u_zFar, zFar );
 	GL_Bind( GL_TEXTURE0, tr.screen_depth );
-	GL_Bind( GL_TEXTURE1, RotateMap );
 	RenderFSQ( glState.width, glState.height );
 
 	// RequestScreenAO
 	GL_Bind( GL_TEXTURE0, ScreenAO );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
 
-	// blur AO pass
+	// blur AO pass X
+	GL_BindShader( glsl.blurShader[0] );
+	ASSERT( RI->currentshader != NULL );
+	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
+	RenderFSQ( glState.width, glState.height );
+
+	// RequestScreenAO
+	GL_Bind( GL_TEXTURE0, ScreenAO );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
+
+	// blur AO pass Y
+	GL_BindShader( glsl.blurShader[1] );
+	ASSERT( RI->currentshader != NULL );
+	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
+	RenderFSQ( glState.width, glState.height );
+
+#if 0
+	// blur X and Y again
+	// RequestScreenAO
+	GL_Bind( GL_TEXTURE0, ScreenAO );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
+
 	GL_BindShader( glsl.blurShader[0] );
 	ASSERT( RI->currentshader != NULL );
 	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
@@ -906,24 +916,7 @@ void SSAO( void )
 	ASSERT( RI->currentshader != NULL );
 	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
 	RenderFSQ( glState.width, glState.height );
-
-	// RequestScreenAO
-	GL_Bind( GL_TEXTURE0, ScreenAO );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
-
-	GL_BindShader( glsl.blurShader[0] );
-	ASSERT( RI->currentshader != NULL );
-	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
-	RenderFSQ( glState.width, glState.height );
-
-	// RequestScreenAO
-	GL_Bind( GL_TEXTURE0, ScreenAO );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
-
-	GL_BindShader( glsl.blurShader[1] );
-	ASSERT( RI->currentshader != NULL );
-	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
-	RenderFSQ( glState.width, glState.height );
+#endif
 
 	// RequestScreenAO
 	GL_Bind( GL_TEXTURE0, ScreenAO );
