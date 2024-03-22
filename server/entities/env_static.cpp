@@ -160,38 +160,45 @@ void CEnvStatic::SoundThink(void)
 	// why if I use only GetAbsOrigin, it crashes the game?
 	Vector Org = GetAbsOrigin() + ((pev->mins + pev->maxs) / 2.f);
 
-	CBaseEntity *pSomeone = NULL;
-	if( (pSomeone = UTIL_FindEntityInSphere( pSomeone, Org, SoundRadius )) != NULL )
+	CBaseEntity *pPlayer = NULL;
+	bool PlayerFound = false;
+	for( int i = 1; i <= gpGlobals->maxClients; i++ )
 	{
-		if (pSomeone->IsMonster() || pSomeone->IsPlayer())
+		pPlayer = UTIL_PlayerByIndex( i );
+
+		if( !pPlayer || (pPlayer->GetAbsOrigin() - Org).Length() > SoundRadius )
+			continue;
+
+		// the first player in the list, who is in the radius, gets to interact with this bush
+		PlayerFound = true;
+
+		SoundVolume = pPlayer->GetAbsVelocity().Length() * 0.003;
+		SoundVolume = bound( 0, SoundVolume, 1 );
+		if( SoundVolume >= 0.0f )
 		{
-			SoundVolume = pSomeone->GetAbsVelocity().Length() * 0.003;
-			SoundVolume = bound(0, SoundVolume, 1);
-			if (SoundVolume >= 0)
-			{
-				EMIT_SOUND_DYN(edict(), CHAN_STATIC, (char*)STRING(m_iszLoopSound), SoundVolume, ATTN_NORM, SND_CHANGE_PITCH | SND_CHANGE_VOL, 100);
-				SoundStopped = false;
-			}
-			SetThink(&CEnvStatic::SoundThink);
-			SetNextThink(0.1);
+			EMIT_SOUND_DYN( edict(), CHAN_STATIC, (char *)STRING( m_iszLoopSound ), SoundVolume, ATTN_NORM, SND_CHANGE_PITCH | SND_CHANGE_VOL, 100 );
+			SoundStopped = false;
 		}
-		else
-			StopSound();
+
+		SetThink( &CEnvStatic::SoundThink );
+		SetNextThink( 0.1 );
+		break;
 	}
-	else
+
+	if( !PlayerFound )
 		StopSound();
 }
 
 void CEnvStatic::StopSound(void)
 {
-	float ThinkTime = 0.5;
+	float ThinkTime = 0.25f;
 
 	if (SoundVolume > 0)
 	{
 		EMIT_SOUND_DYN(edict(), CHAN_STATIC, (char*)STRING(m_iszLoopSound), SoundVolume, ATTN_NORM, SND_CHANGE_PITCH | SND_CHANGE_VOL, 100);
 		SoundVolume -= 0.1;
 		SoundStopped = false;
-		ThinkTime = 0.05;
+		ThinkTime = 0.05f;
 	}
 
 	if (SoundStopped == false && SoundVolume <= 0)
