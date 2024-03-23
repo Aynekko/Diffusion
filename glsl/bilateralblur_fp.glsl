@@ -28,7 +28,7 @@ float AddSampleContribution( in vec2 texCoord, in float depth, in float SampleCo
 {
 	// Load the depth from the depth map, transform the depth into eye space
 	float sampleDepth = texture2D( u_DepthMap, texCoord ).r;
-	sampleDepth = linearizeDepth( u_zFar, RemapVal( sampleDepth, 0.0, 0.8, 0.0, 1.0 ));
+	sampleDepth = linearizeDepth( u_zFar, sampleDepth );
 
 	// Check for depth discontinuities
 	if( abs( depth - sampleDepth ) > 5.0 )
@@ -45,7 +45,7 @@ float AddSampleContribution( in vec2 texCoord, in float depth, in float SampleCo
 void main( void )
 {
 	float depth = texture2D( u_DepthMap, var_TexCoord ).r;
-	depth = linearizeDepth( u_zFar, RemapVal( depth, 0.0, 0.8, 0.0, 1.0 ));
+	depth = linearizeDepth( u_zFar, depth );
 
 	// Blur using a 9x9 bilateral Gaussian filter
 	float weightSum = 0.153170;
