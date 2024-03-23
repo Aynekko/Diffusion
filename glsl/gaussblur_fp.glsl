@@ -14,7 +14,8 @@ GNU General Public License for more details.
 */
 
 uniform sampler2D	u_ScreenMap;
-uniform vec2	u_BlurFactor;
+uniform vec3		u_BlurFactor;
+#define BlurX		u_BlurFactor.z
 
 varying vec2	var_TexCoord;
 
@@ -24,11 +25,11 @@ void main( void )
 	vec4 sum = texture2D( u_ScreenMap, tx ) * 0.134598;
 	vec2 dx = vec2( 0.0 ); // assume no blur
 
-#if defined( BLUR_X )
-	dx = vec2( 0.01953, 0.0 ) * u_BlurFactor.x;
-#elif defined( BLUR_Y )
-	dx = vec2( 0.0, 0.01953 ) * u_BlurFactor.y;
-#endif
+	if( bool(BlurX > 0.0f ) )
+		dx = vec2( 0.01953, 0.0 ) * u_BlurFactor.x;
+	else
+		dx = vec2( 0.0, 0.01953 ) * u_BlurFactor.y;
+
 	vec2 sdx = dx;
 	sum += (texture2D( u_ScreenMap, tx + sdx ) + texture2D( u_ScreenMap, tx - sdx )) * 0.127325;
 	sdx += dx;

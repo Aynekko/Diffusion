@@ -285,10 +285,7 @@ void RenderSunShafts( void )
 	if( !CVAR_TO_BOOL( gl_sunshafts ) || !tr.screen_depth || !tr.screen_color || !tr.target_rgb[0] )
 		return;
 
-	if( !CheckShader( glsl.genSunShafts ) || !CheckShader( glsl.drawSunShafts ))
-		return;
-
-	if( !CheckShader( glsl.blurShader[0] ) || !CheckShader( glsl.blurShader[1] ))
+	if( !CheckShader( glsl.genSunShafts ) || !CheckShader( glsl.drawSunShafts ) || !CheckShader( glsl.blurShader ) )
 		return;
 
 	float Brightness = 0.0f; // don't worry, shader sets to 1.0 in this case
@@ -358,20 +355,17 @@ void RenderSunShafts( void )
 	pglViewport( 0, 0, TargetSize, TargetSize );
 	
 	// combine normal and blurred scenes
-	GL_BindShader( glsl.blurShader[0] );
+	GL_BindShader( glsl.blurShader );
 	ASSERT( RI->currentshader != NULL );
 
-	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
+	pglUniform3fARB( RI->currentshader->u_BlurFactor, blur, 0.0f, 1.0f );	// set blur factor X
 	RenderFSQ( glState.width, glState.height );
 	
 	// request target copy
 	GL_Bind( GL_TEXTURE0, tr.target_rgb[0] );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, TargetSize, TargetSize );
 
-	GL_BindShader( glsl.blurShader[1] );
-	ASSERT( RI->currentshader != NULL );
-
-	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
+	pglUniform3fARB( RI->currentshader->u_BlurFactor, 0.0f, blur, 0.0f );	// set blur factor Y
 	RenderFSQ( glState.width, glState.height );
 	
 	// request target copy
@@ -567,18 +561,15 @@ void RenderGaussBlur( float blur1, float blur2 )
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
-	GL_BindShader( glsl.blurShader[0] );
+	GL_BindShader( glsl.blurShader );
 	ASSERT( RI->currentshader != NULL );
 
-	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur1, blur2 );	// set blur factor
+	pglUniform3fARB( RI->currentshader->u_BlurFactor, blur1, 0.0f, 1.0f );	// set blur factor X
 
 	RenderFSQ( glState.width, glState.height );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
-	
-	GL_BindShader( glsl.blurShader[1] );
-	ASSERT( RI->currentshader != NULL );
 
-	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur1, blur2 );	// set blur factor
+	pglUniform3fARB( RI->currentshader->u_BlurFactor, 0.0f, blur2, 0.0f );	// set blur factor Y
 	RenderFSQ( glState.width, glState.height );
 
 	GL_BindShader( NULL );

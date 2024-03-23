@@ -163,7 +163,7 @@ typedef struct
 {
 	// post-process shaders
 	glsl_program_t *genSunShafts;		// sunshafts effect
-	glsl_program_t *blurShader[2];		// e.g. underwater blur
+	glsl_program_t *blurShader;		// e.g. underwater blur
 	glsl_program_t *drawSunShafts;		// sunshafts effect
 	glsl_program_t *skyboxEnv;		// skybox & sun
 	glsl_program_t *genericFog;		// apply fog

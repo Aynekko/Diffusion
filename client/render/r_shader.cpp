@@ -2304,12 +2304,8 @@ void GL_InitGPUShaders( void )
 	glsl.GenLuminance = shader = GL_InitGPUShader( "GenLuminance", "generic", "generate_luminance" );
 	GL_InitGenLuminanceUniforms( shader );
 
-	// gaussian blur for X
-	glsl.blurShader[0] = shader = GL_InitGPUShader( "HW_GaussBlurX", "generic", "gaussblur", "#define BLUR_X\n" );
-	GL_InitPostProcessUniforms( shader );
-
-	// gaussian blur for Y
-	glsl.blurShader[1] = shader = GL_InitGPUShader( "HW_GaussBlurY", "generic", "gaussblur", "#define BLUR_Y\n" );
+	// gaussian blur
+	glsl.blurShader = shader = GL_InitGPUShader( "GaussBlur", "generic", "gaussblur" );
 	GL_InitPostProcessUniforms( shader );
 
 	glsl.BilateralBlur = shader = GL_InitGPUShader( "BilateralBlur", "bilateralblur", "bilateralblur" );
