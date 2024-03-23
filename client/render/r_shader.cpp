@@ -1111,7 +1111,25 @@ static void GL_InitPostProcessUniforms( glsl_program_t *shader )
 	GL_ShowProgramUniforms( shader );
 }
 
-void GL_InitGenericFogUniforms( glsl_program_t *shader )
+static void GL_InitBilateralBlurUniforms( glsl_program_t *shader )
+{
+	ASSERT( shader != NULL );
+
+	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
+	shader->u_DepthMap = pglGetUniformLocationARB( shader->handle, "u_DepthMap" );
+	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
+	shader->u_zFar = pglGetUniformLocationARB( shader->handle, "u_zFar" );
+
+	GL_BindShader( shader );
+	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE0 );
+	pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE1 );
+	GL_BindShader( GL_NONE );
+
+	GL_ValidateProgram( shader );
+	GL_ShowProgramUniforms( shader );
+}
+
+static void GL_InitGenericFogUniforms( glsl_program_t *shader )
 {
 	ASSERT( shader != NULL );
 
@@ -2293,6 +2311,9 @@ void GL_InitGPUShaders( void )
 	// gaussian blur for Y
 	glsl.blurShader[1] = shader = GL_InitGPUShader( "HW_GaussBlurY", "generic", "gaussblur", "#define BLUR_Y\n" );
 	GL_InitPostProcessUniforms( shader );
+
+	glsl.BilateralBlur = shader = GL_InitGPUShader( "BilateralBlur", "bilateralblur", "bilateralblur" );
+	GL_InitBilateralBlurUniforms( shader );
 
 	// draw sun & skybox
 	glsl.skyboxEnv = shader = GL_InitGPUShader( "SkyBoxGeneric", "generic", "skybox" );

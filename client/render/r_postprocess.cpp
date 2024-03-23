@@ -828,9 +828,7 @@ void SSAO( void )
 	if( !CVAR_TO_BOOL( gl_ssao ) )
 		return;
 
-	bool Debug = false;
-	if( CVAR_TO_BOOL( gl_ssao_debug ) )
-		Debug = true;
+	bool Debug = CVAR_TO_BOOL( gl_ssao_debug );
 
 	float blur = 0.075f;
 	float zFar = RI->farClip;// Q_max( 256.0f, RI->farClip );
@@ -882,46 +880,25 @@ void SSAO( void )
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
 
 	// blur AO pass X
-	GL_BindShader( glsl.blurShader[0] );
+	GL_BindShader( glsl.BilateralBlur );
+	GL_Bind( GL_TEXTURE1, tr.screen_depth );
 	ASSERT( RI->currentshader != NULL );
-	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
+	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / glState.width, 0.0f ); // screen size inv
+	pglUniform1fARB( RI->currentshader->u_zFar, zFar );
 	RenderFSQ( glState.width, glState.height );
-
+	
 	// RequestScreenAO
 	GL_Bind( GL_TEXTURE0, ScreenAO );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
 
 	// blur AO pass Y
-	GL_BindShader( glsl.blurShader[1] );
-	ASSERT( RI->currentshader != NULL );
-	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
+	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 0.0f, 1.0f / glState.height ); // screen size inv
 	RenderFSQ( glState.width, glState.height );
-
-#if 0
-	// blur X and Y again
+	
 	// RequestScreenAO
-	GL_Bind( GL_TEXTURE0, ScreenAO );
+	GL_Bind( GL_TEXTURE1, ScreenAO );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
-
-	GL_BindShader( glsl.blurShader[0] );
-	ASSERT( RI->currentshader != NULL );
-	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
-	RenderFSQ( glState.width, glState.height );
-
-	// RequestScreenAO
-	GL_Bind( GL_TEXTURE0, ScreenAO );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
-
-	GL_BindShader( glsl.blurShader[1] );
-	ASSERT( RI->currentshader != NULL );
-	pglUniform2fARB( RI->currentshader->u_BlurFactor, blur, blur );	// set blur factor
-	RenderFSQ( glState.width, glState.height );
-#endif
-
-	// RequestScreenAO
-	GL_Bind( GL_TEXTURE0, ScreenAO );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
-
+	
 	// do final pass
 	pglViewport( 0, 0, glState.width, glState.height );
 	GL_BindShader( glsl.drawSSAO );
@@ -929,7 +906,6 @@ void SSAO( void )
 
 	pglUniform1fARB( RI->currentshader->u_GenericCondition, Debug );
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	GL_Bind( GL_TEXTURE1, ScreenAO );
 	RenderFSQ( glState.width, glState.height );
 
 	// unbind shader

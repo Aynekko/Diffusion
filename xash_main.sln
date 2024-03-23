@@ -10,6 +10,8 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "glsl", "glsl", "{76F81493-9648-41FD-B7CF-5558EB5444CE}"
 	ProjectSection(SolutionItems) = preProject
 		glsl\alpha2coverage.h = glsl\alpha2coverage.h
+		glsl\bilateralblur_fp.glsl = glsl\bilateralblur_fp.glsl
+		glsl\bilateralblur_vp.glsl = glsl\bilateralblur_vp.glsl
 		glsl\bloom_fp.glsl = glsl\bloom_fp.glsl
 		glsl\blurmip_fp.glsl = glsl\blurmip_fp.glsl
 		glsl\bmodeldecal_fp.glsl = glsl\bmodeldecal_fp.glsl
