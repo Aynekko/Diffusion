@@ -72,16 +72,20 @@ void main( void )
 	vec3 V = normalize( var_ViewVec );
 	vec3 N;
 	vec3 MeshOrigin = u_MeshParams[0];
+	vec3 light_diffuse;
 
-        // compute the normal term
+	// compute the normal term
 #if defined( STUDIO_BUMP )
 	#if defined( STUDIO_INTERIOR )
 		N = normalmap2D( u_NormalMap, fract(var_TexDiffuse * vec2(u_InteriorParams.x,u_InteriorParams.y)));
 	#else
 		N = normalmap2D( u_NormalMap, var_TexDiffuse );
 	#endif
+	float NdotB = ComputeStaticBump( L, N );
+    light_diffuse = var_LightDiffuse * NdotB;
 #else
 	N = normalize( var_Normal );
+	light_diffuse = var_LightDiffuse;
 #endif
 	
 	// two side materials support
@@ -119,7 +123,7 @@ void main( void )
 	diffuse.rgb *= u_RenderColor.rgb; // kRenderTransColor
 #endif
 
-	diffuse.rgb *= var_LightDiffuse; // apply lighting
+	diffuse.rgb *= light_diffuse; // apply lighting
 
 #if defined( STUDIO_INTERIOR )
 	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec, var_Position ); // u_realtime is currently not used

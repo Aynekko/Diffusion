@@ -907,6 +907,10 @@ void CStudioModelRenderer::UploadBufferVLight( vbomesh_t *pOut, svert_t *arrayxv
 		arraysvert[i].light[1] = arrayxvert[i].light[1];
 		arraysvert[i].light[2] = arrayxvert[i].light[2];
 		arraysvert[i].light[3] = arrayxvert[i].light[3];
+		arraysvert[i].deluxe[0] = arrayxvert[i].deluxe[0];
+		arraysvert[i].deluxe[1] = arrayxvert[i].deluxe[1];
+		arraysvert[i].deluxe[2] = arrayxvert[i].deluxe[2];
+		arraysvert[i].deluxe[3] = arrayxvert[i].deluxe[3];
 	}
 
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, pOut->vbo );
@@ -929,6 +933,9 @@ void CStudioModelRenderer::UploadBufferVLight( vbomesh_t *pOut, svert_t *arrayxv
 
 	pglVertexAttribPointerARB( ATTR_INDEX_LIGHT_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof( svert_v1_t ), (void *)offsetof( svert_v1_t, light ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_LIGHT_COLOR );
+
+	pglVertexAttribPointerARB( ATTR_INDEX_LIGHT_VECS, 4, GL_FLOAT, GL_FALSE, sizeof( svert_v1_t ), (void *)offsetof( svert_v1_t, deluxe ) );
+	pglEnableVertexAttribArrayARB( ATTR_INDEX_LIGHT_VECS );
 
 	pOut->cacheSize = pOut->numVerts * sizeof( svert_v1_t );
 }
@@ -1192,7 +1199,7 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 					//	float packDirect = (float)((double)((r << 16) | (g << 8) | b) / (double)(1 << 24));
 					//	arrayxvert[m_nNumArrayVerts].light[map] = packDirect;
 					m_arrayxvert[m_nNumArrayVerts].light[map] = PackColor( vl->light[map] );
-					//	arrayxvert[m_nNumArrayVerts].deluxe[map] = PackColor( vl->deluxe[map] );
+					m_arrayxvert[m_nNumArrayVerts].deluxe[map] = PackColor( vl->deluxe[map] );
 				}
 			}
 

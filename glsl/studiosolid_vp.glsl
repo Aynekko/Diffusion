@@ -25,6 +25,7 @@ attribute vec4		attr_BoneWeights;
 
 #if defined( STUDIO_VERTEX_LIGHTING )
 attribute vec4		attr_LightColor;
+attribute vec4		attr_LightVecs;
 #endif
 
 #if defined( STUDIO_SWAY_FOLIAGE )
@@ -129,21 +130,35 @@ void main( void )
 	var_LightDiffuse = vec3( 1.0 );	// just get fullbright
 #elif defined( STUDIO_VERTEX_LIGHTING )
 	vec3 lightmap = vec3( 0.0 );
+	vec3 deluxmap = vec3( 0.0 );
 	float gammaIndex;
 
 	if( u_LightStyles.x != 0.0 )
-		lightmap += UnpackVector( attr_LightColor.x ) * u_LightStyles.x;
+    {
+        lightmap += UnpackVector( attr_LightColor.x ) * u_LightStyles.x;
+        deluxmap += UnpackNormal( -attr_LightVecs.x ) * u_LightStyles.x;
+    }
 
-	if( u_LightStyles.y != 0.0 )		
-		lightmap += UnpackVector( attr_LightColor.y ) * u_LightStyles.y;
+    if( u_LightStyles.y != 0.0 )
+    {
+        lightmap += UnpackVector( attr_LightColor.y ) * u_LightStyles.y;
+        deluxmap += UnpackNormal( -attr_LightVecs.y ) * u_LightStyles.y;
+    }
 
-	if( u_LightStyles.z != 0.0 )
-		lightmap += UnpackVector( attr_LightColor.z ) * u_LightStyles.z;
+    if( u_LightStyles.z != 0.0 )
+    {
+        lightmap += UnpackVector( attr_LightColor.z ) * u_LightStyles.z;
+        deluxmap += UnpackNormal( -attr_LightVecs.z ) * u_LightStyles.z;
+    }
 
-	if( u_LightStyles.w != 0.0 )		
-		lightmap += UnpackVector( attr_LightColor.w ) * u_LightStyles.w;
+    if( u_LightStyles.w != 0.0 )
+    {
+        lightmap += UnpackVector( attr_LightColor.w ) * u_LightStyles.w;
+        deluxmap += UnpackNormal( -attr_LightVecs.w ) * u_LightStyles.w;
+    }
 
 	var_LightDiffuse = min(( lightmap * LIGHTMAP_SHIFT ), 1.0 );
+    srcL = ( deluxmap * LIGHTMAP_SHIFT ); // get lightvector
 
 	// apply screen gamma
 	gammaIndex = ( var_LightDiffuse.r * 255.0 );

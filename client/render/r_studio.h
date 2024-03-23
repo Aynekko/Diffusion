@@ -115,6 +115,7 @@ typedef struct xvert_s
 	char		boneid[4];		// control bones		
 	byte		weight[4];		// boneweights
 	float		light[MAXLIGHTMAPS];	// packed color + unused entry (used for static vertex lighting)
+	float		deluxe[MAXLIGHTMAPS];	// packed lightdir
 } svert_t;
 /*
 typedef struct xvert_s
@@ -155,6 +156,7 @@ typedef struct
 	Vector		binormal;			// binormal
 	short		stcoord[2];		// ST texture coords
 	float		light[MAXLIGHTMAPS];	// packed color
+	float		deluxe[MAXLIGHTMAPS];	// packed color
 } svert_v1_t;
 
 // have boneweights, no vertexlight, 30 bytes
