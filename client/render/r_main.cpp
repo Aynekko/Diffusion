@@ -1405,6 +1405,16 @@ float R_ComputeFadingDistance( cl_entity_t *e )
 	// they could be culled serverside already, because I only count the distance from the player (host) and entity directly
 	Vector ViewOrigin = tr.viewparams.vieworg;
 
+	// if player has a drone active, we need to check this distance too - otherwise the entities won't be seen on the tablet screen
+	// the tablet must be selected
+	// if the drone is closer to our entity in question, we need to swap the origin
+	// same thing is happenning on server side!
+	if( tr.pDrone
+		&& (gHUD.m_Ammo.WeaponID == WEAPON_DRONE)
+		&& (tr.pDrone->curstate.origin - EntOrigin).Length() < (ViewOrigin - EntOrigin).Length()
+		)
+		{ ViewOrigin = tr.pDrone->curstate.origin; }
+
 	// player within range, no need to fade
 	if( (ViewOrigin - EntOrigin).Length() <= FadeDistance )
 		return tr.fadeblend[e->index];

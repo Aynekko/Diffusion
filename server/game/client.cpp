@@ -1807,7 +1807,7 @@ bool IsBackCulled( CBasePlayer* pPlayer, CBaseEntity* e)
 }
 
 //===========================================================================
-// ComputeDistanceCulling: if the entity is far enough, we don't send it to client.
+// IsDistanceCulled: if the entity is far enough, we don't send it to client.
 //===========================================================================
 bool IsDistanceCulled( CBasePlayer *pPlayer, CBaseEntity *e )
 {	
@@ -1827,6 +1827,16 @@ bool IsDistanceCulled( CBasePlayer *pPlayer, CBaseEntity *e )
 	Vector CenterOffset = (e->pev->mins + e->pev->maxs) / 2.f;
 	Vector EntOrigin = e->GetAbsOrigin() + CenterOffset;
 	Vector HostOrigin = pPlayer->CameraOrigin;
+
+	// if player has a drone active, we need to check this distance too - otherwise the entities won't be seen on the tablet screen
+	// the tablet must be selected
+	// if the drone is closer to our entity in question, we need to swap the origin
+	if( pPlayer->m_hDrone 
+		&& pPlayer->m_pActiveItem 
+		&& (pPlayer->m_pActiveItem->m_iId == WEAPON_DRONE) 
+		&& (pPlayer->m_hDrone->GetAbsOrigin() - EntOrigin).Length() < (HostOrigin - EntOrigin).Length() 
+		)
+		{ HostOrigin = pPlayer->m_hDrone->GetAbsOrigin(); }
 
 	// calculate new, increased fade distance if we are zoomed
 	// for FOV above 70 it is assumed that distance remains unchanged
