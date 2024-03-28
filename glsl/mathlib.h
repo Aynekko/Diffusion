@@ -33,6 +33,9 @@ GNU General Public License for more details.
 
 #define Q_mix( A, B, frac )	( A + ( B - A ) * frac )
 
+#define RAD2DEG( x )	( x * (180.0 / M_PI))
+#define DEG2RAD( x )	( x * (M_PI / 180.0))
+
 // remap a value in the range [A,B] to [C,D].
 float RemapVal( float val, const in vec4 bounds )
 {
@@ -220,6 +223,53 @@ vec3 VectorRotate( vec3 In, vec3 Rotation )
 	RotatedVec = m * vec3( 1.0 );
 
 	return RotatedVec;
+}
+
+vec3 VectorAngles( vec3 vecSrc )
+{
+	vec3 forward = vecSrc;
+
+	vec3 ang;
+
+	ang.z = 0.0f;
+
+	if( bool( forward.x != 0.0f ) || bool( forward.y != 0.0f ) )
+	{
+		float tmp;
+
+		ang.y = RAD2DEG( atan( forward.y, forward.x ) );
+		if( ang.y < 0 ) ang.y += 360;
+
+		tmp = sqrt( forward.x * forward.x + forward.y * forward.y );
+		ang.x = RAD2DEG( atan( -forward.z, tmp ) );
+		if( ang.x < 0 ) ang.x += 360;
+	}
+	else
+	{
+		// fast case
+		ang.y = 0.0f;
+		if( forward.z > 0 )
+			ang.x = 270.0f;
+		else ang.x = 90.0f;
+	}
+
+	return ang;
+}
+
+vec3 ForwardFromAngles( vec3 angles )
+{
+	vec3 forward;
+
+	float cp = cos( DEG2RAD( angles.x ) );
+	float cy = cos( DEG2RAD( angles.y ) );
+	float sy = sin( DEG2RAD( angles.y ) );
+	float sp = sin( DEG2RAD( angles.x ) );
+
+	forward.x = cp * cy;
+	forward.y = cp * sy;
+	forward.z = -sp;
+
+	return forward;
 }
 
 #endif//MATHLIB_H
