@@ -442,6 +442,8 @@ render grass with diffuse or skyambient lighting
 */
 void R_DrawGrassMesh( grass_t *grass, int tex, word &hLastShader, word &hCachedMatrix )
 {
+	bool UseBump = (gl_bump->value > 0 && grasstexs[tex].gl_normalmapnum > 0);
+	
 	if( hLastShader != grass->vbo.shaderNum )
 	{
 		GL_BindShader( &glsl_programs[grass->vbo.shaderNum] );
@@ -466,6 +468,14 @@ void R_DrawGrassMesh( grass_t *grass, int tex, word &hLastShader, word &hCachedM
 	if( r_lightmap->value && !r_fullbright->value )
 		GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 	else GL_Bind( GL_TEXTURE0, grasstexs[tex].gl_texturenum );
+
+	if( UseBump )
+	{
+		GL_Bind( GL_TEXTURE1, grasstexs[tex].gl_normalmapnum );
+		pglUniform1fARB( RI->currentshader->u_GenericCondition, 1.0f );
+	}
+	else
+		pglUniform1fARB( RI->currentshader->u_GenericCondition, 0.0f );
 
 	if( grass->hCachedMatrix != hCachedMatrix )
 	{
@@ -512,7 +522,7 @@ void R_RenderGrassOnList( void )
 	word hCachedMatrix = -1;
 	word hLastShader = -1;
 
-	if( !FBitSet( world->features, WORLD_HAS_GRASS ))
+	if( !CVAR_TO_BOOL( r_grass ) || !FBitSet( world->features, WORLD_HAS_GRASS ))
 		return; // don't waste time
 	
 	GL_Cull( GL_NONE );	// grass is double-sided poly
@@ -524,6 +534,8 @@ void R_RenderGrassOnList( void )
 	}
 
 	pglBindVertexArray( world->vertex_array_object ); // restore old binding
+
+	GL_CleanupAllTextureUnits();
 
 	GL_Cull( GL_FRONT );
 }
@@ -541,6 +553,8 @@ void R_DrawLightForGrassMesh( plight_t *pl, grass_t *grass, int tex, word &hLast
 		return;
 
 	GLfloat gl_lightViewProjMatrix[16];
+
+	bool UseBump = (gl_bump->value > 0 && grasstexs[tex].gl_normalmapnum > 0);
 
 	if( hLastShader != grass->vbo.hLightShader )
 	{
@@ -583,6 +597,14 @@ void R_DrawLightForGrassMesh( plight_t *pl, grass_t *grass, int tex, word &hLast
 
 	GL_Bind( GL_TEXTURE0, grasstexs[tex].gl_texturenum );
 
+	if( UseBump )
+	{
+		GL_Bind( GL_TEXTURE3, grasstexs[tex].gl_normalmapnum );
+		pglUniform1fARB( RI->currentshader->u_GenericCondition, 1.0f );
+	}
+	else
+		pglUniform1fARB( RI->currentshader->u_GenericCondition, 0.0f );
+
 	if( grass->hCachedMatrix != hCachedMatrix )
 	{
 		gl_state_t *glm = &tr.cached_state[grass->hCachedMatrix];
@@ -607,7 +629,7 @@ void R_DrawLightForGrass( plight_t *pl )
 	word hCachedMatrix = -1;
 	word hLastShader = -1;
 
-	if( !tr.num_light_grass ) return; // don't waste time
+	if( !CVAR_TO_BOOL( r_grass ) || !tr.num_light_grass ) return; // don't waste time
 	
 	GL_Cull( GL_NONE );
 
@@ -618,6 +640,8 @@ void R_DrawLightForGrass( plight_t *pl )
 	}
 
 	pglBindVertexArray( world->vertex_array_object ); // restore old binding
+
+	GL_CleanupAllTextureUnits();
 
 	GL_Cull( GL_FRONT );
 }
@@ -1109,6 +1133,13 @@ int R_GrassTextureForName( const char *name, byte *tex )
 	Q_strncpy( grasstexs[i].name, name, sizeof( grasstexs[i].name ));
 	grasstexs[i].gl_texturenum = LOAD_TEXTURE( name, NULL, 0, TF_CLAMP );
 
+	// load normalmap if present
+	grasstexs[i].gl_normalmapnum = 0;
+	char normalmap_name[256];
+	sprintf_s( normalmap_name, "%s_norm", name );
+	if( IMAGE_EXISTS( normalmap_name ) )
+		grasstexs[i].gl_normalmapnum = LOAD_TEXTURE( normalmap_name, NULL, 0, 0 );
+
 	if( !grasstexs[i].gl_texturenum )
 	{
 		ALERT( at_warning, "couldn't load %s\n", name );
@@ -1227,6 +1258,9 @@ void R_GrassShutdown( void )
 			continue;
 
 		FREE_TEXTURE( grasstexs[i].gl_texturenum );
+
+		if( grasstexs[i].gl_normalmapnum )
+			FREE_TEXTURE( grasstexs[i].gl_normalmapnum );
 	}
 }
 

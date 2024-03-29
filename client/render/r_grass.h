@@ -108,6 +108,7 @@ typedef struct grasstex_s
 {
 	char		name[256];
 	int		gl_texturenum;
+	int		gl_normalmapnum;
 	grass_t		*grasschain;	// for sequentially draw
 } grasstex_t;
 

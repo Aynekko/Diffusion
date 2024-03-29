@@ -56,6 +56,21 @@ void main( void )
 	}
 
 	vec4 worldpos = u_ModelMatrix * position;
+
+	// interactive grass!
+	vec3 dir = worldpos.xyz - u_ViewOrigin;
+	// length 2D - works better to have similar results when standing or crouching
+	float dist_to_bush = sqrt( dir.x * dir.x + dir.y * dir.y );
+	if( dist_to_bush <= 50 )
+	{
+		vec3 angles = VectorAngles( worldpos.xyz - u_ViewOrigin );
+		vec3 forward = ForwardFromAngles( angles );
+		float move_dist = 1.0 / clamp( 0.001 * pow(1.2, dist_to_bush), 0.001, 2.5 ); // empirical
+		if( move_dist > 10.0 ) move_dist = 10.0;
+		worldpos.xy += move_dist * normalize( forward ).xy;
+		worldpos.z -= move_dist * 0.5;
+	}
+
 	gl_Position = gl_ModelViewProjectionMatrix * worldpos;
 	var_TexDiffuse = GetTexCoordsForVertex( int( attr_Position.w ));
 	gl_ClipVertex = gl_ModelViewMatrix * worldpos;

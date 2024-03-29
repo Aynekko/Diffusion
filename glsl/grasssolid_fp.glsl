@@ -15,15 +15,19 @@ GNU General Public License for more details.
 
 #include "const.h"
 #include "mathlib.h"
+#include "texfetch.h"
 #include "alpha2coverage.h"
 
 uniform sampler2D		u_ColorMap;
+uniform sampler2D		u_NormalMap;
 
 uniform vec4 u_GrassParams[3];
 #define u_FogParams u_GrassParams[1]
+uniform float u_GenericCondition;
 
 varying vec2		var_TexDiffuse;
 varying vec3		var_VertexLight;
+varying vec3		var_ViewVec;
 
 void main( void )
 {
@@ -33,9 +37,19 @@ void main( void )
 
 	if( diffuse.a < 0.5 )
 		discard;
-
+	
 #if !defined( GRASS_FULLBRIGHT )
-	diffuse.rgb *= var_VertexLight;
+	vec3 light_diffuse = var_VertexLight;
+
+	// add bump
+	if( bool(u_GenericCondition == 1.0f) )
+	{
+		vec3 N = normalmap2D( u_NormalMap, var_TexDiffuse );
+		vec3 L = normalize( var_VertexLight );
+		light_diffuse *= ComputeStaticBump( L, N );
+	}
+
+	diffuse.rgb *= light_diffuse;
 #endif//GRASS_FULLBRIGHT
 
 	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )

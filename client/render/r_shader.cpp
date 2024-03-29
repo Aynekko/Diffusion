@@ -1002,14 +1002,17 @@ static void GL_InitGrassSolidUniforms( glsl_program_t *shader )
 	ASSERT( shader != NULL );
 
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
+	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
 
 	shader->u_ModelMatrix = pglGetUniformLocationARB( shader->handle, "u_ModelMatrix" );
 	shader->u_LightStyleValues = pglGetUniformLocationARB( shader->handle, "u_LightStyleValues" );
 	shader->u_GammaTable = pglGetUniformLocationARB( shader->handle, "u_GammaTable" );
 	shader->u_GrassParams = pglGetUniformLocationARB( shader->handle, "u_GrassParams" );
+	shader->u_GenericCondition = pglGetUniformLocationARB( shader->handle, "u_GenericCondition" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
+	pglUniform1iARB( shader->u_NormalMap, GL_TEXTURE1 );
 	GL_BindShader( GL_NONE );
 
 	GL_ValidateProgram( shader );
@@ -1023,15 +1026,18 @@ static void GL_InitGrassDlightUniforms( glsl_program_t *shader )
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
 	shader->u_ProjectMap = pglGetUniformLocationARB( shader->handle, "u_ProjectMap" );
 	shader->u_ShadowMap = pglGetUniformLocationARB( shader->handle, "u_ShadowMap" );
+	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
 
 	shader->u_LightViewProjectionMatrix = pglGetUniformLocationARB( shader->handle, "u_LightViewProjectionMatrix" );
 	shader->u_ModelMatrix = pglGetUniformLocationARB( shader->handle, "u_ModelMatrix" );
 	shader->u_LightParams = pglGetUniformLocationARB( shader->handle, "u_LightParams" );
+	shader->u_GenericCondition = pglGetUniformLocationARB( shader->handle, "u_GenericCondition" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
 	pglUniform1iARB( shader->u_ProjectMap, GL_TEXTURE1 );// projection texture or XY attenuation
 	pglUniform1iARB( shader->u_ShadowMap, GL_TEXTURE2 ); // shadowmap or cubemap
+	pglUniform1iARB( shader->u_NormalMap, GL_TEXTURE3 );
 	GL_BindShader( GL_NONE );
 
 	GL_ValidateProgram( shader );

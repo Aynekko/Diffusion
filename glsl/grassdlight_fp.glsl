@@ -15,6 +15,7 @@ GNU General Public License for more details.
 
 #include "const.h"
 #include "mathlib.h"
+#include "texfetch.h"
 #include "alpha2coverage.h"
 
 #if defined( GRASS_LIGHT_PROJECTION )
@@ -23,6 +24,7 @@ uniform sampler2D		u_ProjectMap;
 uniform samplerCube		u_ProjectMap;
 #endif
 uniform sampler2D		u_ColorMap;
+uniform sampler2D		u_NormalMap;
 
 #if defined( GRASS_HAS_SHADOWS )
 	#if defined( GRASS_LIGHT_PROJECTION )
@@ -39,6 +41,7 @@ uniform vec4		u_LightParams[7];
 #define u_LightOrigin	u_LightParams[3]
 #define u_FogParams		u_LightParams[4]
 #define u_DynLightBrightness u_LightParams[6].w
+uniform float u_GenericCondition;
 
 varying vec2		var_TexDiffuse;
 varying vec3		var_LightVec;
@@ -69,7 +72,6 @@ void main( void )
 #elif defined( GRASS_LIGHT_OMNIDIRECTIONAL )
 	L = normalize( var_LightVec );
 #endif
-	vec3 N = normalize( var_Normal );
 
 	// compute the diffuse term
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
@@ -80,18 +82,26 @@ void main( void )
 		discard;
 
 	vec3 light = vec3( 1.0 );
+	vec3 N;
 	float shadow = 1.0;
-
 	if( bool( gl_FrontFacing )) L = -L;
 
 	float Brightness = u_DynLightBrightness;
+
+	// add bump
+	if( bool(u_GenericCondition == 1.0f) )
+	{
+		N = normalmap2D( u_NormalMap, var_TexDiffuse );
+		if( bool( gl_FrontFacing )) N = -N;
+	}
+	else
+		N = normalize( var_Normal );
 
 #if defined( GRASS_LIGHT_PROJECTION )
 	light = u_LightDiffuse.rgb;	// light color
 
 	// texture or procedural spotlight
 	light *= 1.5 * Brightness * texture2DProj( u_ProjectMap, var_ProjCoord ).rgb;
-//	atten *= smoothstep( spotCos, spotCos + 0.1, spotDot ) * 0.5;
 	#if defined( GRASS_HAS_SHADOWS )
 		shadow = ShadowProj( var_ShadowCoord, u_ShadowParams.xy, dot( N, L ));
 		if( shadow <= 0.0 ) discard; // fast reject

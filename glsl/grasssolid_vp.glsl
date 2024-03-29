@@ -33,6 +33,7 @@ uniform vec4 u_GrassParams[3];
 
 varying vec2		var_TexDiffuse;
 varying vec3		var_VertexLight;
+varying vec3		var_ViewVec;
 
 void main( void )
 {
@@ -95,4 +96,6 @@ void main( void )
 	gammaIndex = (var_VertexLight.b * 255.0);
 	var_VertexLight.b = u_GammaTable[int(gammaIndex*0.25)][int(mod(gammaIndex, 4 ))];
 #endif//GRASS_FULLBRIGHT
+
+	var_ViewVec = ( u_ViewOrigin - worldpos.xyz );
 }
