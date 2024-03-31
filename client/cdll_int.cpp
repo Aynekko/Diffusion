@@ -56,8 +56,6 @@ int Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 	if( g_iXashEngineBuildNumber <= 0 )
 		g_iXashEngineBuildNumber = (int)CVAR_GET_FLOAT( "buildnum" );
 
-	discord_integration::initialize();
-
 	// diffusion - execute mod-specific stuff
 	ClientCmd( "exec diffusion.cfg\n" );
 
@@ -162,6 +160,8 @@ the hud variables.
 */
 void HUD_Init( void )
 {
+	discord_integration::initialize();
+	
 	InitInput();
 	gHUD.Init();
 

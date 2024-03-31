@@ -21,7 +21,6 @@
 #include "r_local.h"
 #include "r_weather.h"
 #include "r_efx.h"
-#include "r_world.h"
 #include "event_api.h"
 #include "r_quakeparticle.h"
 #include "enginecallback.h"
@@ -1131,7 +1130,5 @@ int CHud::MsgFunc_ServerName( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pszName, pbuf, iSize );
 	Q_strncpy( gHUD.m_szServerName, READ_STRING(), sizeof( gHUD.m_szServerName ) );
 	gHUD.m_szServerName[sizeof( gHUD.m_szServerName ) - 1] = 0;
-	if( gHUD.m_szServerName[0] == '\0' )
-		Q_strcpy( gHUD.m_szServerName, world->name );
 	return 0;
 }
