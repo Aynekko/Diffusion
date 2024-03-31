@@ -173,7 +173,7 @@
       <Optimization>Full</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
-      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;.\render;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;.\render;..\3rd-party;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;CLIENT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\..\x64\Release\client\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\..\x64\Release\client\client.pch</PrecompiledHeaderOutputFile>
@@ -213,8 +213,8 @@
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <OutputFile>.\..\x64\Release\client\client.dll</OutputFile>
       <ImportLibrary>.\..\temp\client\!release\client.lib</ImportLibrary>
-      <AdditionalLibraryDirectories>..\common\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\..\common\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>.\..\3rd-party\discord-rpc.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>
       </StackReserveSize>
       <StackCommitSize>
@@ -289,7 +289,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;.\render;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;.\render;..\3rd-party;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;DEBUG;_DEBUG;_WINDOWS;CLIENT_DLL;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <AssemblerListingLocation>.\..\x64\Debug\client\</AssemblerListingLocation>
@@ -323,7 +323,7 @@
       <OutputFile>.\..\x64\Debug\client\client.dll</OutputFile>
       <ImportLibrary>.\..\x64\Debug\client\client.lib</ImportLibrary>
       <AdditionalLibraryDirectories>..\common\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>msvcrtd.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>.\..\3rd-party\discord-rpc.lib;msvcrtd.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <CustomBuildStep>
       <Command>
@@ -354,6 +354,7 @@
     <ClCompile Include="cdll_int.cpp" />
     <ClCompile Include="crosshair.cpp" />
     <ClCompile Include="death.cpp" />
+    <ClCompile Include="discord.cpp" />
     <ClCompile Include="healthbars.cpp" />
     <ClCompile Include="hud_codeinput.cpp" />
     <ClCompile Include="hud_dronebars.cpp" />
@@ -437,6 +438,7 @@
     <ClInclude Include="ammohistory.h" />
     <ClInclude Include="animatex.h" />
     <ClInclude Include="cubemap.h" />
+    <ClInclude Include="discord.h" />
     <ClInclude Include="hud.h" />
     <ClInclude Include="input_mouse.h" />
     <ClInclude Include="parsemsg.h" />

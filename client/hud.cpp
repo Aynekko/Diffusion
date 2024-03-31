@@ -47,6 +47,8 @@ void CHud :: Init( void )
 //	MsgFunc_ResetHUD( 0, 0, NULL ); // diffusion - now server does this
 
 	g_bDuckToggled = false;
+
+	m_szServerName[0] = '\0';
 }
 
 CHud :: ~CHud()

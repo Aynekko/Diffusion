@@ -19,6 +19,12 @@ GNU General Public License for more details.
 #include "cvardef.h"
 #include "exportdef.h"
 
+#include "net_api.h"
+
+#include <stdio.h> // for safe_sprintf()
+#include <stdarg.h>  // "
+#include <string> // for strncpy()
+
 typedef unsigned char byte;
 typedef unsigned short word;
 
@@ -87,6 +93,65 @@ bool Sys_RemoveFile(const char* path);
 
 extern float g_hullcolor[8][3];
 extern int g_boxpnt[6][4];
+
+template<typename T, size_t N>
+char( &ArraySizeHelper( T( & )[N] ) )[N];
+#define ARRAYSIZED(x) sizeof(ArraySizeHelper(x))
+
+static size_t get_map_name( char *dest, size_t count )
+{
+	auto map_path = gEngfuncs.pfnGetLevelName();
+
+	const char *slash = strrchr( map_path, '/' );
+	if( !slash )
+		slash = map_path - 1;
+
+	const char *dot = strrchr( map_path, '.' );
+	if( !dot )
+		dot = map_path + strlen( map_path );
+
+	size_t bytes_to_copy = Q_min( count - 1, static_cast<size_t>(dot - slash - 1) );
+
+	strncpy( dest, slash + 1, bytes_to_copy );
+	dest[bytes_to_copy] = '\0';
+
+	return bytes_to_copy;
+}
+
+static size_t get_player_count()
+{
+	size_t player_count = 0;
+
+	for( int i = 0; i < MAX_PLAYERS; ++i ) {
+		// Make sure the information is up to date.
+		gEngfuncs.pfnGetPlayerInfo( i + 1, &g_PlayerInfoList[i + 1] );
+
+		// This player slot is empty.
+		if( g_PlayerInfoList[i + 1].name == nullptr )
+			continue;
+
+		++player_count;
+	}
+
+	return player_count;
+}
+
+inline void remove_color_characters( char *input_string )
+{
+	char *read = input_string;
+	char *write = input_string;
+
+	while( *read ) {
+		if( *read == '^' && isdigit( *(read + 1) ) ) {
+			read += 2;
+		}
+		else {
+			*write++ = *read++;
+		}
+	}
+
+	*write = '\0';
+}
 
 inline int ConsoleStringLen( const char *string )
 {

@@ -26,6 +26,7 @@
 #include "entity_state.h"
 #include "r_particle.h"
 #include "cdll_exp.h"
+#include "discord.h"
 
 int developer_level;
 int g_iXashEngineBuildNumber;
@@ -33,13 +34,36 @@ cl_enginefunc_t gEngfuncs;
 render_api_t gRenderfuncs;
 CHud gHUD;
 
-/*
-==========================
-    Initialize
+//==========================================================
+// Initialize: called when the DLL is first loaded.
+//==========================================================
+int Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
+{
+	gEngfuncs = *pEnginefuncs;
 
-Called when the DLL is first loaded.
-==========================
-*/
+	if( iVersion != CLDLL_INTERFACE_VERSION )
+		return 0;
+
+	memcpy( &gEngfuncs, pEnginefuncs, sizeof( cl_enginefunc_t ) );
+
+	// get developer level
+	developer_level = (int)CVAR_GET_FLOAT( "developer" );
+
+	if( !CVAR_GET_POINTER( "host_clientloaded" ) )
+		return 0;	// Not a Xash3D engine
+
+	g_iXashEngineBuildNumber = (int)CVAR_GET_FLOAT( "build" ); // 0 for old builds or GoldSrc
+	if( g_iXashEngineBuildNumber <= 0 )
+		g_iXashEngineBuildNumber = (int)CVAR_GET_FLOAT( "buildnum" );
+
+	discord_integration::initialize();
+
+	// diffusion - execute mod-specific stuff
+	ClientCmd( "exec diffusion.cfg\n" );
+
+	return 1;
+}
+
 /*
 ================================
 HUD_GetHullBounds
@@ -109,31 +133,6 @@ void HUD_PlayerMove( struct playermove_s *ppmove, int server )
 	PM_Move( ppmove, server );
 }
 
-int Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
-{
-	gEngfuncs = *pEnginefuncs;
-
-	if( iVersion != CLDLL_INTERFACE_VERSION )
-		return 0;
-
-	memcpy( &gEngfuncs, pEnginefuncs, sizeof( cl_enginefunc_t ));
-
-	// get developer level
-	developer_level = (int)CVAR_GET_FLOAT( "developer" );
-
-	if( !CVAR_GET_POINTER( "host_clientloaded" ))
-		return 0;	// Not a Xash3D engine
-
-	g_iXashEngineBuildNumber = (int)CVAR_GET_FLOAT( "build" ); // 0 for old builds or GoldSrc
-	if( g_iXashEngineBuildNumber <= 0 )
-		g_iXashEngineBuildNumber = (int)CVAR_GET_FLOAT( "buildnum" );
-
-	// diffusion - execute mod-specific stuff
-	ClientCmd( "exec diffusion.cfg\n" );
-
-	return 1;
-}
-
 /*
 ==========================
 	HUD_VidInit
@@ -180,6 +179,8 @@ void HUD_Shutdown( void )
 {
 	// diffusion - save achievement stats
 	gHUD.m_StatusIconsAchievement.SaveAchievementFile();
+
+	discord_integration::shutdown();
 	
 	ShutdownInput();
 
@@ -220,6 +221,8 @@ returns 1 if anything has been changed, 0 otherwise.
 */
 int HUD_UpdateClientData(client_data_t * pcldata, float flTime)
 {
+	discord_integration::on_update_client_data();
+	
 	return gHUD.UpdateClientData( pcldata, flTime );
 }
 
@@ -271,8 +274,7 @@ Called by engine every frame that client .dll is loaded
 */
 void HUD_Frame( double time )
 {
-	// run anti (_-=ZhekA=-_) system for Xash3D engine
-	gEngfuncs.VGui_ViewportPaintBackground( VGUI_GetRect( ));
+	discord_integration::on_frame();
 }
 
 int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )

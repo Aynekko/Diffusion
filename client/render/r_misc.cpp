@@ -28,6 +28,7 @@ GNU General Public License for more details.
 #include "r_world.h"
 #include "r_cvars.h"
 #include "triangleapi.h"
+#include "discord.h"
 
 /*
 used iuser3 "flags":
@@ -1036,6 +1037,8 @@ void HUD_ProcessPlayerState( struct entity_state_s* dst, const struct entity_sta
 		g_iUser1 = src->iuser1;
 		g_iUser2 = src->iuser2;
 		g_iUser3 = src->iuser3;
+
+		discord_integration::set_spectating( g_iUser1 > 0 );
 	}
 }
 

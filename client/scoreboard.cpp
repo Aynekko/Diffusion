@@ -21,6 +21,7 @@
 #include "hud.h"
 #include "utils.h"
 #include "parsemsg.h"
+#include "discord.h"
 
 hud_player_info_t		g_PlayerInfoList[MAX_PLAYERS+1];	// player info from the engine
 extra_player_info_t		g_PlayerExtraInfo[MAX_PLAYERS+1];	// additional player info sent directly to the client dll
@@ -417,6 +418,8 @@ int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *p
 			g_PlayerExtraInfo[cl].teamnumber = 0;
 
 		g_PlayerExtraInfo[cl].isBot = (isBot > 0);
+
+		discord_integration::on_player_count_update();
 	}
 
 	END_READ();

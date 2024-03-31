@@ -155,6 +155,13 @@ BOOL CHalfLifeRules :: ClientConnected( edict_t *pEntity, const char *pszName, c
 
 void CHalfLifeRules :: InitHUD( CBasePlayer *pl )
 {
+	// in singleplayer, we send the map title if it's present
+	char map[96];
+	Q_sprintf( map, "Map: %s", STRING(gpGlobals->mapname) );
+
+	MESSAGE_BEGIN( MSG_ONE, gmsgServerName, NULL, pl->edict() );
+	WRITE_STRING( g_pWorld->pev->message ? STRING( g_pWorld->pev->message ) : map );
+	MESSAGE_END();
 }
 
 //=========================================================
