@@ -23,6 +23,16 @@ void CEnvSky::KeyValue(KeyValueData* pkvd)
 		pev->fuser2 = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "customfog" ) )
+	{
+		int fog[4];
+		UTIL_StringToIntArray( fog, 4, pkvd->szValue );
+		pev->controller[0] = fog[0];
+		pev->controller[1] = fog[1];
+		pev->controller[2] = fog[2];
+		pev->controller[3] = fog[3];
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CPointEntity::KeyValue(pkvd);
 }
