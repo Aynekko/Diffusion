@@ -46,6 +46,16 @@ void CEnvSky::Spawn(void)
 	SetBits(m_iFlags, MF_POINTENTITY);
 	RelinkEntity(FALSE);
 
+	// hack - I send custom fog through controller field, but if it's not set, it defaults to 127.
+	// so yeah, we can't use this specific fog. hope we can survive without it :)
+	if( pev->controller[0] + pev->controller[1] + pev->controller[2] + pev->controller[3] == 508 ) // 127 x 4
+	{
+		pev->controller[0] = 0;
+		pev->controller[1] = 0;
+		pev->controller[2] = 0;
+		pev->controller[3] = 0;
+	}
+
 	SetFlag(F_NOBACKCULL);
 
 	// disabled for now, because not used
