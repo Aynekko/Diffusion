@@ -2314,7 +2314,7 @@ void GL_InitGPUShaders( void )
 	glsl.blurShader = shader = GL_InitGPUShader( "GaussBlur", "generic", "gaussblur" );
 	GL_InitPostProcessUniforms( shader );
 
-	glsl.BilateralBlur = shader = GL_InitGPUShader( "BilateralBlur", "bilateralblur", "bilateralblur" );
+	glsl.BilateralBlur = shader = GL_InitGPUShader( "BilateralBlur", "generic", "bilateralblur" );
 	GL_InitBilateralBlurUniforms( shader );
 
 	// draw sun & skybox

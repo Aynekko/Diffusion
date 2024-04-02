@@ -440,12 +440,6 @@ void R_CheckChanges( void )
 		settings_changed = true;
 	}
 
-	if( FBitSet( gl_ssao->flags, FCVAR_CHANGED ) )
-	{
-		ClearBits( gl_ssao->flags, FCVAR_CHANGED );
-		tr.ssao_params_changed = true;
-	}
-
 	if( FBitSet( r_lightmap->flags, FCVAR_CHANGED ))
 	{
 		ClearBits( r_lightmap->flags, FCVAR_CHANGED );

@@ -139,29 +139,6 @@ void InitSSAO( void )
 
 		return;
 	}
-
-	int width = glState.width;
-	int height = glState.height;
-
-	if( tr.lowmemory )
-	{
-		width = glState.width / 4;
-		height = glState.height / 4;
-	}
-	else
-	{
-		switch( (int)gl_ssao->value )
-		{
-		case 1:
-			width = glState.width / 4;
-			height = glState.height / 4;
-			break;
-		case 2:
-			width = glState.width / 2;
-			height = glState.height / 2;
-			break;
-		}
-	}
 	
 	if( ScreenAO )
 	{
@@ -170,7 +147,7 @@ void InitSSAO( void )
 	}
 
 	if( !ScreenAO )
-		ScreenAO = CREATE_TEXTURE( "*screenao", width, height, NULL, TF_COLORBUFFER );
+		ScreenAO = CREATE_TEXTURE( "*screenao", glState.width, glState.height, NULL, TF_COLORBUFFER );
 }
 
 void InitPostTextures( void )
@@ -810,19 +787,12 @@ void Monochrome( void )
 
 void SSAO( void )
 {
-	if( tr.ssao_params_changed )
-	{
-		InitSSAO();
-		tr.ssao_params_changed = false;
-	}
-
-	if( !CVAR_TO_BOOL( gl_ssao ) )
+	if( !CVAR_TO_BOOL( gl_ssao ) || tr.lowmemory )
 		return;
 
 	bool Debug = CVAR_TO_BOOL( gl_ssao_debug );
 
-	float blur = 0.075f;
-	float zFar = RI->farClip;// Q_max( 256.0f, RI->farClip );
+	float zFar = RI->farClip;
 
 	// request screen color
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
@@ -836,26 +806,6 @@ void SSAO( void )
 	int width = glState.width;
 	int height = glState.height;
 
-	if( tr.lowmemory )
-	{
-		width = glState.width / 4;
-		height = glState.height / 4;
-	}
-	else
-	{
-		switch( (int)gl_ssao->value )
-		{
-		case 1:
-			width = glState.width / 4;
-			height = glState.height / 4;
-			break;
-		case 2:
-			width = glState.width / 2;
-			height = glState.height / 2;
-			break;
-		}
-	}
-
 	pglViewport( 0, 0, width, height );
 
 	// generate SSAO
@@ -863,8 +813,7 @@ void SSAO( void )
 	ASSERT( RI->currentshader != NULL );
 
 	pglUniform1fARB( RI->currentshader->u_zFar, zFar );
-	GL_Bind( GL_TEXTURE0, tr.screen_depth );
-	RenderFSQ( glState.width, glState.height );
+	RenderFSQ( width, height );
 
 	// RequestScreenAO
 	GL_Bind( GL_TEXTURE0, ScreenAO );
@@ -874,30 +823,30 @@ void SSAO( void )
 	GL_BindShader( glsl.BilateralBlur );
 	GL_Bind( GL_TEXTURE1, tr.screen_depth );
 	ASSERT( RI->currentshader != NULL );
-	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / glState.width, 0.0f ); // screen size inv
+	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / width, 0.0f ); // screen size inv
 	pglUniform1fARB( RI->currentshader->u_zFar, zFar );
-	RenderFSQ( glState.width, glState.height );
+	RenderFSQ( width, height );
 	
 	// RequestScreenAO
 	GL_Bind( GL_TEXTURE0, ScreenAO );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
 
 	// blur AO pass Y
-	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 0.0f, 1.0f / glState.height ); // screen size inv
-	RenderFSQ( glState.width, glState.height );
-	
+	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 0.0f, 1.0f / height ); // screen size inv
+	RenderFSQ( width, height );
+
 	// RequestScreenAO
 	GL_Bind( GL_TEXTURE1, ScreenAO );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
 	
 	// do final pass
-	pglViewport( 0, 0, glState.width, glState.height );
+	pglViewport( 0, 0, width, height );
 	GL_BindShader( glsl.drawSSAO );
 	ASSERT( RI->currentshader != NULL );
 
 	pglUniform1fARB( RI->currentshader->u_GenericCondition, Debug );
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	RenderFSQ( glState.width, glState.height );
+	RenderFSQ( width, height );
 
 	// unbind shader
 	GL_BindShader( NULL );

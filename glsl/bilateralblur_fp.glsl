@@ -1,17 +1,23 @@
 /*
-bilateral_fp.glsl - bilateral filter
-Copyright (C) 2019 Uncle Mike
+ * Copyright (c) 2014-2021, NVIDIA CORPORATION.  All rights reserved.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * SPDX-FileCopyrightText: Copyright (c) 2014-2021 NVIDIA CORPORATION
+ * SPDX-License-Identifier: Apache-2.0
+ */
 
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
-*/
+// taken from https://github.com/nvpro-samples/gl_ssao
 
 #include "const.h"
 #include "mathlib.h"
@@ -19,50 +25,49 @@ GNU General Public License for more details.
 uniform sampler2D	u_ScreenMap;
 uniform sampler2D	u_DepthMap;
 uniform float		u_zFar;
+uniform vec2		u_ScreenSizeInv;
 
-varying vec3		var_Position;
 varying vec2		var_TexCoord;
-varying vec4		var_TexCoords[4];
 
-float AddSampleContribution( in vec2 texCoord, in float depth, in float SampleContribution, inout vec4 color )
+const float KERNEL_RADIUS = 3;
+const float g_Sharpness = 2.0;
+
+vec4 BlurFunction(vec2 uv, float r, vec4 center_c, float center_d, inout float w_total)
 {
-	// Load the depth from the depth map, transform the depth into eye space
-	float sampleDepth = texture2D( u_DepthMap, texCoord ).r;
-	sampleDepth = linearizeDepth( u_zFar, sampleDepth );
+	vec4  c = texture2D( u_ScreenMap, uv );
+	float d = texture2D( u_DepthMap, uv ).x;
 
-	// Check for depth discontinuities
-	if( abs( depth - sampleDepth ) > 5.0 )
-		return 0.0;
+	const float BlurSigma = float(KERNEL_RADIUS) * 0.5;
+	const float BlurFalloff = 1.0 / (2.0 * BlurSigma * BlurSigma);
 
-	//float SampleMulti = clamp( 1.0 - abs( depth - sampleDepth ) * 0.15, 0.0, 1.0 );
+	float ddiff = (d - center_d) * g_Sharpness;
+	float w = exp2(-r * r * BlurFalloff - ddiff * ddiff);
+	w_total += w;
 
-	// Sample the color map and add its contribution
-	color += texture2D( u_ScreenMap, texCoord ) * SampleContribution;
-
-	return SampleContribution;
+	return c * w;
 }
 
 void main( void )
 {
-	float depth = texture2D( u_DepthMap, var_TexCoord ).r;
-	depth = linearizeDepth( u_zFar, depth );
+	vec4  center_c = texture2D( u_ScreenMap, var_TexCoord );
+	float center_d = texture2D( u_DepthMap, var_TexCoord).x;
 
-	// Blur using a 9x9 bilateral Gaussian filter
-	float weightSum = 0.153170;
-	vec4 color = texture2D( u_ScreenMap, var_TexCoord ) * weightSum;
+	vec4  c_total = center_c;
+	float w_total = 1.0;
 
-	weightSum += AddSampleContribution( var_TexCoords[0].st, depth, 0.144893, color );
-	weightSum += AddSampleContribution( var_TexCoords[0].pq, depth, 0.144893, color );
+	vec2 g_InvResolutionDirection = u_ScreenSizeInv;
 
-	weightSum += AddSampleContribution( var_TexCoords[1].st, depth, 0.122649, color );
-	weightSum += AddSampleContribution( var_TexCoords[1].pq, depth, 0.122649, color );
+	for (float r = 1; r <= KERNEL_RADIUS; ++r)
+	{
+		vec2 uv = var_TexCoord + g_InvResolutionDirection * r;
+		c_total += BlurFunction(uv, r, center_c, center_d, w_total);  
+	}
 
-	weightSum += AddSampleContribution( var_TexCoords[2].st, depth, 0.092903, color );
-	weightSum += AddSampleContribution( var_TexCoords[2].pq, depth, 0.092903, color );
+	for (float r = 1; r <= KERNEL_RADIUS; ++r)
+	{
+		vec2 uv = var_TexCoord - g_InvResolutionDirection * r;
+		c_total += BlurFunction(uv, r, center_c, center_d, w_total);  
+	}
 
-	weightSum += AddSampleContribution( var_TexCoords[3].st, depth, 0.062970, color );
-	weightSum += AddSampleContribution( var_TexCoords[3].pq, depth, 0.062970, color );
-
-	// Write the final color
-	gl_FragColor = color / weightSum;
+	gl_FragColor = c_total / w_total;
 }

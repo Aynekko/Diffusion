@@ -444,8 +444,6 @@ typedef struct
 	material_t materials[8192]; // MAX_TEXTURES
 	int studio_screen_tex[8192]; // by entindex
 
-	bool ssao_params_changed; // to keep track of gl_ssao
-
 	float ParticleTime[8192];
 
 	plight_t defSpotlight;
