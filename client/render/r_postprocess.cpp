@@ -790,6 +790,9 @@ void SSAO( void )
 	if( !CVAR_TO_BOOL( gl_ssao ) || tr.lowmemory )
 		return;
 
+	if( !ScreenAO )
+		InitSSAO();
+
 	bool Debug = CVAR_TO_BOOL( gl_ssao_debug );
 
 	float zFar = RI->farClip;
