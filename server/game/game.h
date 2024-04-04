@@ -21,9 +21,7 @@ extern void GameDLLShutdown( void );
 
 extern cvar_t	displaysoundlist;
 
-extern cvar_t sv_fadecorpses;
 extern cvar_t sv_allowhealthbars;
-//extern cvar_t sv_muzzlelight;
 extern cvar_t ai_disable;
 extern cvar_t ai_draw_route;
 extern cvar_t sv_fade_props;

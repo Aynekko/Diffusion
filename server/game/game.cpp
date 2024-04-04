@@ -57,9 +57,7 @@ cvar_t bot_min = { "bot_min", "0", FCVAR_SERVER };
 cvar_t	sv_regeneration	= { "sv_regeneration","1", FCVAR_ARCHIVE };
 
 // Diffusion
-cvar_t	sv_fadecorpses = { "sv_fadecorpses", "0", FCVAR_ARCHIVE };
 cvar_t	sv_allowhealthbars = { "sv_allowhealthbars", "1", FCVAR_ARCHIVE };
-//cvar_t	sv_muzzlelight = { "sv_muzzlelight", "1", FCVAR_ARCHIVE };
 cvar_t ai_draw_route = { "ai_draw_route", "0", FCVAR_CHEAT };
 cvar_t  ai_disable = { "ai_disable", "0", FCVAR_CHEAT };
 cvar_t  sv_ignore_triggers = { "sv_ignore_triggers", "0", FCVAR_CHEAT };
@@ -1069,7 +1067,6 @@ void GameDLLInit( void )
 	CVAR_REGISTER ( &sv_regeneration );
 
 // Diffusion Fade corpses
-	CVAR_REGISTER ( &sv_fadecorpses );
 	CVAR_REGISTER( &sv_allowhealthbars );
 
 	CVAR_REGISTER ( &ai_disable );
