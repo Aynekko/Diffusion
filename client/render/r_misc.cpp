@@ -305,6 +305,9 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 		if( DistanceFade <= 0.0f )
 			return 0; // distance-culled
 
+		if( !tr.nullmodelindex )
+			tr.nullmodelindex = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/null.spr" );
+
 		// experimental
 		if( 0 )//r_fade_props->value == 2 && tr.fadeblend[ent->index] == 1.0f )
 		{
@@ -2069,6 +2072,7 @@ void R_VidInit( void )
 
 	R_ResetShadowTextures();
 
+	tr.nullmodelindex = 0;
 	tr.num_framebuffers = 0;
 	tr.num_subview_used = 0;
 	tr.glsl_valid_sequence++; // refresh shader cache

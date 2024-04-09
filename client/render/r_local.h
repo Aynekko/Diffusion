@@ -460,6 +460,8 @@ typedef struct
 	cl_entity_t *pDrone;
 
 	mstudioevent_t studioevent[8192];
+
+	int nullmodelindex;
 } ref_globals_t;
 
 typedef struct

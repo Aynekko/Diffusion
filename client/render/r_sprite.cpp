@@ -604,7 +604,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	m_pRenderModel = m_pCurrentEntity->model;
 
 	// diffusion - don't draw dummy models
-	if( m_pCurrentEntity->model && Q_strstr( m_pRenderModel->name, "null" ) )
+	if( tr.nullmodelindex > 0 && m_pCurrentEntity->curstate.modelindex == tr.nullmodelindex )
 		return;
 
 	m_pSpriteHeader = (msprite_t *)Mod_Extradata( m_pRenderModel );
