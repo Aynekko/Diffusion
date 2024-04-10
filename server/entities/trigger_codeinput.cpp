@@ -35,7 +35,7 @@ void CTriggerCodeInput::Spawn(void)
 
 	// make a random code
 	if( !pev->iuser1 )
-		pev->iuser1 = RANDOM_LONG( 1258, 9697 );
+		pev->iuser1 = RANDOM_LONG( RANDOM_LONG( 1043, 4987 ), RANDOM_LONG( 4993, 9897 ) );
 }
 
 void CTriggerCodeInput::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )

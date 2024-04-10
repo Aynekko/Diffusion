@@ -1833,7 +1833,11 @@ void CHGrunt::Spawn(void)
 	}
 	else
 	{
-		switch( RANDOM_LONG( 0, 3 ))
+		// shuffle properly because it's still not exactly random it seems
+		int rnd = RANDOM_LONG( 0, 3 );
+		rnd = RANDOM_LONG( 0, 3 );
+		rnd = RANDOM_LONG( 0, 3 );
+		switch( rnd )
 		{
 		case 0:
 			AddWeapon(HGRUNT_9MMAR);
@@ -3014,7 +3018,12 @@ void CHGruntAlien :: Spawn()
 	}
 	else //if ( FStringNull(wpns) )
 	{
-		switch( RANDOM_LONG( 0, 3 ))
+		// shuffle properly because it's still not exactly random it seems
+		int rnd = RANDOM_LONG( 0, 3 );
+		rnd = RANDOM_LONG( 0, 3 );
+		rnd = RANDOM_LONG( 0, 3 );
+
+		switch( rnd )
 		{
 		case 0:
 			AddWeapon(HGRUNT_9MMAR);
@@ -5157,7 +5166,12 @@ void CHGruntSecurity::Spawn()
 	}
 	else
 	{
-		switch (RANDOM_LONG(0, 3))
+		// shuffle properly because it's still not exactly random it seems
+		int rnd = RANDOM_LONG( 0, 3 );
+		rnd = RANDOM_LONG( 0, 3 );
+		rnd = RANDOM_LONG( 0, 3 );
+
+		switch( rnd )
 		{
 		case 0:
 			AddWeapon(HGRUNT_9MMAR);
