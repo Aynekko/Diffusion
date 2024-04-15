@@ -43,6 +43,7 @@ GNU General Public License for more details.
 #define FPART_OPAQUE		BIT(15) // goes through solid render pass
 #define FPART_NOTINSOLID	BIT(16) // don't draw in solid
 #define FPART_TWOSIDE		BIT(17)
+#define FPART_VERTEXLIGHT_INSTANT BIT(18)
 
 enum
 {
@@ -58,6 +59,7 @@ enum
 	TYPE_BUBBLES,
 	TYPE_BEAMRING,
 	TYPE_WATERDROP,
+	TYPE_SINGLEDROP,
 	TYPE_CUSTOM,
 };
 
@@ -96,7 +98,7 @@ public:
 
 	float m_flTime;
 	int	m_iFlags;
-	Vector newLight;
+	float newLight;
 	int EntIndex; // pointer to entity which emitted this particle
 
 //	float AlphaDownScale;
@@ -170,6 +172,7 @@ public:
 	int m_hBubble;
 	int m_hBeamRing;
 	int m_hRainDrop;
+	int m_hSingleDrop;
 
 	CQuakePart *m_pActiveParticles;
 
@@ -201,6 +204,7 @@ public:
 	void BloodParticle( int EntIndex, const Vector &pos, float Scale, Vector Color, Vector Direction );
 	void WaterDripLine( const Vector &start, const Vector &end, int Distance = 666 );
 	void WaterDrop( int EntIndex, const Vector &pos );
+	void WaterLandingDroplet( int EntIndex, const Vector &pos );
 
 	int ParticleCountPerEnt[8192]; // MAX_ENTITIES?
 

@@ -138,6 +138,8 @@ void ProcessRain( void )
 		{
 			if( curDrip->landInWater )
 				WaterLandingEffect( curDrip ); // create water rings
+			else // diffusion - add landing droplets
+				g_pParticles.WaterLandingDroplet( 0, curDrip->origin );
 
 			if( cl_debug_rain->value )
 			{

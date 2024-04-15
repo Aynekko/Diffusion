@@ -31,8 +31,8 @@ GNU General Public License for more details.
 #define MODE_RAIN 0
 #define MODE_SNOW 1
 
-#define DRIP_SPRITE_HALFHEIGHT	46
-#define DRIP_SPRITE_HALFWIDTH		8
+#define DRIP_SPRITE_HALFHEIGHT	20
+#define DRIP_SPRITE_HALFWIDTH		3
 #define SNOW_SPRITE_HALFSIZE		3
 #define MAX_RING_HALFSIZE		25
 

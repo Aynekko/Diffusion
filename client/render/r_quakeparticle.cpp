@@ -51,6 +51,7 @@ MemBlock<CQuakePart>ParticleArray_Blood( MAX_PARTICLES ); // TYPE_BLOOD
 MemBlock<CQuakePart>ParticleArray_Bubbles( MAX_PARTICLES ); // TYPE_BUBBLES
 MemBlock<CQuakePart>ParticleArray_Beamring( MAX_PARTICLES ); // TYPE_BEAMRING
 MemBlock<CQuakePart>ParticleArray_WaterDrop( MAX_PARTICLES ); // TYPE_WATERDROP
+MemBlock<CQuakePart>ParticleArray_SingleDrop( MAX_PARTICLES ); // TYPE_SINGLEDROP
 int partcounter = 0;
 
 //===============================================================================
@@ -89,7 +90,7 @@ CQuakePart InitializeParticle( void )
 	dst.m_hTexture = 0;
 	dst.ParticleType = TYPE_CUSTOM;
 	dst.m_iFlags = 0;
-	dst.newLight = g_vecZero;
+	dst.newLight = 0.0f;
 	dst.EntIndex = 0; // pointer to entity which emitted this particle
 
 	return dst;
@@ -252,7 +253,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 
 			// special case
 			if( curParticle->ParticleType == TYPE_WATERDROP )
-				g_pParticles.CreateEffect( 0, "water_spit", curParticle->m_vecLastOrg, g_vecZero );
+				g_pParticles.WaterLandingDroplet( 0, curParticle->m_vecLastOrg );
 
 			ParticleArray.DeleteCurrent();
 			partcounter--;
@@ -282,7 +283,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			if( curParticle->ParticleType == TYPE_WATERDROP )
 			{
 				R_MakeWaterSplash( curParticle->m_vecOrigin, org, 3 );
-				g_pParticles.CreateEffect( 0, "water_spit", curParticle->m_vecLastOrg, g_vecZero );
+				g_pParticles.WaterLandingDroplet( 0, curParticle->m_vecLastOrg );
 			}
 
 			// not underwater
@@ -466,9 +467,10 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		}
 
 		// vertex lit particle
-		if( FBitSet( curParticle->m_iFlags, FPART_VERTEXLIGHT ) )
+		if( FBitSet( curParticle->m_iFlags, FPART_VERTEXLIGHT ) || FBitSet( curParticle->m_iFlags, FPART_VERTEXLIGHT_INSTANT ) )
 		{
 			Vector light;
+			float fLight;
 			// gather static lighting
 			gEngfuncs.pTriAPI->LightAtPoint( org, light );
 			light *= (1.0f / 255.0f);
@@ -480,16 +482,20 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			float f = Q_max( Q_max( light.x, light.y ), light.z );
 			if( f > 1.0f ) light *= (1.0f / f);
 
-			//	curColor *= light;	// multiply to diffuse
-			if( curParticle->newLight.IsNull() )
-				curParticle->newLight = light;
+			// diffusion - use average and clip, so it won't become too dark...
+			fLight = bound( 0.25f, (light.x + light.y + light.z) / 3.0f, 1.0f );
+
+			if( FBitSet( curParticle->m_iFlags, FPART_VERTEXLIGHT_INSTANT ) )
+				curColor *= fLight;	// multiply to diffuse
 			else
 			{
-				curParticle->newLight.x = CL_UTIL_Approach( light.x, curParticle->newLight.x, g_fFrametime * 3 );
-				curParticle->newLight.y = CL_UTIL_Approach( light.y, curParticle->newLight.y, g_fFrametime * 3 );
-				curParticle->newLight.z = CL_UTIL_Approach( light.z, curParticle->newLight.z, g_fFrametime * 3 );
+				if( curParticle->newLight <= 0.0f )
+					curParticle->newLight = fLight;
+				else
+					curParticle->newLight = CL_UTIL_Approach( fLight, curParticle->newLight, g_fFrametime * 3 );
+		
+				curColor *= curParticle->newLight;
 			}
-			curColor *= curParticle->newLight;
 		}
 
 		curColor.x = bound( 0.0f, curColor.x, 1.0f );
@@ -900,9 +906,10 @@ bool CQuakePart::Evaluate( float gravity )
 	}
 
 	// vertex lit particle
-	if( FBitSet( m_iFlags, FPART_VERTEXLIGHT ) )
+	if( FBitSet( m_iFlags, FPART_VERTEXLIGHT ) || FBitSet( m_iFlags, FPART_VERTEXLIGHT_INSTANT ) )
 	{
 		Vector light;
+		float fLight;
 		// gather static lighting
 		gEngfuncs.pTriAPI->LightAtPoint( org, light );
 		light *= (1.0f / 255.0f);
@@ -914,16 +921,20 @@ bool CQuakePart::Evaluate( float gravity )
 		float f = Q_max( Q_max( light.x, light.y ), light.z );
 		if( f > 1.0f ) light *= (1.0f / f);
 
-		//	curColor *= light;	// multiply to diffuse
-		if( newLight.IsNull() )
-			newLight = light;
+		// diffusion - use average and clip, so it won't become too dark...
+		fLight = bound( 0.25f, (light.x + light.y + light.z) / 3.0f, 1.0f );
+
+		if( FBitSet( m_iFlags, FPART_VERTEXLIGHT_INSTANT ) )
+			curColor *= fLight;	// multiply to diffuse
 		else
 		{
-			newLight.x = CL_UTIL_Approach( light.x, newLight.x, g_fFrametime * 3 );
-			newLight.y = CL_UTIL_Approach( light.y, newLight.y, g_fFrametime * 3 );
-			newLight.z = CL_UTIL_Approach( light.z, newLight.z, g_fFrametime * 3 );
+			if( newLight <= 0.0f )
+				newLight = fLight;
+			else
+				newLight = CL_UTIL_Approach( fLight, newLight, g_fFrametime * 3 );
+
+			curColor *= newLight;
 		}
-		curColor *= newLight;
 	}
 
 	curColor.x = bound( 0.0f, curColor.x, 1.0f );
@@ -1085,6 +1096,7 @@ CQuakePartSystem :: CQuakePartSystem( void )
 	ParticleArray_Bubbles.Clear();
 	ParticleArray_Beamring.Clear();
 	ParticleArray_WaterDrop.Clear();
+	ParticleArray_SingleDrop.Clear();
 
 	partcounter = 0;
 
@@ -1124,6 +1136,7 @@ void CQuakePartSystem :: Clear( void )
 	m_hBubble = LOAD_TEXTURE( "gfx/particles/bubble", NULL, 0, TF_CLAMP );
 	m_hBeamRing = LOAD_TEXTURE( "gfx/particles/beamring", NULL, 0, TF_CLAMP );
 	m_hRainDrop = LOAD_TEXTURE( "gfx/particles/raindrop", NULL, 0, 0 );
+	m_hSingleDrop = LOAD_TEXTURE( "gfx/particles/singledrop", NULL, 0, 0 );
 
 	ParsePartInfos( "data/particles.txt" );
 
@@ -1139,6 +1152,7 @@ void CQuakePartSystem :: Clear( void )
 	ParticleArray_Bubbles.Clear();
 	ParticleArray_Beamring.Clear();
 	ParticleArray_WaterDrop.Clear();
+	ParticleArray_SingleDrop.Clear();
 
 	partcounter = 0;
 
@@ -1338,6 +1352,8 @@ int CQuakePartSystem :: ParseParticleFlags( char *pfile )
 			iFlags |= FPART_FRICTION;
 		else if( !Q_stricmp( token, "Light" )) 
 			iFlags |= FPART_VERTEXLIGHT;
+		else if( !Q_stricmp( token, "LightInstant" ) )
+			iFlags |= FPART_VERTEXLIGHT_INSTANT;
 		else if( !Q_stricmp( token, "Stretch" )) 
 			iFlags |= FPART_STRETCH;
 		else if( !Q_stricmp( token, "Underwater" )) 
@@ -1656,6 +1672,7 @@ void CQuakePartSystem :: Update( void )
 	DrawParticles( ParticleArray_Bubbles );
 	DrawParticles( ParticleArray_Beamring );
 	DrawParticles( ParticleArray_WaterDrop );
+	DrawParticles( ParticleArray_SingleDrop );
 
 	// draw particles from txt-file (through glbegin-end...)
 	CQuakePart *pCur, *pNext;
@@ -1762,6 +1779,9 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 		break;
 	case TYPE_WATERDROP:
 		dst = ParticleArray_WaterDrop.Allocate();
+		break;
+	case TYPE_SINGLEDROP:
+		dst = ParticleArray_SingleDrop.Allocate();
 		break;
 	case TYPE_CUSTOM:
 		dst = AllocParticle();
@@ -2491,7 +2511,7 @@ void CQuakePartSystem::WaterDripLine( const Vector &start, const Vector &end, in
 	src.m_vecOrigin = start + forward * RANDOM_FLOAT( 0.0f, dist );
 	src.m_vecAccel = Vector( 0, 0, -tr.movevars->gravity );
 	src.m_flDistance = Distance;
-	int flags = FPART_NOTINSOLID | FPART_NOTWATER | FPART_ADDITIVE;
+	int flags = FPART_NOTINSOLID | FPART_NOTWATER | FPART_ADDITIVE | FPART_VERTEXLIGHT_INSTANT;
 
 	AddParticle( &src, m_hRainDrop, flags );
 }
@@ -2506,7 +2526,41 @@ void CQuakePartSystem::WaterDrop( int EntIndex, const Vector &pos )
 	src.m_vecOrigin = pos;
 	src.m_vecAccel = Vector( 0, 0, -tr.movevars->gravity );
 	src.EntIndex = EntIndex;
-	int flags = FPART_NOTINSOLID | FPART_NOTWATER | FPART_ADDITIVE;
+	int flags = FPART_NOTINSOLID | FPART_NOTWATER | FPART_ADDITIVE | FPART_VERTEXLIGHT_INSTANT;
 
 	AddParticle( &src, m_hRainDrop, flags );
+}
+
+//=============================================================================
+// WaterLandingDroplet: splash small drips around when a single drip lands
+//=============================================================================
+void CQuakePartSystem::WaterLandingDroplet( int EntIndex, const Vector &pos )
+{
+	if( !g_fRenderInitialized )
+		return;
+
+	int count = RANDOM_LONG( 6, 10 );
+
+	CQuakePart src;
+
+	while( count > 0 )
+	{
+		src = InitializeParticle();
+		src.ParticleType = TYPE_SINGLEDROP;
+		src.m_vecOrigin = pos;
+		src.m_vecVelocity = Vector( RANDOM_LONG( -15, 15 ), RANDOM_LONG( -15, 15 ), RANDOM_LONG( 15, 25 ) );
+		src.m_vecAccel = Vector( 0, 0, RANDOM_FLOAT(-10.0f, -7.0f) );
+		src.m_flAlphaVelocity = RANDOM_FLOAT( -4.0f, -3.0f );
+		src.m_flRadius = RANDOM_FLOAT( 0.05f, 0.30f );
+		src.m_flLength = 0.1f;
+		src.m_flLengthVelocity = RANDOM_LONG( 20, 35 );
+		src.EntIndex = EntIndex;
+		src.m_flDistance = 666;
+		int flags = FPART_NOTWATER | FPART_STRETCH | FPART_VERTEXLIGHT_INSTANT;
+
+		if( !AddParticle( &src, m_hSingleDrop, flags ) )
+			break;
+
+		count--;
+	}
 }
