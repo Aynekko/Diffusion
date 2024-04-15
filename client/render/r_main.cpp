@@ -1230,6 +1230,11 @@ void R_CheckFog( void )
 			}
 			tr.fogEnabled = true;
 		}
+		else
+		{
+			tr.fogColor = g_vecZero;
+			tr.fogDensity = 0.0f;
+		}
 		return;
 	}
 
