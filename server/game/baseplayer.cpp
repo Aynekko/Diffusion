@@ -3209,6 +3209,9 @@ void CBasePlayer::ManageDrone( void )
 					pev->effects |= EF_PLAYERDRONECONTROL;
 					DroneCrosshairUpdate = true;
 					m_hDrone->pev->effects &= ~EF_MERGE_VISIBILITY;
+					// disable player's flashlight
+					if( FlashlightIsOn() )
+						FlashlightTurnOff();
 					// fire target if set
 					if( !FStringNull( DroneTarget_OnEnteringFirstPerson ) )
 						UTIL_FireTargets( DroneTarget_OnEnteringFirstPerson, this, this, USE_TOGGLE, 0 );
@@ -3367,6 +3370,10 @@ void CBasePlayer::ManageDrone( void )
 					drone_forwmove = drone_sidemove = drone_upmove = 0;
 
 					DroneCrosshairUpdate = true;
+
+					// disable drone's flashlight if it was on
+					if( m_hDrone->pev->effects & EF_DIMLIGHT )
+						m_hDrone->pev->effects &= ~EF_DIMLIGHT;
 
 					// fire target if set
 					if( !FStringNull( DroneTarget_OnLeavingFirstPerson ) )
@@ -6040,10 +6047,22 @@ void CBasePlayer::ImpulseCommands( )
 		break;
 		}
 	case 100:
-		if( FlashlightIsOn() )
-			FlashlightTurnOff();
-		else 
-			FlashlightTurnOn();
+		if( m_hDrone && DroneControl )
+		{
+			if( m_hDrone->pev->effects & EF_DIMLIGHT )
+				m_hDrone->pev->effects &= ~EF_DIMLIGHT;
+			else
+				m_hDrone->pev->effects |= EF_DIMLIGHT;
+
+			EMIT_SOUND( m_hDrone->edict(), CHAN_STATIC, "drone/drone_flashlight.wav", VOL_NORM, ATTN_IDLE );
+		}
+		else
+		{
+			if( FlashlightIsOn() )
+				FlashlightTurnOff();
+			else
+				FlashlightTurnOn();
+		}
 		break;
 	case 201:// paint decal
 		if ( gpGlobals->time < m_flNextDecalTime )

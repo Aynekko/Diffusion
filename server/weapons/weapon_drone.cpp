@@ -195,6 +195,7 @@ void CWpnDrone::Precache( void )
 	PRECACHE_SOUND("weapons/gauss_overcharge.wav");
 	PRECACHE_SOUND("weapons/drone_call.wav");
 	PRECACHE_SOUND("buttons_hl2/button17.wav");
+	PRECACHE_SOUND("drone/drone_flashlight.wav");
 
 	UTIL_PrecacheOther("_playerdrone");
 }
@@ -418,10 +419,7 @@ void CWpnDrone::SecondaryAttack( void )
 
 	m_flNextSecondaryAttack = gpGlobals->time + 2;
 
-	if( !m_pPlayer->DroneControl )
-		m_pPlayer->DroneControl = true;
-	else
-		m_pPlayer->DroneControl = false;
+	m_pPlayer->DroneControl = !m_pPlayer->DroneControl;
 /*
 	// if the drone is on the map, on the first click we enter "waiting mode"
 	// player has 3 seconds to click again to detonate the drone

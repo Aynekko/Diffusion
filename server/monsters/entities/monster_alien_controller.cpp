@@ -2913,6 +2913,10 @@ void CDrone::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTyp
 	if( pev->effects & EF_MERGE_VISIBILITY )
 		pev->effects &= ~EF_MERGE_VISIBILITY;
 
+	// disable flashlight
+	if( pev->effects & EF_DIMLIGHT )
+		pev->effects &= ~EF_DIMLIGHT;
+
 	UTIL_Remove(this);
 }
 

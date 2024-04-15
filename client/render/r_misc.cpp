@@ -113,6 +113,7 @@ void SetupFlashlight( cl_entity_t *pEnt )
 	{
 		pl = CL_AllocPlight( FLASHLIGHT_KEY );
 		pl->brightness = 1.1f;
+		pl->projectionTexture = FlashlightTexture;
 		if( r_shadowquality->value < 1 ) // shadows on very low, disable
 			pl->flags |= CF_NOSHADOWS;
 		
@@ -210,6 +211,7 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		v_origin = R_StudioAttachmentOrigin( pEnt, 1 );
 		v_angles = pEnt->angles;
 		v_angles += 5 * sin( tr.time );
+		pl->projectionTexture = FlashlightTexture;
 
 		// diffuse light
 		plight_t *dld = CL_AllocPlight( -pEnt->index );
@@ -223,6 +225,20 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		dld->die = tr.time;
 		R_SetupLightProjection( dld, v_origin, g_vecZero, dld->radius, 90.0f );
 		R_SetupLightAttenuationTexture( dld );
+	}
+	else if( pEnt == tr.pDrone ) // drone's flashlight - works only in 1st-person mode
+	{
+		pl = CL_AllocPlight( pEnt->index );
+		pl->flags |= CF_NOSHADOWS;
+		v_angles = pEnt->angles;
+		v_origin = pEnt->origin;
+		FlashlightFOV = 60;
+		FlashlightRadius = 250;
+		pl->projectionTexture = tr.spotlightTexture;
+		// xenon light
+		pl->color.r = 183;
+		pl->color.g = 192;
+		pl->color.b = 215;
 	}
 	else // other players, in multiplayer
 	{
@@ -238,6 +254,7 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		v_origin = pEnt->origin - forward * 20;
 		v_origin.z -= 6;
 		FlashlightFOV = 50;
+		pl->projectionTexture = FlashlightTexture;
 	}
 
 	// copy the entity number - we don't need light and shadows
@@ -246,7 +263,6 @@ void SetupFlashlight( cl_entity_t *pEnt )
 	if( !r_flashlightlockposition->value ) // allow lighting yourself if this is set
 		pl->effect = 1; // diffusion - just a flag that this is a flashlight
 
-	pl->projectionTexture = FlashlightTexture;
 	R_SetupLightProjection( pl, v_origin, v_angles, FlashlightRadius, FlashlightFOV );
 	R_SetupLightAttenuationTexture( pl );
 
@@ -473,7 +489,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 		{
 			plight_t *dl;
 
-			if( type == ET_PLAYER )
+			if( type == ET_PLAYER || ent == tr.pDrone )
 			{
 				SetupFlashlight( ent );
 			}
