@@ -515,8 +515,8 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				if( tr.time < tr.ParticleTime[ParticleEntIndex] )
 					return 0;
 				
-				bool IsSmoke = (ent->curstate.iuser1 == 0);
-				bool IsDustMotes = (ent->curstate.iuser1 == 1);
+				bool IsSmoke = ((ent->curstate.iuser1 == 0) || (ent->curstate.iuser1 == 2));
+				bool IsDustMotes = ((ent->curstate.iuser1 == 1) || (ent->curstate.iuser1 == 3));
 
 				Vector SmV_Org = ent->curstate.origin + (ent->curstate.mins + ent->curstate.maxs) * 0.5f;
 				// size
