@@ -2142,6 +2142,15 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 	R_UnloadFarGrass();
 
 	HUD_PrintStats();
+
+	// BUGBUG: after building cubemaps some UNSEEN lightmaps will be rendered with 0 gamma when you see them.
+	// after cubepass is finished I set this 5 frames into the future to shake the gamma cvars which slaps sense into those bastards
+	if( tr.reset_gamma_frame > 0 && tr.reset_gamma_frame == tr.realframecount )
+	{
+		SetBits( vid_brightness->flags, FCVAR_CHANGED );
+		SetBits( vid_gamma->flags, FCVAR_CHANGED );
+		tr.reset_gamma_frame = 0;
+	}
 	
 	return 1;
 }

@@ -467,7 +467,7 @@ void R_UpdateSurfaceParams( msurface_t *surf )
 	texture_t		*tex;
 
 	// diffusion - added cubepass check
-	if( (esrf->cached_frame == tr.realframecount) && (world->rebuilding_cubemaps == CMREBUILD_INACTIVE) )
+	if( (esrf->cached_frame == tr.realframecount) && !IsBuildingCubemaps() )
 		return; // already updated?
 
 	// update texture animation if needs
@@ -497,7 +497,7 @@ void R_UpdateSurfaceParams( msurface_t *surf )
 	else esrf->dt_texturenum = tex->dt_texturenum;
 
 	// check for lightmap modification
-	if( FBitSet( surf->flags, SURF_LM_UPDATE|SURF_DM_UPDATE ))
+	if( FBitSet( surf->flags, SURF_LM_UPDATE | SURF_DM_UPDATE ) )
 		R_UpdateLightMap( surf );
 
 	if( FBitSet( surf->flags, SURF_MOVIE ))

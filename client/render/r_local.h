@@ -462,6 +462,8 @@ typedef struct
 	mstudioevent_t studioevent[8192];
 
 	int nullmodelindex;
+
+	int reset_gamma_frame; // reset gamma after cubemap pass
 } ref_globals_t;
 
 typedef struct
