@@ -27,6 +27,7 @@
 #include "r_particle.h"
 #include "cdll_exp.h"
 #include "discord.h"
+#include "build.h"
 
 int developer_level;
 int g_iXashEngineBuildNumber;

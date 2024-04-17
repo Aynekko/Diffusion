@@ -1,3 +1,5 @@
+#include "build.h"
+
 #ifdef XASH_64BIT
 
 // OpenAG

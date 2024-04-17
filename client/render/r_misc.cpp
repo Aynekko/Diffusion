@@ -29,6 +29,7 @@ GNU General Public License for more details.
 #include "r_cvars.h"
 #include "triangleapi.h"
 #include "discord.h"
+#include "build.h"
 
 /*
 used iuser3 "flags":
