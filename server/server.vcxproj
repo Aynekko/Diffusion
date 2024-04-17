@@ -203,7 +203,7 @@
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>.\server.def</ModuleDefinitionFile>
       <OutputFile>.\..\x64\Debug\server\server.dll</OutputFile>
-      <ImportLibrary>.\..\temp\server\!debug\server.lib</ImportLibrary>
+      <ImportLibrary>.\..\x64\Debug\server\server.lib</ImportLibrary>
       <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>

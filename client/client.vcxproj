@@ -212,7 +212,7 @@
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <OutputFile>.\..\x64\Release\client\client.dll</OutputFile>
-      <ImportLibrary>.\..\temp\client\!release\client.lib</ImportLibrary>
+      <ImportLibrary>.\..\x64\Release\client\client.lib</ImportLibrary>
       <AdditionalLibraryDirectories>.\..\common\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>.\..\3rd-party\discord-rpc.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>
