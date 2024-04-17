@@ -160,7 +160,9 @@ the hud variables.
 */
 void HUD_Init( void )
 {
+#ifdef XASH_64BIT
 	discord_integration::initialize();
+#endif
 	
 	InitInput();
 	gHUD.Init();
@@ -180,7 +182,9 @@ void HUD_Shutdown( void )
 	// diffusion - save achievement stats
 	gHUD.m_StatusIconsAchievement.SaveAchievementFile();
 
+#ifdef XASH_64BIT
 	discord_integration::shutdown();
+#endif
 	
 	ShutdownInput();
 
@@ -221,7 +225,9 @@ returns 1 if anything has been changed, 0 otherwise.
 */
 int HUD_UpdateClientData(client_data_t * pcldata, float flTime)
 {
+#ifdef XASH_64BIT
 	discord_integration::on_update_client_data();
+#endif
 	
 	return gHUD.UpdateClientData( pcldata, flTime );
 }
@@ -274,7 +280,9 @@ Called by engine every frame that client .dll is loaded
 */
 void HUD_Frame( double time )
 {
+#ifdef XASH_64BIT
 	discord_integration::on_frame();
+#endif
 }
 
 int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )

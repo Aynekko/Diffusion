@@ -1,3 +1,5 @@
+#ifdef XASH_64BIT
+
 // OpenAG
 #include <cstdint>
 #include <cstring>
@@ -266,3 +268,5 @@ namespace discord_integration
 		discord_state->refresh_player_stats();
 	}
 }
+
+#endif // 64-bit only
