@@ -18,7 +18,9 @@
 DECLARE_MESSAGE( m_CrosshairStatic, CrosshairStatic );
 DECLARE_MESSAGE( m_CrosshairStatic, GaussHUD );
 
-static int CurCrosshair = 0;
+int CurCrosshair = 0;
+int TempDamageDealt = 0;
+char dmg[8];
 
 int CHudCrosshairStatic::Init( void )
 {
@@ -40,6 +42,7 @@ int CHudCrosshairStatic::VidInit( void )
 	G36CCrosshairImage = LOAD_TEXTURE( "sprites/scope_g36c.dds", NULL, 0, 0 );
 	ZoomBlur = 0.0f;
 	CurCrosshair = cl_crosshair->value;
+	DamageDealt = 0;
 
 	// gauss-specific
 	int Gframe = gHUD.GetSpriteIndex( "hud_gausniper_frame" );
@@ -71,6 +74,7 @@ int CHudCrosshairStatic::MsgFunc_CrosshairStatic( const char *pszName, int iSize
 	{
 		WeaponID = READ_BYTE();
 		ConfirmedHit = READ_BYTE();
+		DamageDealt = READ_SHORT();
 		DroneControl = (READ_BYTE() > 0);
 		LoadCrosshairForWeapon( WeaponID );
 		m_iFlags |= HUD_ACTIVE;
@@ -147,6 +151,29 @@ int CHudCrosshairStatic::Draw( float flTime )
 		SPR_DrawAdditive( 0, x, y, &m_HM.rc );
 		if( HMTransparency <= 0 )
 			EnableHitMarker = false;
+
+		// also draw the amount of damage
+		if( DamageDealt > 0 && cl_showdamage->value > 0 )
+		{
+			static int width = 0;
+			if( DamageDealt != TempDamageDealt )
+			{
+				_snprintf_s( dmg, sizeof( dmg ), "%d", DamageDealt );
+				// calculate width to align center...
+				const char *buf;
+				width = 0;
+				buf = dmg;
+				while( *buf )
+				{
+					width += gHUD.m_scrinfo.charWidths[*buf];
+					buf++;
+				}
+
+				TempDamageDealt = DamageDealt; // cache to avoid doing text trickery every frame
+			}
+
+			DrawString( (int)((ScreenWidth - width) * 0.5f), y - 10, dmg, r, g, b );
+		}
 	}
 	
 	if(( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WPNS | HIDEHUD_ALL | HIDEHUD_HEALTH | HIDEHUD_WPNS_HOLDABLEITEM | HIDEHUD_WPNS_CUSTOM)))

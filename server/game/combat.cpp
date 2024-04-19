@@ -950,6 +950,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			else
 				pPlayer->ConfirmedHit = 1; // dealt damage
 		}
+		pPlayer->DamageDealt = (int)flTake;
 	}
 
 	if ( pev->health <= 0 )

@@ -585,6 +585,7 @@ public:
 	bool HadWeapon[MAX_WEAPONS];
 
 	int ConfirmedHit; // an indicator to display a hit marker on the crosshair - 1: hit, 2: killed
+	int DamageDealt; // show on screen how much damage player made to enemy
 
 	char CameraEntity[128]; // if player is using a trigger_camera, copy its name here.
 							// if this field changes (player switched to another camera), the camera will deactivate 

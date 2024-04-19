@@ -82,6 +82,7 @@ extern cvar_t *cl_showmsgs;
 extern cvar_t *cl_viewmodelblend;
 extern cvar_t *cl_tutor;
 extern cvar_t *cl_showhealthbars;
+extern cvar_t *cl_showdamage;
 extern cvar_t *r_shadowquality;
 extern cvar_t *r_mirrorquality;
 extern cvar_t *r_testdlight;

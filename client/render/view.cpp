@@ -125,6 +125,7 @@ cvar_t *cl_showmsgs;
 cvar_t *cl_viewmodelblend;
 cvar_t *cl_tutor;
 cvar_t *cl_showhealthbars;
+cvar_t *cl_showdamage;
 cvar_t *gl_sunshafts;
 cvar_t *gl_sunshafts_blur;
 cvar_t *gl_sunshafts_brightness;
@@ -301,6 +302,7 @@ void V_Init( void )
 	r_show_tbn = CVAR_REGISTER( "r_show_tbn", "0", 0 );
 	cl_crosshair = CVAR_REGISTER( "cl_crosshair", "1", FCVAR_ARCHIVE );
 	cl_useicon = CVAR_REGISTER( "cl_useicon", "1", FCVAR_ARCHIVE );
+	cl_showdamage = CVAR_REGISTER( "cl_showdamage", "1", FCVAR_ARCHIVE );
 
 	// setup some engine cvars for custom rendering
 	r_extensions	= CVAR_GET_POINTER( "gl_allow_extensions" );

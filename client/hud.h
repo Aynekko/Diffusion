@@ -702,6 +702,7 @@ public:
 	int HMSprite;
 	float HMTransparency;
 	int ConfirmedHit;
+	int DamageDealt;
 
 	// gauss stuff
 	int m_hGAmmo;

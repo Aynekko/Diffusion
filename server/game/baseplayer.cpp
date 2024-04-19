@@ -6763,9 +6763,14 @@ void CBasePlayer :: UpdateClientData( void )
 				{
 					WRITE_BYTE(ConfirmedHit);
 					ConfirmedHit = 0;
+					WRITE_SHORT( DamageDealt );
+					DamageDealt = 0;
 				}
 				else
-					WRITE_BYTE(0);
+				{
+					WRITE_BYTE( 0 );
+					WRITE_SHORT( 0 );
+				}
 				if( DroneControl )
 					WRITE_BYTE( 1 );
 				else
