@@ -1198,6 +1198,8 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 
 	pev->solid = SOLID_NOT;
 
+	pev->punchangle.x -= 15;
+
 	if ( ( pev->health < -40 && iGib != GIB_NEVER ) || iGib == GIB_ALWAYS )
 	{
 		GibMonster();	// This clears pev->model
@@ -1214,9 +1216,6 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 
 	SetThink(&CBasePlayer::PlayerDeathThink);
 	SetNextThink( 0.1 );
-
-	pev->punchangle.x = -15;
-	UTIL_FireTargets( "game_playerdeath", this, this, USE_TOGGLE, 0 );
 }
 
 void CBasePlayer::GibMonster( void )

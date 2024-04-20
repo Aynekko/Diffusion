@@ -236,6 +236,7 @@ int CHalfLifeRules :: IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKill
 //=========================================================
 void CHalfLifeRules :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor )
 {
+	UTIL_FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
 }
 
 //=========================================================
