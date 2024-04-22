@@ -2326,10 +2326,15 @@ void R_DrawLightForSurfList( plight_t *pl )
 			float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
 
 			// set the current waveheight
-			if( s->polys->verts[0][2] >= RI->vieworg[2] )
-				waveHeight = -RI->currententity->curstate.scale;
+			if( FBitSet( s->flags, SURF_WATER ) )
+			{
+				if( s->polys->verts[0][2] >= RI->vieworg[2] )
+					waveHeight = -RI->currententity->curstate.scale;
+				else
+					waveHeight = RI->currententity->curstate.scale;
+			}
 			else
-				waveHeight = RI->currententity->curstate.scale;
+				waveHeight = 0.0f;
 
 			// light dir
 			light_params[0] = Vector4D( lightdir.x, lightdir.y, lightdir.z, pl->fov );
@@ -2820,10 +2825,15 @@ void R_DrawBrushList( void )
 			gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
 
 			// set the current waveheight
-			if( s->polys->verts[0][2] >= RI->vieworg[2] )
-				waveHeight = -RI->currententity->curstate.scale;
+			if( FBitSet( s->flags, SURF_WATER ) )
+			{
+				if( s->polys->verts[0][2] >= RI->vieworg[2] )
+					waveHeight = -RI->currententity->curstate.scale;
+				else
+					waveHeight = RI->currententity->curstate.scale;
+			}
 			else
-				waveHeight = RI->currententity->curstate.scale;
+				waveHeight = 0.0f;
 
 			// write constants
 			pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
