@@ -655,6 +655,11 @@ BOOL CBaseDoor::DoorActivate( void )
 		// door should close
 		DoorGoDown();
 	}
+	else if( HasSpawnFlags( SF_DOOR_USE_ONLY ) && m_flWait < 0 && m_iState == STATE_ON )
+	{
+		// door should close
+		DoorGoDown();
+	}
 	else
 	{
 		// door should open
