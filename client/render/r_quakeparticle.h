@@ -77,6 +77,7 @@ public:
 	float		m_flAlphaVelocity;
 	float		m_flRadius;
 	float		m_flRadiusVelocity;
+	float		m_flRadiusMax;
 	float		m_flLength;
 	float		m_flLengthVelocity;
 	float		m_flRotation;	// texture ROLL angle
@@ -174,6 +175,7 @@ public:
 	int m_hBeamRing;
 	int m_hRainDrop;
 	int m_hSingleDrop;
+	int m_hWaterFall;
 
 	CQuakePart *m_pActiveParticles;
 
@@ -206,6 +208,7 @@ public:
 	void WaterDripLine( const Vector &start, const Vector &end, int Distance = 666 );
 	void WaterDrop( int EntIndex, const Vector &pos );
 	void WaterLandingDroplet( int EntIndex, const Vector &pos );
+	void Waterfall( int EntIndex, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, const Vector &Color, float Scale, float Alpha = 1.0f, int Distance = 666 );
 
 	int ParticleCountPerEnt[8192]; // MAX_ENTITIES?
 

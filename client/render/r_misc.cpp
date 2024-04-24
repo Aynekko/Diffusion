@@ -518,6 +518,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				
 				bool IsSmoke = ((ent->curstate.iuser1 == 0) || (ent->curstate.iuser1 == 2));
 				bool IsDustMotes = ((ent->curstate.iuser1 == 1) || (ent->curstate.iuser1 == 3));
+				bool IsWaterfall = (ent->curstate.iuser1 == 4);
 
 				Vector SmV_Org = ent->curstate.origin + (ent->curstate.mins + ent->curstate.maxs) * 0.5f;
 				// size
@@ -530,9 +531,12 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 						Density = 33.0f;
 					else if( IsDustMotes )
 						Density = 10.0f;
+					else if( IsWaterfall )
+						Density = 40.0f;
 				}
 
 				int Count = (SmV_Size.x *SmV_Size.y + SmV_Size.y * SmV_Size.z + SmV_Size.z * SmV_Size.x) / (3 * Density * Density);
+				if( Count < 1 ) Count = 1;
 				Vector vecSpot;
 				int i, j;
 				float SmV_Alpha = ent->curstate.renderamt / 255.0f;
@@ -569,7 +573,10 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 							continue;
 					}
 
-					g_pParticles.SmokeVolume( ParticleEntIndex, ent->curstate.iuser1, vecSpot, ent->curstate.vuser1, ent->curstate.vuser2, Color, SmV_Scale, SmV_Alpha, SmV_Distance );
+					if( IsWaterfall )
+						g_pParticles.Waterfall( ParticleEntIndex, vecSpot, ent->curstate.vuser1, ent->curstate.vuser2, Color, SmV_Scale, SmV_Alpha, SmV_Distance );
+					else
+						g_pParticles.SmokeVolume( ParticleEntIndex, ent->curstate.iuser1, vecSpot, ent->curstate.vuser1, ent->curstate.vuser2, Color, SmV_Scale, SmV_Alpha, SmV_Distance );
 				}
 
 				tr.ParticleTime[ParticleEntIndex] = tr.time + ent->curstate.fuser3;

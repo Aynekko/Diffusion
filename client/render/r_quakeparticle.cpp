@@ -52,6 +52,7 @@ MemBlock<CQuakePart>ParticleArray_Bubbles( MAX_PARTICLES ); // TYPE_BUBBLES
 MemBlock<CQuakePart>ParticleArray_Beamring( MAX_PARTICLES ); // TYPE_BEAMRING
 MemBlock<CQuakePart>ParticleArray_WaterDrop( MAX_PARTICLES ); // TYPE_WATERDROP
 MemBlock<CQuakePart>ParticleArray_SingleDrop( MAX_PARTICLES ); // TYPE_SINGLEDROP
+MemBlock<CQuakePart>ParticleArray_WaterFall( MAX_PARTICLES ); // TYPE_WATERFALL
 int partcounter = 0;
 
 //===============================================================================
@@ -71,6 +72,7 @@ CQuakePart InitializeParticle( void )
 	dst.m_flAlphaVelocity = 0;
 	dst.m_flRadius = 1.0f;
 	dst.m_flRadiusVelocity = 0;
+	dst.m_flRadiusMax = 0;
 	dst.m_flLength = 1.0f;
 	dst.m_flLengthVelocity = 0;
 	dst.m_flRotation = 0; // texture ROLL angle
@@ -165,6 +167,8 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		float time2 = time * time;
 		float curAlpha = curParticle->m_flAlpha + curParticle->m_flAlphaVelocity * time;
 		float curRadius = curParticle->m_flRadius + curParticle->m_flRadiusVelocity * time;
+		if( curParticle->m_flRadiusMax > 0 && curRadius > curParticle->m_flRadiusMax )
+			curRadius = curParticle->m_flRadiusMax;
 		float curLength = curParticle->m_flLength + curParticle->m_flLengthVelocity * time;
 		float curRotation = curParticle->m_flRotation + curParticle->m_flRotationVelocity * time;
 		Vector curColor = curParticle->m_vecColor + curParticle->m_vecColorVelocity * time;
@@ -187,6 +191,13 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 					break;
 				}
 			}
+		}
+
+		// special case for waterfall
+		if( curParticle->ParticleType == TYPE_WATERFALL )
+		{
+			curParticle->m_vecVelocity.x = CL_UTIL_Approach( 0.0f, curParticle->m_vecVelocity.x, 50 * g_fFrametime );
+			curParticle->m_vecVelocity.y = CL_UTIL_Approach( 0.0f, curParticle->m_vecVelocity.y, 50 * g_fFrametime );
 		}
 
 		if( (curParticle->m_iFlags & FPART_DISTANCESCALE) && (curParticle->m_flRadiusVelocity == 0.0f) )
@@ -658,6 +669,8 @@ bool CQuakePart::Evaluate( float gravity )
 
 	float curAlpha;
 	float curRadius = m_flRadius + m_flRadiusVelocity * time;
+	if( m_flRadiusMax > 0 && curRadius > m_flRadiusMax )
+		curRadius = m_flRadiusMax;
 	float curLength = m_flLength + m_flLengthVelocity * time;
 	float curRotation = m_flRotation + m_flRotationVelocity * time;
 
@@ -1097,6 +1110,7 @@ CQuakePartSystem :: CQuakePartSystem( void )
 	ParticleArray_Beamring.Clear();
 	ParticleArray_WaterDrop.Clear();
 	ParticleArray_SingleDrop.Clear();
+	ParticleArray_WaterFall.Clear();
 
 	partcounter = 0;
 
@@ -1137,6 +1151,7 @@ void CQuakePartSystem :: Clear( void )
 	m_hBeamRing = LOAD_TEXTURE( "gfx/particles/beamring", NULL, 0, TF_CLAMP );
 	m_hRainDrop = LOAD_TEXTURE( "gfx/particles/raindrop", NULL, 0, 0 );
 	m_hSingleDrop = LOAD_TEXTURE( "gfx/particles/singledrop", NULL, 0, 0 );
+	m_hWaterFall = LOAD_TEXTURE( "gfx/particles/splash", NULL, 0, 0 );
 
 	ParsePartInfos( "data/particles.txt" );
 
@@ -1153,6 +1168,7 @@ void CQuakePartSystem :: Clear( void )
 	ParticleArray_Beamring.Clear();
 	ParticleArray_WaterDrop.Clear();
 	ParticleArray_SingleDrop.Clear();
+	ParticleArray_WaterFall.Clear();
 
 	partcounter = 0;
 
@@ -1673,6 +1689,7 @@ void CQuakePartSystem :: Update( void )
 	DrawParticles( ParticleArray_Beamring );
 	DrawParticles( ParticleArray_WaterDrop );
 	DrawParticles( ParticleArray_SingleDrop );
+	DrawParticles( ParticleArray_WaterFall );
 
 	// draw particles from txt-file (through glbegin-end...)
 	CQuakePart *pCur, *pNext;
@@ -1783,6 +1800,9 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 	case TYPE_SINGLEDROP:
 		dst = ParticleArray_SingleDrop.Allocate();
 		break;
+	case TYPE_WATERFALL:
+		dst = ParticleArray_WaterFall.Allocate();
+		break;
 	case TYPE_CUSTOM:
 		dst = AllocParticle();
 		break;
@@ -1817,6 +1837,7 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 	dst->m_flRotationVelocity = src->m_flRotationVelocity;
 	dst->m_flAlphaVelocity = src->m_flAlphaVelocity;
 	dst->m_flRadiusVelocity = src->m_flRadiusVelocity;
+	dst->m_flRadiusMax = src->m_flRadiusMax;
 	dst->m_flLengthVelocity = src->m_flLengthVelocity;
 	dst->m_flBounceFactor = src->m_flBounceFactor;
 	dst->m_flDistance = src->m_flDistance;
@@ -2563,4 +2584,55 @@ void CQuakePartSystem::WaterLandingDroplet( int EntIndex, const Vector &pos )
 
 		count--;
 	}
+}
+
+//=============================================================================
+// Waterfall: func_smokevolume uses this
+// creates a splash particle which falls down and grows in scale
+// can be initialized with velocity
+//=============================================================================
+void CQuakePartSystem::Waterfall( int EntIndex, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, const Vector &Color, float Scale, float Alpha, int Distance )
+{
+	if( !g_fRenderInitialized )
+		return;
+
+	CQuakePart src = InitializeParticle();
+
+	int flags = (FPART_FADEIN | FPART_NOTINSOLID | FPART_NOTWATER);
+	float posRand = 20.0f;
+	float ScaleRand = 0.0f;
+
+	if( !Color.IsNull() )
+		src.m_vecColor = Color;
+
+	if( !Scale )
+		Scale = RANDOM_FLOAT( 30, 40 );
+	else
+	{
+		ScaleRand = Scale * 0.1;
+		Scale = RANDOM_FLOAT( Scale - ScaleRand, Scale + ScaleRand );
+	}
+	src.m_vecOrigin.x = pos.x + RANDOM_FLOAT( -posRand, posRand );
+	src.m_vecOrigin.y = pos.y + RANDOM_FLOAT( -posRand, posRand );
+	src.m_vecOrigin.z = pos.z + RANDOM_FLOAT( -posRand, posRand );
+	src.m_vecVelocity = PushVelocity; // special case for TYPE_WATERFALL - x and y will be scaled down to 0 during drawing
+	if( PushVelocityRand.x != 0.0f )
+		src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.x, PushVelocityRand.x );
+	if( PushVelocityRand.y != 0.0f )
+		src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.y, PushVelocityRand.y );
+	if( PushVelocityRand.z != 0.0f )
+		src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.z, PushVelocityRand.z );
+	src.m_vecAccel = Vector( 0, 0, -tr.movevars->gravity * 0.25f );
+	src.m_flAlpha = Alpha;
+	src.m_flAlphaVelocity = -0.5 * Alpha;
+	src.m_flRadius = Scale;
+	src.m_flRadiusVelocity = 100;
+	src.m_flRadiusMax = 150;
+	src.m_flRotation = RANDOM_LONG( 0, 359 );
+	src.m_flRotationVelocity = RANDOM_LONG( -100, 100 );
+	src.m_flDistance = Distance;
+	src.ParticleType = TYPE_WATERFALL;
+	src.EntIndex = EntIndex;
+
+	AddParticle( &src, m_hWaterFall, flags );
 }
