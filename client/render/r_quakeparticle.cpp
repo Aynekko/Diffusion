@@ -43,7 +43,7 @@ MemBlock<CQuakePart>ParticleArray_Default( MAX_PARTICLES ); // TYPE_DEFAULT
 MemBlock<CQuakePart>ParticleArray_Dustmote( MAX_PARTICLES ); // TYPE_DUSTMOTE
 MemBlock<CQuakePart>ParticleArray_Sparks( MAX_PARTICLES ); // TYPE_SPARKS
 MemBlock<CQuakePart>ParticleArray_Smoke( MAX_PARTICLES ); // TYPE_SMOKE
-MemBlock<CQuakePart>ParticleArray_Watersplash( MAX_PARTICLES ); // TYPE_WATERSPLASH
+MemBlock<CQuakePart>ParticleArray_Waterring( MAX_PARTICLES ); // TYPE_WATERRING
 MemBlock<CQuakePart>ParticleArray_Sand( MAX_PARTICLES ); // TYPE_SAND
 MemBlock<CQuakePart>ParticleArray_Dirt( MAX_PARTICLES ); // TYPE_DIRT
 MemBlock<CQuakePart>ParticleArray_Fireball( MAX_PARTICLES ); // TYPE_FIREBALL
@@ -1088,7 +1088,7 @@ CQuakePartSystem :: CQuakePartSystem( void )
 	ParticleArray_Dustmote.Clear();
 	ParticleArray_Sparks.Clear();
 	ParticleArray_Smoke.Clear();
-	ParticleArray_Watersplash.Clear();
+	ParticleArray_Waterring.Clear();
 	ParticleArray_Sand.Clear();
 	ParticleArray_Dirt.Clear();
 	ParticleArray_Fireball.Clear();
@@ -1126,7 +1126,7 @@ void CQuakePartSystem :: Clear( void )
 	m_hDefaultParticle = FIND_TEXTURE( "*particle" );	// quake particle
 	m_hSparks = LOAD_TEXTURE( "gfx/particles/spark", NULL, 0, TF_CLAMP );
 	m_hSmoke = LOAD_TEXTURE( "gfx/particles/smoke", NULL, 0, TF_CLAMP );
-	m_hWaterSplash = LOAD_TEXTURE( "gfx/particles/waterring", NULL, 0, TF_CLAMP );
+	m_hWaterRing = LOAD_TEXTURE( "gfx/particles/waterring", NULL, 0, TF_CLAMP );
 	m_hBlood = LOAD_TEXTURE( "gfx/particles/blood", NULL, 0, TF_CLAMP );
 	m_hBloodSplat = LOAD_TEXTURE( "gfx/particles/blood_splat", NULL, 0, TF_CLAMP );
 	m_hSand = LOAD_TEXTURE( "gfx/particles/sandparticle", NULL, 0, TF_CLAMP );
@@ -1144,7 +1144,7 @@ void CQuakePartSystem :: Clear( void )
 	ParticleArray_Dustmote.Clear();
 	ParticleArray_Sparks.Clear();
 	ParticleArray_Smoke.Clear();
-	ParticleArray_Watersplash.Clear();
+	ParticleArray_Waterring.Clear();
 	ParticleArray_Sand.Clear();
 	ParticleArray_Dirt.Clear();
 	ParticleArray_Fireball.Clear();
@@ -1664,7 +1664,7 @@ void CQuakePartSystem :: Update( void )
 	DrawParticles( ParticleArray_Dustmote );
 	DrawParticles( ParticleArray_Sparks );
 	DrawParticles( ParticleArray_Smoke );
-	DrawParticles( ParticleArray_Watersplash );
+	DrawParticles( ParticleArray_Waterring );
 	DrawParticles( ParticleArray_Sand );
 	DrawParticles( ParticleArray_Dirt );
 	DrawParticles( ParticleArray_Fireball );
@@ -1756,8 +1756,8 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 	case TYPE_SPARKS:
 		dst = ParticleArray_Sparks.Allocate();
 		break;
-	case TYPE_WATERSPLASH:
-		dst = ParticleArray_Watersplash.Allocate();
+	case TYPE_WATERRING:
+		dst = ParticleArray_Waterring.Allocate();
 		break;
 	case TYPE_SAND:
 		dst = ParticleArray_Sand.Allocate();
@@ -2363,7 +2363,7 @@ void CQuakePartSystem :: BulletParticles( int EntIndex, const Vector &org, const
 	}
 }
 
-void CQuakePartSystem::WaterSplashParticle( int EntIndex, const Vector &pos, float size )
+void CQuakePartSystem::WaterRingParticle( int EntIndex, const Vector &pos, float size )
 {
 	if( !g_fRenderInitialized )
 		return;
@@ -2379,10 +2379,10 @@ void CQuakePartSystem::WaterSplashParticle( int EntIndex, const Vector &pos, flo
 	src.m_flRadiusVelocity = (25 + RANDOM_FLOAT( 0, 10 )) * size;
 	src.m_flRotation = RANDOM_LONG( 0, 359 );
 	src.m_flRotationVelocity = RANDOM_FLOAT(-25.0,25.0);
-	src.ParticleType = TYPE_WATERSPLASH;
+	src.ParticleType = TYPE_WATERRING;
 	src.EntIndex = EntIndex;
 
-	AddParticle( &src, m_hWaterSplash, flags );
+	AddParticle( &src, m_hWaterRing, flags );
 }
 
 void CQuakePartSystem::BloodParticle( int EntIndex, const Vector &pos, float Scale, Vector Color, Vector Direction )

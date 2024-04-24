@@ -51,7 +51,7 @@ enum
 	TYPE_DUSTMOTE,
 	TYPE_SPARKS,
 	TYPE_SMOKE,
-	TYPE_WATERSPLASH,
+	TYPE_WATERRING,
 	TYPE_SAND,
 	TYPE_DIRT,
 	TYPE_FIREBALL,
@@ -60,6 +60,7 @@ enum
 	TYPE_BEAMRING,
 	TYPE_WATERDROP,
 	TYPE_SINGLEDROP,
+	TYPE_WATERFALL,
 	TYPE_CUSTOM,
 };
 
@@ -162,7 +163,7 @@ public:
 	int	m_hDefaultParticle;
 	int	m_hSparks;
 	int	m_hSmoke;
-	int	m_hWaterSplash;
+	int	m_hWaterRing;
 	int m_hBlood;
 	int m_hBloodSplat;
 	int m_hSand;
@@ -199,7 +200,7 @@ public:
 	void SmokeParticles( int EntIndex, const Vector &pos, int count, float speed = 0, float scale = 0, float pos_rand = 10 );
 	void Smoke( int EntIndex, int Particle, const Vector &pos, const Vector &vel, int count, float speed = 0.15, float scale = 30, float posRand = 0, float velRand = 0, Vector Color = Vector(1,1,1), float Distance = 0.0f, float Alpha = 0.5f );
 	void GunSmoke( int EntIndex, const Vector &pos, Vector vel, int WeaponID );
-	void WaterSplashParticle( int EntIndex, const Vector &pos, float size = 1.0f );
+	void WaterRingParticle( int EntIndex, const Vector &pos, float size = 1.0f );
 	void SmokeVolume( int EntIndex, int Particle, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, const Vector &Color, float Scale, float Alpha = 0.1f, int Distance = 666 );
 	void BloodParticle( int EntIndex, const Vector &pos, float Scale, Vector Color, Vector Direction );
 	void WaterDripLine( const Vector &start, const Vector &end, int Distance = 666 );

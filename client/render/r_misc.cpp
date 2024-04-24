@@ -2174,15 +2174,15 @@ void R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 		switch( Type )
 		{
 		case 0:
-			g_pParticles.WaterSplashParticle( 0, vecTemp );
+			g_pParticles.WaterRingParticle( 0, vecTemp );
 			g_pParticles.CreateEffect( 0, "very_small_splash", vecTemp, g_vecZero );
 			break;
 		case 1:
-			g_pParticles.WaterSplashParticle( 0, vecTemp );
+			g_pParticles.WaterRingParticle( 0, vecTemp );
 			g_pParticles.CreateEffect( 0, "small_splash", vecTemp, g_vecZero );
 			break;
 		case 2:
-			g_pParticles.WaterSplashParticle( 0, vecTemp );
+			g_pParticles.WaterRingParticle( 0, vecTemp );
 			g_pParticles.CreateEffect( 0, "big_splash", vecTemp, g_vecZero );
 
 			if( (tr.viewparams.vieworg - vecTemp).Length() < 200 )
@@ -2194,7 +2194,7 @@ void R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 			}
 			break;
 		case 3: // small drip
-			g_pParticles.WaterSplashParticle( 0, vecTemp, 0.25f );
+			g_pParticles.WaterRingParticle( 0, vecTemp, 0.25f );
 			break;
 		}
 	}

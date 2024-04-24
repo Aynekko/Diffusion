@@ -495,7 +495,7 @@ void PM_PlayStepSound( int step, float fvol )
 
 		// diffusion - add water splash
 #ifdef CLIENT_DLL
-		g_pParticles.WaterSplashParticle( 0, SplashOrg );
+		g_pParticles.WaterRingParticle( 0, SplashOrg );
 #endif
 		break;
 	case STEP_LADDER:

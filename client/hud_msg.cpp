@@ -1046,7 +1046,7 @@ int CHud::MsgFunc_WaterSplash( const char *pszName, int iSize, void *pbuf )
 	Type = READ_BYTE();
 	END_READ();
 
-	g_pParticles.WaterSplashParticle( 0, pos );
+	g_pParticles.WaterRingParticle( 0, pos );
 
 	switch( Type )
 	{
