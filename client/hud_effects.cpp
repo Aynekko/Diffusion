@@ -14,7 +14,7 @@
 #define SPEED_ARROW_STEP 2
 #define SPEED_ARROW_FRAMES 121
 #define SPEEDOMETER_Y_OFFSET 5
-#define SAVE_SQUARE_SIZE 150
+#define SAVE_SQUARE_SIZE 100
 
 int CScreenEffects::Init( void )
 {
@@ -31,8 +31,7 @@ int CScreenEffects::VidInit(void)
 	SpeedometerArrow = LOAD_TEXTURE( "sprites/diffusion/speedometer_arrow.dds", NULL, 0, 0 );
 	SpeedometerGears.Init( "sprites/diffusion/speed_gears/speed_gears" );
 	LastOrigin = g_vecZero;
-	SaveIcon.Init( "sprites/diffusion/saveicon/saveicon" );
-	SaveIcon.flags = ATX_STOPATLASTFRAME;
+	SaveIcon = LOAD_TEXTURE( "sprites/diffusion/saveicon.dds", NULL, 0, 0 );
 
 	return 1;
 }
@@ -48,46 +47,93 @@ int CScreenEffects::Draw( float flTime )
 	return 1;
 }
 
-//===============================================
-// draw "game saved" icon
-//===============================================
+//==========================================================================
+// draw "game saved" icon (150õ150 image)
+// it's a still picture, and all animation is done here in the code
+//==========================================================================
 void CScreenEffects::DrawGameSaved(void)
 {
-	if( !SaveIcon.Initialized() )
+	if( !SaveIcon )
 		return;
+
+	static float alpha = 0.0f;
+	static bool bFadeOut = false;
+	const int rotation = 360 * 3;
+	static float curRotation = 0.0f;
+	static int fadeout_stage = 0;
 	
 	if( SaveIcon_Reset )
 	{
-		SaveIcon.SetCurFrame( 0 );
-		SaveIcon.SetTransparency( 0 );
+		SaveIcon_RotSpeed = 0.0f;
+		SaveIcon_Alpha = 0.0f;
+		SaveIcon_StartTime = tr.time;
+		curRotation = 0.0f;
+		alpha = 0.0f;
+		bFadeOut = false;
 		SaveIcon_Reset = false;
 	}
 	
 	if( !ShouldDrawGameSaved )
 		return;
 
-	if( SaveIcon.IsLastFrame() )
-	{
-		if( SaveIcon.a > 0.0f )
-			SaveIcon.a -= 300 * g_fFrametime;
+	if( alpha < 1.0f && !bFadeOut )
+		alpha += 0.65f * g_fFrametime;
 
-		if( SaveIcon.a <= 0.0f )
+	alpha = bound( 0.0f, alpha, 1.0f );
+	if( curRotation < rotation )
+	{
+		SaveIcon_RotSpeed = bound( 30.0f, (rotation - curRotation) * 5.0f, 3000.0f );
+		curRotation += SaveIcon_RotSpeed * g_fFrametime;
+	}
+
+	if( curRotation >= rotation )
+	{
+		curRotation = rotation;
+		if( !bFadeOut )
+		{
+			bFadeOut = true;
+			fadeout_stage = 0;
+		}
+	}
+
+	if( bFadeOut )
+	{
+		switch( fadeout_stage ) // pulse 1 time :D
+		{
+		case 0:
+			alpha = CL_UTIL_Approach( 0.25f, alpha, 2.5f * g_fFrametime );
+			if( alpha <= 0.25f )
+				fadeout_stage = 1;
+			break;
+		case 1:
+			alpha = CL_UTIL_Approach( 1.0f, alpha, 2.5f * g_fFrametime );
+			if( alpha >= 1.0f )
+				fadeout_stage = 2;
+			break;
+		case 2:
+			alpha -= 1.5f * g_fFrametime;
+			break;
+		}
+		
+		if( alpha <= 0.0f )
 		{
 			ShouldDrawGameSaved = false;
-			SaveIcon.SetCurFrame( 0 );
-			SaveIcon.SetTransparency( 0 );
 			return;
 		}
 	}
-	else
-	{
-		if( SaveIcon.a < 255.0f )
-			SaveIcon.a += 350 * g_fFrametime;
-	}
 
-	SaveIcon.SetRenderMode( kRenderTransAdd );
-	SaveIcon.SetPos( (ScreenWidth * 0.5f) - (SAVE_SQUARE_SIZE / 2), ScreenHeight - 75 - SAVE_SQUARE_SIZE, (ScreenWidth * 0.5f) + (SAVE_SQUARE_SIZE / 2), ScreenHeight - 75 );
-	SaveIcon.DrawAnimate( 100 );
+	GL_Bind( 0, SaveIcon );
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
+	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, alpha );
+
+	pglPushMatrix();
+	pglTranslatef( (ScreenWidth * 0.5f) - (SAVE_SQUARE_SIZE / 2), ScreenHeight - 75 - SAVE_SQUARE_SIZE, 0 );
+	pglRotatef( curRotation, 0, 0, 1 );
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	DrawQuad( -SAVE_SQUARE_SIZE / 2, -SAVE_SQUARE_SIZE / 2, SAVE_SQUARE_SIZE / 2, SAVE_SQUARE_SIZE / 2 );
+	gEngfuncs.pTriAPI->End();
+	pglPopMatrix();
 }
 
 //===============================================

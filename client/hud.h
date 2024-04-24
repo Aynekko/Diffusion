@@ -806,7 +806,10 @@ private:
 	int Speedometer;
 	int SpeedometerArrow;
 	CAnimatex SpeedometerGears;
-	CAnimatex SaveIcon;
+	int SaveIcon;
+	float SaveIcon_RotSpeed;
+	float SaveIcon_Alpha;
+	float SaveIcon_StartTime;
 	float VignetteAlpha;
 	float ShieldAlpha;
 	float SpeedArrowRotation;
