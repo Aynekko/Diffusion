@@ -109,7 +109,12 @@ int CHudDroneBars::Draw( float flTime )
 	else
 		SPR_Set( m_hDroneIcon, 25, 255, 25 );
 
-	SPR_DrawAdditive( 0, x, y, m_prc_droneicon );
+	int frame = 0;
+
+	if( tr.pDrone && tr.pDrone->curstate.effects & EF_DIMLIGHT )
+		frame = 1;
+
+	SPR_DrawAdditive( frame, x, y, m_prc_droneicon );
 
 	return 1;
 }

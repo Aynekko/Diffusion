@@ -48,7 +48,7 @@ int CScreenEffects::Draw( float flTime )
 }
 
 //==========================================================================
-// draw "game saved" icon (150õ150 image)
+// draw "game saved" icon (150x150 image)
 // it's a still picture, and all animation is done here in the code
 //==========================================================================
 void CScreenEffects::DrawGameSaved(void)

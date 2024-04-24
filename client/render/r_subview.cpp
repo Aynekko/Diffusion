@@ -832,6 +832,9 @@ static void R_RenderDroneView( void )
 {
 	if( !RP_NORMALPASS() )
 		return;
+
+	if( !screen_static.Initialized() )
+		screen_static.Init( "textures/anim_noise/noise" );
 	
 	// don't bother if the drone is not selected at all
 	if( gHUD.m_Ammo.WeaponID != WEAPON_DRONE )
@@ -855,9 +858,6 @@ static void R_RenderDroneView( void )
 	}
 
 	// advance noise when drone is absent
-	if( !screen_static.Initialized() )
-		screen_static.Init( "textures/anim_noise/noise" );
-
 	if( screen_static.Initialized() )
 	{
 		screen_static.AdvanceFrame( 15 );
