@@ -539,7 +539,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			axis[0] = axis[0].Normalize();
 
 			org3 = org + (axis[1] * -curLength);
-			axis[2] *= curParticle->m_flRadius;
+			axis[2] *= curRadius;
 
 			// setup vertexes
 			verts[0] = org3 - axis[2];
@@ -2627,11 +2627,9 @@ void CQuakePartSystem::Waterfall( int EntIndex, const Vector &pos, const Vector 
 	src.m_flAlphaVelocity = -0.5 * Alpha;
 	src.m_flRadius = Scale;
 	src.m_flRadiusVelocity = 50;
-	src.m_flRadiusMax = 250;
-	src.m_flRotation = RANDOM_LONG( 0, 359 );
-	src.m_flRotationVelocity = RANDOM_LONG( -100, 100 );
+	src.m_flRadiusMax = 150;
 	src.m_flLength = Scale;
-	src.m_flLengthVelocity = 120;
+	src.m_flLengthVelocity = 300;
 	src.m_flDistance = Distance;
 	src.ParticleType = TYPE_WATERFALL;
 	src.EntIndex = EntIndex;
