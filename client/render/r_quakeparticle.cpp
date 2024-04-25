@@ -2598,7 +2598,7 @@ void CQuakePartSystem::Waterfall( int EntIndex, const Vector &pos, const Vector 
 
 	CQuakePart src = InitializeParticle();
 
-	int flags = (FPART_FADEIN | FPART_NOTINSOLID | FPART_NOTWATER);
+	int flags = (FPART_FADEIN | FPART_NOTINSOLID | FPART_NOTWATER | FPART_STRETCH);
 	float posRand = 20.0f;
 	float ScaleRand = 0.0f;
 
@@ -2622,14 +2622,16 @@ void CQuakePartSystem::Waterfall( int EntIndex, const Vector &pos, const Vector 
 		src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.y, PushVelocityRand.y );
 	if( PushVelocityRand.z != 0.0f )
 		src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.z, PushVelocityRand.z );
-	src.m_vecAccel = Vector( 0, 0, -tr.movevars->gravity * 0.25f );
+	src.m_vecAccel = Vector( 0, 0, -tr.movevars->gravity * 0.1f );
 	src.m_flAlpha = Alpha;
 	src.m_flAlphaVelocity = -0.5 * Alpha;
 	src.m_flRadius = Scale;
-	src.m_flRadiusVelocity = 100;
-	src.m_flRadiusMax = 150;
+	src.m_flRadiusVelocity = 50;
+	src.m_flRadiusMax = 250;
 	src.m_flRotation = RANDOM_LONG( 0, 359 );
 	src.m_flRotationVelocity = RANDOM_LONG( -100, 100 );
+	src.m_flLength = Scale;
+	src.m_flLengthVelocity = 120;
 	src.m_flDistance = Distance;
 	src.ParticleType = TYPE_WATERFALL;
 	src.EntIndex = EntIndex;
