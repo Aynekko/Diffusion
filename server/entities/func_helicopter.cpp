@@ -435,6 +435,8 @@ void CHelicopter::Setup( void )
 		else
 			pFreeCam->pev->iuser1 = 100; // distance from heli, because it's bigger
 		pFreeCam->pev->effects |= EF_SKIPPVS;
+		if( !FreeCameraDistance )
+			FreeCameraDistance = CameraDistance;
 	}
 
 	if( pev->iuser1 ) // rotate vehicle

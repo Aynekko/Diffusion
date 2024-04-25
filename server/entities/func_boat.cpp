@@ -422,6 +422,8 @@ void CBoat::Setup( void )
 			pFreeCam->pev->iuser1 = (int)((mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale);
 		}
 		pFreeCam->pev->effects |= EF_SKIPPVS;
+		if( !FreeCameraDistance )
+			FreeCameraDistance = CameraDistance;
 	}
 
 	if( pev->iuser1 ) // rotate boat
