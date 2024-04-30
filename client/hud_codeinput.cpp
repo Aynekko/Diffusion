@@ -136,15 +136,15 @@ int CHudCodeInput::Draw( float flTime )
 	if( !CodeInputScreenIsOn )
 		return 1;
 
-	// slightly blacken the screen
-	gEngfuncs.pfnFillRGBABlend( 0, 0, ScreenWidth, ScreenHeight, 0, 0, 0, 150 - (DistanceFromInputStart * 2.0f) );
-
-	// draw user inputs
 	int x = (ScreenWidth / 2) - (ImageWidth / 2);
 	int y = (ScreenHeight / 2) - (ImageHeight / 2);
 	int xmax = (ScreenWidth / 2) + (ImageWidth / 2);
 	int ymax = (ScreenHeight / 2) + (ImageHeight / 2);
+
+	// slightly blacken the screen
+	FillRoundedRGBA( x - 50, y - 50, ImageWidth + 100, ImageHeight + 100, 50, Vector4D( 0.0f, 0.0f, 0.0f, (150 - (DistanceFromInputStart * 2.0f)) / 255.0f ) );
 	
+	// draw user inputs
 	if( CodeInputSpr.Initialized() )
 	{
 		CodeInputSpr.SetRenderMode( kRenderTransAdd );

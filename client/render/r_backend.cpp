@@ -445,6 +445,10 @@ bool GL_UsingAlphaToCoverage( void )
 //=====================================================================================
 void FillRoundedRGBA( float posx, float posy, float w, float h, float r, Vector4D rgba )
 {
+	// so it would have the same behavior as FillRGBA
+	posx += w * 0.5f;
+	posy += h * 0.5f;
+
 	int i;
 	float x0, y0, x, y;
 	const float sina[45] = { 
