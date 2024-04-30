@@ -18,6 +18,7 @@
 #include "hud.h"
 #include "utils.h"
 #include "parsemsg.h"
+#include "r_local.h"
 
 struct DeathNoticeItem
 {
@@ -32,8 +33,11 @@ struct DeathNoticeItem
 	float	*VictimColor;
 };
 
-#define MAX_DEATHNOTICES		4
+#define MAX_DEATHNOTICES	5
 #define DEATHNOTICE_TOP		32
+#define DEATHNOTICE_RIGHT	15
+#define DEATHNOTICE_ROUNDING 7
+#define DEATHNOTICE_SPACING 30
 
 static int DEATHNOTICE_DISPLAY_TIME = 6;
 DeathNoticeItem rgDeathNoticeList[MAX_DEATHNOTICES+1];
@@ -56,6 +60,16 @@ float *GetClientColor( int clientIndex )
 	default: return g_ColorGrey;
 	}
 	return NULL;
+}
+
+bool CheckLocalPlayerName( const char *playername )
+{
+	char *localname = (char *)CVAR_GET_STRING( "name" );
+
+	if( !Q_strcmp( playername, localname ) )
+		return true;
+
+	return false;
 }
 
 DECLARE_MESSAGE( m_DeathNotice, DeathMsg );
@@ -104,18 +118,24 @@ int CHudDeathNotice :: Draw( float flTime )
 		rgDeathNoticeList[i].flDisplayTime = min( rgDeathNoticeList[i].flDisplayTime, gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME );
 
 		// Draw the death notice
-		y = DEATHNOTICE_TOP + (20 * i);  //!!!
+		y = YRES(DEATHNOTICE_TOP) + (DEATHNOTICE_SPACING * i);  //!!!
 
 		int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
-		x = ScreenWidth - ConsoleStringLen( rgDeathNoticeList[i].szVictim ) - ( gHUD.GetSpriteRect( id ).right - gHUD.GetSpriteRect( id ).left );
+		x = ScreenWidth - DEATHNOTICE_RIGHT - ConsoleStringLen( rgDeathNoticeList[i].szVictim ) - ( gHUD.GetSpriteRect( id ).right - gHUD.GetSpriteRect( id ).left );
 
 		if( !rgDeathNoticeList[i].iSuicide )
-		{
-			x -= (5 + ConsoleStringLen( rgDeathNoticeList[i].szKiller ));
+			x -= (10 + ConsoleStringLen( rgDeathNoticeList[i].szKiller ));
 
-			// Draw killers name
-			x = 5 + DrawConsoleString( x, y, rgDeathNoticeList[i].szKiller );
+		// diffusion - if there's our name in this deathnotice, draw background
+		if( CheckLocalPlayerName( rgDeathNoticeList[i].szVictim ) || CheckLocalPlayerName( rgDeathNoticeList[i].szKiller ) )
+		{
+			// -5 and +10 are the 5px rectangle extensions to the left and right
+			FillRoundedRGBA( x - 5, y, ScreenWidth - x - DEATHNOTICE_RIGHT + 10, 20, DEATHNOTICE_ROUNDING, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
 		}
+
+		// and now, draw killer's name
+		if( !rgDeathNoticeList[i].iSuicide )
+			x = 10 + DrawConsoleString( x, y, rgDeathNoticeList[i].szKiller );
 
 		r = 255;
 		g = 80;
