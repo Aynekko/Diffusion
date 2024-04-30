@@ -14,6 +14,8 @@ void CHud :: Init( void )
 	InitHUDMessages();
 
 	// NOTENOTE - ordering here directly affects the rendering order: last will be on top
+	m_Lensflare.Init();
+	m_CrosshairStatic.Init();
 	m_Ammo.Init();
 	m_Health.Init();
 	m_Geiger.Init();
@@ -38,8 +40,6 @@ void CHud :: Init( void )
 	m_UseIcon.Init();
 	m_Zoom.Init();
 	m_Healthbars.Init();
-	m_CrosshairStatic.Init();
-	m_Lensflare.Init();
 	m_CodeInput.Init();
 	m_ScreenEffects.Init();
 	m_Message.Init(); // hud text messages (like subtitles) go last - always visible
