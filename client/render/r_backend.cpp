@@ -438,3 +438,108 @@ bool GL_UsingAlphaToCoverage( void )
 {
 	return (CVAR_GET_FLOAT( "gl_msaa" ) > 0.0f);
 }
+
+//=====================================================================================
+// FillRoundedRGBA
+// credits: https://stackoverflow.com/users/2521214/spektre
+//=====================================================================================
+void FillRoundedRGBA( float posx, float posy, float w, float h, float r, Vector4D rgba )
+{
+	int i;
+	float x0, y0, x, y;
+	const float sina[45] = { 
+		0,
+		0.1736482,
+		0.3420201,
+		0.5,
+		0.6427876,
+		0.7660444,
+		0.8660254,
+		0.9396926,
+		0.9848077,
+		1,
+		0.9848078,
+		0.9396927,
+		0.8660255,
+		0.7660446,
+		0.6427878,
+		0.5000002,
+		0.3420205,
+		0.1736485,
+		3.894144E-07,
+		-0.1736478,
+		-0.3420197,
+		-0.4999996,
+		-0.6427872,
+		-0.7660443,
+		-0.8660252,
+		-0.9396925,
+		-0.9848077,
+		-1,
+		-0.9848078,
+		-0.9396928,
+		-0.8660257,
+		-0.7660449,
+		-0.6427881,
+		-0.5000006,
+		-0.3420208,
+		-0.1736489,
+		0,
+		0.1736482,
+		0.3420201,
+		0.5,
+		0.6427876,
+		0.7660444,
+		0.8660254,
+		0.9396926,
+		0.9848077 };
+	const float *cosa = sina + 9;
+	w -= r + r;
+	h -= r + r;
+
+	GL_Texture2D( GL_FALSE );
+	if( rgba.w < 1.0f )
+	{
+		GL_Blend( GL_TRUE );
+		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	}
+	GL_Color4f( rgba.x, rgba.y, rgba.z, rgba.w );
+
+	pglBegin( GL_TRIANGLE_FAN );
+	pglVertex2f( posx, posy );
+	x0 = posx + (0.5 * w);
+	y0 = posy + (0.5 * h);
+	for( i = 0; i < 9; i++ )
+	{
+		x = x0 + (r * cosa[i]);
+		y = y0 + (r * sina[i]);
+		pglVertex2f( x, y );
+	}
+	x0 -= w;
+	for( ; i < 18; i++ )
+	{
+		x = x0 + (r * cosa[i]);
+		y = y0 + (r * sina[i]);
+		pglVertex2f( x, y );
+	}
+	y0 -= h;
+	for( ; i < 27; i++ )
+	{
+		x = x0 + (r * cosa[i]);
+		y = y0 + (r * sina[i]);
+		pglVertex2f( x, y );
+	}
+	x0 += w;
+	for( ; i < 36; i++ )
+	{
+		x = x0 + (r * cosa[i]);
+		y = y0 + (r * sina[i]);
+		pglVertex2f( x, y );
+	}
+	pglVertex2f( x, posy + (0.5 * h) );
+	pglEnd();
+
+	GL_Texture2D( GL_TRUE );
+	if( rgba.w < 1.0f )
+		GL_Blend( GL_FALSE );
+}
