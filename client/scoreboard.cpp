@@ -21,6 +21,7 @@
 #include "hud.h"
 #include "utils.h"
 #include "r_local.h"
+#include "r_world.h"
 #include "parsemsg.h"
 #include "discord.h"
 #include "build.h"
@@ -117,7 +118,13 @@ int CHudScoreboard :: Draw( float fTime )
 	int ypos = ROW_RANGE_MIN + (list_slot * ROW_GAP) + ((ScreenHeight / 10) + 10);
 	int xpos = NAME_RANGE_MIN + xpos_rel;
 
-	// diffusion - background
+	// diffusion - server name and map name (with background)
+	FillRoundedRGBA( xpos_rel - 10, ypos - 65, SCOREBOARD_WIDTH + 25, 50, 18, Vector4D( 0, 0, 0, 0.59f ) );
+	static char srvname[128];
+	Q_snprintf( srvname, sizeof( srvname ), "%s | %s", gHUD.m_szServerName, world->name );
+	DrawString( xpos, ypos - 50, srvname, 255, 255, 255 );
+
+	// diffusion - table background
 	FillRoundedRGBA( xpos_rel - 10, ypos - 10, SCOREBOARD_WIDTH + 25, ypos_bottom, 18, Vector4D( 0, 0, 0, 0.59f ) ); // bottom border
 
 	if( !gHUD.m_Teamplay ) 
