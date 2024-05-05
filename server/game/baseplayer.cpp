@@ -510,6 +510,29 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 
 	PlayerCarDmgOverride = false;
 
+	if( Dashed )
+	{
+		// the player is in dashing state. modify the damage to make game easier
+		switch( g_iSkillLevel )
+		{
+			case SKILL_EASY: // disable bullet damage and minimize the rest
+				if( bitsDamageType & DMG_BULLET )
+					return 0;
+				flDamage *= 0.5f;
+			break;
+			case SKILL_MEDIUM: // minimize the damage
+				if( bitsDamageType & DMG_BULLET )
+					flDamage *= 0.2f;
+				else
+					flDamage *= 0.75f;
+			break;
+			case SKILL_HARD: // minimize the damage from bullets only
+				if( bitsDamageType & DMG_BULLET )
+					flDamage *= 0.5f;
+			break;
+		}
+	}
+
 	//--------------------------------------------------------------------
 
 	CBaseEntity *pAttacker = CBaseEntity::Instance( pevAttacker );
