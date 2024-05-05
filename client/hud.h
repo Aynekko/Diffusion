@@ -895,7 +895,7 @@ public:
 	int DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, int b );
 	int DrawHudString( int x, int y, int iMaxX, char *szString, int r, int g, int b );
 	int DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString, int r, int g, int b );
-	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b );
+	int DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b, bool forward = false );
 	int GetNumWidth( int iNumber, int iFlags );
 	int m_iHUDColor;
 	bool IsZooming; // true if player is zooming, changing the fov on client (ignore server changes); false if the zoom level is fully set

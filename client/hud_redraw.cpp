@@ -231,11 +231,15 @@ int CHud :: DrawHudString( int xpos, int ypos, int iMaxX, char *szString, int r,
 	return xpos;
 }
 
-int CHud :: DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b )
+int CHud :: DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b, bool forward )
 {
 	char szString[32];
 
 	Q_snprintf( szString, sizeof( szString ), "%d", iNumber );
+
+	if( forward )
+		return DrawString( xpos, ypos, szString, r, g, b );
+
 	return DrawHudStringReverse( xpos, ypos, iMinX, szString, r, g, b );
 
 }
