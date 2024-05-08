@@ -29,19 +29,19 @@ uniform vec2		u_ScreenSizeInv;
 
 varying vec2		var_TexCoord;
 
-const float KERNEL_RADIUS = 3;
+const float KERNEL_RADIUS = 12;
 const float g_Sharpness = 2.0;
 
-vec4 BlurFunction(vec2 uv, float r, vec4 center_c, float center_d, inout float w_total)
+vec4 BlurFunction( vec2 uv, float r, vec4 center_c, float center_d, inout float w_total )
 {
-	vec4  c = texture2D( u_ScreenMap, uv );
+	vec4 c = texture2D( u_ScreenMap, uv );
 	float d = texture2D( u_DepthMap, uv ).x;
 
-	const float BlurSigma = float(KERNEL_RADIUS) * 0.5;
-	const float BlurFalloff = 1.0 / (2.0 * BlurSigma * BlurSigma);
+	const float BlurSigma = float( KERNEL_RADIUS ) * 0.5;
+	const float BlurFalloff = 1.0 / ( 2.0 * BlurSigma * BlurSigma );
 
-	float ddiff = (d - center_d) * g_Sharpness;
-	float w = exp2(-r * r * BlurFalloff - ddiff * ddiff);
+	float ddiff = ( d - center_d ) * g_Sharpness;
+	float w = exp2(-r * r * BlurFalloff - ddiff * ddiff );
 	w_total += w;
 
 	return c * w;
@@ -49,24 +49,24 @@ vec4 BlurFunction(vec2 uv, float r, vec4 center_c, float center_d, inout float w
 
 void main( void )
 {
-	vec4  center_c = texture2D( u_ScreenMap, var_TexCoord );
-	float center_d = texture2D( u_DepthMap, var_TexCoord).x;
+	vec4 center_c = texture2D( u_ScreenMap, var_TexCoord );
+	float center_d = texture2D( u_DepthMap, var_TexCoord ).x;
 
-	vec4  c_total = center_c;
+	vec4 c_total = center_c;
 	float w_total = 1.0;
 
 	vec2 g_InvResolutionDirection = u_ScreenSizeInv;
 
-	for (float r = 1; r <= KERNEL_RADIUS; ++r)
+	for ( float r = 1; r <= KERNEL_RADIUS; ++r )
 	{
 		vec2 uv = var_TexCoord + g_InvResolutionDirection * r;
-		c_total += BlurFunction(uv, r, center_c, center_d, w_total);  
+		c_total += BlurFunction( uv, r, center_c, center_d, w_total );  
 	}
 
-	for (float r = 1; r <= KERNEL_RADIUS; ++r)
+	for ( float r = 1; r <= KERNEL_RADIUS; ++r )
 	{
 		vec2 uv = var_TexCoord - g_InvResolutionDirection * r;
-		c_total += BlurFunction(uv, r, center_c, center_d, w_total);  
+		c_total += BlurFunction( uv, r, center_c, center_d, w_total );  
 	}
 
 	gl_FragColor = c_total / w_total;
