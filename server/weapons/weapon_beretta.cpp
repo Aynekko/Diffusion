@@ -231,7 +231,7 @@ void CBeretta::Reload( void )
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
 
 	if (m_iClip == 0)
-		iResult = DefaultReload( BERETTA_MAX_CLIP, BERETTA_RELOAD, BERETTA_RELOAD_TIME );
+		iResult = DefaultReload( BERETTA_MAX_CLIP, BERETTA_RELOAD, BERETTA_RELOADEMPTY_TIME );
 	else
 		iResult = DefaultReload( BERETTA_MAX_CLIP, BERETTA_RELOAD_NOT_EMPTY, BERETTA_RELOAD_TIME );
 

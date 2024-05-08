@@ -69,7 +69,9 @@ bool CheckForLocalWeaponShootAnimation( int seq )
 			return true;
 		break;
 	case WEAPON_BERETTA:
-		if( seq == BERETTA_RELOAD || seq == BERETTA_RELOAD_NOT_EMPTY ) // caught reload anim!
+		if( seq == BERETTA_RELOAD )
+			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + BERETTA_RELOADEMPTY_TIME;
+		else if( seq == BERETTA_RELOAD_NOT_EMPTY ) // caught reload anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + BERETTA_RELOAD_TIME;
 		else if( seq == BERETTA_DRAW ) // caught deploy anim!
 			localanim_NextPAttackTime = localanim_NextSAttackTime = tr.time + BERETTA_DEPLOY_TIME;
