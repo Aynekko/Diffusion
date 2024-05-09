@@ -87,6 +87,13 @@ void CFuncMonitor::KeyValue( KeyValueData *pkvd )
 
 void CFuncMonitor :: Spawn( void )
 {
+	if( FStringNull( pev->target ) )
+	{
+		ALERT( at_error, "func_monitor \"%s\" without target! Removed.", GetTargetname() );
+		UTIL_Remove( this );
+		return;
+	}
+	
 	Precache();	
 	pev->solid = SOLID_NOT;
 
