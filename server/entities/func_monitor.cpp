@@ -113,6 +113,8 @@ void CFuncMonitor :: Spawn( void )
 			pev->solid = SOLID_NOT;
 		else pev->solid = SOLID_BSP;
 
+		SET_MODEL( edict(), GetModel() ); // yes, again
+
 		if( HasSpawnFlags(SF_MONITOR_MONOCRHOME) )
 			pev->iuser1 |= CF_MONOCHROME;
 	}
