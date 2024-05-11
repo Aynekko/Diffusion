@@ -111,8 +111,15 @@ void CL_TempEntPlaySound( TEMPENTITY *pTemp, float damp )
 	}
 	else
 	{
-		if( RANDOM_LONG( 0, 5 ) )
-			return;
+		if( (pTemp->hitSound & BOUNCE_EMPTYCLIP) && pTemp->entity.baseline.effects == -10 )
+		{
+			// first sound always plays
+		}
+		else
+		{
+			if( RANDOM_LONG( 0, 5 ) )
+				return;
+		}
 	}
 	
 	// dropped clip specific

@@ -2691,6 +2691,9 @@ TEMPENTITY *R_EmptyClip( int WeaponID )
 	case WEAPON_HKMP5:
 		modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/weapons/w_mp5_clip.mdl" );
 		break;
+	case WEAPON_DEAGLE:
+		modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/weapons/w_deagle_clip.mdl" );
+		break;
 	default:
 		break;
 	}
@@ -2704,7 +2707,7 @@ TEMPENTITY *R_EmptyClip( int WeaponID )
 	Vector pos, vel, forward, right, up;
 	AngleVectors( tr.cached_viewangles, forward, right, up );
 	pos = tr.viewparams.vieworg - up * 20 + forward * 10;
-	vel = up * -100 + forward * 25;
+	vel = Vector( 0, 0, -100 ) + forward * 25;
 
 	pTemp = gEngfuncs.pEfxAPI->CL_TempEntAlloc( (float *)&pos, pmodel );
 	if( !pTemp ) return NULL;
