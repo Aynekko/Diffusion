@@ -402,7 +402,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		}
 
 		// save current origin if needed
-		if( 1 )//FBitSet( curParticle->m_iFlags, (FPART_BOUNCE | FPART_STRETCH) ) )
+		if( RP_NORMALPASS() )//FBitSet( curParticle->m_iFlags, (FPART_BOUNCE | FPART_STRETCH) ) )
 		{
 			org2 = curParticle->m_vecLastOrg;
 			curParticle->m_vecLastOrg = org;
@@ -513,16 +513,6 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		curColor.y = bound( 0.0f, curColor.y, 1.0f );
 		curColor.z = bound( 0.0f, curColor.z, 1.0f );
 
-		// diffusion - look at player, but don't rotate with view rotation
-		if( !curParticle->m_vecView.IsNull() )
-			VectorAngles( curParticle->m_vecView, ViewVec );
-		else if( FBitSet( curParticle->m_iFlags, FPART_AFLOAT ) && FBitSet( curParticle->m_iFlags, FPART_FLOATING_ORIENTED ) ) // look at the ceiling
-			VectorAngles( Vector( 0, 0, -1 ), ViewVec );
-		else
-			VectorAngles( org - RI->vieworg, ViewVec );
-		
-		gEngfuncs.pfnAngleVectors( ViewVec, Forward, Right, Up );
-
 		// prepare to draw
 		if( curLength != 1.0f )
 		{
@@ -549,6 +539,16 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		}
 		else
 		{
+			// diffusion - look at player, but don't rotate with view rotation
+			if( !curParticle->m_vecView.IsNull() )
+				VectorAngles( curParticle->m_vecView, ViewVec );
+			else if( FBitSet( curParticle->m_iFlags, FPART_AFLOAT ) && FBitSet( curParticle->m_iFlags, FPART_FLOATING_ORIENTED ) ) // look at the ceiling
+				VectorAngles( Vector( 0, 0, -1 ), ViewVec );
+			else
+				VectorAngles( org - RI->vieworg, ViewVec );
+
+			gEngfuncs.pfnAngleVectors( ViewVec, Forward, Right, Up );
+
 			// Rotate it around its normal
 			RotatePointAroundVector( axis[1], Forward, Right, curRotation );
 			axis[2] = CrossProduct( Forward, axis[1] );
@@ -865,7 +865,7 @@ bool CQuakePart::Evaluate( float gravity )
 	}
 
 	// save current origin if needed
-	if( 1 )//FBitSet( m_iFlags, (FPART_BOUNCE | FPART_STRETCH) ) )
+	if( RP_NORMALPASS() )//FBitSet( m_iFlags, (FPART_BOUNCE | FPART_STRETCH) ) )
 	{
 		org2 = m_vecLastOrg;
 		m_vecLastOrg = org;
@@ -976,17 +976,6 @@ bool CQuakePart::Evaluate( float gravity )
 	Vector axis[3], verts[4];
 	Vector absmin, absmax;
 
-	// diffusion - look at player, but don't rotate with view rotation
-	Vector ViewVec;
-	if( !m_vecView.IsNull() )
-		VectorAngles( m_vecView, ViewVec );
-	else if( FBitSet( m_iFlags, FPART_AFLOAT ) && FBitSet( m_iFlags, FPART_FLOATING_ORIENTED ) ) // look at the ceiling
-		VectorAngles( Vector(0,0,-1), ViewVec );
-	else
-		VectorAngles( org - RI->vieworg, ViewVec );
-	Vector Forward, Right, Up;
-	gEngfuncs.pfnAngleVectors( ViewVec, Forward, Right, Up );
-
 	// prepare to draw
 	if( curLength != 1.0f )
 	{
@@ -1013,6 +1002,17 @@ bool CQuakePart::Evaluate( float gravity )
 	}
 	else
 	{
+		// diffusion - look at player, but don't rotate with view rotation
+		Vector ViewVec;
+		if( !m_vecView.IsNull() )
+			VectorAngles( m_vecView, ViewVec );
+		else if( FBitSet( m_iFlags, FPART_AFLOAT ) && FBitSet( m_iFlags, FPART_FLOATING_ORIENTED ) ) // look at the ceiling
+			VectorAngles( Vector( 0, 0, -1 ), ViewVec );
+		else
+			VectorAngles( org - RI->vieworg, ViewVec );
+		Vector Forward, Right, Up;
+		gEngfuncs.pfnAngleVectors( ViewVec, Forward, Right, Up );
+
 		// Rotate it around its normal
 		RotatePointAroundVector( axis[1], Forward, Right, curRotation );
 		axis[2] = CrossProduct( Forward, axis[1] );
