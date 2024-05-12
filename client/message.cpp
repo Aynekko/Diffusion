@@ -324,6 +324,8 @@ int CHudMessage::Draw( float fTime )
 	if( tr.time == tr.oldtime ) // paused
 		return 1;
 
+	GL_Color4f( 1.0, 1.0, 1.0, 1.0 );
+
 	if( m_gameTitleTime > 0 )
 	{
 		float localTime = gHUD.m_flTime - m_gameTitleTime;
