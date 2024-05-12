@@ -366,6 +366,7 @@
     <ClCompile Include="hud_effects.cpp" />
     <ClCompile Include="hud_health.cpp" />
     <ClCompile Include="hud_msg.cpp" />
+    <ClCompile Include="hud_pseudogui.cpp" />
     <ClCompile Include="hud_redraw.cpp" />
     <ClCompile Include="hud_stamina.cpp" />
     <ClCompile Include="hud_update.cpp" />

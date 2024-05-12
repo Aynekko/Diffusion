@@ -817,6 +817,26 @@ private:
 	Vector LastOrigin;
 };
 
+class CPseudoGUI:public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw( float flTime );
+	int MsgFunc_ShowNote( const char *pszName, int iSize, void *pbuf );
+	void Think( void );
+	void MessageDraw( client_textmessage_t *pMessage, int x, int y );
+
+	typedef struct
+	{
+		int	x, y, w, h;
+		float r, g, b, a;
+	} rectangle_t;
+
+	bool IsInRect( rectangle_t *rect, int x, int y );
+	bool MousePressed;
+};
+
 class CHealthbars:public CHudBase
 {
 public:
@@ -990,6 +1010,7 @@ public:
 	CHudLensflare m_Lensflare;
 	CHealthbars m_Healthbars;
 	CHudCodeInput m_CodeInput;
+	CPseudoGUI m_PseudoGUI;
 	
 	void Init( void );
 	void VidInit( void );

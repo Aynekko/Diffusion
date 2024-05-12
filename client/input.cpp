@@ -570,7 +570,7 @@ void CL_CreateMove( float frametime, usercmd_t *cmd, int active )
 
 		gEngfuncs.SetViewAngles( viewangles );
 
-		if( gHUD.CanMove )
+		if( gHUD.CanMove && !(gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) ) // make sure we are not viewing a note
 		{
 			if( in_strafe.state & BUTTON_DOWN )
 			{
@@ -669,7 +669,8 @@ int CL_ButtonBits( int bResetState )
  
 	if( (in_jump.state & (BUTTON_DOWN|IMPULSE_DOWN)) && gHUD.CanJump)
 	{
-		bits |= IN_JUMP;
+		if( !(gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) ) // make sure we are not viewing a note
+			bits |= IN_JUMP;
 	}
 
 	if( in_forward.state & (BUTTON_DOWN|IMPULSE_DOWN) )
@@ -692,7 +693,8 @@ int CL_ButtonBits( int bResetState )
 		}
 		else
 		{
-			bits |= IN_USE;
+			if( !(gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) ) // make sure we are not viewing a note
+				bits |= IN_USE;
 		}
 	}
 
@@ -723,7 +725,8 @@ int CL_ButtonBits( int bResetState )
 
 	if( in_attack2.state & (BUTTON_DOWN|IMPULSE_DOWN))
 	{
-		bits |= IN_ATTACK2;
+		if( !(gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) ) // make sure we are not viewing a note
+			bits |= IN_ATTACK2;
 	}
 
 	if( in_reload.state & (BUTTON_DOWN|IMPULSE_DOWN))
@@ -744,6 +747,9 @@ int CL_ButtonBits( int bResetState )
 	// dead or in intermission? Show scoreboard, too
 	if( CL_IsDead() || gHUD.m_iIntermission )
 	{
+		if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+			gHUD.m_PseudoGUI.m_iFlags = 0;
+
 		bits |= IN_SCORE;
 	}
 

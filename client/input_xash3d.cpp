@@ -142,6 +142,15 @@ void FWGSInput::IN_ClientLookEvent( float relyaw, float relpitch )
 // Rotate camera and add move values to usercmd
 void FWGSInput::IN_Move( float frametime, usercmd_t *cmd )
 {
+	if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+	{
+		// this needs so the camera won't jump after release
+		ac_movecount = 0;
+		rel_yaw = 0;
+		rel_pitch = 0;
+		return;
+	}
+	
 	Vector viewangles;
 	bool fLadder = false;
 

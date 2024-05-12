@@ -19,66 +19,47 @@ public:
 	void Spawn( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int ObjectCaps( void );
-	bool NoteUsed;
-	CSprite *NoteSpr;
+
+	bool AchievementCounted;
 	DECLARE_DATADESC();
 };
 
-LINK_ENTITY_TO_CLASS( info_note_sprite, CNoteSprite );
-
 BEGIN_DATADESC( CNoteSprite )
-	DEFINE_FIELD( NoteUsed, FIELD_BOOLEAN),
-	DEFINE_FIELD( NoteSpr, FIELD_CLASSPTR ),
+	DEFINE_FIELD( AchievementCounted, FIELD_BOOLEAN ),
 END_DATADESC();
+
+LINK_ENTITY_TO_CLASS( info_note_sprite, CNoteSprite );
 
 int CNoteSprite::ObjectCaps( void )
 {
-	if( NoteUsed )
-		return 0;
-
 	return FCAP_IMPULSE_USE;
 }
 
 void CNoteSprite::Precache(void)
 {
 	PRECACHE_MODEL( NOTE_ICON );
-	if( pev->model )
-		PRECACHE_MODEL( STRING( pev->model ) );
 }
 
 void CNoteSprite::Spawn(void)
 {
 	Precache();
 	
-	if( !(pev->model) )
+	if( !pev->message )
 	{
-		ALERT( at_error, "info_note_sprite \"%s\" has no model specified!\n", GetTargetname() );
+		ALERT( at_error, "info_note_sprite \"%s\" has no message specified!\n", GetTargetname() );
 		UTIL_Remove( this );
 		return;
 	}
 
-	NoteSpr = CSprite::SpriteCreate( NOTE_ICON, GetAbsOrigin(), FALSE );
-	if( NoteSpr )
-	{
-		NoteSpr->SetTransparency( kRenderTransAdd, 0, 0, 0, 255, 0 );
-		NoteSpr->SetScale( 0.05 );
-		if( !(pev->iuser4) )
-			NoteSpr->SetFadeDistance( 800 );
-		else
-			NoteSpr->SetFadeDistance( pev->iuser4 );
-		NoteSpr->SetParent( this );
-	}
-	else
-	{
-		ALERT( at_error, "info_note_sprite \"%s\" - couldn't create the model!\n", STRING( pev->targetname ) );
-		UTIL_Remove( this );
-		return;
-	}
-
+	SET_MODEL( edict(), NOTE_ICON );
+	UTIL_SetSize( pev, Vector( -1, -1, -1 ), Vector( 1, 1, 1 ) );
+	pev->rendermode = kRenderTransAdd;
+	pev->renderamt = 255;
+	pev->scale = 0.05;
 	if( !(pev->iuser4) )
 		SetFadeDistance( 800 );
-	else
-		SetFadeDistance( pev->iuser4 );
+
+	AchievementCounted = false;
 }
 
 void CNoteSprite::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -89,21 +70,20 @@ void CNoteSprite::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 	if( !pActivator || !pActivator->IsPlayer() )
 		pActivator = CBaseEntity::Instance( INDEXENT( 1 ) );
 
-	NoteUsed = true;
-	ObjectCaps();
-
 	CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
 
-	if( NoteSpr )
-	{
-	//	NoteSpr->pev->rendermode = kRenderNormal; rendering issues!
-		NoteSpr->SetTransparency( kRenderTransTexture, 0, 0, 0, 255, 0 );
-		NoteSpr->SetModel( STRING( pev->model ) );
-	}
+	if( !pPlayer )
+		return;
 	
+	MESSAGE_BEGIN( MSG_ONE, gmsgShowNote, NULL, pPlayer->pev );
+		WRITE_STRING( STRING( pev->message ) );
+	MESSAGE_END();
 
-//	pPlayer->AchievementStats[ACH_NOTES]++;
-	pPlayer->SendAchievementStatToClient( ACH_NOTES, 1, 0 );
+	if( !AchievementCounted )
+	{
+		pPlayer->SendAchievementStatToClient( ACH_NOTES, 1, 0 );
+		AchievementCounted = true;
+	}
 
 	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
 }
