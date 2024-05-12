@@ -2694,6 +2694,9 @@ TEMPENTITY *R_EmptyClip( int WeaponID )
 	case WEAPON_DEAGLE:
 		modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/weapons/w_deagle_clip.mdl" );
 		break;
+	case WEAPON_BERETTA:
+		modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "models/weapons/w_beretta_clip.mdl" );
+		break;
 	default:
 		break;
 	}
