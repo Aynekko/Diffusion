@@ -220,12 +220,12 @@ class CWpnFiveSevenAmmo : public CBasePlayerAmmo
 	void Spawn( void )
 	{ 
 		Precache( );
-		SET_MODEL(ENT(pev), "models/weapons/w_9mmclip.mdl");
+		SET_MODEL(ENT(pev), "models/weapons/w_fiveseven_clip.mdl");
 		CBasePlayerAmmo::Spawn( );
 	}
 	void Precache( void )
 	{
-		PRECACHE_MODEL ("models/weapons/w_9mmclip.mdl");
+		PRECACHE_MODEL ("models/weapons/w_fiveseven_clip.mdl");
 		PRECACHE_SOUND("items/9mmclip1.wav");
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 

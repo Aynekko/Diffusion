@@ -405,14 +405,14 @@ void W_Precache(void)
 	UTIL_PrecacheOtherWeapon( "weapon_9mmhandgun" );
 	UTIL_PrecacheOther( "ammo_9mmclip" );
 
-	// mp5
+	// mrc
 	UTIL_PrecacheOtherWeapon( "weapon_9mmAR" );
 	UTIL_PrecacheOther( "ammo_9mmAR" );
 	UTIL_PrecacheOther( "ammo_ARgrenades" );
 
 	// python
 	UTIL_PrecacheOtherWeapon( "weapon_357" );
-	UTIL_PrecacheOther( "ammo_357" );
+	UTIL_PrecacheOther( "ammo_deagle" );
 
 	// gauss
 	UTIL_PrecacheOtherWeapon( "weapon_gausniper" );
@@ -446,6 +446,8 @@ void W_Precache(void)
 
 	// alien blaster rifle
 	UTIL_PrecacheOtherWeapon( "weapon_ar2" );
+	UTIL_PrecacheOther( "ammo_ar2ball" );
+	UTIL_PrecacheOther( "ammo_ar2" );
 
 	// pocket drones :)
 	UTIL_PrecacheOtherWeapon( "weapon_drone" );
@@ -455,14 +457,18 @@ void W_Precache(void)
 
 	// MP5
 	UTIL_PrecacheOtherWeapon( "weapon_hkmp5" );
+	UTIL_PrecacheOther( "ammo_hkmp5" );
 
 	// FiveSeven pistol
 	UTIL_PrecacheOtherWeapon( "weapon_fiveseven" );
+	UTIL_PrecacheOther( "ammo_fiveseven" );
 
 	// sniper
 	UTIL_PrecacheOtherWeapon( "weapon_sniper" );
+	UTIL_PrecacheOther( "ammo_sniper" );
 
 	UTIL_PrecacheOtherWeapon( "weapon_g36c" );
+	UTIL_PrecacheOther( "ammo_g36c" );
 
 	UTIL_PrecacheOtherWeapon( "weapon_smokegrenade" );
 
