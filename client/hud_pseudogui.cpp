@@ -1,10 +1,18 @@
-// funny experiments! (^_^)
-
 #include "hud.h"
 #include "utils.h"
 #include "parsemsg.h"
 #include "triangleapi.h"
 #include "r_local.h"
+
+/*
+====================================================================================
+--- funny experiments! (^_^) ---
+The only purpose of this whole thing here is to show a fixed-sized window
+with a fixed-sized CLOSE button, and a text of any kind.
+Player reads the text and closes the window, that's all there is to it.
+The texts are taken from titles.txt or feeded by MOTD from server.
+====================================================================================
+*/
 
 char Note[255];
 float active_button_alpha = 0;
@@ -13,7 +21,7 @@ int cursor_img = 0;
 
 DECLARE_MESSAGE( m_PseudoGUI, ShowNote );
 
-bool CPseudoGUI::IsInRect( rectangle_t *rect, int x, int y )
+bool CPseudoGUI::DotInRect( rectangle_t *rect, int x, int y )
 {
 	if( !rect )
 		return false;
@@ -47,6 +55,9 @@ int CPseudoGUI::VidInit( void )
 	active_button_alpha = 0;
 	MousePressed = false;
 	cursor_img = LOAD_TEXTURE( "sprites/diffusion/cursor.dds", NULL, 0, 0 );
+	cursor_x = ScreenWidth / 2;
+	cursor_y = ScreenHeight / 2;
+	m_szMOTD[0] = '\0';
 	return 1;
 }
 
@@ -56,9 +67,7 @@ int CPseudoGUI::MsgFunc_ShowNote( const char *pszName, int iSize, void *pbuf )
 	sprintf_s( Note, READ_STRING() );
 	END_READ();
 
-	m_iFlags |= HUD_ACTIVE;
-	active_button_alpha = 0;
-	MousePressed = false;
+	Enable();
 
 	return 1;
 }
@@ -73,18 +82,22 @@ void CPseudoGUI::Think( void )
 	}
 }
 
+void CPseudoGUI::Enable( void )
+{
+	m_iFlags |= HUD_ACTIVE;
+	active_button_alpha = 0;
+	MousePressed = false;
+}
+
 int CPseudoGUI::Draw( float flTime )
 {
 	// not in paused
 	if( tr.time == tr.oldtime )
 		return 1;
-	
-	// cursor
-	int posx = 0;
-	int posy = 0;
-	gEngfuncs.GetMousePosition( &posx, &posy );
 
-	if( IS_NAN( posx ) || IS_NAN( posy ) )
+	gEngfuncs.GetMousePosition( &cursor_x, &cursor_y );
+
+	if( IS_NAN( cursor_x ) || IS_NAN( cursor_y ) )
 		return 1;
 
 	// draw darken frame
@@ -98,7 +111,16 @@ int CPseudoGUI::Draw( float flTime )
 	FillRoundedRGBA( frame.x, frame.y, frame.w, frame.h, 20, Vector4D( frame.r, frame.g, frame.b, frame.a ) );
 
 	// draw text
-	MessageDraw( TextMessageGet( Note ), frame.x + frame.w * 0.1, frame.y + frame.h * 0.1 );
+	// is it MOTD?
+	if( m_szMOTD[0] != '\0' )
+	{
+		client_textmessage_t MOTD;
+		MOTD.pMessage = m_szMOTD;
+		MOTD.r1 = MOTD.g1 = MOTD.b1 = 255;
+		MessageDraw( &MOTD, frame.x + frame.w * 0.1, frame.y + frame.h * 0.1 );
+	}
+	else // it's a note
+		MessageDraw( TextMessageGet( Note ), frame.x + frame.w * 0.1, frame.y + frame.h * 0.1 );
 
 	// draw "Close" button
 	rectangle_t Close;
@@ -113,7 +135,7 @@ int CPseudoGUI::Draw( float flTime )
 	FillRoundedRGBA( Close.x, Close.y, Close.w, Close.h, 10, Vector4D( Close.r, Close.g, Close.b, Close.a ) );
 
 	// active button
-	if( IsInRect( &Close, posx, posy ) )
+	if( DotInRect( &Close, cursor_x, cursor_y ) )
 	{
 		active_button_alpha = CL_UTIL_Approach( 1.0f, active_button_alpha, 10 * g_fFrametime );
 
@@ -122,6 +144,7 @@ int CPseudoGUI::Draw( float flTime )
 			// close the window
 			m_iFlags &= ~HUD_ACTIVE;
 			MousePressed = false;
+			m_szMOTD[0] = '\0'; // terminate motd too
 		}
 	}
 	else
@@ -131,7 +154,7 @@ int CPseudoGUI::Draw( float flTime )
 	Close.g = 169.f / 255.f;
 	Close.b = 1.0f;
 	Close.a = active_button_alpha;
-	
+
 	if( active_button_alpha > 0 )
 		FillRoundedRGBA( Close.x, Close.y, Close.w, Close.h, 10, Vector4D( Close.r, Close.g, Close.b, Close.a ) );
 
@@ -164,12 +187,13 @@ int CPseudoGUI::Draw( float flTime )
 		gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 		GL_Color4f( 1, 1, 1, 1 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-		DrawQuad( posx, posy, posx + CURSOR_SIZE, posy + CURSOR_SIZE );
+		DrawQuad( cursor_x, cursor_y, cursor_x + CURSOR_SIZE, cursor_y + CURSOR_SIZE );
 		gEngfuncs.pTriAPI->End();
 	}
 	else // no image?
-		gEngfuncs.pfnFillRGBA( posx, posy, 10, 10, 255, 255, 255, 255 );
+		gEngfuncs.pfnFillRGBA( cursor_x, cursor_y, 10, 10, 255, 255, 255, 255 );
 
+	// reset mouse press
 	MousePressed = false;
 
 	return 1;

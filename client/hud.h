@@ -826,6 +826,10 @@ public:
 	int MsgFunc_ShowNote( const char *pszName, int iSize, void *pbuf );
 	void Think( void );
 	void MessageDraw( client_textmessage_t *pMessage, int x, int y );
+	void Enable( void );
+	
+	int cursor_x, cursor_y;
+	char m_szMOTD[MAX_MOTD_LENGTH];
 
 	typedef struct
 	{
@@ -833,7 +837,7 @@ public:
 		float r, g, b, a;
 	} rectangle_t;
 
-	bool IsInRect( rectangle_t *rect, int x, int y );
+	bool DotInRect( rectangle_t *rect, int x, int y );
 	bool MousePressed;
 };
 

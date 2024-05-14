@@ -2038,6 +2038,9 @@ void CHalfLifeMultiplay :: SendMOTDToClient( edict_t *client )
 	// Send the message of the day
 	// read it chunk-by-chunk,  and send it in parts
 
+	if( !aFileList )
+		return;
+
 	while ( pFileList && *pFileList && char_count < MAX_MOTD_LENGTH )
 	{
 		char chunk[MAX_MOTD_CHUNK+1];

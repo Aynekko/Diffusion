@@ -35,7 +35,7 @@ int CHudMOTD :: Init( void )
 	CVAR_REGISTER( "motd_display_time", "6", 0 );
 
 	m_iFlags &= ~HUD_ACTIVE;  // start out inactive
-	m_szMOTD[0] = 0;
+	m_szMOTD[0] = '\0';
 
 	return 1;
 }
@@ -48,7 +48,7 @@ int CHudMOTD :: VidInit( void )
 void CHudMOTD :: Reset( void )
 {
 	m_iFlags &= ~HUD_ACTIVE;  // start out inactive
-	m_szMOTD[0] = 0;
+	m_szMOTD[0] = '\0';
 	m_iLines = 0;
 	m_flActiveTill = 0;
 }
@@ -60,7 +60,7 @@ int CHudMOTD :: Draw( float fTime )
 	if( m_flActiveTill < gHUD.m_flTime )
 	{
 		// finished with MOTD, disable it
-		m_szMOTD[0] = 0;
+		m_szMOTD[0] = '\0';
 		m_iLines = 0;
 		m_iFlags &= ~HUD_ACTIVE;
 		return 1;
@@ -118,6 +118,10 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 
 	if( is_finished )
 	{
+		// diffusion - follow it to the new HUD instead
+		strcpy_s( gHUD.m_PseudoGUI.m_szMOTD, m_szMOTD );
+		gHUD.m_PseudoGUI.Enable();
+		/*
 		m_iFlags |= HUD_ACTIVE;
 
 		MOTD_DISPLAY_TIME = CVAR_GET_FLOAT( "motd_display_time" );
@@ -127,6 +131,7 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 		// count the number of lines in the MOTD
 		for( char *sz = m_szMOTD; *sz != 0; sz++ )
 			if( *sz == '\n' ) m_iLines++;
+		*/
 	}
 
 	END_READ();
