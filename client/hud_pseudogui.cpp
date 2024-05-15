@@ -251,7 +251,8 @@ void CPseudoGUI::MessageDraw( client_textmessage_t *pMessage, int x, int y )
 		{
 			byte c = *pText;
 			line[m_parms.lineLength] = c;
-			m_parms.width += gHUD.m_scrinfo.charWidths[c];
+		//	m_parms.width += gHUD.m_scrinfo.charWidths[c];
+			m_parms.width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // thx to a1batross for idea (not ideal, but it will have to do...)
 			m_parms.lineLength++;
 			pText++;
 		}
@@ -264,10 +265,10 @@ void CPseudoGUI::MessageDraw( client_textmessage_t *pMessage, int x, int y )
 		for( j = 0; j < m_parms.lineLength; j++ )
 		{
 			m_parms.text = line[j];
-			int next = m_parms.x + gHUD.m_scrinfo.charWidths[m_parms.text];
+			int next = m_parms.x;
 
 			if( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
-				TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, pMessage->r1, pMessage->g1, pMessage->b1 );
+				next += TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, pMessage->r1, pMessage->g1, pMessage->b1 );
 			m_parms.x = next;
 		}
 		m_parms.y += gHUD.m_scrinfo.iCharHeight;

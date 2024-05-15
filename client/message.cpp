@@ -289,7 +289,8 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 		while( *pText && *pText != '\n' )
 		{
 			unsigned char c = *pText;
-			m_parms.width += gHUD.m_scrinfo.charWidths[c];
+		//	m_parms.width += gHUD.m_scrinfo.charWidths[c];
+			m_parms.width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // thx to a1batross for idea (not ideal, but it will have to do...)
 			m_parms.lineLength++;
 			pText++;
 		}
@@ -301,11 +302,12 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 		for( j = 0; j < m_parms.lineLength; j++ )
 		{
 			m_parms.text = (unsigned char)pLineStart[j];
-			int next = m_parms.x + gHUD.m_scrinfo.charWidths[ m_parms.text ];
+			int next = m_parms.x;
 			MessageScanNextChar();
-			
+
 			if( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
-				TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b );
+				next += TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, m_parms.r, m_parms.g, m_parms.b );
+
 			m_parms.x = next;
 		}
  		m_parms.y += gHUD.m_scrinfo.iCharHeight;
@@ -346,7 +348,6 @@ int CHudMessage::Draw( float fTime )
 
 			int x = XPosition( m_pGameTitle->x, fullWidth, fullWidth );
 			int y = YPosition( m_pGameTitle->y, fullHeight );
-
 
 			SPR_Set( gHUD.GetSprite(m_HUD_title_half), brightness * m_pGameTitle->r1, brightness * m_pGameTitle->g1, brightness * m_pGameTitle->b1 );
 			SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect(m_HUD_title_half) );
