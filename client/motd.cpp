@@ -120,7 +120,9 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pszName, pbuf, iSize );
 
 	int is_finished = READ_BYTE();
-	Q_strcat( m_szMOTD, READ_STRING( ));
+	size_t roomInArray = sizeof( m_szMOTD ) - strlen( m_szMOTD ) - 1;
+	strncat_s( m_szMOTD, READ_STRING(), roomInArray >= 0 ? roomInArray : 0 );
+	m_szMOTD[sizeof( m_szMOTD ) - 1] = '\0';
 
 	if( is_finished )
 	{

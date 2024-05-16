@@ -207,13 +207,12 @@ void CPseudoGUI::MessageDraw( client_textmessage_t *pMessage, int x, int y )
 
 	int i, j, length, width;
 	const char *pText;
-	unsigned char line[200];
+	const char *pLineStart;
 	message_parms_t m_parms;
 
 	pText = pMessage->pMessage;
 	// Count lines
 	m_parms.lines = 1;
-	m_parms.time = tr.time;
 	m_parms.pMessage = pMessage;
 	length = 0;
 	width = 0;
@@ -240,17 +239,14 @@ void CPseudoGUI::MessageDraw( client_textmessage_t *pMessage, int x, int y )
 	m_parms.y = y;
 	pText = pMessage->pMessage;
 
-	m_parms.charTime = 0;
-
 	for( i = 0; i < m_parms.lines; i++ )
 	{
 		m_parms.lineLength = 0;
 		m_parms.width = 0;
-
+		pLineStart = pText;
 		while( *pText && *pText != '\n' )
 		{
-			byte c = *pText;
-			line[m_parms.lineLength] = c;
+			unsigned char c = *pText;
 		//	m_parms.width += gHUD.m_scrinfo.charWidths[c];
 			m_parms.width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // thx to a1batross for idea (not ideal, but it will have to do...)
 			m_parms.lineLength++;
@@ -258,13 +254,12 @@ void CPseudoGUI::MessageDraw( client_textmessage_t *pMessage, int x, int y )
 		}
 
 		pText++; // Skip LF
-		line[m_parms.lineLength] = 0;
 
 		m_parms.x = x;
 
 		for( j = 0; j < m_parms.lineLength; j++ )
 		{
-			m_parms.text = line[j];
+			m_parms.text = (unsigned char)pLineStart[j];
 			int next = m_parms.x;
 
 			if( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )

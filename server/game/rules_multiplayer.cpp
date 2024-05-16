@@ -2025,8 +2025,12 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 
 void CGameRules :: SendMOTDToClient( edict_t *client )
 {
+	if( gpGlobals->maxClients == 1 )
+		return; // not in singleplayer!
+	
 	// read from the MOTD.txt file
-	int length, char_count = 0;
+	int length = 0;
+	size_t char_count = 0;
 	char *pFileList;
 	char *aFileList = pFileList = (char*)LOAD_FILE( (char *)CVAR_GET_STRING( "motdfile" ), &length );
 
@@ -2050,7 +2054,7 @@ void CGameRules :: SendMOTDToClient( edict_t *client )
 		else
 		{
 			strncpy( chunk, pFileList, MAX_MOTD_CHUNK );
-			chunk[MAX_MOTD_CHUNK] = 0;		// strncpy doesn't always append the null terminator
+			chunk[MAX_MOTD_CHUNK] = '\0';		// strncpy doesn't always append the null terminator
 		}
 
 		char_count += strlen( chunk );
