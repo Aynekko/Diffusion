@@ -830,6 +830,7 @@ public:
 	
 	int cursor_x, cursor_y;
 	char m_szMOTD[MAX_MOTD_LENGTH];
+	int scrolled_lines;
 
 	typedef struct
 	{

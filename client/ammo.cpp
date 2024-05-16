@@ -766,6 +766,9 @@ void CHudAmmo::UserCmd_NextWeapon( void )
 	if( gHUD.m_fPlayerDead || ( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WPNS | HIDEHUD_ALL | HIDEHUD_WPNS_HOLDABLEITEM | HIDEHUD_WPNS_CUSTOM)))
 		return;
 
+	if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+		gHUD.m_PseudoGUI.scrolled_lines++; // scroll down
+
 	if( !gpActiveSel || gpActiveSel == (WEAPON *)1 )
 		gpActiveSel = m_pWeapon;
 
@@ -807,6 +810,9 @@ void CHudAmmo::UserCmd_PrevWeapon( void )
 {
 	if( gHUD.m_fPlayerDead || ( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WPNS | HIDEHUD_ALL | HIDEHUD_WPNS_HOLDABLEITEM | HIDEHUD_WPNS_CUSTOM)))
 		return;
+
+	if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+		gHUD.m_PseudoGUI.scrolled_lines--; // scroll up
 
 	if( !gpActiveSel || gpActiveSel == (WEAPON *)1 )
 		gpActiveSel = m_pWeapon;

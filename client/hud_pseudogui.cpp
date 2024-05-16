@@ -18,6 +18,9 @@ char Note[255];
 float active_button_alpha = 0;
 int cursor_img = 0;
 #define CURSOR_SIZE 24
+#define FRAME_WIDTH 666
+#define FRAME_HEIGHT 666
+#define BUTTON_HEIGHT 50
 
 DECLARE_MESSAGE( m_PseudoGUI, ShowNote );
 
@@ -58,6 +61,7 @@ int CPseudoGUI::VidInit( void )
 	cursor_x = ScreenWidth / 2;
 	cursor_y = ScreenHeight / 2;
 	m_szMOTD[0] = '\0';
+	scrolled_lines = 0;
 	return 1;
 }
 
@@ -87,6 +91,7 @@ void CPseudoGUI::Enable( void )
 	m_iFlags |= HUD_ACTIVE;
 	active_button_alpha = 0;
 	MousePressed = false;
+	scrolled_lines = 0;
 }
 
 int CPseudoGUI::Draw( float flTime )
@@ -102,8 +107,8 @@ int CPseudoGUI::Draw( float flTime )
 
 	// draw darken frame
 	rectangle_t frame;
-	frame.w = 666;
-	frame.h = 666;
+	frame.w = FRAME_WIDTH;
+	frame.h = FRAME_HEIGHT;
 	frame.x = (ScreenWidth / 2) - (frame.w / 2);
 	frame.y = (ScreenHeight / 2) - (frame.h / 2);
 	frame.r = frame.g = frame.b = 80.f / 255.f;
@@ -127,7 +132,7 @@ int CPseudoGUI::Draw( float flTime )
 	Close.r = Close.g = Close.b = 25.f / 255.f;
 	Close.a = 0.75f;
 	Close.w = frame.w * 0.5f;
-	Close.h = 50;
+	Close.h = BUTTON_HEIGHT;
 	Close.x = frame.x + (frame.w / 2) - (Close.w / 2);
 	Close.y = (frame.y + frame.h) - Close.h - 20; // frame bottom - button height - 20
 
@@ -236,11 +241,31 @@ void CPseudoGUI::MessageDraw( client_textmessage_t *pMessage, int x, int y )
 	m_parms.length = length;
 	m_parms.totalHeight = (m_parms.lines * gHUD.m_scrinfo.iCharHeight);
 
-	m_parms.y = y;
+	int text_end_pos = (ScreenHeight / 2) - (FRAME_HEIGHT / 2) + FRAME_HEIGHT - BUTTON_HEIGHT * 3;
+	int text_start_pos = y;
+	bool enable_scrollbar = (m_parms.totalHeight > (text_end_pos - text_start_pos)) && (m_parms.lines > 5); // hack to understand that it's not a button :D
+	int lines_below = 0;
+
+	if( enable_scrollbar )
+	{
+		// we need to know how many lines went below the allowed drawing position
+		lines_below = (m_parms.totalHeight - (text_end_pos - text_start_pos)) / gHUD.m_scrinfo.iCharHeight;
+		scrolled_lines = bound( 0, scrolled_lines, lines_below );
+		m_parms.y = y - scrolled_lines * gHUD.m_scrinfo.iCharHeight;
+	}
+	else
+		m_parms.y = y;
+
 	pText = pMessage->pMessage;
 
 	for( i = 0; i < m_parms.lines; i++ )
 	{
+		if( enable_scrollbar )
+		{
+			if( i > m_parms.lines - lines_below + scrolled_lines )
+				break;
+		}
+		
 		m_parms.lineLength = 0;
 		m_parms.width = 0;
 		pLineStart = pText;
@@ -257,6 +282,13 @@ void CPseudoGUI::MessageDraw( client_textmessage_t *pMessage, int x, int y )
 
 		m_parms.x = x;
 
+		// if we scrolled down, we don't draw text lines above the allowed zone - skip
+		if( enable_scrollbar && i < scrolled_lines )
+		{
+			m_parms.y += gHUD.m_scrinfo.iCharHeight;
+			continue;
+		}
+
 		for( j = 0; j < m_parms.lineLength; j++ )
 		{
 			m_parms.text = (unsigned char)pLineStart[j];
@@ -267,5 +299,19 @@ void CPseudoGUI::MessageDraw( client_textmessage_t *pMessage, int x, int y )
 			m_parms.x = next;
 		}
 		m_parms.y += gHUD.m_scrinfo.iCharHeight;
+	}
+
+	if( enable_scrollbar && lines_below > 0 )
+	{
+		int sbar_x = (ScreenWidth / 2) - (FRAME_WIDTH / 2) + (FRAME_WIDTH - 40);
+		int sbar_w = 20;
+		int sbar_h = (text_end_pos - text_start_pos);
+		FillRoundedRGBA( sbar_x, y, sbar_w, sbar_h, 2, Vector4D( 25.0f / 255.0f, 25.0f / 255.0f, 25.0f / 255.0f, 0.8f ) );
+
+		// scrollbar handle
+		int handle_x = sbar_x;
+		int handle_y = y + ((sbar_h / m_parms.lines) * scrolled_lines);
+		int handle_h = sbar_h - ((sbar_h / m_parms.lines) * lines_below);
+		FillRoundedRGBA( handle_x, handle_y, sbar_w, handle_h, 2, Vector4D( 125.0f / 255.0f, 125.0f / 255.0f, 125.0f / 255.0f, 0.8f ) );
 	}
 }
