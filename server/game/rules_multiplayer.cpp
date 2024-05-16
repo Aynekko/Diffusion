@@ -2023,7 +2023,7 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 #define MAX_MOTD_CHUNK	  60
 #define MAX_MOTD_LENGTH   1536 // (MAX_MOTD_CHUNK * 4)
 
-void CHalfLifeMultiplay :: SendMOTDToClient( edict_t *client )
+void CGameRules :: SendMOTDToClient( edict_t *client )
 {
 	// read from the MOTD.txt file
 	int length, char_count = 0;

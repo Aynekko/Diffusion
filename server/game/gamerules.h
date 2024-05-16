@@ -196,6 +196,8 @@ public:
 	Vector BonusSpawnPoints[MAX_ACTIVE_BONUSES];
 	float NextBonusSpawnTime;
 	void ManageBonuses( void );
+
+	void SendMOTDToClient( edict_t *client );
 };
 
 extern CGameRules *InstallGameRules( void );
@@ -393,7 +395,6 @@ protected:
 	virtual void GoToIntermission( void );
 	float m_flIntermissionEndTime;
 	BOOL m_iEndIntermissionButtonHit;
-	void SendMOTDToClient( edict_t *client );
 };
 
 extern DLL_GLOBAL CGameRules*	g_pGameRules;

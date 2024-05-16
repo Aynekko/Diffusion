@@ -44,7 +44,7 @@ bool CPseudoGUI::DotInRect( rectangle_t *rect, int x, int y )
 int CPseudoGUI::Init( void )
 {
 	HOOK_MESSAGE( ShowNote );
-
+	m_szMOTD[0] = '\0';
 	gHUD.AddHudElem( this );
 	return 1;
 }

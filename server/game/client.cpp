@@ -317,6 +317,14 @@ bool ChatCommands( char *Text, CBasePlayer *pPlayer )
 
 		return true;
 	}
+	else if( FStrEq( Text, "motd" ) )
+	{
+		if( g_fGameOver )
+			return true;
+
+		g_pGameRules->SendMOTDToClient( pPlayer->edict() );
+		return true;
+	}
 	
 	return false;
 }

@@ -26,6 +26,8 @@
 
 DECLARE_MESSAGE( m_MOTD, MOTD );
 
+bool reset_motd = false;
+
 int CHudMOTD :: Init( void )
 {
 	gHUD.AddHudElem( this );
@@ -36,6 +38,7 @@ int CHudMOTD :: Init( void )
 
 	m_iFlags &= ~HUD_ACTIVE;  // start out inactive
 	m_szMOTD[0] = '\0';
+	reset_motd = false;
 
 	return 1;
 }
@@ -108,8 +111,11 @@ int CHudMOTD :: Draw( float fTime )
 
 int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 {
-	if( m_iFlags & HUD_ACTIVE )
+	if( !reset_motd )
+	{
 		Reset(); // clear the current MOTD in prep for this one
+		reset_motd = true;
+	}
 
 	BEGIN_READ( pszName, pbuf, iSize );
 
@@ -118,7 +124,10 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 
 	if( is_finished )
 	{
+		reset_motd = false;
+		
 		// diffusion - follow it to the new HUD instead
+		gHUD.m_PseudoGUI.m_szMOTD[0] = '\0';
 		strcpy_s( gHUD.m_PseudoGUI.m_szMOTD, m_szMOTD );
 		gHUD.m_PseudoGUI.Enable();
 		/*
