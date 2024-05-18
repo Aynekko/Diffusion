@@ -508,11 +508,8 @@ void FillRoundedRGBA( float posx, float posy, float w, float h, float r, Vector4
 	h -= r + r;
 
 	GL_Texture2D( GL_FALSE );
-	if( rgba.w < 1.0f )
-	{
-		GL_Blend( GL_TRUE );
-		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	}
+	GL_Blend( GL_TRUE );
+	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	GL_Color4f( rgba.x, rgba.y, rgba.z, rgba.w );
 
 	pglBegin( GL_TRIANGLE_FAN );
@@ -550,6 +547,5 @@ void FillRoundedRGBA( float posx, float posy, float w, float h, float r, Vector4
 	pglEnd();
 
 	GL_Texture2D( GL_TRUE );
-	if( rgba.w < 1.0f )
-		GL_Blend( GL_FALSE );
+	GL_Blend( GL_FALSE );
 }

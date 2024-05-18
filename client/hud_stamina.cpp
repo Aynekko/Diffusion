@@ -9,6 +9,8 @@
 
 float OFFLINEFlashAlpha = 0;
 float StaminaLowSoundTime = 0;
+int stamina_icon = 0;
+const int icon_size = 30;
 
 DECLARE_MESSAGE( m_Stamina, Stamina )
 
@@ -31,17 +33,7 @@ int CHudStamina:: MsgFunc_Stamina( const char *pszName,  int iSize, void *pbuf )
 
 int CHudStamina :: VidInit(void)
 {
-	int bar_empty = gHUD.GetSpriteIndex( "stamina_empty" );
-	int bar_full = gHUD.GetSpriteIndex( "stamina_full" );
-	int bar_offline = gHUD.GetSpriteIndex( "stamina_offline" );
-	m_hBarEmpty = gHUD.GetSprite( bar_empty );
-	m_hBarFull = gHUD.GetSprite( bar_full );
-	m_hBarOffline = gHUD.GetSprite( bar_offline );
-	m_prc_emp = &gHUD.GetSpriteRect( bar_empty );
-	m_prc_full = &gHUD.GetSpriteRect( bar_full );
-	m_prc_offline = &gHUD.GetSpriteRect( bar_offline );
-	m_iBarWidth = m_prc_full->right - m_prc_full->left;
-
+	stamina_icon = LOAD_TEXTURE( "sprites/diffusion/stamina.dds", NULL, 0, 0 );
 	return 1;
 };
 
@@ -59,34 +51,59 @@ int CHudStamina :: Draw(float flTime)
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
 
-	int stamina_val = m_iStaminaValue;
-	int r, g, b, x, y = 255;
-	
-	UnpackRGB( r, g, b, 0x0046A9FF ); // 70,169,255 for Diffusion
+	// size of an invisible drawing field...
+	const int full_frame_h = 64;
+	const int full_frame_w = 280;
 
-	x = (ScreenWidth / 32) - 30;
-	y = ScreenHeight - 40;
-	SPR_Set(m_hBarEmpty, r, g, b );
-	SPR_DrawAdditive( 0,  x, y, m_prc_emp);
+	float pos_x = (ScreenWidth / 32) - 30;
+	float pos_y = ScreenHeight - 75;
+	pos_y += (full_frame_h / 3.0f) + 10; // accounting for health bar
+
+	if( stamina_icon )
+	{
+		GL_Bind( 0, stamina_icon );
+		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+		GL_Color4f( 70.f / 255.f, 169.f / 255.f, 1.0f, 1.0f );
+
+		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+		DrawQuad( pos_x, pos_y - 5, pos_x + icon_size, pos_y + icon_size - 5 );
+		gEngfuncs.pTriAPI->End();
+	}
 
 	if( gHUD.IsDrawingOfflineHUD || CL_IsDead() || gHUD.HUDSuitOffline )
 	{
-		DrawOfflineBar( x, y );
+		DrawOfflineBar( pos_x, pos_y );
 		return 1;
 	}
+
+	float r = 70.f / 255.f;
+	float g = 169.f / 255.f;
+	float b = 1.0f;
+
+	float stamina_val = m_iStaminaValue;
 	
-	if( stamina_val < 25 )
-		UnpackRGB( r, g, b, 0x00FF4242 );
-		
-	int iOffset = m_iBarWidth * (100.0 - stamina_val) / 100;
-	if( iOffset < m_iBarWidth )
+	if( stamina_val < 25.f )
 	{
-		wrect_t rc = *m_prc_full;
-		rc.right -= iOffset;
-		ScaleColors( r, g, b, 150 );
-		SPR_Set( m_hBarFull, r, g, b );
-		//		SPR_DrawAdditive( 0, x + iOffset, y, &rc);  // try to uncomment this for cool effect?
-		SPR_DrawAdditive( 0, x, y, &rc );
+		r = 220.f;
+		g = b = 0.0f;
+	}
+
+	const int total_cells_width = full_frame_w - 20; // 10px borders from left and right
+	const int total_cells = 50;
+	const float cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / (float)total_cells_width);
+	const float cell_height = full_frame_h / 3.0f;
+	const float cell_margin = cell_width * 0.25f;
+	float cell_start_x = pos_x + icon_size + 10;
+	float cell_start_y = pos_y;
+	int cell;
+
+	for( cell = 0; cell < total_cells; cell++ )
+	{
+		if( cell >= stamina_val * 0.5f ) // draw grey cells
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+		else
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, 0.5f ) );
+		cell_start_x += cell_width + cell_margin;
 	}
 
 	// play sound
@@ -103,15 +120,15 @@ int CHudStamina :: Draw(float flTime)
 }
 
 void CHudStamina::DrawOfflineBar( int x, int y )
-{	
+{
 	int r = 255;
-	int g, b = 0;
-		
-	OFFLINEFlashAlpha = 128 + (fabs( sin( tr.time * 3 ) ) * 128 );
+	int g = 0;
+	int b = 0;
+
+	OFFLINEFlashAlpha = 128 + (fabs( sin( tr.time * 3 ) ) * 128);
 	OFFLINEFlashAlpha = bound( 128, OFFLINEFlashAlpha, 255 );
 
 	ScaleColors( r, g, b, (int)OFFLINEFlashAlpha );
 
-	SPR_Set( m_hBarOffline, r, g, b );
-	SPR_DrawAdditive( 0, x, y, m_prc_offline );
+	DrawString( x + 10 + icon_size, y, "O F F L I N E", r, g, b );
 }

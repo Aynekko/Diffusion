@@ -467,14 +467,6 @@ public:
   int m_iStaminaValue;
   int MsgFunc_Stamina( const char *pszName, int iSize, void *pbuf );
   void DrawOfflineBar( int x, int y );
-private:
-  SpriteHandle m_hBarEmpty;
-  SpriteHandle m_hBarFull;
-  SpriteHandle m_hBarOffline;
-  wrect_t *m_prc_emp;
-  wrect_t *m_prc_full;
-  wrect_t *m_prc_offline;
-  float	  m_iBarWidth;
 };
 
 // diffusion health visual
@@ -485,20 +477,10 @@ public:
   int VidInit( void );
   int Draw(float flTime);
   int m_iHealthVisual;
-  int GotHit; // got a message that we received a damage
+  bool GotHit; // got a message that we received a damage
   float Transparency; // store transparency here for this mode
-  bool FlashingMode; // while true, the hud is flashing
-  float UpdateTime; // mark the time when we do this
   int MsgFunc_HealthVisual( const char *pszName, int iSize, void *pbuf );
   void DrawOfflineBar( int x, int y );
-private:
-  SpriteHandle m_hBarEmpty;
-  SpriteHandle m_hBarFull;
-  SpriteHandle m_hBarOffline;
-  wrect_t *m_prc_emp;
-  wrect_t *m_prc_full;
-  wrect_t *m_prc_offline;
-  int	  m_iBarWidth;
 };
 
 class CHudDroneBars: public CHudBase

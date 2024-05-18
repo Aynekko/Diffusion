@@ -1162,7 +1162,7 @@ int CHudAmmo::Draw( float flTime )
 	{
 		// draw the ammo cells, figure out their positions
 		const float total_cells_width2 = (ammo_frame_w - 20) / 3.0f; // 10px border from the right
-		int total_cells2 = 3; // equals the maximum clip capacity // !!!!!!!!
+		int total_cells2 = m_pWeapon->iMax2; // equals the maximum clip capacity
 		float cell_width2 = 1.0f / ((total_cells2 + ((total_cells2 - 1) / 4.0f)) / (float)total_cells_width2);
 		float cell_height2 = ammo_frame_h / 6.0f;
 		float cell_margin2 = cell_width2 * 0.25f;

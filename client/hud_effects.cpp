@@ -129,7 +129,6 @@ void CScreenEffects::DrawGameSaved(void)
 	pglPushMatrix();
 	pglTranslatef( (ScreenWidth * 0.5f) - (SAVE_SQUARE_SIZE / 2), ScreenHeight - 75 - SAVE_SQUARE_SIZE, 0 );
 	pglRotatef( curRotation, 0, 0, 1 );
-	gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 	DrawQuad( -SAVE_SQUARE_SIZE / 2, -SAVE_SQUARE_SIZE / 2, SAVE_SQUARE_SIZE / 2, SAVE_SQUARE_SIZE / 2 );
 	gEngfuncs.pTriAPI->End();

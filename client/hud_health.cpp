@@ -3,42 +3,33 @@
 #include "parsemsg.h"
 #include "r_local.h"
 #include "string.h"
+#include "triangleapi.h"
 #include <stdio.h>
 
 DECLARE_MESSAGE( m_HealthVisual, HealthVisual )
 
 float OFFLINEFlashAlphaH = 0;
+int health_icon = 0;
+const int icon_size = 30;
 
 int CHudHealthVisual :: Init(void)
 {
 	m_iFlags |= HUD_ACTIVE;
-
 	HOOK_MESSAGE( HealthVisual );
-
 	gHUD.AddHudElem(this);
 	return 1;
 };
 
 int CHudHealthVisual :: VidInit(void)
 {
-	int bar_emptyh = gHUD.GetSpriteIndex( "health_empty" );
-	int bar_fullh = gHUD.GetSpriteIndex( "health_full" );
-	int bar_offline = gHUD.GetSpriteIndex( "health_offline" );
-	m_hBarEmpty = gHUD.GetSprite( bar_emptyh );
-	m_hBarFull = gHUD.GetSprite( bar_fullh );
-	m_hBarOffline = gHUD.GetSprite( bar_offline );
-	m_prc_emp = &gHUD.GetSpriteRect( bar_emptyh );
-	m_prc_full = &gHUD.GetSpriteRect( bar_fullh );
-	m_prc_offline = &gHUD.GetSpriteRect( bar_offline );
-	m_iBarWidth = m_prc_full->right - m_prc_full->left;
-
+	health_icon = LOAD_TEXTURE( "sprites/diffusion/health.dds", NULL, 0, 0 );
 	return 1;
 };
 
 int CHudHealthVisual:: MsgFunc_HealthVisual( const char *pszName,  int iSize, void *pbuf )
 {
 	BEGIN_READ( pszName, pbuf, iSize );
-	GotHit = READ_BYTE();
+	GotHit = (READ_BYTE() > 0);
 	m_iHealthVisual = READ_BYTE();
 	END_READ();
 
@@ -59,88 +50,78 @@ int CHudHealthVisual :: Draw(float flTime)
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
 
-//	int health_val = m_iHealthVisual;
-	static float health_val = 0.0f;
-	health_val = CL_UTIL_Approach( m_iHealthVisual, health_val, g_fFrametime * 500 );
+	float pos_x = (ScreenWidth / 32) - 30;
+	float pos_y = ScreenHeight - 75;
 
-	int r, g, b, x, y = 255;
+	if( health_icon )
+	{
+		GL_Bind( 0, health_icon );
+		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+		GL_Color4f( 70.f / 255.f, 169.f / 255.f, 1.0f, 1.0f );
 
-	UnpackRGB( r, g, b, 0x0046A9FF ); // 70,169,255 for Diffusion
-
-	x = (ScreenWidth / 32) - 30;
-	y = ScreenHeight - 75;
-	SPR_Set(m_hBarEmpty, r, g, b );
-	SPR_DrawAdditive( 0, x, y, m_prc_emp);
+		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+		DrawQuad( pos_x, pos_y - 5, pos_x + icon_size, pos_y + icon_size - 5 );
+		gEngfuncs.pTriAPI->End();
+	}
 
 	if( gHUD.IsDrawingOfflineHUD || CL_IsDead() || gHUD.HUDSuitOffline )
 	{
-		DrawOfflineBar( x, y );
+		DrawOfflineBar( pos_x, pos_y );
 		return 1;
 	}
 
-	int iOffset = m_iBarWidth * (100.0 - health_val) / 100;
+	static float health_val = 0.0f;
+	health_val = CL_UTIL_Approach( m_iHealthVisual, health_val, g_fFrametime * 500 );
 
-	if( UpdateTime > gHUD.m_flTime )
-	{
-		UpdateTime = 0;
-		FlashingMode = false;
-		Transparency = 150;
-		GotHit = 0;
-	}
+	float r = 0.8f;
+	float g = 0.08f;
+	float b = 0.08f;
 
-	if( GotHit == 1 )
+	if( GotHit )
 	{
 		if( health_val <= 100 )
-		{
-			FlashingMode = true;
-			Transparency = 255;
-		}
+			Transparency = 1.0f;
 		else
-			Transparency = 150;
+			Transparency = 0.65f;
 
-		GotHit = 0;
+		GotHit = false;
 	}
 
-	if( FlashingMode == true )
+	if( Transparency > 0.65f )
+		Transparency -= 0.1f * g_fFrametime;
+
+	if( Transparency < 0.65f )
+		Transparency = 0.65f;
+
+	// size of an invisible drawing field...
+	const int full_frame_h = 64;
+	const int full_frame_w = 280;
+	const int total_cells_width = full_frame_w - 20; // 10px borders from left and right
+	const int total_cells = 50;
+	const float cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / (float)total_cells_width);
+	const float cell_height = full_frame_h / 3.0f;
+	const float cell_margin = cell_width * 0.25f;
+	float cell_start_x = pos_x + icon_size + 10;
+	float cell_start_y = pos_y;
+	int cell;
+
+	for( cell = 0; cell < total_cells; cell++ )
 	{
-		if( gHUD.m_flTime > UpdateTime )
+		if( cell >= health_val * 0.5f ) // draw grey cells
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+		else
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, Transparency ) );
+		cell_start_x += cell_width + cell_margin;
+	}
+
+	if( health_val > 100 ) // draw same stuff on top (only red cells)
+	{
+		cell_start_x = pos_x + 10;
+		for( cell = 0; cell < health_val - 100; cell++ )
 		{
-			if( Transparency > 150 )
-				Transparency -= 50 * g_fFrametime;
-
-			UpdateTime = gHUD.m_flTime;
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, Transparency ) );
+			cell_start_x += cell_width + cell_margin;
 		}
-		else if( Transparency <= 150 )
-		{
-			FlashingMode = false;
-			Transparency = 150;
-		}
-	}
-	else
-		Transparency = 150;
-
-	if( iOffset < m_iBarWidth )
-	{
-		wrect_t rc = *m_prc_full;
-		rc.right -= iOffset;
-		UnpackRGB( r, g, b, 0x00EB4034 ); // 235 64 52
-		ScaleColors( r, g, b, Transparency );
-		SPR_Set( m_hBarFull, r, g, b );
-		//		SPR_DrawAdditive( 0, x + iOffset, y, &rc);  // try to uncomment this for cool effect?
-		SPR_DrawAdditive( 0, x, y, &rc );
-	}
-
-	// for megahealth, just draw the same stuff on top
-	if( health_val > 100 )
-	{
-		int megahealth_val = health_val - 100;
-		wrect_t rc2 = *m_prc_full;
-		int iOffset2 = m_iBarWidth * (100.0 - megahealth_val) / 100;
-		rc2.right -= iOffset2;
-		UnpackRGB( r, g, b, 0x00EB4034 ); // 235 64 52
-		ScaleColors( r, g, b, 150 );
-		SPR_Set( m_hBarFull, r, g, b );
-		SPR_DrawAdditive( 0, x, y, &rc2 );
 	}
 
 	return 1;
@@ -149,13 +130,13 @@ int CHudHealthVisual :: Draw(float flTime)
 void CHudHealthVisual::DrawOfflineBar( int x, int y )
 {
 	int r = 255;
-	int g, b = 0;
+	int g = 0;
+	int b = 0;
 		
 	OFFLINEFlashAlphaH = 128 + (fabs( sin( tr.time * 3 ) ) * 128);
 	OFFLINEFlashAlphaH = bound( 128, OFFLINEFlashAlphaH, 255 );
 
 	ScaleColors( r, g, b, (int)OFFLINEFlashAlphaH );
 
-	SPR_Set( m_hBarOffline, r, g, b );
-	SPR_DrawAdditive( 0, x, y, m_prc_offline );
+	DrawString( x + 10 + icon_size, y, "O F F L I N E", r, g, b );
 }
