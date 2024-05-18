@@ -741,8 +741,6 @@ private:
 	int BlastAbilityLVL;
 	int BlastChargesReady;
 	bool CanElectroBlast;
-	SpriteHandle m_hBlastIcon1, m_hBlastIcon2, m_hBlastIcon3;
-	wrect_t *rc1, *rc2, *rc3;
 	float AlphaFade1, AlphaFade2, AlphaFade3;
 };
 

@@ -2,12 +2,15 @@
 #include "utils.h"
 #include "parsemsg.h"
 #include "r_local.h"
+#include "triangleapi.h"
 
 //===========================================================================================
 // diffusion - draw icons for player's available electroblasts
 //===========================================================================================
 
 DECLARE_MESSAGE( m_BlastIcons, BlastIcons );
+
+int img_blasticon = 0;
 
 int CHudBlastIcons::Init( void )
 {
@@ -18,11 +21,7 @@ int CHudBlastIcons::Init( void )
 
 int CHudBlastIcons::VidInit(void)
 {
-	int spr = gHUD.GetSpriteIndex( "hud_electroblast" );
-	m_hBlastIcon1 = gHUD.GetSprite( spr );
-	rc1 = &gHUD.GetSpriteRect( spr );
-	m_hBlastIcon3 = m_hBlastIcon2 = m_hBlastIcon1;
-	rc3 = rc2 = rc1;
+	img_blasticon = LOAD_TEXTURE( "sprites/diffusion/electroblast.dds", NULL, 0, 0 );
 	AlphaFade1 = AlphaFade2 = AlphaFade3 = 0.0f;
 
 	return 1;
@@ -58,19 +57,21 @@ int CHudBlastIcons::Draw( float flTime )
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
 
-	int r1, g1, b1, x1, y1 = 0;
-	int r2, g2, b2, x2, y2 = 0;
-	int r3, g3, b3, x3, y3 = 0;
-	int IconWidth = 54; // 48 + offset
+	int r1 = 0, g1 = 0, b1 = 0, x1 = 0;
+	int r2 = 0, g2 = 0, b2 = 0, x2 = 0;
+	int r3 = 0, g3 = 0, b3 = 0, x3 = 0;
+	const int icon_size = 48;
+	int y = ScreenHeight - 72;
 
-	y1 = y2 = y3 = ScreenHeight - 75;
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+	GL_Bind( 0, img_blasticon );
 
 	//====================
 	// first icon
 	//====================
 	if( BlastAbilityLVL > 0 )
 	{
-		x1 = (ScreenWidth / 32) + 270;
+		x1 = (ScreenWidth / 32) + 280;
 
 		if( BlastChargesReady > 0 )
 		{
@@ -94,10 +95,12 @@ int CHudBlastIcons::Draw( float flTime )
 		}
 
 		AlphaFade1 = bound( 0, AlphaFade1, 255 );
-		ScaleColors( r1, g1, b1, (int)AlphaFade1 );
 
-		SPR_Set( m_hBlastIcon1, r1, g1, b1 );
-		SPR_DrawAdditive( 0, x1, y1, rc1 );
+		GL_Color4f( r1 / 255.f, g1 / 255.f, b1 / 255.f, AlphaFade1 / 255.f );
+
+		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+		DrawQuad( x1, y, x1 + icon_size, y + icon_size );
+		gEngfuncs.pTriAPI->End();
 	}
 
 	//====================
@@ -105,7 +108,7 @@ int CHudBlastIcons::Draw( float flTime )
 	//====================
 	if( BlastAbilityLVL > 1 )
 	{
-		x2 = (ScreenWidth / 32) + 270 + IconWidth;
+		x2 = (ScreenWidth / 32) + 280 + icon_size + 5;
 
 		if( BlastChargesReady > 1 )
 		{
@@ -129,10 +132,12 @@ int CHudBlastIcons::Draw( float flTime )
 		}
 
 		AlphaFade2 = bound( 0, AlphaFade2, 255 );
-		ScaleColors( r2, g2, b2, (int)AlphaFade2 );
 
-		SPR_Set( m_hBlastIcon2, r2, g2, b2 );
-		SPR_DrawAdditive( 0, x2, y2, rc2 );
+		GL_Color4f( r2 / 255.f, g2 / 255.f, b2 / 255.f, AlphaFade2 / 255.f );
+
+		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+		DrawQuad( x2, y, x2 + icon_size, y + icon_size );
+		gEngfuncs.pTriAPI->End();
 	}
 
 	//====================
@@ -140,7 +145,7 @@ int CHudBlastIcons::Draw( float flTime )
 	//====================
 	if( BlastAbilityLVL > 2 )
 	{
-		x3 = (ScreenWidth / 32) + 270 + IconWidth + IconWidth;
+		x3 = (ScreenWidth / 32) + 280 + icon_size + icon_size + 5;
 
 		if( BlastChargesReady > 2 )
 		{
@@ -164,12 +169,13 @@ int CHudBlastIcons::Draw( float flTime )
 		}
 
 		AlphaFade3 = bound( 0, AlphaFade3, 255 );
-		ScaleColors( r3, g3, b3, (int)AlphaFade3 );
 
-		SPR_Set( m_hBlastIcon3, r3, g3, b3 );
-		SPR_DrawAdditive( 0, x3, y3, rc3 );
+		GL_Color4f( r3 / 255.f, g3 / 255.f, b3 / 255.f, AlphaFade3 / 255.f );
+
+		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+		DrawQuad( x3, y, x3 + icon_size, y + icon_size );
+		gEngfuncs.pTriAPI->End();
 	}
-
 
 	return 1;
 }
