@@ -79,6 +79,7 @@ int CHudStamina :: Draw(float flTime)
 	float r = 70.f / 255.f;
 	float g = 169.f / 255.f;
 	float b = 1.0f;
+	float a = 0.65f;
 
 	float stamina_val = m_iStaminaValue;
 	
@@ -86,6 +87,7 @@ int CHudStamina :: Draw(float flTime)
 	{
 		r = 220.f;
 		g = b = 0.0f;
+		a += fabs( sin( tr.time * 3 ) ) * 0.25f;
 	}
 
 	const int total_cells_width = full_frame_w - 20; // 10px borders from left and right
@@ -102,7 +104,7 @@ int CHudStamina :: Draw(float flTime)
 		if( cell >= stamina_val * 0.5f ) // draw grey cells
 			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
 		else
-			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, 0.5f ) );
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, a ) );
 		cell_start_x += cell_width + cell_margin;
 	}
 

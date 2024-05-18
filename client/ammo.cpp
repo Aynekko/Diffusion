@@ -989,6 +989,20 @@ int CHudAmmo::GetPrimaryClipSize( void )
 	}
 }
 
+bool CHudAmmo::PaintLowAmmo( void )
+{
+	switch( WeaponID )
+	{
+	case WEAPON_SMOKEGRENADE:
+	case WEAPON_SATCHEL:
+	case WEAPON_TRIPMINE:
+	case WEAPON_HANDGRENADE:
+		return false;
+	}
+
+	return true;
+}
+
 //-------------------------------------------------------------------------
 // Drawing code
 //-------------------------------------------------------------------------
@@ -1092,6 +1106,8 @@ int CHudAmmo::Draw( float flTime )
 			{
 				if( cell >= weapon_clip ) // draw grey cells
 					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+				else if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
+					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
 				else
 					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
 				cell_start_x += cell_width + cell_margin;
@@ -1102,7 +1118,10 @@ int CHudAmmo::Draw( float flTime )
 			// draw the full bar (dark)
 			FillRoundedRGBA( cell_start_x, cell_start_y, total_cells_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
 			// draw the bar of actual ammo on top of it
-			FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+			if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
+				FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
+			else
+				FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
 		}
 
 		// draw shell icon

@@ -140,6 +140,7 @@ public:
 	void AmmoSetCrosshair(SpriteHandle hspr, wrect_t rc, int r, int g, int b);
 	void SetWeaponNameText( void );
 	int GetPrimaryClipSize( void );
+	bool PaintLowAmmo( void );
 
 	int WeaponID; // copy of m_pWeapon->iId
 	WEAPON *m_pWeapon;
