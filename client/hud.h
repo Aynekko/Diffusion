@@ -138,15 +138,19 @@ public:
 
 	// to reduce calls to the engine, because I use different crosshairs
 	void AmmoSetCrosshair(SpriteHandle hspr, wrect_t rc, int r, int g, int b);
+	void SetWeaponNameText( void );
+	int GetPrimaryClipSize( void );
 
 	int WeaponID; // copy of m_pWeapon->iId
 	WEAPON *m_pWeapon;
 private:
-	float	m_fFade;
+	float m_fFade;
+	float m_fFade2;
 	int	m_HUD_bucket0;
 	int	m_HUD_selection;
-	int m_HUD_divider;
+//	int m_HUD_divider;
 	int iId; // weapon id
+	char hud_wpn_name[64];
 };
 
 //

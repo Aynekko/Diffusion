@@ -448,6 +448,12 @@ void FillRoundedRGBA( float posx, float posy, float w, float h, float r, Vector4
 	// so it would have the same behavior as FillRGBA
 	posx += w * 0.5f;
 	posy += h * 0.5f;
+	rgba.x = bound( 0.0f, rgba.x, 1.0f );
+	rgba.y = bound( 0.0f, rgba.y, 1.0f );
+	rgba.z = bound( 0.0f, rgba.z, 1.0f );
+	rgba.w = bound( 0.0f, rgba.w, 1.0f );
+	if( r > w * 0.5f ) r = w * 0.5f;
+	if( r > h * 0.5f ) r = h * 0.5f;
 
 	int i;
 	float x0, y0, x, y;

@@ -100,6 +100,117 @@ typedef struct weapon_data_s
 
 #define WEAPON_ALLWEAPONS		(~(1<<WEAPON_SUIT))
 
+#define MAX_NORMAL_BATTERY	100
+
+// weapon weight factors (for auto-switching)   (-1 = noswitch)
+#define CROWBAR_WEIGHT		0
+#define BERETTA_WEIGHT		10
+#define DEAGLE_WEIGHT		15
+#define MP5_WEIGHT			15
+#define SHOTGUN_WEIGHT		15
+#define CROSSBOW_WEIGHT		10
+#define RPG_WEIGHT			20
+#define GAUSS_WEIGHT		20
+#define EGON_WEIGHT			20
+#define HORNETGUN_WEIGHT	10
+#define HANDGRENADE_WEIGHT	5
+#define SNARK_WEIGHT		5
+#define SATCHEL_WEIGHT		-10
+#define TRIPMINE_WEIGHT		-10
+
+// weapon clip/carry ammo capacities
+#define URANIUM_MAX_CARRY		10
+#define AR2_MAX_CARRY			250
+#define	_9MM_MAX_CARRY			200
+#define DEAGLE_MAX_CARRY		21
+#define BUCKSHOT_MAX_CARRY		60
+#define BOLT_MAX_CARRY			15
+#define ROCKET_MAX_CARRY		5
+#define HANDGRENADE_MAX_CARRY	10
+#define SMOKEGRENADE_MAX_CARRY	3
+#define SATCHEL_MAX_CARRY		5
+#define TRIPMINE_MAX_CARRY		5
+#define SNARK_MAX_CARRY			15
+#define HORNET_MAX_CARRY		8
+#define M203_GRENADE_MAX_CARRY	4
+#define SNIPER_MAX_CARRY		15
+#define _57_MAX_CARRY			100
+
+// the maximum amount of ammo each weapon's clip can hold
+#define WEAPON_NOCLIP			-1
+
+//#define CROWBAR_MAX_CLIP		WEAPON_NOCLIP
+#define BERETTA_MAX_CLIP			15
+#define DEAGLE_MAX_CLIP			7 
+#define MRC_MAX_CLIP			50
+#define MP5_MAX_CLIP			30
+#define MP5_DEFAULT_AMMO		50  // 25? What were they smoking in Valve?
+#define SHOTGUN_MAX_CLIP		12
+#define SHOTGUNXM_MAX_CLIP		8
+#define CROSSBOW_MAX_CLIP		5
+#define RPG_MAX_CLIP			1
+#define GAUSS_MAX_CLIP			URANIUM_MAX_CARRY
+#define EGON_MAX_CLIP			WEAPON_NOCLIP
+#define HORNETGUN_MAX_CLIP		WEAPON_NOCLIP
+#define HANDGRENADE_MAX_CLIP	WEAPON_NOCLIP
+#define SATCHEL_MAX_CLIP		WEAPON_NOCLIP
+#define TRIPMINE_MAX_CLIP		WEAPON_NOCLIP
+#define SNARK_MAX_CLIP			WEAPON_NOCLIP
+#define AR2_MAX_CLIP			30
+#define SNIPER_MAX_CLIP			5
+#define FIVESEVEN_MAX_CLIP		20
+#define G36C_MAX_CLIP			30
+
+// the default amount of ammo that comes with each gun when it spawns
+#define BERETTA_DEFAULT_GIVE			BERETTA_MAX_CLIP * 2
+#define DEAGLE_DEFAULT_GIVE			7
+#define MRC_DEFAULT_GIVE			50
+#define MP5_DEFAULT_GIVE			MP5_MAX_CLIP * 2
+#define MRC_GR_DEFAULT_GIVE			0
+#define SHOTGUN_DEFAULT_GIVE		12
+#define CROSSBOW_DEFAULT_GIVE		5
+#define RPG_DEFAULT_GIVE			1
+#define GAUSS_DEFAULT_GIVE			100
+#define EGON_DEFAULT_GIVE			20
+#define HANDGRENADE_DEFAULT_GIVE	1
+#define SATCHEL_DEFAULT_GIVE		1
+#define TRIPMINE_DEFAULT_GIVE		1
+#define SNARK_DEFAULT_GIVE			5
+#define HIVEHAND_DEFAULT_GIVE		8
+#define AR2_DEFAULT_GIVE			50
+#define SNIPER_DEFAULT_GIVE			10
+#define G36C_DEFAULT_GIVE			G36C_MAX_CLIP * 2
+
+// The amount of ammo given to a player by an ammo item.
+#define AMMO_URANIUMBOX_GIVE	5
+#define AMMO_BERETTACLIP_GIVE	BERETTA_MAX_CLIP
+#define AMMO_DEAGLEBOX_GIVE		DEAGLE_MAX_CLIP
+#define AMMO_MRCCLIP_GIVE		MRC_MAX_CLIP
+#define AMMO_CHAINBOX_GIVE		200
+#define AMMO_M203BOX_GIVE		1
+#define AMMO_BUCKSHOTBOX_GIVE	8
+#define AMMO_CROSSBOWCLIP_GIVE	CROSSBOW_MAX_CLIP
+#define AMMO_RPGCLIP_GIVE		RPG_MAX_CLIP
+#define AMMO_SNARKBOX_GIVE		5
+#define AMMO_SNIPER_GIVE		5
+#define AMMO_FIVESEVEN_GIVE		FIVESEVEN_MAX_CLIP
+#define AMMO_HKMP5_GIVE			MP5_MAX_CLIP
+#define AMMO_G36C_GIVE			MP5_MAX_CLIP
+
+// diffusion - weapon damage
+#define DMG_WPN_MRC				15
+#define DMG_WPN_CROSSBOW		110
+//#define DMG_WPN_DEAGLE		using BULLET_PLAYER_357 damage (70)
+#define DMG_WPN_FIVESEVEN		25
+#define DMG_WPN_GAUSS			10
+#define DMG_WPN_GAUSS_FULL		150
+//#define DMG_WPN_HKMP5			using BULLET_PLAYER_MP5 damage (15)
+#define DMG_WPN_PISTOL			20
+//#define DMG_WPN_SHOTGUN		using BULLET_PLAYER_BUCKSHOT damage (13x6 primary, 13x12 sec.)
+#define DMG_WEAPON_SHOTGUN_XM	15
+#define DMG_WPN_KNIFE			27
+#define DMG_WPN_SNIPER			150
+
 //====================================================================
 // weapon menu positions
 //====================================================================
