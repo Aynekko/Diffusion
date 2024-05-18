@@ -243,6 +243,8 @@ void R_DrawCable( cl_entity_t *e )
 	VectorAngles( forward, angles );
 	AngleVectors( angles, NULL, right, NULL );
 
+	GL_Color4f( Color.x, Color.y, Color.z, RenderAmt );
+
 	pglBegin( GL_TRIANGLE_STRIP );
 	for( int j = 0; j < inumpoints; j++ )
 	{
@@ -251,8 +253,6 @@ void R_DrawCable( cl_entity_t *e )
 
 		VectorSubtract( vpoints[j], RI->vieworg, vDir );
 		vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
-
-		GL_Color4f( Color.x, Color.y, Color.z, RenderAmt );
 
 		VectorMA( vpoints[j], fwidth, vRight, vVertex );
 		if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
