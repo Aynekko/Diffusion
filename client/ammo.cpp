@@ -26,6 +26,7 @@
 #include "event_api.h"
 #include "r_local.h"
 #include "WEAPONINFO.H"
+#include "triangleapi.h"
 
 int		g_weaponselect = 0;
 WEAPON		*gpActiveSel;	// NULL means off, 1 means just the menu bar, otherwise
@@ -37,6 +38,7 @@ extern float localanim_NextPAttackTime;
 extern float localanim_NextSAttackTime;
 extern int localanim_WeaponID;
 extern bool localanim_AllowRpgShoot;
+int shell1, shell2, shell3, shell4, shell5, shell6;
 
 int WeaponsResource :: HasAmmo( WEAPON *p )
 {
@@ -326,6 +328,13 @@ int CHudAmmo::VidInit( void )
 		giABWidth = 10;
 		giABHeight = 2;
 	}
+
+	shell1 = LOAD_TEXTURE( "sprites/diffusion/shell1.dds", NULL, 0, 0 );
+	shell2 = LOAD_TEXTURE( "sprites/diffusion/shell2.dds", NULL, 0, 0 );
+	shell3 = LOAD_TEXTURE( "sprites/diffusion/shell3.dds", NULL, 0, 0 );
+	shell4 = LOAD_TEXTURE( "sprites/diffusion/shell4.dds", NULL, 0, 0 );
+	shell5 = LOAD_TEXTURE( "sprites/diffusion/shell5.dds", NULL, 0, 0 );
+	shell6 = LOAD_TEXTURE( "sprites/diffusion/shell6.dds", NULL, 0, 0 );
 
 	return 1;
 }
@@ -767,11 +776,14 @@ void CHudAmmo::UserCmd_Close( void )
 // Selects the next item in the weapon menu
 void CHudAmmo::UserCmd_NextWeapon( void )
 {
+	if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+	{
+		gHUD.m_PseudoGUI.scrolled_lines++; // scroll down
+		return;
+	}
+	
 	if( gHUD.m_fPlayerDead || ( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WPNS | HIDEHUD_ALL | HIDEHUD_WPNS_HOLDABLEITEM | HIDEHUD_WPNS_CUSTOM)))
 		return;
-
-	if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
-		gHUD.m_PseudoGUI.scrolled_lines++; // scroll down
 
 	if( !gpActiveSel || gpActiveSel == (WEAPON *)1 )
 		gpActiveSel = m_pWeapon;
@@ -812,11 +824,14 @@ void CHudAmmo::UserCmd_NextWeapon( void )
 // Selects the previous item in the menu
 void CHudAmmo::UserCmd_PrevWeapon( void )
 {
+	if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+	{
+		gHUD.m_PseudoGUI.scrolled_lines--; // scroll up
+		return;
+	}
+	
 	if( gHUD.m_fPlayerDead || ( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WPNS | HIDEHUD_ALL | HIDEHUD_WPNS_HOLDABLEITEM | HIDEHUD_WPNS_CUSTOM)))
 		return;
-
-	if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
-		gHUD.m_PseudoGUI.scrolled_lines--; // scroll up
 
 	if( !gpActiveSel || gpActiveSel == (WEAPON *)1 )
 		gpActiveSel = m_pWeapon;
@@ -1031,7 +1046,8 @@ int CHudAmmo::Draw( float flTime )
 	// diffusion hud color is 70 169 255
 	const int ammo_frame_h = 64;
 	const int ammo_frame_w = 280;
-	int pos_x = ScreenWidth - ammo_frame_w - 30; // 30px border just like in hud_health
+	const int icon_size = 0;
+	int pos_x = ScreenWidth - ammo_frame_w - icon_size - 10; // 10px border
 	int pos_y = ScreenHeight - 75; // same as hud_health
 
 	// Does weapon have any ammo at all?
@@ -1065,9 +1081,9 @@ int CHudAmmo::Draw( float flTime )
 		float cell_margin = cell_width * 0.25f;
 		float cell_start_x = pos_x + 10;
 		float cell_start_y = pos_y + (ammo_frame_h / 2.f) - (cell_height / 2.f);
-		float cell_r = 70.f / 255.f;
-		float cell_g = 169.f / 255.f;
-		float cell_b = 1.0f;
+		const float cell_r = 70.f / 255.f;
+		const float cell_g = 169.f / 255.f;
+		const float cell_b = 1.0f;
 
 		// draw the current clip
 		if( draw_cells )
@@ -1088,6 +1104,22 @@ int CHudAmmo::Draw( float flTime )
 			// draw the bar of actual ammo on top of it
 			FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
 		}
+
+		// draw shell icon
+		/*
+		if( shell6 )
+		{
+			GL_Bind( 0, shell6 );
+			gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+			GL_Color4f( 70.f / 255.f, 169.f / 255.f, 1.0f, 1.0f );
+			int shell_icon_x = pos_x + 10 + total_cells_width;
+			int shell_icon_y = cell_start_y - 10;
+
+			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+			DrawQuad( shell_icon_x, shell_icon_y, shell_icon_x + icon_size, shell_icon_y + icon_size );
+			gEngfuncs.pTriAPI->End();
+			GL_CleanUpTextureUnits( 0 );
+		}*/
 
 		// draw the ammo left in backpack, visualized by line
 		if( pw->iClip >= 0 && WeaponID != WEAPON_RPG ) // an exception for better look...
