@@ -1124,9 +1124,12 @@ int CHudAmmo::Draw( float flTime )
 				float line_pos_x = pos_x + 10;
 				float line_pos_y = cell_start_y + cell_height + 5;
 				// draw the full bar (dark)
-				FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width, 5, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+				FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - 28, 5, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
 				// draw the bar of actual ammo on top of it
-				FillRoundedRGBA( line_pos_x, line_pos_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), 5, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+				FillRoundedRGBA( line_pos_x, line_pos_y, ((((float)total_cells_width - 28) / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType )), 5, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+				char ammo[8];
+				sprintf( ammo, "%i", gWR.CountAmmo( pw->iAmmoType ) );
+				DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, ammo, 70, 169, 255 );
 			}
 		}
 		else // old code (left by Camblu request)

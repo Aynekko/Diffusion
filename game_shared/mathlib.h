@@ -152,6 +152,16 @@ inline float lerp( float start, float end, float frac )
 	return frac > 1 == end > start ? Q_max( end, x ) : Q_min( end, x ); // monotonic near t=1
 }
 
+inline Vector LerpRGB( Vector a, Vector b, float t )
+{
+	return Vector
+	(
+		a.x + (b.x - a.x) * t,
+		a.y + (b.y - a.y) * t,
+		a.z + (b.z - a.z) * t
+	);
+}
+
 inline float LoopingLerp( float flPercent, float flFrom, float flTo )
 {
 	if( fabs( flTo - flFrom ) >= 0.5f )

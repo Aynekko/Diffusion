@@ -3877,6 +3877,7 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 			// use default hl lighting for env_statics
 			m_pModelInstance->lighting.ambientlight = lighting.ambientlight;
 			m_pModelInstance->lighting.shadelight = lighting.shadelight;
+			m_pModelInstance->lighting.color = lighting.color;
 		}
 		else
 		{
@@ -3885,9 +3886,11 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 			m_pModelInstance->lighting.curshadelight = CL_UTIL_Approach( lighting.shadelight, m_pModelInstance->lighting.curshadelight, 300 * g_fFrametime );
 			m_pModelInstance->lighting.ambientlight = m_pModelInstance->lighting.curambientlight;
 			m_pModelInstance->lighting.shadelight = m_pModelInstance->lighting.curshadelight;
+
+			// lerp color too
+			m_pModelInstance->lighting.color = LerpRGB( m_pModelInstance->lighting.color, lighting.color, g_fFrametime );
 		}
 
-		m_pModelInstance->lighting.color = lighting.color;
 		//	m_pModelInstance->lighting.plightvec = m_pModelInstance->m_plightmatrix.VectorIRotate( lighting.plightvec ); // turn back to model space
 	}
 

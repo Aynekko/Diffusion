@@ -20,10 +20,10 @@ public:
 	void Spawn(void);
 
 	string_t NewFogString;
-	int NewFog[4];
-	int OldFog[4];
+	float NewFog[4];
+	float OldFog[4];
 	void SetNewFog(void);
-	int SpeedState;
+	bool Instant;
 
 	DECLARE_DATADESC();
 };
@@ -31,9 +31,9 @@ LINK_ENTITY_TO_CLASS(trigger_fog, CTriggerFog);
 
 BEGIN_DATADESC(CTriggerFog)
 	DEFINE_KEYFIELD(NewFogString, FIELD_STRING, "newfog"),
-	DEFINE_ARRAY(NewFog, FIELD_INTEGER, 4),
-	DEFINE_ARRAY(OldFog, FIELD_INTEGER, 4),
-	DEFINE_KEYFIELD(SpeedState, FIELD_INTEGER, "speedstate"),
+	DEFINE_ARRAY(NewFog, FIELD_FLOAT, 4),
+	DEFINE_ARRAY(OldFog, FIELD_FLOAT, 4),
+	DEFINE_KEYFIELD( Instant, FIELD_BOOLEAN, "speedstate"),
 	DEFINE_FUNCTION(SetNewFog),
 END_DATADESC();
 
@@ -46,7 +46,7 @@ void CTriggerFog::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "speedstate"))
 	{
-		SpeedState = Q_atoi(pkvd->szValue);
+		Instant = (Q_atoi( pkvd->szValue ) > 0);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -62,20 +62,12 @@ void CTriggerFog::Spawn(void)
 		return;
 	}
 
-	if( !SpeedState || (SpeedState <= 0) )
-		m_flWait = 0;
-	else if( SpeedState == 1 )
-		m_flWait = 0.01;
-	else if( SpeedState == 2 )
-		m_flWait = 0.02;
-	else if( SpeedState == 3 )
-		m_flWait = 0.05;
-	else if( SpeedState == 4 )
-		m_flWait = 0.1;
-	else if( SpeedState != 5 )
-		m_flWait = SpeedState * 0.01f;
-
-	UTIL_StringToIntArray(NewFog, 4, STRING(NewFogString));
+	int tmp[4];
+	UTIL_StringToIntArray(tmp, 4, STRING(NewFogString));
+	NewFog[0] = tmp[0] / 255.f;
+	NewFog[1] = tmp[1] / 255.f;
+	NewFog[2] = tmp[2] / 255.f;
+	NewFog[3] = tmp[3] / 255.f;
 }
 
 void CTriggerFog::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
@@ -88,11 +80,11 @@ void CTriggerFog::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE us
 	if (IsLockedByMaster(pActivator))
 		return;
 
-	// first, get the values of the current fog
-	OldFog[0] = (g_pWorld->pev->impulse & 0xFF000000) >> 24;
-	OldFog[1] = (g_pWorld->pev->impulse & 0xFF0000) >> 16;
-	OldFog[2] = (g_pWorld->pev->impulse & 0xFF00) >> 8;
-	OldFog[3] = (g_pWorld->pev->impulse & 0xFF) >> 0;
+	// first, get the values of the current fog (stored in range 0 - 1)
+	OldFog[0] = (float)((g_pWorld->pev->impulse & 0xFF000000) >> 24) / 255.f;
+	OldFog[1] = (float)((g_pWorld->pev->impulse & 0xFF0000) >> 16) / 255.f;
+	OldFog[2] = (float)((g_pWorld->pev->impulse & 0xFF00) >> 8) / 255.f;
+	OldFog[3] = (float)((g_pWorld->pev->impulse & 0xFF) >> 0) / 255.f;
 
 	if ((OldFog[0] == NewFog[0]) && (OldFog[1] == NewFog[1]) && (OldFog[2] == NewFog[2]) && (OldFog[3] == NewFog[3]))
 	{
@@ -105,11 +97,16 @@ void CTriggerFog::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE us
 	while ((pOther = UTIL_FindEntityByClassname(pOther, "trigger_fog")) != NULL)
 		pOther->DontThink();
 
-	if (SpeedState == 5)
+	if( Instant )
 	{
 		// instantly update fog and save new values
-		UPDATE_PACKED_FOG((NewFog[0] << 24) | (NewFog[1] << 16) | (NewFog[2] << 8) | NewFog[3]);
-		g_pWorld->pev->impulse = (NewFog[0] << 24) | (NewFog[1] << 16) | (NewFog[2] << 8) | NewFog[3];
+		int fog[4];
+		fog[0] = NewFog[0] * 255.f;
+		fog[1] = NewFog[1] * 255.f;
+		fog[2] = NewFog[2] * 255.f;
+		fog[3] = NewFog[3] * 255.f;
+		UPDATE_PACKED_FOG((fog[0] << 24) | (fog[1] << 16) | (fog[2] << 8) | fog[3]);
+		g_pWorld->pev->impulse = (fog[0] << 24) | (fog[1] << 16) | (fog[2] << 8) | fog[3];
 	}
 	else
 	{
@@ -120,24 +117,40 @@ void CTriggerFog::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE us
 
 void CTriggerFog::SetNewFog(void)
 {
-	for (int i = 0; i < 4; i++)
+	Vector TempFog = LerpRGB( Vector( OldFog[0], OldFog[1], OldFog[2] ), Vector( NewFog[0], NewFog[1], NewFog[2] ), gpGlobals->frametime );
+	OldFog[0] = TempFog.x;
+	OldFog[1] = TempFog.y;
+	OldFog[2] = TempFog.z;
+	OldFog[3] = UTIL_Approach( NewFog[3], OldFog[3], gpGlobals->frametime );
+//	ALERT( at_console, "setting new fog %f %f %f %f\n", OldFog[0], OldFog[1], OldFog[2], OldFog[3] );
+
+	bool finished = false;
+	if( fabs( OldFog[0] - NewFog[0] ) < 0.01f && fabs( OldFog[1] - NewFog[1] ) < 0.01f && fabs( OldFog[2] - NewFog[2] ) < 0.01f && fabs( OldFog[3] - NewFog[3] ) < 0.01f )
 	{
-		OldFog[i] = UTIL_Approach( NewFog[i], OldFog[i], 1.0f );
-	//	ALERT(at_console, "setting new fog %3d %3d %3d %3d\n", OldFog[0], OldFog[1], OldFog[2], OldFog[3]);
+		OldFog[0] = NewFog[0];
+		OldFog[1] = NewFog[1];
+		OldFog[2] = NewFog[2];
+		OldFog[3] = NewFog[3];
+		finished = true;
 	}
 
 	// update the fog on the map
-	UPDATE_PACKED_FOG((OldFog[0] << 24) | (OldFog[1] << 16) | (OldFog[2] << 8) | OldFog[3]);
-	g_pWorld->pev->impulse = (OldFog[0] << 24) | (OldFog[1] << 16) | (OldFog[2] << 8) | OldFog[3];
+	int fog[4];
+	fog[0] = OldFog[0] * 255.f;
+	fog[1] = OldFog[1] * 255.f;
+	fog[2] = OldFog[2] * 255.f;
+	fog[3] = OldFog[3] * 255.f;
+	UPDATE_PACKED_FOG((fog[0] << 24) | (fog[1] << 16) | (fog[2] << 8) | fog[3]);
+	g_pWorld->pev->impulse = (fog[0] << 24) | (fog[1] << 16) | (fog[2] << 8) | fog[3];
 
-	if ((OldFog[0] == NewFog[0]) && (OldFog[1] == NewFog[1]) && (OldFog[2] == NewFog[2]) && (OldFog[3] == NewFog[3]))
+	if( finished )
 	{
 	//	ALERT(at_console, "FINISHED NewFog\n");
 		return;
 	}
 
-	SetThink(&CTriggerFog::SetNewFog);
-	SetNextThink(m_flWait);
+	SetThink( &CTriggerFog::SetNewFog );
+	SetNextThink( 0 );
 }
 
 

@@ -1844,9 +1844,7 @@ void HUD_PrintStats( void )
 		R_Speeds_Printf( "%3i 3d sky\n", r_stats.c_sky_passes );
 		R_Speeds_Printf( "%3i total\n\n", r_stats.num_passes );
 		R_Speeds_Printf( "Dynamic lights:\n" );
-		R_Speeds_Printf( "%3i total\n", r_stats.c_plights );
-		R_Speeds_Printf( "%3i studio models affected\n", r_stats.c_plights_meshes );
-		R_Speeds_Printf( "%3i world surfaces affected\n\n", r_stats.num_light_surfaces );
+		R_Speeds_Printf( "%3i total (%3i mdl | %3i surf)\n\n", r_stats.c_plights, r_stats.c_plights_meshes, r_stats.num_light_surfaces );
 		R_Speeds_Printf( "GLSL shaders: %3i\n\n", Q_max( num_glsl_programs - 1, 0 ) );
 		R_Speeds_Printf( "TEX used mem. %s\n", Q_memprint( RENDER_GET_PARM( PARM_TEX_MEMORY, 0 ) ) );
 		R_Speeds_Printf( "VBO used mem. %s\n", Q_memprint( tr.total_vbo_memory ) );
