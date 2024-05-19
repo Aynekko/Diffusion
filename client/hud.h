@@ -149,7 +149,7 @@ private:
 	float m_fFade2;
 	int	m_HUD_bucket0;
 	int	m_HUD_selection;
-//	int m_HUD_divider;
+	int m_HUD_divider;
 	int iId; // weapon id
 	char hud_wpn_name[64];
 };

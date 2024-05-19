@@ -38,7 +38,6 @@ extern float localanim_NextPAttackTime;
 extern float localanim_NextSAttackTime;
 extern int localanim_WeaponID;
 extern bool localanim_AllowRpgShoot;
-int shell1, shell2, shell3, shell4, shell5, shell6;
 
 int WeaponsResource :: HasAmmo( WEAPON *p )
 {
@@ -307,7 +306,7 @@ int CHudAmmo::VidInit( void )
 	// Load sprites for buckets (top row of weapon menu)
 	m_HUD_bucket0 = gHUD.GetSpriteIndex( "bucket1" );
 	m_HUD_selection = gHUD.GetSpriteIndex( "selection" );
-//	m_HUD_divider = gHUD.GetSpriteIndex( "divider" );
+	m_HUD_divider = gHUD.GetSpriteIndex( "divider" );
 
 	ghsprBuckets = gHUD.GetSprite( m_HUD_bucket0 );
 	giBucketWidth = gHUD.GetSpriteRect( m_HUD_bucket0 ).right - gHUD.GetSpriteRect( m_HUD_bucket0 ).left;
@@ -328,13 +327,6 @@ int CHudAmmo::VidInit( void )
 		giABWidth = 10;
 		giABHeight = 2;
 	}
-
-	shell1 = LOAD_TEXTURE( "sprites/diffusion/shell1.dds", NULL, 0, 0 );
-	shell2 = LOAD_TEXTURE( "sprites/diffusion/shell2.dds", NULL, 0, 0 );
-	shell3 = LOAD_TEXTURE( "sprites/diffusion/shell3.dds", NULL, 0, 0 );
-	shell4 = LOAD_TEXTURE( "sprites/diffusion/shell4.dds", NULL, 0, 0 );
-	shell5 = LOAD_TEXTURE( "sprites/diffusion/shell5.dds", NULL, 0, 0 );
-	shell6 = LOAD_TEXTURE( "sprites/diffusion/shell6.dds", NULL, 0, 0 );
 
 	return 1;
 }
@@ -1067,140 +1059,120 @@ int CHudAmmo::Draw( float flTime )
 	// Does weapon have any ammo at all?
 	if( m_pWeapon->iAmmoType > 0 )
 	{
-		// RGB 0 111 210 - same color, but scaled down in brightness
-	//	FillRoundedRGBA( pos_x, pos_y, ammo_frame_w, ammo_frame_h, 10, Vector4D( 0.0f, 111.f / 255.f, 210.f / 255.f, 0.5f ) );
-
-		// draw the ammo cells, figure out their positions
-		const int total_cells_width = ammo_frame_w - 20; // 10px borders from left and right
-		int total_cells = GetPrimaryClipSize(); // equals the maximum clip capacity
-		bool draw_cells = (total_cells <= 50); // draw a single bar if we have way too many cells...
-		int weapon_clip = (pw->iClip >= 0) ? pw->iClip : gWR.CountAmmo( pw->iAmmoType );
-		if( WeaponID == WEAPON_RPG )
+		if( cl_oldammohud->value <= 0 )
 		{
-			weapon_clip = gWR.CountAmmo( pw->iAmmoType ) + pw->iClip;
-			total_cells = ROCKET_MAX_CARRY;
-		}
-		/*
-		==========================================================
-		x = cell width
-		x / 4 = cell margin
-		z = total cells (ammo)
-		y = total width of the whole thing
-		y = zx - (z-1)*(x/4)
-		cell width: x = 1 / ((z + (z-1)*4) / y);
-		==========================================================
-		*/
-		float cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / (float)total_cells_width);
-		float cell_height = ammo_frame_h / 3.0f;
-		float cell_margin = cell_width * 0.25f;
-		float cell_start_x = pos_x + 10;
-		float cell_start_y = pos_y + (ammo_frame_h / 2.f) - (cell_height / 2.f);
-		const float cell_r = 70.f / 255.f;
-		const float cell_g = 169.f / 255.f;
-		const float cell_b = 1.0f;
+			// RGB 0 111 210 - same color, but scaled down in brightness
+		//	FillRoundedRGBA( pos_x, pos_y, ammo_frame_w, ammo_frame_h, 10, Vector4D( 0.0f, 111.f / 255.f, 210.f / 255.f, 0.5f ) );
 
-		// draw the current clip
-		if( draw_cells )
-		{
-			for( int cell = 0; cell < total_cells; cell++ )
+			// draw the ammo cells, figure out their positions
+			const int total_cells_width = ammo_frame_w - 20; // 10px borders from left and right
+			int total_cells = GetPrimaryClipSize(); // equals the maximum clip capacity
+			bool draw_cells = (total_cells <= 50); // draw a single bar if we have way too many cells...
+			int weapon_clip = (pw->iClip >= 0) ? pw->iClip : gWR.CountAmmo( pw->iAmmoType );
+			if( WeaponID == WEAPON_RPG )
 			{
-				if( cell >= weapon_clip ) // draw grey cells
-					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
-				else if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
-					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
+				weapon_clip = gWR.CountAmmo( pw->iAmmoType ) + pw->iClip;
+				total_cells = ROCKET_MAX_CARRY;
+			}
+			/*
+			==========================================================
+			x = cell width
+			x / 4 = cell margin
+			z = total cells (ammo)
+			y = total width of the whole thing
+			y = zx - (z-1)*(x/4)
+			cell width: x = 1 / ((z + (z-1)*4) / y);
+			==========================================================
+			*/
+			float cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / (float)total_cells_width);
+			float cell_height = ammo_frame_h / 3.0f;
+			float cell_margin = cell_width * 0.25f;
+			float cell_start_x = pos_x + 10;
+			float cell_start_y = pos_y + (ammo_frame_h / 2.f) - (cell_height / 2.f);
+			const float cell_r = 70.f / 255.f;
+			const float cell_g = 169.f / 255.f;
+			const float cell_b = 1.0f;
+
+			// draw the current clip
+			if( draw_cells )
+			{
+				for( int cell = 0; cell < total_cells; cell++ )
+				{
+					if( cell >= weapon_clip ) // draw grey cells
+						FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+					else if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
+						FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
+					else
+						FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+					cell_start_x += cell_width + cell_margin;
+				}
+			}
+			else // we have too much ammo to draw separate cells, use single bar
+			{
+				// draw the full bar (dark)
+				FillRoundedRGBA( cell_start_x, cell_start_y, total_cells_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+				// draw the bar of actual ammo on top of it
+				if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
+					FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
 				else
-					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
-				cell_start_x += cell_width + cell_margin;
+					FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+			}
+
+			// draw the ammo left in backpack, visualized by line
+			if( pw->iClip >= 0 && WeaponID != WEAPON_RPG ) // an exception for better look...
+			{
+				float line_pos_x = pos_x + 10;
+				float line_pos_y = cell_start_y + cell_height + 5;
+				// draw the full bar (dark)
+				FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width, 5, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+				// draw the bar of actual ammo on top of it
+				FillRoundedRGBA( line_pos_x, line_pos_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), 5, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
 			}
 		}
-		else // we have too much ammo to draw separate cells, use single bar
-		{
-			// draw the full bar (dark)
-			FillRoundedRGBA( cell_start_x, cell_start_y, total_cells_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
-			// draw the bar of actual ammo on top of it
-			if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
-				FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
-			else
-				FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
-		}
-
-		// draw shell icon
-		/*
-		if( shell6 )
-		{
-			GL_Bind( 0, shell6 );
-			gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
-			GL_Color4f( 70.f / 255.f, 169.f / 255.f, 1.0f, 1.0f );
-			int shell_icon_x = pos_x + 10 + total_cells_width;
-			int shell_icon_y = cell_start_y - 10;
-
-			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-			DrawQuad( shell_icon_x, shell_icon_y, shell_icon_x + icon_size, shell_icon_y + icon_size );
-			gEngfuncs.pTriAPI->End();
-			GL_CleanUpTextureUnits( 0 );
-		}*/
-
-		// draw the ammo left in backpack, visualized by line
-		if( pw->iClip >= 0 && WeaponID != WEAPON_RPG ) // an exception for better look...
-		{
-			float line_pos_x = pos_x + 10;
-			float line_pos_y = cell_start_y + cell_height + 5;
-			// draw the full bar (dark)
-			FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width, 5, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
-			// draw the bar of actual ammo on top of it
-			FillRoundedRGBA( line_pos_x, line_pos_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), 5, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
-		}
-
-		// Draw the ammo Icon
-	//	int icon_x = pos_x + total_cells_width + 10;
-	//	int icon_y = cell_start_y;
-	//	SPR_Set( m_pWeapon->hAmmo, r, g, b );
-	//	SPR_DrawAdditive( 0, icon_x, icon_y, &m_pWeapon->rcAmmo );
-		
-		// old code
-		/*
-		if( pw->iClip >= 0 )
+		else // old code (left by Camblu request)
 		{
 			int iIconWidth = m_pWeapon->rcAmmo.right - m_pWeapon->rcAmmo.left;
 
-			// room for the number and the '|' and the current ammo
-			x = ScreenWidth - ( 8 * AmmoWidth ) - iIconWidth;
-			x = gHUD.DrawHudNumber( x, y, iFlags | DHN_3DIGITS, pw->iClip, r, g, b );
+			if( pw->iClip >= 0 )
+			{
+				// room for the number and the '|' and the current ammo
+				x = ScreenWidth - ( 8 * AmmoWidth ) - iIconWidth;
+				x = gHUD.DrawHudNumber( x, y, iFlags | DHN_3DIGITS, pw->iClip, r, g, b );
 
-			wrect_t rc;
-			rc.top = 0;
-			rc.left = 0;
-			rc.right = AmmoWidth;
-			rc.bottom = 100;
+				wrect_t rc;
+				rc.top = 0;
+				rc.left = 0;
+				rc.right = AmmoWidth;
+				rc.bottom = 100;
 
-			int iBarWidth =  AmmoWidth / 10;
+				int iBarWidth =  AmmoWidth / 10;
 
-			x += AmmoWidth / 2;
+				x += AmmoWidth / 2;
 
-			UnpackRGB( r, g, b, gHUD.m_iHUDColor );
+				UnpackRGB( r, g, b, gHUD.m_iHUDColor );
 
-			// draw the | bar
-	//		FillRGBA( x, y, iBarWidth, gHUD.m_iFontHeight, r, g, b, a );
-			ScaleColors( r, g, b, a );
-			SPR_Set( gHUD.GetSprite( m_HUD_divider ), r, g, b );
-			SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect( m_HUD_divider ));
+				// draw the | bar
+		//		FillRGBA( x, y, iBarWidth, gHUD.m_iFontHeight, r, g, b, a );
+				ScaleColors( r, g, b, a );
+				SPR_Set( gHUD.GetSprite( m_HUD_divider ), r, g, b );
+				SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect( m_HUD_divider ));
 
-			x += iBarWidth + AmmoWidth / 2;
+				x += iBarWidth + AmmoWidth / 2;
 
-			x = gHUD.DrawHudNumber( x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo( pw->iAmmoType ), r, g, b );		
+				x = gHUD.DrawHudNumber( x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo( pw->iAmmoType ), r, g, b );
+			}
+			else
+			{
+				// SPR_Draw a bullets only line
+				x = ScreenWidth - 4 * AmmoWidth - iIconWidth;
+				x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo( pw->iAmmoType ), r, g, b );
+			}
+
+			// Draw the ammo Icon
+			int iOffset = ( m_pWeapon->rcAmmo.bottom - m_pWeapon->rcAmmo.top ) / 8;
+			SPR_Set( m_pWeapon->hAmmo, r, g, b );
+			SPR_DrawAdditive( 0, x, y - iOffset, &m_pWeapon->rcAmmo );
 		}
-		else
-		{
-			// SPR_Draw a bullets only line
-			x = ScreenWidth - 4 * AmmoWidth - iIconWidth;
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_3DIGITS, gWR.CountAmmo( pw->iAmmoType ), r, g, b );
-		}
-		
-		// Draw the ammo Icon
-		int iOffset = ( m_pWeapon->rcAmmo.bottom - m_pWeapon->rcAmmo.top ) / 8;
-		SPR_Set( m_pWeapon->hAmmo, r, g, b );
-		SPR_DrawAdditive( 0, x, y - iOffset, &m_pWeapon->rcAmmo );
-		*/
 	}
 
 	if( m_fFade2 > 0 )
@@ -1209,58 +1181,63 @@ int CHudAmmo::Draw( float flTime )
 		m_fFade2 = 0;
 
 	// Does weapon have secondary ammo?
-	if( pw->iAmmo2Type > 0 ) 
+	if( pw->iAmmo2Type > 0 )
 	{
-		// draw the ammo cells, figure out their positions
-		const float total_cells_width2 = (ammo_frame_w - 20) / 3.0f; // 10px border from the right
-		int total_cells2 = m_pWeapon->iMax2; // equals the maximum clip capacity
-		float cell_width2 = 1.0f / ((total_cells2 + ((total_cells2 - 1) / 4.0f)) / (float)total_cells_width2);
-		float cell_height2 = ammo_frame_h / 6.0f;
-		float cell_margin2 = cell_width2 * 0.25f;
-		float cell_start_x = pos_x + 10 + total_cells_width2 * 2;
-		float cell_start_y = pos_y + (ammo_frame_h / 10.f);
-		float cell2_r = 70.f / 255.f;
-		float cell2_g = 169.f / 255.f;
-		float cell2_b = 1.0f;
-		int secondary_ammo_amount = gWR.CountAmmo( gHUD.m_Ammo.m_pWeapon->iAmmo2Type );
-
-		// draw the current secondary clip
-		for( int cell = 0; cell < total_cells2; cell++ )
+		if( cl_oldammohud->value <= 0 )
 		{
-			if( cell >= secondary_ammo_amount ) // draw grey cells
-				FillRoundedRGBA( cell_start_x, cell_start_y, cell_width2, cell_height2, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
-			else
-				FillRoundedRGBA( cell_start_x, cell_start_y, cell_width2, cell_height2, 3, Vector4D( cell2_r, cell2_g, cell2_b, 0.65f + (m_fFade2 / 255.f) ) );
-			cell_start_x += cell_width2 + cell_margin2;
+			// draw the ammo cells, figure out their positions
+			const float total_cells_width2 = (ammo_frame_w - 20) / 3.0f; // 10px border from the right
+			int total_cells2 = m_pWeapon->iMax2; // equals the maximum clip capacity
+			float cell_width2 = 1.0f / ((total_cells2 + ((total_cells2 - 1) / 4.0f)) / (float)total_cells_width2);
+			float cell_height2 = ammo_frame_h / 6.0f;
+			float cell_margin2 = cell_width2 * 0.25f;
+			float cell_start_x = pos_x + 10 + total_cells_width2 * 2;
+			float cell_start_y = pos_y + (ammo_frame_h / 10.f);
+			float cell2_r = 70.f / 255.f;
+			float cell2_g = 169.f / 255.f;
+			float cell2_b = 1.0f;
+			int secondary_ammo_amount = gWR.CountAmmo( gHUD.m_Ammo.m_pWeapon->iAmmo2Type );
+
+			// draw the current secondary clip
+			for( int cell = 0; cell < total_cells2; cell++ )
+			{
+				if( cell >= secondary_ammo_amount ) // draw grey cells
+					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width2, cell_height2, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+				else
+					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width2, cell_height2, 3, Vector4D( cell2_r, cell2_g, cell2_b, 0.65f + (m_fFade2 / 255.f) ) );
+				cell_start_x += cell_width2 + cell_margin2;
+			}
 		}
-
-		// old code
-		/*
-		int iIconWidth = m_pWeapon->rcAmmo2.right - m_pWeapon->rcAmmo2.left;
-
-		// Do we have secondary ammo?
-		if(( pw->iAmmo2Type != 0 ) && ( gWR.CountAmmo(pw->iAmmo2Type ) > 0))
+		else // old code (left by Camblu request)
 		{
-			y -= gHUD.m_iFontHeight + gHUD.m_iFontHeight / 4;
-			x = ScreenWidth - 4 * AmmoWidth - iIconWidth;
-			x = gHUD.DrawHudNumber( x, y, iFlags|DHN_3DIGITS, gWR.CountAmmo( pw->iAmmo2Type ), r, g, b );
+			int iIconWidth = m_pWeapon->rcAmmo2.right - m_pWeapon->rcAmmo2.left;
 
-			// Draw the ammo Icon
-			SPR_Set( m_pWeapon->hAmmo2, r, g, b );
-			int iOffset = ( m_pWeapon->rcAmmo2.bottom - m_pWeapon->rcAmmo2.top ) / 8;
-			SPR_DrawAdditive( 0, x, y - iOffset, &m_pWeapon->rcAmmo2 );
+			// Do we have secondary ammo?
+			if(( pw->iAmmo2Type != 0 ) && ( gWR.CountAmmo(pw->iAmmo2Type ) > 0))
+			{
+				y -= gHUD.m_iFontHeight + gHUD.m_iFontHeight / 4;
+				x = ScreenWidth - 4 * AmmoWidth - iIconWidth;
+				x = gHUD.DrawHudNumber( x, y, iFlags|DHN_3DIGITS, gWR.CountAmmo( pw->iAmmo2Type ), r, g, b );
+
+				// Draw the ammo Icon
+				SPR_Set( m_pWeapon->hAmmo2, r, g, b );
+				int iOffset = ( m_pWeapon->rcAmmo2.bottom - m_pWeapon->rcAmmo2.top ) / 8;
+				SPR_DrawAdditive( 0, x, y - iOffset, &m_pWeapon->rcAmmo2 );
+			}
 		}
-		*/
 	}
 
-	// lastly, draw the weapon name
-	SetWeaponNameText();
-	if( hud_wpn_name[0] != '\0' )
+	if( cl_oldammohud->value <= 0 )
 	{
-		int text_pos_x = pos_x + 10;
-		int text_pos_y = pos_y + 2;
-	//	DrawConsoleString( text_pos_x, text_pos_y, hud_wpn_name );
-		DrawString( text_pos_x, text_pos_y, hud_wpn_name, 70, 169, 255 );
+		// lastly, draw the weapon name
+		SetWeaponNameText();
+		if( hud_wpn_name[0] != '\0' )
+		{
+			int text_pos_x = pos_x + 10;
+			int text_pos_y = pos_y + 2;
+			//	DrawConsoleString( text_pos_x, text_pos_y, hud_wpn_name );
+			DrawString( text_pos_x, text_pos_y, hud_wpn_name, 70, 169, 255 );
+		}
 	}
 
 	return 1;

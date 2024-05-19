@@ -147,6 +147,7 @@ cvar_t *r_show_tbn;
 cvar_t *r_flashlightlockposition;
 cvar_t *cl_crosshair;
 cvar_t *cl_useicon;
+cvar_t *cl_oldammohud;
 
 cvar_t  *r_blur;
 cvar_t *r_blur_threshold;
@@ -303,6 +304,7 @@ void V_Init( void )
 	cl_crosshair = CVAR_REGISTER( "cl_crosshair", "1", FCVAR_ARCHIVE );
 	cl_useicon = CVAR_REGISTER( "cl_useicon", "1", FCVAR_ARCHIVE );
 	cl_showdamage = CVAR_REGISTER( "cl_showdamage", "1", FCVAR_ARCHIVE );
+	cl_oldammohud = CVAR_REGISTER( "cl_oldammohud", "0", FCVAR_ARCHIVE ); // Camblu request
 
 	// setup some engine cvars for custom rendering
 	r_extensions	= CVAR_GET_POINTER( "gl_allow_extensions" );
