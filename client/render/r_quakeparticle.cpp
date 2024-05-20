@@ -1737,7 +1737,7 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 	// diffusion - particle is too far, don't allow it
 	if( src->m_flDistance > 0 )
 	{
-		if( (tr.viewparams.vieworg - src->m_vecOrigin).Length() > src->m_flDistance )
+		if( (RI->vieworg - src->m_vecOrigin).Length() > src->m_flDistance )
 			return false;
 	}
 
