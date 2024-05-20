@@ -23,7 +23,8 @@ public:
 	float NewFog[4];
 	float OldFog[4];
 	void SetNewFog(void);
-	bool Instant;
+	int SpeedState;
+	float DensitySpeed;
 
 	DECLARE_DATADESC();
 };
@@ -33,7 +34,8 @@ BEGIN_DATADESC(CTriggerFog)
 	DEFINE_KEYFIELD(NewFogString, FIELD_STRING, "newfog"),
 	DEFINE_ARRAY(NewFog, FIELD_FLOAT, 4),
 	DEFINE_ARRAY(OldFog, FIELD_FLOAT, 4),
-	DEFINE_KEYFIELD( Instant, FIELD_BOOLEAN, "speedstate"),
+	DEFINE_KEYFIELD( SpeedState, FIELD_INTEGER, "speedstate" ),
+	DEFINE_FIELD( DensitySpeed, FIELD_FLOAT ),
 	DEFINE_FUNCTION(SetNewFog),
 END_DATADESC();
 
@@ -46,7 +48,7 @@ void CTriggerFog::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "speedstate"))
 	{
-		Instant = (Q_atoi( pkvd->szValue ) > 0);
+		SpeedState = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -60,6 +62,37 @@ void CTriggerFog::Spawn(void)
 		ALERT(at_error, "trigger_fog \"%s\" doesn't have New Fog setting!\n", STRING(pev->targetname));
 		UTIL_Remove(this);
 		return;
+	}
+
+	if( !SpeedState || (SpeedState <= 0) )
+	{
+		m_flWait = 1.5f;
+		DensitySpeed = 1.0f;
+	}
+	else if( SpeedState == 1 )
+	{
+		m_flWait = 0.8f;
+		DensitySpeed = 0.25f;
+	}
+	else if( SpeedState == 2 )
+	{
+		m_flWait = 0.5f;
+		DensitySpeed = 0.1f;
+	}
+	else if( SpeedState == 3 )
+	{
+		m_flWait = 0.25f;
+		DensitySpeed = 0.025f;
+	}
+	else if( SpeedState == 4 )
+	{
+		m_flWait = 0.1f;
+		DensitySpeed = 0.01f;
+	}
+	else if( SpeedState != 5 )
+	{
+		m_flWait = SpeedState * 0.01f;
+		DensitySpeed = SpeedState * 0.0001f;
 	}
 
 	int tmp[4];
@@ -97,7 +130,7 @@ void CTriggerFog::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE us
 	while ((pOther = UTIL_FindEntityByClassname(pOther, "trigger_fog")) != NULL)
 		pOther->DontThink();
 
-	if( Instant )
+	if( SpeedState == 5 ) // instant mode
 	{
 		// instantly update fog and save new values
 		int fog[4];
@@ -111,17 +144,17 @@ void CTriggerFog::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE us
 	else
 	{
 		SetThink(&CTriggerFog::SetNewFog);
-		SetNextThink(m_flWait);
+		SetNextThink( 0 );
 	}
 }
 
 void CTriggerFog::SetNewFog(void)
 {
-	Vector TempFog = LerpRGB( Vector( OldFog[0], OldFog[1], OldFog[2] ), Vector( NewFog[0], NewFog[1], NewFog[2] ), gpGlobals->frametime );
+	Vector TempFog = LerpRGB( Vector( OldFog[0], OldFog[1], OldFog[2] ), Vector( NewFog[0], NewFog[1], NewFog[2] ), gpGlobals->frametime * m_flWait );
 	OldFog[0] = TempFog.x;
 	OldFog[1] = TempFog.y;
 	OldFog[2] = TempFog.z;
-	OldFog[3] = UTIL_Approach( NewFog[3], OldFog[3], gpGlobals->frametime );
+	OldFog[3] = UTIL_Approach( NewFog[3], OldFog[3], gpGlobals->frametime * DensitySpeed );
 //	ALERT( at_console, "setting new fog %f %f %f %f\n", OldFog[0], OldFog[1], OldFog[2], OldFog[3] );
 
 	bool finished = false;
@@ -149,7 +182,6 @@ void CTriggerFog::SetNewFog(void)
 		return;
 	}
 
-	SetThink( &CTriggerFog::SetNewFog );
 	SetNextThink( 0 );
 }
 
