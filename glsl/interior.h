@@ -54,7 +54,7 @@ vec4 InteriorMapping( vec4 diffuse, vec2 TexDiffuse, vec3 N, float Time, vec3 Vi
 	vec3 sampleDir = normalize( ViewVec );
 
 #if defined( STUDIO_INTERIOR )
-	sampleDir *= vec3(-1,-1,1);
+	sampleDir *= vec3( -1, 1, 1 );
 #endif
 
 	vec3 viewInv = 1.0 / sampleDir;
