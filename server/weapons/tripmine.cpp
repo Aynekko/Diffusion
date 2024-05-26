@@ -351,7 +351,7 @@ void CTripmineGrenade :: MakeBeam( void )
 	m_flBeamLength = tr.flFraction;
 
 	Vector vecTmpEnd = GetAbsOrigin() + m_vecDir * 2048 * m_flBeamLength;
-	Vector vecStart = GetAbsOrigin() - m_vecDir * 5;
+	Vector vecStart = GetAbsOrigin() - m_vecDir * 7;
 
 	m_pBeam = CBeam::BeamCreate( g_pModelNameLaser, 10 );
 
@@ -694,7 +694,7 @@ void CTripmine::WeaponIdle( void )
 	else
 	{
 		iAnim = TRIPMINE_FIDGET;
-		m_flTimeWeaponIdle = gpGlobals->time + 100.0 / 30.0;
+		m_flTimeWeaponIdle = gpGlobals->time + 10.0f;
 	}
 
 	SendWeaponAnim( iAnim );
