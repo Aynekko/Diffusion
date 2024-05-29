@@ -3324,6 +3324,7 @@ void CBasePlayer::ManageDrone( void )
 						if( m_hDrone->m_iCounter > 0 )
 						{
 							Vector vecShootOrigin = m_hDrone->GetAbsOrigin();
+							vecShootOrigin.z += 8.0f; // 8 not 16, so it would be a bit below the center
 
 							FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 5 );
 							m_hDrone->m_iCounter--;
