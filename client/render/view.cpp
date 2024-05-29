@@ -123,6 +123,9 @@ cvar_t *cl_localweaponanims;
 cvar_t *cl_achievement_notify;
 cvar_t *cl_showmsgs;
 cvar_t *cl_viewmodelblend;
+cvar_t *cl_viewmodel_offset_x;
+cvar_t *cl_viewmodel_offset_y;
+cvar_t *cl_viewmodel_offset_z;
 cvar_t *cl_tutor;
 cvar_t *cl_showhealthbars;
 cvar_t *cl_showdamage;
@@ -298,6 +301,9 @@ void V_Init( void )
 	cl_muzzlelight = CVAR_REGISTER( "cl_muzzlelight", "1", FCVAR_ARCHIVE );
 	cl_showmsgs = CVAR_REGISTER( "cl_showmsgs", "0", FCVAR_ARCHIVE );
 	cl_viewmodelblend = CVAR_REGISTER( "cl_viewmodelblend", "0", FCVAR_ARCHIVE );
+	cl_viewmodel_offset_x = CVAR_REGISTER( "cl_viewmodel_offset_x", "0", FCVAR_ARCHIVE );
+	cl_viewmodel_offset_y = CVAR_REGISTER( "cl_viewmodel_offset_y", "0", FCVAR_ARCHIVE );
+	cl_viewmodel_offset_z = CVAR_REGISTER( "cl_viewmodel_offset_z", "0", FCVAR_ARCHIVE );
 	cl_tutor = CVAR_REGISTER( "cl_tutor", "1", FCVAR_ARCHIVE );
 	cl_notbn = CVAR_REGISTER( "cl_notbn", "0", 0 );
 	r_show_tbn = CVAR_REGISTER( "r_show_tbn", "0", 0 );
@@ -1057,6 +1063,11 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 		origin += forward * add * 0.1f + right * add * 0.2f;
 		origin.z += add * 0.05f;
 	}
+
+	// diffusion - add offsets
+	origin += right * cl_viewmodel_offset_x->value;
+	origin += forward * cl_viewmodel_offset_y->value;
+	origin += up * cl_viewmodel_offset_z->value;
 }
 
 //==========================
