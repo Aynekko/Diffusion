@@ -930,7 +930,7 @@ static void R_RenderDroneView( void )
 	RI->viewangles[2] = anglemod( angles[2] );
 	RI->pvsorigin = tr.pDrone->origin;
 	RI->vieworg = origin;
-	RI->vieworg.z += 8.0f;
+	RI->vieworg.z += 16.0f;
 	tr.modelorg = RI->vieworg;
 
 	RI->params = RP_SCREENVIEW;

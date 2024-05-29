@@ -232,9 +232,9 @@ void SetupFlashlight( cl_entity_t *pEnt )
 		pl = CL_AllocPlight( pEnt->index );
 		pl->flags |= CF_NOSHADOWS;
 		v_angles = pEnt->angles;
-		v_origin = pEnt->origin;
+		v_origin = pEnt->origin + Vector( 0, 0, 16.0f );
 		FlashlightFOV = 60;
-		FlashlightRadius = 250;
+		FlashlightRadius = 450;
 		pl->projectionTexture = tr.spotlightTexture;
 		// xenon light
 		pl->color.r = 183;

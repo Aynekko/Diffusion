@@ -2041,7 +2041,7 @@ void R_SetupRefParams( const ref_viewpass_t *rvp )
 		RI->fov_x = 100; // adjust fov for monster view
 		V_CalcFov( RI->fov_x, RI->viewport[2], RI->viewport[3] );
 		if( Drone_View )
-			RI->vieworg.z += 8.0f;
+			RI->vieworg.z += 16.0f;
 	}
 	else
 	{

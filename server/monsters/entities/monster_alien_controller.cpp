@@ -2178,7 +2178,7 @@ void CDrone :: Spawn()
 		SET_MODEL(ENT(pev), STRING(pev->model)); //LRC
 	else
 		SET_MODEL(ENT(pev), "models/npc/drone_security.mdl");
-	UTIL_SetSize( pev, Vector( -16, -16, 0 ), Vector( 16, 16, 16 ) );
+	UTIL_SetSize( this, Vector( -16, -16, 0 ), Vector( 16, 16, 32 ) );
 
 	if( FClassnameIs( pev, "monster_security_heavydrone" ) )
 		IsRocketDrone = true;
