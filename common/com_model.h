@@ -33,6 +33,7 @@ typedef uint32_t poolhandle_t;
 #define STUDIO_EVENTS	BIT( 1 )
 #define STUDIO_FORCE	BIT( 2 )
 #define STUDIO_LOCAL_SPACE	BIT( 3 )
+#define STUDIO_ATTACHMENTS BIT( 4 )
 
 #define ZISCALE		((float)0x8000)
 

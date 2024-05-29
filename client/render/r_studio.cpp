@@ -3679,14 +3679,28 @@ StudioGetAttachment
 void CStudioModelRenderer::StudioGetAttachment( const cl_entity_t *ent, int iAttachment, Vector *origin, Vector *angles, int flags )
 {
 	// diffusion - rewritten
+	int	studio_flags = STUDIO_ATTACHMENTS;
+
+	if( FBitSet( flags, AF_FORCE_RECALC ) )
+		SetBits( studio_flags, STUDIO_FORCE );
+
+	if( FBitSet( flags, AF_LOCAL_SPACE ) )
+		SetBits( studio_flags, STUDIO_LOCAL_SPACE );
 
 	if( !ent || !ent->model || (!origin && !angles) )
 		return;
 
-	studiohdr_t *phdr = (studiohdr_t *)IEngineStudio.Mod_Extradata( ent->model );
+	RI->currententity = (cl_entity_t *)ent;
+	RI->currentmodel = ent->model;
+	if( !RI->currentmodel ) return;
 
-	if( !phdr )
-		return;
+	// force to compute attachments
+	SET_CURRENT_ENTITY( RI->currententity );
+	StudioDrawModel( studio_flags );
+
+	SET_CURRENT_ENTITY( NULL );
+	RI->currententity = NULL;
+	RI->currentmodel = NULL;
 
 	if( ent->modelhandle == INVALID_HANDLE )
 		return; // too early ?
@@ -3694,56 +3708,10 @@ void CStudioModelRenderer::StudioGetAttachment( const cl_entity_t *ent, int iAtt
 	ModelInstance_t *inst = &m_ModelInstances[ent->modelhandle];
 
 	// make sure we don't overflow
-	iAttachment = bound( 0, iAttachment, phdr->numattachments - 1 );
+	iAttachment = bound( 0, iAttachment, inst->numattachments - 1 );
 
-	Vector AttOrg = inst->attachment[iAttachment].origin;
-
-	// diffusion - FIXME this is a hack for attached sprites.
-	// when the model is not visible on screen initially, the attachment's coord is zero.
-	// so this is a "solution" so we don't see anything in the world center if entity is in the PVS.
-	if( AttOrg == g_vecZero )
-		AttOrg = ent->origin;
-
-	if( origin ) *origin = AttOrg;
+	if( origin ) *origin = inst->attachment[iAttachment].origin;
 	if( angles ) *angles = inst->attachment[iAttachment].angles;
-
-	return;
-	//	}
-	/*
-		int	studio_flags = STUDIO_EVENTS;
-
-		if( FBitSet( flags, AF_FORCE_RECALC ) )
-			SetBits( studio_flags, STUDIO_FORCE );
-
-		if( FBitSet( flags, AF_LOCAL_SPACE ) )
-			SetBits( studio_flags, STUDIO_LOCAL_SPACE );
-
-		if( !ent || !ent->model || (!origin && !angles) )
-			return;
-
-		RI->currententity = (cl_entity_t *)ent;
-		RI->currentmodel = ent->model;
-		if( !RI->currentmodel ) return;
-
-		// force to compute attachments
-		SET_CURRENT_ENTITY( RI->currententity );
-		StudioDrawModel( studio_flags );
-
-		SET_CURRENT_ENTITY( NULL );
-		RI->currententity = NULL;
-		RI->currentmodel = NULL;
-
-		if( ent->modelhandle == INVALID_HANDLE )
-			return; // too early ?
-
-		ModelInstance_t *inst = &m_ModelInstances[ent->modelhandle];
-
-		// make sure we not overflow
-		iAttachment = bound( 0, iAttachment, inst->numattachments - 1 );
-
-		if( origin ) *origin = inst->attachment[iAttachment].origin;
-		if( angles ) *angles = inst->attachment[iAttachment].angles;
-		*/
 }
 
 /*
@@ -4568,11 +4536,10 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 		m_pModelInstance->cached_frame = tr.realframecount;
 	}
 
-	if( FBitSet( flags, STUDIO_EVENTS ) )
+	if( FBitSet( flags, STUDIO_EVENTS ) || FBitSet( flags, STUDIO_ATTACHMENTS ) )
 	{
 		// calc attachments only once per frame
 		StudioCalcAttachments( m_pModelInstance->m_pbones, FBitSet( flags, STUDIO_LOCAL_SPACE ) );
-		StudioClientEvents();
 
 		// copy attachments into global entity array
 		// g-cont: share client attachments with viewmodel
@@ -4582,6 +4549,9 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 			memcpy( ent->attachment, m_pCurrentEntity->attachment, sizeof( Vector ) * 4 );
 		}
 	}
+
+	if( FBitSet( flags, STUDIO_EVENTS ) )
+		StudioClientEvents();
 
 	if( FBitSet( flags, STUDIO_RENDER ) )
 	{
