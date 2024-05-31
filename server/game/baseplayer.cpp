@@ -5886,17 +5886,15 @@ void CBloodSplat::Spray ( void )
 {
 	TraceResult tr;	
 	
-	if( g_Language != LANGUAGE_GERMAN )
-	{
-		UTIL_MakeVectors( GetAbsAngles() );
-		UTIL_TraceLine( GetAbsOrigin(), GetAbsOrigin() + gpGlobals->v_forward * 128, dont_ignore_monsters, pev->owner, &tr );
+	UTIL_MakeVectors( GetAbsAngles() );
+	UTIL_TraceLine( GetAbsOrigin(), GetAbsOrigin() + gpGlobals->v_forward * 128, dont_ignore_monsters, pev->owner, &tr );
 
-		CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
+	CBaseEntity *pEntity = CBaseEntity::Instance( tr.pHit );
 
-		if( pEntity && UTIL_GetModelType( pEntity->pev->modelindex ) == mod_studio )
-			UTIL_BloodStudioDecalTrace( &tr, BLOOD_COLOR_RED );
-		else UTIL_BloodDecalTrace( &tr, BLOOD_COLOR_RED );
-	}
+	if( pEntity && UTIL_GetModelType( pEntity->pev->modelindex ) == mod_studio )
+		UTIL_BloodStudioDecalTrace( &tr, BLOOD_COLOR_RED );
+	else
+		UTIL_BloodDecalTrace( &tr, BLOOD_COLOR_RED );
 
 	SetThink( &CBaseEntity::SUB_Remove );
 	SetNextThink( 0.1 );

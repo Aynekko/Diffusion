@@ -499,20 +499,7 @@ void DBG_AssertFunction(BOOL fExpr, const char* szExpr, const char* szFile, int 
 #define ASSERTSZ(f, sz)
 #endif	// !DEBUG
 
-
 extern DLL_GLOBAL ULONG	g_ulFrameCount;
-
-//
-// Constants that were used only by QC (maybe not used at all now)
-//
-// Un-comment only as needed
-//
-#define LANGUAGE_ENGLISH			0
-#define LANGUAGE_GERMAN			1
-#define LANGUAGE_FRENCH			2
-#define LANGUAGE_BRITISH			3
-
-extern DLL_GLOBAL int		g_Language;
 extern DLL_GLOBAL BOOL		g_fPhysicInitialized;
 extern DLL_GLOBAL BOOL		g_fTouchLinkSemaphore;
 extern DLL_GLOBAL int		g_iXashEngineBuildNumber;	// may be 0 for old versions or GoldSource

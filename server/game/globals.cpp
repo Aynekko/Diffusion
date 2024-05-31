@@ -38,4 +38,3 @@ DLL_GLOBAL BOOL		g_fGameOver;
 DLL_GLOBAL BOOL		g_fTouchLinkSemaphore = FALSE;
 DLL_GLOBAL BOOL		g_fPhysicInitialized = FALSE;
 DLL_GLOBAL int		g_iXashEngineBuildNumber;
-DLL_GLOBAL int		g_Language;

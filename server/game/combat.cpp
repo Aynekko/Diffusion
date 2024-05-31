@@ -38,7 +38,6 @@ extern DLL_GLOBAL int		g_iSkillLevel;
 extern Vector VecBModelOrigin( entvars_t* pevBModel );
 extern entvars_t *g_pevLastInflictor;
 
-#define GERMAN_GIB_COUNT		4
 #define HUMAN_GIB_COUNT		6
 #define ALIEN_GIB_COUNT		4
 
@@ -731,7 +730,7 @@ void CGib :: BounceGibTouch( CBaseEntity *pOther )
 	}
 	else
 	{
-		if( g_Language != LANGUAGE_GERMAN && m_cBloodDecals > 0 && m_bloodColor != DONT_BLEED )
+		if( m_cBloodDecals > 0 && m_bloodColor != DONT_BLEED )
 		{
 			vecSpot = GetAbsOrigin() + Vector ( 0 , 0 , 8 );//move up a bit, and trace down.
 			UTIL_TraceLine( vecSpot, vecSpot + Vector( 0, 0, -24 ),  ignore_monsters, edict(), &tr );

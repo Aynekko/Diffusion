@@ -77,18 +77,10 @@ LINK_ENTITY_TO_CLASS(gibshooter, CGibShooter);
 
 void CGibShooter::Precache(void)
 {
-	if (g_Language == LANGUAGE_GERMAN)
-	{
-		m_iGibModelIndex = PRECACHE_MODEL("models/germanygibs.mdl");
-	}
-	else if (m_iBloodColor == BLOOD_COLOR_YELLOW)
-	{
+	if (m_iBloodColor == BLOOD_COLOR_YELLOW)
 		m_iGibModelIndex = PRECACHE_MODEL("models/agibs.mdl");
-	}
 	else
-	{
 		m_iGibModelIndex = PRECACHE_MODEL("models/hgibs.mdl");
-	}
 }
 
 void CGibShooter::KeyValue(KeyValueData* pkvd)
