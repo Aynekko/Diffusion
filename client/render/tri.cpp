@@ -22,40 +22,18 @@
 #include "r_local.h"
 #include "edict.h"
 
-static void CableSetRender( bool start )
-{
-	if( start )
-	{
-		GL_Texture2D( GL_FALSE );
-		GL_Cull( GL_NONE );
-		if( glState.drawTrans )
-		{
-			GL_DepthMask( GL_FALSE );
-			GL_Blend( GL_TRUE );
-			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-		}
-		else
-		{
-			GL_Blend( GL_FALSE );
-			GL_DepthTest( GL_TRUE );
-			GL_DepthMask( GL_TRUE );
-		}
-	}
-	else
-	{
-		GL_Texture2D( GL_TRUE );
-		GL_DepthMask( GL_TRUE );
-		GL_Blend( GL_FALSE );
-		GL_Cull( GL_FRONT );
-	}
-}
+#define MAX_CABLE_VERTS 65536
+Vector CableVertexesArray[MAX_CABLE_VERTS];
+byte CableColorArray[MAX_CABLE_VERTS][4];
+int cable_numverts;
 
 void HUD_DrawNormalTriangles( void )
 {
 	gEngfuncs.pTriAPI->Begin(TRI_POLYGON);
 	gEngfuncs.pTriAPI->End();
 
-	bool CableRender = false;
+	// prepare the cable arrays
+	cable_numverts = 0;
 	
 	for( int i = 0; i < tr.num_solid_entities; i++ )
 	{
@@ -74,20 +52,13 @@ void HUD_DrawNormalTriangles( void )
 		if( R_CullModel( RI->currententity, absmin, absmax ) )
 			continue;
 
-		if( !CableRender )
-		{
-			CableSetRender( true );
-			CableRender = true;
-		}
-
 		if( r_drawentities->value == 7 )
 			DBG_DrawBBox( absmin, absmax );
 
-		R_DrawCable( RI->currententity );
+		R_SetupCable( RI->currententity );
 	}
 	
-	if( CableRender )
-		CableSetRender( false );
+	R_RenderCables();
 
 	g_pParticles.Update();
 }
@@ -107,7 +78,8 @@ void HUD_DrawTransparentTriangles( void )
 		tr.frametime = tr.time - tr.oldtime;
 	}
 
-	bool CableRender = false;
+	// prepare the cable arrays
+	cable_numverts = 0;
 
 	for( int i = 0; i < tr.num_trans_entities; i++ )
 	{
@@ -126,20 +98,13 @@ void HUD_DrawTransparentTriangles( void )
 		if( R_CullModel( RI->currententity, absmin, absmax ) )
 			continue;
 
-		if( !CableRender )
-		{
-			CableSetRender( true );
-			CableRender = true;
-		}
-
 		if( r_drawentities->value == 7 )
 			DBG_DrawBBox( absmin, absmax );
 
-		R_DrawCable( RI->currententity );
+		R_SetupCable( RI->currententity );
 	}
 	
-	if( CableRender )
-		CableSetRender( false );
+	R_RenderCables();
 
 	if( g_pParticleSystems )
 		g_pParticleSystems->UpdateSystems();
@@ -151,10 +116,10 @@ void HUD_DrawTransparentTriangles( void )
 }
 
 //==========================================================================
-// R_DrawCable
+// R_SetupCable
 // diffusion - thanks to Bacontsu for the cable rendering code!
 //==========================================================================
-void R_DrawCable( cl_entity_t *e )
+void R_SetupCable( cl_entity_t *e )
 {
 	if( e->index >= 8192 )
 		return; // ¯\_(ツ)_/¯
@@ -202,11 +167,7 @@ void R_DrawCable( cl_entity_t *e )
 	int isegments = bound( 3, e->curstate.iuser2, 49 );
 
 	int inumpoints = isegments + 1;
-	Vector Color;
-	Color.x = (float)e->curstate.rendercolor.r / 255.0f;
-	Color.y = (float)e->curstate.rendercolor.g / 255.0f;
-	Color.z = (float)e->curstate.rendercolor.b / 255.0f;
-	float RenderAmt = ((float)CL_FxBlend(e) / 255.0f) * tr.fadeblend[e->index];
+	float RenderAmt = (float)CL_FxBlend(e) * tr.fadeblend[e->index];
 	vposition1 = e->curstate.origin; // start cable
 	vposition2 = e->curstate.vuser1; // end cable
 
@@ -219,6 +180,9 @@ void R_DrawCable( cl_entity_t *e )
 
 	for( int cablenum = 0; cablenum < NumberOfCables; cablenum++ )
 	{
+		if( cable_numverts >= MAX_CABLE_VERTS - (inumpoints * 2) )
+			break; // array full
+		
 		float SwayPhase = tr.cableSwayPhase[e->index];
 		
 		if( cablenum > 0 )
@@ -252,7 +216,7 @@ void R_DrawCable( cl_entity_t *e )
 
 		Vector vTangent, vDir, vRight, vVertex;
 
-		// find cable's right fector
+		// find cable's right vector
 		Vector forward = vposition2 - vposition1;
 		forward.z = 0;
 		forward = forward.Normalize();
@@ -261,9 +225,6 @@ void R_DrawCable( cl_entity_t *e )
 		VectorAngles( forward, angles );
 		AngleVectors( angles, NULL, right, NULL );
 
-		GL_Color4f( Color.x, Color.y, Color.z, RenderAmt );
-
-		pglBegin( GL_TRIANGLE_STRIP );
 		for( int j = 0; j < inumpoints; j++ )
 		{
 			if( j == 0 ){ VectorSubtract( vpoints[0], vpoints[1], vTangent ); }
@@ -278,7 +239,19 @@ void R_DrawCable( cl_entity_t *e )
 				if( j != 0 && j != inumpoints - 1 ) // bacontsu - dont animate last and first vertex
 					vVertex = vVertex + (right * 1.5f * tr.cableSwayIntensity[e->index] * 5 * cos( SwayPhase * (float( (e->index % 4) + 1 ) * 2.0f / 4.0f) + j * 0.2f ));
 			}
-			pglVertex3fv( vVertex );
+			CableVertexesArray[cable_numverts] = vVertex;
+			CableColorArray[cable_numverts][0] = e->curstate.rendercolor.r;
+			CableColorArray[cable_numverts][1] = e->curstate.rendercolor.g;
+			CableColorArray[cable_numverts][2] = e->curstate.rendercolor.b;
+			CableColorArray[cable_numverts][3] = RenderAmt;
+			cable_numverts++;
+
+			// repeat the first vertex
+			if( j == 0 )
+			{
+				CableVertexesArray[cable_numverts] = vVertex;
+				cable_numverts++;
+			}
 
 			VectorMA( vpoints[j], -fwidth, vRight, vVertex );
 			if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
@@ -286,9 +259,17 @@ void R_DrawCable( cl_entity_t *e )
 				if( j != 0 && j != inumpoints - 1 ) // bacontsu - dont animate last and first vertex
 					vVertex = vVertex + (right * 1.5f * tr.cableSwayIntensity[e->index] * 5 * cos( SwayPhase * (float( (e->index % 4) + 1 ) * 2.0f / 4.0f) + j * 0.2f ));
 			}
-			pglVertex3fv( vVertex );
+			CableVertexesArray[cable_numverts] = vVertex;
+			CableColorArray[cable_numverts][0] = e->curstate.rendercolor.r;
+			CableColorArray[cable_numverts][1] = e->curstate.rendercolor.g;
+			CableColorArray[cable_numverts][2] = e->curstate.rendercolor.b;
+			CableColorArray[cable_numverts][3] = RenderAmt;
+			cable_numverts++;
 		}
-		pglEnd();
+
+		// repeat the last vertex
+		CableVertexesArray[cable_numverts] = vVertex;
+		cable_numverts++;
 
 		// is it time to create water particle?
 		if( bMakeWaterDrops && cablenum == WaterdropCable ) // rate: 0 - 255
@@ -299,7 +280,43 @@ void R_DrawCable( cl_entity_t *e )
 				tr.ParticleTime[e->index] = tr.time + (1.0f / (0.1f + (e->curstate.vuser2.x * 0.2f)));
 			}
 		}
-
-		r_stats.c_cables++;
 	}
+}
+
+void R_RenderCables( void )
+{
+	if( cable_numverts <= 0 )
+		return;
+	
+	GL_Texture2D( GL_FALSE );
+	GL_Cull( GL_NONE );
+	if( glState.drawTrans )
+	{
+		GL_DepthMask( GL_FALSE );
+		GL_Blend( GL_TRUE );
+		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	}
+	else
+	{
+		GL_Blend( GL_FALSE );
+		GL_DepthTest( GL_TRUE );
+		GL_DepthMask( GL_TRUE );
+	}
+
+	pglEnableClientState( GL_VERTEX_ARRAY );
+	pglVertexPointer( 3, GL_FLOAT, sizeof( Vector ), CableVertexesArray );
+	pglEnableClientState( GL_COLOR_ARRAY );
+	pglColorPointer( 4, GL_UNSIGNED_BYTE, 0, CableColorArray );
+
+	pglDrawArrays( GL_TRIANGLE_STRIP, 0, cable_numverts );
+
+	pglDisableClientState( GL_VERTEX_ARRAY );
+	pglDisableClientState( GL_COLOR_ARRAY );
+
+	GL_Texture2D( GL_TRUE );
+	GL_DepthMask( GL_TRUE );
+	GL_Blend( GL_FALSE );
+	GL_Cull( GL_FRONT );
+
+	r_stats.c_cables++;
 }

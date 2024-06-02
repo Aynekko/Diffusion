@@ -673,7 +673,8 @@ void GL_CheckForErrors_( const char *filename, const int fileline );
 //
 // tri.cpp
 //
-void R_DrawCable( cl_entity_t *e );
+void R_SetupCable( cl_entity_t *e );
+void R_RenderCables( void );
 
 //
 // r_backend.cpp
