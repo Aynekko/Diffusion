@@ -9,7 +9,10 @@
 // env_cable + env_cable_manager
 
 // pev->message = cable group
+// vuser1 = origin of the 2nd point
 // vuser2.x = water drip intensity (0 - 255)
+// vuser2.y = number of cables (<=0 means 1 cable)
+// vuser2.z = added slack for the next cable
 
 class CEnvCable : public CPointEntity
 {
@@ -23,6 +26,8 @@ public:
 	EHANDLE m_hTarget; // 2nd point (optional)
 	void KeyValue( KeyValueData *pkvd );
 	int WaterDropIntensity;
+	int NumberOfCables;
+	int AddSlack; // added slack for the next cable
 
 	DECLARE_DATADESC();
 };
@@ -34,6 +39,8 @@ BEGIN_DATADESC( CEnvCable )
 	DEFINE_FUNCTION( CollectTarget ),
 	DEFINE_FIELD( m_hTarget, FIELD_EHANDLE ),
 	DEFINE_KEYFIELD( WaterDropIntensity, FIELD_INTEGER, "waterdrops" ),
+	DEFINE_KEYFIELD( NumberOfCables, FIELD_INTEGER, "cables" ),
+	DEFINE_KEYFIELD( AddSlack, FIELD_INTEGER, "addslack" ),
 END_DATADESC()
 
 void CEnvCable::KeyValue( KeyValueData *pkvd )
@@ -43,6 +50,16 @@ void CEnvCable::KeyValue( KeyValueData *pkvd )
 		WaterDropIntensity = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "cables" ) )
+	{
+		NumberOfCables = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "addslack" ) )
+	{
+		AddSlack = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CPointEntity::KeyValue( pkvd );
 }
@@ -50,6 +67,13 @@ void CEnvCable::KeyValue( KeyValueData *pkvd )
 void CEnvCable::Spawn( void )
 {
 	SetNullModel(); // needed to pass to client
+
+	// bound particle rate
+	pev->vuser2.x = bound( 0, WaterDropIntensity, 255 );
+	// number of cables
+	pev->vuser2.y = bound( 1, NumberOfCables, 999 );
+	// added slack
+	pev->vuser2.z = bound( 5, AddSlack, 999 );
 
 	if( !pev->vuser1 || pev->vuser1 == g_vecZero ) // user didn't specify 2nd point manually, so we need to find target
 	{
@@ -94,9 +118,6 @@ void CEnvCable::Spawn( void )
 
 	if( !pev->rendercolor || (pev->rendercolor.x == 0.0f && pev->rendercolor.y == 0.0f && pev->rendercolor.z == 0.0f) )
 		pev->rendercolor = Vector( 1,1,1 ); // it becomes white if 0, Xash does this
-
-	// bound particle rate
-	pev->vuser2.x = bound( 0, WaterDropIntensity, 255 );
 }
 
 void CEnvCable::CalcBox( void )
@@ -124,7 +145,10 @@ void CEnvCable::CalcBox( void )
 	// after normalizing, then find drop point
 	Vector diff = pev->vuser1 - pev->origin;
 	vmidpoint = pev->origin + (diff * 0.5f);
-	float lowest = (vmidpoint.z - (pev->fuser1 / 2.0f)) - pev->origin.z - accounted_difference;
+	float total_falldepth = pev->fuser1;
+	if( pev->vuser2.y > 1 ) // if we have more than 1 cable, increase falldepth accordingly
+		total_falldepth += pev->vuser2.y * pev->vuser2.z; // number of cables * added slack per cable
+	float lowest = (vmidpoint.z - (total_falldepth * 0.5f)) - pev->origin.z - accounted_difference;
 
 	// check if mins is already lower than this
 	if( mins.z > lowest )

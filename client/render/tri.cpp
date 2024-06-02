@@ -180,6 +180,7 @@ void R_DrawCable( cl_entity_t *e )
 	Vector vmidpoint;
 	
 	float TargetSway = e->curstate.fuser3;
+	int NumberOfCables = (int)e->curstate.vuser2.y;
 	
 	// origin of the cable can move when parented. if so, add shaking
 	float Speed = (e->curstate.origin - e->prevstate.origin).Length() / g_fFrametime;
@@ -194,8 +195,6 @@ void R_DrawCable( cl_entity_t *e )
 	float falldepth = e->curstate.fuser1;
 	if( falldepth <= 0.0f )
 		falldepth = 0.001f;
-	if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
-		falldepth += sin( tr.cableSwayPhase[e->index] * ((float( (e->index % 4) + 1 ) * 2.0f / 4.0f)) ) * ((falldepth * tr.cableSwayIntensity[e->index]) / 10.0f);
 
 	float fwidth = e->curstate.fuser2;
 
@@ -211,76 +210,96 @@ void R_DrawCable( cl_entity_t *e )
 	vposition1 = e->curstate.origin; // start cable
 	vposition2 = e->curstate.vuser1; // end cable
 
-	// Calculate dropping point
-	VectorSubtract( vposition2, vposition1, vdirection );
-	VectorMA( vposition1, 0.5, vdirection, vmidpoint );
-	vdroppoint = Vector( vmidpoint[0], vmidpoint[1], vmidpoint[2] - falldepth );
-
 	bool bMakeWaterDrops = (e->curstate.vuser2.x > 0.01f); // rate: 0 - 255
-	Vector vParticlePoint = g_vecZero;
-	int ParticlePointNum = -1; 
-	if( bMakeWaterDrops )
-		ParticlePointNum = RANDOM_LONG( 1, isegments );
+	// choose a cable for waterdrop
+	int WaterdropCable = 1;
+	if( bMakeWaterDrops && NumberOfCables > 1 )
+		WaterdropCable = RANDOM_LONG( 1, NumberOfCables );
+	const float DeSync[] = { 0.0f, 0.666f, -0.42f, -0.834f, 0.444f, -0.711f };
 
-	for( int i = 0; i < inumpoints; i++ )
+	for( int cablenum = 0; cablenum < NumberOfCables; cablenum++ )
 	{
-		float f = (float)i / (float)isegments;
-		vpoints[i][0] = vposition1[0] * ((1 - f) * (1 - f)) + vdroppoint[0] * ((1 - f) * f * 2) + vposition2[0] * (f * f);
-		vpoints[i][1] = vposition1[1] * ((1 - f) * (1 - f)) + vdroppoint[1] * ((1 - f) * f * 2) + vposition2[1] * (f * f);
-		vpoints[i][2] = vposition1[2] * ((1 - f) * (1 - f)) + vdroppoint[2] * ((1 - f) * f * 2) + vposition2[2] * (f * f);
-		if( i == ParticlePointNum ) // randomly choosen point for water drop particle
-			vParticlePoint = vpoints[i];
-	}
+		float SwayPhase = tr.cableSwayPhase[e->index];
+		
+		if( cablenum > 0 )
+		{
+			falldepth += e->curstate.vuser2.z * cablenum;
+			SwayPhase += DeSync[bound( 0, cablenum % sizeof( DeSync ) - 1, sizeof( DeSync ) - 1 )];
+		}
 
-	Vector vTangent, vDir, vRight, vVertex;
-
-	// find cable's right fector
-	Vector forward = vposition2 - vposition1;
-	forward.z = 0;
-	forward = forward.Normalize();
-
-	Vector right, angles;
-	VectorAngles( forward, angles );
-	AngleVectors( angles, NULL, right, NULL );
-
-	GL_Color4f( Color.x, Color.y, Color.z, RenderAmt );
-
-	pglBegin( GL_TRIANGLE_STRIP );
-	for( int j = 0; j < inumpoints; j++ )
-	{
-		if( j == 0 ){ VectorSubtract( vpoints[0], vpoints[1], vTangent ); }
-		else { VectorSubtract( vpoints[0], vpoints[j], vTangent ); }
-
-		VectorSubtract( vpoints[j], RI->vieworg, vDir );
-		vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
-
-		VectorMA( vpoints[j], fwidth, vRight, vVertex );
 		if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
-		{
-			if( j != 0 && j != inumpoints - 1 ) // bacontsu - dont animate last and first vertex
-				vVertex = vVertex + (right * 1.5f * tr.cableSwayIntensity[e->index] * 5 * cos( tr.cableSwayPhase[e->index] * (float( (e->index % 4) + 1 ) * 2.0f / 4.0f) + j * 0.2f ));
-		}
-		pglVertex3fv( vVertex );
+			falldepth += sin( SwayPhase * ((float( (e->index % 4) + 1 ) * 2.0f / 4.0f)) ) * ((falldepth * tr.cableSwayIntensity[e->index]) / 10.0f);
 
-		VectorMA( vpoints[j], -fwidth, vRight, vVertex );
-		if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
+		// Calculate dropping point
+		VectorSubtract( vposition2, vposition1, vdirection );
+		VectorMA( vposition1, 0.5, vdirection, vmidpoint );
+		vdroppoint = Vector( vmidpoint[0], vmidpoint[1], vmidpoint[2] - falldepth );
+
+		Vector vParticlePoint = g_vecZero;
+		int ParticlePointNum = -1;
+		if( bMakeWaterDrops && cablenum == WaterdropCable )
+			ParticlePointNum = RANDOM_LONG( 1, isegments );
+
+		for( int i = 0; i < inumpoints; i++ )
 		{
-			if( j != 0 && j != inumpoints - 1 ) // bacontsu - dont animate last and first vertex
-				vVertex = vVertex + (right * 1.5f * tr.cableSwayIntensity[e->index] * 5 * cos( tr.cableSwayPhase[e->index] * (float( (e->index % 4) + 1 ) * 2.0f / 4.0f) + j * 0.2f ));
+			float f = (float)i / (float)isegments;
+			vpoints[i][0] = vposition1[0] * ((1 - f) * (1 - f)) + vdroppoint[0] * ((1 - f) * f * 2) + vposition2[0] * (f * f);
+			vpoints[i][1] = vposition1[1] * ((1 - f) * (1 - f)) + vdroppoint[1] * ((1 - f) * f * 2) + vposition2[1] * (f * f);
+			vpoints[i][2] = vposition1[2] * ((1 - f) * (1 - f)) + vdroppoint[2] * ((1 - f) * f * 2) + vposition2[2] * (f * f);
+			if( i == ParticlePointNum ) // randomly choosen point for water drop particle
+				vParticlePoint = vpoints[i];
 		}
-		pglVertex3fv( vVertex );
+
+		Vector vTangent, vDir, vRight, vVertex;
+
+		// find cable's right fector
+		Vector forward = vposition2 - vposition1;
+		forward.z = 0;
+		forward = forward.Normalize();
+
+		Vector right, angles;
+		VectorAngles( forward, angles );
+		AngleVectors( angles, NULL, right, NULL );
+
+		GL_Color4f( Color.x, Color.y, Color.z, RenderAmt );
+
+		pglBegin( GL_TRIANGLE_STRIP );
+		for( int j = 0; j < inumpoints; j++ )
+		{
+			if( j == 0 ){ VectorSubtract( vpoints[0], vpoints[1], vTangent ); }
+			else { VectorSubtract( vpoints[0], vpoints[j], vTangent ); }
+
+			VectorSubtract( vpoints[j], RI->vieworg, vDir );
+			vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
+
+			VectorMA( vpoints[j], fwidth, vRight, vVertex );
+			if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
+			{
+				if( j != 0 && j != inumpoints - 1 ) // bacontsu - dont animate last and first vertex
+					vVertex = vVertex + (right * 1.5f * tr.cableSwayIntensity[e->index] * 5 * cos( SwayPhase * (float( (e->index % 4) + 1 ) * 2.0f / 4.0f) + j * 0.2f ));
+			}
+			pglVertex3fv( vVertex );
+
+			VectorMA( vpoints[j], -fwidth, vRight, vVertex );
+			if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
+			{
+				if( j != 0 && j != inumpoints - 1 ) // bacontsu - dont animate last and first vertex
+					vVertex = vVertex + (right * 1.5f * tr.cableSwayIntensity[e->index] * 5 * cos( SwayPhase * (float( (e->index % 4) + 1 ) * 2.0f / 4.0f) + j * 0.2f ));
+			}
+			pglVertex3fv( vVertex );
+		}
+		pglEnd();
+
+		// is it time to create water particle?
+		if( bMakeWaterDrops && cablenum == WaterdropCable ) // rate: 0 - 255
+		{
+			if( tr.time >= tr.ParticleTime[e->index] )
+			{
+				g_pParticles.WaterDrop( e->index, vParticlePoint );
+				tr.ParticleTime[e->index] = tr.time + (1.0f / (0.1f + (e->curstate.vuser2.x * 0.2f)));
+			}
+		}
+
+		r_stats.c_cables++;
 	}
-	pglEnd();
-
-	// is it time to create water particle?
-	if( bMakeWaterDrops ) // rate: 0 - 255
-	{
-		if( tr.time >= tr.ParticleTime[e->index] )
-		{
-			g_pParticles.WaterDrop( e->index, vParticlePoint );
-			tr.ParticleTime[e->index] = tr.time + (1.0f / (0.1f + (e->curstate.vuser2.x * 0.2f)));
-		}
-	}
-
-	r_stats.c_cables++;
 }
