@@ -250,6 +250,10 @@ void R_SetupCable( cl_entity_t *e )
 			if( j == 0 )
 			{
 				CableVertexesArray[cable_numverts] = vVertex;
+				CableColorArray[cable_numverts][0] = e->curstate.rendercolor.r;
+				CableColorArray[cable_numverts][1] = e->curstate.rendercolor.g;
+				CableColorArray[cable_numverts][2] = e->curstate.rendercolor.b;
+				CableColorArray[cable_numverts][3] = RenderAmt;
 				cable_numverts++;
 			}
 
@@ -269,6 +273,10 @@ void R_SetupCable( cl_entity_t *e )
 
 		// repeat the last vertex
 		CableVertexesArray[cable_numverts] = vVertex;
+		CableColorArray[cable_numverts][0] = e->curstate.rendercolor.r;
+		CableColorArray[cable_numverts][1] = e->curstate.rendercolor.g;
+		CableColorArray[cable_numverts][2] = e->curstate.rendercolor.b;
+		CableColorArray[cable_numverts][3] = RenderAmt;
 		cable_numverts++;
 
 		// is it time to create water particle?
