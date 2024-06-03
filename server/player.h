@@ -598,7 +598,7 @@ public:
 	bool IsSpawnProtected;
 	float HUDtextTime; // last time hud text was shown ("press x to respawn and such" - too much network spam...)
 
-	EHANDLE m_pFlashlightMonster; // pointer to flashlight monster
+	CBaseEntity *m_pFlashlightMonster; // pointer to flashlight monster
 
 	Vector NotInWaterVelocity; // copy of the velocity when waterlevel == 0. Need this to calculate damage when hitting water.
 								// equals g_vecZero when waterlevel > 0           P.S. not saved!

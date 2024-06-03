@@ -219,7 +219,7 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( ZoomState, FIELD_INTEGER ),
 	DEFINE_FIELD( ButtonFreezeTime, FIELD_TIME ),
 	DEFINE_FIELD( HUDtextTime, FIELD_TIME ),
-	DEFINE_FIELD( m_pFlashlightMonster, FIELD_EHANDLE ),
+//	DEFINE_FIELD( m_pFlashlightMonster, FIELD_CLASSPTR ), // this is fucked up: I can't save this thing because it crashes the game or corrupts whole player physics. What the hell?
 
 	// remember the weapons we had throughout the game
 	DEFINE_ARRAY( HadWeapon, FIELD_BOOLEAN, MAX_WEAPONS ),
@@ -4339,21 +4339,47 @@ void CBasePlayer::PostThink()
 		}
 	}
 
-	if( m_pFlashlightMonster != NULL )
+	// ----------------flashlight "dot" which monsters can see-----------------------------
+	if( gpGlobals->maxClients == 1 ) // UNDONE must be tested in multiplayer with monsters and other players, single-player for now
 	{
-		TraceResult TraceFlashlightMonster;
-		UTIL_MakeVectors( pev->v_angle );
-		int FlashlightRadius = 600; // same value in r_misc.cpp - Flashlight()
-		UTIL_TraceLine( GetGunPosition(), GetGunPosition() + gpGlobals->v_forward * FlashlightRadius, ignore_monsters, ENT( pev ), &TraceFlashlightMonster );
-		Vector newposition = TraceFlashlightMonster.vecEndPos;
-		if( TraceFlashlightMonster.flFraction < 1 )
+		// try to search for the entity first
+		if( !m_pFlashlightMonster )
 		{
-			TraceResult GodDamnTrace = UTIL_GetGlobalTrace();
-			newposition = TraceFlashlightMonster.vecEndPos + GodDamnTrace.vecPlaneNormal * 5; // pull out from the touched surface
+			bool found_flashlight = false;
+			if( (m_pFlashlightMonster = UTIL_FindEntityByClassname( NULL, "_flashlight" )) != NULL )
+				found_flashlight = true;
+
+			if( !found_flashlight ) // create a new one
+			{
+				m_pFlashlightMonster = CBaseEntity::Create( "_flashlight", GetAbsOrigin(), g_vecZero, edict() );
+				m_pFlashlightMonster->pev->effects |= EF_NODRAW;
+			//	m_pFlashlightMonster->SetModel( "sprites/laserdot.spr" );
+			//	m_pFlashlightMonster->pev->rendermode = kRenderGlow;
+			//	m_pFlashlightMonster->pev->renderfx = kRenderFxNoDissipation;
+			//	m_pFlashlightMonster->pev->renderamt = 255;
+			}
 		}
 
-		UTIL_SetOrigin( m_pFlashlightMonster, newposition );
+		if( m_pFlashlightMonster )
+		{
+			if( !(m_pFlashlightMonster->pev->effects & EF_NODRAW) )
+			{
+				TraceResult TraceFlashlightMonster;
+				UTIL_MakeVectors( pev->v_angle );
+				int FlashlightRadius = 600; // same value in r_misc.cpp - Flashlight()
+				UTIL_TraceLine( GetGunPosition(), GetGunPosition() + gpGlobals->v_forward * FlashlightRadius, ignore_monsters, ENT( pev ), &TraceFlashlightMonster );
+				Vector newposition = TraceFlashlightMonster.vecEndPos;
+				if( TraceFlashlightMonster.flFraction < 1 )
+				{
+					TraceResult GodDamnTrace = UTIL_GetGlobalTrace();
+					newposition = TraceFlashlightMonster.vecEndPos + GodDamnTrace.vecPlaneNormal * 5; // pull out from the touched surface
+				}
+
+				UTIL_SetOrigin( m_pFlashlightMonster, newposition );
+			}
+		}
 	}
+	// ------------------------------------------------------------------------------------------------
 
 	if( m_hDrone == NULL )
 	{
@@ -5962,12 +5988,8 @@ void CBasePlayer :: FlashlightTurnOn( void )
 
 	m_flFlashLightTime = FLASH_DRAIN_TIME + gpGlobals->time;
 
-	if( gpGlobals->maxClients == 1 ) // UNDONE must be tested in multiplayer with monsters and other players, single-player for now
-	{
-		CBaseMonster *pFlashlightMonster = (CBaseMonster *)Create( "_flashlight", GetAbsOrigin(), g_vecZero, edict() );
-		if( pFlashlightMonster )
-			m_pFlashlightMonster = pFlashlightMonster;
-	}
+	if( m_pFlashlightMonster )
+		m_pFlashlightMonster->pev->effects &= ~EF_NODRAW;
 }
 
 
@@ -5983,11 +6005,8 @@ void CBasePlayer :: FlashlightTurnOff( void )
 
 	m_flFlashLightTime = FLASH_CHARGE_TIME + gpGlobals->time;
 
-	if( m_pFlashlightMonster != NULL )
-	{
-		UTIL_Remove( m_pFlashlightMonster );
-		m_pFlashlightMonster = NULL;
-	}
+	if( m_pFlashlightMonster )
+		m_pFlashlightMonster->pev->effects |= EF_NODRAW;
 }
 
 /*
@@ -6571,6 +6590,7 @@ void CBasePlayer :: UpdateClientData( void )
 {
 	if (m_fInitHUD)
 	{
+		m_pFlashlightMonster = NULL; // nullify the flashlight monster, force search again...
 		m_fInitHUD = FALSE;
 		gInitHUD = FALSE;
 

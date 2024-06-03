@@ -340,12 +340,15 @@ void CBaseMonster :: Look ( int iDistance )
 	CBaseEntity	*pSightEnt = NULL;// the current visible entity that we're dealing with
 	
 	CBaseEntity *pFlashlightMonster = NULL; // diffusion - find the player's flashlight "dot"
-	// does this account only one flashlight at a time?..
-	if( (pFlashlightMonster = UTIL_FindEntityByClassname( pFlashlightMonster, "_flashlight" )) != NULL )
+	if( gpGlobals->maxClients == 1 )
 	{
-		// if monster can see this flashlight, set the condition
-		if( FVisible( pFlashlightMonster ) && FInViewCone( pFlashlightMonster, m_flFieldOfView ) && ( (pFlashlightMonster->GetAbsOrigin() - GetAbsOrigin()).Length() <= iDistance ) && (m_afCapability & bits_CAP_CANSEEFLASHLIGHT))
-			iSighted |= bits_COND_SEE_FLASHLIGHT;
+		// does this account only one flashlight at a time?..
+		if( (pFlashlightMonster = UTIL_FindEntityByClassname( pFlashlightMonster, "_flashlight" )) != NULL )
+		{
+			// if monster can see this flashlight, set the condition
+			if( !(pFlashlightMonster->pev->effects & EF_NODRAW) && FVisible( pFlashlightMonster ) && FInViewCone( pFlashlightMonster, m_flFieldOfView ) && ((pFlashlightMonster->GetAbsOrigin() - GetAbsOrigin()).Length() <= iDistance) && (m_afCapability & bits_CAP_CANSEEFLASHLIGHT) )
+				iSighted |= bits_COND_SEE_FLASHLIGHT;
+		}
 	}
 
 	// See no evil if prisoner is set
