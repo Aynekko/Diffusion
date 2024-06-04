@@ -6495,11 +6495,11 @@ void CBasePlayer::ItemPostFrame()
 {
 //	static int fInSelect = FALSE;
 
-	// check if the player is using a tank
-	if ( m_pTank != NULL )
-		return;
-
 	ImpulseCommands();
+
+	// check if the player is using a tank
+	if( m_pTank != NULL )
+		return;
 
 	// diffusion - https://github.com/ValveSoftware/halflife/issues/3345
 	// check again if the player is using a tank if they started using it in PlayerUse
