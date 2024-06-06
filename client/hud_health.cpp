@@ -117,8 +117,11 @@ int CHudHealthVisual :: Draw(float flTime)
 	if( health_val > 100 ) // draw same stuff on top (only red cells)
 	{
 		cell_start_x = pos_x + icon_size + 10;
-		for( cell = 0; cell < health_val - 100; cell++ )
+		for( cell = 0; cell < total_cells; cell++ )
 		{
+			if( cell > ( health_val - 100 ) * 0.5f )
+				break;
+			
 			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, Transparency ) );
 			cell_start_x += cell_width + cell_margin;
 		}

@@ -149,7 +149,7 @@ int CHudScoreboard :: Draw( float fTime )
 
 	FillRGBA( xpos - 5, ypos, PING_RANGE_MAX - 5, 1, 255, 140, 0, 255 );  // draw the separator line
 	
-	list_slot += 0.8f;
+	list_slot += 0.4f;
 
 	if( !gHUD.m_Teamplay )
 	{
