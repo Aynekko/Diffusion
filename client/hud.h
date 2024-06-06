@@ -336,6 +336,7 @@ struct extra_player_info_t
 	short teamnumber;
 	char teamname[MAX_TEAM_NAME];
 	bool isBot;
+	bool isTalking; // using voice right now
 };
 
 struct team_info_t
@@ -781,6 +782,8 @@ public:
 	void DrawSpeedometer( void );
 	void DrawShieldVignette( void );
 	void DrawGameSaved( void );
+	void DrawVoiceIcon( void );
+	bool ShouldDrawVoiceIcon;
 	bool ShouldDrawGameSaved;
 	bool SaveIcon_Reset;
 	bool InCar;

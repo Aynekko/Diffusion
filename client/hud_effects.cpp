@@ -16,6 +16,8 @@
 #define SPEEDOMETER_Y_OFFSET 5
 #define SAVE_SQUARE_SIZE 100
 
+int VoiceIcon = 0;
+
 int CScreenEffects::Init( void )
 {
 	gHUD.AddHudElem( this );
@@ -32,6 +34,8 @@ int CScreenEffects::VidInit(void)
 	SpeedometerGears.Init( "sprites/diffusion/speed_gears/speed_gears" );
 	LastOrigin = g_vecZero;
 	SaveIcon = LOAD_TEXTURE( "sprites/diffusion/saveicon.dds", NULL, 0, 0 );
+	VoiceIcon = LOAD_TEXTURE( "sprites/diffusion/voice_icon", NULL, 0, 0 );
+	ShouldDrawVoiceIcon = false;
 
 	return 1;
 }
@@ -43,6 +47,7 @@ int CScreenEffects::Draw( float flTime )
 	DrawVignette();
 	DrawCinematicBorder();
 	DrawGameSaved();
+	DrawVoiceIcon();
 
 	return 1;
 }
@@ -284,4 +289,27 @@ void CScreenEffects::DrawShieldVignette(void)
 		DrawQuad( 0, 0, ScreenWidth, ScreenHeight );
 		gEngfuncs.pTriAPI->End();
 	}
+}
+
+//===============================================
+// draw voice icon when local player speaks
+//===============================================
+void CScreenEffects::DrawVoiceIcon( void )
+{
+	if( GET_MAX_CLIENTS() <= 1 )
+		return;
+
+	if( !ShouldDrawVoiceIcon )
+		return;
+
+	const int icon_size = 50;
+	int x_pos = ScreenWidth - icon_size - 20;
+	int y_pos = ScreenHeight - (ScreenHeight * 0.25f);
+
+	GL_Bind( 0, VoiceIcon );
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
+	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	DrawQuad( x_pos, y_pos, x_pos + icon_size, y_pos + icon_size );
+	gEngfuncs.pTriAPI->End();
 }

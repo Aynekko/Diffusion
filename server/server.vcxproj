@@ -279,13 +279,12 @@
       <PrecompiledHeaderOutputFile>.\..\x64\Release\server\server.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\..\x64\Release\server\</ObjectFileName>
       <ProgramDataBaseFileName>.\..\x64\Release\server\</ProgramDataBaseFileName>
-      <DebugInformationFormat>
-      </DebugInformationFormat>
+      <DebugInformationFormat>None</DebugInformationFormat>
       <MinimalRebuild>
       </MinimalRebuild>
       <BufferSecurityCheck>false</BufferSecurityCheck>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <WholeProgramOptimization>true</WholeProgramOptimization>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>

@@ -25,6 +25,10 @@
 #include "parsemsg.h"
 #include "discord.h"
 #include "build.h"
+#include "triangleapi.h"
+
+int VoicePic = 0;
+#define VOICE_PIC_SIZE 18
 
 hud_player_info_t		g_PlayerInfoList[MAX_PLAYERS+1];	// player info from the engine
 extra_player_info_t		g_PlayerExtraInfo[MAX_PLAYERS+1];	// additional player info sent directly to the client dll
@@ -59,6 +63,7 @@ int CHudScoreboard :: Init( void )
 int CHudScoreboard :: VidInit( void )
 {
 	IsShowingObjective = false;
+	VoicePic = LOAD_TEXTURE( "sprites/diffusion/voice_icon", NULL, 0, 0 );
 	return 1;
 }
 
@@ -100,7 +105,7 @@ We have a minimum width of 1-320 - we could have the field widths scale with it?
 #define ROW_RANGE_MAX	( ScreenHeight - 50 )
 
 #define ROW_ROUNDING 7
-#define TXT_Y_OFFSET 5
+#define TXT_Y_OFFSET 6
 
 int CHudScoreboard :: Draw( float fTime )
 {
@@ -352,6 +357,19 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 
 		// draw their name (left to right)
 		DrawString( xpos + nameoffset, ypos + TXT_Y_OFFSET, pl_info->name, r, g, b );
+
+		// if they are talking, draw the small icon right before the "kills" column
+		if( g_PlayerExtraInfo[best_player].isTalking )
+		{
+			int voice_pic_x = xpos_rel + KILLS_RANGE_MIN - VOICE_PIC_SIZE - 10;
+			int voice_pic_y = ypos + TXT_Y_OFFSET;
+			GL_Bind( 0, VoicePic );
+			gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
+			gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+			gEngfuncs.pTriAPI->Begin( TRI_QUADS );		
+			DrawQuad( voice_pic_x, voice_pic_y, voice_pic_x + VOICE_PIC_SIZE, voice_pic_y + VOICE_PIC_SIZE );
+			gEngfuncs.pTriAPI->End();
+		}
 
 		// draw kills (left to right)
 		gHUD.DrawHudNumberString( xpos_rel + KILLS_RANGE_MIN, ypos + TXT_Y_OFFSET, 0, g_PlayerExtraInfo[best_player].frags, 25, 255, 25, true );

@@ -297,6 +297,11 @@ void HUD_PostRunCmd(struct local_state_s*, local_state_s*, struct usercmd_s*, in
 
 void HUD_VoiceStatus( int entindex, qboolean bTalking )
 {
+	if( entindex == -1 )
+		gHUD.m_ScreenEffects.ShouldDrawVoiceIcon = bTalking;
+
+	if( entindex > 0 && entindex <= MAX_PLAYERS + 1 )
+		g_PlayerExtraInfo[entindex].isTalking = bTalking;
 }
 
 void HUD_DirectorMessage( int iSize, void *pbuf )
