@@ -842,7 +842,7 @@ void CPhysicsPushedEntities::AddPushedEntityToBlockingList( CBaseEntity *pPushed
 	}
 
 	pCheckHighestParent->m_iPushEnumCount = s_nEnumCount;
-
+	
 	// NOTE: This is pretty tricky here. If a rigidly attached child comes into
 	// contact with a pusher, we *cannot* push the child. Instead, we must push
 	// the highest parent of that child.
@@ -1152,8 +1152,10 @@ returns true if the entity is in solid currently
 BOOL SV_TestEntityPosition( CBaseEntity *pEntity, CBaseEntity *pBlocker )
 {
 	TraceResult trace;
-
-	if( pEntity->IsPlayer( ))
+	
+	if( pEntity->IsPlayer() && !pEntity->HasFlag( F_BOT ) )
+	// BUGBUG: added check for the bot: bots hang the game in an endless loop after some time.
+	// To check, add 8-12 bots and spectate. The game will hang after 3-5 minutes.
 	{
 		// to avoid falling through tracktrain update client mins\maxs here
 		if( pEntity->pev->flags & FL_DUCKING ) 
@@ -1163,7 +1165,7 @@ BOOL SV_TestEntityPosition( CBaseEntity *pEntity, CBaseEntity *pBlocker )
 
 	gpGlobals->trace_flags = FTRACE_SIMPLEBOX;
 	TRACE_MONSTER_HULL( pEntity->edict(), pEntity->GetAbsOrigin(), pEntity->GetAbsOrigin(), dont_ignore_monsters, pEntity->edict(), &trace );
-
+	
 	if( pBlocker && trace.pHit )
 	{
 		CBaseEntity *pHit = CBaseEntity::Instance( trace.pHit );
@@ -1171,7 +1173,7 @@ BOOL SV_TestEntityPosition( CBaseEntity *pEntity, CBaseEntity *pBlocker )
 			return trace.fStartSolid;
 		return FALSE;
 	}
-
+	
 	return trace.fStartSolid;
 }
 

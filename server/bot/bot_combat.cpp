@@ -159,7 +159,9 @@ CBaseEntity * CBot::BotFindEnemy( void )
 	  vecEnd = pBotEnemy->EyePosition();
 
 	  // if the enemy is dead or has switched to botcam mode...
-	  if (!pBotEnemy->IsAlive() || (pBotEnemy->pev->effects & EF_NODRAW))
+	  // diffusion - NOTE: the takedamage check has been added because it sets in ClientDisconnect()
+	  // this fixed the issue when bots were still attracted to "disconnected bots" when they leave (their leftover edicts)
+	  if( !pBotEnemy->IsAlive() || (pBotEnemy->pev->effects & EF_NODRAW) || (pBotEnemy->pev->takedamage == DAMAGE_NO))
 	  {
 		 if (!pBotEnemy->IsAlive())  // is the enemy dead?, assume bot killed it
 		 {
@@ -200,6 +202,10 @@ CBaseEntity * CBot::BotFindEnemy( void )
 	  // skip invalid players and skip self (i.e. this bot)
 	  if ((!pPlayer) || (pPlayer == this))
 		 continue;
+
+	  // this can be a leftover edict of disconnected player or bot
+	  if( pPlayer->pev->takedamage == DAMAGE_NO )
+		  continue;
 
 	  // skip this player if not alive (i.e. dead or dying)
 	  if (pPlayer->pev->deadflag != DEAD_NO)
