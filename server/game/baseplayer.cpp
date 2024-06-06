@@ -7810,8 +7810,11 @@ BOOL CBasePlayer :: SwitchWeapon( CBasePlayerItem *pWeapon )
 	
 	ResetAutoaim( );
 	
-	if (m_pActiveItem)
-		m_pActiveItem->Holster( );
+	if( m_pActiveItem )
+	{
+		m_pLastItem = m_pActiveItem;
+		m_pActiveItem->Holster();
+	}
 
 	m_pActiveItem = pWeapon;
 	pWeapon->Deploy( );
