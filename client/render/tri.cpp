@@ -173,7 +173,7 @@ void R_SetupCable( cl_entity_t *e )
 
 	bool bMakeWaterDrops = (e->curstate.vuser2.x > 0.01f); // rate: 0 - 255
 	// choose a cable for waterdrop
-	int WaterdropCable = 1;
+	int WaterdropCable = 0;
 	if( bMakeWaterDrops && NumberOfCables > 1 )
 		WaterdropCable = RANDOM_LONG( 1, NumberOfCables );
 	const float DeSync[] = { 0.0f, 0.666f, -0.42f, -0.834f, 0.444f, -0.711f };
@@ -202,7 +202,7 @@ void R_SetupCable( cl_entity_t *e )
 		Vector vParticlePoint = g_vecZero;
 		int ParticlePointNum = -1;
 		if( bMakeWaterDrops && cablenum == WaterdropCable )
-			ParticlePointNum = RANDOM_LONG( 1, isegments );
+			ParticlePointNum = RANDOM_LONG( 1, isegments - 1 );
 
 		for( int i = 0; i < inumpoints; i++ )
 		{
