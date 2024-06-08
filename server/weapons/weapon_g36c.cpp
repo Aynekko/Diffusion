@@ -41,10 +41,6 @@ public:
 	void Holster( void );
 	void Reload( void );
 	void WeaponIdle( void );
-	float m_flNextAnimTime;
-
-	float m_iShotsFired;
-	bool m_bDelayFire;
 
 	void ResetZoom( void );
 	int m_fInZoom;
@@ -177,7 +173,6 @@ void CWeaponG36C::PrimaryAttack()
 	m_pPlayer->pev->effects |= EF_MUZZLEFLASH;
 
 	SendWeaponAnim( G36C_SHOOT );
-	m_flNextAnimTime = gpGlobals->time + 0.2;
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );

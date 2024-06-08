@@ -37,10 +37,6 @@ public:
 	BOOL Deploy( void );
 	void Reload( void );
 	void WeaponIdle( void );
-	float m_flNextAnimTime;
-
-	float m_iShotsFired;
-	bool m_bDelayFire;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_hkmp5, CWeaponHKMP5 );
@@ -143,7 +139,6 @@ void CWeaponHKMP5::PrimaryAttack()
 		m_pPlayer->FireLoudWeaponRestrictionEntity();
 
 	SendWeaponAnim( HKMP5_FIRE1 + RANDOM_LONG(0,2));
-	m_flNextAnimTime = gpGlobals->time + 0.2;
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );

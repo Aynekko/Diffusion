@@ -46,7 +46,6 @@ public:
 	BOOL Deploy( void );
 	void Holster( void );
 	void WeaponIdle( void );
-	float m_flNextAnimTime;
 	bool CheckForDrone(void);
 	int AddDuplicate( CBasePlayerItem *pOriginal );
 	bool SpawnTest( void );
@@ -80,22 +79,6 @@ int CWpnDrone::SecondaryAmmoIndex( void )
 	return m_iSecondaryAmmoType;
 }
 */
-
-bool CWpnDrone::CheckForDrone(void)
-{
-	CBaseEntity *pDrone = NULL;
-
-	if ((pDrone = UTIL_FindEntityByClassname( pDrone, "_playerdrone" )) != NULL)
-	{
-		m_pPlayer->DroneDeployed = true;
-		return true;
-	}
-	else
-	{
-		m_pPlayer->DroneDeployed = false;
-		return false;
-	}
-}
 
 BOOL CWpnDrone::IsUseable(void)
 {
@@ -232,6 +215,22 @@ int CWpnDrone::AddToPlayer( CBasePlayer *pPlayer )
 	}
 
 	return FALSE;
+}
+
+bool CWpnDrone::CheckForDrone( void )
+{
+	CBaseEntity *pDrone = NULL;
+
+	if( (pDrone = UTIL_FindEntityByClassname( pDrone, "_playerdrone" )) != NULL )
+	{
+		m_pPlayer->DroneDeployed = true;
+		return true;
+	}
+	else
+	{
+		m_pPlayer->DroneDeployed = false;
+		return false;
+	}
 }
 
 //=========================================================

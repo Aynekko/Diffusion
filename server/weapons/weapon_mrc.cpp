@@ -39,10 +39,6 @@ public:
 	BOOL Deploy( void );
 	void Reload( void );
 	void WeaponIdle( void );
-	float m_flNextAnimTime;
-
-	float m_iShotsFired;
-	bool m_bDelayFire;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_mrc, CMRC );
@@ -158,7 +154,6 @@ void CMRC::PrimaryAttack()
 		m_pPlayer->FireLoudWeaponRestrictionEntity();
 
 	SendWeaponAnim( MRC_FIRE1 + RANDOM_LONG(0,2));
-	m_flNextAnimTime = gpGlobals->time + 0.2;
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );

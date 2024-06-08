@@ -39,10 +39,6 @@ public:
 	BOOL Deploy( void );
 	void Holster( void );
 	void WeaponIdle( void );
-	float m_flNextAnimTime;
-
-	float m_iShotsFired;
-	bool m_bDelayFire;
 
 	bool SpawnTest( void );
 
