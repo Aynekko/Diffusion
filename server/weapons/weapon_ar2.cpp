@@ -37,12 +37,7 @@ public:
 	void SecondaryAttack( void );
 	int SecondaryAmmoIndex( void );
 	BOOL Deploy( void );
-//	void Reload( void );
 	void WeaponIdle( void );
-	float m_flNextAnimTime;
-
-	float m_iShotsFired;
-	bool m_bDelayFire;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_ar2, C_AR2 );
@@ -154,7 +149,6 @@ void C_AR2::PrimaryAttack()
 		m_pPlayer->FireLoudWeaponRestrictionEntity();
 
 	SendWeaponAnim( AR2_FIRE );
-	m_flNextAnimTime = gpGlobals->time + 0.2;
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
@@ -193,10 +187,13 @@ void C_AR2::PrimaryAttack()
 	m_pPlayer->pev->punchangle.y = -Cone * RANDOM_LONG(30,40);
 
 	CBaseEntity *pShock = CBaseEntity::Create( "shock_beam", vecSrc, anglesAim, m_pPlayer->edict() );
-	pShock->SetLocalVelocity( vecDir * 5000 );
-	pShock->pev->nextthink = gpGlobals->time;
-	pShock->pev->owner = m_pPlayer->edict();
-	pShock->pev->dmg = 15;
+	if( pShock )
+	{
+		UTIL_SetSize( pShock, Vector( -4, -4, -4 ), Vector( 4, 4, 4 ) );
+		pShock->SetLocalVelocity( vecDir * 5000 );
+		pShock->SetNextThink( 0 );
+		pShock->pev->dmg = 15;
+	}
 
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 
@@ -213,7 +210,6 @@ void C_AR2::PrimaryAttack()
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 
-//	m_pPlayer->AchievementStats[ACH_BULLETSFIRED]++;
 	m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 1, 0 );
 }
 

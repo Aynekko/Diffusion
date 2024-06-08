@@ -28,13 +28,13 @@ public:
 
 	CBeam *m_pBeam;
 	CBeam *m_pNoise;
-	CSprite *m_pSprite;
+	bool SetSpriteModel;
 	CSprite *m_pSprite2;
 
 	int EffectsCreated;
 	int BeamsRelinked; // relink beams on saverestore.
 
-	int GotOwnerClass; // we need to get the class of our owner, so we don't hurt our allies
+	bool GotOwnerClass; // we need to get the class of our owner, so we don't hurt our allies
 	int m_iClass;
 
 	DECLARE_DATADESC();

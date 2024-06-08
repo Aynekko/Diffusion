@@ -33,7 +33,7 @@ LINK_ENTITY_TO_CLASS(shock_beam, CShock)
 BEGIN_DATADESC( CShock )
 //	DEFINE_FIELD(m_pBeam, FIELD_CLASSPTR), shockbeamdisable
 //	DEFINE_FIELD(m_pNoise, FIELD_CLASSPTR),
-	DEFINE_FIELD(m_pSprite, FIELD_CLASSPTR),
+	DEFINE_FIELD( SetSpriteModel, FIELD_BOOLEAN ),
 	DEFINE_FIELD(m_pSprite2, FIELD_CLASSPTR),
 	DEFINE_FUNCTION( Touch ),
 	DEFINE_FUNCTION( FlyThink ),
@@ -48,7 +48,7 @@ void CShock::Spawn(void)
 
 	pev->solid = SOLID_BBOX;
 	
-	SET_MODEL(ENT(pev), "models/shock_effect.mdl");
+	SetNullModel();
 	UTIL_SetOrigin(this, pev->origin);
 
 	pev->dmg = 1;
@@ -81,10 +81,10 @@ void CShock::FlyThink()
 		pev->owner = NULL;
 	else
 	{
-		if( GotOwnerClass == 0 )
+		if( !GotOwnerClass )
 		{
 			m_iClass = m_hOwner->Classify();
-			GotOwnerClass = 1;
+			GotOwnerClass = true;
 		}
 	}
 
@@ -118,12 +118,15 @@ void CShock::FlyThink()
 	}
 	*/
 
-	if (m_pSprite)
+	if( SetSpriteModel )
 	{
-		if(m_pSprite->pev->frame > 9) // FIXME hardcoded!!! how to get the amount of frames from the sprite? AnimateUntilDead doesn't seem to work
-			m_pSprite->pev->frame = 0;
-		m_pSprite->pev->frame++;
+		if( pev->frame > 9 ) // FIXME hardcoded!!! how to get the amount of frames from the sprite? AnimateUntilDead doesn't seem to work
+			pev->frame = 0;
+		pev->frame++;
 	}
+
+	if( m_pSprite2 )
+		m_pSprite2->pev->origin = pev->origin;
 	
 	if (pev->waterlevel == 3)
 	{
@@ -231,21 +234,35 @@ void CShock::Touch(CBaseEntity *pOther)
 
 void CShock::CreateEffects(void)
 {
-	if( !m_pSprite )
-		m_pSprite = CSprite::SpriteCreate( "sprites/shock.spr", GetAbsOrigin(), TRUE );
-
-	if( m_pSprite )
+	if( !SetSpriteModel )
 	{
-		m_pSprite->SetAttachment( edict(), 0 );
+		// cache spawn size before changing model
+		Vector mins = pev->mins;
+		Vector maxs = pev->maxs;
+		SET_MODEL( edict(), "sprites/shock.spr" );
+		UTIL_SetSize( this, mins, maxs );
+		SetSpriteModel = true;
+	}
+
+	if( SetSpriteModel )
+	{
 		if( HasSpawnFlags(SHOCK_ALIENSHIP) )
 		{
-			m_pSprite->pev->scale = 0.6;
-			m_pSprite->SetTransparency( kRenderTransAdd, 255, 0, 50, 150, 0 );
+			pev->scale = 0.6;
+			pev->rendermode = kRenderTransAdd;
+			pev->renderamt = 150;
+			pev->rendercolor.x = 255;
+			pev->rendercolor.y = 0;
+			pev->rendercolor.z = 50;
 		}
 		else
 		{
-			m_pSprite->pev->scale = 0.1;
-			m_pSprite->SetTransparency( kRenderTransAdd, 80, 160, 255, 150, 0 );
+			pev->scale = 0.1;
+			pev->rendermode = kRenderTransAdd;
+			pev->renderamt = 150;
+			pev->rendercolor.x = 80;
+			pev->rendercolor.y = 169;
+			pev->rendercolor.z = 255;
 		}
 	}
 
@@ -258,12 +275,12 @@ void CShock::CreateEffects(void)
 		if( HasSpawnFlags( SHOCK_ALIENSHIP ) )
 		{
 			m_pSprite2->pev->scale = 0.6;
-			m_pSprite2->SetTransparency( kRenderTransAdd, 255, 0, 50, 200, 0 );
+			m_pSprite2->SetTransparency( kRenderGlow, 255, 0, 50, 200, 0 );
 		}
 		else
 		{
 			m_pSprite2->pev->scale = 0.2;
-			m_pSprite2->SetTransparency( kRenderTransAdd, 80, 160, 255, 200, 0 );
+			m_pSprite2->SetTransparency( kRenderGlow, 80, 160, 255, 200, 0 );
 		}
 	}
 
@@ -313,6 +330,7 @@ void CShock::CreateEffects(void)
 
 void CShock::ClearEffects()
 {
+	/* // shockbeamdisable
 	if (m_pBeam)
 	{
 		UTIL_Remove( m_pBeam );
@@ -323,13 +341,7 @@ void CShock::ClearEffects()
 	{
 		UTIL_Remove( m_pNoise );
 		m_pNoise = NULL;
-	}
-
-	if (m_pSprite)
-	{
-		UTIL_Remove( m_pSprite );
-		m_pSprite = NULL;
-	}
+	}*/
 
 	if (m_pSprite2)
 	{
