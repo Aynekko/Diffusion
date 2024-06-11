@@ -2345,7 +2345,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			// light origin
 			light_params[3] = Vector4D( pl->origin.x, pl->origin.y, pl->origin.z, (1.0f / pl->radius) );
 			// view origin + waveheight
-			light_params[4] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, waveHeight );
+			light_params[4] = Vector4D( RI->vieworg.x, RI->vieworg.y, RI->vieworg.z, waveHeight );
 			// fog params
 			if( e->curstate.rendermode == kRenderTransAdd || e->curstate.renderfx == kRenderFxFullbright || e->curstate.renderfx == kRenderFxFullbrightNoShadows )
 				light_params[5] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f );
@@ -2844,7 +2844,7 @@ void R_DrawBrushList( void )
 			else
 				brush_params[0] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 			// view origin + waveheight
-			brush_params[1] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, waveHeight );
+			brush_params[1] = Vector4D( RI->vieworg.x, RI->vieworg.y, RI->vieworg.z, waveHeight );
 			// waterlevel
 			brush_params[2] = Vector4D( tr.viewparams.waterlevel == 3 ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f );
 			pglUniform4fvARB( RI->currentshader->u_BrushParams, 3, &brush_params[0][0] );
