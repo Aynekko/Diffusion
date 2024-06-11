@@ -1546,7 +1546,10 @@ void R_DrawSolidEntities(void)
 			continue;
 
 		if( RI->currententity->curstate.iuser3 == -669 )
-			continue;
+			continue; // env_cable
+
+		if( RI->currententity->curstate.iuser3 == -664 )
+			continue; // env_volumetric_light
 
 		SET_CURRENT_ENTITY( RI->currententity );
 
@@ -1643,7 +1646,10 @@ void R_DrawTranslucentEntities(void)
 			continue;
 
 		if( RI->currententity->curstate.iuser3 == -669 )
-			continue;
+			continue; // env_cable
+
+		if( RI->currententity->curstate.iuser3 == -664 )
+			continue; // env_volumetric_light
 
 		SET_CURRENT_ENTITY( RI->currententity );
 

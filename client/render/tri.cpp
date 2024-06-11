@@ -21,11 +21,19 @@
 #include "r_weather.h"
 #include "r_local.h"
 #include "edict.h"
+#include "r_sprite.h"
 
 #define MAX_CABLE_VERTS 65536
 Vector CableVertexesArray[MAX_CABLE_VERTS];
 byte CableColorArray[MAX_CABLE_VERTS][4];
 int cable_numverts;
+
+#define MAX_VOLUMETRIC_VERTS 65536
+#define MAX_LIGHT_SPRITES 50 // per 1 entity - do not increase: sunflower constant has only 50 elements
+Vector VolumetricVertexesArray[MAX_VOLUMETRIC_VERTS];
+byte VolumetricColorArray[MAX_VOLUMETRIC_VERTS][4];
+Vector2D VolumetricTexCoordsArray[MAX_VOLUMETRIC_VERTS];
+int volumetric_numverts;
 
 void HUD_DrawNormalTriangles( void )
 {
@@ -78,33 +86,43 @@ void HUD_DrawTransparentTriangles( void )
 		tr.frametime = tr.time - tr.oldtime;
 	}
 
-	// prepare the cable arrays
+	// prepare the cable and volumetrics arrays
 	cable_numverts = 0;
+	volumetric_numverts = 0;
 
 	for( int i = 0; i < tr.num_trans_entities; i++ )
 	{
 		RI->currententity = tr.trans_entities[i];
 		RI->currentmodel = RI->currententity->model;
 
-		if( RI->currententity->curstate.iuser3 != -669 )
-			continue;
+		if( RI->currententity->curstate.iuser3 == -669 )
+		{
+			SET_CURRENT_ENTITY( RI->currententity );
 
-		SET_CURRENT_ENTITY( RI->currententity );
+			Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
+			Vector absmax = RI->currententity->origin + RI->currententity->curstate.maxs;
+			if( !Mod_CheckBoxVisible( absmin, absmax ) )
+				continue;
+			if( R_CullModel( RI->currententity, absmin, absmax ) )
+				continue;
 
-		Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
-		Vector absmax = RI->currententity->origin + RI->currententity->curstate.maxs;
-		if( !Mod_CheckBoxVisible( absmin, absmax ) )
-			continue;
-		if( R_CullModel( RI->currententity, absmin, absmax ) )
-			continue;
+			if( r_drawentities->value == 7 )
+				DBG_DrawBBox( absmin, absmax );
 
-		if( r_drawentities->value == 7 )
-			DBG_DrawBBox( absmin, absmax );
+			R_SetupCable( RI->currententity );
+		}
+		else if( RI->currententity->curstate.iuser3 == -664 )
+		{
+			SET_CURRENT_ENTITY( RI->currententity );
 
-		R_SetupCable( RI->currententity );
+			// FIXME no culling here yet...
+
+			R_SetupVolumetricLight( RI->currententity );
+		}
 	}
 	
 	R_RenderCables();
+	R_RenderVolumetricLights();
 
 	if( g_pParticleSystems )
 		g_pParticleSystems->UpdateSystems();
@@ -327,4 +345,209 @@ void R_RenderCables( void )
 	GL_Cull( GL_FRONT );
 
 	r_stats.c_cables++;
+}
+
+//============================================================================================
+// diffusion - sprite-based volumetric light
+//============================================================================================
+const Vector2D sunflower[50] =
+{
+	Vector2D( 0.000, 0.000 ),
+	Vector2D( -0.019, -0.068 ),
+	Vector2D( -0.105, 0.064 ),
+	Vector2D( 0.116, 0.108 ),
+	Vector2D( 0.086, -0.167 ),
+	Vector2D( -0.208, -0.043 ),
+	Vector2D( 0.016, 0.235 ),
+	Vector2D( 0.241, -0.086 ),
+	Vector2D( -0.158, -0.224 ),
+	Vector2D( -0.184, 0.227 ),
+	Vector2D( 0.283, 0.123 ),
+	Vector2D( 0.044, -0.322 ),
+	Vector2D( -0.337, 0.046 ),
+	Vector2D( 0.141, 0.325 ),
+	Vector2D( 0.286, -0.232 ),
+	Vector2D( -0.312, -0.220 ),
+	Vector2D( -0.132, 0.372 ),
+	Vector2D( 0.406, 0.028 ),
+	Vector2D( -0.085, -0.411 ),
+	Vector2D( -0.383, 0.198 ),
+	Vector2D( 0.302, 0.323 ),
+	Vector2D( 0.236, -0.388 ),
+	Vector2D( -0.448, -0.125 ),
+	Vector2D( 0.000, 0.476 ),
+	Vector2D( 0.468, -0.131 ),
+	Vector2D( -0.258, -0.424 ),
+	Vector2D( -0.346, 0.370 ),
+	Vector2D( 0.458, 0.237 ),
+	Vector2D( 0.107, -0.515 ),
+	Vector2D( -0.534, 0.037 ),
+	Vector2D( 0.182, 0.513 ),
+	Vector2D( 0.452, -0.319 ),
+	Vector2D( -0.437, -0.355 ),
+	Vector2D( -0.228, 0.524 ),
+	Vector2D( 0.575, 0.079 ),
+	Vector2D( -0.080, -0.583 ),
+	Vector2D( -0.548, 0.238 ),
+	Vector2D( 0.382, 0.470 ),
+	Vector2D( 0.354, -0.502 ),
+	Vector2D( -0.586, -0.208 ),
+	Vector2D( -0.043, 0.629 ),
+	Vector2D( 0.625, -0.130 ),
+	Vector2D( -0.298, -0.573 ),
+	Vector2D( -0.477, 0.447 ),
+	Vector2D( 0.565, 0.343 ),
+	Vector2D( 0.180, -0.644 ),
+	Vector2D( -0.676, 0.001 ),
+	Vector2D( 0.185, 0.658 ),
+	Vector2D( 0.591, -0.359 ),
+	Vector2D( -0.510, -0.477 ),
+};
+
+void R_SetupVolumetricLight( cl_entity_t *e )
+{
+	Vector vTangent, vDir, vRight, vVertex;
+	Vector v_angles = e->curstate.angles;
+	Vector ang_forward, ang_right, ang_up;
+	gEngfuncs.pfnAngleVectors( v_angles, ang_forward, ang_right, ang_up );
+
+	float light_length = e->curstate.vuser1.x;
+	float light_width = e->curstate.vuser1.y;
+	int num_sprites = e->curstate.vuser1.z;
+
+	// this way we can shape our cone how we want
+	float start_cone_scale = e->curstate.vuser2.x; // distance between sprites at start point
+	float end_cone_scale = e->curstate.vuser2.y; // distance between sprites at ending point
+
+	Vector vmidpoint; // average midpoint of the cone
+	vmidpoint = e->curstate.origin + ang_forward * light_length * 0.5f;
+	float flFade = 1.0f;
+	float flDist = (RI->vieworg - vmidpoint).Length();
+	float dist_check = light_length; // full length
+
+	num_sprites = bound( 1, num_sprites, MAX_LIGHT_SPRITES );
+
+	for( int i = 0; i < num_sprites; i++ )
+	{
+		Vector vposition1 = e->curstate.origin + ang_up * sunflower[i].x * 100 * start_cone_scale + ang_right * sunflower[i].y * 100 * start_cone_scale;
+		Vector vposition2 = e->curstate.origin + ang_forward * light_length + ang_up * sunflower[i].x * 100 * end_cone_scale + ang_right * sunflower[i].y * 100 * end_cone_scale;
+
+		// find right vector
+		Vector forward = vposition2 - vposition1;
+		forward.z = 0;
+		forward = forward.Normalize();
+
+		VectorSubtract( vposition1, vposition2, vTangent );
+		VectorSubtract( vposition1, RI->vieworg, vDir );
+		vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
+
+		float fader = 1.0f;
+		float DotP = 1.0f;
+		if( flDist <= dist_check )
+		{
+			DotP = fabs( DotProduct( RI->vforward, ang_right ) );
+			fader = RemapVal( flDist, 0, dist_check, 0, 1 );
+		}
+		flFade = DotP + fader;
+		flFade = bound( 0, flFade, 1 );
+		float transparency = flFade * e->curstate.renderamt * tr.fadeblend[e->index];
+
+		VectorMA( vposition1, light_width, vRight, vVertex );
+		VolumetricColorArray[volumetric_numverts][0] = e->curstate.rendercolor.r;
+		VolumetricColorArray[volumetric_numverts][1] = e->curstate.rendercolor.g;
+		VolumetricColorArray[volumetric_numverts][2] = e->curstate.rendercolor.b;
+		VolumetricColorArray[volumetric_numverts][3] = transparency;
+		VolumetricTexCoordsArray[volumetric_numverts] = Vector2D( 0.0f, 0.0f );
+		VolumetricVertexesArray[volumetric_numverts] = vVertex;
+		volumetric_numverts++;
+
+		// repeat first vertex
+		VolumetricColorArray[volumetric_numverts][0] = e->curstate.rendercolor.r;
+		VolumetricColorArray[volumetric_numverts][1] = e->curstate.rendercolor.g;
+		VolumetricColorArray[volumetric_numverts][2] = e->curstate.rendercolor.b;
+		VolumetricColorArray[volumetric_numverts][3] = transparency;
+		VolumetricTexCoordsArray[volumetric_numverts] = Vector2D( 0.0f, 0.0f );
+		VolumetricVertexesArray[volumetric_numverts] = vVertex;
+		volumetric_numverts++;
+
+		VectorMA( vposition1, -light_width, vRight, vVertex );
+		VolumetricColorArray[volumetric_numverts][0] = e->curstate.rendercolor.r;
+		VolumetricColorArray[volumetric_numverts][1] = e->curstate.rendercolor.g;
+		VolumetricColorArray[volumetric_numverts][2] = e->curstate.rendercolor.b;
+		VolumetricColorArray[volumetric_numverts][3] = transparency;
+		VolumetricTexCoordsArray[volumetric_numverts] = Vector2D( 1.0f, 0.0f );
+		VolumetricVertexesArray[volumetric_numverts] = vVertex;
+		volumetric_numverts++;
+
+		VectorSubtract( vposition1, vposition2, vTangent );
+		VectorSubtract( vposition2, RI->vieworg, vDir );
+		vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
+		VectorMA( vposition2, light_width, vRight, vVertex );
+		VolumetricColorArray[volumetric_numverts][0] = e->curstate.rendercolor.r;
+		VolumetricColorArray[volumetric_numverts][1] = e->curstate.rendercolor.g;
+		VolumetricColorArray[volumetric_numverts][2] = e->curstate.rendercolor.b;
+		VolumetricColorArray[volumetric_numverts][3] = transparency;
+		VolumetricTexCoordsArray[volumetric_numverts] = Vector2D( 0.0f, 1.0f );
+		VolumetricVertexesArray[volumetric_numverts] = vVertex;
+		volumetric_numverts++;
+
+		VectorMA( vposition2, -light_width, vRight, vVertex );
+		VolumetricColorArray[volumetric_numverts][0] = e->curstate.rendercolor.r;
+		VolumetricColorArray[volumetric_numverts][1] = e->curstate.rendercolor.g;
+		VolumetricColorArray[volumetric_numverts][2] = e->curstate.rendercolor.b;
+		VolumetricColorArray[volumetric_numverts][3] = transparency;
+		VolumetricTexCoordsArray[volumetric_numverts] = Vector2D( 1.0f, 1.0f );
+		VolumetricVertexesArray[volumetric_numverts] = vVertex;
+		volumetric_numverts++;
+
+		// repeat last vertex
+		VolumetricColorArray[volumetric_numverts][0] = e->curstate.rendercolor.r;
+		VolumetricColorArray[volumetric_numverts][1] = e->curstate.rendercolor.g;
+		VolumetricColorArray[volumetric_numverts][2] = e->curstate.rendercolor.b;
+		VolumetricColorArray[volumetric_numverts][3] = transparency;
+		VolumetricTexCoordsArray[volumetric_numverts] = Vector2D( 1.0f, 1.0f );
+		VolumetricVertexesArray[volumetric_numverts] = vVertex;
+		volumetric_numverts++;	
+	}
+}
+
+void R_RenderVolumetricLights( void )
+{
+	if( volumetric_numverts <= 0 )
+		return;
+	
+	int texture = SPR_Load( "sprites/volumetric.spr" );
+
+	model_t *sprite = (struct model_s *)gEngfuncs.GetSpritePointer( texture );
+	if( !sprite )
+		return;
+	msprite_t *m_pSpriteHeader = (msprite_t *)sprite->cache.data;
+	if( !m_pSpriteHeader )
+		return;
+
+	// animate
+	float frame = (int)(tr.time * 10) % m_pSpriteHeader->numframes;
+	if( !gEngfuncs.pTriAPI->SpriteTexture( sprite, (int)frame ) )
+		return;
+
+	GL_Cull( GL_NONE );
+	GL_Blend( GL_TRUE );
+	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+	GL_DepthMask( GL_FALSE );
+	
+	pglEnableClientState( GL_VERTEX_ARRAY );
+	pglVertexPointer( 3, GL_FLOAT, sizeof( Vector ), VolumetricVertexesArray );
+	pglEnableClientState( GL_COLOR_ARRAY );
+	pglColorPointer( 4, GL_UNSIGNED_BYTE, 0, VolumetricColorArray );
+	pglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	pglTexCoordPointer( 2, GL_FLOAT, 0, VolumetricTexCoordsArray );
+
+	pglDrawArrays( GL_TRIANGLE_STRIP, 0, volumetric_numverts );
+
+	pglDisableClientState( GL_VERTEX_ARRAY );
+	pglDisableClientState( GL_COLOR_ARRAY );
+	pglDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	
+	GL_Blend( GL_FALSE );
+	GL_Cull( GL_FRONT );
 }

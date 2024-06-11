@@ -131,9 +131,6 @@
     <ClCompile Include="train.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="render\tri.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="use_icon.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -262,6 +259,9 @@
     </ClCompile>
     <ClCompile Include="hud_pseudogui.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="render\tri.cpp">
+      <Filter>Source Files\render</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

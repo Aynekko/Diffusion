@@ -37,6 +37,7 @@ used iuser3 "flags":
 -661 prop_explosive_barrel
 -662 player's drone
 -663 env_bubbles
+-664 env_volumetric_light
 -666 item_flare
 -667 monster on fire
 -668 dust particles from car wheel

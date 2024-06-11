@@ -365,6 +365,7 @@
     <ClCompile Include="entities\env_counter.cpp" />
     <ClCompile Include="entities\env_customize.cpp" />
     <ClCompile Include="entities\env_shockwave.cpp" />
+    <ClCompile Include="entities\env_volumetric_light.cpp" />
     <ClCompile Include="entities\func_boat.cpp" />
     <ClCompile Include="entities\func_car.cpp" />
     <ClCompile Include="entities\func_carblocker.cpp" />
