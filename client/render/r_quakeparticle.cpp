@@ -2195,7 +2195,7 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 		if( PushVelocityRand.z != 0.0f )
 			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.z, PushVelocityRand.z );
 		src.m_flAlpha = Alpha;
-		src.m_flAlphaVelocity = -0.5 * Alpha;
+		src.m_flAlphaVelocity = -RANDOM_FLOAT( 0.3f, 0.666f ) * Alpha;
 		src.m_flRadius = Scale;
 		src.m_flRotation = RANDOM_LONG( 1, 360 );
 		src.m_flDistance = Distance;
@@ -2230,7 +2230,7 @@ void CQuakePartSystem::SmokeVolume( int EntIndex, int Particle, const Vector &po
 		if( PushVelocityRand.z != 0.0f )
 			src.m_vecVelocity += RANDOM_FLOAT( -PushVelocityRand.z, PushVelocityRand.z );
 		src.m_flAlpha = Alpha;
-		src.m_flAlphaVelocity = -0.5 * Alpha;
+		src.m_flAlphaVelocity = -RANDOM_FLOAT( 0.4f, 0.6f ) * Alpha;
 		src.m_flRadius = Scale;
 		src.m_flMinScale = Scale * 0.1;
 		src.m_flMaxScale = Scale * 2.0;
