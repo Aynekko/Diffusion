@@ -537,7 +537,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				}
 
 				int Count = (SmV_Size.x *SmV_Size.y + SmV_Size.y * SmV_Size.z + SmV_Size.z * SmV_Size.x) / (3 * Density * Density);
-				if( Count < 1 ) Count = 1;
+				Count = bound( 1, Count, 1024 );
 				Vector vecSpot;
 				int i, j;
 				float SmV_Alpha = ent->curstate.renderamt / 255.0f;
@@ -552,7 +552,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 
 				for( i = 0; i < Count; i++ )
 				{
-					for( j = 0; j < 32; j++ )
+					for( j = 0; j < 16; j++ )
 					{
 						// fill up the box with stuff
 						vecSpot[0] = SmV_Org.x + RANDOM_FLOAT( -0.5f, 0.5f ) * SmV_Size.x;
