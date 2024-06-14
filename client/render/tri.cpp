@@ -406,6 +406,9 @@ const Vector2D sunflower[50] =
 
 void R_SetupVolumetricLight( cl_entity_t *e )
 {
+	if( !tr.volumetric_light_texture )
+		return;
+	
 	Vector vTangent, vDir, vRight, vVertex;
 	Vector v_angles = e->curstate.angles;
 	Vector ang_forward, ang_right, ang_up;
@@ -515,7 +518,7 @@ void R_RenderVolumetricLights( void )
 {
 	if( volumetric_numverts <= 0 )
 		return;
-	
+#if 0 // animated sprite
 	int texture = SPR_Load( "sprites/volumetric.spr" );
 
 	model_t *sprite = (struct model_s *)gEngfuncs.GetSpritePointer( texture );
@@ -529,6 +532,9 @@ void R_RenderVolumetricLights( void )
 	float frame = (int)(tr.time * 10) % m_pSpriteHeader->numframes;
 	if( !gEngfuncs.pTriAPI->SpriteTexture( sprite, (int)frame ) )
 		return;
+#else
+	GL_Bind( GL_TEXTURE0, tr.volumetric_light_texture );
+#endif
 
 	GL_Cull( GL_NONE );
 	GL_Blend( GL_TRUE );

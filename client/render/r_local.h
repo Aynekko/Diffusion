@@ -464,6 +464,8 @@ typedef struct
 	int nullmodelindex;
 
 	int reset_gamma_frame; // reset gamma after cubemap pass
+
+	int volumetric_light_texture;
 } ref_globals_t;
 
 typedef struct

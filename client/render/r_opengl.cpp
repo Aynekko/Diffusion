@@ -870,6 +870,9 @@ static void GL_InitTextures( void )
 			tr.waterTextures[i] = LOAD_TEXTURE( path, NULL, 0, TF_NORMALMAP );
 		}
 	}
+
+	if( !(tr.volumetric_light_texture = LOAD_TEXTURE( "sprites/diffusion/volumetric.dds", NULL, 0, 0 )) )
+		ConPrintf( "^1Error:^7 sprites/diffusion/volumetric.dds couldn't be loaded, env_volumetric_light won't work.\n" );
 }
 
 /*
