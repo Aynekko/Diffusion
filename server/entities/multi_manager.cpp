@@ -196,7 +196,7 @@ void CMultiManager::ManagerThink(void)
 			DontThink();
 		}
 
-		if (IsClone() || FBitSet(pev->spawnflags, SF_MULTIMAN_ONLYONCE))
+		if (IsClone() || HasSpawnFlags(SF_MULTIMAN_ONLYONCE) )
 		{
 			UTIL_Remove(this);
 			return;
@@ -364,6 +364,8 @@ void CFuncMultiManager::Spawn(void)
 	SetTouch( &CFuncMultiManager::UseTouch );
 
 	BaseClass::Spawn();
+
+	pev->spawnflags |= SF_MULTIMAN_ONLYONCE;
 }
 
 void CFuncMultiManager::UseTouch( CBaseEntity *pOther )
@@ -377,7 +379,7 @@ void CFuncMultiManager::UseTouch( CBaseEntity *pOther )
 	if( pOther->IsPlayer() )
 	{
 		Use( pOther, pOther, USE_TOGGLE, 0 );
-		SetTouch( NULL );
+		SetTouch( NULL ); // trigger can't be touched anymore and will remove itself after firing all targets
 	}
 }
 
