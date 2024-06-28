@@ -21,6 +21,8 @@ vuser2.x - start cone spread scale (more - wider)
 vuser2.y - end cone spread scale (more - wider)
 */
 
+#define SF_VOLLIGHT_STARTOFF BIT(0)
+
 class CEnvVolumetricLight : public CPointEntity
 {
 	DECLARE_CLASS( CEnvVolumetricLight, CPointEntity );
@@ -84,6 +86,12 @@ void CEnvVolumetricLight::Spawn( void )
 	pev->solid = SOLID_NOT;
 	SetBits( m_iFlags, MF_POINTENTITY );
 	pev->iuser3 = -664; // flag for client
+
+	if( HasSpawnFlags( SF_VOLLIGHT_STARTOFF ) )
+	{
+		pev->iuser3 = 0;
+		pev->effects |= EF_NODRAW;
+	}
 
 	SetNullModel();
 	UTIL_SetSize( pev, Vector( -256, -256, -256 ), Vector( 256, 256, 256 ) ); // FIXME calculate something here...
