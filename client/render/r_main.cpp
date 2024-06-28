@@ -1432,13 +1432,17 @@ float R_ComputeFadingDistance( cl_entity_t *e )
 		)
 		{ ViewOrigin = tr.pDrone->curstate.origin; }
 
+	int iDist = (int)(ViewOrigin - EntOrigin).Length();
+
 	// player within range, no need to fade
-	if( (ViewOrigin - EntOrigin).Length() <= FadeDistance )
+	if( iDist <= FadeDistance )
 		return tr.fadeblend[e->index];
 
 	// if the distance from model origin and the player exceeds desired fade distance, start fading
-	if( (int)(ViewOrigin - EntOrigin).Length() > FadeDistance )
-		tr.fadeblend[e->index] = (e->curstate.renderamt - ((int)(ViewOrigin - EntOrigin).Length() - FadeDistance)) / 255.0f;
+	float remapped = RemapVal( iDist, FadeDistance, FadeDistance + 255, 0.0f, 1.0f );
+	
+	if( iDist > FadeDistance )
+		tr.fadeblend[e->index] = 1.0f - remapped;
 
 	// keep the custom render mode intact, only switch to Fade if Normal or Solid (those can't fade)
 	if( tr.fadeblend[e->index] < 1.0f )
@@ -1590,7 +1594,7 @@ void R_DrawTranslucentEntities(void)
 		if( RI->currententity->index < MAX_FADING_ENTS )
 		{
 			if( tr.fadeblend[RI->currententity->index] < 1.0f )
-				tr.blend = tr.fadeblend[RI->currententity->index];
+				tr.blend *= tr.fadeblend[RI->currententity->index];
 		}
 
 		if( tr.blend <= 0.0f ) continue;
@@ -1618,7 +1622,7 @@ void R_DrawTranslucentEntities(void)
 		if( RI->currententity->index < MAX_FADING_ENTS )
 		{
 			if( tr.fadeblend[RI->currententity->index] < 1.0f )
-				tr.blend = tr.fadeblend[RI->currententity->index];
+				tr.blend *= tr.fadeblend[RI->currententity->index];
 		}
 
 		if( tr.blend <= 0.0f ) continue;
@@ -1660,7 +1664,7 @@ void R_DrawTranslucentEntities(void)
 		if( RI->currententity->index < MAX_FADING_ENTS )
 		{
 			if( tr.fadeblend[RI->currententity->index] < 1.0f )
-				tr.blend = tr.fadeblend[RI->currententity->index];
+				tr.blend *= tr.fadeblend[RI->currententity->index];
 		}
 
 		if( tr.blend <= 0.0f ) continue;

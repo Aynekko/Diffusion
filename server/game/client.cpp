@@ -1858,8 +1858,7 @@ bool IsDistanceCulled( CBasePlayer *pPlayer, CBaseEntity *e )
 	else
 		FadeDistance = e->pev->iuser4 * (1 / FOVfactor);
 
-	// renderamt is added so entity can be faded on client
-	if( (int)(HostOrigin - EntOrigin).Length() > FadeDistance + ((e->pev->renderamt == 0) ? 255 : e->pev->renderamt) )
+	if( (int)(HostOrigin - EntOrigin).Length() > FadeDistance + 255 )
 		return true;
 
 	return false;

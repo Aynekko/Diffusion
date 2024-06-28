@@ -453,7 +453,7 @@ void R_SetupVolumetricLight( cl_entity_t *e )
 		}
 		flFade = DotP + fader;
 		flFade = bound( 0, flFade, 1 );
-		float transparency = flFade * e->curstate.renderamt * tr.fadeblend[e->index];
+		float transparency = flFade * (float)CL_FxBlend( e ) * tr.fadeblend[e->index];
 
 		VectorMA( vposition1, light_width, vRight, vVertex );
 		VolumetricColorArray[volumetric_numverts][0] = e->curstate.rendercolor.r;

@@ -327,6 +327,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 			tr.nullmodelindex = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/null.spr" );
 
 		// experimental
+		/*
 		if( 0 )//r_fade_props->value == 2 && tr.fadeblend[ent->index] == 1.0f )
 		{
 			float x, y, w, h;
@@ -354,7 +355,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 						return 0;
 				}
 			}
-		}
+		}*/
 
 		if( !R_AddEntity( ent, type ) )
 			return 0;
