@@ -428,6 +428,8 @@ void R_SetupVolumetricLight( cl_entity_t *e )
 	float flDist = (RI->vieworg - vmidpoint).Length();
 	float dist_check = light_length; // full length
 
+	bool spawn_particles = (e->curstate.vuser2.z == 1.0f) && (tr.time >= tr.ParticleTime[e->index]);
+
 	num_sprites = bound( 1, num_sprites, MAX_LIGHT_SPRITES );
 
 	for( int i = 0; i < num_sprites; i++ )
@@ -436,9 +438,18 @@ void R_SetupVolumetricLight( cl_entity_t *e )
 		Vector vposition2 = e->curstate.origin + ang_forward * light_length + ang_up * sunflower[i].x * 100 * end_cone_scale + ang_right * sunflower[i].y * 100 * end_cone_scale;
 
 		// find right vector
-		Vector forward = vposition2 - vposition1;
+		Vector forward = (vposition2 - vposition1).Normalize();
+
+		// spawn a particle
+		if( spawn_particles ) // 3 - fullbright dustmotes
+		{
+			float ParticleDist = RANDOM_FLOAT( light_length * 0.1f, light_length * 0.75f );
+			Vector Color = Vector( e->curstate.rendercolor.r, e->curstate.rendercolor.g, e->curstate.rendercolor.b ) / 255.0f;
+			// remapval on ParticleDist is controlling alpha: closer to light emission means brighter particle
+			g_pParticles.SmokeVolume( e->index, 3, vposition1 + forward * ParticleDist, g_vecZero, g_vecZero, Color, 0.0f, 1.0f - RemapVal( ParticleDist, light_length * 0.1f, light_length * 0.75f, 0.0f, 1.0f ), 1000 );
+		}
+
 		forward.z = 0;
-		forward = forward.Normalize();
 
 		VectorSubtract( vposition1, vposition2, vTangent );
 		VectorSubtract( vposition1, RI->vieworg, vDir );
@@ -510,8 +521,11 @@ void R_SetupVolumetricLight( cl_entity_t *e )
 		VolumetricColorArray[volumetric_numverts][3] = transparency;
 		VolumetricTexCoordsArray[volumetric_numverts] = Vector2D( 1.0f, 1.0f );
 		VolumetricVertexesArray[volumetric_numverts] = vVertex;
-		volumetric_numverts++;	
+		volumetric_numverts++;
 	}
+
+	if( spawn_particles )
+		tr.ParticleTime[e->index] = tr.time + RANDOM_FLOAT(2.5f, 3.5f);
 }
 
 void R_RenderVolumetricLights( void )

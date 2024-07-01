@@ -19,9 +19,11 @@ vuser1.y - light width (of a single sprite)
 vuser1.z - amount of sprites in a cone
 vuser2.x - start cone spread scale (more - wider)
 vuser2.y - end cone spread scale (more - wider)
+vuser2.z - use dust particles or not (0-1)
 */
 
 #define SF_VOLLIGHT_STARTOFF BIT(0)
+#define SF_VOLLIGHT_DUSTPARTICLES BIT(1)
 
 class CEnvVolumetricLight : public CPointEntity
 {
@@ -122,10 +124,14 @@ void CEnvVolumetricLight::Spawn( void )
 	// spread scales
 	pev->vuser2.x = bound( 0, start_cone_scale, 9999 );
 	pev->vuser2.y = bound( 0, end_cone_scale, 9999 );
+	pev->vuser2.z = 0.0f;
 
 	// diffusion - important. when mapper didn't set angles, it doesn't assume that it's zero vector
 	if( GetAbsAngles() == g_vecZero )
 		SetAbsAngles( g_vecZero );
+
+	if( HasSpawnFlags( SF_VOLLIGHT_DUSTPARTICLES ) )
+		pev->vuser2.z = 1.0f;
 }
 
 void CEnvVolumetricLight::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
