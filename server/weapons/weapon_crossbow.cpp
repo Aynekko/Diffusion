@@ -327,7 +327,7 @@ public:
 	int GetItemInfo(ItemInfo *p);
 
 	void FireBolt( void );
-	void FireSniperBolt( void );
+//	void FireSniperBolt( void );
 	void PrimaryAttack( void );
 	void SecondaryAttack( void );
 	int AddToPlayer( CBasePlayer *pPlayer );
@@ -342,6 +342,8 @@ public:
 
 	int m_fInZoom;
 	int m_fZoomInUse;
+
+	bool bNeedPump;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_crossbow, CCrossbow );
@@ -360,6 +362,8 @@ void CCrossbow::Spawn( void )
 	m_iDefaultAmmo = CROSSBOW_DEFAULT_GIVE;
 
 	FallInit();// get ready to fall down.
+
+	bNeedPump = false;
 }
 
 int CCrossbow::AddToPlayer( CBasePlayer *pPlayer )
@@ -376,14 +380,17 @@ int CCrossbow::AddToPlayer( CBasePlayer *pPlayer )
 
 void CCrossbow::Precache( void )
 {
-	PRECACHE_MODEL("models/weapons/w_crossbow.mdl");
-	PRECACHE_MODEL("models/weapons/v_crossbow.mdl");
-	PRECACHE_MODEL("models/weapons/p_crossbow.mdl");
+	PRECACHE_MODEL( "models/weapons/w_crossbow.mdl" );
+	PRECACHE_MODEL( "models/weapons/v_crossbow.mdl" );
+	PRECACHE_MODEL( "models/weapons/p_crossbow.mdl" );
 
-	PRECACHE_SOUND("weapons/xbow_fire1.wav");
-	PRECACHE_SOUND("weapons/xbow_reload1.wav");
-
-	PRECACHE_SOUND("weapons/xbow_scope.wav");
+	PRECACHE_SOUND( "weapons/xbow_shoot.wav" );
+	PRECACHE_SOUND( "weapons/xbow_clipin.wav" );
+	PRECACHE_SOUND( "weapons/xbow_clipout.wav" );
+	PRECACHE_SOUND( "weapons/xbow_drawback.wav" );
+	PRECACHE_SOUND( "weapons/xbow_drawback_long.wav" );
+	PRECACHE_SOUND( "weapons/xbow_cloth.wav" );
+	PRECACHE_SOUND( "weapons/xbow_scope.wav" );
 
 	UTIL_PrecacheOther( "crossbow_bolt" );
 }
@@ -407,9 +414,18 @@ int CCrossbow::GetItemInfo(ItemInfo *p)
 BOOL CCrossbow::Deploy( )
 {
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
-	if (m_iClip)
-		return DefaultDeploy( "models/weapons/v_crossbow.mdl", "models/weapons/p_crossbow.mdl", CROSSBOW_DRAW1, "bow" );
+	m_flNextPrimaryAttack = gpGlobals->time + CROSSBOW_DEPLOY_TIME;
+	if( m_iClip > 0 )
+	{
+		if( bNeedPump )
+		{
+			m_flTimeWeaponIdle = gpGlobals->time + CROSSBOW_DEPLOY_TIME;
+			return DefaultDeploy( "models/weapons/v_crossbow.mdl", "models/weapons/p_crossbow.mdl", CROSSBOW_DRAW2, "bow" );
+		}
+		else
+			return DefaultDeploy( "models/weapons/v_crossbow.mdl", "models/weapons/p_crossbow.mdl", CROSSBOW_DRAW1, "bow" );
+	}
+
 	return DefaultDeploy( "models/weapons/v_crossbow.mdl", "models/weapons/p_crossbow.mdl", CROSSBOW_DRAW2, "bow" );
 }
 
@@ -452,6 +468,11 @@ void CCrossbow::PrimaryAttack( void )
 		return;
 	}
 */
+	CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
+
+	if( bNeedPump )
+		return;
+
 	if( m_iClip <= 3)
 		LowAmmoMsg(m_pPlayer);
 
@@ -460,6 +481,7 @@ void CCrossbow::PrimaryAttack( void )
 
 // this function only gets called in multiplayer
 // diffusion - not used
+/*
 void CCrossbow::FireSniperBolt()
 {
 	m_flNextPrimaryAttack = gpGlobals->time + 0.75;
@@ -528,7 +550,7 @@ void CCrossbow::FireSniperBolt()
 		else
 			pBolt->SetNextThink(0);
 	}
-}
+}*/
 
 void CCrossbow::FireBolt( void )
 {
@@ -537,7 +559,6 @@ void CCrossbow::FireBolt( void )
 	if (m_iClip <= 0)
 	{
 		PlayEmptySound( );
-		CLIENT_COMMAND(m_pPlayer->edict(), "-attack\n");
 		return;
 	}
 
@@ -549,13 +570,7 @@ void CCrossbow::FireBolt( void )
 //	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/xbow_fire1.wav", RANDOM_FLOAT(0.95, 1.0), ATTN_NORM, 0, 93 + RANDOM_LONG(0,0xF));
 	PlayClientSound( m_pPlayer, WEAPON_CROSSBOW );
 
-	if (m_iClip)
-	{
-		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/xbow_reload1.wav", RANDOM_FLOAT(0.95, 1.0), ATTN_NORM, 0, 93 + RANDOM_LONG(0,0xF));
-		SendWeaponAnim( CROSSBOW_FIRE1 );
-	}
-	else if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] == 0)
-		SendWeaponAnim( CROSSBOW_FIRE3 );
+	SendWeaponAnim( CROSSBOW_FIRE1 );
 
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
@@ -602,13 +617,11 @@ void CCrossbow::FireBolt( void )
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);
 
-	m_flNextPrimaryAttack = gpGlobals->time + CROSSBOW_NEXT_PA_TIME;
+	m_flTimeWeaponIdle = gpGlobals->time + CROSSBOW_NEXT_PA_TIME;
+	bNeedPump = true;
 
-//	m_flNextSecondaryAttack = gpGlobals->time + 0.75;
-	if (m_iClip != 0)
-		m_flTimeWeaponIdle = gpGlobals->time + 5.0;
-	else
-		m_flTimeWeaponIdle = 0.75;
+	if( !m_iClip )
+		m_flNextPrimaryAttack = gpGlobals->time + CROSSBOW_NEXT_PA_TIME; // this will delay reloading to let shooting animation play
 
 	if( m_pPlayer->ZoomState > 0 )
 		m_pPlayer->pev->punchangle.x -= 2;
@@ -662,7 +675,6 @@ void CCrossbow::SecondaryAttack( void )
 	}
 
 	m_flNextSecondaryAttack = gpGlobals->time + 0.2;
-	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 }
 
 void CCrossbow::Reload( void )
@@ -671,12 +683,14 @@ void CCrossbow::Reload( void )
 		return;
 	
 	CLIENT_COMMAND(m_pPlayer->edict(), "-reload\n");
+
+	bNeedPump = false;
+	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT( 10, 15 );
 	
 	if( m_fInZoom )
 		ResetZoom();
 
-	if (DefaultReload( 5, CROSSBOW_RELOAD, CROSSBOW_RELOAD_TIME ))
-		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/xbow_reload1.wav", RANDOM_FLOAT(0.95, 1.0), ATTN_NORM, 0, 93 + RANDOM_LONG(0,0xF));
+	DefaultReload( CROSSBOW_MAX_CLIP, CROSSBOW_RELOAD, CROSSBOW_RELOAD_TIME );
 }
 
 void CCrossbow::WeaponIdle( void )
@@ -686,10 +700,18 @@ void CCrossbow::WeaponIdle( void )
 	ResetEmptySound( );
 	m_fZoomInUse = 0;
 	
-	if (m_flTimeWeaponIdle < gpGlobals->time)
+	if( m_flTimeWeaponIdle < gpGlobals->time )
 	{
-		float flRand = RANDOM_FLOAT(0, 1);
-		if (flRand <= 0.75)
+		if( bNeedPump )
+		{
+			SendWeaponAnim( CROSSBOW_FIRE2 );
+			bNeedPump = false;
+			m_flNextPrimaryAttack = gpGlobals->time + CROSSBOW_PUMP_TIME;
+			m_flTimeWeaponIdle = gpGlobals->time + 8.0f;
+			return;
+		}
+		
+		if( RANDOM_FLOAT( 0.0f, 1.0f ) <= 0.75f )
 		{
 			if (m_iClip)
 				SendWeaponAnim( CROSSBOW_IDLE1 );
@@ -703,12 +725,12 @@ void CCrossbow::WeaponIdle( void )
 			if (m_iClip)
 			{
 				SendWeaponAnim( CROSSBOW_FIDGET1 );
-				m_flTimeWeaponIdle = gpGlobals->time + 90.0 / 30.0;
+				m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT( 7, 15 );
 			}
-			else
+			else // no empty fidget anim...
 			{
-				SendWeaponAnim( CROSSBOW_FIDGET2 );
-				m_flTimeWeaponIdle = gpGlobals->time + 80.0 / 30.0;
+			//	SendWeaponAnim( CROSSBOW_FIDGET2 );
+			//	m_flTimeWeaponIdle = gpGlobals->time + 80.0 / 30.0;
 			}
 		}
 	}

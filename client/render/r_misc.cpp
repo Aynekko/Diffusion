@@ -2386,7 +2386,7 @@ void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoV
 	case WEAPON_CROSSBOW:
 		if( localanim )
 			break;
-		sndname[0] = "weapons/xbow_fire1.wav";
+		sndname[0] = "weapons/xbow_shoot.wav";
 		num = 0;
 	break;
 	case WEAPON_DEAGLE:

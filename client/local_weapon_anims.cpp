@@ -93,10 +93,12 @@ bool CheckForLocalWeaponShootAnimation( int seq )
 	case WEAPON_CROSSBOW:
 		if( seq == CROSSBOW_RELOAD ) // caught reload anim!
 			localanim_NextPAttackTime = tr.time + CROSSBOW_RELOAD_TIME;
-		else if( seq == CROSSBOW_DRAW1 || seq == CROSSBOW_DRAW2 ) // caught deploy anim!
+		else if( seq == CROSSBOW_DRAW1 || seq == CROSSBOW_DRAW2 ) // caught deploy anim! // FIXME - bNeedPump is not accounted here...
 			localanim_NextPAttackTime = tr.time + DEFAULT_DEPLOY_TIME;
+		else if( seq == CROSSBOW_FIRE2 ) // caught drawback anim!
+			localanim_NextPAttackTime = tr.time + CROSSBOW_PUMP_TIME;
 
-		if( seq != CROSSBOW_FIRE1 && seq != CROSSBOW_FIRE3 ) // only interested in FIRE animations
+		if( seq != CROSSBOW_FIRE1 ) // only interested in FIRE animations
 			return false;
 		else
 			return true;
@@ -359,8 +361,8 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 				WeaponAnim( CROSSBOW_FIRE3, 0 );
 			else
 				WeaponAnim( CROSSBOW_FIRE1, 0 );
-			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/xbow_fire1.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
-			localanim_NextPAttackTime = tr.time + CROSSBOW_NEXT_PA_TIME;
+			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/xbow_shoot.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
+			localanim_NextPAttackTime = tr.time + CROSSBOW_NEXT_PA_TIME + 1.0f; // extended to make room for drawback animation
 		}
 		break;
 	case WEAPON_DEAGLE:
