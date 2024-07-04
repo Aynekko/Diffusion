@@ -11,6 +11,8 @@
 
 #pragma warning(disable : 4244)	// MIPS
 
+#define COM_CheckString( string ) ( ( !string || !*string ) ? 0 : 1 )
+
 //============
 // UTIL_FileExtension
 // returns file extension
@@ -176,44 +178,62 @@ char *copystring( const char *s )
 	return b;
 }
 
-int Q_atoi( const char *str )
+static int Q_atoi_hex( int sign, const char *str )
 {
-	int       val = 0;
-	int	c, sign;
+	int c, val = 0;
 
-	if( !str ) return 0;
+	str += 2;
+	while( 1 )
+	{
+		c = *str++;
+		if( c >= '0' && c <= '9' ) val = (val << 4) + c - '0';
+		else if( c >= 'a' && c <= 'f' ) val = (val << 4) + c - 'a' + 10;
+		else if( c >= 'A' && c <= 'F' ) val = (val << 4) + c - 'A' + 10;
+		else return val * sign;
+	}
+}
 
-	// check for empty charachters in string
+static int Q_atoi_character( int sign, const char *str )
+{
+	return sign * str[1];
+}
+
+static const char *Q_atoi_strip_whitespace( const char *str )
+{
 	while( str && *str == ' ' )
 		str++;
 
-	if( !str ) return 0;
-	
+	return str;
+}
+
+int Q_atoi( const char *str )
+{
+	int val = 0;
+	int c, sign;
+
+	if( !COM_CheckString( str ) )
+		return 0;
+
+	str = Q_atoi_strip_whitespace( str );
+
+	if( !COM_CheckString( str ) )
+		return 0;
+
 	if( *str == '-' )
 	{
 		sign = -1;
 		str++;
 	}
 	else sign = 1;
-		
+
 	// check for hex
-	if( str[0] == '0' && ( str[1] == 'x' || str[1] == 'X' ))
-	{
-		str += 2;
-		while( 1 )
-		{
-			c = *str++;
-			if( c >= '0' && c <= '9' ) val = (val<<4) + c - '0';
-			else if( c >= 'a' && c <= 'f' ) val = (val<<4) + c - 'a' + 10;
-			else if( c >= 'A' && c <= 'F' ) val = (val<<4) + c - 'A' + 10;
-			else return val * sign;
-		}
-	}
-	
+	if( str[0] == '0' && (str[1] == 'x' || str[1] == 'X') )
+		return Q_atoi_hex( sign, str );
+
 	// check for character
 	if( str[0] == '\'' )
-		return sign * str[1];
-	
+		return Q_atoi_character( sign, str );
+
 	// assume decimal
 	while( 1 )
 	{
@@ -230,38 +250,29 @@ float Q_atof( const char *str )
 	double	val = 0;
 	int	c, sign, decimal, total;
 
-	if( !str ) return 0.0f;
+	if( !COM_CheckString( str ) )
+		return 0;
 
-	// check for empty charachters in string
-	while( str && *str == ' ' )
-		str++;
+	str = Q_atoi_strip_whitespace( str );
 
-	if( !str ) return 0.0f;
-	
+	if( !COM_CheckString( str ) )
+		return 0;
+
 	if( *str == '-' )
 	{
 		sign = -1;
 		str++;
 	}
 	else sign = 1;
-		
+
 	// check for hex
-	if( str[0] == '0' && ( str[1] == 'x' || str[1] == 'X' ))
-	{
-		str += 2;
-		while( 1 )
-		{
-			c = *str++;
-			if( c >= '0' && c <= '9' ) val = (val * 16) + c - '0';
-			else if( c >= 'a' && c <= 'f' ) val = (val * 16) + c - 'a' + 10;
-			else if( c >= 'A' && c <= 'F' ) val = (val * 16) + c - 'A' + 10;
-			else return val * sign;
-		}
-	}
-	
+	if( str[0] == '0' && (str[1] == 'x' || str[1] == 'X') )
+		return Q_atoi_hex( sign, str );
+
 	// check for character
-	if( str[0] == '\'' ) return sign * str[1];
-	
+	if( str[0] == '\'' )
+		return Q_atoi_character( sign, str );
+
 	// assume decimal
 	decimal = -1;
 	total = 0;
@@ -273,43 +284,35 @@ float Q_atof( const char *str )
 			decimal = total;
 			continue;
 		}
-
 		if( c < '0' || c > '9' )
 			break;
 		val = val * 10 + c - '0';
 		total++;
 	}
-
 	if( decimal == -1 )
 		return val * sign;
-
 	while( total > decimal )
 	{
 		val /= 10;
 		total--;
 	}
-	
 	return val * sign;
 }
 
 void Q_atov( float *vec, const char *str, size_t siz )
 {
-	char	buffer[64];
-	char *pstr, *pfront;
-	size_t	j;
+	const char *pstr, *pfront;
+	int	j;
 
-	Q_strncpy( buffer, str, sizeof( buffer ) );
-	memset( vec, 0, sizeof( float ) * siz );
-	pstr = pfront = buffer;
+	memset( vec, 0, sizeof( *vec ) * siz );
+	pstr = pfront = str;
 
 	for( j = 0; j < siz; j++ )
 	{
 		vec[j] = Q_atof( pfront );
-
 		// valid separator is space
 		while( *pstr && *pstr != ' ' )
 			pstr++;
-
 		if( !*pstr ) break;
 		pstr++;
 		pfront = pstr;
@@ -510,70 +513,63 @@ char *Q_pretifymem( float value, int digitsafterdecimal )
 {
 	static char	output[8][32];
 	static int	current;
-	float		onekb = 1024.0f;
-	float		onemb = onekb * onekb;
-	char		suffix[8];
-	char		*out = output[current];
-	char		val[32], *i, *o, *dot;
-	int		pos;
-
-	current = ( current + 1 ) & ( 8 - 1 );
-
+	const float onekb = 1024.0f;
+	const float onemb = onekb * onekb;
+	const char *suffix;
+	char *out = output[current];
+	char val[32], *i, *o, *dot;
+	int pos;
+	current = (current + 1) & (8 - 1);
 	// first figure out which bin to use
 	if( value > onemb )
 	{
 		value /= onemb;
-		Q_sprintf( suffix, " Mb" );
+		suffix = " Mb";
 	}
 	else if( value > onekb )
 	{
 		value /= onekb;
-		Q_sprintf( suffix, " Kb" );
+		suffix = " Kb";
 	}
-	else Q_sprintf( suffix, " bytes" );
+	else
+	{
+		suffix = " bytes";
+	}
 
 	// clamp to >= 0
 	digitsafterdecimal = Q_max( digitsafterdecimal, 0 );
-
 	// if it's basically integral, don't do any decimals
-	if( fabs( value - (int)value ) < 0.00001 )
+	if( fabs( value - (int)value ) < 0.00001f )
 	{
-		Q_sprintf( val, "%i%s", (int)value, suffix );
+		Q_snprintf( val, sizeof( val ), "%i%s", (int)value, suffix );
 	}
 	else
 	{
 		char fmt[32];
-
 		// otherwise, create a format string for the decimals
-		Q_sprintf( fmt, "%%.%if%s", digitsafterdecimal, suffix );
-		Q_sprintf( val, fmt, value );
+		Q_snprintf( fmt, sizeof( fmt ), "%%.%if%s", digitsafterdecimal, suffix );
+		Q_snprintf( val, sizeof( val ), fmt, (double)value );
 	}
-
 	// copy from in to out
 	i = val;
 	o = out;
-
 	// search for decimal or if it was integral, find the space after the raw number
-	dot = Q_strstr( i, "." );
-	if( !dot ) dot = Q_strstr( i, " " );
-
+	dot = Q_strchr( i, '.' );
+	if( !dot ) dot = Q_strchr( i, ' ' );
 	pos = dot - i;	// compute position of dot
 	pos -= 3;		// don't put a comma if it's <= 3 long
-
 	while( *i )
 	{
 		// if pos is still valid then insert a comma every third digit, except if we would be
 		// putting one in the first spot
-		if( pos >= 0 && !( pos % 3 ))
+		if( pos >= 0 && !(pos % 3) )
 		{
 			// never in first spot
 			if( o != out ) *o++ = ',';
 		}
-
 		pos--;		// count down comma position
 		*o++ = *i++;	// copy rest of data as normal
 	}
 	*o = 0; // terminate
-
 	return out;
 }

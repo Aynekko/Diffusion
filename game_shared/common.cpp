@@ -339,10 +339,8 @@ Changes all '/' characters into '\' characters, in place.
 */
 void COM_FixSlashes(char* pname)
 {
-	while (*pname)
+	while( (pname = Q_strchr( pname, '\\' )) )
 	{
-		if (*pname == '\\')
-			*pname = '/';
-		pname++;
+		*pname = '/';
 	}
 }
