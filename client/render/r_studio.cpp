@@ -189,9 +189,6 @@ bool CStudioModelRenderer::StudioSetEntity( cl_entity_t *pEnt )
 	if( !pEnt || !pEnt->model || pEnt->model->type != mod_studio )
 		return false;
 
-	if( pEnt == GET_VIEWMODEL() && gHUD.IsZoomed )
-		return false;
-
 	m_pCurrentEntity = RI->currententity = pEnt;
 	SET_CURRENT_ENTITY( m_pCurrentEntity );
 	m_pPlayerInfo = NULL;
@@ -4422,6 +4419,9 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 
 	if( !StudioSetEntity( IEngineStudio.GetCurrentEntity() ) )
 		return 0;
+
+	if( m_pCurrentEntity == GET_VIEWMODEL() && gHUD.IsZoomed )
+		flags = STUDIO_EVENTS;
 	
 	if( FBitSet( flags, STUDIO_RENDER ) )
 	{
