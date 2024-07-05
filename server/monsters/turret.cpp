@@ -784,7 +784,7 @@ void CBaseTurret::ActiveThink(void)
 
 void CTurret::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
 {
-	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_12MM, 1, 0, VARS(pev->owner) );
+	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_9MM, 1, 0, VARS(pev->owner) );
 	EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "turret/tu_fire1.wav", 1, 0.6, 0, RANDOM_LONG( 95, 105 ) );
 	pev->effects |= EF_MUZZLEFLASH;
 }
