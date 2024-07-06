@@ -186,6 +186,7 @@ protected:
 	int FOV; // keyvalue
 	float m_flFOV; // actual field of view // ??? I don't remember why I separated them, recheck...
 	Vector CachedAngles; // cache angles on spawn to calculate FOV from here
+	Vector CustomFiringVector; // func_tankrocket special
 
 	float m_flAttenuation; // shooting sound radius
 };
@@ -640,6 +641,8 @@ CBaseEntity *CBaseTank :: FindTarget( void )
 	if( !m_iszFireTarget && !m_iTankClass )
 	{
 		CBaseEntity *pClientTarget = CBaseEntity::Instance( FIND_CLIENT_IN_PVS( edict() ) );
+		if( m_hParent != NULL ) // OOPS! Parent object can rotate so I can't use spawn angles...
+			return pClientTarget;
 		if( pClientTarget )
 		{
 			// check view cone
@@ -722,6 +725,8 @@ CBaseEntity *CBaseTank :: FindTarget( void )
 	if( pReturn != NULL && InRange( flDist ))
 	{
 //		ALERT( at_console, "Found %s\n", pReturn->GetClassname( ));
+		if( m_hParent != NULL ) // OOPS! Parent object can rotate so I can't use spawn angles...
+			return pReturn;
 		// check view cone
 		UTIL_MakeVectors( CachedAngles );
 		vec2LOS = (pReturn->GetAbsOrigin() - GetAbsOrigin()).Make2D();
@@ -1080,6 +1085,14 @@ void CBaseTank :: TrackTarget( void )
 		direction = m_sightOrigin - GetAbsOrigin();
 		angles = UTIL_VecToAngles( direction );
 
+		if( FClassnameIs( this, "func_tankrocket" ) )
+		{
+			if( pTarget->pev->flags & FL_ONGROUND ) // shoot under player's feet
+				CustomFiringVector = UTIL_VecToAngles( (pTarget->GetAbsOrigin() - Vector( 0, 0, (pTarget->pev->flags & FL_DUCKING) ? 18 : 36 )) - GetAbsOrigin() );
+			else
+				CustomFiringVector = angles;
+		}
+
 		// Calculate the additional rotation to point the end of the barrel at the target (not the gun's center) 
 		AdjustAnglesForBarrel( angles, direction.Length() );
 	}
@@ -1184,7 +1197,7 @@ void CBaseTank :: TrackTarget( void )
 		if( gpGlobals->time < m_flNextAttack )
 			return;	// too early
 
-		if( ReloadingFunction == true )
+		if( ReloadingFunction )
 		{
 			if( gpGlobals->time <= ReloadStartTime + 0.5 )
 				return; // still reloading
@@ -1201,7 +1214,7 @@ void CBaseTank :: TrackTarget( void )
 
 		if( pController->pev->button & IN_ATTACK )
 		{
-			if( ReloadingFunction == true )
+			if( ReloadingFunction )
 			{
 				if( BulletsFired >= TankClipSize )
 					BulletsFired = 0;
@@ -1272,7 +1285,7 @@ void CBaseTank :: TrackTarget( void )
 			// added a "solid" check
 			if( !tr.fStartSolid && (tr.pHit == pTarget->edict() || (FClassnameIs( pTarget, "monster_target" ) && tr.fInOpen)) )
 			{
-				if( ReloadingFunction == true )
+				if( ReloadingFunction )
 				{
 					if( gpGlobals->time <= ReloadStartTime )
 						fire = FALSE;
@@ -1283,7 +1296,7 @@ void CBaseTank :: TrackTarget( void )
 					fire = TRUE;
 			}
 		}
-		else if( ReloadingFunction == true )
+		else if( ReloadingFunction )
 		{
 			if( gpGlobals->time <= ReloadStartTime )
 				fire = FALSE;
@@ -1301,7 +1314,7 @@ void CBaseTank :: TrackTarget( void )
 	else
 		m_fireLast = 0;
 	
-	if( ReloadingFunction == true )
+	if( ReloadingFunction )
 	{
 		if( (TankClipSize > 0) && (gpGlobals->time > ReloadStartTime + 1) ) // FIXME somehow it turns on way too early, gotta add a second
 		{
@@ -1670,7 +1683,7 @@ void CFuncTankRocket :: Fire( const Vector &barrelEnd, const Vector &forward, en
 				}
 				else
 				{
-					CBaseEntity *pRocket = CBaseEntity::Create( "robo_rocket", barrelEnd, GetAbsAngles(), edict() );
+					CBaseEntity *pRocket = CBaseEntity::Create( "robo_rocket", barrelEnd, CustomFiringVector, edict() );
 					if( m_iBulletDamage && pRocket )
 						pRocket->pev->dmg = m_iBulletDamage;
 				}
