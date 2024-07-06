@@ -26,6 +26,7 @@ extern cvar_t ai_disable;
 extern cvar_t ai_draw_route;
 extern cvar_t sv_fade_props;
 extern cvar_t sv_force_fadedistance;
+extern cvar_t sv_cubemap_culling;
 
 // multiplayer server rules
 extern cvar_t teamplay;

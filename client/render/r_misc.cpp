@@ -2103,7 +2103,6 @@ void R_VidInit( void )
 	tr.nullmodelindex = 0;
 	tr.num_framebuffers = 0;
 	tr.num_subview_used = 0;
-	tr.reset_gamma_frame = 0;
 	tr.glsl_valid_sequence++; // refresh shader cache
 
 	InitPostTextures();

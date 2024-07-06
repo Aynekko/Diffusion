@@ -1899,14 +1899,17 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 
 	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE( host );
 
-	// diffusion - don't send faded entites' data to clients
-	if( IsDistanceCulled( pPlayer, pEntity ) )
-		return 0;
+	if( sv_cubemap_culling.value <= 0 )
+	{
+		// diffusion - don't send faded entites' data to clients
+		if( IsDistanceCulled( pPlayer, pEntity ) )
+			return 0;
 
-	// diffusion - don't send entites' data to clients if they are behind his back
-	// very experimental feature, requires fadedistance to be set.
-	if( IsBackCulled( pPlayer, pEntity ) )
-		return 0;
+		// diffusion - don't send entites' data to clients if they are behind his back
+		// very experimental feature, requires fadedistance to be set.
+		if( IsBackCulled( pPlayer, pEntity ) )
+			return 0;
+	}
 
 	// diffusion - apply a flag to laser spot, will be using local origin on client
 	if( FClassnameIs(pEntity,"laser_spot"))
@@ -1921,12 +1924,19 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 		}
 	}
 
+	bool DisableCullingForCubemap = false;
+	if( sv_cubemap_culling.value > 0 )
+	{
+		if( FClassnameIs( pEntity, "env_static" ) || FClassnameIs( pEntity, "func_wall" ) || FClassnameIs( pEntity, "func_illusionary" ) )
+			DisableCullingForCubemap = true;
+	}
+
 	// Ignore if not the host and not touching a PVS/PAS leaf
 	// If pSet is NULL, then the test will always succeed and the entity will be added to the update
 	// diffusion - skip PVS check if has an effect set - info_shader_params using it
 	if ( ent != host )
 	{
-		if( !(ent->v.effects & EF_SKIPPVS) )
+		if( !(ent->v.effects & EF_SKIPPVS) && !DisableCullingForCubemap )
 		{
 			if( !ENGINE_CHECK_VISIBILITY( (const struct edict_s *)ent, pSet ) )
 			{

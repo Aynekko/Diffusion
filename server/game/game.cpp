@@ -79,6 +79,7 @@ cvar_t sv_train_debug = { "sv_train_debug", "0", FCVAR_SPONLY };
 // sv_fade_props: 0 - disable all server culling, 1 - enable distance culling, 2 and more - also enable back-culling, where number means distance in units (i.e. sv_fade_props 500)
 cvar_t	sv_fade_props = { "sv_fade_props", "1", FCVAR_ARCHIVE };
 cvar_t	sv_force_fadedistance = { "sv_force_fadedistance", "0", FCVAR_CHEAT };
+cvar_t	sv_cubemap_culling = { "sv_cubemap_culling", "0", FCVAR_SPONLY | FCVAR_CHEAT }; // this disables culling for all env_statics, func_wall and func_illusionary
 
 // Engine Cvars
 cvar_t 	*g_psv_gravity = NULL;
@@ -1073,6 +1074,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &ai_draw_route );
 	CVAR_REGISTER ( &sv_fade_props );
 	CVAR_REGISTER( &sv_force_fadedistance );
+	CVAR_REGISTER( &sv_cubemap_culling );
 	CVAR_REGISTER( &sv_ignore_triggers );
 	CVAR_REGISTER( &mp_dash_air );
 	CVAR_REGISTER( &mp_alwaysgib );

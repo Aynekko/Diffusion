@@ -100,9 +100,9 @@ void HUD_BuildLightmaps( void )
 {
 	if( !g_fRenderInitialized ) return;
 
-	// put the gamma into GLSL-friendly array
-	for( int i = 0; i < 256; i++ )
-		tr.gamma_table[i/4][i%4] = (float)TEXTURE_TO_TEXGAMMA( i ) / 255.0f;
+	// put the gamma into GLSL-friendly array // diffusion - moved to GL_EndBuildingLightmaps
+//	for( int i = 0; i < 256; i++ )
+//		tr.gamma_table[i/4][i%4] = (float)TEXTURE_TO_TEXGAMMA( i ) / 255.0f;
 }
 
 void GL_InitRandomTable( void )

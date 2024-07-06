@@ -85,7 +85,7 @@ int R_CullSurfaceExt( msurface_t *surf, CFrustum *frustum )
 	if( !surf || !surf->texinfo || !surf->texinfo->texture )
 		return CULL_OTHER;
 
-	if( CVAR_TO_BOOL( r_nocull ) )
+	if( CVAR_TO_BOOL( r_nocull ) || IsBuildingCubemaps() )
 		return CULL_VISIBLE;
 
 	// only static ents can be culled by frustum

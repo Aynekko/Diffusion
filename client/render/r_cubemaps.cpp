@@ -706,7 +706,8 @@ void GL_LoadAndRebuildCubemaps( int refParams )
 
 		// we reached the end of list
 		// next frame will be restored gamma
-		tr.reset_gamma_frame = tr.realframecount + 5;
+		SetBits( vid_brightness->flags, FCVAR_CHANGED );
+		SetBits( vid_gamma->flags, FCVAR_CHANGED );
 		world->rebuilding_cubemaps = CMREBUILD_INACTIVE;
 		world->cubemap_build_number = 0;
 		tr.params_changed = true;

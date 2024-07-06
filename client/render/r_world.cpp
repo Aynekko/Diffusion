@@ -3411,7 +3411,7 @@ void R_MarkLeaves( void )
 	// cache current values
 	RI->oldviewleaf = RI->viewleaf;
 
-	if( r_novis->value || FBitSet( RI->params, RP_OVERVIEW ) || !worldmodel->visdata )
+	if( r_novis->value || FBitSet( RI->params, RP_OVERVIEW ) || !worldmodel->visdata || IsBuildingCubemaps() )
 		novis = true;
 
 	ENGINE_SET_PVS( RI->pvsorigin, REFPVS_RADIUS, RI->visbytes, FBitSet( RI->params, RP_MERGEVISIBILITY ), novis );
@@ -3609,11 +3609,14 @@ void R_WorldMarkVisibleFaces( void )
 						dist = surf->plane->normal[2];
 					else dist = PlaneDiff( tr.modelorg, surf->plane );
 
-					if( (backplane && dist >= -BACKFACE_EPSILON) || (!backplane && dist <= BACKFACE_EPSILON) )
-						continue; // wrong side
+					if( !IsBuildingCubemaps() )
+					{
+						if( (backplane && dist >= -BACKFACE_EPSILON) || (!backplane && dist <= BACKFACE_EPSILON) )
+							continue; // wrong side
 
-					if( RI->frustum.CullBox( surf->info->mins, surf->info->maxs ) )
-						continue;
+						if( RI->frustum.CullBox( surf->info->mins, surf->info->maxs ) )
+							continue;
+					}
 				}
 #else
 				if( !force && R_CullSurface( surf ) )
