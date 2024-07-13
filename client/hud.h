@@ -211,15 +211,8 @@ private:
 		float flPlayerBlend2;
 		float flPlayerBlend3;
 		float flPlayerBlend4;
-		float flPlayerBlend5;
-		float flPlayerBlend6;
 		float Screenmx;
 		float Screenmy;
-		float multi[10];
-		int scale[10];
-		int red[10];
-		int green[10];
-		int blue[10];
 		SpriteHandle tex[10];
 		float Lensx[10];
 		float Lensy[10];
