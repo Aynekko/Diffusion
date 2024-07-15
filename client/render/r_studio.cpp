@@ -833,7 +833,10 @@ void CStudioModelRenderer::UploadBufferBase( vbomesh_t *pOut, svert_t *arrayxver
 	arraysvert.resize( pOut->numVerts );
 
 	// convert to GLSL-compacted array
-	for( unsigned int i = 0; i < pOut->numVerts; i++ )
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
+	for( int i = 0; i < pOut->numVerts; i++ )
 	{
 		arraysvert[i].vertex[0] = arrayxvert[i].vertex[0];
 		arraysvert[i].vertex[1] = arrayxvert[i].vertex[1];
@@ -885,7 +888,10 @@ void CStudioModelRenderer::UploadBufferVLight( vbomesh_t *pOut, svert_t *arrayxv
 	arraysvert.resize( pOut->numVerts );
 
 	// convert to GLSL-compacted array
-	for( unsigned int i = 0; i < pOut->numVerts; i++ )
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
+	for( int i = 0; i < pOut->numVerts; i++ )
 	{
 		arraysvert[i].vertex[0] = arrayxvert[i].vertex[0];
 		arraysvert[i].vertex[1] = arrayxvert[i].vertex[1];
@@ -944,7 +950,10 @@ void CStudioModelRenderer::UploadBufferWeight( vbomesh_t *pOut, svert_t *arrayxv
 	arraysvert.resize( pOut->numVerts );
 
 	// convert to GLSL-compacted array
-	for( unsigned int i = 0; i < pOut->numVerts; i++ )
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
+	for( int i = 0; i < pOut->numVerts; i++ )
 	{
 		arraysvert[i].vertex[0] = arrayxvert[i].vertex[0];
 		arraysvert[i].vertex[1] = arrayxvert[i].vertex[1];
@@ -1003,7 +1012,10 @@ void CStudioModelRenderer::UploadBufferGeneric( vbomesh_t *pOut, svert_t *arrayx
 	arraysvert.resize( pOut->numVerts );
 
 	// convert to GLSL-compacted array
-	for( unsigned int i = 0; i < pOut->numVerts; i++ )
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
+	for( int i = 0; i < pOut->numVerts; i++ )
 	{
 		arraysvert[i].vertex[0] = arrayxvert[i].vertex[0];
 		arraysvert[i].vertex[1] = arrayxvert[i].vertex[1];
@@ -1109,6 +1121,9 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 		if( has_boneweights )
 		{
 			// compute weighted vertexes
+			#ifdef _OPENMP
+			#pragma omp parallel for
+			#endif
 			for( int i = 0; i < pSubModel->numverts; i++ )
 			{
 				ComputeSkinMatrix( &pvertweight[i], bones, skinMat );
@@ -1118,6 +1133,9 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 		else
 		{
 			// compute unweighted vertexes
+			#ifdef _OPENMP
+			#pragma omp parallel for
+			#endif
 			for( int i = 0; i < pSubModel->numverts; i++ )
 				localverts[i] = bones[pvertbone[i]].VectorTransform( pstudioverts[i] );
 		}
@@ -1263,6 +1281,9 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 	// compute tangent space for all submodel meshes to avoid seams
 	if( m_iTBNState == TBNSTATE_GENERATE )
 	{
+		#ifdef _OPENMP
+		#pragma omp parallel for
+		#endif
 		for( int vertID = 0; vertID < m_nNumArrayVerts; vertID++ ) {
 			m_arrayxvert[vertID].tangent = m_arrayxvert[vertID].binormal = g_vecZero;
 		}
@@ -1352,6 +1373,9 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 
 		// calculate an average tangent space for each vertex
 		// optimized implementation by ncuxonaT
+		#ifdef _OPENMP
+		#pragma omp parallel for
+		#endif
 		for( int vertID = 0; vertID < m_nNumArrayVerts; vertID++ )
 		{
 			Vector tangent = m_arrayxvert[vertID].tangent.Normalize();

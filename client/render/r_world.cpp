@@ -1442,6 +1442,9 @@ static void Mod_SubdividePolygon_r( msurface_t *warpface, int numverts, Vector v
 		HOST_ERROR( "Mod_SubdividePolygon: too many vertexes on face ( %i )\n", numverts );
 
 	ClearBounds( mins, maxs );
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for( i = 0; i < numverts; i++ )
 		AddPointToBounds( verts[i], mins, maxs );
 
@@ -1685,12 +1688,18 @@ static void Mod_CreateBufferObject( void )
 #endif
 
 	// time to prepare landscapes
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for( i = 0; i < worldmodel->numsurfaces; i++ )
 	{
 		msurface_t *surf = &worldmodel->surfaces[i];
 		Mod_ProcessLandscapes( surf, surf->info );
 	}
 
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for( i = 0; i < worldmodel->numsurfaces; i++ )
 	{
 		msurface_t *surf = &worldmodel->surfaces[i];
@@ -1860,10 +1869,16 @@ static void Mod_LoadWorld( model_t *mod, const byte *buf )
 	Mod_LoadWorldMaterials();
 
 	// mark submodel faces
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for( i = worldmodel->submodels[0].numfaces; i < worldmodel->numsurfaces; i++ )
 		SetBits( worldmodel->surfaces[i].flags, SURF_OF_SUBMODEL );
 
 	// detect surfs in local space
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for( i = 0; i < worldmodel->numsubmodels; i++ )
 	{
 		dmodel_t *bm = &worldmodel->submodels[i];
@@ -1887,6 +1902,9 @@ static void Mod_LoadWorld( model_t *mod, const byte *buf )
 	}
 
 	// mark surfaces for world features
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for( i = 0; i < worldmodel->numsurfaces; i++ )
 	{
 		msurface_t *surf = &worldmodel->surfaces[i];

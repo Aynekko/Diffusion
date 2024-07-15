@@ -1128,7 +1128,7 @@ int CHudAmmo::Draw( float flTime )
 				// draw the bar of actual ammo on top of it
 				FillRoundedRGBA( line_pos_x, line_pos_y, ((((float)total_cells_width - 28) / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType )), 5, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
 				char ammo[8];
-				sprintf( ammo, "%i", gWR.CountAmmo( pw->iAmmoType ) );
+				sprintf_s( ammo, "%i", gWR.CountAmmo( pw->iAmmoType ) );
 				DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, ammo, 70, 169, 255 );
 			}
 		}

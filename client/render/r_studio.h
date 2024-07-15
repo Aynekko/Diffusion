@@ -655,11 +655,11 @@ private:
 	Vector4D			m_arraycoord[MAXARRAYVERTS];
 	byte			m_arraycolor[MAXARRAYVERTS][4];
 	unsigned int		m_arrayelems[MAXARRAYVERTS*6];
-	unsigned int			m_nNumArrayVerts;
-	unsigned int			m_nNumArrayElems;
-	unsigned int			m_nNumLightVerts;
+	int			m_nNumArrayVerts;
+	int			m_nNumArrayElems;
+	int			m_nNumLightVerts;
 
-	unsigned int		m_nNumTBNVerts;
+	int		m_nNumTBNVerts;
 	svert_t			m_arrayxvert[MAXARRAYVERTS];
 	dmodeltbn_t *m_tbnverts;			// variable sized
 	int			m_iTBNState;
