@@ -922,7 +922,6 @@ void R_DrawWorld( void );
 void R_DrawWorldShadowPass( void );
 void R_DrawBrushModel( cl_entity_t *e, bool translucent );
 float R_ComputeFadingDistance( cl_entity_t *e );
-int R_CheckRenderGroup( cl_entity_t *e );
 void R_DrawEntitiesOnList( void );
 void R_DrawSolidEntities(void);
 void R_DrawTranslucentEntities(void);

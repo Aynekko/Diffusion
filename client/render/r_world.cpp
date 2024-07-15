@@ -3587,7 +3587,8 @@ void R_WorldMarkVisibleFaces( void )
 	// always skip the leaf 0, because it's an outside leaf
 	for( i = 1, leaf = &world->leafs[1]; i < world->numleafs; i++, leaf++ )
 	{
-		if( CHECKVISBIT( RI->visbytes, leaf->cluster ) && (leaf->efrags || leaf->nummarksurfaces) )
+		// during cubemap pass, all faces are visible - this way pvs is ignored and all faces have correct gamma. Fix it properly?
+		if( (CHECKVISBIT( RI->visbytes, leaf->cluster ) || IsBuildingCubemaps()) && (leaf->efrags || leaf->nummarksurfaces) )
 		{
 			if( RI->frustum.CullBox( leaf->mins, leaf->maxs ) )
 				continue;
