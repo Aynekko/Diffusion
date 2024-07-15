@@ -547,6 +547,9 @@ void R_CheckChanges( void )
 
 	if( FBitSet( vid_gamma->flags, FCVAR_CHANGED ) || FBitSet( vid_brightness->flags, FCVAR_CHANGED ) )
 	{
+		#ifdef _OPENMP
+		#pragma omp parallel for
+		#endif
 		for( int i = 0; i < worldmodel->numsurfaces; i++ )
 			SetBits( worldmodel->surfaces[i].flags, SURF_LM_UPDATE );
 		R_StudioClearLightCache();

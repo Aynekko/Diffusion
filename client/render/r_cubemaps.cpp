@@ -24,7 +24,7 @@ GNU General Public License for more details.
 #include "r_world.h"
 #include "pm_defs.h"
 
-static Vector env_dir[] =
+const Vector env_dir[] =
 {
 	Vector( 1.0f,  0.0f,  0.0f ),
 	Vector( -1.0f,  0.0f,  0.0f ),
@@ -733,6 +733,9 @@ void GL_LoadAndRebuildCubemaps( int refParams )
 
 		// bind cubemaps onto world surfaces
 		// so we don't need to search them again
+		#ifdef _OPENMP
+		#pragma omp parallel for
+		#endif
 		for( i = 0; i < worldmodel->numsurfaces; i++ )
 		{
 			msurface_t *surf = &worldmodel->surfaces[i];

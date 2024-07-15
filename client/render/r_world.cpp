@@ -973,6 +973,9 @@ static void Mod_FinalizeWorld( void )
 	world->numsortedfaces = worldmodel->numsurfaces;
 
 	// initial filling
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for( i = 0; i < world->numsortedfaces; i++ )
 		world->sortedfaces[i] = i;
 
