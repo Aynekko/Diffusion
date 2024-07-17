@@ -755,7 +755,7 @@ void R_ClearScene( void )
 	GET_ENTITY( 0 )->hCachedMatrix = GL_CacheState( g_vecZero, g_vecZero );
 	GET_ENTITY( 0 )->curstate.messagenum = r_currentMessageNum;
 
-	tr.num_solid_entities = tr.num_trans_entities = 0;
+	tr.num_solid_entities = tr.num_trans_entities = tr.num_subview_entities = 0;
 	tr.local_client_added = false;
 	tr.num_shadows_used = tr.num_CM_shadows_used = 0;
 	tr.sky_camera = NULL;
@@ -1372,12 +1372,42 @@ qboolean R_AddEntity( struct cl_entity_s *clent, int entityType )
 		tr.num_trans_entities++;
 	}
 
+	if( clent->curstate.iuser3 == -662 ) // it's a drone
+	{
+		tr.subview_entities[tr.num_subview_entities] = clent;
+		tr.num_subview_entities++;
+	}
+
+	if( (clent->curstate.effects & EF_SCREEN) || (clent->curstate.effects & EF_PORTAL) )
+	{
+		tr.subview_entities[tr.num_subview_entities] = clent;
+		tr.num_subview_entities++;
+	}
+
 	if( clent->model->type == mod_brush )
 	{
 		if( clent->curstate.effects & EF_ROTATING )
 			FuncRotatingClient( clent );
 
 		clent->hCachedMatrix = GL_CacheState( clent->origin, clent->angles );
+
+		// check for possible subview textures (mirror and water)
+		bool add_subview_ent = false;
+		msurface_t *psurf = &clent->model->surfaces[clent->model->firstmodelsurface];
+		for( int i = 0; i < clent->model->nummodelsurfaces; i++, psurf++ )
+		{
+			if( FBitSet( psurf->flags, SURF_REFLECT ) || FBitSet( psurf->flags, SURF_WATER ) )
+			{
+				add_subview_ent = true;
+				break;
+			}
+		}
+
+		if( add_subview_ent )
+		{
+			tr.subview_entities[tr.num_subview_entities] = clent;
+			tr.num_subview_entities++;
+		}
 	}
 
 	if( entityType == ET_FRAGMENTED )

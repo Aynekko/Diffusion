@@ -698,10 +698,10 @@ Check all bmodel surfaces and store subview faces
 */
 void R_FindBmodelSubview( cl_entity_t *e )
 {
-	Vector		absmin, absmax;
-	model_t		*clmodel;
-	msurface_t	*psurf;
-	mplane_t		plane;
+	Vector absmin, absmax;
+	model_t *clmodel;
+	msurface_t *psurf;
+	mplane_t plane;
 
 	clmodel = e->model;
 
@@ -795,29 +795,12 @@ Check all bmodels for subview surfaces
 */
 void R_FindSubviewEnts( void )
 {
-	int	i;
-
-	// check solid entities
-	for( i = 0; i < tr.num_solid_entities; i++ )
+	// check subview entities
+	for( int i = 0; i < tr.num_subview_entities; i++ )
 	{
-		RI->currententity = tr.solid_entities[i];
+		RI->currententity = tr.subview_entities[i];
 		RI->currentmodel = RI->currententity->model;
 
-		if( RI->currentmodel->type != mod_brush )
-			continue;
-
-		if( RI->num_subview_faces >= MAX_SUBVIEWS )
-			return; // limit is out
-
-		R_FindBmodelSubview( RI->currententity );
-	}
-
-	// check translucent entities
-	for( i = 0; i < tr.num_trans_entities; i++ )
-	{
-		RI->currententity = tr.trans_entities[i];
-		RI->currentmodel = RI->currententity->model;
-	
 		if( RI->currentmodel->type != mod_brush )
 			continue;
 
@@ -843,9 +826,9 @@ static void R_RenderDroneView( void )
 	// reset drone pointer
 	tr.pDrone = NULL;
 	
-	for( int i = 0; i < tr.num_solid_entities; i++ )
+	for( int i = 0; i < tr.num_subview_entities; i++ )
 	{
-		RI->currententity = tr.solid_entities[i];
+		RI->currententity = tr.subview_entities[i];
 		if( RI->currententity->curstate.iuser3 == -662 )
 		{
 			// it's our drone
@@ -876,9 +859,6 @@ static void R_RenderDroneView( void )
 	Vector origin, angles;
 
 	if( FBitSet( RI->params, RP_OVERVIEW ) )
-		return;
-
-	if( IsBuildingCubemaps() )
 		return;
 
 	// player is outside world. Don't draw subview for speedup reasons
@@ -1035,16 +1015,13 @@ static void R_FindScreenStudio( void )
 	if( FBitSet( RI->params, RP_OVERVIEW ) )
 		return;
 
-	if( IsBuildingCubemaps() )
-		return;
-
 	// player is outside world. Don't draw subview for speedup reasons
 	if( RP_OUTSIDE( RI->viewleaf ) )
 		return;
 	
-	for( int i = 0; i < tr.num_solid_entities; i++ )
+	for( int i = 0; i < tr.num_subview_entities; i++ )
 	{
-		RI->currententity = tr.solid_entities[i];
+		RI->currententity = tr.subview_entities[i];
 		RI->currentmodel = RI->currententity->model;
 
 		if( RI->currentmodel->type != mod_studio )
@@ -1064,6 +1041,9 @@ find all the subview faces
 */
 void R_RenderSubview( void )
 {
+	if( IsBuildingCubemaps() )
+		return;
+	
 	R_RenderDroneView();
 
 	R_FindScreenStudio();
@@ -1078,9 +1058,6 @@ void R_RenderSubview( void )
 		return; // too deep...
 
 	if( FBitSet( RI->params, RP_OVERVIEW ) )
-		return;
-
-	if( IsBuildingCubemaps() )
 		return;
 
 	// player is outside world. Don't draw subview for speedup reasons

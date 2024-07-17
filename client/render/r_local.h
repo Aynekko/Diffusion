@@ -360,8 +360,10 @@ typedef struct
 	cl_entity_t	*solid_entities[MAX_VISIBLE_PACKET];	// opaque moving or alpha brushes
 	cl_entity_t	*trans_entities[MAX_VISIBLE_PACKET];	// translucent brushes
 	gl_movie_t	cinematics[MAX_MOVIES];		// precached cinematics
-	int		num_solid_entities;
-	int		num_trans_entities;
+	cl_entity_t *subview_entities[MAX_VISIBLE_PACKET];
+	int	num_solid_entities;
+	int	num_trans_entities;
+	int num_subview_entities;
 
 	gl_bmodelface_t	draw_surfaces[MAX_MAP_FACES];		// 390 kB here
 	int		num_draw_surfaces;
