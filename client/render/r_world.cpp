@@ -1445,9 +1445,6 @@ static void Mod_SubdividePolygon_r( msurface_t *warpface, int numverts, Vector v
 		HOST_ERROR( "Mod_SubdividePolygon: too many vertexes on face ( %i )\n", numverts );
 
 	ClearBounds( mins, maxs );
-	#ifdef _OPENMP
-	#pragma omp parallel for
-	#endif
 	for( i = 0; i < numverts; i++ )
 		AddPointToBounds( verts[i], mins, maxs );
 
