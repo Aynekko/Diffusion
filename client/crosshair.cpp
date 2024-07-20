@@ -344,10 +344,16 @@ void CHudCrosshairStatic::DrawGaussZoomedHUD(void)
 	int skin = bound( 0, 9 - GaussCharge, 9 );
 	GET_VIEWMODEL()->curstate.skin = skin;
 
-	if( skin < 9 && GaussSound != skin )
+	static int iPlaySound = 0;
+	if( GaussCharge == 0 )
+		iPlaySound = 1;
+	else if( GaussCharge == 9 && iPlaySound == 2 )
+		iPlaySound = 0;
+
+	if( iPlaySound == 1 )
 	{
-		gEngfuncs.pEventAPI->EV_PlaySound( 0, Vector( 0, 0, 0 ), CHAN_STATIC, "weapons/gauss_charge.wav", 1.0, 0, 0, 75 + (100/(skin + 1)) );
-		GaussSound = skin;
+		gEngfuncs.pEventAPI->EV_PlaySound( 0, Vector( 0, 0, 0 ), CHAN_STATIC, "weapons/gauss_charge.wav", 1.0, 0, 0, 100 );
+		iPlaySound = 2;
 	}
 
 	if( !gHUD.IsZoomed )
