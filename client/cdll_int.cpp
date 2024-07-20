@@ -28,6 +28,7 @@
 #include "cdll_exp.h"
 #include "discord.h"
 #include "build.h"
+#include "keydefs.h"
 
 int developer_level;
 int g_iXashEngineBuildNumber;
@@ -288,6 +289,12 @@ void HUD_Frame( double time )
 
 int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 {
+	if( (gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) && (keynum == K_ENTER || keynum == K_ESCAPE) )
+	{
+		gHUD.m_PseudoGUI.CloseWindow();
+		return 0;
+	}
+
 	return 1;
 }
 

@@ -808,6 +808,7 @@ public:
 	void Think( void );
 	void MessageDraw( client_textmessage_t *pMessage, int x, int y );
 	void Enable( void );
+	void CloseWindow( void );
 	
 	int cursor_x, cursor_y;
 	char m_szMOTD[MAX_MOTD_LENGTH];

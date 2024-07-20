@@ -3,6 +3,7 @@
 #include "parsemsg.h"
 #include "triangleapi.h"
 #include "r_local.h"
+#include "keydefs.h"
 
 /*
 ====================================================================================
@@ -23,6 +24,14 @@ int cursor_img = 0;
 #define BUTTON_HEIGHT 50
 
 DECLARE_MESSAGE( m_PseudoGUI, ShowNote );
+
+void CPseudoGUI::CloseWindow( void )
+{
+	// close the window
+	m_iFlags &= ~HUD_ACTIVE;
+	MousePressed = false;
+	m_szMOTD[0] = '\0'; // terminate motd too
+}
 
 bool CPseudoGUI::DotInRect( rectangle_t *rect, int x, int y )
 {
@@ -145,12 +154,7 @@ int CPseudoGUI::Draw( float flTime )
 		active_button_alpha = CL_UTIL_Approach( 1.0f, active_button_alpha, 10 * g_fFrametime );
 
 		if( MousePressed )
-		{
-			// close the window
-			m_iFlags &= ~HUD_ACTIVE;
-			MousePressed = false;
-			m_szMOTD[0] = '\0'; // terminate motd too
-		}
+			CloseWindow();
 	}
 	else
 		active_button_alpha = CL_UTIL_Approach( 0.0f, active_button_alpha, 10 * g_fFrametime );
