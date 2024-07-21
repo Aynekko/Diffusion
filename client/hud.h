@@ -805,10 +805,9 @@ public:
 	int VidInit( void );
 	int Draw( float flTime );
 	int MsgFunc_ShowNote( const char *pszName, int iSize, void *pbuf );
-	void Think( void );
 	void MessageDraw( client_textmessage_t *pMessage, int x, int y );
 	void Enable( void );
-	void CloseWindow( void );
+	void CloseWindow( bool mouse = false );
 	
 	int cursor_x, cursor_y;
 	char m_szMOTD[MAX_MOTD_LENGTH];
@@ -820,8 +819,10 @@ public:
 		float r, g, b, a;
 	} rectangle_t;
 
+	rectangle_t rFrame;
+	rectangle_t rClose;
+
 	bool DotInRect( rectangle_t *rect, int x, int y );
-	bool MousePressed;
 };
 
 class CHealthbars:public CHudBase

@@ -25,11 +25,16 @@ int cursor_img = 0;
 
 DECLARE_MESSAGE( m_PseudoGUI, ShowNote );
 
-void CPseudoGUI::CloseWindow( void )
+void CPseudoGUI::CloseWindow( bool mouse )
 {
+	if( mouse )
+	{
+		if( !DotInRect( &rClose, cursor_x, cursor_y ) )
+			return;
+	}
+	
 	// close the window
 	m_iFlags &= ~HUD_ACTIVE;
-	MousePressed = false;
 	m_szMOTD[0] = '\0'; // terminate motd too
 }
 
@@ -65,12 +70,25 @@ int CPseudoGUI::VidInit( void )
 {
 	m_iFlags = 0;
 	active_button_alpha = 0;
-	MousePressed = false;
 	cursor_img = LOAD_TEXTURE( "sprites/diffusion/cursor.dds", NULL, 0, 0 );
 	cursor_x = ScreenWidth / 2;
 	cursor_y = ScreenHeight / 2;
 	m_szMOTD[0] = '\0';
 	scrolled_lines = 0;
+
+	// init frame
+	rFrame.w = FRAME_WIDTH;
+	rFrame.h = FRAME_HEIGHT;
+	rFrame.x = (ScreenWidth / 2) - (rFrame.w / 2);
+	rFrame.y = (ScreenHeight / 2) - (rFrame.h / 2);
+	rFrame.r = rFrame.g = rFrame.b = 80.f / 255.f;
+	rFrame.a = 0.8f;
+
+	// init Close button
+	rClose.w = rFrame.w * 0.5f;
+	rClose.h = BUTTON_HEIGHT;
+	rClose.x = rFrame.x + (rFrame.w / 2) - (rClose.w / 2);
+	rClose.y = (rFrame.y + rFrame.h) - rClose.h - 20; // frame bottom - button height - 20
 	return 1;
 }
 
@@ -85,21 +103,10 @@ int CPseudoGUI::MsgFunc_ShowNote( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
-void CPseudoGUI::Think( void )
-{
-	// I need to do this trickery so we wouldn't shoot a gun while and after pressing the button
-	if( gHUD.m_iKeyBits & IN_ATTACK )
-	{
-		MousePressed = true;
-		gHUD.m_iKeyBits &= ~IN_ATTACK;
-	}
-}
-
 void CPseudoGUI::Enable( void )
 {
 	m_iFlags |= HUD_ACTIVE;
 	active_button_alpha = 0;
-	MousePressed = false;
 	scrolled_lines = 0;
 }
 
@@ -115,14 +122,7 @@ int CPseudoGUI::Draw( float flTime )
 		return 1;
 
 	// draw darken frame
-	rectangle_t frame;
-	frame.w = FRAME_WIDTH;
-	frame.h = FRAME_HEIGHT;
-	frame.x = (ScreenWidth / 2) - (frame.w / 2);
-	frame.y = (ScreenHeight / 2) - (frame.h / 2);
-	frame.r = frame.g = frame.b = 80.f / 255.f;
-	frame.a = 0.8f;
-	FillRoundedRGBA( frame.x, frame.y, frame.w, frame.h, 20, Vector4D( frame.r, frame.g, frame.b, frame.a ) );
+	FillRoundedRGBA( rFrame.x, rFrame.y, rFrame.w, rFrame.h, 20, Vector4D( rFrame.r, rFrame.g, rFrame.b, rFrame.a ) );
 
 	// draw text
 	// is it MOTD?
@@ -131,41 +131,31 @@ int CPseudoGUI::Draw( float flTime )
 		client_textmessage_t MOTD;
 		MOTD.pMessage = m_szMOTD;
 		MOTD.r1 = MOTD.g1 = MOTD.b1 = 255;
-		MessageDraw( &MOTD, frame.x + frame.w * 0.1, frame.y + frame.h * 0.1 );
+		MessageDraw( &MOTD, rFrame.x + rFrame.w * 0.1, rFrame.y + rFrame.h * 0.1 );
 	}
 	else // it's a note
-		MessageDraw( TextMessageGet( Note ), frame.x + frame.w * 0.1, frame.y + frame.h * 0.1 );
+		MessageDraw( TextMessageGet( Note ), rFrame.x + rFrame.w * 0.1, rFrame.y + rFrame.h * 0.1 );
 
 	// draw "Close" button
-	rectangle_t Close;
-	Close.r = Close.g = Close.b = 25.f / 255.f;
-	Close.a = 0.75f;
-	Close.w = frame.w * 0.5f;
-	Close.h = BUTTON_HEIGHT;
-	Close.x = frame.x + (frame.w / 2) - (Close.w / 2);
-	Close.y = (frame.y + frame.h) - Close.h - 20; // frame bottom - button height - 20
+	rClose.r = rClose.g = rClose.b = 25.f / 255.f;
+	rClose.a = 0.75f;
 
 	// inactive button
-	FillRoundedRGBA( Close.x, Close.y, Close.w, Close.h, 10, Vector4D( Close.r, Close.g, Close.b, Close.a ) );
+	FillRoundedRGBA( rClose.x, rClose.y, rClose.w, rClose.h, 10, Vector4D( rClose.r, rClose.g, rClose.b, rClose.a ) );
 
 	// active button
-	if( DotInRect( &Close, cursor_x, cursor_y ) )
-	{
+	if( DotInRect( &rClose, cursor_x, cursor_y ) )
 		active_button_alpha = CL_UTIL_Approach( 1.0f, active_button_alpha, 10 * g_fFrametime );
-
-		if( MousePressed )
-			CloseWindow();
-	}
 	else
 		active_button_alpha = CL_UTIL_Approach( 0.0f, active_button_alpha, 10 * g_fFrametime );
 
-	Close.r = 70.f / 255.f;
-	Close.g = 169.f / 255.f;
-	Close.b = 1.0f;
-	Close.a = active_button_alpha;
+	rClose.r = 70.f / 255.f;
+	rClose.g = 169.f / 255.f;
+	rClose.b = 1.0f;
+	rClose.a = active_button_alpha;
 
 	if( active_button_alpha > 0 )
-		FillRoundedRGBA( Close.x, Close.y, Close.w, Close.h, 10, Vector4D( Close.r, Close.g, Close.b, Close.a ) );
+		FillRoundedRGBA( rClose.x, rClose.y, rClose.w, rClose.h, 10, Vector4D( rClose.r, rClose.g, rClose.b, rClose.a ) );
 
 	// draw "close" text
 	char bttn_close[12];
@@ -186,7 +176,7 @@ int CPseudoGUI::Draw( float flTime )
 			pText++;
 		}
 
-		MessageDraw( MsgClose, Close.x + (Close.w / 2) - (width / 2), Close.y + (Close.h / 2) - (gHUD.m_scrinfo.iCharHeight / 2) );
+		MessageDraw( MsgClose, rClose.x + (rClose.w / 2) - (width / 2), rClose.y + (rClose.h / 2) - (gHUD.m_scrinfo.iCharHeight / 2) );
 	}
 
 	// draw cursor last
@@ -201,9 +191,6 @@ int CPseudoGUI::Draw( float flTime )
 	}
 	else // no image?
 		gEngfuncs.pfnFillRGBA( cursor_x, cursor_y, 10, 10, 255, 255, 255, 255 );
-
-	// reset mouse press
-	MousePressed = false;
 
 	return 1;
 }
