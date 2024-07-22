@@ -94,6 +94,7 @@ public:
 	bool AllowCamera; // when Car is used with value 2.0, the camera toggles. this is to allow using trigger_camera while in car
 	bool CamUnlocked;
 	bool CarInAir;
+	float EnteringShake; // shake the car when driver enters it (not saved)
 	Vector Camera2LocalOrigin;
 	Vector Camera2LocalAngles;
 	Vector CameraAngles;

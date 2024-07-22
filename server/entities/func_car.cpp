@@ -650,6 +650,7 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 
 			IsShifting = false;
 			ShiftStartTime = 0;
+			LastGear = -1;
 
 			SetNextThink( 0 );
 		}
@@ -713,11 +714,17 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			DriverMdlSequence = -1;
 			CameraBrakeOffsetX = 0;
 			TurboAccum = 0;
-			IsShifting = false;
-			ShiftStartTime = 0;
+			if( HasSpawnFlags(SF_CAR_ELECTRIC))
+				IsShifting = false;
+			else
+				IsShifting = true;
+			Gear = 1;
+			LastGear = -1;
+			ShiftStartTime = gpGlobals->time - ShiftingTime;
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
 			NewCameraAngle = CameraAngles.y;
 			AccelAddX = BrakeAddX = 0;
+			EnteringShake = 2.0f;
 
 			SetNextThink( 0 );
 		}
@@ -1799,6 +1806,11 @@ void CCar::Drive( void )
 
 	// Z - lateral rotation
 	float NewChassisAngZ = -LateralChange * SuspDiff2 + CarSpeed * Turning * (DriftAmount * MaxLean * 0.001) + AddChassisShake;
+	if( EnteringShake > 0.0f )
+	{
+		NewChassisAngZ += EnteringShake * sin( gpGlobals->time * 5.0f );
+		EnteringShake = UTIL_Approach( 0.0f, EnteringShake, 3.0f * gpGlobals->frametime );
+	}
 	if( FrontWheelsInAir + RearWheelsInAir < 4 )
 		ChassisAng.z = UTIL_Approach( NewChassisAngZ, ChassisAng.z, SuspHardness * fabs( NewChassisAngZ - ChassisAng.z ) * gpGlobals->frametime );
 
