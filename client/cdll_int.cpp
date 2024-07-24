@@ -29,6 +29,7 @@
 #include "discord.h"
 #include "build.h"
 #include "keydefs.h"
+#include "buildtime.h"
 
 int developer_level;
 int g_iXashEngineBuildNumber;
@@ -60,6 +61,8 @@ int Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	// diffusion - execute mod-specific stuff
 	ClientCmd( "exec diffusion.cfg\n" );
+
+	Msg( "^2Client DLL build date^7: ^5%s %s^7\n", BUILD_DATE, BUILD_TIME );
 
 	return 1;
 }

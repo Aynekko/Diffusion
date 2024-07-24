@@ -31,6 +31,7 @@ GNU General Public License for more details.
 #include "r_world.h"
 #include "pm_defs.h"
 #include "cdll_int.h"
+#include "buildtime.h"
 
 #define IsLiquidContents( cnt )	( cnt == CONTENTS_WATER || cnt == CONTENTS_SLIME || cnt == CONTENTS_LAVA )
 
@@ -1873,13 +1874,14 @@ void HUD_PrintStats( void )
 	else
 		R_Speeds_Printf( "Renderer: ^2XashXT | Diffusion^7\n\n" );
 
+	R_Speeds_Printf( "DLL: ^5%s %s^7\n\n", BUILD_DATE, BUILD_TIME );
+
 	switch( (int)r_speeds->value )
 	{
 	case 1:
 		R_Speeds_Printf( "%3i wpoly %3i epoly\n", r_stats.c_world_polys, r_stats.c_studio_polys );
 		R_Speeds_Printf( "%3i spoly %3i grass\n\n", r_stats.c_sprite_polys, r_stats.c_grass_polys );
-		R_Speeds_Printf( "%3i studio models\n", r_stats.c_studio_models_drawn );
-		R_Speeds_Printf( "%3i sprite models\n", r_stats.c_sprite_models_drawn );
+		R_Speeds_Printf( "%3i models %3i sprites\n", r_stats.c_studio_models_drawn, r_stats.c_sprite_models_drawn );
 		R_Speeds_Printf( "%3i temp entities\n", r_stats.c_active_tents_count );
 		R_Speeds_Printf( "%3i particles (%i total)\n", r_stats.c_particles_total - r_stats.c_particles_culled, r_stats.c_particles_total );
 		R_Speeds_Printf( "%3i cables\n\n", r_stats.c_cables );

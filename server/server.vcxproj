@@ -328,6 +328,9 @@
       <LinkTimeCodeGenerationObjectFile>.\..\x64\Release\server\server.iobj</LinkTimeCodeGenerationObjectFile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
+    <PreBuildEvent>
+      <Command>copy /b buildtime.h +,,</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\common\virtualfs.cpp" />
@@ -610,6 +613,7 @@
     <ClInclude Include="..\game_shared\utlmemory.h" />
     <ClInclude Include="areanode.h" />
     <ClInclude Include="bot\bot.h" />
+    <ClInclude Include="buildtime.h" />
     <ClInclude Include="cbase.h" />
     <ClInclude Include="clipfile.h" />
     <ClInclude Include="entities\func_car.h" />

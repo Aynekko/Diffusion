@@ -1051,6 +1051,9 @@
     <ClInclude Include="game\user_messages.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="buildtime.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="cpp.hint" />

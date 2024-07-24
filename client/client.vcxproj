@@ -225,6 +225,9 @@
       <LinkTimeCodeGenerationObjectFile>.\..\x64\Release\client\client.iobj</LinkTimeCodeGenerationObjectFile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
+    <PreBuildEvent>
+      <Command>copy /b buildtime.h +,,</Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -439,6 +442,7 @@
     <ClInclude Include="ammo.h" />
     <ClInclude Include="ammohistory.h" />
     <ClInclude Include="animatex.h" />
+    <ClInclude Include="buildtime.h" />
     <ClInclude Include="cubemap.h" />
     <ClInclude Include="discord.h" />
     <ClInclude Include="hud.h" />
