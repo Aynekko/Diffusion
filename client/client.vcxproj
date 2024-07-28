@@ -373,6 +373,7 @@
     <ClCompile Include="hud_pseudogui.cpp" />
     <ClCompile Include="hud_redraw.cpp" />
     <ClCompile Include="hud_stamina.cpp" />
+    <ClCompile Include="hud_trigger_timer.cpp" />
     <ClCompile Include="hud_update.cpp" />
     <ClCompile Include="input.cpp" />
     <ClCompile Include="input_mouse.cpp" />

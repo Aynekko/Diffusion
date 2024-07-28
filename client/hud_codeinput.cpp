@@ -187,7 +187,8 @@ int CHudCodeInput::Draw( float flTime )
 	int width = 0;
 	while( *buf )
 	{
-		width += gHUD.m_scrinfo.charWidths[*buf];
+		unsigned char c = *buf;
+		width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
 		buf++;
 	}
 

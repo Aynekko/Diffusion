@@ -739,6 +739,18 @@ private:
 	float AlphaFade1, AlphaFade2, AlphaFade3;
 };
 
+class CHudTriggerTimer : public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw( float flTime );
+	int timer;
+	char message[255];
+	int enabled;
+	bool critical;
+};
+
 class CHudCodeInput : public CHudBase
 {
 public:
@@ -999,6 +1011,7 @@ public:
 	CHealthbars m_Healthbars;
 	CHudCodeInput m_CodeInput;
 	CPseudoGUI m_PseudoGUI;
+	CHudTriggerTimer m_TriggerTimer;
 	
 	void Init( void );
 	void VidInit( void );

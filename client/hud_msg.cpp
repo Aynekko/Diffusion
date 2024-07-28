@@ -1024,6 +1024,24 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		g_pParticles.Smoke( 0, Model, pos, Vector( 0, 0, 5 ), 1, 0.15f, 10, 1 );
 	}
 	break;
+
+	case TE_TRIGGERTIMER:
+	{
+		gHUD.m_TriggerTimer.enabled = READ_BYTE();
+		if( gHUD.m_TriggerTimer.enabled == 0 )
+		{
+			gHUD.m_TriggerTimer.message[0] = '\0';
+			break;
+		}
+		const char *pText = READ_STRING();
+		sprintf_s( gHUD.m_TriggerTimer.message, pText );
+		gHUD.m_TriggerTimer.timer = READ_SHORT();
+		if( gHUD.m_TriggerTimer.enabled > 1 )
+			gHUD.m_TriggerTimer.critical = true;
+		else
+			gHUD.m_TriggerTimer.critical = false;
+	}
+	break;
 	}
 
 	END_READ();

@@ -263,6 +263,9 @@
     <ClCompile Include="render\tri.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
+    <ClCompile Include="hud_trigger_timer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ammo.h">

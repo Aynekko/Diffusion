@@ -653,7 +653,6 @@
 // byte (rendermode) 0 = default alphablend, 1 = additive
 
 #define TE_PLAYERPARAMS 129 // diffusion - just a hack so I don't need to create another message
-
 #define TE_CLIENTSOUND 130 // diffusion - client sound at location...used for distant weapon sounds
 #define TE_SMOKEGRENADE 131 // diffusion - used by monster_security_assassin
 #define TE_BOAT_TRAIL 132 // diffusion
@@ -667,6 +666,7 @@
 #define TE_STEP_PARTICLE 140
 #define TE_PLAYER_GLITCH 141
 #define TE_DRONEPARAMS 142
+#define TE_TRIGGERTIMER 143 // trigger_timer parameters
 
 #define MSG_BROADCAST		0	// unreliable to all
 #define MSG_ONE			1	// reliable to one (msg_entity)

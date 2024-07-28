@@ -43,6 +43,7 @@ void CHud :: Init( void )
 	m_CodeInput.Init();
 	m_ScreenEffects.Init();
 	m_PseudoGUI.Init();
+	m_TriggerTimer.Init();
 	m_Message.Init(); // hud text messages (like subtitles) go last - always visible
 		
 //	MsgFunc_ResetHUD( 0, 0, NULL ); // diffusion - now server does this
@@ -207,6 +208,7 @@ void CHud :: VidInit( void )
 	m_ScreenEffects.VidInit();
 	m_Lensflare.VidInit();
 	m_PseudoGUI.VidInit();
+	m_TriggerTimer.VidInit();
 	m_Message.VidInit();
 
 	memset( &gHUD.shake, 0.0f, sizeof( gHUD.shake ) ); // diffusion - reset screen shake
