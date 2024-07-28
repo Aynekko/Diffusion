@@ -1,8 +1,6 @@
 #include "hud.h"
 #include "utils.h"
-#include "parsemsg.h"
 #include "r_local.h"
-#include "triangleapi.h"
 
 //===========================================================================================
 // diffusion - HUD for trigger_timer
@@ -55,7 +53,7 @@ int CHudTriggerTimer::Draw( float flTime )
 			pText++;
 		}
 		// draw the frame first
-		FillRoundedRGBA( ScreenWidth - text_width - 60, (ScreenHeight * 0.1f) - 5, text_width + 15, gHUD.m_scrinfo.iCharHeight * 3.0f, 5, Vector4D( 0.314f, 0.314f, 0.314f, 0.8f ) );
+		FillRoundedRGBA( ScreenWidth - text_width - 60, (ScreenHeight * 0.1f) - 5, text_width + 20, gHUD.m_scrinfo.iCharHeight * 3.0f, 5, Vector4D( 0.314f, 0.314f, 0.314f, 0.8f ) );
 		frame_drawn = true;
 		text_pos_x = ScreenWidth - text_width - 50;
 		text_pos_y = ScreenHeight * 0.1f;
@@ -84,7 +82,7 @@ int CHudTriggerTimer::Draw( float flTime )
 
 	// draw the frame if it wasn't yet
 	if( !frame_drawn )
-		FillRoundedRGBA( ScreenWidth - text_width - 60, (ScreenHeight * 0.1f) - 5, text_width + 15, gHUD.m_scrinfo.iCharHeight * 3.0f, 5, Vector4D( 0.314f, 0.314f, 0.314f, 0.8f ) );
+		FillRoundedRGBA( ScreenWidth - text_width - 60, (ScreenHeight * 0.1f) - 5, text_width + 20, gHUD.m_scrinfo.iCharHeight * 1.5f, 5, Vector4D( 0.314f, 0.314f, 0.314f, 0.8f ) );
 
 	text_pos_x = ScreenWidth - text_width - 50;
 	text_pos_y = ScreenHeight * 0.1f;
