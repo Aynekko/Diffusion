@@ -78,7 +78,7 @@ void LinkUserMessages( void )
 	gmsgGeigerRange = REG_USER_MSG( "Geiger", 1 );
 	gmsgFlashlight = REG_USER_MSG( "Flashlight", 2 );
 	gmsgHealth = REG_USER_MSG( "Health", 1 );
-	gmsgHealthVisual = REG_USER_MSG( "HealthVisual", 2 ); // diffusion health visual
+	gmsgHealthVisual = REG_USER_MSG( "HealthVisual", 3 ); // diffusion health visual
 	gmsgStamina = REG_USER_MSG( "Stamina", 1 ); // DiffusionSprint
 	gmsgDamage = REG_USER_MSG( "Damage", 12 );
 	gmsgBattery = REG_USER_MSG( "Battery", 2 );

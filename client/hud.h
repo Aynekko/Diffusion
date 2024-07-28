@@ -471,7 +471,8 @@ public:
   int Init( void );
   int VidInit( void );
   int Draw(float flTime);
-  int m_iHealthVisual;
+  int m_iHealth;
+  int m_iMaxHealth;
   bool GotHit; // got a message that we received a damage
   float Transparency; // store transparency here for this mode
   int MsgFunc_HealthVisual( const char *pszName, int iSize, void *pbuf );

@@ -12,6 +12,15 @@ float OFFLINEFlashAlphaH = 0;
 int health_icon = 0;
 const int icon_size = 30;
 
+// size of an invisible drawing field...
+const int full_frame_h = 64;
+const int full_frame_w = 280;
+const int total_cells_width = full_frame_w - 20; // 10px borders from left and right
+const int total_cells = 50;
+const float cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / (float)total_cells_width);
+const float cell_height = full_frame_h / 3.0f;
+const float cell_margin = cell_width * 0.25f;
+
 int CHudHealthVisual :: Init(void)
 {
 	m_iFlags |= HUD_ACTIVE;
@@ -30,7 +39,8 @@ int CHudHealthVisual:: MsgFunc_HealthVisual( const char *pszName,  int iSize, vo
 {
 	BEGIN_READ( pszName, pbuf, iSize );
 	GotHit = (READ_BYTE() > 0);
-	m_iHealthVisual = READ_BYTE();
+	m_iHealth = READ_BYTE();
+	m_iMaxHealth = READ_BYTE();
 	END_READ();
 
 	return 1;
@@ -71,7 +81,7 @@ int CHudHealthVisual :: Draw(float flTime)
 	}
 
 	static float health_val = 0.0f;
-	health_val = CL_UTIL_Approach( m_iHealthVisual, health_val, g_fFrametime * 500 );
+	health_val = CL_UTIL_Approach( m_iHealth, health_val, g_fFrametime * 500 );
 
 	float r = 0.8f;
 	float g = 0.08f;
@@ -93,14 +103,6 @@ int CHudHealthVisual :: Draw(float flTime)
 	if( Transparency < 0.65f )
 		Transparency = 0.65f;
 
-	// size of an invisible drawing field...
-	const int full_frame_h = 64;
-	const int full_frame_w = 280;
-	const int total_cells_width = full_frame_w - 20; // 10px borders from left and right
-	const int total_cells = 50;
-	const float cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / (float)total_cells_width);
-	const float cell_height = full_frame_h / 3.0f;
-	const float cell_margin = cell_width * 0.25f;
 	float cell_start_x = pos_x + icon_size + 10;
 	float cell_start_y = pos_y;
 	int cell;
@@ -126,6 +128,13 @@ int CHudHealthVisual :: Draw(float flTime)
 			cell_start_x += cell_width + cell_margin;
 		}
 	}
+
+	// draw numbers
+	char numbers[16];
+	sprintf_s( numbers, "%3d / %i", (int)health_val, m_iMaxHealth );
+	int text_pos_x = pos_x + icon_size + full_frame_w;
+	int text_pos_y = pos_y;
+	DrawString( text_pos_x, text_pos_y, numbers, 70, 169, 255 );
 
 	return 1;
 }

@@ -753,9 +753,9 @@ void Monochrome( void )
 		&& !g_iUser1
 		&& !( gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH ) )
 	{
-		if( gHUD.m_HealthVisual.m_iHealthVisual < 25 )
+		if( gHUD.m_HealthVisual.m_iHealth < 25 )
 		{
-			CurrentMonochrome = 4.0f / ((float)gHUD.m_HealthVisual.m_iHealthVisual + 0.1f);
+			CurrentMonochrome = 4.0f / ((float)gHUD.m_HealthVisual.m_iHealth + 0.1f);
 		}
 	}
 

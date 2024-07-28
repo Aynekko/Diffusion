@@ -882,6 +882,7 @@ skip_shield:
 	MESSAGE_BEGIN( MSG_ONE, gmsgHealthVisual, NULL, pev );
 		WRITE_BYTE( 1 );
 		WRITE_BYTE( pev->health );
+		WRITE_BYTE( pev->max_health );
 	MESSAGE_END();
 
 	return fTookDamage;
@@ -6869,6 +6870,7 @@ void CBasePlayer :: UpdateClientData( void )
 		MESSAGE_BEGIN( MSG_ONE, gmsgHealthVisual, NULL, pev );
 			WRITE_BYTE( 0 ); // don't flash the health
 			WRITE_BYTE( iHealth );  // send the value to client HUD
+			WRITE_BYTE( pev->max_health );
 		MESSAGE_END();
 
 		m_iClientHealth = pev->health;

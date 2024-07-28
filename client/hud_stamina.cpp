@@ -108,6 +108,13 @@ int CHudStamina :: Draw(float flTime)
 		cell_start_x += cell_width + cell_margin;
 	}
 
+	// draw number
+	char number[5];
+	sprintf_s( number, "%3d", (int)stamina_val );
+	int text_pos_x = pos_x + icon_size + full_frame_w;
+	int text_pos_y = pos_y;
+	DrawString( text_pos_x, text_pos_y, number, 70, 169, 255 );
+
 	// play sound
 	if( StaminaLowSoundTime > gHUD.m_flTime )
 		StaminaLowSoundTime = 0; // possible saverestore issues...
