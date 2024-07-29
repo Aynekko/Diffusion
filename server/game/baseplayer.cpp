@@ -5208,6 +5208,7 @@ void CBasePlayer::Spawn( void )
 	ShieldOn = false;
 	LastUseCheckTime = gpGlobals->time;
 	LastBlastTime = gpGlobals->time;
+	BlastAbilityLVL = 0;
 	if( g_pGameRules->IsMultiplayer() )
 	{
 		BlastAbilityLVL = 1; // UNDONE - make a server cvar?

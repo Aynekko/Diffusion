@@ -57,9 +57,11 @@ int CHudBlastIcons::Draw( float flTime )
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
 
-	int r1 = 0, g1 = 0, b1 = 0, x1 = 0;
-	int r2 = 0, g2 = 0, b2 = 0, x2 = 0;
-	int r3 = 0, g3 = 0, b3 = 0, x3 = 0;
+	int x = 0;
+	const int padding = 10;
+	int r1 = 0, g1 = 0, b1 = 0;
+	int r2 = 0, g2 = 0, b2 = 0;
+	int r3 = 0, g3 = 0, b3 = 0;
 	const int icon_size = 48;
 	int y = ScreenHeight - 72;
 
@@ -71,7 +73,7 @@ int CHudBlastIcons::Draw( float flTime )
 	//====================
 	if( BlastAbilityLVL > 0 )
 	{
-		x1 = (ScreenWidth / 32) + 280;
+		x += (ScreenWidth / 32) + 360;
 
 		if( BlastChargesReady > 0 )
 		{
@@ -99,7 +101,7 @@ int CHudBlastIcons::Draw( float flTime )
 		GL_Color4f( r1 / 255.f, g1 / 255.f, b1 / 255.f, AlphaFade1 / 255.f );
 
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-		DrawQuad( x1, y, x1 + icon_size, y + icon_size );
+		DrawQuad( x, y, x + icon_size, y + icon_size );
 		gEngfuncs.pTriAPI->End();
 	}
 
@@ -108,7 +110,7 @@ int CHudBlastIcons::Draw( float flTime )
 	//====================
 	if( BlastAbilityLVL > 1 )
 	{
-		x2 = (ScreenWidth / 32) + 280 + icon_size + 5;
+		x += padding + icon_size;
 
 		if( BlastChargesReady > 1 )
 		{
@@ -136,7 +138,7 @@ int CHudBlastIcons::Draw( float flTime )
 		GL_Color4f( r2 / 255.f, g2 / 255.f, b2 / 255.f, AlphaFade2 / 255.f );
 
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-		DrawQuad( x2, y, x2 + icon_size, y + icon_size );
+		DrawQuad( x, y, x + icon_size, y + icon_size );
 		gEngfuncs.pTriAPI->End();
 	}
 
@@ -145,7 +147,7 @@ int CHudBlastIcons::Draw( float flTime )
 	//====================
 	if( BlastAbilityLVL > 2 )
 	{
-		x3 = (ScreenWidth / 32) + 280 + icon_size + icon_size + 5;
+		x += padding + icon_size;
 
 		if( BlastChargesReady > 2 )
 		{
@@ -173,7 +175,7 @@ int CHudBlastIcons::Draw( float flTime )
 		GL_Color4f( r3 / 255.f, g3 / 255.f, b3 / 255.f, AlphaFade3 / 255.f );
 
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-		DrawQuad( x3, y, x3 + icon_size, y + icon_size );
+		DrawQuad( x, y, x + icon_size, y + icon_size );
 		gEngfuncs.pTriAPI->End();
 	}
 
