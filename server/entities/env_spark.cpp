@@ -78,7 +78,6 @@ void CEnvSpark::SparkThink( void )
 {
 	UTIL_DoSpark( pev, GetAbsOrigin() );
 	SetNextThink( 0.1f + RANDOM_FLOAT( 0.0f, m_flDelay ) );
-	m_iState = STATE_ON;
 }
 
 void CEnvSpark::SparkUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -95,6 +94,7 @@ void CEnvSpark::SparkUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	}
 	else
 	{
+		m_iState = STATE_ON;
 		SetThink( &CEnvSpark::SparkThink );
 		SetNextThink( 0.1f + RANDOM_FLOAT( 0.0f, m_flDelay ) );
 	}
