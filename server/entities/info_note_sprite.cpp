@@ -82,8 +82,7 @@ void CNoteSprite::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 	if( !AchievementCounted )
 	{
 		pPlayer->SendAchievementStatToClient( ACH_NOTES, 1, 0 );
+		SUB_UseTargets( pActivator, USE_TOGGLE, 0 ); // fire target only once.
 		AchievementCounted = true;
 	}
-
-	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
 }
