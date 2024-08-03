@@ -684,18 +684,8 @@ int CL_ButtonBits( int bResetState )
 	}
 
 	if( in_use.state & (BUTTON_DOWN|IMPULSE_DOWN))
-	{
-		// currently drawing a tutor
-		if( gHUD.m_StatusIconsTutor.IsTutorDrawing && (gHUD.m_flTime > gHUD.m_StatusIconsTutor.TutorStartTime + 1) && !gHUD.m_StatusIconsTutor.x_direction )
-		{
-			gHUD.m_StatusIconsTutor.x_direction = true; // let's hide the tutor
-			IN_UseUp();
-		}
-		else
-		{
-			if( !(gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) ) // make sure we are not viewing a note
-				bits |= IN_USE;
-		}
+	{	
+		bits |= IN_USE;
 	}
 
 	if( in_cancel )
