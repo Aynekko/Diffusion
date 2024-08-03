@@ -135,6 +135,7 @@ public:
 
 	int CanInvestigate;
 	CSprite *AlienEye;
+	float AlertSoundTime;
 };
 
 LINK_ENTITY_TO_CLASS( monster_alien_controller, CController );
@@ -147,6 +148,7 @@ BEGIN_DATADESC( CController )
 	DEFINE_FIELD( m_vecEstVelocity, FIELD_VECTOR ),
 	DEFINE_FIELD( CanInvestigate, FIELD_INTEGER ),
 	DEFINE_FIELD( AlienEye, FIELD_CLASSPTR ),
+	DEFINE_FIELD( AlertSoundTime, FIELD_TIME ),
 END_DATADESC()
 
 const char *CController::pAttackSounds[] = 
@@ -301,7 +303,11 @@ void CController :: PainSound( void )
 
 void CController :: AlertSound( void )
 {
-	EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pAlertSounds ); 
+	if( gpGlobals->time > AlertSoundTime )
+	{
+		EMIT_SOUND_ARRAY_DYN( CHAN_VOICE, pAlertSounds );
+		AlertSoundTime = gpGlobals->time + 3;
+	}
 }
 
 void CController :: IdleSound( void )
@@ -435,6 +441,7 @@ void CController :: Spawn()
 	pev->view_ofs		= Vector( 0, 0, -2 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_FULL;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
+	AlertSoundTime = 0;
 
 	if( RANDOM_LONG(0,2) == 0)
 		CanInvestigate = 1;
@@ -2258,6 +2265,7 @@ void CDrone :: Spawn()
 	m_afCapability &= ~bits_CAP_CANSEEFLASHLIGHT;
 
 	snd_pitch = 100;
+	AlertSoundTime = 0;
 }
 
 //=========================================================
@@ -2873,12 +2881,17 @@ void CDrone :: PainSound( void )
 
 void CDrone :: AlertSound(void)
 {
+	if( gpGlobals->time < AlertSoundTime )
+		return;
+	
 	switch(RANDOM_LONG(0,2))
 	{
 	case 0: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_alert1.wav", 1, ATTN_NORM ); break;
 	case 1: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_alert2.wav", 1, ATTN_NORM ); break;
 	case 2: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_alert3.wav", 1, ATTN_NORM ); break;
 	}
+
+	AlertSoundTime = gpGlobals->time + 3;
 }
 
 void CDrone :: IdleSound(void)
@@ -3234,6 +3247,7 @@ void CDroneAlien :: Spawn()
 	m_afCapability &= ~bits_CAP_CANSEEFLASHLIGHT; // robots can't recognize player's flashlight
 
 	snd_pitch = 100;
+	AlertSoundTime = 0;
 }
 
 //=========================================================
