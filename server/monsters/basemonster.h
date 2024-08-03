@@ -160,7 +160,8 @@ public:
 // Basic Monster AI functions
 	virtual float ChangeYaw ( int speed );
 	float VecToYaw( Vector vecDir );
-	float FlYawDiff ( void ); 
+	float FlYawDiff ( void );
+	float last_turn_time;
 
 	float DamageForce( float damage );
 
