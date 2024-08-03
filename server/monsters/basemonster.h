@@ -151,6 +151,7 @@ public:
 	virtual BOOL	ShouldFadeOnDeath( void );
 
 	void			IdleHeadTurn( const Vector &vecFriend );
+	float headyaw;
 
 	BOOL		HasWeapon( int weaponnum ) { return FBitSet( m_iWeapons[weaponnum >> 3], BIT( weaponnum & 7 )); }
 	void		AddWeapon( int weaponnum ) { SetBits( m_iWeapons[weaponnum >> 3], BIT( weaponnum & 7 )); }

@@ -584,7 +584,8 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		}
 		else
 		{
-			IdleHeadTurn( GetAbsOrigin() );
+			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime );
+			SetBoneController( 0, headyaw );
 			// override so that during walk, a scientist may talk and greet player
 			FIdleHello();
 			if (RANDOM_LONG(0,m_nSpeak * 20) == 0)
@@ -594,8 +595,11 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		}
 
 		CBaseMonster::RunTask( pTask );
-		if (TaskIsComplete())
-			IdleHeadTurn( GetAbsOrigin() );
+		if( TaskIsComplete() )
+		{
+			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime );
+			SetBoneController( 0, headyaw );
+		}
 		break;
 
 	default:
@@ -605,7 +609,8 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		}
 		else
 		{
-			SetBoneController( 0, 0 );
+			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime );
+			SetBoneController( 0, headyaw );
 		}
 		CBaseMonster::RunTask( pTask );
 	}
@@ -1042,23 +1047,6 @@ int CTalkMonster :: FIdleHello( void )
 	}
 	return FALSE;
 }
-
-/*
-// turn head towards supplied origin // diffusion - moved to basemonster
-void CTalkMonster :: IdleHeadTurn( const Vector &vecFriend )
-{
-	 // turn head in desired direction only if ent has a turnable head
-	if (m_afCapability & bits_CAP_TURN_HEAD)
-	{
-		float yaw = VecToYaw(vecFriend - GetAbsOrigin()) - GetAbsAngles().y;
-
-		if (yaw > 180) yaw -= 360;
-		if (yaw < -180) yaw += 360;
-
-		// turn towards vector
-		SetBoneController( 0, yaw );
-	}
-}*/
 
 //=========================================================
 // FIdleSpeak

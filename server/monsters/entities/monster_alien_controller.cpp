@@ -1005,6 +1005,8 @@ void CController::Stop( void )
 #define DIST_TO_CHECK	200
 void CController :: Move ( float flInterval ) 
 {
+	flInterval = gpGlobals->frametime * 0.5f; // diffusion - constant, because monsters are thinking every frame
+	
 	float		flWaypointDist;
 	float		flCheckDist;
 	float		flDist;// how far the lookahead check got before hitting an object.
@@ -1236,6 +1238,8 @@ void CController::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, fl
 	
 	if ( m_IdealActivity != m_movementActivity )
 		m_IdealActivity = m_movementActivity;
+
+	flInterval = gpGlobals->frametime * 0.5f; // diffusion - constant, because monsters are thinking every frame
 
 	// ALERT( at_console, "move %.4f %.4f %.4f : %f\n", vecDir.x, vecDir.y, vecDir.z, flInterval );
 
@@ -3466,6 +3470,8 @@ void CDroneAlien :: RunTask ( Task_t *pTask )
 
 void CDroneAlien::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval )
 {
+	flInterval = gpGlobals->frametime * 0.5f; // diffusion - constant, because monsters are thinking every frame
+	
 	if ( m_IdealActivity != m_movementActivity )
 		m_IdealActivity = m_movementActivity;
 
@@ -4124,6 +4130,8 @@ void CAlienShip :: RunTask ( Task_t *pTask )
 
 void CAlienShip::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval )
 {
+	flInterval = gpGlobals->frametime * 0.5f; // diffusion - constant, because monsters are thinking every frame
+	
 	if ( m_IdealActivity != m_movementActivity )
 		m_IdealActivity = m_movementActivity;
 

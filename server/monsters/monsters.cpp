@@ -573,18 +573,19 @@ void CBaseMonster :: MonsterThink ( void )
 		UTIL_SetOrigin( this, Org );
 	}
 	
-	SetNextThink( 0.1 ); // keep monster thinking.
+	SetNextThink( 0 ); // keep monster thinking.
 
 	if( ai_disable.value == 1)
 		return;
 
+	float flInterval = StudioFrameAdvance( ); // animate
+	DispatchAnimEvents( flInterval );
+
 	RunAI();
 
-	float flInterval = StudioFrameAdvance( ); // animate
-
-// start or end a fidget
-// This needs a better home -- switching animations over time should be encapsulated on a per-activity basis
-// perhaps MaintainActivity() or a ShiftAnimationOverTime() or something.
+	// start or end a fidget
+	// This needs a better home -- switching animations over time should be encapsulated on a per-activity basis
+	// perhaps MaintainActivity() or a ShiftAnimationOverTime() or something.
 	if( m_MonsterState != MONSTERSTATE_SCRIPT && m_MonsterState != MONSTERSTATE_DEAD && m_Activity == ACT_IDLE && m_fSequenceFinished )
 	{
 		int iSequence;
@@ -607,8 +608,6 @@ void CBaseMonster :: MonsterThink ( void )
 			ResetSequenceInfo();
 		}
 	}
-
-	DispatchAnimEvents( flInterval );
 
 	if( !MovementIsComplete() )
 		Move( flInterval );
@@ -2153,7 +2152,8 @@ void CBaseMonster :: MonsterInit ( void )
 	// set eye position
 	SetEyePosition();
 
-//	NextThinkTime - gpGlobals->time;
+	NextThinkTime = 0;
+	headyaw = 0;
 //	LastServerTime = gpGlobals->time;
 
 	// create a monster collision box
@@ -2734,8 +2734,9 @@ float	CBaseMonster::FlYawDiff ( void )
 
 float CBaseMonster::ChangeYaw ( int yawSpeed )
 {
-	float frametime = gpGlobals->time - last_turn_time;
-	last_turn_time = gpGlobals->time;
+//	float frametime = gpGlobals->time - last_turn_time;
+//	last_turn_time = gpGlobals->time;
+	float frametime = gpGlobals->frametime;
 	
 	float ideal, current, move, speed;
 	Vector angles = GetAbsAngles();
@@ -2751,7 +2752,7 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 		if( delta > 0.25 )
 			delta = 0.25;
 
-		speed = yawSpeed * delta * 2;
+		speed = yawSpeed * delta;
 
 		float originalSpeed = yawSpeed * frametime * 10.f;
 		float multiplier = originalSpeed / ( yawSpeed * delta );
@@ -2786,8 +2787,8 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 			float yaw = pev->ideal_yaw - angles.y;
 			if (yaw > 180) yaw -= 360;
 			if (yaw < -180) yaw += 360;
-			// yaw *= 0.8;
-			SetBoneController( 0, yaw );
+			headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime );
+			SetBoneController( 0, headyaw );
 		}
 
 		SetAbsAngles( angles );
@@ -3898,8 +3899,10 @@ void CBaseMonster::IdleHeadTurn( const Vector &vecFriend )
 		if( yaw > 180 ) yaw -= 360;
 		if( yaw < -180 ) yaw += 360;
 
+		headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime );
+
 		// turn towards vector
-		SetBoneController( 0, yaw );
+		SetBoneController( 0, headyaw );
 	}
 }
 
