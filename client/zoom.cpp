@@ -59,7 +59,7 @@ void CZoom::Think( void )
 	{
 		if( ZoomMode == 1 ) // zooming in
 		{
-			FOV -= 150 * g_fFrametime;
+			FOV -= 165 * g_fFrametime;
 			gHUD.m_flFOV = (int)FOV;
 
 			if( FOV <= 20 )

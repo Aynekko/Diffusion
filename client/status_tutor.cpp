@@ -2,6 +2,7 @@
 #include "utils.h"
 #include "parsemsg.h"
 #include "r_cvars.h"
+#include "r_local.h"
 #include "triangleapi.h"
 
 DECLARE_MESSAGE( m_StatusIconsTutor, StatusIconTutor );
@@ -96,10 +97,11 @@ int CHudTutorial::Draw( float flTime )
 	int xmax = RENDER_GET_PARM( PARM_TEX_WIDTH, CurrentImage );
 	int ymax = RENDER_GET_PARM( PARM_TEX_HEIGHT, CurrentImage );
 	GL_Bind( 0, CurrentImage );
-	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
-	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+	GL_Blend( GL_FALSE );
+	pglBegin( GL_QUADS );
 	DrawQuad( x, y, x + xmax, y + ymax );
-	gEngfuncs.pTriAPI->End();
+	pglEnd();
 	
 	return 1;
 }
