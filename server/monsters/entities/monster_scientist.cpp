@@ -651,17 +651,17 @@ void CScientist :: SetYawSpeed ( void )
 	switch ( m_Activity )
 	{
 	case ACT_IDLE:
-		ys = 120;
+		ys = 140;
 		break;
 	case ACT_WALK:
-		ys = 150;
+		ys = 200;
 		break;
 	case ACT_RUN:
-		ys = 150;
+		ys = 200;
 		break;
 	case ACT_TURN_LEFT:
 	case ACT_TURN_RIGHT:
-		ys = 90;
+		ys = 140;
 		break;
 	}
 

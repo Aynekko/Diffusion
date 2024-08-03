@@ -94,8 +94,6 @@ public:
 
 	int		m_failSchedule;				// Schedule type to choose if current schedule fails
 
-	float	m_flLastYawTime; //Diffusion FPS turn fix for monsters
-
 	float		m_flHungryTime;// set this is a future time to stop the monster from eating for a while. 
 
 	float		m_flDistTooFar;	// if enemy farther away than this, bits_COND_ENEMY_TOOFAR set in CheckEnemy

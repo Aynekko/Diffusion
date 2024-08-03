@@ -1355,7 +1355,7 @@ void CHGrunt :: SetYawSpeed ( void )
 		ys = 150;		
 		break;
 	case ACT_RUN:	
-		ys = 150;	
+		ys = 170;	
 		break;
 	case ACT_WALK:	
 		ys = 150;		

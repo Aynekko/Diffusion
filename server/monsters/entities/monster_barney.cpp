@@ -443,23 +443,18 @@ void CBarney :: AlertSound( void )
 //=========================================================
 void CBarney :: SetYawSpeed ( void )
 {
-	int ys;
-
-	ys = 0;
+	int ys = 140;
 
 	switch ( m_Activity )
 	{
 	case ACT_IDLE:		
-		ys = 70;
+		ys = 160;
 		break;
 	case ACT_WALK:
-		ys = 100;
-		break;
-	case ACT_RUN:
 		ys = 200;
 		break;
-	default:
-		ys = 70;
+	case ACT_RUN:
+		ys = 240;
 		break;
 	}
 
