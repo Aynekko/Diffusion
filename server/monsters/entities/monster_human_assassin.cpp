@@ -600,10 +600,10 @@ void CHAssassin :: SetYawSpeed ( void )
 	{
 	case ACT_TURN_LEFT:
 	case ACT_TURN_RIGHT:
-		ys = 360;
+		ys = 180;
 		break;
 	default:			
-		ys = 360;
+		ys = 180;
 		break;
 	}
 
