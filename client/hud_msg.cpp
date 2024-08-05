@@ -1034,7 +1034,13 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 			break;
 		}
 		const char *pText = READ_STRING();
-		sprintf_s( gHUD.m_TriggerTimer.message, pText );
+		// try to find the message from titles.txt
+		client_textmessage_t *TimerText = TextMessageGet( pText );
+		// if found, replace the message with titles.txt text; make sure it's not too long or game will freeze
+		if( TimerText && strlen( TimerText->pMessage ) < sizeof(gHUD.m_TriggerTimer.message) )
+			sprintf_s( gHUD.m_TriggerTimer.message, TimerText->pMessage );
+		else // use as is
+			sprintf_s( gHUD.m_TriggerTimer.message, pText );
 		gHUD.m_TriggerTimer.timer = READ_SHORT();
 		if( gHUD.m_TriggerTimer.enabled > 1 )
 			gHUD.m_TriggerTimer.critical = true;
