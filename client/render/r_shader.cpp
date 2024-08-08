@@ -215,7 +215,7 @@ static bool GL_ProcessShader( const char *filename, CVirtualFS *out, bool compat
 	}
 	else if( GL_Support( R_TEXTURE_ARRAY_EXT ))
 	{
-		out->Printf( "#extension GL_EXT_texture_array : require\n" ); // support texture arrays
+	//	out->Printf( "#extension GL_EXT_texture_array : require\n" ); // support texture arrays
 		out->Printf( "#define GLSL_ALLOW_TEXTURE_ARRAY\n" );
 	}
 	if( defines ) out->Print( defines );

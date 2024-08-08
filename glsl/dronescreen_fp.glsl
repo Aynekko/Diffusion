@@ -65,7 +65,7 @@ void main( void )
     
     float vig = 1. - sin(M_PI * uv.x) * sin(M_PI * uv.y);
     
-    vec4 output = color - (vig * vignette_intensity);
+    vec4 output_color = color - (vig * vignette_intensity);
 
-	gl_FragColor = vec4( mix( original.rgb, output.rgb, 1.0 ), 1.0 );
+	gl_FragColor = vec4( mix( original.rgb, output_color.rgb, 1.0 ), 1.0 );
 }

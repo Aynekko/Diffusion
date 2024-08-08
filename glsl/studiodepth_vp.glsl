@@ -27,6 +27,7 @@ uniform vec4		u_BoneQuaternion[MAXSTUDIOBONES];
 uniform vec3		u_BonePosition[MAXSTUDIOBONES];
 
 varying vec2		var_TexCoord;	// for alpha-testing
+varying vec3	var_VertexColor;
 
 void main( void )
 {
@@ -59,4 +60,5 @@ void main( void )
 	gl_Position = gl_ModelViewProjectionMatrix * worldpos;
 	gl_ClipVertex = gl_ModelViewMatrix * worldpos;
 	var_TexCoord = attr_TexCoord0;
+	var_VertexColor = vec3(0.0);
 }

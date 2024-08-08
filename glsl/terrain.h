@@ -22,33 +22,28 @@ GNU General Public License for more details.
 uniform sampler2DArray	u_LayerMap;
 #endif
 
-#if defined( GLSL_ALLOW_TEXTURE_ARRAY )
+#if defined( GLSL_ALLOW_TEXTURE_ARRAY ) && defined( BMODEL_MULTI_LAYERS )
+
 void TerrainReadMask( const vec2 tc, inout vec4 mask0, inout vec4 mask1, inout vec4 mask2, inout vec4 mask3 )
 {
-#if defined( BMODEL_MULTI_LAYERS )
-	mask0 = texture2DArray( u_LayerMap, vec3( tc, 0.0 ));
+	mask0 = texture2DArray( u_LayerMap, vec3( tc, 0.0 ) );
 #if TERRAIN_NUM_LAYERS >= 4
-	mask1 = texture2DArray( u_LayerMap, vec3( tc, 1.0 ));
+	mask1 = texture2DArray( u_LayerMap, vec3( tc, 1.0 ) );
 #else
 	mask1 = vec4( 0.0 );
 #endif
 #if TERRAIN_NUM_LAYERS >= 8
-	mask2 = texture2DArray( u_LayerMap, vec3( tc, 2.0 ));
+	mask2 = texture2DArray( u_LayerMap, vec3( tc, 2.0 ) );
 #else
 	mask2 = vec4( 0.0 );
 #endif
 #if TERRAIN_NUM_LAYERS >= 12
-	mask3 = texture2DArray( u_LayerMap, vec3( tc, 3.0 ));
+	mask3 = texture2DArray( u_LayerMap, vec3( tc, 3.0 ) );
 #else
 	mask3 = vec4( 0.0 );
 #endif
-#else
-	mask0 = mask1 = mask2 = mask3 = vec4( 0.0 );
-#endif
 }
-#endif
 
-#if defined( GLSL_ALLOW_TEXTURE_ARRAY )
 vec4 TerrainApplyDiffuse( sampler2DArray tex, vec2 tc, vec4 mask0, vec4 mask1, vec4 mask2, vec4 mask3 )
 {
 	vec4 diffuse = vec4( 0.0 );
@@ -102,9 +97,7 @@ vec4 TerrainApplyDiffuse( sampler2DArray tex, vec2 tc, vec4 mask0, vec4 mask1, v
 #endif
 	return diffuse;
 }
-#endif
 
-#if defined( GLSL_ALLOW_TEXTURE_ARRAY )
 vec3 TerrainApplyNormal( sampler2DArray tex, vec2 tc, vec4 mask0, vec4 mask1, vec4 mask2, vec4 mask3 )
 {
 	vec3 normal = vec3( 0.0 );
@@ -158,9 +151,7 @@ vec3 TerrainApplyNormal( sampler2DArray tex, vec2 tc, vec4 mask0, vec4 mask1, ve
 #endif
 	return normalize( normal );
 }
-#endif
 
-#if defined( BMODEL_MULTI_LAYERS )
 vec3 TerrainCalcMaterialDefines( const in float GlossScale[TERRAIN_NUM_LAYERS], const in float GlossSmoothness[TERRAIN_NUM_LAYERS], const in float EmbossScale[TERRAIN_NUM_LAYERS], vec4 mask0, vec4 mask1, vec4 mask2, vec4 mask3 )
 {
 	vec3 result = vec3( 0.0 );
@@ -215,9 +206,7 @@ vec3 TerrainCalcMaterialDefines( const in float GlossScale[TERRAIN_NUM_LAYERS], 
 #endif
 	return result;
 }
-#endif
 
-#if defined( BMODEL_MULTI_LAYERS )
 float TerrainCalcDynLightBrightness( const in float DynLightBrightness[TERRAIN_NUM_LAYERS], vec4 mask0, vec4 mask1, vec4 mask2, vec4 mask3 )
 {
 	float result = 0.0;
@@ -272,10 +261,8 @@ float TerrainCalcDynLightBrightness( const in float DynLightBrightness[TERRAIN_N
 #endif
 	return result;
 }
-#endif
 
 // this is for debug
-#if defined( GLSL_ALLOW_TEXTURE_ARRAY )
 vec4 TerrainColorDebug( vec4 mask0, vec4 mask1, vec4 mask2, vec4 mask3 )
 {
 	vec4 diffuse = vec4( vec3( 0.0 ), 1.0 );	// black as default
@@ -345,5 +332,6 @@ vec4 TerrainColorDebug( vec4 mask0, vec4 mask1, vec4 mask2, vec4 mask3 )
 #endif
 	return diffuse;
 }
-#endif
-#endif
+
+#endif // defined( GLSL_ALLOW_TEXTURE_ARRAY ) && defined( BMODEL_MULTI_LAYERS )
+#endif // TERRAIN_H
