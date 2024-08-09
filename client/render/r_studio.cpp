@@ -2321,6 +2321,11 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 
 	Vector origin = m_pCurrentEntity->curstate.origin;
 	Vector angles = m_pCurrentEntity->curstate.angles;
+	if( m_fDrawViewModel )
+	{
+		origin = m_pCurrentEntity->origin;
+		angles = m_pCurrentEntity->angles;
+	}
 	Vector scale = Vector( 1.0f, 1.0f, 1.0f );
 
 	if( m_pCurrentEntity->curstate.effects & EF_ROTATING )
