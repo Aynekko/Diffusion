@@ -973,7 +973,7 @@ void FuncRotatingClient( cl_entity_t *e )
 	if( e->baseline.angles.y < -359 ) e->baseline.angles.y = 0;
 	if( e->baseline.angles.z < -359 ) e->baseline.angles.z = 0;
 
-	e->angles = e->baseline.angles;
+	e->curstate.angles = e->baseline.angles;
 }
 
 /*

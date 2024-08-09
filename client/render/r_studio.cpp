@@ -2184,7 +2184,7 @@ int CStudioModelRenderer::StudioComputeBBox( cl_entity_t *e )
 	}
 
 	// rotate the bounding box
-	angles = e->angles;
+	angles = e->curstate.angles;
 
 	// don't rotate player model, only aim
 	if( e->player ) angles[PITCH] = 0;
@@ -2319,68 +2319,12 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 		}
 	}
 
+	Vector origin = m_pCurrentEntity->curstate.origin;
+	Vector angles = m_pCurrentEntity->curstate.angles;
+	Vector scale = Vector( 1.0f, 1.0f, 1.0f );
+
 	if( m_pCurrentEntity->curstate.effects & EF_ROTATING )
 		FuncRotatingClient( m_pCurrentEntity );
-
-	/*
-	// diffusion: bacontsu - interactive grass
-	if( 1 )
-	{
-		const float GRASS_RADIUS = 40.0f;
-		const float GRASS_ANGLE = 15.0f;
-
-		// get base params
-		Vector clientOrg = gEngfuncs.GetLocalPlayer()->curstate.origin;
-		Vector grassOrg = m_pCurrentEntity->curstate.origin;
-
-		// calculate distance of x and y axis from player
-		Vector dist = grassOrg - clientOrg;
-
-		// actually apply logic when we're close enough 
-		if( dist.Length2D() < GRASS_RADIUS )
-		{
-			// clamps
-			float distX = bound( -GRASS_RADIUS, dist.x, GRASS_RADIUS );
-			float distY = bound( -GRASS_RADIUS, dist.y, GRASS_RADIUS );
-
-			if( distX > 0 )
-			{
-				distX = GRASS_RADIUS - distX;
-			}
-			else if( distX < 0 )
-			{
-				distX = -GRASS_RADIUS - distX;
-			}
-
-			if( distY > 0 )
-			{
-				distY = GRASS_RADIUS - distY;
-			}
-			else if( distY < 0 )
-			{
-				distY = -GRASS_RADIUS - distY;
-			}
-
-			m_pCurrentEntity->curstate.angles.x -= (distX * GRASS_ANGLE / GRASS_RADIUS);
-			m_pCurrentEntity->curstate.angles.z -= (distY * GRASS_ANGLE / GRASS_RADIUS);
-			m_pCurrentEntity->curstate.angles.y = 0;
-		}
-
-		for( int j = 0; j < 3; j++ )
-		{
-			m_pCurrentEntity->baseline.angles[j] = lerp( m_pCurrentEntity->baseline.angles[j], m_pCurrentEntity->curstate.angles[j], gHUD.m_flTimeDelta * 5 );
-		}
-
-		m_pCurrentEntity->angles = m_pCurrentEntity->baseline.angles;
-		m_pCurrentEntity->angles.x = -m_pCurrentEntity->angles.x; // because stupid quake bug is fixed in XT
-	}*/
-
-	Vector origin = m_pCurrentEntity->origin;
-	Vector angles = m_pCurrentEntity->angles;
-	// diffusion - switched to curstate for player
-	if( m_pCurrentEntity->player )
-		angles = m_pCurrentEntity->curstate.angles;
-	Vector scale = Vector( 1.0f, 1.0f, 1.0f );
 
 	float lodDist = (origin - RI->vieworg).Length() * tr.lodScale;
 	float radius = Q_max( m_pModelInstance->radius, 1.0f ); // to avoid division by zero
@@ -2663,7 +2607,7 @@ float CStudioModelRenderer::StudioEstimateInterpolant( void )
 float CStudioModelRenderer::StudioEstimateInterpolant( void )
 {
 	cl_entity_t *e = RI->currententity;
-	double interval = 0.1;	// monster think interval
+	double interval = g_fFrametime;	// monster think interval
 	float dadt = 1.0f;
 
 	if( e->player )
