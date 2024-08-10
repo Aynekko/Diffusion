@@ -672,6 +672,7 @@ void CCrossbow::SecondaryAttack( void )
 			WRITE_BYTE( WEAPON_CROSSBOW );
 		MESSAGE_END();
 		m_pPlayer->m_flFOV = CROSSBOW_MAX_ZOOM;
+		SendWeaponAnim( CROSSBOW_IDLE1 );
 	}
 
 	m_flNextSecondaryAttack = gpGlobals->time + 0.2;
@@ -711,26 +712,29 @@ void CCrossbow::WeaponIdle( void )
 			return;
 		}
 		
-		if( RANDOM_FLOAT( 0.0f, 1.0f ) <= 0.75f )
+		if( !m_fInZoom )
 		{
-			if (m_iClip)
-				SendWeaponAnim( CROSSBOW_IDLE1 );
-			else
-				SendWeaponAnim( CROSSBOW_IDLE2 );
+			if( RANDOM_FLOAT( 0.0f, 1.0f ) <= 0.75f )
+			{
+				if( m_iClip )
+					SendWeaponAnim( CROSSBOW_IDLE1 );
+				else
+					SendWeaponAnim( CROSSBOW_IDLE2 );
 
-			m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
-		}
-		else
-		{
-			if (m_iClip)
-			{
-				SendWeaponAnim( CROSSBOW_FIDGET1 );
-				m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT( 7, 15 );
+				m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT( 10, 15 );
 			}
-			else // no empty fidget anim...
+			else
 			{
-			//	SendWeaponAnim( CROSSBOW_FIDGET2 );
-			//	m_flTimeWeaponIdle = gpGlobals->time + 80.0 / 30.0;
+				if( m_iClip )
+				{
+					SendWeaponAnim( CROSSBOW_FIDGET1 );
+					m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT( 7, 15 );
+				}
+				else // no empty fidget anim...
+				{
+					//	SendWeaponAnim( CROSSBOW_FIDGET2 );
+					//	m_flTimeWeaponIdle = gpGlobals->time + 80.0 / 30.0;
+				}
 			}
 		}
 	}

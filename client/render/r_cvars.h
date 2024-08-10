@@ -83,6 +83,7 @@ extern cvar_t *cl_viewmodelblend;
 extern cvar_t *cl_viewmodel_offset_x;
 extern cvar_t *cl_viewmodel_offset_y;
 extern cvar_t *cl_viewmodel_offset_z;
+extern cvar_t *cl_viewmodel_extras;
 extern cvar_t *cl_tutor;
 extern cvar_t *cl_showhealthbars;
 extern cvar_t *cl_showdamage;

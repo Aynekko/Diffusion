@@ -518,8 +518,26 @@ void CStudioModelRenderer::ClearInstanceData( bool create )
 	// setup attachment names
 	for( int i = 0; i < Q_min( MAXSTUDIOATTACHMENTS, m_pStudioHeader->numattachments ); i++ )
 	{
-		Q_strncpy( att[i].name, pattachment[i].name, sizeof( att[0].name ) );
+		Q_strncpy( att[i].name, pattachment[i].name, sizeof( att[i].name ) );
+#if 0
 		att[i].local.Identity();
+	//	att[i].local = matrix3x4( g_vecZero, Vector( -88.59, -90, 0 ) );
+#else
+		if( FBitSet( pattachment[i].flags, STUDIO_ATTACHMENT_LOCAL ) )
+		{
+			att[i].local[0][0] = pattachment->vectors[0][0];
+			att[i].local[0][1] = pattachment->vectors[0][1];
+			att[i].local[0][2] = pattachment->vectors[0][2];
+			att[i].local[1][0] = pattachment->vectors[1][0];
+			att[i].local[1][1] = pattachment->vectors[1][1];
+			att[i].local[1][2] = pattachment->vectors[1][2];
+			att[i].local[2][0] = pattachment->vectors[2][0];
+			att[i].local[2][1] = pattachment->vectors[2][1];
+			att[i].local[2][2] = pattachment->vectors[2][2];
+		}
+		else
+			att[i].local.Identity();
+#endif
 		att[i].local.SetOrigin( pattachment[i].org );
 	}
 	m_pModelInstance->numattachments = m_pStudioHeader->numattachments;
@@ -4393,7 +4411,7 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 	if( !StudioSetEntity( IEngineStudio.GetCurrentEntity() ) )
 		return 0;
 
-	if( m_pCurrentEntity == GET_VIEWMODEL() && gHUD.IsZoomed )
+	if( m_pCurrentEntity == GET_VIEWMODEL() && gHUD.IsZoomed && !(flags & STUDIO_ATTACHMENTS) )
 		flags = STUDIO_EVENTS;
 	
 	if( FBitSet( flags, STUDIO_RENDER ) )
