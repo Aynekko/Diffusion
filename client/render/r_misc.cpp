@@ -938,7 +938,7 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 
 	if( e == GET_VIEWMODEL() )
 	{
-		R_SetupLightProjection( dl, origin, e->curstate.angles, Radius * 3.0f, 120.0f );
+		R_SetupLightProjection( dl, origin, e->angles, Radius * 3.0f, 120.0f );
 		dl->lightFalloff = 2.5f;
 	}
 	else

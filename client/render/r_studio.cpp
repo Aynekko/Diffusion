@@ -3682,6 +3682,8 @@ void CStudioModelRenderer::StudioGetAttachment( const cl_entity_t *ent, int iAtt
 	RI->currentmodel = ent->model;
 	if( !RI->currentmodel ) return;
 
+	m_fDrawViewModel = (ent == GET_VIEWMODEL());
+
 	// force to compute attachments
 	SET_CURRENT_ENTITY( RI->currententity );
 	StudioDrawModel( studio_flags );
@@ -3689,6 +3691,7 @@ void CStudioModelRenderer::StudioGetAttachment( const cl_entity_t *ent, int iAtt
 	SET_CURRENT_ENTITY( NULL );
 	RI->currententity = NULL;
 	RI->currentmodel = NULL;
+	m_fDrawViewModel = false;
 
 	if( ent->modelhandle == INVALID_HANDLE )
 		return; // too early ?
@@ -4411,7 +4414,7 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 	if( !StudioSetEntity( IEngineStudio.GetCurrentEntity() ) )
 		return 0;
 
-	if( m_pCurrentEntity == GET_VIEWMODEL() && gHUD.IsZoomed && !(flags & STUDIO_ATTACHMENTS) )
+	if( m_fDrawViewModel && gHUD.IsZoomed && !(flags & STUDIO_ATTACHMENTS) )
 		flags = STUDIO_EVENTS;
 	
 	if( FBitSet( flags, STUDIO_RENDER ) )
@@ -5602,11 +5605,11 @@ void CStudioModelRenderer::RunViewModelEvents( void )
 	if( !CVAR_TO_BOOL( m_pCvarDrawViewModel ) )
 		return;
 
-	// ignore in thirdperson, camera view or client is dead
-	if( FBitSet( RI->params, RP_THIRDPERSON ) || CL_IsDead() || !UTIL_IsLocal( RI->viewentity ) )
+	if( !RP_NORMALPASS() )
 		return;
 
-	if( RI->params & RP_NONVIEWERREF )
+	// ignore in thirdperson, camera view or client is dead
+	if( FBitSet( RI->params, RP_THIRDPERSON ) || CL_IsDead() || !UTIL_IsLocal( RI->viewentity ) )
 		return;
 
 	RI->currententity = GET_VIEWMODEL();
@@ -5635,11 +5638,11 @@ void CStudioModelRenderer::DrawViewModel( void )
 	if( !CVAR_TO_BOOL( m_pCvarDrawViewModel ) )
 		return;
 
-	// ignore in thirdperson, camera view or client is dead
-	if( FBitSet( RI->params, RP_THIRDPERSON ) || CL_IsDead() || !UTIL_IsLocal( RI->viewentity ) )
+	if( !RP_NORMALPASS() )
 		return;
 
-	if( RI->params & RP_NONVIEWERREF )
+	// ignore in thirdperson, camera view or client is dead
+	if( FBitSet( RI->params, RP_THIRDPERSON ) || CL_IsDead() || !UTIL_IsLocal( RI->viewentity ) )
 		return;
 
 	if( !IEngineStudio.Mod_Extradata( GET_VIEWMODEL()->model ) )
