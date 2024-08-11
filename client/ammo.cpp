@@ -1012,6 +1012,9 @@ int CHudAmmo::Draw( float flTime )
 	if(( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WPNS | HIDEHUD_ALL | HIDEHUD_WPNS_HOLDABLEITEM | HIDEHUD_WPNS_CUSTOM)))
 		return 1;
 
+	if( CVAR_TO_BOOL( ui_is_active ) )
+		return 0;
+
 	// Draw Weapon Menu
 	DrawWList( flTime );
 

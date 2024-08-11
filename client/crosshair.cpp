@@ -178,9 +178,6 @@ int CHudCrosshairStatic::Draw( float flTime )
 	
 	if(( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WPNS | HIDEHUD_ALL | HIDEHUD_HEALTH | HIDEHUD_WPNS_HOLDABLEITEM | HIDEHUD_WPNS_CUSTOM)))
 		return 1;
-
-	if( CVAR_TO_BOOL( ui_is_active ) )
-		return 0;
 	
 	if( gHUD.IsZoomed ) // draw sniper scope
 	{
@@ -240,6 +237,9 @@ int CHudCrosshairStatic::Draw( float flTime )
 	{
 		if( tr.time == tr.oldtime ) // paused
 			return 1;
+
+		if( CVAR_TO_BOOL( ui_is_active ) )
+			return 0;
 
 		ZoomBlur = 0.0f; // reset blur
 

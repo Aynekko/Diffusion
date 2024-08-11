@@ -60,6 +60,9 @@ int CHudAmmoSecondary :: Draw( float flTime )
 	if( tr.time == tr.oldtime ) // paused
 		return 1;
 
+	if( CVAR_TO_BOOL( ui_is_active ) )
+		return 0;
+
 	// draw secondary ammo icons above normal ammo readout
 	int a, x, y, r, g, b, AmmoWidth;
 

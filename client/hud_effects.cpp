@@ -154,6 +154,9 @@ void CScreenEffects::DrawSpeedometer(void)
 
 	if( tr.time == tr.oldtime ) // not in paused
 		return;
+
+	if( CVAR_TO_BOOL( ui_is_active ) )
+		return;
 	
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );

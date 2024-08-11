@@ -61,6 +61,9 @@ int CHudFlashlight::Draw( float flTime )
 	if( tr.time == tr.oldtime ) // paused
 		return 1;
 
+	if( CVAR_TO_BOOL( ui_is_active ) )
+		return 0;
+
 	// diffusion - for smooth turning on, see SetupFlashlight function
 	if( !m_fOn )
 	{

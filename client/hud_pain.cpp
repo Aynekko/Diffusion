@@ -177,6 +177,9 @@ int CHudHealth::Draw( float flTime )
 	if( tr.time == tr.oldtime ) // paused
 		return 1;
 
+	if( CVAR_TO_BOOL( ui_is_active ) )
+		return 0;
+
 	// diffusion - old HL health with numbers
 /*	
 	int r, g, b;

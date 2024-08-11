@@ -22,6 +22,7 @@
 #include "hud.h"
 #include "utils.h"
 #include "parsemsg.h"
+#include "r_cvars.h"
 
 extern float *GetClientColor( int clientIndex );
 
@@ -94,6 +95,9 @@ int CHudSayText :: Draw( float flTime )
 {
 	if( !m_HUD_saytext->value )
 		return 1;
+
+	if( CVAR_TO_BOOL( ui_is_active ) )
+		return 0;
 
 	int y = Y_START;
 

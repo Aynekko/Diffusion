@@ -76,6 +76,9 @@ int CHealthbars::Draw( float flTime )
 	if( tr.time == tr.oldtime ) // not in paused
 		return 1;
 
+	if( CVAR_TO_BOOL( ui_is_active ) )
+		return 0;
+
 	if( CL_IsDead() )
 	{
 		entindex = 0;

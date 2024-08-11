@@ -325,6 +325,9 @@ int CHudMessage::Draw( float fTime )
 	if( tr.time == tr.oldtime ) // paused
 		return 1;
 
+	if( CVAR_TO_BOOL( ui_is_active ) )
+		return 0;
+
 	GL_Color4f( 1.0, 1.0, 1.0, 1.0 );
 
 	if( m_gameTitleTime > 0 )

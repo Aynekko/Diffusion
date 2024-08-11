@@ -99,6 +99,9 @@ int CHudDeathNotice :: VidInit( void )
 
 int CHudDeathNotice :: Draw( float flTime )
 {
+	if( CVAR_TO_BOOL( ui_is_active ) )
+		return 0;
+	
 	int x, y, r, g, b;
 
 	for( int i = 0; i < MAX_DEATHNOTICES; i++ )
