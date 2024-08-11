@@ -149,6 +149,7 @@ int CHudCodeInput::Draw( float flTime )
 	{
 		CodeInputSpr.SetRenderMode( kRenderTransAdd );
 		CodeInputSpr.SetColor( r, g, b );
+		CodeInputSpr.SetTransparency( 225.f - (DistanceFromInputStart * 3.0f) );
 		CodeInputSpr.SetPos( x, y, xmax, ymax );
 		if( CodeSuccess )
 			CodeInputSpr.DrawFrame( 6 );

@@ -292,9 +292,15 @@ void HUD_Frame( double time )
 
 int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 {
-	if( (gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) && (keynum == K_ENTER || keynum == K_ESCAPE || keynum == K_MOUSE1 || !Q_strcmp(pszCurrentBinding, "+attack")) )
+	if( (gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) && (keynum == K_ENTER || keynum == K_MOUSE1 || !Q_strcmp(pszCurrentBinding, "+attack") || !Q_strcmp( pszCurrentBinding, "escape" )) )
 	{
 		gHUD.m_PseudoGUI.CloseWindow( keynum == K_MOUSE1 || !Q_strcmp( pszCurrentBinding, "+attack" ) );
+		return 0;
+	}
+
+	if( gHUD.m_CodeInput.CodeInputScreenIsOn && !Q_strcmp( pszCurrentBinding, "escape" ) )
+	{
+		gHUD.m_CodeInput.DisableCodeScreen();
 		return 0;
 	}
 
