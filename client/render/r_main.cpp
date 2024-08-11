@@ -519,7 +519,6 @@ void R_CheckChanges( void )
 	{
 		ClearBits(thirdperson->flags, FCVAR_CHANGED);
 		V_ChangeView();
-		settings_changed = true;
 	}
 
 	if( FBitSet( r_grass->flags, FCVAR_CHANGED ))

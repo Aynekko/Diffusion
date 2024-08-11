@@ -1977,6 +1977,9 @@ void R_NewMap( void )
 
 	g_pParticles.Clear();
 
+	// reset player's view, might be a background map - can't be in third person
+	V_ChangeView();
+
 	if( !g_fRenderInitialized )
 		return;
 

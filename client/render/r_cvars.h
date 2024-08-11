@@ -108,6 +108,6 @@ extern cvar_t *cl_useicon;
 extern cvar_t *cl_oldammohud;
 
 extern cvar_t *ui_is_active; // internal cvar
-extern cvar_t *ui_backgroundmap_active;
+extern cvar_t *cl_background;
 
 #endif//R_CVARS_H
