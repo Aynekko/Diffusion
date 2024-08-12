@@ -3698,11 +3698,27 @@ void CStudioModelRenderer::StudioGetAttachment( const cl_entity_t *ent, int iAtt
 
 	ModelInstance_t *inst = &m_ModelInstances[ent->modelhandle];
 
-	// make sure we don't overflow
-	iAttachment = bound( 0, iAttachment, inst->numattachments - 1 );
+	if( inst->numattachments > 0 )
+	{
+		// make sure we don't overflow
+		iAttachment = bound( 0, iAttachment, inst->numattachments - 1 );
 
-	if( origin ) *origin = inst->attachment[iAttachment].origin;
-	if( angles ) *angles = inst->attachment[iAttachment].angles;
+		if( origin ) *origin = inst->attachment[iAttachment].origin;
+		if( angles ) *angles = inst->attachment[iAttachment].angles;
+	}
+	else // model doesn't have attachments at all
+	{
+		if( FBitSet( flags, AF_LOCAL_SPACE ) )
+		{
+			if( origin ) *origin = Vector( 0, 0, 0 );
+			if( angles ) *angles = Vector( 0, 0, 0 );
+		}
+		else
+		{
+			if( origin ) *origin = ent->origin;
+			if( angles ) *angles = ent->angles;
+		}
+	}
 }
 
 /*
