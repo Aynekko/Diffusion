@@ -36,15 +36,23 @@ GNU General Public License for more details.
 #if defined( BMODEL_MULTI_LAYERS )
 uniform sampler2DArray	u_ColorMap;
 uniform sampler2DArray	u_NormalMap;
+#if defined( BMODEL_SPECULAR )
 uniform float		u_GlossSmoothness[TERRAIN_NUM_LAYERS];
 uniform float		u_GlossScale[TERRAIN_NUM_LAYERS];
+#endif
+#if defined( BMODEL_EMBOSS )
 uniform float		u_EmbossScale[TERRAIN_NUM_LAYERS];
+#endif
 #else
 uniform sampler2D	u_ColorMap;
 uniform sampler2D	u_NormalMap;
+#if defined( BMODEL_SPECULAR )
 uniform float		u_GlossSmoothness;
 uniform float		u_GlossScale;
+#endif
+#if defined( BMODEL_EMBOSS )
 uniform float		u_EmbossScale;
+#endif
 uniform float		u_ReflectScale;
 #endif
 
@@ -136,16 +144,38 @@ void main( void )
 	// two side materials support
 	if( bool( gl_FrontFacing )) N = -N;
 
+	float GlossScale = 0.0;
+	float GlossSmoothness = 0.0;
+	float EmbossScale = 0.0;
+
 	// compute the matetial defines
 #if defined( BMODEL_MULTI_LAYERS )
-	vec3 MaterialDefines = TerrainCalcMaterialDefines( u_GlossScale, u_GlossSmoothness, u_EmbossScale, mask0, mask1, mask2, mask3 );
-	float GlossScale = MaterialDefines.x; 
-	float GlossSmoothness = MaterialDefines.y; 
-	float EmbossScale = MaterialDefines.z;
+	float InitGlossScale[TERRAIN_NUM_LAYERS] = float[TERRAIN_NUM_LAYERS]( 0.0 );
+	float InitGlossSmoothness[TERRAIN_NUM_LAYERS] = float[TERRAIN_NUM_LAYERS]( 0.0 );
+	float InitEmbossScale[TERRAIN_NUM_LAYERS] = float[TERRAIN_NUM_LAYERS]( 0.0 );
+	#if defined( BMODEL_EMBOSS )
+	InitEmbossScale = u_EmbossScale;
+	#endif
+	#if defined( BMODEL_SPECULAR )
+	InitGlossScale = u_GlossScale; 
+	InitGlossSmoothness = u_GlossSmoothness;
+	#endif
+	vec3 MaterialDefines = TerrainCalcMaterialDefines( InitGlossScale, InitGlossSmoothness, InitEmbossScale, mask0, mask1, mask2, mask3 );
+	#if defined( BMODEL_SPECULAR )
+	GlossScale = MaterialDefines.x; 
+	GlossSmoothness = MaterialDefines.y;
+	#endif
+	#if defined( BMODEL_EMBOSS )
+	EmbossScale = MaterialDefines.z;
+	#endif
 #else
-	float GlossScale = u_GlossScale; 
-	float GlossSmoothness = u_GlossSmoothness; 
-	float EmbossScale = u_EmbossScale;
+	#if defined( BMODEL_SPECULAR )
+	GlossScale = u_GlossScale;
+	GlossSmoothness = u_GlossSmoothness;
+	#endif
+	#if defined( BMODEL_EMBOSS )
+	EmbossScale = u_EmbossScale;
+	#endif
 #endif
 
 	// compute the diffuse, specular and emboss term

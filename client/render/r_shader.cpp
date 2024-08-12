@@ -727,9 +727,13 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 	//	shader->u_zFar = pglGetUniformLocationARB( shader->handle, "u_zFar" );
 	}
 	shader->u_DeluxeMap = pglGetUniformLocationARB( shader->handle, "u_DeluxeMap" );
-	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
-	shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
-	shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
+	if( GL_FindShaderDirective( shader, "BMODEL_SPECULAR" ) )
+	{
+		shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
+		shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
+	}
+	if( GL_FindShaderDirective( shader, "BMODEL_EMBOSS" ) )
+		shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
 	shader->u_Fresnel = pglGetUniformLocationARB( shader->handle, "u_Fresnel" );
 
 	if( GL_FindShaderDirective( shader, "BMODEL_MULTI_LAYERS" ) )
@@ -802,9 +806,13 @@ static void GL_InitBmodelDlightUniforms( glsl_program_t *shader )
 	shader->u_RenderColor = pglGetUniformLocationARB( shader->handle, "u_RenderColor" );
 	shader->u_DynLightBrightness = pglGetUniformLocationARB( shader->handle, "u_DynLightBrightness" );
 	shader->u_LightParams = pglGetUniformLocationARB( shader->handle, "u_LightParams" );
-	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
-	shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
-	shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
+	if( GL_FindShaderDirective( shader, "BMODEL_SPECULAR" ) )
+	{
+		shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
+		shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
+	}
+	if( GL_FindShaderDirective( shader, "BMODEL_EMBOSS" ) )
+		shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
 
 	if( GL_FindShaderDirective( shader, "BMODEL_INTERIOR" ) )
 	{
@@ -879,9 +887,13 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
 	shader->u_BoneQuaternion = pglGetUniformLocationARB( shader->handle, "u_BoneQuaternion" );
 	shader->u_BonePosition = pglGetUniformLocationARB( shader->handle, "u_BonePosition" );
-	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
-	shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
-	shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
+	if( GL_FindShaderDirective( shader, "STUDIO_SPECULAR" ) )
+	{
+		shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
+		shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
+	}
+	if( GL_FindShaderDirective( shader, "STUDIO_EMBOSS" ) )
+		shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
 	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
 	shader->u_ColorMask = pglGetUniformLocationARB( shader->handle, "u_ColorMask" );
 	shader->u_MeshParams = pglGetUniformLocationARB( shader->handle, "u_MeshParams" );
@@ -945,9 +957,13 @@ static void GL_InitStudioDlightUniforms( glsl_program_t *shader )
 	shader->u_BonePosition = pglGetUniformLocationARB( shader->handle, "u_BonePosition" );
 	shader->u_DynLightBrightness = pglGetUniformLocationARB( shader->handle, "u_DynLightBrightness" );
 	shader->u_RenderColor = pglGetUniformLocationARB( shader->handle, "u_RenderColor" );
-	shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
-	shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
-	shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
+	if( GL_FindShaderDirective( shader, "STUDIO_SPECULAR" ) )
+	{
+		shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
+		shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
+	}
+	if( GL_FindShaderDirective( shader, "STUDIO_EMBOSS" ) )
+		shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
 	shader->u_NormalMap = pglGetUniformLocationARB( shader->handle, "u_NormalMap" );
 	shader->u_ColorMask = pglGetUniformLocationARB( shader->handle, "u_ColorMask" );
 	shader->u_LightViewProjectionMatrix = pglGetUniformLocationARB( shader->handle, "u_LightViewProjectionMatrix" );
@@ -1485,6 +1501,7 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	bool mirror = false;
 	bool portal = false;
 	bool using_cubemaps = false;
+	bool IsLandscape = FBitSet( s->flags, SURF_LANDSCAPE );
 
 	ASSERT( worldmodel != NULL );
 
@@ -1558,7 +1575,7 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 			GL_AddShaderDirective( options, "ALPHA_TO_COVERAGE" );
 		}
 	}*/
-	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransAlpha && !FBitSet( s->flags, SURF_LANDSCAPE ) )
+	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransAlpha && !IsLandscape )
 		GL_AddShaderDirective( options, "ALPHA_RESCALING" );
 
 	if( FBitSet( s->flags, SURF_WATER ))
@@ -1575,29 +1592,50 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 		}
 	}
 
-	if( CVAR_TO_BOOL( gl_emboss ) )
+	if( !IsLandscape )
 	{
-		if( tr.materials[tx->gl_texturenum].EmbossScale > 0.01f )
-			GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+		if( gl_emboss->value > 0 )
+		{
+			if( tr.materials[tx->gl_texturenum].EmbossScale > 0.0f )
+				GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+		}
+
+		if( gl_specular->value > 0 )
+		{
+			if( tr.materials[tx->gl_texturenum].GlossScale > 0.0f )
+				GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
+		}
+
+		if( gl_bump->value > 0 )
+		{
+			if( tr.materials[tx->gl_texturenum].gl_normalmap_id > 0 )
+			{
+				GL_AddShaderDirective( options, "BMODEL_BUMP" );
+				GL_EncodeNormal( options, tr.materials[tx->gl_texturenum].gl_normalmap_id );
+			}
+		}
 	}
-
-	if( CVAR_TO_BOOL( gl_specular ) )
-		GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
-
-	if( CVAR_TO_BOOL(gl_bump) )
+	else // landscape
 	{
-		if( FBitSet( s->flags, SURF_LANDSCAPE ) )
+		if( gl_emboss->value > 0 )
+		{
+			if( landscape && landscape->terrain && landscape->terrain->layermap.has_emboss )
+				GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+		}
+
+		if( gl_specular->value > 0 )
+		{
+			if( landscape && landscape->terrain && landscape->terrain->layermap.has_specular )
+				GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
+		}
+
+		if( gl_bump->value > 0 )
 		{
 			if( landscape && landscape->terrain && landscape->terrain->layermap.gl_normalmap_id > 0 )
 			{
 				GL_AddShaderDirective( options, "BMODEL_BUMP" );
 				GL_EncodeNormal( options, landscape->terrain->layermap.gl_normalmap_id );
 			}
-		}
-		else if( tr.materials[tx->gl_texturenum].gl_normalmap_id > 0 )
-		{
-			GL_AddShaderDirective( options, "BMODEL_BUMP" );
-			GL_EncodeNormal( options, tr.materials[tx->gl_texturenum].gl_normalmap_id );
 		}
 	}
 
@@ -1617,7 +1655,7 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	if( translucent )
 		GL_AddShaderDirective( options, "BMODEL_TRANSLUCENT" );
 #endif
-	if( FBitSet( s->flags, SURF_LANDSCAPE ) )
+	if( IsLandscape )
 	{
 		if( landscape && landscape->terrain && landscape->terrain->layermap.gl_diffuse_id != 0 )
 		{
@@ -1671,6 +1709,7 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 	bool mirrorSurface = false;
 	bool portalSurface = false;
 	mfaceinfo_t *landscape = NULL;
+	bool IsLandscape = FBitSet( s->flags, SURF_LANDSCAPE );
 	
 	Q_strncpy( glname, "BmodelDlight", sizeof( glname ));
 
@@ -1703,29 +1742,50 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 		}
 	}
 
-	if( CVAR_TO_BOOL( gl_emboss ) )
+	if( !IsLandscape )
 	{
-		if( tr.materials[tx->gl_texturenum].EmbossScale > 0.01f )
-			GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+		if( gl_emboss->value > 0 )
+		{
+			if( tr.materials[tx->gl_texturenum].EmbossScale > 0.0f )
+				GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+		}
+
+		if( gl_specular->value > 0 )
+		{
+			if( tr.materials[tx->gl_texturenum].GlossScale > 0.0f )
+				GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
+		}
+
+		if( gl_bump->value > 0 )
+		{
+			if( tr.materials[tx->gl_texturenum].gl_normalmap_id > 0 )
+			{
+				GL_AddShaderDirective( options, "BMODEL_BUMP" );
+				GL_EncodeNormal( options, tr.materials[tx->gl_texturenum].gl_normalmap_id );
+			}
+		}
 	}
-
-	if( CVAR_TO_BOOL( gl_specular ) )
-		GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
-
-	if( CVAR_TO_BOOL( gl_bump ) )
+	else // landscape
 	{
-		if( FBitSet( s->flags, SURF_LANDSCAPE ) )
+		if( gl_emboss->value > 0 )
+		{
+			if( landscape && landscape->terrain && landscape->terrain->layermap.has_emboss )
+				GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+		}
+
+		if( gl_specular->value > 0 )
+		{
+			if( landscape && landscape->terrain && landscape->terrain->layermap.has_specular )
+				GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
+		}
+
+		if( gl_bump->value > 0 )
 		{
 			if( landscape && landscape->terrain && landscape->terrain->layermap.gl_normalmap_id > 0 )
 			{
 				GL_AddShaderDirective( options, "BMODEL_BUMP" );
 				GL_EncodeNormal( options, landscape->terrain->layermap.gl_normalmap_id );
 			}
-		}
-		else if( tr.materials[tx->gl_texturenum].gl_normalmap_id > 0 )
-		{
-			GL_AddShaderDirective( options, "BMODEL_BUMP" );
-			GL_EncodeNormal( options, tr.materials[tx->gl_texturenum].gl_normalmap_id );
 		}
 	}
 
@@ -1942,14 +2002,17 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 			GL_AddShaderDirective( options, "STUDIO_LIGHT_FLATSHADE" );
 	}
 
-	if( CVAR_TO_BOOL( gl_emboss ) )
+	if( gl_emboss->value > 0 )
 	{
-		if( tr.materials[mat->gl_diffuse_id].EmbossScale > 0.01f )
+		if( tr.materials[mat->gl_diffuse_id].EmbossScale > 0.0f )
 			GL_AddShaderDirective( options, "STUDIO_EMBOSS" );
 	}
 
-	if( CVAR_TO_BOOL( gl_specular ) )
-		GL_AddShaderDirective( options, "STUDIO_SPECULAR" );
+	if( gl_specular->value > 0 )
+	{
+		if( tr.materials[mat->gl_diffuse_id].GlossScale > 0.0f )
+			GL_AddShaderDirective( options, "STUDIO_SPECULAR" );
+	}
 
 	if( CVAR_TO_BOOL( gl_bump ) && tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 )
 	{
@@ -2067,14 +2130,17 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 	if( FBitSet( mat->flags, STUDIO_NF_CHROME ))
 		GL_AddShaderDirective( options, "STUDIO_HAS_CHROME" );
 
-	if( CVAR_TO_BOOL( gl_emboss ) )
+	if( gl_emboss->value > 0 )
 	{
-		if( tr.materials[mat->gl_diffuse_id].EmbossScale > 0.01f )
+		if( tr.materials[mat->gl_diffuse_id].EmbossScale > 0.0f )
 			GL_AddShaderDirective( options, "STUDIO_EMBOSS" );
 	}
 
-	if( CVAR_TO_BOOL( gl_specular ) )
-		GL_AddShaderDirective( options, "STUDIO_SPECULAR" );
+	if( gl_specular->value > 0 )
+	{
+		if( tr.materials[mat->gl_diffuse_id].GlossScale > 0.0f )
+			GL_AddShaderDirective( options, "STUDIO_SPECULAR" );
+	}
 
 	if( CVAR_TO_BOOL( gl_bump ) && tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 )
 	{

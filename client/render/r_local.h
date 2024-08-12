@@ -246,6 +246,8 @@ typedef struct
 	float GlossScale[MAX_LANDSCAPE_LAYERS];
 	float GlossSmoothness[MAX_LANDSCAPE_LAYERS];
 	float EmbossScale[MAX_LANDSCAPE_LAYERS];
+	bool has_emboss; // at least one of the textures has emboss
+	bool has_specular; // same here
 } layerMap_t;
 
 // simple version of P2:Savior landscape: global texture only

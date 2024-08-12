@@ -1626,7 +1626,11 @@ bool LoadTerrainLayers( layerMap_t* lm, int numLayers )
 		lm->DynlightScale[i] = tr.materials[tex_id].DynlightScale;
 		lm->GlossScale[i] = tr.materials[tex_id].GlossScale;
 		lm->GlossSmoothness[i] = tr.materials[tex_id].GlossSmoothness;
+		if( lm->GlossScale[i] > 0.0f )
+			lm->has_specular = true;
 		lm->EmbossScale[i] = tr.materials[tex_id].EmbossScale;
+		if( lm->EmbossScale[i] > 0.0f )
+			lm->has_emboss = true;
 
 		if( tr.materials[tex_id].normalmap_name[0] != '\0' )
 		{

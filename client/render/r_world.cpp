@@ -2452,9 +2452,13 @@ void R_DrawLightForSurfList( plight_t *pl )
 						ScaledDynLightBrightness[sc] *= pl->brightness;
 
 					pglUniform1fvARB( RI->currentshader->u_DynLightBrightness, land->terrain->numLayers, &ScaledDynLightBrightness[0] );
-					pglUniform1fvARB( RI->currentshader->u_GlossSmoothness, land->terrain->numLayers, &land->terrain->layermap.GlossSmoothness[0] );
-					pglUniform1fvARB( RI->currentshader->u_GlossScale, land->terrain->numLayers, &land->terrain->layermap.GlossScale[0] );
-					pglUniform1fvARB( RI->currentshader->u_EmbossScale, land->terrain->numLayers, &land->terrain->layermap.EmbossScale[0] );
+					if( gl_specular->value > 0 && land->terrain->layermap.has_specular )
+					{
+						pglUniform1fvARB( RI->currentshader->u_GlossSmoothness, land->terrain->numLayers, &land->terrain->layermap.GlossSmoothness[0] );
+						pglUniform1fvARB( RI->currentshader->u_GlossScale, land->terrain->numLayers, &land->terrain->layermap.GlossScale[0] );
+					}
+					if( gl_emboss->value > 0 && land->terrain->layermap.has_emboss )
+						pglUniform1fvARB( RI->currentshader->u_EmbossScale, land->terrain->numLayers, &land->terrain->layermap.EmbossScale[0] );
 				}
 			}
 			else
@@ -2466,22 +2470,28 @@ void R_DrawLightForSurfList( plight_t *pl )
 					cached_dynlightscale = newdynlightscale;
 				}
 
-				if( tr.materials[es->gl_texturenum].GlossSmoothness != cached_glosssmoothness )
+				if( gl_specular->value > 0 && tr.materials[es->gl_texturenum].GlossScale > 0.0f )
 				{
-					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[es->gl_texturenum].GlossSmoothness );
-					cached_glosssmoothness = tr.materials[es->gl_texturenum].GlossSmoothness;
+					if( tr.materials[es->gl_texturenum].GlossSmoothness != cached_glosssmoothness )
+					{
+						pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[es->gl_texturenum].GlossSmoothness );
+						cached_glosssmoothness = tr.materials[es->gl_texturenum].GlossSmoothness;
+					}
+
+					if( tr.materials[es->gl_texturenum].GlossScale != cached_glossscale )
+					{
+						pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[es->gl_texturenum].GlossScale );
+						cached_glossscale = tr.materials[es->gl_texturenum].GlossScale;
+					}
 				}
 
-				if( tr.materials[es->gl_texturenum].GlossScale != cached_glossscale )
+				if( gl_emboss->value > 0 && tr.materials[es->gl_texturenum].EmbossScale > 0.0f )
 				{
-					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[es->gl_texturenum].GlossScale );
-					cached_glossscale = tr.materials[es->gl_texturenum].GlossScale;
-				}
-
-				if( tr.materials[es->gl_texturenum].EmbossScale != cached_embossscale )
-				{
-					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[es->gl_texturenum].EmbossScale );
-					cached_embossscale = tr.materials[es->gl_texturenum].EmbossScale;
+					if( tr.materials[es->gl_texturenum].EmbossScale != cached_embossscale )
+					{
+						pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[es->gl_texturenum].EmbossScale );
+						cached_embossscale = tr.materials[es->gl_texturenum].EmbossScale;
+					}
 				}
 
 				if( tr.materials[es->gl_texturenum].gl_normalmap_id > 0 )
@@ -2950,9 +2960,13 @@ void R_DrawBrushList( void )
 			{
 				if( land && land->terrain )
 				{
-					pglUniform1fvARB( RI->currentshader->u_GlossSmoothness, land->terrain->numLayers, &land->terrain->layermap.GlossSmoothness[0] );
-					pglUniform1fvARB( RI->currentshader->u_GlossScale, land->terrain->numLayers, &land->terrain->layermap.GlossScale[0] );
-					pglUniform1fvARB( RI->currentshader->u_EmbossScale, land->terrain->numLayers, &land->terrain->layermap.EmbossScale[0] );
+					if( gl_specular->value > 0 && land->terrain->layermap.has_specular )
+					{
+						pglUniform1fvARB( RI->currentshader->u_GlossSmoothness, land->terrain->numLayers, &land->terrain->layermap.GlossSmoothness[0] );
+						pglUniform1fvARB( RI->currentshader->u_GlossScale, land->terrain->numLayers, &land->terrain->layermap.GlossScale[0] );
+					}
+					if( gl_emboss->value > 0 && land->terrain->layermap.has_emboss )
+						pglUniform1fvARB( RI->currentshader->u_EmbossScale, land->terrain->numLayers, &land->terrain->layermap.EmbossScale[0] );
 					GL_Bind( GL_TEXTURE5, land->terrain->indexmap.gl_heightmap_id );
 					if( land->terrain->layermap.gl_normalmap_id > 0 )
 						GL_Bind( GL_TEXTURE4, land->terrain->layermap.gl_normalmap_id );
@@ -2960,22 +2974,28 @@ void R_DrawBrushList( void )
 			}
 			else
 			{
-				if( tr.materials[es->gl_texturenum].GlossSmoothness != cached_glosssmoothness )
+				if( gl_specular->value > 0 && tr.materials[es->gl_texturenum].GlossScale > 0.0f )
 				{
-					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[es->gl_texturenum].GlossSmoothness );
-					cached_glosssmoothness = tr.materials[es->gl_texturenum].GlossSmoothness;
+					if( tr.materials[es->gl_texturenum].GlossSmoothness != cached_glosssmoothness )
+					{
+						pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[es->gl_texturenum].GlossSmoothness );
+						cached_glosssmoothness = tr.materials[es->gl_texturenum].GlossSmoothness;
+					}
+
+					if( tr.materials[es->gl_texturenum].GlossScale != cached_glossscale )
+					{
+						pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[es->gl_texturenum].GlossScale );
+						cached_glossscale = tr.materials[es->gl_texturenum].GlossScale;
+					}
 				}
 
-				if( tr.materials[es->gl_texturenum].GlossScale != cached_glossscale )
+				if( gl_emboss->value > 0 && tr.materials[es->gl_texturenum].EmbossScale > 0.0f )
 				{
-					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[es->gl_texturenum].GlossScale );
-					cached_glossscale = tr.materials[es->gl_texturenum].GlossScale;
-				}
-
-				if( tr.materials[es->gl_texturenum].EmbossScale != cached_embossscale )
-				{
-					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[es->gl_texturenum].EmbossScale );
-					cached_embossscale = tr.materials[es->gl_texturenum].EmbossScale;
+					if( tr.materials[es->gl_texturenum].EmbossScale != cached_embossscale )
+					{
+						pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[es->gl_texturenum].EmbossScale );
+						cached_embossscale = tr.materials[es->gl_texturenum].EmbossScale;
+					}
 				}
 
 				if( tr.materials[es->gl_texturenum].gl_normalmap_id > 0 )

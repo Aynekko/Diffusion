@@ -36,9 +36,13 @@ uniform sampler2D	u_ColorMask;
 #endif
 
 uniform vec4		u_RenderColor;
+#if defined( STUDIO_SPECULAR )
 uniform float		u_GlossScale;
 uniform float		u_GlossSmoothness;
+#endif
+#if defined( STUDIO_EMBOSS )
 uniform float		u_EmbossScale;
+#endif
 uniform float		u_ReflectScale;
 uniform vec3		u_MeshParams[3];
 uniform vec4		u_StudioParams[3];
@@ -92,9 +96,13 @@ void main( void )
 	if( bool( gl_FrontFacing )) N = -N;
 
 	// compute the material defines
+	#if defined( STUDIO_SPECULAR )
 	float GlossScale = u_GlossScale; 
-	float GlossSmoothness = u_GlossSmoothness; 
-	float EmbossScale = u_EmbossScale; 
+	float GlossSmoothness = u_GlossSmoothness;
+	#endif
+	#if defined( STUDIO_EMBOSS )
+	float EmbossScale = u_EmbossScale;
+	#endif
 
 	// compute the diffuse, emboss and specular term
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );

@@ -55,9 +55,13 @@ uniform vec4		u_LightParams[7];
 #define u_LightOrigin	u_LightParams[3]
 #define u_FogParams		u_LightParams[6]
 uniform vec4		u_RenderColor;
+#if defined( STUDIO_SPECULAR )
 uniform float	        u_GlossSmoothness;
 uniform float	        u_GlossScale;
+#endif
+#if defined( STUDIO_EMBOSS )
 uniform float	        u_EmbossScale;
+#endif
 uniform float		u_DynLightBrightness;
 uniform float           u_RealTime;
 uniform vec3		u_MeshParams[3];
@@ -114,9 +118,13 @@ void main( void )
 	if( bool( gl_FrontFacing )) N = -N;
 
 	// compute the material defines
+	#if defined( STUDIO_SPECULAR )
 	float GlossScale = u_GlossScale; 
-	float GlossSmoothness = u_GlossSmoothness; 
-	float EmbossScale = u_EmbossScale;	
+	float GlossSmoothness = u_GlossSmoothness;
+	#endif
+	#if defined( STUDIO_EMBOSS )
+	float EmbossScale = u_EmbossScale;
+	#endif
 	float Brightness = u_DynLightBrightness; 
 
 	// compute the diffuse, emboss and specular term

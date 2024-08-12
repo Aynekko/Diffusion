@@ -5086,22 +5086,28 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 				cached_dynlightscale = newdynlightscale;
 			}
 
-			if( tr.materials[mat->gl_diffuse_id].GlossSmoothness != cached_glosssmoothness )
+			if( gl_specular->value > 0 && tr.materials[mat->gl_diffuse_id].GlossScale > 0.0f )
 			{
-				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
-				cached_glosssmoothness = tr.materials[mat->gl_diffuse_id].GlossSmoothness;
+				if( tr.materials[mat->gl_diffuse_id].GlossSmoothness != cached_glosssmoothness )
+				{
+					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
+					cached_glosssmoothness = tr.materials[mat->gl_diffuse_id].GlossSmoothness;
+				}
+
+				if( tr.materials[mat->gl_diffuse_id].GlossScale != cached_glossscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
+					cached_glossscale = tr.materials[mat->gl_diffuse_id].GlossScale;
+				}
 			}
 
-			if( tr.materials[mat->gl_diffuse_id].GlossScale != cached_glossscale )
+			if( gl_emboss->value > 0 && tr.materials[mat->gl_diffuse_id].EmbossScale > 0.0f )
 			{
-				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
-				cached_glossscale = tr.materials[mat->gl_diffuse_id].GlossScale;
-			}
-
-			if( tr.materials[mat->gl_diffuse_id].EmbossScale != cached_embossscale )
-			{
-				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
-				cached_embossscale = tr.materials[mat->gl_diffuse_id].EmbossScale;
+				if( tr.materials[mat->gl_diffuse_id].EmbossScale != cached_embossscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
+					cached_embossscale = tr.materials[mat->gl_diffuse_id].EmbossScale;
+				}
 			}
 
 			// diffusion - apply custom color to a specific texture
@@ -5421,22 +5427,28 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
 				pglUniform1iARB( RI->currentshader->u_FoliageSwayHeight, tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
 
-			if( tr.materials[mat->gl_diffuse_id].GlossSmoothness != cached_glosssmoothness )
+			if( gl_specular->value > 0 && tr.materials[mat->gl_diffuse_id].GlossScale > 0.0f )
 			{
-				pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
-				cached_glosssmoothness = tr.materials[mat->gl_diffuse_id].GlossSmoothness;
+				if( tr.materials[mat->gl_diffuse_id].GlossSmoothness != cached_glosssmoothness )
+				{
+					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
+					cached_glosssmoothness = tr.materials[mat->gl_diffuse_id].GlossSmoothness;
+				}
+
+				if( tr.materials[mat->gl_diffuse_id].GlossScale != cached_glossscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
+					cached_glossscale = tr.materials[mat->gl_diffuse_id].GlossScale;
+				}
 			}
 
-			if( tr.materials[mat->gl_diffuse_id].GlossScale != cached_glossscale )
+			if( gl_emboss->value > 0 && tr.materials[mat->gl_diffuse_id].EmbossScale > 0.0f )
 			{
-				pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
-				cached_glossscale = tr.materials[mat->gl_diffuse_id].GlossScale;
-			}
-
-			if( tr.materials[mat->gl_diffuse_id].EmbossScale != cached_embossscale )
-			{
-				pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
-				cached_embossscale = tr.materials[mat->gl_diffuse_id].EmbossScale;
+				if( tr.materials[mat->gl_diffuse_id].EmbossScale != cached_embossscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
+					cached_embossscale = tr.materials[mat->gl_diffuse_id].EmbossScale;
+				}
 			}
 
 			// diffusion - apply custom color to a specific texture
