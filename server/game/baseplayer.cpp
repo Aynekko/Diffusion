@@ -4264,7 +4264,7 @@ void CBasePlayer::LookAtPlayers( void )
 	if( !bFoundViewTarget )
 		m_vLookAtTarget = PlayerOrg + vForward * 512;
 
-	headyaw = UTIL_ApproachAngle( VecToYaw( m_vLookAtTarget - PlayerOrg ) - GetLocalAngles().y, headyaw, 130 * gpGlobals->frametime );
+	headyaw = UTIL_ApproachAngle( VecToYaw( m_vLookAtTarget - PlayerOrg ) - GetLocalAngles().y, headyaw, 130 * gpGlobals->frametime, true );
 
 	// turn towards vector
 	SetBoneController( 3, headyaw );

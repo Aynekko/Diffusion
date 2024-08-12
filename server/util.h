@@ -405,7 +405,7 @@ extern void		UTIL_StringToVector( float *pVector, const char *pString );
 extern void		UTIL_StringToIntArray( int *pVector, int count, const char *pString );
 extern Vector		UTIL_ClampVectorToBox( const Vector &input, const Vector &clampSize );
 extern float		UTIL_Approach( float target, float value, float speed );
-extern float		UTIL_ApproachAngle( float target, float value, float speed );
+extern float		UTIL_ApproachAngle( float target, float value, float speed, bool lerp = false );
 extern float		UTIL_AngleDistance( float next, float cur );
 extern CBaseEntity*		UTIL_FindClientInPVS( edict_t *pEdict );
 

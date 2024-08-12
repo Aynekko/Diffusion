@@ -1549,7 +1549,7 @@ float UTIL_Approach( float target, float value, float speed )
 	return value;
 }
 
-float UTIL_ApproachAngle( float target, float value, float speed )
+float UTIL_ApproachAngle( float target, float value, float speed, bool lerp )
 {
 	target = UTIL_AngleMod( target );
 	value = UTIL_AngleMod( value );
@@ -1564,6 +1564,14 @@ float UTIL_ApproachAngle( float target, float value, float speed )
 		delta += 360;
 	else if ( delta > 180 )
 		delta -= 360;
+
+	if( lerp ) // diffusion - this is an experiment :)
+	{
+		float limitspeed = speed * 0.1f;
+		speed *= fabs( delta ) * 0.05f;
+		if( speed < limitspeed )
+			speed = limitspeed;
+	}
 
 	if ( delta > speed )
 		value += speed;

@@ -2698,7 +2698,7 @@ StudioInterpolateBlends
 void CStudioModelRenderer::StudioInterpolateBlends( cl_entity_t *e, float dadt )
 {
 	mstudiobonecontroller_t *pbonecontroller = (mstudiobonecontroller_t *)((byte *)m_pStudioHeader + m_pStudioHeader->bonecontrollerindex);
-
+	
 	// interpolate controllers
 	for( int j = 0; j < m_pStudioHeader->numbonecontrollers; j++ )
 	{
@@ -3193,7 +3193,7 @@ void CStudioModelRenderer::StudioSetupBones( void )
 	static Vector	pos[MAXSTUDIOBONES];
 	static Vector4D	q[MAXSTUDIOBONES];
 	float cycle;
-
+	
 	if( e->curstate.sequence < 0 || e->curstate.sequence >= m_pStudioHeader->numseq )
 	{
 		int sequence = (short)e->curstate.sequence;
@@ -3227,7 +3227,7 @@ void CStudioModelRenderer::StudioSetupBones( void )
 		m_boneSetup.CalcBoneAdj( adj, m_pModelInstance->m_controller, e->mouth.mouthopen );
 	m_boneSetup.AccumulatePose( pIK, pos, q, e->curstate.sequence, cycle, 1.0 );
 	m_pModelInstance->lerp.frame = f;
-
+	
 	pbones = (mstudiobone_t *)((byte *)m_pStudioHeader + m_pStudioHeader->boneindex);
 	pboneinfo = (mstudioboneinfo_t *)((byte *)m_pStudioHeader + m_pStudioHeader->boneindex + m_pStudioHeader->numbones * sizeof( mstudiobone_t ));
 
@@ -3323,7 +3323,7 @@ void CStudioModelRenderer::StudioSetupBones( void )
 			else m_pModelInstance->m_pbones[i] = m_pModelInstance->m_pbones[pbones[i].parent].ConcatTransforms( bonematrix );
 		}
 	}
-
+	
 	mposetobone_t *m = m_pModelInstance->m_pModel->poseToBone;
 
 	// convert bones into compacted GLSL array

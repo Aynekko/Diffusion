@@ -584,7 +584,7 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		}
 		else
 		{
-			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime );
+			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
 			SetBoneController( 0, headyaw );
 			// override so that during walk, a scientist may talk and greet player
 			FIdleHello();
@@ -597,7 +597,7 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		CBaseMonster::RunTask( pTask );
 		if( TaskIsComplete() )
 		{
-			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime );
+			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
 			SetBoneController( 0, headyaw );
 		}
 		break;
@@ -609,7 +609,7 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		}
 		else
 		{
-			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime );
+			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
 			SetBoneController( 0, headyaw );
 		}
 		CBaseMonster::RunTask( pTask );

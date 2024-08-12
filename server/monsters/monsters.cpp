@@ -2734,10 +2734,6 @@ float	CBaseMonster::FlYawDiff ( void )
 
 float CBaseMonster::ChangeYaw ( int yawSpeed )
 {
-//	float frametime = gpGlobals->time - last_turn_time;
-//	last_turn_time = gpGlobals->time;
-	float frametime = gpGlobals->frametime;
-	
 	float ideal, current, move, speed;
 	Vector angles = GetAbsAngles();
 
@@ -2746,40 +2742,11 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 
 	if (current != ideal)
 	{
-		//speed = (float)yawSpeed * gpGlobals->frametime * 10;
-		float delta = frametime;
-		move = ideal - current;
-		if( delta > 0.25 )
-			delta = 0.25;
-
+		float delta = gpGlobals->frametime;
+		if( delta > 0.25f )
+			delta = 0.25f;
 		speed = yawSpeed * delta;
-
-		float originalSpeed = yawSpeed * frametime * 10.f;
-		float multiplier = originalSpeed / ( yawSpeed * delta );
-
-		if (ideal > current)
-		{
-			if (move >= 180)
-				move = move - 360;
-		}
-		else
-		{
-			if (move <= -180)
-				move = move + 360;
-		}
-
-		if (move > 0)
-		{// turning to the monster's left
-			if (move > speed)
-				move = speed;
-		}
-		else
-		{// turning to the monster's right
-			if (move < -speed)
-				move = -speed;
-		}
-		
-		angles.y = UTIL_AngleMod (current + move);
+		angles.y = UTIL_ApproachAngle( ideal, current, speed * 0.5f, true );
 
 		// turn head in desired direction only if they have a turnable head
 		if (m_afCapability & bits_CAP_TURN_HEAD)
@@ -2787,7 +2754,7 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 			float yaw = pev->ideal_yaw - angles.y;
 			if (yaw > 180) yaw -= 360;
 			if (yaw < -180) yaw += 360;
-			headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime );
+			headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime, true );
 			SetBoneController( 0, headyaw );
 		}
 
@@ -3899,7 +3866,7 @@ void CBaseMonster::IdleHeadTurn( const Vector &vecFriend )
 		if( yaw > 180 ) yaw -= 360;
 		if( yaw < -180 ) yaw += 360;
 
-		headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime );
+		headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime, true );
 
 		// turn towards vector
 		SetBoneController( 0, headyaw );
