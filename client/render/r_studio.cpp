@@ -3898,6 +3898,9 @@ StudioClientEvents
 
 void CStudioModelRenderer::StudioClientEvents( void )
 {
+	if( RI->params & RP_SHADOWPASS )
+		return;
+	
 	// forced events from server
 	if( tr.studioevent[m_pCurrentEntity->index].event > 0 )
 	{

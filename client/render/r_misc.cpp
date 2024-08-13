@@ -1363,9 +1363,6 @@ fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound
 */
 void HUD_StudioEvent( const struct mstudioevent_s* event, const struct cl_entity_s* entity )
 {
-	if( RI->params & RP_SHADOWPASS )
-		return;
-	
 	Vector velocity = entity->curstate.velocity;
 	int WeaponID = 0;
 

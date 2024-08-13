@@ -654,7 +654,7 @@ void CScientist :: SetYawSpeed ( void )
 		ys = 140;
 		break;
 	case ACT_WALK:
-		ys = 200;
+		ys = 180;
 		break;
 	case ACT_RUN:
 		ys = 200;

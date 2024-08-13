@@ -451,10 +451,10 @@ void CBarney :: SetYawSpeed ( void )
 		ys = 160;
 		break;
 	case ACT_WALK:
-		ys = 200;
+		ys = 170;
 		break;
 	case ACT_RUN:
-		ys = 240;
+		ys = 180;
 		break;
 	}
 

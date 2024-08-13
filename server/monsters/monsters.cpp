@@ -2746,7 +2746,7 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 		if( delta > 0.25f )
 			delta = 0.25f;
 		speed = yawSpeed * delta;
-		angles.y = UTIL_ApproachAngle( ideal, current, speed * 0.5f, true );
+		angles.y = UTIL_ApproachAngle( ideal, current, speed, true );
 
 		// turn head in desired direction only if they have a turnable head
 		if (m_afCapability & bits_CAP_TURN_HEAD)
