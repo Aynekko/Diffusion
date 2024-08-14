@@ -157,12 +157,10 @@ CStudioModelRenderer::CStudioModelRenderer( void )
 	m_pRenderModel = NULL;
 }
 
-static int SortSolidMeshes( gl_studiomesh_t *a, gl_studiomesh_t *b )
+static int SortSolidMeshes( gl_studiomesh_t &a, gl_studiomesh_t &b )
 {
-	if( a->hProgram > b->hProgram )
-		return -1;
-	if( a->hProgram < b->hProgram )
-		return 1;
+	if( a.hProgram != b.hProgram )
+		return a.hProgram > b.hProgram;
 
 	return 0;
 }
@@ -4927,8 +4925,8 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 
 	// sorting list to reduce shader switches
 	if( !CVAR_TO_BOOL( r_nosort ) )
-//		QSortStudioMeshes( m_LightMeshes, 0, m_nNumLightMeshes - 1 );
-		qsort( m_LightMeshes, m_nNumLightMeshes - 1, sizeof( gl_studiomesh_t ), (cmpfunc)SortSolidMeshes );
+		// QSortStudioMeshes( m_LightMeshes, 0, m_nNumLightMeshes - 1 );
+		std::sort( m_LightMeshes, m_LightMeshes + m_nNumLightMeshes - 1, SortSolidMeshes );
 
 	m_pModelInstance = &m_ModelInstances[RI->currententity->modelhandle];
 
@@ -5236,7 +5234,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	// sorting list to reduce shader switches
 	if( !CVAR_TO_BOOL( r_nosort ) ) 
 	//	QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
-		qsort( m_DrawMeshes, m_nNumDrawMeshes - 1, sizeof( gl_studiomesh_t ), (cmpfunc)SortSolidMeshes );
+		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes - 1, SortSolidMeshes );
 
 	// sorting list to reduce shader switches
 	for( i = 0; i < m_nNumDrawMeshes; i++ )
@@ -5526,7 +5524,7 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 	// sorting list to reduce shader switches
 	if( !CVAR_TO_BOOL( r_nosort ) ) 
 //		QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
-		qsort( m_DrawMeshes, m_nNumDrawMeshes - 1, sizeof( gl_studiomesh_t ), (cmpfunc)SortSolidMeshes );
+		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes - 1, SortSolidMeshes );
 
 	// sorting list to reduce shader switches
 	for( i = 0; i < m_nNumDrawMeshes; i++ )

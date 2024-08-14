@@ -24,6 +24,7 @@ GNU General Public License for more details.
 #include "r_world.h"
 #include "pm_defs.h"
 #include "entity_types.h"
+#include <algorithm>
 
 static gl_world_t	worlddata;
 gl_world_t *world = &worlddata;
@@ -541,34 +542,25 @@ static void Mod_LoadWorldMaterials( void )
 // R_SolidSurfaceCompare: compare solid surfaces.
 // Sorts surfaces to reduce state switches
 //=====================================================================
-static int R_SolidSurfaceCompare( const gl_bmodelface_t *a, const gl_bmodelface_t *b )
+static int R_SolidSurfaceCompare( const gl_bmodelface_t &a, const gl_bmodelface_t &b )
 {
-	msurface_t *surf1 = (msurface_t *)a->surface;
-	msurface_t *surf2 = (msurface_t *)b->surface;
+	msurface_t *surf1 = (msurface_t *)a.surface;
+	msurface_t *surf2 = (msurface_t *)b.surface;
 	mextrasurf_t *esrf1 = surf1->info;
 	mextrasurf_t *esrf2 = surf2->info;
 
 	// sort priority
 	// 1. shaders
-	if( esrf1->shaderNum[0] > esrf2->shaderNum[0] )
-		return 1;
-
-	if( esrf1->shaderNum[0] < esrf2->shaderNum[0] )
-		return -1;
+	if( esrf1->shaderNum[0] != esrf2->shaderNum[0] )
+		return esrf1->shaderNum[0] > esrf2->shaderNum[0];
 
 	// 2. texture number
-	if( esrf1->gl_texturenum > esrf2->gl_texturenum )
-		return 1;
-
-	if( esrf1->gl_texturenum < esrf2->gl_texturenum )
-		return -1;
+	if( esrf1->gl_texturenum != esrf2->gl_texturenum )
+		return esrf1->gl_texturenum > esrf2->gl_texturenum;
 
 	// 3. lightmap texture number
-	if( esrf1->lightmaptexturenum > esrf2->lightmaptexturenum )
-		return 1;
-
-	if( esrf1->lightmaptexturenum < esrf2->lightmaptexturenum )
-		return -1;
+	if( esrf1->lightmaptexturenum != esrf2->lightmaptexturenum )
+		return esrf1->lightmaptexturenum > esrf2->lightmaptexturenum;
 
 	return 0;
 }
@@ -3311,11 +3303,11 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 	if( translucent )
 	{
 		if( !FBitSet( clmodel->flags, MODEL_LIQUID ) )
-			qsort( tr.draw_surfaces, tr.num_draw_surfaces, sizeof( gl_bmodelface_t ), (cmpfunc)R_SolidSurfaceCompare ); // use solid?
+			std::sort( tr.draw_surfaces, tr.draw_surfaces + tr.num_draw_surfaces, R_SolidSurfaceCompare ); // use solid?
 		//	qsort( tr.draw_surfaces, tr.num_draw_surfaces, sizeof( gl_bmodelface_t ), (cmpfunc)R_TransSurfaceCompare );
 	}
 	else
-		qsort( tr.draw_surfaces, tr.num_draw_surfaces, sizeof( gl_bmodelface_t ), (cmpfunc)R_SolidSurfaceCompare );
+		std::sort( tr.draw_surfaces, tr.draw_surfaces + tr.num_draw_surfaces, R_SolidSurfaceCompare );
 
 	R_SetRenderMode( e );
 
@@ -3764,7 +3756,7 @@ void R_DrawWorld( void )
 	GL_DepthMask( GL_TRUE );
 	GL_Blend( GL_FALSE );
 
-	qsort( tr.draw_surfaces, tr.num_draw_surfaces, sizeof( gl_bmodelface_t ), (cmpfunc)R_SolidSurfaceCompare );
+	std::sort( tr.draw_surfaces, tr.draw_surfaces + tr.num_draw_surfaces, R_SolidSurfaceCompare );
 
 	R_DrawBrushList();
 
