@@ -484,6 +484,7 @@ typedef struct
 	unsigned int	c_cables;
 	unsigned int	c_particles_total;
 	unsigned int	c_particles_culled;
+	unsigned int	c_decals;
 
 	unsigned int	c_portal_passes;
 	unsigned int	c_mirror_passes;
@@ -741,8 +742,6 @@ void R_DrawTangentSpaces( void );
 // r_decals.c
 //
 void DrawDecalsBatch( void );
-void DrawSurfaceDecals( msurface_t *fa, qboolean single, qboolean reverse );
-void DrawSingleDecal( decal_t *pDecal, msurface_t *fa );
 
 //
 // r_light.c

@@ -220,6 +220,7 @@ static dllfunc_t opengl_200funcs[] =
 { "glVertexAttrib3fv"           , (void **)&pglVertexAttrib3fvARB },
 { "glVertexAttrib4fv"           , (void **)&pglVertexAttrib4fvARB },
 { "glVertexAttrib4ubv"			, (void **)&pglVertexAttrib4ubvARB },
+{ "glMultiDrawArrays"			, (void **)&pglMultiDrawArrays },
 { NULL, NULL }
 };
 

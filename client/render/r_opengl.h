@@ -965,6 +965,7 @@ EXTERN void ( APIENTRY *pglMaterialfv )(GLenum face, GLenum pname, const GLfloat
 EXTERN void ( APIENTRY *pglMateriali )(GLenum face, GLenum pname, GLint param);
 EXTERN void ( APIENTRY *pglMaterialiv )(GLenum face, GLenum pname, const GLint *params);
 EXTERN void ( APIENTRY *pglMatrixMode )(GLenum mode);
+EXTERN void ( APIENTRY *pglMultiDrawArrays )(GLenum mode, const GLint *first, const GLsizei *count, GLsizei drawcount);
 EXTERN void ( APIENTRY *pglMultMatrixd )(const GLdouble *m);
 EXTERN void ( APIENTRY *pglMultMatrixf )(const GLfloat *m);
 EXTERN void ( APIENTRY *pglNewList )(GLuint list, GLenum mode);

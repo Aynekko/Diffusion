@@ -17,9 +17,11 @@ GNU General Public License for more details.
 #include "pm_movevars.h"
 #include "r_shader.h"
 #include "r_world.h"
+#include <algorithm>
 
-// gl_decals.c
-#define MAX_DECALCLIPVERT		32
+#define MAX_DECALCLIPVERT 32
+#define MAX_RENDER_DECALS 4096
+
 static struct decalarray_s
 {
 	Vector4D texcoord0;
@@ -31,6 +33,12 @@ static struct decalarray_s
 
 static GLuint decal_vao;
 static GLuint decal_vbo;
+int num_render_decals = 0;
+decal_t *decal_list[MAX_RENDER_DECALS];
+short cached_decal_texture = -1;
+int cached_brush_texture = -1;
+int cached_lightmap = -1;
+word cached_shader = -1;
 
 static void R_CreateDecalsVAO()
 {
@@ -53,18 +61,6 @@ static void R_CreateDecalsVAO()
 	pglBindVertexArray(0);
 }
 
-
-/*
-===============
-R_ChooseDecalProgram
-Select the program for surface (diffuse\puddle)
-===============
-*/
-static word R_ChooseDecalProgram(decal_t* decal)
-{
-	return GL_UberShaderForBmodelDecal(decal);
-}
-
 /*
 ================
 R_DrawProjectDecal
@@ -84,12 +80,28 @@ void R_DrawProjectDecal(decal_t* decal, float* v, int numVerts)
 	pglEnd();
 }
 
-/*
-================
-R_DrawSingleDecal
-================
-*/
-bool DrawSingleDecal(decal_t* decal, word& hLastShader, bool project)
+int SortDecals( const decal_t *a, const decal_t *b )
+{	
+	// sort priority
+	// 1. shaders
+	if( a->shaderNum != b->shaderNum )
+		return a->shaderNum > b->shaderNum;
+
+	// 2. texture number
+	if( a->texture != b->texture )
+		return a->texture > b->texture;
+
+	// 3. lightmap texture number
+	if( a->psurface->info->lightmaptexturenum != b->psurface->info->lightmaptexturenum )
+		return a->psurface->info->lightmaptexturenum > b->psurface->info->lightmaptexturenum;
+
+	return 0;
+}
+
+//============================================================================================
+// DrawSingleDecal: render decal from the list
+//============================================================================================
+bool DrawSingleDecal( decal_t* decal, bool project )
 {
 	int	numVerts;
 	float* v, s, t;
@@ -111,14 +123,17 @@ bool DrawSingleDecal(decal_t* decal, word& hLastShader, bool project)
 		return true;
 	}
 
-	// initialize decal shader
-	if (!R_ChooseDecalProgram(decal))
-		return false;
-
-	if (hLastShader != decal->shaderNum)
+	if (cached_shader != decal->shaderNum)
 	{
 		GL_BindShader(&glsl_programs[decal->shaderNum]);
-		hLastShader = decal->shaderNum;
+		cached_shader = decal->shaderNum;
+
+		// update transformation matrix
+		gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
+		pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
+
+		pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
+		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 	}
 
 	mextrasurf_t* es = decal->psurface->info;
@@ -127,19 +142,25 @@ bool DrawSingleDecal(decal_t* decal, word& hLastShader, bool project)
 	mtexinfo_t* tex = surf->texinfo;
 	Vector normal = FBitSet(surf->flags, SURF_PLANEBACK) ? -surf->plane->normal : surf->plane->normal;
 	int decalFlags = 0;
-
-	GL_BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	
-	pglUniform1fvARB(RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0]);
-	pglUniform4fARB(RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity);
-	
-	GL_Bind(GL_TEXTURE0, decal->texture);
-	GL_Bind(GL_TEXTURE1, surf->texinfo->texture->gl_texturenum);
-	GL_Bind(GL_TEXTURE2, tr.lightmaps[es->lightmaptexturenum].lightmap);
+	if( cached_decal_texture != decal->texture )
+	{
+		GL_Bind( GL_TEXTURE0, decal->texture );
+		cached_decal_texture = decal->texture;
+	}
 
-	// update transformation matrix
-	gl_state_t* glm = &tr.cached_state[e->hCachedMatrix];
-	pglUniformMatrix4fvARB(RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0]);
+	if( cached_brush_texture != surf->texinfo->texture->gl_texturenum )
+	{
+		GL_Bind( GL_TEXTURE1, surf->texinfo->texture->gl_texturenum );
+		cached_brush_texture = surf->texinfo->texture->gl_texturenum;
+	}
+
+	if( cached_lightmap != tr.lightmaps[es->lightmaptexturenum].lightmap )
+	{
+		GL_Bind( GL_TEXTURE2, tr.lightmaps[es->lightmaptexturenum].lightmap );
+		cached_lightmap = tr.lightmaps[es->lightmaptexturenum].lightmap;
+	}
+
 	r_stats.c_total_tris += (numVerts - 2);
 
 	// prepare decal_array for rendering
@@ -159,46 +180,44 @@ bool DrawSingleDecal(decal_t* decal, word& hLastShader, bool project)
 		else decal_verts[i].position = v;
 	}
 
-	// TODO: sort decal by programs to make this batch
-	if (!decal_vao)
-		R_CreateDecalsVAO();
-
-	pglBindVertexArray(decal_vao);
-	pglBindBufferARB(GL_ARRAY_BUFFER_ARB, decal_vbo);
 	pglBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(decal_verts[0]) * numVerts, decal_verts, GL_STATIC_DRAW_ARB);
 	pglDrawArrays(GL_POLYGON, 0, numVerts);
-	pglBindVertexArray(0);
-	pglBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+
+	r_stats.c_decals++;
+
 	return true;
 }
 
-void DrawSurfaceDecals(msurface_t* fa, bool reverse, bool project)
+//============================================================================================
+// PrepareSurfaceDecals: check each surface of the bmodel and add decals to a single list
+//============================================================================================
+void PrepareSurfaceDecals(msurface_t* fa, bool project)
 {
-	word	hLastShader = 0xFFFF;
-	decal_t* p;
+	if( !fa->pdecals )
+		return;
 
-	if (!fa->pdecals) return;
+	if( num_render_decals == MAX_RENDER_DECALS )
+		return;
 
-	if (reverse && ((RI->currententity->curstate.rendermode == kRenderTransTexture) || (RI->currententity->curstate.rendermode == kRenderFade)))
+	decal_t *p = fa->pdecals;
+
+	while( p )
 	{
-		decal_t* list[1024];
-		int	i, count;
-
-		for (p = fa->pdecals, count = 0; p && count < 1024; p = p->pnext)
-			if (p->texture) list[count++] = p;
-
-		for (i = count - 1; i >= 0; i--)
-			DrawSingleDecal(list[i], hLastShader, project);
-	}
-	else
-	{
-		for (p = fa->pdecals; p; p = p->pnext)
+		if( num_render_decals == MAX_RENDER_DECALS )
+			break;
+			
+		if( p->texture )
 		{
-			DrawSingleDecal(p, hLastShader, project);
+			p->shaderNum = GL_UberShaderForBmodelDecal( p );
+			decal_list[num_render_decals++] = p;
+			p = p->pnext;
 		}
 	}
 }
 
+//============================================================================================
+// DrawDecalsBatch: draw all decals for specified bmodel
+//============================================================================================
 void DrawDecalsBatch(void)
 {
 	cl_entity_t* e;
@@ -207,18 +226,36 @@ void DrawDecalsBatch(void)
 	if (!tr.num_draw_decals)
 		return;
 
+	if( !decal_vao )
+		R_CreateDecalsVAO();
+
+	// reset cache
+	cached_decal_texture = -1;
+	cached_brush_texture = -1;
+	cached_lightmap = -1;
+	cached_shader = -1;
+	num_render_decals = 0;
+
 	e = RI->currententity;
 	ASSERT(e != NULL);
-	GL_AlphaTest( GL_FALSE );
 
-//	if ( (e->curstate.rendermode != kRenderTransTexture) && (e->curstate.rendermode != kRenderFade) ) // diffusion - why?
-//	{
-		GL_Blend( GL_TRUE );
-		GL_BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-		GL_DepthMask(GL_FALSE);
-//	}
+	if( e->curstate.rendermode == kRenderFade )
+		return;
+	
+	for( i = 0; i < tr.num_draw_decals; i++ )
+		PrepareSurfaceDecals( tr.draw_decals[i], false );
 
-	if ((e->curstate.rendermode == kRenderTransTexture) || (e->curstate.rendermode == kRenderTransAdd) || (e->curstate.rendermode == kRenderFade))
+	if( num_render_decals == 0 )
+		return;
+
+	std::sort( decal_list, decal_list + num_render_decals, SortDecals );
+
+	GL_AlphaTest( GL_TRUE );
+	GL_Blend( GL_TRUE );
+	GL_BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+	GL_DepthMask(GL_FALSE);
+
+	if ((e->curstate.rendermode == kRenderTransTexture) || (e->curstate.rendermode == kRenderTransAdd))
 		GL_Cull(GL_NONE);
 
 	if (CVAR_TO_BOOL(r_polyoffset))
@@ -227,9 +264,16 @@ void DrawDecalsBatch(void)
 		pglPolygonOffset(-1.0f, -r_polyoffset->value);
 	}
 
-	for (i = 0; i < tr.num_draw_decals; i++)
-		DrawSurfaceDecals(tr.draw_decals[i], false, false);
+	pglBindVertexArray( decal_vao );
+	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, decal_vbo );
+	
+	for( i = 0; i < num_render_decals; i++ )
+		DrawSingleDecal( decal_list[i], false );
 
+	pglBindVertexArray( 0 );
+	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
+
+	/*
 	if (R_CountPlights())
 	{
 		RI->objectMatrix = matrix4x4(e->origin, e->angles);	// FIXME
@@ -245,18 +289,15 @@ void DrawDecalsBatch(void)
 				continue;
 
 			for (int k = 0; k < tr.num_draw_decals; k++)
-				DrawSurfaceDecals(tr.draw_decals[k], false, true);
+				PrepareSurfaceDecals(tr.draw_decals[k], false, true);
 
 			R_EndDrawProjectionGLSL();
 		}
-	}
+	}*/
 
-//	if ((e->curstate.rendermode != kRenderTransTexture) && (e->curstate.rendermode != kRenderFade))
-//	{
-		GL_DepthMask(GL_TRUE);
-		GL_Blend( GL_FALSE );
-		GL_AlphaTest( GL_FALSE );
-//	}
+	GL_DepthMask(GL_TRUE);
+	GL_Blend( GL_FALSE );
+	GL_AlphaTest( GL_FALSE );
 
 	if (CVAR_TO_BOOL(r_polyoffset))
 		pglDisable(GL_POLYGON_OFFSET_FILL);
@@ -267,6 +308,6 @@ void DrawDecalsBatch(void)
 	GL_SelectTexture(glConfig.max_texture_units - 1); // force to cleanup all the units
 	GL_CleanUpTextureUnits(0);
 	GL_BindShader(NULL);
-
+	
 	tr.num_draw_decals = 0;
 }
