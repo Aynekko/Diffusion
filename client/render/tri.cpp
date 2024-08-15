@@ -37,9 +37,6 @@ int volumetric_numverts;
 
 void HUD_DrawNormalTriangles( void )
 {
-	gEngfuncs.pTriAPI->Begin(TRI_POLYGON);
-	gEngfuncs.pTriAPI->End();
-
 	// prepare the cable arrays
 	cable_numverts = 0;
 	
@@ -329,6 +326,7 @@ void R_RenderCables( void )
 		GL_DepthMask( GL_TRUE );
 	}
 
+	pglBindVertexArray( NULL );
 	pglEnableClientState( GL_VERTEX_ARRAY );
 	pglVertexPointer( 3, GL_FLOAT, sizeof( Vector ), CableVertexesArray );
 	pglEnableClientState( GL_COLOR_ARRAY );
@@ -554,7 +552,8 @@ void R_RenderVolumetricLights( void )
 	GL_Blend( GL_TRUE );
 	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 	GL_DepthMask( GL_FALSE );
-	
+
+	pglBindVertexArray( NULL );
 	pglEnableClientState( GL_VERTEX_ARRAY );
 	pglVertexPointer( 3, GL_FLOAT, sizeof( Vector ), VolumetricVertexesArray );
 	pglEnableClientState( GL_COLOR_ARRAY );

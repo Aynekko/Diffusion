@@ -2613,6 +2613,7 @@ void R_RenderDynLightList( void )
 
 	GL_Blend( GL_FALSE );
 	GL_DepthMask( GL_TRUE );
+	pglBindVertexArray( GL_FALSE );
 }
 
 /*
@@ -3143,7 +3144,6 @@ void R_DrawBrushList( void )
 	// draw dynamic lighting for world and bmodels
 	R_RenderDynLightList();
 
-	pglBindVertexArray( GL_FALSE );
 	GL_BindShader( NULL );
 	DrawWireFrame();
 

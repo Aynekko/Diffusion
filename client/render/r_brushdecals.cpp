@@ -223,7 +223,7 @@ void DrawDecalsBatch(void)
 	cl_entity_t* e;
 	int	i;
 
-	if (!tr.num_draw_decals)
+	if( !tr.num_draw_decals )
 		return;
 
 	if( !decal_vao )
@@ -270,7 +270,7 @@ void DrawDecalsBatch(void)
 	for( i = 0; i < num_render_decals; i++ )
 		DrawSingleDecal( decal_list[i], false );
 
-	pglBindVertexArray( 0 );
+	pglBindVertexArray( NULL );
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 
 	/*

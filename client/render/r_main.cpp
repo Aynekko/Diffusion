@@ -1561,6 +1561,7 @@ void R_DrawSolidEntities(void)
 	GL_CheckForErrors();
 
 	// 2: studio models
+	GL_BindShader( NULL );
 	for( i = 0; i < tr.num_solid_entities; i++ )
 	{
 		RI->currententity = tr.solid_entities[i];
@@ -1573,6 +1574,7 @@ void R_DrawSolidEntities(void)
 
 		R_DrawStudioModel( RI->currententity );
 	}
+	GL_BindShader( NULL );
 
 	GL_CheckForErrors();
 
@@ -1641,6 +1643,7 @@ void R_DrawTranslucentEntities(void)
 	GL_CheckForErrors();
 
 	// models:
+	GL_BindShader( NULL );
 	for( i = 0; i < tr.num_trans_entities; i++ )
 	{
 		RI->currententity = tr.trans_entities[i];
@@ -1665,6 +1668,7 @@ void R_DrawTranslucentEntities(void)
 
 		R_DrawStudioModel( RI->currententity );
 	}
+	GL_BindShader( NULL );
 
 	GL_CheckForErrors();
 

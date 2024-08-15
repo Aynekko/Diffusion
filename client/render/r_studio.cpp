@@ -4091,6 +4091,8 @@ void CStudioModelRenderer::StudioDrawShell( void )
 	if( m_pCurrentEntity->curstate.renderfx != kRenderFxGlowShell )
 		return;
 
+	GL_BindShader( NULL );
+
 	// setup worldtransform array
 	if( m_pRenderModel->poseToBone != NULL )
 	{
@@ -4384,37 +4386,47 @@ void CStudioModelRenderer::StudioRenderModel( void )
 	m_pCurrentEntity->curstate.renderfx = kRenderFxGlowShell;
 	m_pCurrentEntity->curstate.renderamt = 255;
 #endif
-	//	StudioSetupRenderer( m_pCurrentEntity->curstate.rendermode );
 
-	if( r_drawentities->value == 2 )
-	{
-		StudioDrawBones();
-	}
-	else if( r_drawentities->value == 3 )
-	{
-		StudioDrawHulls();
-	}
-	else
-	{
-		DrawStudioMeshes();
-		GL_BindShader( NULL );
-		StudioDrawShell();
+	int draw_ents = (int)r_drawentities->value;
 
-		if( r_drawentities->value == 4 )
-		{
-			gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+	switch( draw_ents )
+	{
+		default:
+			DrawStudioMeshes();
+			// do not reset shader here - this reduces shader binds
+			// it will be reset in StudioDrawShell if the model has this effect
+			StudioDrawShell();
+			break;
+		case 2:
+			StudioDrawBones();
+			break;
+		case 3:
+			GL_BindShader( NULL );
 			StudioDrawHulls();
-			gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
-		}
-		else if( r_drawentities->value == 5 )
+			break;
+		case 4:
+			DrawStudioMeshes();
+			GL_BindShader( NULL );
+		//	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+			StudioDrawHulls();
+		//	gEngfuncs.pTriAPI->RenderMode( kRenderNormal );
+			break;
+		case 5:
+			DrawStudioMeshes();
+			GL_BindShader( NULL );
 			StudioDrawAbsBBox();
-		else if( r_drawentities->value == 6 )
+			break;
+		case 6:
+			DrawStudioMeshes();
+			GL_BindShader( NULL );
 			StudioDrawAttachments();
-		else if( r_drawentities->value == 7 ) // diffusion - draw bbox
+			break;
+		case 7:
+			DrawStudioMeshes();
+			GL_BindShader( NULL );
 			DBG_DrawBBox( m_pCurrentEntity->curstate.mins, m_pCurrentEntity->curstate.maxs );
+			break;
 	}
-
-	//	StudioRestoreRenderer();
 }
 
 /*

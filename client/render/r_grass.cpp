@@ -533,8 +533,6 @@ void R_RenderGrassOnList( void )
 			R_DrawGrassMesh( g, i, hLastShader, hCachedMatrix );
 	}
 
-	pglBindVertexArray( world->vertex_array_object ); // restore old binding
-
 	GL_CleanupAllTextureUnits();
 
 	GL_Cull( GL_FRONT );
@@ -1642,7 +1640,7 @@ void R_DrawGrass( qboolean lightpass )
 
 	if( tr.fogEnabled && normalpass )
 		GL_BindShader( GL_NONE );
-	if( !lightpass && !shadowpass )
+	if( normalpass )
 		pglDisableClientState( GL_COLOR_ARRAY );
 	pglDisableClientState( GL_TEXTURE_COORD_ARRAY );
 	pglDisableClientState( GL_VERTEX_ARRAY );
