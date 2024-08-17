@@ -150,6 +150,40 @@ void InitSSAO( void )
 		ScreenAO = CREATE_TEXTURE( "*screenao", glState.width, glState.height, NULL, TF_COLORBUFFER );
 }
 
+void InitBloom( void )
+{
+	if( tr.screen_fbo_texture_color )
+	{
+		FREE_TEXTURE( tr.screen_fbo_texture_color );
+		tr.screen_fbo_texture_color = 0;
+	}
+
+	if( !tr.screen_fbo_texture_color )
+		tr.screen_fbo_texture_color = CREATE_TEXTURE( "*screen_temp_fbo_texture_color", glState.width, glState.height, NULL, TF_COLORBUFFER ); // was TF_HAS_ALPHA | TF_ARB_16BIT | TF_CLAMP | TF_ARB_FLOAT
+
+	GL_Bind( GL_TEXTURE0, tr.screen_fbo_texture_color );
+	pglGenerateMipmap( GL_TEXTURE_2D );
+	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
+	GL_Bind( GL_TEXTURE0, 0 );
+
+	// mips
+	if( !tr.screen_fbo_mip[0] )
+		pglGenFramebuffers( 6, tr.screen_fbo_mip );
+
+	for( int i = 0; i < 6; i++ )
+	{
+		if( tr.screen_fbo_mip[i] <= 0 )
+			pglGenFramebuffers( 1, &tr.screen_fbo_mip[i] );
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, tr.screen_fbo_mip[i] );
+		pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, tr.screen_fbo_texture_color ), i + 1 );
+	}
+
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+}
+
 void InitPostTextures( void )
 {
 	if( tr.screen_depth )
@@ -195,38 +229,7 @@ void InitPostTextures( void )
 
 	InitSSAO();
 
-	// ----------------- bloom -------------------
-	if( tr.screen_fbo_texture_color )
-	{
-		FREE_TEXTURE( tr.screen_fbo_texture_color );
-		tr.screen_fbo_texture_color = 0;
-	}
-
-	if( !tr.screen_fbo_texture_color )
-		tr.screen_fbo_texture_color = CREATE_TEXTURE( "*screen_temp_fbo_texture_color", glState.width, glState.height, NULL, TF_COLORBUFFER ); // was TF_HAS_ALPHA | TF_ARB_16BIT | TF_CLAMP | TF_ARB_FLOAT
-
-	GL_Bind( GL_TEXTURE0, tr.screen_fbo_texture_color );
-	pglGenerateMipmap( GL_TEXTURE_2D );
-	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
-	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
-	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR );
-	GL_Bind( GL_TEXTURE0, 0 );
-
-	// mips
-	if( !tr.screen_fbo_mip[0] )
-		pglGenFramebuffers( 6, tr.screen_fbo_mip );
-
-	for( int i = 0; i < 6; i++ )
-	{
-		if( tr.screen_fbo_mip[i] <= 0 )
-			pglGenFramebuffers( 1, &tr.screen_fbo_mip[i] );
-		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, tr.screen_fbo_mip[i] );
-		pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM(PARM_TEX_TEXNUM, tr.screen_fbo_texture_color), i + 1 );
-	}
-
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
-	// -----------------------------------------
+	InitBloom();
 
 	InitAutoExposure();
 
@@ -865,6 +868,9 @@ void Bloom( void )
 
 	if( IsBuildingCubemaps() ) // no bloom in cubemaps
 		return;
+
+	if( !tr.screen_fbo_texture_color )
+		InitBloom();
 
 	GL_Bind( GL_TEXTURE0, tr.screen_fbo_texture_color );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );

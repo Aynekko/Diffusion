@@ -17,6 +17,7 @@ GNU General Public License for more details.
 #define R_CVARS_H
 
 extern cvar_t	*gl_renderer;
+extern cvar_t	*gl_anisotropy;
 extern cvar_t	*gl_test;	// just cvar for testify new effects
 extern cvar_t	*r_debug;	//show renderer info
 extern cvar_t	*r_extensions;

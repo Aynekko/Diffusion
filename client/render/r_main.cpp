@@ -441,6 +441,17 @@ void R_CheckChanges( void )
 		settings_changed = true;
 	}
 
+	if( FBitSet( gl_anisotropy->flags, FCVAR_CHANGED ) )
+	{
+		ClearBits( gl_anisotropy->flags, FCVAR_CHANGED );
+		// diffusion - need to reset bloom fbo after changing anisotropy
+		if( tr.screen_fbo_texture_color )
+		{
+			FREE_TEXTURE( tr.screen_fbo_texture_color );
+			tr.screen_fbo_texture_color = 0;
+		}
+	}
+
 	if( FBitSet( r_lightmap->flags, FCVAR_CHANGED ))
 	{
 		ClearBits( r_lightmap->flags, FCVAR_CHANGED );

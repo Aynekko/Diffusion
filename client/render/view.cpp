@@ -61,6 +61,7 @@ float    g_verticalBob;
 float RemapVal( float val, float A, float B, float C, float D );
 
 cvar_t *gl_test;
+cvar_t *gl_anisotropy;
 cvar_t *r_extensions;
 cvar_t *cl_bobcycle;
 cvar_t *cl_bob;
@@ -325,6 +326,7 @@ void V_Init( void )
 	r_clear = CVAR_GET_POINTER( "gl_clear" );
 	r_speeds = CVAR_GET_POINTER( "r_speeds" );
 	gl_test = CVAR_GET_POINTER( "gl_test" );
+	gl_anisotropy = CVAR_GET_POINTER( "gl_anisotropy" );
 	cl_viewsize = CVAR_GET_POINTER( "viewsize" );
 
 	r_novis = CVAR_GET_POINTER( "r_novis" );
