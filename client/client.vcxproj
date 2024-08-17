@@ -223,7 +223,7 @@
       <ManifestFile>.\..\x64\Release\client\client.dll.intermediate.manifest</ManifestFile>
       <ProfileGuidedDatabase>.\..\x64\Release\client\client.pgd</ProfileGuidedDatabase>
       <LinkTimeCodeGenerationObjectFile>.\..\x64\Release\client\client.iobj</LinkTimeCodeGenerationObjectFile>
-      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
       <Command>copy /b buildtime.h +,,</Command>

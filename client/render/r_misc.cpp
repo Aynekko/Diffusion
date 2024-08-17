@@ -2169,14 +2169,14 @@ void R_Bubbles( const Vector mins, const Vector maxs, float height, int count, f
 	}
 }
 
-void R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
+Vector R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 {
 	if( !(POINT_CONTENTS( vecEnd ) == CONTENTS_WATER && POINT_CONTENTS( vecSrc ) != CONTENTS_WATER) )
-		return;
+		return g_vecZero;
 
 	float len = (vecEnd - vecSrc).Length();
 
-	// Делим пополам
+	// divide by 2
 	Vector vecTemp = Vector( (vecEnd.x + vecSrc.x) * 0.5f, (vecEnd.y + vecSrc.y) * 0.5f, (vecEnd.z + vecSrc.z) * 0.5f );
 
 	if( len <= 1 )
@@ -2209,6 +2209,8 @@ void R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 			g_pParticles.WaterRingParticle( 0, vecTemp, 0.25f );
 			break;
 		}
+
+		return vecTemp;
 	}
 	else
 	{

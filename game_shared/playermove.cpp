@@ -381,7 +381,7 @@ void PM_PlayStepSound( int step, float fvol )
 	// FIXME, move to player state
 #ifdef CLIENT_DLL
 	float height = (pmove->player_maxs[pmove->usehull][2] - pmove->player_mins[pmove->usehull][2]) * 0.5f;
-	Vector SplashOrg = pmove->origin;
+	Vector SplashOrg = pmove->origin; // initialize vector
 #endif
 	switch (step)
 	{
@@ -478,7 +478,7 @@ void PM_PlayStepSound( int step, float fvol )
 		case 3:	pmove->PM_PlaySound( CHAN_STATIC, "footsteps/slosh4.wav", fvol, ATTN_NORM, 0, PITCH_NORM );	break;
 		}
 #ifdef CLIENT_DLL
-		R_MakeWaterSplash( SplashOrg + Vector(0,0,100), pmove->origin - Vector(0,0,height) );
+		SplashOrg = R_MakeWaterSplash( pmove->origin + Vector( 0, 0, height ), pmove->origin - Vector( 0, 0, height ) );
 #endif
 		break;
 	case STEP_WADE:
@@ -495,6 +495,7 @@ void PM_PlayStepSound( int step, float fvol )
 
 		// diffusion - add water splash
 #ifdef CLIENT_DLL
+		SplashOrg = R_MakeWaterSplash( pmove->origin + Vector( 0, 0, height ), pmove->origin - Vector( 0, 0, height ) );
 		g_pParticles.WaterRingParticle( 0, SplashOrg );
 #endif
 		break;

@@ -813,7 +813,7 @@ void R_LoadLandscapes( const char *filename );
 terrain_t *R_FindTerrain( const char *texname );
 void R_FreeLandscapes( void );
 void R_Sprite_Smoke( TEMPENTITY *pTemp, float scale, int mode );
-void R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type = 0 );
+Vector R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type = 0 );
 void R_Explosion( Vector pos, int model, float scale, float framerate, int flags );
 void R_ClientSound( Vector pos, int entindex, int sndnum, int type = 0, int LowAmmoVolume = 0 );
 void FuncRotatingClient( cl_entity_t *e );
