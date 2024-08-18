@@ -2294,9 +2294,6 @@ void CDrone :: Precache()
 	PRECACHE_SOUND("buttons/spark1.wav");
 	PRECACHE_SOUND("buttons/spark2.wav");
 	PRECACHE_SOUND("buttons/spark3.wav");
-	PRECACHE_SOUND("buttons/spark4.wav");
-	PRECACHE_SOUND("buttons/spark5.wav");
-	PRECACHE_SOUND("buttons/spark6.wav");
 
 	PRECACHE_SOUND("drone/drone_running.wav");
 

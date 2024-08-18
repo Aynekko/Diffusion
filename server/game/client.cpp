@@ -1295,11 +1295,6 @@ void ClientPrecache( void )
 	PRECACHE_SOUND("footsteps/step5.wav");
 	PRECACHE_SOUND("footsteps/step6.wav");
 
-	PRECACHE_SOUND("common/npc_step1.wav");		// NPC walk on concrete
-	PRECACHE_SOUND("common/npc_step2.wav");
-	PRECACHE_SOUND("common/npc_step3.wav");
-	PRECACHE_SOUND("common/npc_step4.wav");
-
 	PRECACHE_SOUND("footsteps/metal1.wav");		// walk on metal
 	PRECACHE_SOUND("footsteps/metal2.wav");
 	PRECACHE_SOUND("footsteps/metal3.wav");
@@ -1448,8 +1443,8 @@ void ClientPrecache( void )
 
 	PRECACHE_SOUND("plats/train_use1.wav");		// use a train
 
-	PRECACHE_SOUND("buttons/spark5.wav");		// hit computer texture
-	PRECACHE_SOUND("buttons/spark6.wav");
+	PRECACHE_SOUND("buttons/spark1.wav");		// hit computer texture
+	PRECACHE_SOUND("buttons/spark2.wav");
 //	PRECACHE_SOUND("debris/glass1.wav");
 //	PRECACHE_SOUND("debris/glass2.wav");
 //	PRECACHE_SOUND("debris/glass3.wav");

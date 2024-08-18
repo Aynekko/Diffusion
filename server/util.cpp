@@ -2208,9 +2208,6 @@ void UTIL_DoSpark( entvars_t *pev, const Vector &location )
 	case 0: EMIT_SOUND( ENT(pev), CHAN_VOICE, "buttons/spark1.wav", flVolume, ATTN_STATIC ); break;
 	case 1: EMIT_SOUND( ENT(pev), CHAN_VOICE, "buttons/spark2.wav", flVolume, ATTN_STATIC ); break;
 	case 2: EMIT_SOUND( ENT(pev), CHAN_VOICE, "buttons/spark3.wav", flVolume, ATTN_STATIC ); break;
-//	case 3: EMIT_SOUND( ENT(pev), CHAN_VOICE, "buttons/spark4.wav", flVolume, ATTN_STATIC ); break;
-//	case 4: EMIT_SOUND( ENT(pev), CHAN_VOICE, "buttons/spark5.wav", flVolume, ATTN_STATIC ); break;
-//	case 5: EMIT_SOUND( ENT(pev), CHAN_VOICE, "buttons/spark6.wav", flVolume, ATTN_STATIC ); break;
 	}
 }
 

@@ -578,9 +578,6 @@ void CBaseButton :: Precache( void )
 		UTIL_PrecacheSound( "buttons/spark1.wav" );
 		UTIL_PrecacheSound( "buttons/spark2.wav" );
 		UTIL_PrecacheSound( "buttons/spark3.wav" );
-		UTIL_PrecacheSound( "buttons/spark4.wav" );
-		UTIL_PrecacheSound( "buttons/spark5.wav" );
-		UTIL_PrecacheSound( "buttons/spark6.wav" );
 	}
 
 	pszSound = UTIL_ButtonSound( m_sounds );

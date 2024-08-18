@@ -324,8 +324,8 @@ void CBreakable::Precache( void )
 		PRECACHE_SOUND("debris/bustflesh2.wav");
 		break;
 	case matComputer:
-		PRECACHE_SOUND("buttons/spark5.wav");
-		PRECACHE_SOUND("buttons/spark6.wav");
+		PRECACHE_SOUND("buttons/spark1.wav");
+		PRECACHE_SOUND("buttons/spark2.wav");
 		pGibName = "models/computergibs.mdl";
 		
 		PRECACHE_SOUND("debris/bustmetal1.wav");
@@ -532,8 +532,8 @@ void CBreakable::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 				float flVolume = RANDOM_FLOAT ( 0.7 , 1.0 );//random volume range
 				switch ( RANDOM_LONG(0,1) )
 				{
-					case 0: EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark5.wav", flVolume, ATTN_NORM);	break;
-					case 1: EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark6.wav", flVolume, ATTN_NORM);	break;
+					case 0: EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark1.wav", flVolume, ATTN_NORM);	break;
+					case 1: EMIT_SOUND(ENT(pev), CHAN_VOICE, "buttons/spark2.wav", flVolume, ATTN_NORM);	break;
 				}
 			}
 			break;

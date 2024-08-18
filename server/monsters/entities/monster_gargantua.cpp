@@ -331,9 +331,9 @@ const char *CGargantua::pRicSounds[] =
 	"buttons/spark3.wav",
 	
 #else
-	"buttons/spark4.wav",
-	"buttons/spark5.wav",
-	"buttons/spark6.wav",
+	"buttons/spark1.wav",
+	"buttons/spark2.wav",
+	"buttons/spark3.wav",
 /*	"debris/metal4.wav",
 	"debris/metal6.wav",
 	"weapons/ric4.wav",
@@ -527,8 +527,8 @@ void CGargantua :: Precache()
 	for ( i = 0; i < SIZEOFARRAY( pAttackHitSounds ); i++ )
 		PRECACHE_SOUND((char *)pAttackHitSounds[i]);
 
-	for ( i = 0; i < SIZEOFARRAY( pBeamAttackSounds ); i++ )
-		PRECACHE_SOUND((char *)pBeamAttackSounds[i]);
+//	for ( i = 0; i < SIZEOFARRAY( pBeamAttackSounds ); i++ )
+//		PRECACHE_SOUND((char *)pBeamAttackSounds[i]);
 
 	for ( i = 0; i < SIZEOFARRAY( pAttackMissSounds ); i++ )
 		PRECACHE_SOUND((char *)pAttackMissSounds[i]);
@@ -539,8 +539,8 @@ void CGargantua :: Precache()
 	for ( i = 0; i < SIZEOFARRAY( pFootSounds ); i++ )
 		PRECACHE_SOUND((char *)pFootSounds[i]);
 
-	for ( i = 0; i < SIZEOFARRAY( pIdleSounds ); i++ )
-		PRECACHE_SOUND((char *)pIdleSounds[i]);
+//	for ( i = 0; i < SIZEOFARRAY( pIdleSounds ); i++ )
+//		PRECACHE_SOUND((char *)pIdleSounds[i]);
 
 	for ( i = 0; i < SIZEOFARRAY( pAlertSounds ); i++ )
 		PRECACHE_SOUND((char *)pAlertSounds[i]);
@@ -554,8 +554,8 @@ void CGargantua :: Precache()
 	for ( i = 0; i < SIZEOFARRAY( pStompSounds ); i++ )
 		PRECACHE_SOUND((char *)pStompSounds[i]);
 
-	for ( i = 0; i < SIZEOFARRAY( pBreatheSounds ); i++ )
-		PRECACHE_SOUND((char *)pBreatheSounds[i]);
+//	for ( i = 0; i < SIZEOFARRAY( pBreatheSounds ); i++ )
+//		PRECACHE_SOUND((char *)pBreatheSounds[i]);
 
 	PRECACHE_SOUND("drone/drone_hit1.wav");
 	PRECACHE_SOUND("drone/drone_hit2.wav");
