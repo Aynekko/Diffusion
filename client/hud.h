@@ -822,7 +822,6 @@ public:
 	void Enable( void );
 	void CloseWindow( bool mouse = false );
 	
-	int cursor_x, cursor_y;
 	char m_szMOTD[MAX_MOTD_LENGTH];
 	int scrolled_lines;
 
@@ -836,6 +835,16 @@ public:
 	rectangle_t rClose;
 
 	bool DotInRect( rectangle_t *rect, int x, int y );
+};
+
+class CMouseCursor:public CHudBase
+{
+public:
+	int x, y;
+	int Init( void );
+	int VidInit( void );
+	void DrawCursor( void );
+	bool GetMousePosition( void );
 };
 
 class CHealthbars:public CHudBase
@@ -980,7 +989,7 @@ public:
           int InitHUDMessages( void ); // init hud messages
 	int GetSpriteIndex( const char *SpriteName ); // gets a sprite index, for use in the m_rghSprites[] array
 
-	
+	CMouseCursor m_Cursor;
 	CHudAmmo		m_Ammo;
 	CHudHealth	m_Health;
 	CHudGeiger	m_Geiger;

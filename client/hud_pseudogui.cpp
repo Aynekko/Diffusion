@@ -17,8 +17,6 @@ The texts are taken from titles.txt or feeded by MOTD from server.
 
 char Note[255];
 float active_button_alpha = 0;
-int cursor_img = 0;
-#define CURSOR_SIZE 24
 #define FRAME_WIDTH 666
 #define FRAME_HEIGHT 666
 #define BUTTON_HEIGHT 50
@@ -29,7 +27,7 @@ void CPseudoGUI::CloseWindow( bool mouse )
 {
 	if( mouse )
 	{
-		if( !DotInRect( &rClose, cursor_x, cursor_y ) )
+		if( !DotInRect( &rClose, gHUD.m_Cursor.x, gHUD.m_Cursor.y ) )
 			return;
 	}
 	
@@ -70,9 +68,6 @@ int CPseudoGUI::VidInit( void )
 {
 	m_iFlags = 0;
 	active_button_alpha = 0;
-	cursor_img = LOAD_TEXTURE( "sprites/diffusion/cursor.dds", NULL, 0, 0 );
-	cursor_x = ScreenWidth / 2;
-	cursor_y = ScreenHeight / 2;
 	m_szMOTD[0] = '\0';
 	scrolled_lines = 0;
 
@@ -116,9 +111,7 @@ int CPseudoGUI::Draw( float flTime )
 	if( tr.time == tr.oldtime )
 		return 1;
 
-	gEngfuncs.GetMousePosition( &cursor_x, &cursor_y );
-
-	if( IS_NAN( cursor_x ) || IS_NAN( cursor_y ) )
+	if( !gHUD.m_Cursor.GetMousePosition() )
 		return 1;
 
 	// draw darken frame
@@ -144,7 +137,7 @@ int CPseudoGUI::Draw( float flTime )
 	FillRoundedRGBA( rClose.x, rClose.y, rClose.w, rClose.h, 10, Vector4D( rClose.r, rClose.g, rClose.b, rClose.a ) );
 
 	// active button
-	if( DotInRect( &rClose, cursor_x, cursor_y ) )
+	if( DotInRect( &rClose, gHUD.m_Cursor.x, gHUD.m_Cursor.y ) )
 		active_button_alpha = CL_UTIL_Approach( 1.0f, active_button_alpha, 10 * g_fFrametime );
 	else
 		active_button_alpha = CL_UTIL_Approach( 0.0f, active_button_alpha, 10 * g_fFrametime );
@@ -180,17 +173,7 @@ int CPseudoGUI::Draw( float flTime )
 	}
 
 	// draw cursor last
-	if( cursor_img )
-	{
-		GL_Bind( GL_TEXTURE0, cursor_img );
-		gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
-		GL_Color4f( 1, 1, 1, 1 );
-		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-		DrawQuad( cursor_x, cursor_y, cursor_x + CURSOR_SIZE, cursor_y + CURSOR_SIZE );
-		gEngfuncs.pTriAPI->End();
-	}
-	else // no image?
-		gEngfuncs.pfnFillRGBA( cursor_x, cursor_y, 10, 10, 255, 255, 255, 255 );
+	gHUD.m_Cursor.DrawCursor();
 
 	return 1;
 }
