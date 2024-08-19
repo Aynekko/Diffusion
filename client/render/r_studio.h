@@ -220,6 +220,7 @@ public:
 	void Init( void );
 
 	void VidInit( void );
+	void ResetRenderCache();
 
 	// public Interfaces
 	virtual int StudioDrawModel( int flags );
@@ -708,6 +709,17 @@ public:
 	int	CacheCount( void ) { return m_ModelInstances.Count(); }
 
 	void	ClearLightCache( void );
+
+	// rendering cache
+	int num_binds;
+	int cached_texture;
+	mcubemap_t *cached_cubemap;
+	float cached_glossscale;
+	float cached_glosssmoothness;
+	float cached_embossscale;
+	float cached_fresnel;
+	float cached_reflectscale;
+	float cached_dynlightscale;
 };
 
 extern CStudioModelRenderer g_StudioRenderer;

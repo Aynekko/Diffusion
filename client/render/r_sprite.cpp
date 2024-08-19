@@ -36,6 +36,17 @@ void CSpriteModelRenderer::Init( void )
 	m_pCvarLerping		= IEngineStudio.GetCvar( "r_sprite_lerping" );
 	m_pCvarLighting		= IEngineStudio.GetCvar( "r_sprite_lighting" );
 	m_pCvarTraceGlow		= IEngineStudio.GetCvar( "r_traceglow" );
+	
+}
+
+void CSpriteModelRenderer::VidInit( void )
+{
+	ResetRenderCache();
+}
+
+void CSpriteModelRenderer::ResetRenderCache( void )
+{
+	cached_sprite_texture = -1;
 }
 
 /*
@@ -775,7 +786,11 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	{
 		// draw the single non-lerped frame
 		GL_Color4f( color[0], color[1], color[2], tr.blend );
-		GL_Bind( GL_TEXTURE0, frame->gl_texturenum );
+		if( cached_sprite_texture == -1 || cached_sprite_texture != frame->gl_texturenum )
+		{
+			GL_Bind( GL_TEXTURE0, frame->gl_texturenum );
+			cached_sprite_texture = frame->gl_texturenum;
+		}
 		DrawSpriteQuad( frame, sprite_origin, v_right, v_up, scale );
 	}
 	else
@@ -797,6 +812,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 			GL_Bind( GL_TEXTURE0, frame->gl_texturenum );
 			DrawSpriteQuad( frame, sprite_origin, v_right, v_up, scale );
 		}
+		cached_sprite_texture = -1;
 	}
 
 	// draw the sprite 'lightmap' :-)
@@ -812,6 +828,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 		pglShadeModel( GL_SMOOTH );
 
 		GL_Bind( GL_TEXTURE0, tr.whiteTexture );
+		cached_sprite_texture = -1;
 		DrawLighting( frame, sprite_origin, v_right, v_up, color2, scale, tr.blend );
 
 		GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );

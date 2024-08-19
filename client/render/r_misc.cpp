@@ -30,6 +30,7 @@ GNU General Public License for more details.
 #include "triangleapi.h"
 #include "discord.h"
 #include "build.h"
+#include "r_sprite.h"
 
 /*
 used iuser3 "flags":
@@ -2027,6 +2028,7 @@ void R_NewMap( void )
 	tr.num_cin_used = 0;
 
 	g_StudioRenderer.VidInit();
+	g_SpriteRenderer.VidInit();
 
 	GL_InitVertexLightCache();
 

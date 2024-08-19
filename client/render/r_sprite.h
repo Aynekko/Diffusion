@@ -32,7 +32,9 @@ public:
 	virtual ~CSpriteModelRenderer( void );
 
 	// Initialization
-	virtual void Init( void );
+	void Init( void );
+	void VidInit( void );
+	void ResetRenderCache( void );
 
 	virtual void SpriteDrawModel( void );
 
@@ -92,6 +94,8 @@ private:
 
 	// Pointer to header block for sprite model data
 	msprite_t			*m_pSpriteHeader;
+
+	int cached_sprite_texture; // rendering cache
 
 	// engine stuff (backend)
 public:

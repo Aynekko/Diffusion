@@ -134,6 +134,19 @@ VidInit
 */
 void CStudioModelRenderer::VidInit( void )
 {
+	ResetRenderCache();
+}
+
+void CStudioModelRenderer::ResetRenderCache( void )
+{
+	mcubemap_t *cached_cubemap = NULL;
+	cached_glossscale = -1.0f;
+	cached_glosssmoothness = -1.0f;
+	cached_embossscale = -1.0f;
+	cached_fresnel = -1.0f;
+	cached_reflectscale = -1.0f;
+	cached_dynlightscale = -1.0f;
+	cached_texture = -1;
 }
 
 /*
@@ -2342,6 +2355,12 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 		origin = m_pCurrentEntity->origin;
 		angles = m_pCurrentEntity->angles;
 	}
+	else if( m_pCurrentEntity->player )
+	{
+		// can't use curstate for origin because camera falls behind in spectate
+		origin = m_pCurrentEntity->origin;
+	}
+
 	Vector scale = Vector( 1.0f, 1.0f, 1.0f );
 
 	if( m_pCurrentEntity->curstate.effects & EF_ROTATING )
@@ -4928,7 +4947,6 @@ void CStudioModelRenderer::BuildMeshListForLight( plight_t *pl )
 
 void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 {
-	mstudiomaterial_t *cached_material = NULL;
 	model_t *cached_model = NULL;
 	GLfloat	gl_lightViewProjMatrix[16];
 
@@ -4951,11 +4969,6 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 	matrix4x4 projectionView = pl->projectionMatrix.Concat( lightView );
 	projectionView.CopyToArray( gl_lightViewProjMatrix );
 
-	float cached_dynlightscale = -1.0f;
-	float cached_glossscale = -1.0f;
-	float cached_glosssmoothness = -1.0f;
-	float cached_embossscale = -1.0f;
-
 	Vector4D light_params[7];
 
 	// sorting list to reduce shader switches
@@ -4977,6 +4990,8 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 		// begin to draw the sorted list
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 		{
+			bool reset_cache = (RI->currentshader != &glsl_programs[entry->hProgram]);
+			
 			GL_BindShader( &glsl_programs[entry->hProgram] );
 
 			ASSERT( RI->currentshader != NULL );
@@ -5030,12 +5045,16 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			}
 
 			// reset cache
-			cached_material = NULL;
+			if( reset_cache )
+			{
+				cached_texture = -1;
+				cached_dynlightscale = -1.0f;
+				cached_glossscale = -1.0f;
+				cached_glosssmoothness = -1.0f;
+				cached_embossscale = -1.0f;
+			}
+
 			cached_model = NULL;
-			cached_dynlightscale = -1.0f;
-			cached_glossscale = -1.0f;
-			cached_glosssmoothness = -1.0f;
-			cached_embossscale = -1.0f;
 		}
 
 		if( cached_model != m_pRenderModel )
@@ -5059,10 +5078,20 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			cached_model = m_pRenderModel;
 		}
 
-		if( cached_material != mat )
+		if( mat->flags & STUDIO_NF_TWOSIDE || (m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide) )
+			GL_Cull( GL_NONE );
+		else
+			GL_Cull( GL_FRONT );
+
+		if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
+			cached_texture = -1;
+
+		if( cached_texture == -1 || cached_texture != mat->gl_diffuse_id )
 		{		
 			if( r_lightmap->value && !r_fullbright->value )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
+			else if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
+				IEngineStudio.StudioSetupSkin( m_pStudioHeader, pskinref[pMesh->skinref] );
 			else if( tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id > 0 )
 				GL_Bind( GL_TEXTURE0, tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id );
 			else if( mat->gl_diffuse_id != tr.defaultTexture && tr.materials[mat->gl_diffuse_id].animation_id >= 0 )
@@ -5086,11 +5115,6 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[mat->gl_diffuse_id].InteriorGrid.x, tr.materials[mat->gl_diffuse_id].InteriorGrid.y, (float)tr.materials[mat->gl_diffuse_id].InteriorLightState );
 				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_interiormap_id ); // u_InteriorMap
 			}
-
-			if( mat->flags & STUDIO_NF_TWOSIDE || (m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide) )
-				GL_Cull( GL_NONE );
-			else
-				GL_Cull( GL_FRONT );
 
 			float newdynlightscale = pl->brightness * tr.materials[mat->gl_diffuse_id].DynlightScale;
 			if( newdynlightscale != cached_dynlightscale )
@@ -5149,7 +5173,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			else
 				R_SetRenderColor( RI->currententity );
 
-			cached_material = mat;
+			cached_texture = mat->gl_diffuse_id;
 		}
 
 		DrawMeshFromBuffer( pMesh );
@@ -5211,29 +5235,20 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 		return;
 	}
 
-	mstudiomaterial_t *cached_material = NULL;
-	cl_entity_t *cached_entity = NULL;
-	model_t *cached_model = NULL;
-	int	i;
-
 	if( !m_nNumDrawMeshes )
 		return;
 
 	if( m_pCurrentEntity->modelhandle == INVALID_HANDLE )
 		return; // out of memory ?
 
+	cl_entity_t *cached_entity = NULL;
+	model_t *cached_model = NULL;
+	int	i;
+
 	m_pModelInstance = &m_ModelInstances[m_pCurrentEntity->modelhandle];
 	tr.modelorg = m_pModelInstance->m_plightmatrix.VectorITransform( RI->vieworg );
 	Vector right = m_pModelInstance->m_plightmatrix.VectorIRotate( RI->vright );
 
-	// diffusioncubemaps
-	mcubemap_t *cached_cubemap = NULL;
-
-	float cached_glossscale = -1.0f;
-	float cached_glosssmoothness = -1.0f;
-	float cached_embossscale = -1.0f;
-	float cached_fresnel = -1.0f;
-	float cached_reflectscale = -1.0f;
 	Vector cubemap_params[3];
 	Vector4D studio_params[3];
 	Vector4D studio_lighting[2];
@@ -5267,6 +5282,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 		// begin draw the sorted list
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 		{
+			bool reset_cache = (RI->currentshader != &glsl_programs[entry->hProgram]);
 			GL_BindShader( &glsl_programs[entry->hProgram] );
 
 			ASSERT( RI->currentshader != NULL );
@@ -5295,19 +5311,29 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
 
 			// reset cache
-			cached_material = NULL;
+			if( reset_cache )
+			{
+				cached_texture = -1;
+				cached_cubemap = NULL;
+				cached_glossscale = -1.0f;
+				cached_glosssmoothness = -1.0f;
+				cached_embossscale = -1.0f;
+				cached_fresnel = -1.0f;
+				cached_reflectscale = -1.0f;
+			}
+
 			cached_entity = NULL;
 			cached_model = NULL;
-
-			// diffusioncubemaps
-			cached_cubemap = NULL;
-
-			cached_glossscale = -1.0f;
-			cached_glosssmoothness = -1.0f;
-			cached_embossscale = -1.0f;
-			cached_fresnel = -1.0f;
-			cached_reflectscale = -1.0f;
 		}
+
+		if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) )
+		{
+			GL_DepthMask( GL_FALSE );
+			GL_Blend( GL_TRUE );
+			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+		}
+		else
+			StudioSetRenderMode( m_pCurrentEntity->curstate.rendermode );
 
 		if( cached_entity != m_pCurrentEntity || (cached_model != m_pRenderModel) )
 		{
@@ -5354,8 +5380,17 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			cached_model = m_pRenderModel;
 		}
 
-		if( cached_material != mat )
+		if( mat->flags & STUDIO_NF_TWOSIDE || (m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide) )
+			GL_Cull( GL_NONE );
+		else
+			GL_Cull( GL_FRONT );
+
+		if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
+			cached_texture = -1;
+
+		if( cached_texture == -1 || cached_texture != mat->gl_diffuse_id )
 		{
+			num_binds++;
 			if( r_lightmap->value && !r_fullbright->value )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 			else if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
@@ -5373,55 +5408,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				GL_Bind( GL_TEXTURE0, tr.DroneViewTex );
 			else 
 				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
-
-			if( mat->flags & STUDIO_NF_TWOSIDE || (m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide) )
-				GL_Cull( GL_NONE );
-			else
-				GL_Cull( GL_FRONT );
-
-			if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) )
-			{
-				GL_DepthMask( GL_FALSE );
-				GL_Blend( GL_TRUE );
-				GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
-			}
-			else
-				StudioSetRenderMode( m_pCurrentEntity->curstate.rendermode );
-
-			if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[mat->gl_diffuse_id].ReflectScale != cached_reflectscale) && (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
-			{
-				if( m_pModelInstance->cubemap != NULL )
-				{
-					GL_Bind( GL_TEXTURE2, m_pModelInstance->cubemap->texture );
-					// box mins
-					cubemap_params[0] = m_pModelInstance->cubemap->mins;
-					// box maxs
-					cubemap_params[1] = m_pModelInstance->cubemap->maxs;
-					// origin
-					cubemap_params[2] = m_pModelInstance->cubemap->origin;
-				}
-				else
-				{
-					GL_Bind( GL_TEXTURE2, tr.blackCubeTexture );
-					cubemap_params[0] = g_vecZero;
-					cubemap_params[1] = g_vecZero;
-					cubemap_params[2] = g_vecZero;
-				}
-
-				// send through one call!
-				pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
-
-				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[mat->gl_diffuse_id].ReflectScale );
-				cached_reflectscale = tr.materials[mat->gl_diffuse_id].ReflectScale;
-
-				cached_cubemap = m_pModelInstance->cubemap;
-
-				if( tr.materials[mat->gl_diffuse_id].Fresnel != cached_fresnel )
-				{
-					pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[mat->gl_diffuse_id].Fresnel );
-					cached_fresnel = tr.materials[mat->gl_diffuse_id].Fresnel;
-				}
-			}
 
 			if( tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 )
 				GL_Bind( GL_TEXTURE1, tr.materials[mat->gl_diffuse_id].gl_normalmap_id ); // u_NormalMap
@@ -5490,7 +5476,50 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			else
 				R_SetRenderColor( m_pCurrentEntity );
 
-			cached_material = mat;
+			cached_texture = mat->gl_diffuse_id;
+		}
+
+		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready
+			&& (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f)
+			&& ((tr.materials[mat->gl_diffuse_id].ReflectScale != cached_reflectscale) || (cached_cubemap != m_pModelInstance->cubemap))
+			&& !IsBuildingCubemaps() ) // diffusioncubemaps
+		{
+			if( cached_cubemap != m_pModelInstance->cubemap )
+			{
+				if( m_pModelInstance->cubemap != NULL )
+				{
+					GL_Bind( GL_TEXTURE2, m_pModelInstance->cubemap->texture );
+					// box mins
+					cubemap_params[0] = m_pModelInstance->cubemap->mins;
+					// box maxs
+					cubemap_params[1] = m_pModelInstance->cubemap->maxs;
+					// origin
+					cubemap_params[2] = m_pModelInstance->cubemap->origin;
+				}
+				else
+				{
+					GL_Bind( GL_TEXTURE2, tr.blackCubeTexture );
+					cubemap_params[0] = g_vecZero;
+					cubemap_params[1] = g_vecZero;
+					cubemap_params[2] = g_vecZero;
+				}
+
+				// send through one call!
+				pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
+				cached_cubemap = m_pModelInstance->cubemap;
+			}
+
+			if( tr.materials[mat->gl_diffuse_id].ReflectScale != cached_reflectscale )
+			{
+				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[mat->gl_diffuse_id].ReflectScale );
+				cached_reflectscale = tr.materials[mat->gl_diffuse_id].ReflectScale;
+			}
+
+			if( tr.materials[mat->gl_diffuse_id].Fresnel != cached_fresnel )
+			{
+				pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[mat->gl_diffuse_id].Fresnel );
+				cached_fresnel = tr.materials[mat->gl_diffuse_id].Fresnel;
+			}
 		}
 
 		r_stats.c_studio_polys += (pMesh->numElems / 3);

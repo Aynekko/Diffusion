@@ -32,6 +32,7 @@ GNU General Public License for more details.
 #include "pm_defs.h"
 #include "cdll_int.h"
 #include "buildtime.h"
+#include <algorithm>
 
 #define IsLiquidContents( cnt )	( cnt == CONTENTS_WATER || cnt == CONTENTS_SLIME || cnt == CONTENTS_LAVA )
 
@@ -293,6 +294,14 @@ static int R_TransEntityCompare( const cl_entity_t **a, const cl_entity_t **b )
 		return 1;
 	if( R_RankForRenderMode( rendermode1 ) < R_RankForRenderMode( rendermode2 ))
 		return -1;
+
+	return 0;
+}
+
+static int SortModels( cl_entity_t *a, cl_entity_t *b )
+{
+	if( a->curstate.modelindex != b->curstate.modelindex )
+		return a->curstate.modelindex > b->curstate.modelindex;
 
 	return 0;
 }
@@ -1553,6 +1562,9 @@ void R_DrawSolidEntities(void)
 	GL_CheckForErrors();
 	tr.blend = 1.0f;
 	GL_AlphaTest( GL_FALSE ); // just in case
+
+	// sort by modelindex
+	std::sort( tr.solid_entities, tr.solid_entities + tr.num_solid_entities, SortModels );
 	
 	// 1: brush entities
 	for( i = 0; i < tr.num_solid_entities; i++ )
@@ -1573,6 +1585,7 @@ void R_DrawSolidEntities(void)
 
 	// 2: studio models
 	GL_BindShader( NULL );
+	g_StudioRenderer.ResetRenderCache();
 	for( i = 0; i < tr.num_solid_entities; i++ )
 	{
 		RI->currententity = tr.solid_entities[i];
@@ -1590,6 +1603,7 @@ void R_DrawSolidEntities(void)
 	GL_CheckForErrors();
 
 	// 3: sprites
+	g_SpriteRenderer.ResetRenderCache();
 	for( i = 0; i < tr.num_solid_entities; i++ )
 	{
 		RI->currententity = tr.solid_entities[i];
@@ -1623,6 +1637,9 @@ void R_DrawTranslucentEntities(void)
 	glState.drawTrans = true;
 	GL_AlphaTest( GL_FALSE ); // just in case
 
+	// sort by modelindex
+	std::sort( tr.trans_entities, tr.trans_entities + tr.num_trans_entities, SortModels );
+
 	// brushes:
 	for( i = 0; i < tr.num_trans_entities; i++ )
 	{
@@ -1655,6 +1672,7 @@ void R_DrawTranslucentEntities(void)
 
 	// models:
 	GL_BindShader( NULL );
+	g_StudioRenderer.ResetRenderCache();
 	for( i = 0; i < tr.num_trans_entities; i++ )
 	{
 		RI->currententity = tr.trans_entities[i];
@@ -1692,6 +1710,7 @@ void R_DrawTranslucentEntities(void)
 	}
 
 	// sprites:
+	g_SpriteRenderer.ResetRenderCache();
 	for( i = 0; i < tr.num_trans_entities; i++ )
 	{
 		RI->currententity = tr.trans_entities[i];
