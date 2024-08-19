@@ -29,7 +29,7 @@ uniform vec2		u_ScreenSizeInv;
 
 varying vec2		var_TexCoord;
 
-const float KERNEL_RADIUS = 12;
+const float KERNEL_RADIUS = 3;
 const float g_Sharpness = 2.0;
 
 vec4 BlurFunction( vec2 uv, float r, vec4 center_c, float center_d, inout float w_total )
