@@ -147,6 +147,7 @@ void CStudioModelRenderer::ResetRenderCache( void )
 	cached_reflectscale = -1.0f;
 	cached_dynlightscale = -1.0f;
 	cached_texture = -1;
+	cached_normalmap = -1;
 }
 
 /*
@@ -5052,6 +5053,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 				cached_glossscale = -1.0f;
 				cached_glosssmoothness = -1.0f;
 				cached_embossscale = -1.0f;
+				cached_normalmap = -1;
 			}
 
 			cached_model = NULL;
@@ -5106,8 +5108,11 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			else
 				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
 
-			if( tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 ) // u_NormalMap
+			if( tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 && cached_normalmap != tr.materials[mat->gl_diffuse_id].gl_normalmap_id ) // u_NormalMap
+			{
 				GL_Bind( GL_TEXTURE3, tr.materials[mat->gl_diffuse_id].gl_normalmap_id );
+				cached_normalmap = tr.materials[mat->gl_diffuse_id].gl_normalmap_id;
+			}
 
 			// diffusion - interior mapping
 			if( tr.materials[mat->gl_diffuse_id].gl_interiormap_id > 0 )
@@ -5147,34 +5152,34 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 				}
 			}
 
-			// diffusion - apply custom color to a specific texture
-			if( !r_lightmap->value )
-			{
-				if( tr.materials[mat->gl_diffuse_id].ApplyColor || tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
-				{
-					// hack
-					if( RI->currententity->curstate.rendermode == kRenderTransAdd )
-					{
-						if( RI->currententity->curstate.rendercolor.r == 0 && RI->currententity->curstate.rendercolor.g == 0 && RI->currententity->curstate.rendercolor.b == 0 )
-							pglUniform4fARB( RI->currentshader->u_RenderColor, 1.0f, 1.0f, 1.0f, tr.blend );
-						else
-							pglUniform4fARB( RI->currentshader->u_RenderColor, RI->currententity->curstate.rendercolor.r / 255.0f, RI->currententity->curstate.rendercolor.g / 255.0f, RI->currententity->curstate.rendercolor.b / 255.0f, tr.blend );
-					}
-					else
-						pglUniform4fARB( RI->currentshader->u_RenderColor, RI->currententity->curstate.rendercolor.r / 255.0f, RI->currententity->curstate.rendercolor.g / 255.0f, RI->currententity->curstate.rendercolor.b / 255.0f, tr.blend );
-
-					// color mask
-					if( tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
-						GL_Bind( GL_TEXTURE5, tr.materials[mat->gl_diffuse_id].gl_colormask_id ); // u_ColorMask
-				}
-				else
-					R_SetRenderColor( m_pCurrentEntity );
-			}
-			else
-				R_SetRenderColor( RI->currententity );
-
 			cached_texture = mat->gl_diffuse_id;
 		}
+
+		// diffusion - apply custom color to a specific texture
+		if( !r_lightmap->value )
+		{
+			if( tr.materials[mat->gl_diffuse_id].ApplyColor || tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
+			{
+				// hack
+				if( RI->currententity->curstate.rendermode == kRenderTransAdd )
+				{
+					if( RI->currententity->curstate.rendercolor.r == 0 && RI->currententity->curstate.rendercolor.g == 0 && RI->currententity->curstate.rendercolor.b == 0 )
+						pglUniform4fARB( RI->currentshader->u_RenderColor, 1.0f, 1.0f, 1.0f, tr.blend );
+					else
+						pglUniform4fARB( RI->currentshader->u_RenderColor, RI->currententity->curstate.rendercolor.r / 255.0f, RI->currententity->curstate.rendercolor.g / 255.0f, RI->currententity->curstate.rendercolor.b / 255.0f, tr.blend );
+				}
+				else
+					pglUniform4fARB( RI->currentshader->u_RenderColor, RI->currententity->curstate.rendercolor.r / 255.0f, RI->currententity->curstate.rendercolor.g / 255.0f, RI->currententity->curstate.rendercolor.b / 255.0f, tr.blend );
+
+				// color mask
+				if( tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
+					GL_Bind( GL_TEXTURE5, tr.materials[mat->gl_diffuse_id].gl_colormask_id ); // u_ColorMask
+			}
+			else
+				R_SetRenderColor( m_pCurrentEntity );
+		}
+		else
+			R_SetRenderColor( RI->currententity );
 
 		DrawMeshFromBuffer( pMesh );
 	}
@@ -5320,6 +5325,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				cached_embossscale = -1.0f;
 				cached_fresnel = -1.0f;
 				cached_reflectscale = -1.0f;
+				cached_normalmap = -1;
 			}
 
 			cached_entity = NULL;
@@ -5409,8 +5415,11 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			else 
 				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
 
-			if( tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 )
+			if( tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 && cached_normalmap != tr.materials[mat->gl_diffuse_id].gl_normalmap_id )
+			{
 				GL_Bind( GL_TEXTURE1, tr.materials[mat->gl_diffuse_id].gl_normalmap_id ); // u_NormalMap
+				cached_normalmap = tr.materials[mat->gl_diffuse_id].gl_normalmap_id;
+			}
 
 			// diffusion - interior mapping
 			if( tr.materials[mat->gl_diffuse_id].gl_interiormap_id > 0 )
@@ -5450,34 +5459,34 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				}
 			}
 
-			// diffusion - apply custom color to a specific texture
-			if( !r_lightmap->value )
+			cached_texture = mat->gl_diffuse_id;
+		}
+
+		// diffusion - apply custom color to a specific texture
+		if( !r_lightmap->value )
+		{
+			if( tr.materials[mat->gl_diffuse_id].ApplyColor || tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
 			{
-				if( tr.materials[mat->gl_diffuse_id].ApplyColor || tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
+				// hack
+				if( RI->currententity->curstate.rendermode == kRenderTransAdd )
 				{
-					// hack
-					if( RI->currententity->curstate.rendermode == kRenderTransAdd )
-					{
-						if( RI->currententity->curstate.rendercolor.r == 0 && RI->currententity->curstate.rendercolor.g == 0 && RI->currententity->curstate.rendercolor.b == 0 )
-							pglUniform4fARB( RI->currentshader->u_RenderColor, 1.0f, 1.0f, 1.0f, tr.blend );
-						else
-							pglUniform4fARB( RI->currentshader->u_RenderColor, RI->currententity->curstate.rendercolor.r / 255.0f, RI->currententity->curstate.rendercolor.g / 255.0f, RI->currententity->curstate.rendercolor.b / 255.0f, tr.blend );
-					}
+					if( RI->currententity->curstate.rendercolor.r == 0 && RI->currententity->curstate.rendercolor.g == 0 && RI->currententity->curstate.rendercolor.b == 0 )
+						pglUniform4fARB( RI->currentshader->u_RenderColor, 1.0f, 1.0f, 1.0f, tr.blend );
 					else
 						pglUniform4fARB( RI->currentshader->u_RenderColor, RI->currententity->curstate.rendercolor.r / 255.0f, RI->currententity->curstate.rendercolor.g / 255.0f, RI->currententity->curstate.rendercolor.b / 255.0f, tr.blend );
-
-					// color mask
-					if( tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
-						GL_Bind( GL_TEXTURE5, tr.materials[mat->gl_diffuse_id].gl_colormask_id ); // u_ColorMask
 				}
 				else
-					R_SetRenderColor( m_pCurrentEntity );
+					pglUniform4fARB( RI->currentshader->u_RenderColor, RI->currententity->curstate.rendercolor.r / 255.0f, RI->currententity->curstate.rendercolor.g / 255.0f, RI->currententity->curstate.rendercolor.b / 255.0f, tr.blend );
+
+				// color mask
+				if( tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
+					GL_Bind( GL_TEXTURE5, tr.materials[mat->gl_diffuse_id].gl_colormask_id ); // u_ColorMask
 			}
 			else
 				R_SetRenderColor( m_pCurrentEntity );
-
-			cached_texture = mat->gl_diffuse_id;
 		}
+		else
+			R_SetRenderColor( m_pCurrentEntity );
 
 		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready
 			&& (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f)

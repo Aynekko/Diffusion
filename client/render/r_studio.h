@@ -720,6 +720,7 @@ public:
 	float cached_fresnel;
 	float cached_reflectscale;
 	float cached_dynlightscale;
+	int cached_normalmap;
 };
 
 extern CStudioModelRenderer g_StudioRenderer;
