@@ -294,15 +294,18 @@ void CTriggerCamera::FollowTarget(void)
 
 	Vector angles = GetLocalAngles();
 	Vector vecGoal = angles;
-
-	if( m_hTarget == NULL )
+	Vector targetOrigin = g_vecZero;
+	if( m_hTarget )
 	{
-		// skip condition
+		if( m_hTarget->IsMonster() )
+			targetOrigin = m_hTarget->Center();
+		else if( HasSpawnFlags( SF_CAMERA_ABSORG ) )
+			targetOrigin = m_hTarget->GetAbsOrigin();
+		else
+			targetOrigin = m_hTarget->GetLocalOrigin();
+
+		vecGoal = UTIL_VecToAngles( targetOrigin - (HasSpawnFlags( SF_CAMERA_ABSORG ) ? GetAbsOrigin() : GetLocalOrigin()) );
 	}
-	else if(HasSpawnFlags(SF_CAMERA_ABSORG))
-		vecGoal = UTIL_VecToAngles(m_hTarget->GetAbsOrigin() - GetAbsOrigin()); // diffusion - changed localorg to absorg, the camera now looks to parented objects (but not always works!!!)
-	else
-		vecGoal = UTIL_VecToAngles( m_hTarget->GetLocalOrigin() - GetLocalOrigin() );
 
 	if (angles.y > 360)
 		angles.y -= 360;
