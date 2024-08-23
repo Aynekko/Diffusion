@@ -125,8 +125,7 @@ BEGIN_DATADESC( CBaseMonster )
 	DEFINE_FIELD( m_scriptState, FIELD_INTEGER ),
 	DEFINE_FIELD( m_pCine, FIELD_CLASSPTR ),
 
-//	DEFINE_FIELD( NextThinkTime, FIELD_TIME ),
-//	DEFINE_FIELD( LastServerTime, FIELD_TIME ),
+	DEFINE_FIELD( NextUpdateTime, FIELD_TIME ),
 END_DATADESC()
 
 void CBaseMonster::ClearEffects(void)
@@ -335,6 +334,13 @@ void CBaseMonster :: Look ( int iDistance )
 	// DON'T let visibility information from last frame sit around!
 	ClearConditions(bits_COND_SEE_HATE | bits_COND_SEE_DISLIKE | bits_COND_SEE_ENEMY | bits_COND_SEE_FEAR | bits_COND_SEE_NEMESIS | bits_COND_SEE_CLIENT | bits_COND_SEE_FLASHLIGHT | bits_COND_SEETHROUGHWALL );
 
+	if( HasSpawnFlags( SF_MONSTER_PRISONER ) )
+	{
+		// See no evil if prisoner is set
+		SetConditions( iSighted );
+		return;
+	}
+
 	m_pLink = NULL;
 
 	CBaseEntity	*pSightEnt = NULL;// the current visible entity that we're dealing with
@@ -351,91 +357,87 @@ void CBaseMonster :: Look ( int iDistance )
 		}
 	}
 
-	// See no evil if prisoner is set
-	if ( !FBitSet( pev->spawnflags, SF_MONSTER_PRISONER ) )
+	CBaseEntity *pList[100];
+
+	Vector delta = Vector( iDistance, iDistance, iDistance );
+
+	// Find only monsters/clients in box, NOT limited to PVS
+	int count = UTIL_EntitiesInBox( pList, 100, GetAbsOrigin() - delta, GetAbsOrigin() + delta, FL_CLIENT|FL_MONSTER );
+
+	for ( int i = 0; i < count; i++ )
 	{
-		CBaseEntity *pList[100];
+		pSightEnt = pList[i];
 
-		Vector delta = Vector( iDistance, iDistance, iDistance );
+		// !!!temporarily only considering other monsters and clients, don't see prisoners
+		if ( (pSightEnt != this) && !FBitSet( pSightEnt->pev->spawnflags, SF_MONSTER_PRISONER ) && (pSightEnt->pev->health > 0) )
+		{			
+			int iVisible = FVisible( pSightEnt );
 
-		// Find only monsters/clients in box, NOT limited to PVS
-		int count = UTIL_EntitiesInBox( pList, 100, GetAbsOrigin() - delta, GetAbsOrigin() + delta, FL_CLIENT|FL_MONSTER );
-
-		for ( int i = 0; i < count; i++ )
-		{
-			pSightEnt = pList[i];
-
-			// !!!temporarily only considering other monsters and clients, don't see prisoners
-			if ( (pSightEnt != this) && !FBitSet( pSightEnt->pev->spawnflags, SF_MONSTER_PRISONER ) && (pSightEnt->pev->health > 0) )
-			{			
-				int iVisible = FVisible( pSightEnt );
-
-				if( iVisible == 2 )
-					iSighted |= bits_COND_SEETHROUGHWALL;
+			if( iVisible == 2 )
+				iSighted |= bits_COND_SEETHROUGHWALL;
 				
-				// the looker will want to consider this entity
-				// don't check anything else about an entity that can't be seen, or an entity that you don't care about.
-				if( IRelationship( pSightEnt ) != R_NO && !FBitSet( pSightEnt->pev->flags, FL_NOTARGET )
-				&& ( 
-						( iVisible && FInViewCone(pSightEnt, m_flFieldOfView) )
-						||
-						// diffusion - this is extremely specific condition for the player to pass
-						( (iSighted & bits_COND_SEE_FLASHLIGHT) && (pSightEnt == CBaseEntity::Instance( pFlashlightMonster->pev->owner)))
-					)
+			// the looker will want to consider this entity
+			// don't check anything else about an entity that can't be seen, or an entity that you don't care about.
+			if( IRelationship( pSightEnt ) != R_NO && !FBitSet( pSightEnt->pev->flags, FL_NOTARGET )
+			&& ( 
+					( iVisible && FInViewCone(pSightEnt, m_flFieldOfView) )
+					||
+					// diffusion - this is extremely specific condition for the player to pass
+					( (iSighted & bits_COND_SEE_FLASHLIGHT) && (pSightEnt == CBaseEntity::Instance( pFlashlightMonster->pev->owner)))
 				)
-				{	
-					if ( pSightEnt->IsPlayer() )
+			)
+			{	
+				if ( pSightEnt->IsPlayer() )
+				{
+					if ( pev->spawnflags & SF_MONSTER_WAIT_TILL_SEEN )
 					{
-						if ( pev->spawnflags & SF_MONSTER_WAIT_TILL_SEEN )
+						CBaseMonster *pClient;
+
+						pClient = pSightEnt->MyMonsterPointer();
+						// don't link this client in the list if the monster is wait till seen and the player isn't facing the monster
+						if ( pSightEnt && !pClient->FInViewCone( this, m_flFieldOfView ) )
 						{
-							CBaseMonster *pClient;
-
-							pClient = pSightEnt->MyMonsterPointer();
-							// don't link this client in the list if the monster is wait till seen and the player isn't facing the monster
-							if ( pSightEnt && !pClient->FInViewCone( this, m_flFieldOfView ) )
-							{
-								// we're not in the player's view cone. 
-								continue;
-							}
-							else
-							{
-								// player sees us, become normal now.
-								pev->spawnflags &= ~SF_MONSTER_WAIT_TILL_SEEN;
-							}
+							// we're not in the player's view cone. 
+							continue;
 						}
-
-						// if we see a client, remember that (mostly for scripted AI)
-						iSighted |= bits_COND_SEE_CLIENT;
+						else
+						{
+							// player sees us, become normal now.
+							pev->spawnflags &= ~SF_MONSTER_WAIT_TILL_SEEN;
+						}
 					}
 
-					pSightEnt->m_pLink = m_pLink;
-					m_pLink = pSightEnt;
+					// if we see a client, remember that (mostly for scripted AI)
+					iSighted |= bits_COND_SEE_CLIENT;
+				}
 
-					if ( pSightEnt == m_hEnemy )
-						iSighted |= bits_COND_SEE_ENEMY; // we know this ent is visible, so if it also happens to be our enemy, store that now.
+				pSightEnt->m_pLink = m_pLink;
+				m_pLink = pSightEnt;
 
-					// don't add the Enemy's relationship to the conditions. We only want to worry about conditions when
-					// we see monsters other than the Enemy.
-					switch ( IRelationship ( pSightEnt ) )
-					{
-					case	R_NM:
-						iSighted |= bits_COND_SEE_NEMESIS;		
-						break;
-					case	R_HT:		
-						iSighted |= bits_COND_SEE_HATE;		
-						break;
-					case	R_DL:
-						iSighted |= bits_COND_SEE_DISLIKE;
-						break;
-					case	R_FR:
-						iSighted |= bits_COND_SEE_FEAR;
-						break;
-					case    R_AL:
-						break;
-					default:
-						ALERT ( at_aiconsole, "%s can't assess %s\n", STRING(pev->classname), STRING(pSightEnt->pev->classname ) );
-						break;
-					}
+				if ( pSightEnt == m_hEnemy )
+					iSighted |= bits_COND_SEE_ENEMY; // we know this ent is visible, so if it also happens to be our enemy, store that now.
+
+				// don't add the Enemy's relationship to the conditions. We only want to worry about conditions when
+				// we see monsters other than the Enemy.
+				switch ( IRelationship ( pSightEnt ) )
+				{
+				case	R_NM:
+					iSighted |= bits_COND_SEE_NEMESIS;		
+					break;
+				case	R_HT:		
+					iSighted |= bits_COND_SEE_HATE;		
+					break;
+				case	R_DL:
+					iSighted |= bits_COND_SEE_DISLIKE;
+					break;
+				case	R_FR:
+					iSighted |= bits_COND_SEE_FEAR;
+					break;
+				case    R_AL:
+					break;
+				default:
+					ALERT ( at_aiconsole, "%s can't assess %s\n", STRING(pev->classname), STRING(pSightEnt->pev->classname ) );
+					break;
 				}
 			}
 		}
@@ -2152,7 +2154,6 @@ void CBaseMonster :: MonsterInit ( void )
 	// set eye position
 	SetEyePosition();
 
-	NextThinkTime = 0;
 	headyaw = 0;
 //	LastServerTime = gpGlobals->time;
 
@@ -2255,6 +2256,7 @@ void CBaseMonster :: StartMonster ( void )
 	SetThink (&CBaseMonster::CallMonsterThink );
 
 	SetNextThink( RANDOM_FLOAT(0.1, 0.6) ); // spread think times.
+	NextUpdateTime = 0;
 	
 	// diffusion - this messes up an enemy pointer on spawn. disabled for now, take a look later, maybe make a spawnflag
 	// or maybe it's not needed at all.

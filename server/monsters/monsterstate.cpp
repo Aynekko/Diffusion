@@ -66,54 +66,55 @@ void CBaseMonster :: RunAI ( void )
 	// to test model's eye height
 //	UTIL_ParticleEffect ( EyePosition(), g_vecZero, 255, 10 );
 	
-	CheckFire();
-
-	// IDLE sound permitted in ALERT state is because monsters were silent in ALERT state. Only play IDLE sound in IDLE state
-	// once we have sounds for that state.
-	if ( ( m_MonsterState == MONSTERSTATE_IDLE || m_MonsterState == MONSTERSTATE_ALERT ) && RANDOM_LONG(0,99) == 0 && !(pev->spawnflags & SF_MONSTER_GAG) )
-		IdleSound();
-
-	if ( m_MonsterState != MONSTERSTATE_NONE	&& 
-		 m_MonsterState != MONSTERSTATE_PRONE   && 
-		 m_MonsterState != MONSTERSTATE_DEAD
-
-	//	&& gpGlobals->time > NextThinkTime
-
-		)// don't bother with this crap if monster is prone. 
+	if( gpGlobals->time > NextUpdateTime )
 	{
-	//	NextThinkTime = gpGlobals->time + 0.1;
-		// collect some sensory Condition information.
-		// don't let monsters outside of the player's PVS act up, or most of the interesting
-		// things will happen before the player gets there!
-		// UPDATE: We now let COMBAT state monsters think and act fully outside of player PVS. This allows the player to leave 
-		// an area where monsters are fighting, and the fight will continue.
-		if ( !FNullEnt( FIND_CLIENT_IN_PVS( edict() ) ) || ( m_MonsterState == MONSTERSTATE_COMBAT ) )
-		{
-			Look( m_flDistLook );
-			Listen();// check for audible sounds. 
+		CheckFire();
 
-			// check for low health
-			if( pev->max_health > 0 ) // make sure this is valid
+		// IDLE sound permitted in ALERT state is because monsters were silent in ALERT state. Only play IDLE sound in IDLE state
+		// once we have sounds for that state.
+		if( (m_MonsterState == MONSTERSTATE_IDLE || m_MonsterState == MONSTERSTATE_ALERT) && RANDOM_LONG( 0, 99 ) == 0 && !(pev->spawnflags & SF_MONSTER_GAG) )
+			IdleSound();
+
+		if( m_MonsterState != MONSTERSTATE_NONE &&
+			m_MonsterState != MONSTERSTATE_PRONE &&
+			m_MonsterState != MONSTERSTATE_DEAD
+			)// don't bother with this crap if monster is prone. 
+		{
+			// collect some sensory Condition information.
+			// don't let monsters outside of the player's PVS act up, or most of the interesting
+			// things will happen before the player gets there!
+			// UPDATE: We now let COMBAT state monsters think and act fully outside of player PVS. This allows the player to leave 
+			// an area where monsters are fighting, and the fight will continue.
+			if( !FNullEnt( FIND_CLIENT_IN_PVS( edict() ) ) || (m_MonsterState == MONSTERSTATE_COMBAT) )
 			{
-				if( !HasConditions( bits_COND_LOW_HEALTH ) && (pev->health <= (pev->max_health * 0.25f)) )
-					SetConditions( bits_COND_LOW_HEALTH );
-				else if( HasConditions( bits_COND_LOW_HEALTH ) && (pev->health > (pev->max_health * 0.25f)) )
-					ClearConditions( bits_COND_LOW_HEALTH ); // regenerated? clear condition
+				Look( m_flDistLook );
+				Listen();// check for audible sounds. 
+
+				// check for low health
+				if( pev->max_health > 0 ) // make sure this is valid
+				{
+					if( !HasConditions( bits_COND_LOW_HEALTH ) && (pev->health <= (pev->max_health * 0.25f)) )
+						SetConditions( bits_COND_LOW_HEALTH );
+					else if( HasConditions( bits_COND_LOW_HEALTH ) && (pev->health > (pev->max_health * 0.25f)) )
+						ClearConditions( bits_COND_LOW_HEALTH ); // regenerated? clear condition
+				}
+
+				// now filter conditions.
+				ClearConditions( IgnoreConditions() );
+
+				GetEnemy();
 			}
 
-			// now filter conditions.
-			ClearConditions( IgnoreConditions() );
+			// do these calculations if monster has an enemy.
+			if( m_hEnemy != NULL )
+				CheckEnemy( m_hEnemy );
 
-			GetEnemy();
+			CheckAmmo();
 		}
 
-		// do these calculations if monster has an enemy.
-		if ( m_hEnemy != NULL )
-			CheckEnemy( m_hEnemy );
-
-		CheckAmmo();
+		NextUpdateTime = gpGlobals->time + 0.1;
 	}
-		
+
 	FCheckAITrigger();
 	PrescheduleThink();
 	MaintainSchedule();
@@ -121,7 +122,7 @@ void CBaseMonster :: RunAI ( void )
 	// if the monster didn't use these conditions during the above call to MaintainSchedule() or CheckAITrigger()
 	// we throw them out cause we don't want them sitting around through the lifespan of a schedule
 	// that doesn't use them. 
-	m_afConditions &= ~( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE );
+	m_afConditions &= ~(bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE);
 }
 
 // ==========================================================================

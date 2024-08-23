@@ -375,8 +375,7 @@ public:
 
 	CBaseEntity* DropItem ( char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
 
-	float NextThinkTime; // unused
-	float LastServerTime;
+	float NextUpdateTime; // don't update the monster logic every frame
 
 	int iTest; // just for testing purposes
 };
