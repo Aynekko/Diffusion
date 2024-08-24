@@ -186,7 +186,6 @@ int CHud :: Redraw( float flTime, int intermission )
 	// diffusion: HUD is hidden, but show anyway( i.e. text messages )
 	if( m_iHideHUDDisplay & HIDEHUD_ALL )
 	{
-		m_Lensflare.Draw( flTime );
 		m_ScreenEffects.Draw( flTime );
 		m_StatusIconsAchievement.Draw( flTime );
 		m_Message.Draw( flTime );

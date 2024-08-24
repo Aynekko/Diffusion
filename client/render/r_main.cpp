@@ -1860,6 +1860,7 @@ void R_DrawPostEffects(void)
 		WaterDrops();
 		Glitch();
 		DroneScreenShader();
+		LensFlare();
 		Monochrome();
 		MotionBlur();
 		Enhance();

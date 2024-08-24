@@ -22,6 +22,7 @@ GNU General Public License for more details.
 #include "event_api.h"
 #include "r_view.h"
 #include "r_cvars.h"
+#include "r_world.h"
 
 void AngleMatrix( const Vector &angles, matrix3x4 &matrix )
 {
@@ -437,7 +438,7 @@ void GaussBlur( void )
 	}
 
 	// blur when paused (menu is shown)
-	if( RP_NORMALPASS() && !CVAR_GET_FLOAT( "cl_background" ) )
+	if( RP_NORMALPASS() && !cl_background->value )
 	{
 		if( tr.time == tr.oldtime || CVAR_TO_BOOL( ui_is_active ) )
 			pausedblur += 0.5 * g_fFrametime;
@@ -1051,6 +1052,112 @@ void Enhance( void )
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
+}
+
+void LensFlare( void )
+{
+	if( gl_lensflare->value <= 0 )
+		return;
+	
+	if( !(world->features & WORLD_HAS_SKYBOX) )
+		return; // don't waste time on tracing
+
+	// mapper disabled the lensflare on this map
+	if( tr.shader_modifier && tr.shader_modifier->curstate.iuser2 == 1 )
+		return;
+
+	if( !tr.bSkySurfFound )
+		return; // no sky surface was found this frame, don't waste time tracing
+
+	Vector sunangles, sundir, suntarget;
+	Vector forward, right, up, screen;
+	Vector v_angles, v_origin;
+
+	// Sun position
+	VectorAngles( -tr.sky_normal, sunangles );
+
+	v_angles = tr.viewparams.viewangles;
+	v_origin = tr.viewparams.vieworg;
+	AngleVectors( v_angles, forward, NULL, NULL );
+	AngleVectors( sunangles, sundir, NULL, NULL );
+	suntarget = v_origin + sundir * 135000; // maps can be this big :)
+
+	float DotP = DotProduct( forward, sundir );
+	if( DotP < 0.0f )
+		gHUD.LensFlareAlpha = 0.0f;
+
+	if( gHUD.LensFlareAlpha <= 0.0f && DotP < 0.8f )
+		return;
+
+	int maxLoops = 4;
+	int ignoreent = -1;	// first, ignore no entity
+	cl_entity_t *ent = NULL;
+	Vector vecStart = v_origin;
+	pmtrace_t trace;
+	while( maxLoops > 0 )
+	{
+		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( vecStart, suntarget, PM_TRACELINE_PHYSENTSONLY, ignoreent, &trace );
+
+		if( trace.ent <= 0 ) break; // we hit the world or nothing, stop trace
+
+		ent = GET_ENTITY( PM_GetPhysEntInfo( trace.ent ) );
+		if( ent == NULL ) break;
+
+		if( ent->curstate.rendermode == kRenderNormal )
+			break;
+
+		if( ent->curstate.rendermode == kRenderTransTexture && ent->curstate.renderamt == 0 ) // invisible brush "collision", so it's likely a model
+			break;
+
+		if( ent->curstate.rendermode == kRenderTransColor && ent->curstate.renderamt == 255 )
+			break;
+
+		// if close enough to end pos, stop, otherwise continue trace
+		if( (suntarget - trace.endpos).Length() < 1.0f )
+			break;
+		else
+		{
+			ignoreent = trace.ent;	// ignore last hit entity
+			vecStart = trace.endpos;
+		}
+		maxLoops--;
+	}
+
+	if( POINT_CONTENTS( trace.endpos ) == CONTENTS_SKY )
+		gHUD.LensFlareAlpha += 5.0f * g_fFrametime;
+	else
+		gHUD.LensFlareAlpha -= 10.0f * g_fFrametime;
+
+	gHUD.LensFlareAlpha = bound( 0.0f, gHUD.LensFlareAlpha, 1.0f - gHUD.ScreenDrips_DripIntensity );
+
+	if( gHUD.LensFlareAlpha <= 0.01f )
+		return;
+
+	Vector sky_color = tr.sky_ambient / 255.f;
+	Vector ndc, view;
+	// project sunpos to screen 
+	R_TransformWorldToDevice( suntarget, ndc );
+	R_TransformDeviceToScreen( ndc, view );
+
+	GL_Blend( GL_TRUE );
+	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE ); // additive
+
+	pglViewport( 0, 0, glState.width, glState.height );
+
+	GL_BindShader( glsl.LensFlare );
+	ASSERT( RI->currentshader != NULL );
+
+	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, (float)(glState.width), (float)(glState.height) );
+	pglUniform1fARB( RI->currentshader->u_Accum, gHUD.LensFlareAlpha * pow( DotP, 10 ) );
+	pglUniform2fARB( RI->currentshader->u_LightOrigin, view.x, view.y );
+	pglUniform3fARB( RI->currentshader->u_LightColor, sky_color.x, sky_color.y, sky_color.z );
+
+	RenderFSQ( glState.width, glState.height );
+
+	GL_BindShader( NULL );
+	GL_CleanUpTextureUnits( 0 );
+	GL_Blend( GL_FALSE );
 }
 
 void WaterDrops( void )

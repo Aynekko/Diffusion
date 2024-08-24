@@ -46,6 +46,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "glsl", "glsl", "{76F81493-9
 		glsl\heat_fp.glsl = glsl\heat_fp.glsl
 		glsl\horizontalblur_fp.glsl = glsl\horizontalblur_fp.glsl
 		glsl\interior.h = glsl\interior.h
+		glsl\lensflare_fp.glsl = glsl\lensflare_fp.glsl
 		glsl\mathlib.h = glsl\mathlib.h
 		glsl\matrix.h = glsl\matrix.h
 		glsl\monochrome_fp.glsl = glsl\monochrome_fp.glsl

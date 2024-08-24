@@ -224,9 +224,6 @@
     <ClCompile Include="render\r_quakeparticle.cpp">
       <Filter>Source Files\render</Filter>
     </ClCompile>
-    <ClCompile Include="lensflare.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\common\virtualfs.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

@@ -197,32 +197,6 @@ private:
 
 };
 
-class CHudLensflare : public CHudBase
-{
-public:
-		int Init( void );
-		int VidInit( void );
-		int Draw( float flTime );
-private:
-		int Sunanglex;
-		int Sunangley;
-		int Sunadd[5];
-		float flPlayerBlend;
-		float flPlayerBlend2;
-		float flPlayerBlend3;
-		float flPlayerBlend4;
-		float Screenmx;
-		float Screenmy;
-		SpriteHandle tex[10];
-		float Lensx[10];
-		float Lensy[10];
-		float Suncoordx;
-		float Suncoordy;
-		float Sundistx;
-		float Sundisty;
-		float BlendMult;
-};
-
 
 //
 //-----------------------------------------------------
@@ -963,6 +937,9 @@ public:
 	float GlitchAmount;
 	float GlitchHoldTime;
 
+	// lensflare shader
+	float LensFlareAlpha;
+
 	// diffusion - client screen shake
 	typedef struct
 	{
@@ -1017,7 +994,6 @@ public:
 	CUseIcon m_UseIcon;
 	CScreenEffects m_ScreenEffects;
 	CHudBlastIcons m_BlastIcons;
-	CHudLensflare m_Lensflare;
 	CHealthbars m_Healthbars;
 	CHudCodeInput m_CodeInput;
 	CPseudoGUI m_PseudoGUI;

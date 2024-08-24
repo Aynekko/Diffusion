@@ -189,6 +189,7 @@ typedef struct
 	glsl_program_t *DroneScreen;
 	glsl_program_t *HeatDistortion;
 	glsl_program_t *BilateralBlur;
+	glsl_program_t *LensFlare;
 } ref_shaders_t;
 
 void GL_AddShaderDirective( char *options, const char *directive );

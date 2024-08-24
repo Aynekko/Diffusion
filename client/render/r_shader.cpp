@@ -1282,6 +1282,19 @@ static void GL_InitHeatDistortionUniforms( glsl_program_t *shader )
 	GL_ShowProgramUniforms( shader );
 }
 
+static void GL_InitLensFlareUniforms( glsl_program_t *shader )
+{
+	ASSERT( shader != NULL );
+
+	shader->u_LightOrigin = pglGetUniformLocationARB( shader->handle, "u_LightOrigin" );
+	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
+	shader->u_Accum = pglGetUniformLocationARB( shader->handle, "u_Accum" );
+	shader->u_LightColor = pglGetUniformLocationARB( shader->handle, "u_LightColor" );
+
+	GL_ValidateProgram( shader );
+	GL_ShowProgramUniforms( shader );
+}
+
 static void GL_InitMonochromeUniforms( glsl_program_t *shader )
 {
 	ASSERT( shader != NULL );
@@ -2355,6 +2368,10 @@ void GL_InitGPUShaders( void )
 	// heat distortion effect
 	glsl.HeatDistortion = shader = GL_InitGPUShader( "HeatDistortion", "generic", "heat" );
 	GL_InitHeatDistortionUniforms( shader );
+
+	// lens flare
+	glsl.LensFlare = shader = GL_InitGPUShader( "LensFlare", "generic", "lensflare" );
+	GL_InitLensFlareUniforms( shader );
 
 	// water drops on screen
 	glsl.WaterDrops = shader = GL_InitGPUShader( "WaterDrops", "generic", "waterdrops" );

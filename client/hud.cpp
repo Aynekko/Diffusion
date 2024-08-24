@@ -14,7 +14,6 @@ void CHud :: Init( void )
 	InitHUDMessages();
 
 	// NOTENOTE - ordering here directly affects the rendering order: last will be on top
-	m_Lensflare.Init();
 	m_CrosshairStatic.Init();
 	m_Ammo.Init();
 	m_Health.Init();
@@ -207,7 +206,6 @@ void CHud :: VidInit( void )
 	m_CrosshairStatic.VidInit(); // new simple crosshairs
 	m_CodeInput.VidInit();
 	m_ScreenEffects.VidInit();
-	m_Lensflare.VidInit();
 	m_PseudoGUI.VidInit();
 	m_TriggerTimer.VidInit();
 	m_Message.VidInit();
@@ -217,6 +215,7 @@ void CHud :: VidInit( void )
 
 	gHUD.GlitchAmount = 0.0f;
 	gHUD.GlitchHoldTime = 0.0f;
+	gHUD.LensFlareAlpha = 0.0f;
 
 	memset( emptyclipspawned, 0, sizeof( emptyclipspawned ) );
 }
