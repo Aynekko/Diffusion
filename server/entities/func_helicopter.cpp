@@ -224,6 +224,10 @@ void CHelicopter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 		if( AllowCamera ) // only set view if camera was allowed, otherwise maybe we were using some external camera, don't interrupt it
 			SET_VIEW( pPlayer->edict(), pPlayer->edict() );
 
+		// reset player's angles, look in the vehicle direction
+		pPlayer->SetAbsAngles( GetAbsAngles() );
+		pPlayer->pev->fixangle = TRUE;
+
 		if( pPlayer == hDriver )
 		{
 			if( m_iszEngineSnd )
