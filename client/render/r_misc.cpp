@@ -2217,9 +2217,9 @@ Vector R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 	else
 	{
 		if( POINT_CONTENTS( vecTemp ) == CONTENTS_WATER )
-			R_MakeWaterSplash( vecSrc, vecTemp, Type );
+			return R_MakeWaterSplash( vecSrc, vecTemp, Type );
 		else
-			R_MakeWaterSplash( vecTemp, vecEnd, Type );
+			return R_MakeWaterSplash( vecTemp, vecEnd, Type );
 	}
 }
 

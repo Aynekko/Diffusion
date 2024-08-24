@@ -161,45 +161,44 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 
 	int msg_dest = READ_BYTE();
 
-	static char szBuf[6][128];
-	char *msg_text = LookupString( READ_STRING(), &msg_dest );
-	msg_text = strcpy( szBuf[0], msg_text );
+#define MSG_BUF_SIZE 128
+	char szBuf[6][MSG_BUF_SIZE];
 
-	// keep reading strings and using C format strings for subsituting the strings into the localised text string
-	char *sstr1 = LookupString( READ_STRING() );
-	sstr1 = strcpy( szBuf[1], sstr1 );
-	StripEndNewlineFromString( sstr1 );  // these strings are meant for subsitution into the main strings, so cull the automatic end newlines
-	char *sstr2 = LookupString( READ_STRING() );
-	sstr2 = strcpy( szBuf[2], sstr2 );
-	StripEndNewlineFromString( sstr2 );
-	char *sstr3 = LookupString( READ_STRING() );
-	sstr3 = strcpy( szBuf[3], sstr3 );
-	StripEndNewlineFromString( sstr3 );
-	char *sstr4 = LookupString( READ_STRING() );
-	sstr4 = strcpy( szBuf[4], sstr4 );
-	StripEndNewlineFromString( sstr4 );
+	strncpy( szBuf[0], LookupString( READ_STRING(), &msg_dest ), MSG_BUF_SIZE - 1 );
+	szBuf[0][MSG_BUF_SIZE - 1] = '\0';
+
+	for( int i = 1; i <= 4; i++ )
+	{
+		// keep reading strings and using C format strings for subsituting the strings into the localised text string
+		strncpy( szBuf[i], LookupString( READ_STRING() ), MSG_BUF_SIZE - 1 );
+		szBuf[i][MSG_BUF_SIZE - 1] = '\0';
+		StripEndNewlineFromString( szBuf[i] ); // these strings are meant for subsitution into the main strings, so cull the automatic end newlines
+	}
+
 	char *psz = szBuf[5];
 
-	switch ( msg_dest )
+	switch( msg_dest )
 	{
 	case HUD_PRINTCENTER:
-		Q_snprintf( psz, sizeof( szBuf[5] ), msg_text, sstr1, sstr2, sstr3, sstr4 );
-		CenterPrint( ConvertCRtoNL( psz ));
+		_snprintf( psz, MSG_BUF_SIZE, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		psz[MSG_BUF_SIZE - 1] = '\0';
+		CenterPrint( ConvertCRtoNL( psz ) );
 		break;
 	case HUD_PRINTNOTIFY:
 		psz[0] = 1;  // mark this message to go into the notify buffer
-		Q_snprintf( psz + 1, sizeof( szBuf[5] ), msg_text, sstr1, sstr2, sstr3, sstr4 );
+		_snprintf( psz + 1, MSG_BUF_SIZE - 1, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		psz[MSG_BUF_SIZE - 2] = '\0';
 		ConsolePrint( ConvertCRtoNL( psz ) );
 		break;
-
 	case HUD_PRINTTALK:
-		Q_snprintf( psz, sizeof( szBuf[5] ), msg_text, sstr1, sstr2, sstr3, sstr4 );
-		gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), 128 );
+		_snprintf( psz, MSG_BUF_SIZE, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		psz[MSG_BUF_SIZE - 1] = '\0';
+		gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), MSG_BUF_SIZE );
 		break;
-
 	case HUD_PRINTCONSOLE:
-		Q_snprintf( psz, sizeof( szBuf[5] ), msg_text, sstr1, sstr2, sstr3, sstr4 );
-		ConsolePrint( ConvertCRtoNL( psz ));
+		_snprintf( psz, MSG_BUF_SIZE, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		psz[MSG_BUF_SIZE - 1] = '\0';
+		ConsolePrint( ConvertCRtoNL( psz ) );
 		break;
 	}
 
