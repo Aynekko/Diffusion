@@ -569,13 +569,10 @@ CSound* CBaseMonster :: PBestScent ( void )
 //=========================================================
 void CBaseMonster :: MonsterThink ( void )
 {
-	if( !CheckingLocalMove )
-	{
-		Vector Org = GetAbsOrigin();
-		UTIL_SetOrigin( this, Org );
-	}
-	
 	SetNextThink( 0 ); // keep monster thinking.
+	
+	if( HasSpawnFlags( SF_MONSTER_ASLEEP ) || ai_disable.value )
+		return;
 
 	if( ai_disable.value == 1)
 		return;

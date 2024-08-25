@@ -68,6 +68,12 @@ void CBaseMonster :: RunAI ( void )
 	
 	if( gpGlobals->time > NextUpdateTime )
 	{
+		if( !CheckingLocalMove )
+		{
+			Vector Org = GetAbsOrigin();
+			UTIL_SetOrigin( this, Org );
+		}
+		
 		CheckFire();
 
 		// IDLE sound permitted in ALERT state is because monsters were silent in ALERT state. Only play IDLE sound in IDLE state

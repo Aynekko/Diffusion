@@ -57,9 +57,10 @@ public:
 	float	m_fController3;
 	int	m_iReflection;	// reflection style
 	int newhealth; // diffusion - change monster health
-	int m_iEnemy; // diffusion - make them aware about the player and hunt him
+	bool m_iEnemy; // diffusion - make them aware about the player and hunt him
 	int m_HealthBar;
 	int m_HealthBarType;
+	bool m_bWakeUp; // start monster AI
 };
 
 LINK_ENTITY_TO_CLASS(env_customize, CEnvCustomize);
@@ -83,9 +84,10 @@ BEGIN_DATADESC(CEnvCustomize)
 	DEFINE_KEYFIELD(m_fController3, FIELD_FLOAT, "m_fController3"),
 	DEFINE_KEYFIELD(m_iReflection, FIELD_INTEGER, "m_iReflection"),
 	DEFINE_KEYFIELD(newhealth, FIELD_INTEGER, "newhealth"),
-	DEFINE_KEYFIELD(m_iEnemy, FIELD_INTEGER, "m_iEnemy"),
+	DEFINE_KEYFIELD(m_iEnemy, FIELD_BOOLEAN, "m_iEnemy"),
 	DEFINE_KEYFIELD(m_HealthBar, FIELD_INTEGER, "m_HealthBar" ),
 	DEFINE_KEYFIELD( m_HealthBarType, FIELD_INTEGER, "m_HealthBarType" ),
+	DEFINE_KEYFIELD( m_bWakeUp, FIELD_BOOLEAN, "m_bWakeUp" ),
 END_DATADESC()
 
 void CEnvCustomize::KeyValue(KeyValueData* pkvd)
@@ -182,7 +184,7 @@ void CEnvCustomize::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "m_iEnemy"))
 	{
-		m_iEnemy = Q_atoi(pkvd->szValue);
+		m_iEnemy = (Q_atoi( pkvd->szValue ) > 0);
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "newhealth" ) )
@@ -198,6 +200,11 @@ void CEnvCustomize::KeyValue(KeyValueData* pkvd)
 	else if( FStrEq( pkvd->szKeyName, "m_HealthBarType" ) )
 	{
 		m_HealthBarType = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "m_bWakeUp" ) )
+	{
+		m_bWakeUp = (Q_atoi( pkvd->szValue ) > 0);
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -412,7 +419,7 @@ void CEnvCustomize::Affect(CBaseEntity* pTarget, USE_TYPE useType)
 			ALERT(at_console, "new health = %d", newhealth);
 	}
 
-	if (m_iEnemy == 1)
+	if( m_iEnemy )
 	{
 		CBaseEntity* pPlayer = CBaseEntity::Instance(INDEXENT(1));
 		if (pPlayer)
@@ -421,6 +428,12 @@ void CEnvCustomize::Affect(CBaseEntity* pTarget, USE_TYPE useType)
 			pMonster->SetEnemy( pPlayer );
 			pMonster->SetConditions( bits_COND_NEW_ENEMY );
 		}
+	}
+
+	if( m_bWakeUp )
+	{
+		if( pMonster->HasSpawnFlags( SF_MONSTER_ASLEEP ) )
+			pMonster->pev->spawnflags &= ~SF_MONSTER_ASLEEP;
 	}
 
 	if (m_iClass != 0)

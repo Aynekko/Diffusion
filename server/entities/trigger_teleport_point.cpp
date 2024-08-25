@@ -3,6 +3,7 @@
 #include "cbase.h"
 #include "player.h"
 #include "triggers.h"
+#include "monsters.h"
 
 //=======================================================================================================================
 // diffusion - teleports entity regardless of its position (no teleport brush needed) - this entity also acts as a target
@@ -80,6 +81,10 @@ void CTriggerTeleportPoint::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 	// offset to correctly teleport the player...
 	if( pEntity->IsPlayer() )
 		TargetOrg.z += 36;
+
+	// wake up monster - if I teleport it, I want him up and running
+	if( pEntity->IsMonster() && pEntity->HasSpawnFlags( SF_MONSTER_ASLEEP ) )
+		pEntity->pev->spawnflags &= ~SF_MONSTER_ASLEEP;
 
 	pEntity->Teleport(&TargetOrg, &EntityAngles, &EntityVelocity);
 

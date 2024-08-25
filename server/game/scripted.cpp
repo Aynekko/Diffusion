@@ -315,6 +315,8 @@ void CCineMonster :: PossessEntity( void )
 			return;
 		}
 #endif
+		if( pTarget->HasSpawnFlags( SF_MONSTER_ASLEEP ) ) // diffusion - wake up monster's AI if we are using him in a script
+			pTarget->pev->spawnflags &= ~SF_MONSTER_ASLEEP;
 
 		pTarget->m_pGoalEnt = this;
 		pTarget->m_pCine = this;
