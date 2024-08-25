@@ -574,9 +574,6 @@ void CBaseMonster :: MonsterThink ( void )
 	if( HasSpawnFlags( SF_MONSTER_ASLEEP ) || ai_disable.value )
 		return;
 
-	if( ai_disable.value == 1)
-		return;
-
 	float flInterval = StudioFrameAdvance( ); // animate
 	DispatchAnimEvents( flInterval );
 
