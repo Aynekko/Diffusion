@@ -1289,7 +1289,6 @@ static void GL_InitLensFlareUniforms( glsl_program_t *shader )
 	shader->u_LightOrigin = pglGetUniformLocationARB( shader->handle, "u_LightOrigin" );
 	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
 	shader->u_Accum = pglGetUniformLocationARB( shader->handle, "u_Accum" );
-	shader->u_LightColor = pglGetUniformLocationARB( shader->handle, "u_LightColor" );
 
 	GL_ValidateProgram( shader );
 	GL_ShowProgramUniforms( shader );

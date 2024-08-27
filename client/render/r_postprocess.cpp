@@ -1134,7 +1134,6 @@ void LensFlare( void )
 	if( gHUD.LensFlareAlpha <= 0.01f )
 		return;
 
-	Vector sky_color = tr.sky_ambient / 255.f;
 	Vector ndc, view;
 	// project sunpos to screen 
 	R_TransformWorldToDevice( suntarget, ndc );
@@ -1151,7 +1150,6 @@ void LensFlare( void )
 	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, (float)(glState.width), (float)(glState.height) );
 	pglUniform1fARB( RI->currentshader->u_Accum, gHUD.LensFlareAlpha * pow( DotP, 10 ) );
 	pglUniform2fARB( RI->currentshader->u_LightOrigin, view.x, view.y );
-	pglUniform3fARB( RI->currentshader->u_LightColor, sky_color.x, sky_color.y, sky_color.z );
 
 	RenderFSQ( glState.width, glState.height );
 
