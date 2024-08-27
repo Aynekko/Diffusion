@@ -427,6 +427,7 @@ void CEnvCustomize::Affect(CBaseEntity* pTarget, USE_TYPE useType)
 			// the player is now the known enemy.
 			pMonster->SetEnemy( pPlayer );
 			pMonster->SetConditions( bits_COND_NEW_ENEMY );
+			pMonster->m_IdealMonsterState = MONSTERSTATE_COMBAT;
 		}
 	}
 

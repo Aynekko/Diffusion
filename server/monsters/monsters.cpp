@@ -2126,11 +2126,12 @@ void CBaseMonster :: MonsterInit ( void )
 	RouteClear();
 	InitBoneControllers( ); // FIX: should be done in Spawn
 
-	m_iHintNode			= NO_NODE;
+	m_iHintNode = NO_NODE;
 
-	m_afMemory			= MEMORY_CLEAR;
+	m_afMemory = MEMORY_CLEAR;
 
-	m_hEnemy			= NULL;
+	m_hEnemy = NULL;
+	m_vecEnemyLKP = g_vecZero; // initialize the goddamn vector!!!
 
 	if(!m_flDistTooFar) m_flDistTooFar = 1536.0;
 	if(!m_flDistLook) m_flDistLook = 3072.0;
@@ -2158,8 +2159,10 @@ void CBaseMonster :: MonsterInit ( void )
 
 	SetUse( &CBaseMonster::MonsterUse );
 
+	SetState( MONSTERSTATE_IDLE ); // set this here, so it can be overriden after custom spawn
+
 	SetThink( &CBaseMonster::MonsterInitThink );
-	SetNextThink( 0.1 );
+	SetNextThink( 0 );
 }
 
 //=========================================================
@@ -2263,7 +2266,6 @@ void CBaseMonster :: StartMonster ( void )
 		ChangeSchedule( GetScheduleOfType( SCHED_WAIT_TRIGGER ) );
 	}
 	*/
-	SetState( MONSTERSTATE_IDLE );
 
 	ResetSequenceInfo(); // TTTEST
 }
@@ -2729,7 +2731,13 @@ float	CBaseMonster::FlYawDiff ( void )
 //=========================================================
 
 float CBaseMonster::ChangeYaw ( int yawSpeed )
-{
+{	
+	if( FClassnameIs( this, "monster_security_general") )
+	{
+		float x = 0;
+		float z = 0;
+	}
+	
 	float ideal, current, move, speed;
 	Vector angles = GetAbsAngles();
 

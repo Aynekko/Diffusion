@@ -126,7 +126,7 @@ public:
 
 	string_t	wpns;
 	bool CanSpawnDrone;
-	int DroneSpawned;
+	bool DroneSpawned;
 	int m_iFlashlightCap;
 	CSprite *FlashlightSpr;
 	//monster_alien_soldier:

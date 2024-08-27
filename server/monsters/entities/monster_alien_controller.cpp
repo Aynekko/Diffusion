@@ -4050,6 +4050,7 @@ void CAlienShip :: RunTask ( Task_t *pTask )
 							{
 								pDrone->SetEnemy( m_hEnemy );
 								pDrone->SetConditions( bits_COND_NEW_ENEMY );
+								pDrone->m_IdealMonsterState = m_IdealMonsterState;
 							}
 							pDrone->m_flDistTooFar = 4096; // those drones can shoot from afar
 							DroneSpawnTime = gpGlobals->time + RANDOM_LONG( 20, 30 );

@@ -163,7 +163,7 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD(m_voicePitch, FIELD_INTEGER),
 	DEFINE_FIELD(m_iSentence, FIELD_INTEGER),
 	DEFINE_FIELD(CanSpawnDrone, FIELD_BOOLEAN),
-	DEFINE_FIELD(DroneSpawned, FIELD_INTEGER),
+	DEFINE_FIELD(DroneSpawned, FIELD_BOOLEAN),
 	DEFINE_KEYFIELD(wpns, FIELD_STRING, "wpns"),
 	DEFINE_KEYFIELD(m_iFlashlightCap, FIELD_INTEGER, "flashlight"),
 	DEFINE_FIELD(CanInvestigate, FIELD_INTEGER),
@@ -621,7 +621,7 @@ Schedule_t slGruntHideReload[] =
 	{
 		tlGruntHideReload,
 		SIZEOFARRAY(tlGruntHideReload),
-		bits_COND_HEAVY_DAMAGE |
+	//	bits_COND_HEAVY_DAMAGE | // diffusion - do not interrupt reload with this.
 		bits_COND_HEAR_SOUND,
 
 		bits_SOUND_DANGER,
@@ -1186,7 +1186,7 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 	if( HasWeapon( HGRUNT_HANDGRENADE ))
 	{
 		// find feet
-		if( RANDOM_LONG( 0, 1 ) )
+		if( RANDOM_LONG( 0, 1 ) || (m_vecEnemyLKP == g_vecZero) )
 		{
 			// magically know where they are
 			vecTarget = Vector( m_hEnemy->pev->origin.x, m_hEnemy->pev->origin.y, m_hEnemy->pev->absmin.z );
@@ -1231,7 +1231,15 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 
 	if( HasWeapon( HGRUNT_HANDGRENADE ))
 	{
-		Vector vecToss = VecCheckToss( pev, GetGunPosition(), vecTarget, 0.5 );
+		Vector vecToss;
+		if( !DroneSpawned )
+		{
+			// for drone spawn just use a default forward vector, we don't perform a toss, just looking in the enemy direction
+			UTIL_MakeVectors( GetAbsAngles() );
+			vecToss = gpGlobals->v_forward;
+		}
+		else
+			vecToss = VecCheckToss( pev, GetGunPosition(), vecTarget, 0.5 );
 
 		if( vecToss != g_vecZero )
 		{
@@ -1584,7 +1592,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 			if( CanSpawnDrone == true ) // I can spawn drones.
 			{
-				if( DroneSpawned == 0 ) // I didn't spawn any of them yet, so check if I'm able to
+				if( !DroneSpawned ) // I didn't spawn any of them yet, so check if I'm able to
 				{
 					TraceResult tracer;
 					Vector vecStart, vecEnd;
@@ -1592,7 +1600,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 					// drone spawns at 120. check up to 300, and 180 is acceptable
 					vecEnd.z += 500;
 					UTIL_TraceLine(vecStart, vecEnd, dont_ignore_monsters, dont_ignore_glass, edict(), &tracer);
-					if( fabs((vecStart - tracer.vecEndPos).Length()) < 180 ) // not enough space. throw a grenade instead
+					if( (vecStart - tracer.vecEndPos).Length() < 180 ) // not enough space. throw a grenade instead
 					{
 						UTIL_MakeVectors( GetAbsAngles() );
 						CBaseEntity *pGrenade = CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5 );
@@ -1615,14 +1623,16 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 							pDrone->m_iClass = m_iClass; // do not shoot at the owner!!!
 							// make the drone aware of the enemy which grunt was angry at
 							// even if the drone didn't see him at the moment of spawn.
+
 							if( m_hEnemy != NULL )
 							{
 								pDrone->SetEnemy( m_hEnemy );
 								pDrone->SetConditions( bits_COND_NEW_ENEMY );
+								pDrone->m_IdealMonsterState = m_IdealMonsterState; // do not strip the enemy after spawn
 							}
 						}
 
-						DroneSpawned = 1; // the drone is now spawned, grunt can't spawn any more drones and will use the grenade
+						DroneSpawned = true; // the drone is now spawned, grunt can't spawn any more drones and will use the grenade
 						m_fThrowGrenade = FALSE;
 						m_flNextGrenadeCheck = gpGlobals->time + 3;
 					}
@@ -2469,7 +2479,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 					//!!!KELLY - this grunt is about to throw or fire a grenade at the player. Great place for "fire in the hole"  "frag out" etc
 					if (FOkToSpeak())
 					{
-						if( CanSpawnDrone && (DroneSpawned == 0) )
+						if( CanSpawnDrone && !DroneSpawned )
 							SENTENCEG_PlayRndSz( ENT(pev), "HG_DRONE", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
 						else
 							SENTENCEG_PlayRndSz( ENT(pev), "HG_THROW", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
@@ -4326,7 +4336,7 @@ void CHGruntSecurityGeneral::Spawn()
 
 	CTalkMonster::g_talkWaitTime = 0;
 
-	DroneSpawned = 0; // when 1, grunt can't spawn any more drones
+	DroneSpawned = false; // when true, grunt can't spawn any more drones
 
 //	pev->scale = 1.15; // bigger than other grunts //scaled in the model itself
 
@@ -4481,7 +4491,7 @@ void CHGruntSecurityGeneral::Shoot(void)
 
 int CHGruntSecurityGeneral::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType)
 {
-	if (pev->spawnflags & SF_MONSTER_NODAMAGE)
+	if( HasSpawnFlags(SF_MONSTER_NODAMAGE) )
 		return 0;
 
 	Forget(bits_MEMORY_INCOVER);
@@ -4539,7 +4549,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 
 	case HGRUNT_AE_GREN_TOSS:
 	{
-		if (DroneSpawned == 0) // I didn't spawn any of them yet, so check if I'm able to
+		if( !DroneSpawned ) // I didn't spawn any of them yet, so check if I'm able to
 		{
 			TraceResult tracer;
 			Vector vecStart, vecEnd;
@@ -4547,7 +4557,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 			// drone spawns at 120. check up to 300, and 180 is acceptable
 			vecEnd.z += 500;
 			UTIL_TraceLine(vecStart, vecEnd, dont_ignore_monsters, dont_ignore_glass, edict(), &tracer);
-			if (fabs((vecStart - tracer.vecEndPos).Length()) < 180) // not enough space. throw a grenade instead
+			if( (vecStart - tracer.vecEndPos).Length() < 180 ) // not enough space. throw a grenade instead
 			{
 				UTIL_MakeVectors(GetAbsAngles());
 				CBaseEntity *pGrenade = CGrenade::ShootTimed(pev, GetGunPosition(), m_vecTossVelocity, 3.5, ForceEMPGrenade );
@@ -4565,15 +4575,19 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 				Vector vecStart = GetAbsOrigin();
 				vecStart.z += 120;  // drone spawns right above grunt's head, there's a possibility that it could stuck though...
 				CBaseMonster* pDrone = (CBaseMonster*)Create("monster_security_drone", vecStart, GetAbsAngles(), edict());
-				pDrone->m_iClass = m_iClass; // do not shoot at the owner!!!
-				// make the drone aware of the enemy which grunt was angry at
-				// even if the drone didn't see him at the moment of spawn.
-				if (m_hEnemy != NULL)
+				if( pDrone )
 				{
-					Vector EnemyOrigin = m_hEnemy->GetAbsOrigin();
-					pDrone->PushEnemy(m_hEnemy, EnemyOrigin);
+					pDrone->m_iClass = m_iClass; // do not shoot at the owner!!!
+					// make the drone aware of the enemy which grunt was angry at
+					// even if the drone didn't see him at the moment of spawn.
+					if( m_hEnemy != NULL )
+					{
+						pDrone->SetEnemy( m_hEnemy );
+						pDrone->SetConditions( bits_COND_NEW_ENEMY );
+						pDrone->m_IdealMonsterState = m_IdealMonsterState; // do not strip the enemy after spawn
+					}
 				}
-				DroneSpawned = 1; // the drone is now spawned, grunt can't spawn any more drones and will use the grenade
+				DroneSpawned = true; // the drone is now spawned, grunt can't spawn any more drones and will use the grenade
 				m_fThrowGrenade = FALSE;
 				m_flNextGrenadeCheck = gpGlobals->time + 3;
 			}
@@ -4686,7 +4700,7 @@ BOOL CHGruntSecurityGeneral::CheckRangeAttack2Impl( float grenadeSpeed, float fl
 */
 Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 {
-	if (HasConditions(bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE) && !HasConditions(bits_COND_SEE_ENEMY))
+	if ( HasConditions(bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE) && !HasConditions(bits_COND_SEE_ENEMY))
 	{
 		// something hurt me and I can't see anyone. Better relocate
 		return GetScheduleOfType(SCHED_TAKE_COVER_FROM_ENEMY);
@@ -4780,7 +4794,7 @@ Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 				JustSpoke();
 			}
 
-			if ((OccupySlot(bits_SLOTS_HGRUNT_GRENADE)) && (DroneSpawned == 0)) // HasConditions ( bits_COND_CAN_RANGE_ATTACK2 )
+			if( (OccupySlot( bits_SLOTS_HGRUNT_GRENADE )) && !DroneSpawned ) // HasConditions ( bits_COND_CAN_RANGE_ATTACK2 )
 				return GetScheduleOfType(SCHED_RANGE_ATTACK2); // spawn a drone
 
 			if (HasConditions(bits_COND_CAN_RANGE_ATTACK1))
@@ -4861,7 +4875,7 @@ Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 		// can't see enemy
 		else if (HasConditions(bits_COND_ENEMY_OCCLUDED))
 		{
-			if (HasConditions(bits_COND_CAN_RANGE_ATTACK2) && OccupySlot(bits_SLOTS_HGRUNT_GRENADE) && (DroneSpawned == 1)) // diffusion - undone sentences
+		if( HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) && OccupySlot( bits_SLOTS_HGRUNT_GRENADE ) && DroneSpawned ) // diffusion - undone sentences
 			{
 				//!!!KELLY - this grunt is about to throw or fire a grenade at the player. Great place for "fire in the hole"  "frag out" etc
 				if (FOkToSpeak())
@@ -5234,7 +5248,7 @@ void CHGruntSecurity::Spawn()
 		pev->skin = 1; // always dark skin
 	}
 
-	DroneSpawned = 0;
+	DroneSpawned = false;
 
 	if (RANDOM_LONG(0, 2) == 0)
 		CanInvestigate = 1;
