@@ -376,6 +376,9 @@ void CFuncMultiManager::UseTouch( CBaseEntity *pOther )
 	if( sv_ignore_triggers.value > 0 )
 		return;
 
+	if( IsLockedByMaster() )
+		return;
+
 	if( pOther->IsPlayer() )
 	{
 		Use( pOther, pOther, USE_TOGGLE, 0 );

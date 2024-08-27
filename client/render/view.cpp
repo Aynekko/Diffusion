@@ -1062,9 +1062,9 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 	// diffusion - lower the weapon
 	static float add = 0.0f;
 	if( gHUD.WeaponLowered )
-		add = CL_UTIL_Approach( 25.0f, add, 60 * g_fFrametime );
+		add = lerp( add, 25.0f, 5.0f * g_fFrametime );
 	else
-		add = CL_UTIL_Approach( 0.0f, add, 60 * g_fFrametime );
+		add = lerp( add, 0.0f, 5.0f * g_fFrametime );
 	if( add > 0.0f )
 	{
 		angles.x += add;
