@@ -56,6 +56,10 @@ BOOL CBaseTrigger::CanTouch(CBaseEntity* pOther)
 	
 	if (FStringNull(pev->netname))
 	{
+		// trigger_hurt has its own set of spawnflags
+		if( FClassnameIs( this, "trigger_hurt" ) )
+			return TRUE;
+		
 		// Only touch clients, monsters, or pushables (depending on flags)
 		if (pOther->pev->flags & FL_CLIENT)
 			return !HasSpawnFlags(SF_TRIGGER_NOCLIENTS);
