@@ -100,6 +100,11 @@ void CCineMonster :: KeyValue( KeyValueData *pkvd )
 		m_iszFireOnBegin = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "m_iszFireOnPossess" ) )
+	{
+		m_iszFireOnPossess = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		BaseClass::KeyValue( pkvd );
@@ -114,6 +119,7 @@ BEGIN_DATADESC( CCineMonster )
 	DEFINE_KEYFIELD( m_flRepeat, FIELD_FLOAT, "m_flRepeat" ),
 	DEFINE_KEYFIELD( m_flRadius, FIELD_FLOAT, "m_flRadius" ),
 	DEFINE_KEYFIELD( m_iszFireOnBegin, FIELD_STRING, "m_iszFireOnBegin" ),
+	DEFINE_KEYFIELD( m_iszFireOnPossess, FIELD_STRING, "m_iszFireOnPossess" ),
 	DEFINE_FIELD( m_iDelay, FIELD_INTEGER ),
 	DEFINE_FIELD( m_startTime, FIELD_TIME ),
 
@@ -260,6 +266,13 @@ int CCineMonster :: FindEntity( void )
 	{
 		if ( FBitSet( VARS(pentTarget)->flags, FL_MONSTER ))
 		{
+			// respect radius setting
+			if( FStringNull(pev->targetname) && m_flRadius > 0.0f && (pentTarget->v.origin - GetAbsOrigin()).Length() > m_flRadius )
+			{
+				pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( m_iszEntity ) );
+				continue;
+			}
+			
 			pTarget = GetMonsterPointer( pentTarget );
 			if ( pTarget && pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_BY_NAME ) )
 			{
@@ -378,6 +391,9 @@ void CCineMonster :: PossessEntity( void )
 			if (FStrEq( STRING(m_iszIdle), STRING(m_iszPlay)))
 				pTarget->pev->framerate = 0;
 		}
+
+		if( m_iszFireOnPossess )
+			UTIL_FireTargets( m_iszFireOnPossess, this, this, USE_TOGGLE, 0 );
 	}
 }
 

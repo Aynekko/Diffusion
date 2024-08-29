@@ -81,6 +81,7 @@ public:
 	int	m_iszEntity;	// entity that is wanted for this script
 	int	m_fMoveTo;
 	string_t	m_iszFireOnBegin; // entity to fire when the sequence _starts_.
+	string_t	m_iszFireOnPossess; // diffusion - fire a target as soon as monster starts walking
 	int	m_iFinishSchedule;
 	float	m_flRadius;		// range to search
 	float	m_flRepeat;	// repeat rate
