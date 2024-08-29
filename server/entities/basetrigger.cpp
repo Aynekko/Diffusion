@@ -126,7 +126,8 @@ void CBaseTrigger::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_
 // When touched, a hurt trigger does DMG points of damage each half-second
 void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 {
-	float fldmg;
+	if( !CanTouch( pOther ) )
+		return;
 
 	if( sv_ignore_triggers.value > 0 )
 		return;
@@ -195,7 +196,7 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 	// while touching the trigger.  Player continues taking damage for a while after
 	// leaving the trigger
 
-	fldmg = pev->dmg * 0.5;	// 0.5 seconds worth of damage, pev->dmg is damage/second
+	float fldmg = pev->dmg * 0.5;	// 0.5 seconds worth of damage, pev->dmg is damage/second
 
 
 	// JAY: Cut this because it wasn't fully realized.  Damage is simpler now.

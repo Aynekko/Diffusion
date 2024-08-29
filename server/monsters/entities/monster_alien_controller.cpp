@@ -3004,6 +3004,7 @@ int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 
 void CDrone::Killed( entvars_t *pevAttacker, int iGib )
 {
+	pev->takedamage = DAMAGE_NO;
 	pev->deadflag = DEAD_DEAD;
 	FCheckAITrigger();
 	
@@ -3634,6 +3635,7 @@ int CDroneAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 
 void CDroneAlien::Killed( entvars_t *pevAttacker, int iGib )
 {
+	pev->takedamage = DAMAGE_NO;
 	pev->deadflag = DEAD_DEAD;
 	FCheckAITrigger();
 	
@@ -3658,7 +3660,7 @@ void CDroneAlien::Killed( entvars_t *pevAttacker, int iGib )
 		pGib->m_material = matMetal;
 		pGib->SetAbsOrigin( GetAbsOrigin() );
 //		pGib->SetAbsVelocity( UTIL_RandomBloodVector() * RANDOM_FLOAT( 1, 2 ));
-		pGib->SetNextThink( 1.25 );
+		pGib->SetNextThink( 3.0 );
 		pGib->SetThink( &CBaseEntity::SUB_FadeOut );
 	}
 	

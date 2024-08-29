@@ -490,7 +490,8 @@ Activity CBaseMonster :: GetSmallFlinchActivity ( void )
 
 void CBaseMonster::BecomeDead( void )
 {
-	pev->takedamage = DAMAGE_YES;// don't let autoaim aim at corpses.
+	if( pev->takedamage > 0 ) // do not change it if it was set to NO (issue with drones which have custom gibs - the could be killed a few times)
+		pev->takedamage = DAMAGE_YES;// don't let autoaim aim at corpses.
 	
 	// give the corpse half of the monster's original maximum health. 
 	pev->health = pev->max_health / 2;
