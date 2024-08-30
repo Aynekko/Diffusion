@@ -94,6 +94,8 @@ public:
 	int m_saved_effects;
 //	Vector m_vecOrigOrigin;
 	BOOL m_interruptable;
+
+	bool monster_not_found; // for debug alert
 };
 
 class CCineAI : public CCineMonster

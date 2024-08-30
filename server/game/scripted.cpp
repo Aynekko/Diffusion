@@ -149,7 +149,7 @@ void CCineMonster :: Spawn( void )
 	if ( FStringNull(pev->targetname) ) // !FStringNull( m_iszIdle ) )
 	{
 		SetThink( &CCineMonster::CineThink );
-		SetNextThink(1.0);
+		SetNextThink( RANDOM_FLOAT( 0.8, 1.8 ) ); // spread think times
 		// Wait to be used?
 		// diffusion - FIXME this must be looked into. if I leave this, it can break stuff
 	//	if ( pev->targetname )
@@ -262,6 +262,8 @@ int CCineMonster :: FindEntity( void )
 	m_hTargetEnt = NULL;
 	CBaseMonster	*pTarget = NULL;
 
+	monster_not_found = true;
+
 	while (!FNullEnt(pentTarget))
 	{
 		if ( FBitSet( VARS(pentTarget)->flags, FL_MONSTER ))
@@ -269,6 +271,7 @@ int CCineMonster :: FindEntity( void )
 			// respect radius setting
 			if( FStringNull(pev->targetname) && m_flRadius > 0.0f && (pentTarget->v.origin - GetAbsOrigin()).Length() > m_flRadius )
 			{
+				monster_not_found = false; // we found the monster, he's just far, don't spam the message
 				pentTarget = FIND_ENTITY_BY_TARGETNAME( pentTarget, STRING( m_iszEntity ) );
 				continue;
 			}
@@ -277,6 +280,7 @@ int CCineMonster :: FindEntity( void )
 			if ( pTarget && pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_BY_NAME ) )
 			{
 				m_hTargetEnt = pTarget;
+				monster_not_found = false;
 				return TRUE;
 			}
 			ALERT( at_aiconsole, "Found %s, but can't play!\n", STRING(m_iszEntity) );
@@ -297,6 +301,7 @@ int CCineMonster :: FindEntity( void )
 					pTarget = pEntity->MyMonsterPointer( );
 					if ( pTarget && pTarget->CanPlaySequence( FCanOverrideState(), SS_INTERRUPT_IDLE ) )
 					{
+						monster_not_found = false;
 						m_hTargetEnt = pTarget;
 						return TRUE;
 					}
@@ -494,8 +499,9 @@ void CCineMonster :: CineThink( void )
 	else
 	{
 		CancelScript( );
-		ALERT( at_aiconsole, "script \"%s\" can't find monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
-		pev->nextthink = gpGlobals->time + 1.0;
+		if( monster_not_found )
+			ALERT( at_aiconsole, "script \"%s\" can't find monster \"%s\"\n", STRING( pev->targetname ), STRING( m_iszEntity ) );
+		SetNextThink( 1.0 );
 	}
 }
 
@@ -715,7 +721,8 @@ void ScriptEntityCancel( edict_t *pentCine )
 // find all the cinematic entities with my targetname and stop them from playing
 void CCineMonster :: CancelScript( void )
 {
-	ALERT( at_aiconsole, "Cancelling script: %s\n", STRING(m_iszPlay) );
+	if( monster_not_found )
+		ALERT( at_aiconsole, "Cancelling script: %s\n", STRING(m_iszPlay) );
 	
 	if ( !pev->targetname )
 	{
@@ -1106,7 +1113,7 @@ void CScriptedSentence :: Spawn( void )
 	if ( !pev->targetname )
 	{
 		SetThink(&CScriptedSentence::FindThink );
-		SetNextThink(1.0);
+		SetNextThink( RANDOM_FLOAT( 0.8, 1.8 ) ); // spread think times
 	}
 
 	// diffusion - this is a weird system, but it doesn't break compatibility and now I can override
