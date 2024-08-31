@@ -2210,23 +2210,29 @@ void CCar::Drive( void )
 			TowerAngles = pChassisMdl->GetLocalAngles();
 
 		if( CamUnlocked )
-			TowerAngles.y = hDriver->pev->v_angle.y;
+		{
+			// turret moves almost freely because we use it as a camera
+			TowerAngles = hDriver->pev->v_angle;
+			TowerAngles.x *= 0.4f; // let's not get carried away...
+		}
 		else
 			TowerAngles.y = pev->angles.y;
 		pTankTower->SetAbsAngles( TowerAngles );
 
 		if( (hDriver->pev->button & IN_ATTACK) && (gpGlobals->time > LastShootTime + 1) )
 		{
-			// gpGlobals->v_forward comes from the driver's v_angle vector! don't mess up util_makevectors
+			// use forward vector of the tower
+			UTIL_MakeVectors( TowerAngles );
 			Vector RocketOrg = pTankTower->GetAbsOrigin() + gpGlobals->v_forward * 50;
-			Vector RocketAng = hDriver->pev->v_angle;
-			RocketAng.x -= 10; // aim higher
+			Vector RocketAng = TowerAngles;
 
 			if( !CamUnlocked )
 				RocketAng = TowerAngles; // just forward
 			
 			if( !CamUnlocked )
 				RocketAng.x = RocketAng.z = 0;
+
+			RocketAng.x -= 5; // aim higher
 			CBaseEntity *pRocket = CBaseEntity::Create( "apc_projectile", RocketOrg, RocketAng, hDriver->edict() );
 
 			if( pRocket )
@@ -2236,6 +2242,9 @@ void CCar::Drive( void )
 			}
 
 			LastShootTime = gpGlobals->time;
+
+			// bring back the car vectors
+			UTIL_MakeVectors( GetAbsAngles() );
 		}
 	}
 
@@ -2412,7 +2421,11 @@ void CCar::Camera(void)
 
 	TraceResult CamTr;
 
-	if( CamUnlocked && pFreeCam )
+	if( CamUnlocked && pTankTower )
+	{
+		SET_VIEW( hDriver->edict(), pTankTower->edict() );
+	}
+	else if( CamUnlocked && pFreeCam )
 	{
 		SET_VIEW( hDriver->edict(), pFreeCam->edict() );
 		TraceResult CamTr;
