@@ -555,6 +555,8 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		{
 			// ALERT( at_console, "waiting %f\n", m_flStopTalkTime - gpGlobals->time );
 			IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+			if( HasConditions( bits_COND_CLIENT_PUSH ) ) // interrupt, start moving!
+				TaskComplete();
 		}
 		else
 		{
