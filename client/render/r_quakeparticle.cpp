@@ -1676,6 +1676,8 @@ void CQuakePartSystem :: Update( void )
 	if( glState.drawTrans )
 		GL_DepthMask( GL_FALSE );
 
+	pglBindVertexArray( GL_FALSE ); // just in case
+
 	DrawParticles( ParticleArray_Default );
 	DrawParticles( ParticleArray_Dustmote );
 	DrawParticles( ParticleArray_Sparks );

@@ -533,6 +533,8 @@ void R_RenderGrassOnList( void )
 			R_DrawGrassMesh( g, i, hLastShader, hCachedMatrix );
 	}
 
+	pglBindVertexArray( world->vertex_array_object ); // restore old binding
+
 	GL_CleanupAllTextureUnits();
 
 	GL_Cull( GL_FRONT );
