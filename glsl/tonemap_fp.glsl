@@ -28,12 +28,12 @@ void main( void )
 
 	if( bool( u_GenericCondition == 1.0f ))
 	{
-		float tonemap_exposure = exposure * brightness;
-		const vec2 lum = vec2( 0.8, 0.8 );   // fixed constant instead of adaptation curve
-		float Lp = ( 8.0 / lum.x ) * min( color.x, min( color.y, color.z ));
+		vec2 lum = vec2( exposure * 0.5, exposure * 2.0 );   // fixed constant instead of adaptation curve
+		float Lp = ( 8.0 / lum.x ) * max( color.x, min( color.y, color.z ));
 		float LmSqr = ( lum.y + 8.0 * lum.y ) * ( lum.y + 8.0 * lum.y ) * ( lum.y + 8.0 * lum.y );
-		float toneScalar = ( Lp * ( 1.0 + ( Lp / ( LmSqr )))) / ( 1.0 + Lp ) * tonemap_exposure;
+		float toneScalar = ( Lp * ( 1.0 + ( Lp / ( LmSqr )))) / ( 1.0 + Lp ) * exposure;
 		color *= toneScalar;
+		color *= brightness; 
 	}
 	else
 	{
