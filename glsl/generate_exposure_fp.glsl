@@ -27,14 +27,14 @@ float ComputeEV100FromAvgLuminance( float avgLum )
 
 float ConvertEV100ToExposure( float ev100 ) 
 {
-    float max_luminance = 1.2 * pow( 2.0, ev100 );
+    float max_luminance = 1.2 * pow( 4.0, ev100 );
     return 1.0 / ( max_luminance );
 }
 
 void main()
 {
     const float exposureMin = 0.5;
-    const float exposureMax = 2.0;
+    const float exposureMax = 1.1;
     const float exposureScale = 1.0;
     const float adaptRateToDark = 1.2;
     const float adaptRateToBright = 1.6;
