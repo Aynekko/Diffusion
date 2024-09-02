@@ -3882,6 +3882,22 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 	
 	if( !FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) )
 	{
+		// diffusion - here's the thing with this half-life lighting
+		// ambient and shade seem to be too dark if taken from the floor, compared to those takes from the sunlight, which seem to be absolutely fine (???)
+		// so I want to make them brighter, in the floor case only, but how to determine if we took the lighting from the floor?
+		// plightvec[2] < -0.8 - this is how. This is probably bad, but works... This, or I rip everything from the engine and rewrite (no, thanks)
+		#if 1
+		if( lighting.plightvec[2] < -0.8 )
+		{
+			lighting.ambientlight *= 3.0f;
+			if( lighting.ambientlight > 128 )
+				lighting.ambientlight = 128;
+			lighting.shadelight *= 3.0f;
+			if( lighting.shadelight > 192 )
+				lighting.shadelight = 192;
+		}
+		#endif
+
 		if( FBitSet( ent->curstate.iuser1, CF_STATIC_ENTITY ) )
 		{
 			// use default hl lighting for env_statics
