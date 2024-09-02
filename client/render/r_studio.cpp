@@ -3889,10 +3889,10 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 		#if 1
 		if( lighting.plightvec[2] < -0.8 )
 		{
-			lighting.ambientlight *= 3.0f;
+			lighting.ambientlight *= vid_gamma->value * 0.65f + vid_brightness->value * 0.35f; // this is strangely fitting. maybe the gamma doesn't work?...
 			if( lighting.ambientlight > 128 )
 				lighting.ambientlight = 128;
-			lighting.shadelight *= 3.0f;
+			lighting.shadelight *= vid_gamma->value * 0.65f + vid_brightness->value * 0.35f;
 			if( lighting.shadelight > 192 )
 				lighting.shadelight = 192;
 		}
