@@ -5490,12 +5490,11 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready
 			&& (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f)
-			&& ((tr.materials[mat->gl_diffuse_id].ReflectScale != cached_reflectscale) || (cached_cubemap != m_pModelInstance->cubemap))
 			&& !IsBuildingCubemaps() ) // diffusioncubemaps
 		{
-			if( cached_cubemap != m_pModelInstance->cubemap )
+			if( m_pModelInstance->cubemap )
 			{
-				if( m_pModelInstance->cubemap != NULL )
+				if( cached_cubemap != m_pModelInstance->cubemap )
 				{
 					GL_Bind( GL_TEXTURE2, m_pModelInstance->cubemap->texture );
 					// box mins
@@ -5504,18 +5503,19 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 					cubemap_params[1] = m_pModelInstance->cubemap->maxs;
 					// origin
 					cubemap_params[2] = m_pModelInstance->cubemap->origin;
+					pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
+					cached_cubemap = m_pModelInstance->cubemap;
 				}
-				else
-				{
-					GL_Bind( GL_TEXTURE2, tr.blackCubeTexture );
-					cubemap_params[0] = g_vecZero;
-					cubemap_params[1] = g_vecZero;
-					cubemap_params[2] = g_vecZero;
-				}
-
-				// send through one call!
+				
+			}
+			else // model doesn't have a cubemap
+			{
+				GL_Bind( GL_TEXTURE2, tr.blackCubeTexture );
+				cubemap_params[0] = g_vecZero;
+				cubemap_params[1] = g_vecZero;
+				cubemap_params[2] = g_vecZero;
 				pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
-				cached_cubemap = m_pModelInstance->cubemap;
+				cached_cubemap = NULL;
 			}
 
 			if( tr.materials[mat->gl_diffuse_id].ReflectScale != cached_reflectscale )
