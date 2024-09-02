@@ -115,7 +115,7 @@ Task_t	tlIdleSpeakWait[] =
 	{ TASK_SET_ACTIVITY,	(float)ACT_SIGNAL3	},// Stop and talk
 	{ TASK_TLK_SPEAK,		(float)0		},// question or remark
 	{ TASK_TLK_EYECONTACT,	(float)0		},// 
-	{ TASK_WAIT,			(float)2		},// wait - used when sci is in 'use' mode to keep head turned
+	{ TASK_WAIT_RANDOM,		(float)0.5		},// wait - used when sci is in 'use' mode to keep head turned
 };
 
 Schedule_t	slIdleSpeakWait[] =
