@@ -34,7 +34,7 @@ float ConvertEV100ToExposure( float ev100 )
 void main()
 {
     const float exposureMin = 0.5;
-    const float exposureMax = 1.1;
+    const float exposureMax = 0.8;
     const float exposureScale = 1.0;
     const float adaptRateToDark = 1.2;
     const float adaptRateToBright = 1.6;
