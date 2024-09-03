@@ -3845,11 +3845,9 @@ void CBaseMonster::PlaySentence( const char *pszSentence, float duration, float 
 void CBaseMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener, string_t SpeakFrom )
 { 
 	if( pListener )
-	{
 		m_hTalkTarget = pListener;
-		m_flTalkTime = gpGlobals->time + duration;
-	}
 	
+	m_flTalkTime = gpGlobals->time + duration;
 	PlaySentence( pszSentence, duration, volume, attenuation, SpeakFrom );
 }
 

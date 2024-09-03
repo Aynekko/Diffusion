@@ -160,7 +160,6 @@ public:
 	int		m_nSpeak;			// number of times initiated talking
 	int		m_voicePitch;		// pitch of voice for this head
 	const char	*m_szGrp[TLK_CGROUPS];	// sentence group names
-	float		m_useTime;		// Don't allow +USE until this time
 	int		m_iszUse;			// Custom +USE sentence group (follow)
 	int		m_iszUnUse;		// Custom +USE sentence group (stop following)
 	int		m_iszDecline;		// Custom +USE sentence group (refuse to follow) LRC

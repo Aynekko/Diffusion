@@ -34,7 +34,6 @@ float	CTalkMonster::g_talkWaitTime = 0;		// time delay until it's ok to speak: u
 BEGIN_DATADESC( CTalkMonster )
 	DEFINE_FIELD( m_bitsSaid, FIELD_INTEGER ),
 	DEFINE_FIELD( m_nSpeak, FIELD_INTEGER ),
-	DEFINE_FIELD( m_useTime, FIELD_TIME ),
 	DEFINE_KEYFIELD( m_iszUse, FIELD_STRING, "UseSentence" ),
 	DEFINE_KEYFIELD( m_iszUnUse, FIELD_STRING, "UnUseSentence" ),
 	DEFINE_KEYFIELD( m_iszDecline, FIELD_STRING, "RefusalSentence" ), //LRC
@@ -1173,7 +1172,6 @@ void CTalkMonster::PlayScriptedSentence( const char *pszSentence, float duration
 		ShutUpFriends();
 
 	ClearConditions( bits_COND_CLIENT_PUSH );	// Forget about moving!  I've got something to say!
-	m_useTime = gpGlobals->time + duration;
 	PlaySentence( pszSentence, duration, volume, attenuation );
 
 	m_hTalkTarget = pListener;
@@ -1397,7 +1395,8 @@ void CTalkMonster::StopFollowing( BOOL clearSchedule )
 	{
 		if ( !(m_afMemory & bits_MEMORY_PROVOKED) )
 		{
-			PlaySentence( m_szGrp[TLK_UNUSE], RANDOM_FLOAT(2.8, 3.2), VOL_NORM, ATTN_IDLE );
+			if( m_flTalkTime <= gpGlobals->time ) // make sure I'm not talking
+				PlaySentence( m_szGrp[TLK_UNUSE], RANDOM_FLOAT(2.8, 3.2), VOL_NORM, ATTN_IDLE );
 			m_hTalkTarget = m_hTargetEnt;
 		}
 
@@ -1422,7 +1421,8 @@ void CTalkMonster::StartFollowing( CBaseEntity *pLeader )
 
 	m_hTargetEnt = pLeader;
 
-	PlaySentence( m_szGrp[TLK_USE], RANDOM_FLOAT(2.8, 3.2), VOL_NORM, ATTN_IDLE );
+	if( m_flTalkTime <= gpGlobals->time ) // make sure I'm not talking
+		PlaySentence( m_szGrp[TLK_USE], RANDOM_FLOAT(2.8, 3.2), VOL_NORM, ATTN_IDLE );
 
 	m_hTalkTarget = m_hTargetEnt;
 	ClearConditions( bits_COND_CLIENT_PUSH );
@@ -1447,10 +1447,6 @@ BOOL CTalkMonster::CanFollow( void )
 
 void CTalkMonster :: FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	// Don't allow use during a scripted_sentence
-	if ( m_useTime > gpGlobals->time )
-		return;
-
 	if ( pCaller != NULL && pCaller->IsPlayer() )
 	{
 		// Pre-disaster followers can't be used
