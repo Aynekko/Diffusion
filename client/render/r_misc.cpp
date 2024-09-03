@@ -2075,6 +2075,8 @@ void R_NewMap( void )
 	}
 
 	memset( tr.studio_screen_tex, 0, sizeof( tr.studio_screen_tex ) );
+
+	gHUD.m_vecLastFacing = gEngfuncs.GetLocalPlayer()->curstate.angles;
 }
 
 void R_VidInit( void )

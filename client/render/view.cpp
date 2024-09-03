@@ -35,6 +35,14 @@ int CL_IsThirdPerson( void )
 	return 0;
 }
 
+bool CL_IsCrouching( void )
+{
+	if( gEngfuncs.GetLocalPlayer()->curstate.usehull == 1 )
+		return true;
+
+	return false;
+}
+
 cl_entity_t *v_intermission_spot;
 float v_idlescale;
 int pause = 0;
@@ -417,7 +425,6 @@ float V_CalcBob( struct ref_params_s *pparams )
 	float	cycle;
 	static float	lasttime;
 	Vector	vel;
-
 
 	if( pparams->onground == -1 || pparams->time == lasttime )
 	{
@@ -977,7 +984,6 @@ void V_CalcGunAngle( struct ref_params_s *pparams )
 //==========================
 void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, const Vector &original_angles )
 {
-	static Vector m_vecLastFacing;
 	Vector vOriginalOrigin = origin;
 	Vector vOriginalAngles = angles;
 
@@ -990,7 +996,7 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 	{
 		Vector vDifference;
 
-		vDifference = forward - m_vecLastFacing;
+		vDifference = forward - gHUD.m_vecLastFacing;
 
 		float flSpeed = 3.0f;
 
@@ -1006,9 +1012,9 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 		}
 
 		// FIXME:  Needs to be predictable?
-		m_vecLastFacing = m_vecLastFacing + vDifference * (flSpeed * pparams->frametime);
+		gHUD.m_vecLastFacing = gHUD.m_vecLastFacing + vDifference * (flSpeed * pparams->frametime);
 		// Make sure it doesn't grow out of control!!!
-		m_vecLastFacing = m_vecLastFacing.Normalize();
+		gHUD.m_vecLastFacing = gHUD.m_vecLastFacing.Normalize();
 		origin = origin + (vDifference * -1.0f) * flSpeed * 0.25;  // diffusion *0.25
 	}
 
@@ -1962,14 +1968,19 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	//	LowerGunAmount = bound(0, LowerGunAmount, 1);
 	//	view->origin[2] -= LowerGunAmount;
 		// another solution:
-	if( gHUD.m_iKeyBits & (IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT) )
+	if( CL_IsCrouching() )
+	{
+		if( GunPosZCurrent > 0 )
+			GunPosZCurrent -= 3 * g_fFrametime;
+	}
+	else if( gHUD.m_iKeyBits & (IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT) )
 	{
 		if( pparams->simvel.Length2D() > 0 && (GunPosZCurrent < 1) )
-			GunPosZCurrent += pparams->simvel.Length2D() * 0.015 * g_fFrametime;
+			GunPosZCurrent += pparams->simvel.Length2D() * 0.02f * g_fFrametime;
 	}
 	else
 	{
-		if( pparams->simvel.Length2D() <= 150 && (GunPosZCurrent > 0) )
+		if( GunPosZCurrent > 0 )
 			GunPosZCurrent -= 3 * g_fFrametime;
 	}
 	if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN )

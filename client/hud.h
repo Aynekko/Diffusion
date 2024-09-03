@@ -933,6 +933,9 @@ public:
 	float ScreenDrips_DripIntensity;
 	float ScreenDrips_OverrideTime;
 
+	// viewmodel lag
+	Vector m_vecLastFacing;
+
 	// glitch shader
 	float GlitchAmount;
 	float GlitchHoldTime;
