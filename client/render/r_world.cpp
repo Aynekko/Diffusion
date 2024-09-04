@@ -2573,7 +2573,7 @@ void R_RenderDynLightList( void )
 	if( R_FullBright() )
 		return;
 
-	if( !R_CountPlights() )
+	if( !tr.num_dynlights )
 		return;
 
 	GL_Blend( GL_TRUE );
@@ -2581,20 +2581,13 @@ void R_RenderDynLightList( void )
 	pglEnable( GL_SCISSOR_TEST );
 	pglBindVertexArray( world->vertex_array_object );
 
-	plight_t *pl = cl_plights;
+	plight_t *pl = NULL;
 
-	for( int i = 0; i < MAX_PLIGHTS; i++, pl++ )
+	for( int i = 0; i < tr.num_dynlights; i++ )
 	{
-		if( pl->die < tr.time || !pl->radius || pl->culled )
-			continue;
+		pl = tr.cur_dynlights[i];
 
 		RI->currentlight = pl;
-
-		if( !Mod_CheckBoxVisible( pl->absmin, pl->absmax ) )
-			continue;
-
-		if( R_CullBox( pl->absmin, pl->absmax ) )
-			continue;
 
 		// draw world from light position
 		R_BuildFaceListForLight( pl );

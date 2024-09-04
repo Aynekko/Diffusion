@@ -5208,25 +5208,18 @@ void CStudioModelRenderer::RenderDynLightList( void )
 	if( IsBuildingCubemaps() )
 		return;
 
-	if( !R_CountPlights() )
+	if( !tr.num_dynlights )
 		return;
 
 	GL_Blend( GL_TRUE );
 	GL_DepthMask( GL_FALSE );
 	GL_BlendFunc( GL_ONE, GL_ONE );
 	pglEnable( GL_SCISSOR_TEST );
-	plight_t *pl = cl_plights;
+	plight_t *pl = NULL;
 
-	for( int i = 0; i < MAX_PLIGHTS; i++, pl++ )
+	for( int i = 0; i < tr.num_dynlights; i++ )
 	{
-		if( pl->die < tr.time || !pl->radius || pl->culled )
-			continue;
-
-		if( !Mod_CheckBoxVisible( pl->absmin, pl->absmax ) )
-			continue;
-
-		if( R_CullBox( pl->absmin, pl->absmax ) )
-			continue;
+		pl = tr.cur_dynlights[i];
 
 		RI->currentlight = pl;
 

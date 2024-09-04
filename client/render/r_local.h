@@ -366,6 +366,8 @@ typedef struct
 	int	num_solid_entities;
 	int	num_trans_entities;
 	int num_subview_entities;
+	plight_t *cur_dynlights[MAX_PLIGHTS]; // list of dynlights in the current pass
+	int num_dynlights; // number of lights
 
 	gl_bmodelface_t	draw_surfaces[MAX_MAP_FACES];		// 390 kB here
 	int		num_draw_surfaces;
@@ -468,6 +470,8 @@ typedef struct
 	int nullmodelindex;
 
 	int volumetric_light_texture;
+
+	int test; // counter/bool for testing purposes
 } ref_globals_t;
 
 typedef struct
@@ -748,6 +752,7 @@ void DrawDecalsBatch( void );
 //
 void R_AnimateLight( void );
 void R_PushDlights( void );
+void R_BuildLightList( void );
 int R_CountPlights( bool countShadowLights = false );
 Vector R_LightsForPoint( const Vector &point, float radius );
 void R_GetLightVectors( cl_entity_t *pEnt, Vector &origin, Vector &angles );

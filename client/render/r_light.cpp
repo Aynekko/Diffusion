@@ -409,13 +409,41 @@ int R_CountPlights( bool countShadowLights )
 		if( pl->die < tr.time || !pl->radius || pl->culled )
 			continue;
 
-		if( (FBitSet( pl->flags, CF_NOSHADOWS )) && countShadowLights )
+		if( countShadowLights && FBitSet( pl->flags, CF_NOSHADOWS ) )
 			continue;
 
 		numPlights++;
 	}
 	
 	return numPlights;
+}
+
+//====================================================================================
+// R_BuildLightList: build a list of available lights for current renderpass
+//====================================================================================
+void R_BuildLightList( void )
+{
+	tr.num_dynlights = 0;
+	
+	if( !R_CountPlights() )
+		return;
+
+	plight_t *pl = cl_plights;
+
+	for( int i = 0; i < MAX_PLIGHTS; i++, pl++ )
+	{
+		if( pl->die < tr.time || !pl->radius || pl->culled )
+			continue;
+
+		if( !Mod_CheckBoxVisible( pl->absmin, pl->absmax ) )
+			continue;
+
+		if( R_CullBox( pl->absmin, pl->absmax ) )
+			continue;
+
+		tr.cur_dynlights[tr.num_dynlights] = pl;
+		tr.num_dynlights++;
+	}
 }
 
 /*
@@ -477,6 +505,8 @@ void R_PushDlights( void )
 		else
 			r_stats.c_plights++;
 	}
+
+	R_BuildLightList();
 }
 
 /*
@@ -577,13 +607,15 @@ Vector R_LightsForPoint( const Vector &point, float radius )
 
 	lightColor = g_vecZero;
 
-	for( int lnum = 0; lnum < MAX_PLIGHTS; lnum++ )
-	{
-		plight_t *pl = &cl_plights[lnum];
-		float atten = 1.0f;
+	if( !tr.num_dynlights )
+		return lightColor;
 
-		if( pl->die < tr.time || !pl->radius )
-			continue;
+	plight_t *pl = NULL;
+
+	for( int lnum = 0; lnum < tr.num_dynlights; lnum++ )
+	{
+		pl = tr.cur_dynlights[lnum];
+		float atten = 1.0f;
 
 		Vector dir = (pl->origin - point);
 		float dist = dir.Length();
