@@ -48,6 +48,7 @@ float v_idlescale;
 int pause = 0;
 
 float GunPosZCurrent = 0;
+float GunPosXYCurrent = 0;
 
 bool UnderwaterSoundPlaying = false;
 
@@ -1923,7 +1924,7 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	*/
 
 	//---------diffusion hl2 bob start
-	Vector    forward, right;
+	Vector forward, right;
 
 	AngleVectors( view->angles, forward, right, NULL );
 
@@ -1970,23 +1971,26 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 		// another solution:
 	if( CL_IsCrouching() )
 	{
-		if( GunPosZCurrent > 0 )
-			GunPosZCurrent -= 3 * g_fFrametime;
+		GunPosZCurrent = lerp( GunPosZCurrent, 0, 2.0f * g_fFrametime );
+		GunPosXYCurrent = lerp( GunPosXYCurrent, 1, 1.5f * g_fFrametime );
 	}
 	else if( gHUD.m_iKeyBits & (IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT) )
 	{
 		if( pparams->simvel.Length2D() > 0 && (GunPosZCurrent < 1) )
 			GunPosZCurrent += pparams->simvel.Length2D() * 0.02f * g_fFrametime;
+		GunPosXYCurrent = lerp( GunPosXYCurrent, 0, 1.5f * g_fFrametime );
 	}
 	else
 	{
-		if( GunPosZCurrent > 0 )
-			GunPosZCurrent -= 3 * g_fFrametime;
+		GunPosZCurrent = lerp( GunPosZCurrent, 0, 2.0f * g_fFrametime );
+		GunPosXYCurrent = lerp( GunPosXYCurrent, 0, 1.5f * g_fFrametime );
 	}
 	if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN )
 		view->origin.z += GunPosZCurrent;
 	else
 		view->origin.z -= GunPosZCurrent;
+
+	view->origin -= forward * GunPosXYCurrent + right * GunPosXYCurrent * 1.25f;
 
 	// and move the gun in the direction opposite to movement
 	float VelX = -pparams->simvel[0] * 0.004;
@@ -2011,15 +2015,14 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	if( !RP_OUTSIDE( RI->viewleaf ) )
 	{
 		pmtrace_t ptr;
-		Vector VecEnd, Forward;
-		gEngfuncs.pfnAngleVectors( view->angles, Forward, NULL, NULL );
-		VecEnd = view->origin + Forward * 32;
+		Vector VecEnd;
+		VecEnd = view->origin + forward * 32;
 		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
 		gEngfuncs.pEventAPI->EV_PlayerTrace( view->origin, VecEnd, PM_NORMAL, -1, &ptr );
 		static float move_back_dist = 0.0f;
 		float move_back_speed = (ptr.fraction < 1.0f) ? 35 : 15;
 		move_back_dist = CL_UTIL_Approach( ((1 / (1 + ptr.fraction) - 0.5f)) * 25, move_back_dist, gHUD.m_flTimeDelta * move_back_speed );
-		view->origin -= Forward * move_back_dist;
+		view->origin -= forward * move_back_dist;
 	}
 
 	V_CalcViewModelLag( pparams, view->origin, view->angles, lastAngles );
