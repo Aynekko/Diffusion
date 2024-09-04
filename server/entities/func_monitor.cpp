@@ -236,7 +236,7 @@ void CFuncMonitor :: VisThink( void )
 		{
 			CBaseEntity *pClient = CBaseEntity::Instance( FIND_CLIENT_IN_PVS( edict() ) );
 			
-			if( !pClient )
+			if( FNullEnt( pClient ) )
 				ClearBits( pTarget->pev->effects, EF_MERGE_VISIBILITY );
 			else
 			{
