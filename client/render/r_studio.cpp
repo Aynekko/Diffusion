@@ -3849,6 +3849,9 @@ StudioStaticLight
 */
 void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 {
+	if( RI->params & RP_SHADOWPASS )
+		return;
+	
 	// setup advanced vertexlighting for env_static entities
 	if( (ent->curstate.iuser3 > 0) && world->vertex_lighting != NULL )
 	{
@@ -3940,9 +3943,6 @@ StudioClientEvents
 
 void CStudioModelRenderer::StudioClientEvents( void )
 {
-	if( RI->params & RP_SHADOWPASS )
-		return;
-	
 	// forced events from server
 	if( tr.studioevent[m_pCurrentEntity->index].event > 0 )
 	{
@@ -4543,27 +4543,6 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 		// grab the static lighting from world
 		StudioStaticLight( m_pCurrentEntity );
 
-		// convert bones into compacted GLSL array
-		if( m_pRenderModel->poseToBone != NULL )
-		{
-			for( int i = 0; i < m_pStudioHeader->numbones; i++ )
-			{
-				matrix3x4 out = m_pModelInstance->m_pbones[i].ConcatTransforms( m_pRenderModel->poseToBone->posetobone[i] );
-				out.CopyToArray4x3( &m_pModelInstance->m_glstudiobones[i * 3] );
-				m_pModelInstance->m_studioquat[i] = out.GetQuaternion();
-				m_pModelInstance->m_studiopos[i] = out.GetOrigin();
-			}
-		}
-		else
-		{
-			for( int i = 0; i < m_pStudioHeader->numbones; i++ )
-			{
-				m_pModelInstance->m_pbones[i].CopyToArray4x3( &m_pModelInstance->m_glstudiobones[i * 3] );
-				m_pModelInstance->m_studioquat[i] = m_pModelInstance->m_pbones[i].GetQuaternion();
-				m_pModelInstance->m_studiopos[i] = m_pModelInstance->m_pbones[i].GetOrigin();
-			}
-		}
-
 		model_t *pweaponmodel = NULL;
 
 		if( m_pCurrentEntity->curstate.weaponmodel )
@@ -4733,7 +4712,10 @@ void CStudioModelRenderer::DrawStudioModelInternal( cl_entity_t *e )
 	if( tr.nullmodelindex > 0 && e->curstate.modelindex == tr.nullmodelindex )
 		return;
 
-	int flags = (STUDIO_RENDER | STUDIO_EVENTS);
+	int flags = STUDIO_RENDER;
+
+	if( !(RI->params & RP_SHADOWPASS) )
+		flags |= STUDIO_EVENTS;
 
 	if( e->player )
 	{
