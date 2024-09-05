@@ -648,15 +648,10 @@ void V_CalcSpectatorRefdef( struct ref_params_s *pparams )
 
 		if( timeDiff > 0 )
 		{
-			vec3_t distance;
-			VectorSubtract( ent->prevstate.origin, ent->curstate.origin, distance );
-			distance *= 1 / timeDiff;
+			Vector distance = ent->prevstate.origin - ent->curstate.origin;
+			distance *= 1.0f / timeDiff;
 
-			velocity[0] = velocity[0] * 0.9f + distance[0] * 0.1f;
-			velocity[1] = velocity[1] * 0.9f + distance[1] * 0.1f;
-			velocity[2] = velocity[2] * 0.9f + distance[2] * 0.1f;
-
-			VectorCopy( velocity, pparams->simvel );
+			pparams->simvel = velocity * 0.9f + distance * 0.1f;
 		}
 
 		// predict missing client data and set weapon model ( in HLTV mode, inset in eye mode or in AG )
@@ -833,8 +828,8 @@ void V_GetInEyePos( int target, Vector &origin, Vector &angles )
 	if( !target )
 	{
 		// just copy a save in-map position
-		VectorCopy( vJumpAngles, angles );
-		VectorCopy( vJumpOrigin, origin );
+		angles = vJumpAngles;
+		origin = vJumpOrigin;
 		return;
 	}
 
@@ -843,8 +838,8 @@ void V_GetInEyePos( int target, Vector &origin, Vector &angles )
 	if( !ent )
 		return;
 
-	VectorCopy( ent->origin, origin );
-	VectorCopy( ent->angles, angles );
+	origin = ent->origin;
+	angles = ent->angles;
 
 	angles[PITCH] *= -3.0f;	// see CL_ProcessEntityUpdate()
 
@@ -871,8 +866,8 @@ void V_GetChasePos( int target, Vector &cl_angles, Vector &origin, Vector &angle
 	if( !ent )
 	{
 		// just copy a save in-map position
-		VectorCopy( vJumpAngles, angles );
-		VectorCopy( vJumpOrigin, origin );
+		angles = vJumpAngles;
+		origin = vJumpOrigin;
 		return;
 	}
 
@@ -1138,9 +1133,7 @@ void V_CalcSendOrigin( struct ref_params_s *pparams )
 	// dissapear when viewed with the eye exactly on it.
 	// FIXME, we send origin at 1/128 now, change this?
 	// the server protocol only specifies to 1/16 pixel, so add 1/32 in each axis
-	pparams->vieworg[0] += 1.0f / 32;
-	pparams->vieworg[1] += 1.0f / 32;
-	pparams->vieworg[2] += 1.0f / 32;
+	pparams->vieworg += 0.03125f; // 1.0f / 32;
 }
 
 // remaps an angular variable to a 3 band function:
@@ -1942,24 +1935,20 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 		angles[ROLL] -= g_verticalBob * 0.3f;
 		angles[PITCH] += g_verticalBob * 0.8f;
 		angles[YAW] += g_lateralBob * 0.5f;
-		view->origin[0] = view->origin[0] - g_lateralBob * 0.8f * right[0];
-		view->origin[1] = view->origin[1] - g_lateralBob * 0.8f * right[1];
-		view->origin[2] = (view->origin[2] - g_lateralBob * 0.8f * right[2]) + 1;  // weapon height lower a bit
+		view->origin -= g_lateralBob * 0.8f * right;
+		view->origin.z += 1.0f;  // weapon height lower a bit
 	}
 	else
 	{
-		view->origin[0] = view->origin[0] + g_verticalBob * 0.1f * forward[0];
-		view->origin[1] = view->origin[1] + g_verticalBob * 0.1f * forward[1];
-		view->origin[2] = view->origin[2] + g_verticalBob * 0.1f * forward[2];
+		view->origin += g_verticalBob * 0.1f * forward;
 		// Z bob a bit more
-		view->origin[2] += g_verticalBob * 0.1f;
+		view->origin.z += g_verticalBob * 0.1f;
 		// bob the angles
 		angles[ROLL] += g_verticalBob * 0.3f;
 		angles[PITCH] -= g_verticalBob * 0.8f;
 		angles[YAW] -= g_lateralBob * 0.5f;
-		view->origin[0] = view->origin[0] + g_lateralBob * 0.8f * right[0];
-		view->origin[1] = view->origin[1] + g_lateralBob * 0.8f * right[1];
-		view->origin[2] = (view->origin[2] + g_lateralBob * 0.8f * right[2]) - 1;  // weapon height lower a bit
+		view->origin += g_lateralBob * 0.8f * right;
+		view->origin.z -= 1.0f;  // weapon height lower a bit
 	}
 
 	//----------hl2 bob end
@@ -2063,8 +2052,8 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 
 		if( viewentity )
 		{
-			VectorCopy( viewentity->origin, pparams->vieworg );
-			VectorCopy( viewentity->angles, pparams->viewangles );
+			pparams->vieworg = viewentity->origin;
+			pparams->viewangles = viewentity->angles;
 
 			// Store off overridden viewangles
 			v_angles = pparams->viewangles;

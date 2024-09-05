@@ -40,6 +40,7 @@ public:
 BEGIN_DATADESC(CExplosiveBarrel)
 	DEFINE_FUNCTION(Ignite),
 	DEFINE_FUNCTION(Explode),
+	DEFINE_FUNCTION( RespawnBarrel ),
 	DEFINE_FIELD( SpawnOrigin, FIELD_VECTOR ),
 	DEFINE_FIELD( RespawnTime, FIELD_INTEGER ),
 END_DATADESC();
