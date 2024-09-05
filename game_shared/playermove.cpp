@@ -354,11 +354,9 @@ void PM_PlayGroupSound( const char* szValue, int irand, float fvol )
 
 void PM_PlayStepSound( int step, float fvol )
 {
-	static int iSkipStep = 0;
-	int irand;
+	static int last_rand = -1; // the footstep sound will never repeat twice in a row
+	static int irand = 0;
 	Vector hvel;
-
-	pmove->iStepLeft = !pmove->iStepLeft;
 
 	if ( !pmove->runfuncs )
 		return;
@@ -366,8 +364,6 @@ void PM_PlayStepSound( int step, float fvol )
 	// diffusion - small price to pay for a drone without step sounds...ugh
 	if( pmove->flags & FL_ONTRAIN )
 		return;
-
-	irand = pmove->RandomLong(0,1) + ( pmove->iStepLeft * 2 );
 
 	// FIXME mp_footsteps needs to be a movevar
 	if ( pmove->multiplayer && !pmove->movevars->footsteps )
@@ -387,8 +383,10 @@ void PM_PlayStepSound( int step, float fvol )
 	{
 	default:
 	case STEP_CONCRETE:
-		if ( !pmove->RandomLong(0,3) )
-			irand = pmove->RandomLong(4,5);
+		irand = pmove->RandomLong( 0, 5 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 5 );
+		last_rand = irand;
 		switch (irand)
 		{
 		// right foot
@@ -404,6 +402,10 @@ void PM_PlayStepSound( int step, float fvol )
 	case STEP_NONE:
 		break;
 	case STEP_METAL:
+		irand = pmove->RandomLong( 0, 3 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 3 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
@@ -415,6 +417,10 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_DIRT:
+		irand = pmove->RandomLong( 0, 3 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 3 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
@@ -431,6 +437,10 @@ void PM_PlayStepSound( int step, float fvol )
 #endif
 		break;
 	case STEP_VENT:
+		irand = pmove->RandomLong( 0, 3 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 3 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
@@ -442,6 +452,10 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_GRATE:
+		irand = pmove->RandomLong( 0, 3 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 3 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
@@ -453,8 +467,10 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_TILE:
-		if ( !pmove->RandomLong(0,3) )
-			irand = 4;
+		irand = pmove->RandomLong( 0, 4 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 4 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
@@ -467,6 +483,10 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_SLOSH:
+		irand = pmove->RandomLong( 0, 3 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 3 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// diffusion - chan_static so the sound won't be cut off
@@ -482,6 +502,10 @@ void PM_PlayStepSound( int step, float fvol )
 #endif
 		break;
 	case STEP_WADE:
+		irand = pmove->RandomLong( 0, 3 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 3 );
+		last_rand = irand;
 		// diffusion - chan_static so the sound won't be cut off
 		switch (irand)
 		{
@@ -500,6 +524,10 @@ void PM_PlayStepSound( int step, float fvol )
 #endif
 		break;
 	case STEP_LADDER:
+		irand = pmove->RandomLong( 0, 3 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 3 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
@@ -511,6 +539,10 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_LADDER_WOOD:
+		irand = pmove->RandomLong( 0, 3 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 3 );
+		last_rand = irand;
 		switch( irand )
 		{
 			// right foot
@@ -522,8 +554,10 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_WOOD:
-		if ( !pmove->RandomLong(0,3) )
-			irand = pmove->RandomLong(4,5);
+		irand = pmove->RandomLong( 0, 5 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 5 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
@@ -537,8 +571,10 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_SNOW:
-		if ( !pmove->RandomLong(0,3) )
-			irand = pmove->RandomLong(4,5);
+		irand = pmove->RandomLong( 0, 5 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 5 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
@@ -552,8 +588,10 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_CARPET:
-		if ( !pmove->RandomLong(0,3) )
-			irand = pmove->RandomLong(4,5);
+		irand = pmove->RandomLong( 0, 5 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 5 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
@@ -567,8 +605,10 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_GRASS:
-		if ( !pmove->RandomLong(0,3) )
-			irand = pmove->RandomLong(4,5);
+		irand = pmove->RandomLong( 0, 5 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 5 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
@@ -582,8 +622,10 @@ void PM_PlayStepSound( int step, float fvol )
 		}
 		break;
 	case STEP_GRAVEL:
-		if ( !pmove->RandomLong(0,3) )
-			irand = pmove->RandomLong(4,5);
+		irand = pmove->RandomLong( 0, 5 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 5 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
@@ -602,8 +644,10 @@ void PM_PlayStepSound( int step, float fvol )
 #endif
 		break;
 	case STEP_GLASS:
-		if ( !pmove->RandomLong(0,3) )
-			irand = pmove->RandomLong(4,5);
+		irand = pmove->RandomLong( 0, 5 );
+		while( irand == last_rand )
+			irand = pmove->RandomLong( 0, 5 );
+		last_rand = irand;
 		switch(irand)
 		{
 		// right foot
