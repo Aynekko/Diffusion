@@ -35,11 +35,12 @@ GNU General Public License for more details.
 
 #define MAXARRAYVERTS	320000 // 65536 // diffusion - like in PrimeXT
 
-#define MF_STATIC_BOUNDS	BIT( 0 )	// this model is a env_static. don't recalc bounds every frame
-#define MF_VERTEX_LIGHTING	BIT( 1 )	// model has the custom vertex lighting (loading from level)
-#define MF_VL_BAD_CACHE	BIT( 2 )	// for some reasons this model can't be instanced with a vertex lighting (bad crc, mismatch vertexcount etc)
+#define MF_STATIC_BOUNDS		BIT( 0 )	// this model is a env_static. don't recalc bounds every frame
+#define MF_VERTEX_LIGHTING		BIT( 1 )	// model has the custom vertex lighting (loading from level)
+#define MF_VL_BAD_CACHE			BIT( 2 )	// for some reasons this model can't be instanced with a vertex lighting (bad crc, mismatch vertexcount etc)
 #define MF_INIT_SMOOTHSTAIRS	BIT( 3 )
-#define MF_ATTACHMENTS_DONE	BIT( 4 )
+#define MF_ATTACHMENTS_DONE		BIT( 4 )
+#define MF_STATIC_LIGHTING_DONE BIT( 5 ) // diffusion - calculate lighting vector for env_static only once
 
 #define QSORT_MAX_STACKDEPTH		(MAX_MODEL_MESHES)
 

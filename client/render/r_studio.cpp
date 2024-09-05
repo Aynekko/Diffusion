@@ -3869,19 +3869,39 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 			}
 		}
 	}
-
-	float dynamic = r_dynamic->value;
-	alight_t lighting;
-	Vector dir;
-	lighting.plightvec = dir;
-
-	// setup classic Half-Life lighting
-	r_dynamic->value = 0.0f; // ignore dlights
-	IEngineStudio.StudioDynamicLight( ent, &lighting );
-	r_dynamic->value = dynamic;
 	
-	if( !FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) )
+	if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) || FBitSet( ent->curstate.iuser1, CF_STATIC_ENTITY ) )
 	{
+		if( !(m_pModelInstance->info_flags & MF_STATIC_LIGHTING_DONE) )
+		{
+			alight_t lighting;
+			Vector tmp;
+			lighting.plightvec = tmp;
+
+			// setup lighting vectors here, for env_static it should be done only once
+			float dynamic = r_dynamic->value;
+			r_dynamic->value = 0.0f; // ignore dlights
+			IEngineStudio.StudioDynamicLight( ent, &lighting );
+			r_dynamic->value = dynamic;
+			m_pModelInstance->lighting.ambientlight = lighting.ambientlight;
+			m_pModelInstance->lighting.shadelight = lighting.shadelight;
+			m_pModelInstance->lighting.color = lighting.color;
+			m_pModelInstance->lighting.plightvec = m_pModelInstance->m_plightmatrix.VectorIRotate( lighting.plightvec ); // turn back to model space
+			SetBits( m_pModelInstance->info_flags, MF_STATIC_LIGHTING_DONE );
+		}
+	}
+	else // dynamic entity or without vertex light
+	{
+		alight_t lighting;
+		Vector tmp; // yes, this is crucial! :D
+		lighting.plightvec = tmp;
+
+		// setup classic Half-Life lighting
+		float dynamic = r_dynamic->value;
+		r_dynamic->value = 0.0f; // ignore dlights
+		IEngineStudio.StudioDynamicLight( ent, &lighting );
+		r_dynamic->value = dynamic;
+
 		// diffusion - here's the thing with this half-life lighting
 		// ambient and shade seem to be too dark if taken from the floor, compared to those takes from the sunlight, which seem to be absolutely fine (???)
 		// so I want to make them brighter, in the floor case only, but how to determine if we took the lighting from the floor?
@@ -3898,29 +3918,17 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 		}
 		#endif
 
-		if( FBitSet( ent->curstate.iuser1, CF_STATIC_ENTITY ) )
-		{
-			// use default hl lighting for env_statics
-			m_pModelInstance->lighting.ambientlight = lighting.ambientlight;
-			m_pModelInstance->lighting.shadelight = lighting.shadelight;
-			m_pModelInstance->lighting.color = lighting.color;
-		}
-		else
-		{
-			// diffusion - smooth light change for everything else (moving models like viewmodel, players etc)
-			m_pModelInstance->lighting.curambientlight = CL_UTIL_Approach( lighting.ambientlight, m_pModelInstance->lighting.curambientlight, 300 * g_fFrametime );
-			m_pModelInstance->lighting.curshadelight = CL_UTIL_Approach( lighting.shadelight, m_pModelInstance->lighting.curshadelight, 300 * g_fFrametime );
-			m_pModelInstance->lighting.ambientlight = m_pModelInstance->lighting.curambientlight;
-			m_pModelInstance->lighting.shadelight = m_pModelInstance->lighting.curshadelight;
+		// diffusion - smooth light change for everything else (moving models like viewmodel, players etc)
+		m_pModelInstance->lighting.curambientlight = CL_UTIL_Approach( lighting.ambientlight, m_pModelInstance->lighting.curambientlight, 300 * g_fFrametime );
+		m_pModelInstance->lighting.curshadelight = CL_UTIL_Approach( lighting.shadelight, m_pModelInstance->lighting.curshadelight, 300 * g_fFrametime );
+		m_pModelInstance->lighting.ambientlight = m_pModelInstance->lighting.curambientlight;
+		m_pModelInstance->lighting.shadelight = m_pModelInstance->lighting.curshadelight;
 
-			// lerp color too
-			m_pModelInstance->lighting.color = LerpRGB( m_pModelInstance->lighting.color, lighting.color, g_fFrametime );
-		}
+		// lerp color too
+		m_pModelInstance->lighting.color = LerpRGB( m_pModelInstance->lighting.color, lighting.color, g_fFrametime );
 
-		//	m_pModelInstance->lighting.plightvec = m_pModelInstance->m_plightmatrix.VectorIRotate( lighting.plightvec ); // turn back to model space
+		m_pModelInstance->lighting.plightvec = m_pModelInstance->m_plightmatrix.VectorIRotate( lighting.plightvec ); // turn back to model space
 	}
-
-	m_pModelInstance->lighting.plightvec = m_pModelInstance->m_plightmatrix.VectorIRotate( lighting.plightvec ); // turn back to model space
 }
 
 /*
