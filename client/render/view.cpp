@@ -446,7 +446,7 @@ float V_CalcBob( struct ref_params_s *pparams )
 
 	// bob is proportional to simulated velocity in the xy plane
 	// (don't count Z, or jumping messes it up)
-	VectorCopy( pparams->simvel, vel );
+	vel = pparams->simvel;
 	vel[2] = 0;
 
 	bob = sqrt( vel[0] * vel[0] + vel[1] * vel[1] ) * cl_bob->value;
@@ -462,8 +462,7 @@ float V_CalcNewBob( struct ref_params_s *pparams )  // diffusion hl2 bob
 	static    float lastbobtime;
 	float    cycle;
 
-	Vector    vel;
-	VectorCopy( pparams->simvel, vel );
+	Vector vel = pparams->simvel;
 	vel[2] = 0;
 
 	if( pparams->onground == -1 || pparams->time == lastbobtime )
@@ -634,12 +633,12 @@ void V_CalcSpectatorRefdef( struct ref_params_s *pparams )
 	pparams->onlyClientDraw = false;
 
 	// refresh position
-	VectorCopy( pparams->simorg, v_sim_org );
+	v_sim_org = pparams->simorg;
 
 	// get old values
-	VectorCopy( pparams->cl_viewangles, v_cl_angles );
-	VectorCopy( pparams->viewangles, v_angles );
-	VectorCopy( pparams->vieworg, v_origin );
+	v_cl_angles = pparams->cl_viewangles;
+	v_angles = pparams->viewangles;
+	v_origin = pparams->vieworg;
 
 	if( (g_iUser1 == OBS_IN_EYE /*|| gHUD.m_Spectator.m_pip->value == INSET_IN_EYE*/) && ent )
 	{
@@ -692,7 +691,7 @@ void V_CalcSpectatorRefdef( struct ref_params_s *pparams )
 		else
 		{
 			// only get viewangles from entity
-			VectorCopy( ent->angles, pparams->cl_viewangles );
+			pparams->cl_viewangles = ent->angles;
 			pparams->cl_viewangles[PITCH] *= -3.0f;	// see CL_ProcessEntityUpdate()
 		}
 	}
@@ -714,8 +713,8 @@ void V_CalcSpectatorRefdef( struct ref_params_s *pparams )
 			break;
 
 		case OBS_ROAMING:
-			VectorCopy( v_cl_angles, v_angles );
-			VectorCopy( v_sim_org, v_origin );
+			v_angles = v_cl_angles;
+			v_origin = v_sim_org;
 			break;
 
 		case OBS_IN_EYE:
@@ -776,9 +775,9 @@ void V_CalcSpectatorRefdef( struct ref_params_s *pparams )
 		}*/
 
 		// write back new values into pparams
-	VectorCopy( v_cl_angles, pparams->cl_viewangles );
-	VectorCopy( v_angles, pparams->viewangles );
-	VectorCopy( v_origin, pparams->vieworg );
+	pparams->cl_viewangles = v_cl_angles;
+	pparams->viewangles = v_angles;
+	pparams->vieworg = v_origin;
 }
 
 int V_FindViewModelByWeaponModel( int weaponindex )
@@ -1374,8 +1373,8 @@ void V_CalcIntermissionRefdef( struct ref_params_s *pparams )
 	// view is the weapon model (only visible from inside body )
 	view = gEngfuncs.GetViewModel();
 
-	VectorCopy( pparams->simorg, pparams->vieworg );
-	VectorCopy( pparams->cl_viewangles, pparams->viewangles );
+	pparams->vieworg = pparams->simorg;
+	pparams->viewangles = pparams->cl_viewangles;
 
 	view->model = NULL;
 

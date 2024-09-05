@@ -79,7 +79,7 @@ typedef struct
 
 typedef struct
 {
-	float		pos[3];
+	Vector		pos;
 	float		size;
 	byte		color[4];
 	grassvert_t	*mesh;

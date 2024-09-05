@@ -334,7 +334,9 @@ void Mod_LoadCubemaps( const byte *base, const dlump_t *l )
 		Q_snprintf( out->name, sizeof( out->name ), "maps/env/%s/cube#%i", world->name, i );
 		out->valid = Mod_CheckCubemap( va( "cube#%i", i ) ); // need for rebuild?
 		if( !out->valid ) world->rebuilding_cubemaps = CMREBUILD_INACTIVE_NEEDSREBUILD;
-		VectorCopy( in->origin, out->origin );
+		out->origin[0] = in->origin[0];
+		out->origin[1] = in->origin[1];
+		out->origin[2] = in->origin[2];
 		ClearBounds( out->mins, out->maxs );
 		out->size = in->size;
 

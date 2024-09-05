@@ -49,11 +49,11 @@ Vector PrevViewAngles = g_vecZero;
 Vector PrevViewOrg = g_vecZero;
 
 // some simple helpers to draw a cube in the special way the ambient visualization wants
-static float* CubeSide(const vec3_t pos, float size, int vert)
+static float* CubeSide(const Vector pos, float size, int vert)
 {
-	static vec3_t	side;
+	static Vector side;
 
-	VectorCopy(pos, side);
+	side = pos;
 	side[0] += (vert & 1) ? -size : size;
 	side[1] += (vert & 2) ? -size : size;
 	side[2] += (vert & 4) ? -size : size;

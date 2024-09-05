@@ -816,8 +816,8 @@ void R_ReLightGrass( msurface_t *surf, bool force )
 		mtexinfo_t *tex = surf->texinfo;
 
 		// NOTE: don't need to trace here because we already have a valid surface spot. just read lightmap color and out
-		float s = ( DotProduct( Vector( g->cva.pos ), surf->info->lmvecs[0] ) + surf->info->lmvecs[0][3] - surf->info->lightmapmins[0] );
-		float t = ( DotProduct( Vector( g->cva.pos ), surf->info->lmvecs[1] ) + surf->info->lmvecs[1][3] - surf->info->lightmapmins[1] );
+		float s = ( DotProduct( g->cva.pos, surf->info->lmvecs[0] ) + surf->info->lmvecs[0][3] - surf->info->lightmapmins[0] );
+		float t = ( DotProduct( g->cva.pos, surf->info->lmvecs[1] ) + surf->info->lmvecs[1][3] - surf->info->lightmapmins[1] );
 		int smax = (surf->info->lightextents[0] / sample_size) + 1;
 		int tmax = (surf->info->lightextents[1] / sample_size) + 1;
 		int size = smax * tmax;
@@ -1079,7 +1079,7 @@ void R_ConstructGrass( msurface_t *psurf )
 				}
 
 				Vector pos = v0->vertex + e1 * u + e2 * v;
-				VectorCopy( pos, g->cva.pos );
+				g->cva.pos = pos;
 
 				if( !Mod_CheckLayerNameForPixel( land, g->cva.pos, entry->name ))
 					continue;
