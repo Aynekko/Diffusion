@@ -210,7 +210,7 @@ void R_SetupCable( cl_entity_t *e )
 			falldepth += sin( SwayPhase * ((float( (e->index % 4) + 1 ) * 2.0f / 4.0f)) ) * ((falldepth * tr.cableSwayIntensity[e->index]) / 10.0f);
 
 		// Calculate dropping point
-		VectorSubtract( vposition2, vposition1, vdirection );
+		vdirection = vposition2 - vposition1;
 		VectorMA( vposition1, 0.5, vdirection, vmidpoint );
 		vdroppoint = Vector( vmidpoint[0], vmidpoint[1], vmidpoint[2] - falldepth );
 
@@ -242,10 +242,10 @@ void R_SetupCable( cl_entity_t *e )
 
 		for( int j = 0; j < inumpoints; j++ )
 		{
-			if( j == 0 ){ VectorSubtract( vpoints[0], vpoints[1], vTangent ); }
-			else { VectorSubtract( vpoints[0], vpoints[j], vTangent ); }
+			if( j == 0 ){ vTangent = vpoints[0] - vpoints[1]; }
+			else { vTangent = vpoints[0] - vpoints[j]; }
 
-			VectorSubtract( vpoints[j], RI->vieworg, vDir );
+			vDir = vpoints[j] - RI->vieworg;
 			vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
 
 			VectorMA( vpoints[j], fwidth, vRight, vVertex );
@@ -449,8 +449,8 @@ void R_SetupVolumetricLight( cl_entity_t *e )
 
 		forward.z = 0;
 
-		VectorSubtract( vposition1, vposition2, vTangent );
-		VectorSubtract( vposition1, RI->vieworg, vDir );
+		vTangent = vposition1 - vposition2;
+		vDir = vposition1 - RI->vieworg;
 		vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
 
 		float fader = 1.0f;
@@ -491,8 +491,8 @@ void R_SetupVolumetricLight( cl_entity_t *e )
 		VolumetricVertexesArray[volumetric_numverts] = vVertex;
 		volumetric_numverts++;
 
-		VectorSubtract( vposition1, vposition2, vTangent );
-		VectorSubtract( vposition2, RI->vieworg, vDir );
+		vTangent = vposition1 - vposition2;
+		vDir = vposition2 - RI->vieworg;
 		vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
 		VectorMA( vposition2, light_width, vRight, vVertex );
 		VolumetricColorArray[volumetric_numverts][0] = e->curstate.rendercolor.r;

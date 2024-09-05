@@ -345,7 +345,6 @@ Vector VectorYawRotate( const Vector &in, float flYaw );
 
 // FIXME: get rid of this
 #define DotProductA( x,y )	((x)[0]*(y)[0]+(x)[1]*(y)[1]+(x)[2]*(y)[2])
-#define VectorSubtract(a,b,c) {(c)[0]=(a)[0]-(b)[0];(c)[1]=(a)[1]-(b)[1];(c)[2]=(a)[2]-(b)[2];}
 
 #define TriangleNormal(a,b,c,n) \
 ( \
