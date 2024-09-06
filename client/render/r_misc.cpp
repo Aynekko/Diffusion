@@ -935,7 +935,7 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 	dl->color.b = bound( 0, B, 255 );
 	dl->brightness = Brightness;
 	dl->effect = 2; // muzzleflash light
-	dl->entindex = gEngfuncs.GetLocalPlayer()->index;
+	dl->entindex = e->index;
 
 	if( e == GET_VIEWMODEL() )
 	{
