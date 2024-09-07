@@ -224,9 +224,13 @@ void CHudAchievement::SaveAchievementFile(void)
 	
 	// I have to do this, otherwise I can't get the file if it exists and hidden (we are doing a reset)
 	SetFileAttributes( "diffusion/data/achievements.txt", FILE_ATTRIBUTE_NORMAL );
-
-	achStatsFile = fopen( "diffusion/data/achievements.txt", "w" ); // empty the file
-	if( !achStatsFile )
+	int err = 0;
+#ifdef WIN32
+	err = fopen_s( &achStatsFile, "diffusion/data/achievements.txt", "w" ); // empty the file
+#else
+	achStatsFile = fopen( &achStatsFile, "diffusion/data/achievements.txt", "w" ); // empty the file
+#endif
+	if( !achStatsFile || err != 0 )
 		return;
 
 	for( int i = 0; i < TOTAL_ACHIEVEMENTS; i++ ) // write new stuff
@@ -330,9 +334,13 @@ void CHudAchievement::CreateDefaultAchievementFile(void)
 
 	// I have to do this, otherwise I can't get the file if it exists and hidden (we are doing a reset)
 	SetFileAttributes( "diffusion/data/achievements.txt", FILE_ATTRIBUTE_NORMAL );
-
+	int err = 0;
+#ifdef WIN32
+	err = fopen_s( &achStatsFile, "diffusion/data/achievements.txt", "w" ); // empty file
+#else
 	achStatsFile = fopen( "diffusion/data/achievements.txt", "w" ); // empty file
-	if( !achStatsFile )
+#endif
+	if( !achStatsFile || err != 0 )
 		return;
 	
 	// first line is for current stats

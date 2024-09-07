@@ -1376,8 +1376,6 @@ void PM_Accelerate (Vector wishdir, float wishspeed, float accel)
 	if (pmove->waterjumptime)
 		return;
 
-	int i;
-
 	// See if we are changing direction a bit
 	float currentspeed = DotProduct (pmove->velocity, wishdir);
 
@@ -1410,7 +1408,6 @@ void PM_WalkMove( void )
 {
 	int			clip;
 	int			oldonground;
-	int i;
 
 	Vector		wishvel;
 	float       spd;
@@ -1683,8 +1680,7 @@ void PM_Friction (void)
 
 void PM_AirAccelerate (Vector wishdir, float wishspeed, float accel)
 {
-	int			i;
-	float		addspeed, accelspeed, currentspeed, wishspd = wishspeed;
+	float addspeed, accelspeed, currentspeed, wishspd = wishspeed;
 		
 	if (pmove->dead)
 		return;
@@ -1721,7 +1717,6 @@ PM_WaterMove
 */
 void PM_WaterMove (void)
 {
-	int		i;
 	Vector	wishvel;
 	float	wishspeed;
 	Vector	wishdir;
@@ -1816,7 +1811,6 @@ PM_AirMove
 */
 void PM_AirMove (void)
 {
-	int			i;
 	Vector		wishvel;
 	float		fmove, smove;
 	Vector		wishdir;
@@ -2281,7 +2275,6 @@ void PM_FixPlayerCrouchStuck( int direction )
 
 void PM_UnDuck( void )
 {
-	int i;
 	pmtrace_t trace;
 	Vector newOrigin;
 	int VecView = VIEW_HEIGHT;
@@ -2328,7 +2321,6 @@ void PM_UnDuck( void )
 
 void PM_Duck( void )
 {
-	int i;
 	float time;
 	float duckFraction;
 	int VecDuckView = DUCK_VIEW;
@@ -2801,7 +2793,6 @@ PM_Jump
 */
 void PM_Jump (void)
 {
-	int i;
 	qboolean cansuperjump = false;
 
 	if (pmove->dead || pmove->flags & FL_ONTRAIN) // diffusion - added ontrain

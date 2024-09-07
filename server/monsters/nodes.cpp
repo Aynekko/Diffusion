@@ -2337,7 +2337,6 @@ int CGraph :: FLoadGraph ( char *szMapName )
 {
 	char	szFilename[MAX_PATH];
 	int	iVersion;
-	int	iResult;
 	int	length;
 	byte	*aMemFile;
 	byte	*pMemFile;
@@ -2345,7 +2344,7 @@ int CGraph :: FLoadGraph ( char *szMapName )
 	Q_snprintf( szFilename, sizeof( szFilename ), "maps/%s.bsp", szMapName );
 
 #if defined USE_BSP_LUMP_AINODEGRAPH
-	iResult = MAP_READ_LUMP( szFilename, LUMP_AINODEGRAPH, (void **)&aMemFile, &length );
+	int iResult = MAP_READ_LUMP( szFilename, LUMP_AINODEGRAPH, (void **)&aMemFile, &length );
 
 	if( iResult != LUMP_LOAD_OK )
 	{
