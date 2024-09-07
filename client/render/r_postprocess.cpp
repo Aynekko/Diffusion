@@ -440,7 +440,7 @@ void GaussBlur( void )
 	// blur when paused (menu is shown)
 	if( RP_NORMALPASS() && !cl_background->value )
 	{
-		if( tr.time == tr.oldtime || CVAR_TO_BOOL( ui_is_active ) )
+		if( !CVAR_TO_BOOL( ui_videooptions_active ) && (tr.time == tr.oldtime || CVAR_TO_BOOL( ui_is_active )) )
 			pausedblur += 0.5 * g_fFrametime;
 		else
 			pausedblur -= 0.5 * g_fFrametime;
