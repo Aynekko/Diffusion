@@ -489,6 +489,7 @@ typedef struct
 	unsigned int	c_particles_total;
 	unsigned int	c_particles_culled;
 	unsigned int	c_decals;
+	unsigned int	c_vis_mergers; // EF_MERGE_VISIBILITY ent count
 
 	unsigned int	c_portal_passes;
 	unsigned int	c_mirror_passes;

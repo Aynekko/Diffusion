@@ -1927,6 +1927,7 @@ void HUD_PrintStats( void )
 		R_Speeds_Printf( "%3i screens\n", r_stats.c_screen_passes );
 		R_Speeds_Printf( "%3i shadows\n", r_stats.c_shadow_passes );
 		R_Speeds_Printf( "%3i 3d sky\n", r_stats.c_sky_passes );
+		R_Speeds_Printf( "%3i vis mergers\n", r_stats.c_vis_mergers );
 		R_Speeds_Printf( "%3i total\n\n", r_stats.num_passes );
 		R_Speeds_Printf( "Dynamic lights:\n" );
 		R_Speeds_Printf( "%3i total (%3i mdl | %3i surf)\n\n", r_stats.c_plights, r_stats.c_plights_meshes, r_stats.num_light_surfaces );
@@ -2225,7 +2226,7 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 	R_UnloadFarGrass();
 
 	HUD_PrintStats();
-	
+
 	return 1;
 }
 

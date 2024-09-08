@@ -423,6 +423,7 @@ void R_InitWeather( void )
 	gHUD.ScreenDrips_CurVisibility = 0.0f;
 	gHUD.ScreenDrips_DripIntensity = 0.0f;
 	gHUD.ScreenDrips_OverrideTime = 0.0f;
+	gHUD.Weather_Intensity = 0.0f;
 
 	RainTexture = LOAD_TEXTURE( "gfx/particles/raindrop", NULL, 0, 0 );
 }
@@ -890,12 +891,12 @@ void R_DrawWeather( void )
 	ProcessRain();
 	ProcessFXObjects();
 
+	// a neat global to determine the intensity of a storm if needed
+	gHUD.Weather_Intensity = bound( 0.0f, Rain.dripsPerSecond / 2500.0f, 1.0f );  // this number can be tuned
+
 	gHUD.ScreenDrips_Visible = false;
 	if( gHUD.ScreenDrips_OverrideTime < tr.time )
-	{
-		gHUD.ScreenDrips_DripIntensity = Rain.dripsPerSecond / 2500.0f; // this number can be tuned
-		gHUD.ScreenDrips_DripIntensity = bound( 0.0f, gHUD.ScreenDrips_DripIntensity, 0.5f );
-	}
+		gHUD.ScreenDrips_DripIntensity = bound( 0.0f, gHUD.Weather_Intensity, 0.5f ); // for water drops shader
 
 	if( Rain.dripsPerSecond > 0 )
 	{

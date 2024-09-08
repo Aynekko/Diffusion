@@ -3849,9 +3849,6 @@ StudioStaticLight
 */
 void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 {
-	if( RI->params & RP_SHADOWPASS )
-		return;
-	
 	// setup advanced vertexlighting for env_static entities
 	if( (ent->curstate.iuser3 > 0) && world->vertex_lighting != NULL )
 	{
@@ -4182,6 +4179,8 @@ void CStudioModelRenderer::StudioDrawShell( void )
 
 		m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata( m_pRenderModel );
 	}
+
+	IEngineStudio.GL_SetRenderMode( kRenderNormal );
 }
 
 /*

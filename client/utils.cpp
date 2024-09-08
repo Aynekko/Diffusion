@@ -698,7 +698,7 @@ R_ScissorForBounds
 */
 static bool R_ScissorForBounds( const Vector bbox[8], float *x, float *y, float *w, float *h )
 {
-	static int	cornerIndices[6][4] = {{3, 2, 6, 7}, {0, 1, 5, 4}, {2, 3, 1, 0}, {4, 5, 7, 6}, {1, 3, 7, 5}, {2, 0, 4, 6}};
+	const int	cornerIndices[6][4] = {{3, 2, 6, 7}, {0, 1, 5, 4}, {2, 3, 1, 0}, {4, 5, 7, 6}, {1, 3, 7, 5}, {2, 0, 4, 6}};
 	Vector		points[2][MAX_POLYGON_POINTS];
 	float		ix1, iy1, ix2, iy2;
 	float		x1, y1, x2, y2;

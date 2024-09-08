@@ -234,23 +234,61 @@ void CFuncMonitor :: VisThink( void )
 		// no reason to find in PVS itself
 		if( AllowToFindClientInPVS( pTarget ))
 		{
-			CBaseEntity *pClient = CBaseEntity::Instance( FIND_CLIENT_IN_PVS( edict() ) );
-			
-			if( FNullEnt( pClient ) )
-				ClearBits( pTarget->pev->effects, EF_MERGE_VISIBILITY );
-			else
+			CBaseEntity *pClient = NULL;
+
+			// special case for multiplayer - we need to check all clients
+			if( gpGlobals->maxClients > 1 )
 			{
-				// diffusion - also check distance!
-				// doesn't work in multiplayer
-				if( (gpGlobals->maxClients == 1) && (pev->iuser4 > 0) )
+				// problem! FIND_CLIENT_IN_PVS produces bollocks - no matter how many times I cycle through, the loop
+				// told me that no player's were found in the screen's pvs. And occasionally is DOES find them.
+				// the screen keeps turning on and off, so...just keep it running, only make a special case if there's a fadedistance.
+				// (and there's better be one because visibility merging is damn expensive)
+				
+				// by default set it as visible
+				SetBits( pTarget->pev->effects, EF_MERGE_VISIBILITY );
+				// in case of the screen having fadedistance, check if all clients are far enough to disable the screen
+				if( pev->iuser4 > 0 )
 				{
-					if( (pClient->GetAbsOrigin() - GetAbsOrigin()).Length() > (pev->iuser4 + 255) )
+					bool ClosePlayerFound = false;
+					for( int i = 1; i <= gpGlobals->maxClients; i++ )
+					{
+						CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
+
+						if( !pPlayer || pPlayer->HasFlag( F_BOT ) )
+							continue;
+
+						if( (pPlayer->GetAbsOrigin() - GetAbsOrigin()).Length() < (pev->iuser4 + 255) )
+						{
+							// at least one real player is close enough. keep screen running
+							ClosePlayerFound = true;
+							break;
+						}
+					}
+
+					if( !ClosePlayerFound )
 						ClearBits( pTarget->pev->effects, EF_MERGE_VISIBILITY );
+				}
+			}
+			else // single player
+			{
+				pClient = CBaseEntity::Instance( FIND_CLIENT_IN_PVS( edict() ) );
+
+				if( FNullEnt( pClient ) )
+					ClearBits( pTarget->pev->effects, EF_MERGE_VISIBILITY );
+				else
+				{
+					// diffusion - also check distance!
+					// doesn't work in multiplayer
+					if( pev->iuser4 > 0 )
+					{
+						if( (pClient->GetAbsOrigin() - GetAbsOrigin()).Length() > (pev->iuser4 + 255) )
+							ClearBits( pTarget->pev->effects, EF_MERGE_VISIBILITY );
+						else
+							SetBits( pTarget->pev->effects, EF_MERGE_VISIBILITY );
+					}
 					else
 						SetBits( pTarget->pev->effects, EF_MERGE_VISIBILITY );
 				}
-				else
-					SetBits( pTarget->pev->effects, EF_MERGE_VISIBILITY );
 			}
 		}
 	}

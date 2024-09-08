@@ -608,8 +608,6 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		curParticle = ParticleArray.GetCurrent();
 	}
 
-	GL_Blend( GL_TRUE );
-
 	if( glState.drawTrans )
 	{
 		if( UseAdditive )
@@ -646,8 +644,6 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		GL_AlphaTest( GL_FALSE );
 		GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	}
-
-	GL_Blend( GL_FALSE );
 }
 
 bool CQuakePart::Evaluate( float gravity )
@@ -1034,8 +1030,6 @@ bool CQuakePart::Evaluate( float gravity )
 	for( int i = 0; i < 4; i++ )
 		AddPointToBounds( verts[i], absmin, absmax );
 
-	GL_Blend( GL_TRUE );
-
 	if( FBitSet( m_iFlags, FPART_TWOSIDE ) || (FBitSet( m_iFlags, FPART_AFLOAT ) && FBitSet( m_iFlags, FPART_FLOATING_ORIENTED )) ) // visible from underwater
 		GL_Cull( GL_NONE );
 	else
@@ -1083,8 +1077,6 @@ bool CQuakePart::Evaluate( float gravity )
 		GL_AlphaTest( GL_FALSE );
 		GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	}
-
-	GL_Blend( GL_FALSE );
 
 	return true;
 }
@@ -1675,8 +1667,12 @@ void CQuakePartSystem :: Update( void )
 
 	if( glState.drawTrans )
 		GL_DepthMask( GL_FALSE );
+	else
+		GL_DepthMask( GL_TRUE );
 
 	pglBindVertexArray( GL_FALSE ); // just in case
+
+	GL_Blend( GL_TRUE );
 
 	DrawParticles( ParticleArray_Default );
 	DrawParticles( ParticleArray_Dustmote );
@@ -1727,6 +1723,10 @@ void CQuakePartSystem :: Update( void )
 	m_pActiveParticles = pActive;
 
 	r_stats.c_particles_total = partcounter;
+
+	GL_Blend( GL_FALSE );
+	if( glState.drawTrans )
+		GL_DepthMask( GL_TRUE );
 
 //	ExplosionOrg = g_vecZero;
 }

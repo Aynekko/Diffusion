@@ -570,10 +570,7 @@ void R_RenderShadowCubeSide( plight_t *pl, int side )
 }
 
 void R_RenderShadowmaps(void)
-{
-	if( !tr.num_dynlights )
-		return;
-	
+{	
 	if (R_FullBright() || !CVAR_TO_BOOL(r_shadows) || tr.fGamePaused || tr.shadows_notsupport)
 		return;
 
@@ -594,14 +591,24 @@ void R_RenderShadowmaps(void)
 		R_ResetShadowTextures();
 	}
 
-	plight_t *pl = NULL;
-
-	for (int i = 0; i < tr.num_dynlights; i++)
+	for( int i = 0; i < MAX_PLIGHTS; i++ )
 	{
-		pl = tr.cur_dynlights[i];
+		plight_t *pl = &cl_plights[i];
 
 		if( FBitSet( pl->flags, CF_NOSHADOWS ) )
 			continue;
+
+		if( pl->die < tr.time || !pl->radius || pl->culled )
+			continue;
+
+		if( !UTIL_IsLocal( pl->entindex ) ) // do not perform culling for this player's flashlight - it's always visible
+		{
+			if( !Mod_CheckBoxVisible( pl->absmin, pl->absmax ) )
+				continue;
+
+			if( R_CullBox( pl->absmin, pl->absmax ) )
+				continue;
+		}
 
 		if( pl->pointlight && tr.omni_shadows_notsupport )
 			continue;

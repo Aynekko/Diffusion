@@ -1069,6 +1069,9 @@ void LensFlare( void )
 	if( !tr.bSkySurfFound )
 		return; // no sky surface was found this frame, don't waste time tracing
 
+	if( gHUD.Weather_Intensity >= 0.99f )
+		return; // complete storm (rain/snow), no lensflare for you!
+
 	Vector sunangles, sundir, suntarget;
 	Vector forward, right, up, screen;
 	Vector v_angles, v_origin;
@@ -1129,7 +1132,7 @@ void LensFlare( void )
 	else
 		gHUD.LensFlareAlpha -= 10.0f * g_fFrametime;
 
-	gHUD.LensFlareAlpha = bound( 0.0f, gHUD.LensFlareAlpha, 1.0f - gHUD.ScreenDrips_DripIntensity );
+	gHUD.LensFlareAlpha = bound( 0.0f, gHUD.LensFlareAlpha, 1.0f );
 
 	if( gHUD.LensFlareAlpha <= 0.01f )
 		return;
@@ -1148,7 +1151,7 @@ void LensFlare( void )
 	ASSERT( RI->currentshader != NULL );
 
 	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, (float)(glState.width), (float)(glState.height) );
-	pglUniform1fARB( RI->currentshader->u_Accum, gHUD.LensFlareAlpha * pow( DotP, 10 ) );
+	pglUniform1fARB( RI->currentshader->u_Accum, gHUD.LensFlareAlpha * pow( DotP, 10 ) * (1.0f - gHUD.Weather_Intensity) );
 	pglUniform2fARB( RI->currentshader->u_LightOrigin, view.x, view.y );
 
 	RenderFSQ( glState.width, glState.height );

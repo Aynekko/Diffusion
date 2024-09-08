@@ -432,11 +432,11 @@ void R_BuildLightList( void )
 
 	for( int i = 0; i < MAX_PLIGHTS; i++, pl++ )
 	{
+		if( pl->die < tr.time || !pl->radius || pl->culled )
+			continue;
+
 		if( !UTIL_IsLocal( pl->entindex ) ) // do not perform culling for this player's flashlight - it's always visible
 		{
-			if( pl->die < tr.time || !pl->radius || pl->culled )
-				continue;
-
 			if( !Mod_CheckBoxVisible( pl->absmin, pl->absmax ) )
 				continue;
 

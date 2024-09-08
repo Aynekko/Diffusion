@@ -932,6 +932,7 @@ public:
 	bool ScreenDrips_Visible;
 	float ScreenDrips_DripIntensity;
 	float ScreenDrips_OverrideTime;
+	float Weather_Intensity;
 
 	// viewmodel lag
 	Vector m_vecLastFacing;

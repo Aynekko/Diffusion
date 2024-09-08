@@ -289,6 +289,9 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 		if( gl_renderer->value == 0 )
 			return 1;
 
+		if( ent->curstate.effects & EF_MERGE_VISIBILITY )
+			r_stats.c_vis_mergers++;
+
 		if( ent->curstate.effects & EF_SCREEN )
 		{
 			ent->curstate.movetype = 0; // clear movetype for screen (engine sets this to MOVETYPE_FOLLOW because we use aiment. Argh!)
