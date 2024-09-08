@@ -813,6 +813,15 @@ void ClientCommand( edict_t *pEntity )
 				pTarget = UTIL_FindEntityByClassname( pTarget, CMD_ARGV( 1 ) );
 				while( pTarget != NULL )
 				{
+					// do not delete weapons attached to player!
+					if( !strncmp( "weapon_", pTarget->GetClassname(), 7 ) )
+					{
+						if( pTarget->pev->movetype == MOVETYPE_FOLLOW )
+						{
+							pTarget = UTIL_FindEntityByClassname( pTarget, CMD_ARGV( 1 ) );
+							continue;
+						}
+					}
 					// diffusion - hack for ambient generic - stop sound if we are deleting this entity
 					if( FClassnameIs( pTarget, "ambient_generic" ) )
 						pTarget->Use( pPlayer, pPlayer, USE_OFF, 0 );
