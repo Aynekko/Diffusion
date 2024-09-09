@@ -3916,6 +3916,14 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 			if( lighting.shadelight > 192 )
 				lighting.shadelight = 192;
 		}
+		else
+		{
+			if( tr.sunlightscale > 0.0f )
+			{
+				lighting.ambientlight *= tr.sunlightscale;
+				lighting.shadelight *= tr.sunlightscale;
+			}
+		}
 		#endif
 
 		// diffusion - smooth light change for everything else (moving models like viewmodel, players etc)

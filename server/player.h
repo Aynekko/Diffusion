@@ -529,6 +529,7 @@ public:
 	bool WeaponLowered_CL;
 	bool CanShoot_CL;
 	int DrunkLevel_CL;
+	int SunLightScale_CL;
 
 	string_t Objective; // objective name from titles.txt
 	string_t Objective2; // secondary objective

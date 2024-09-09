@@ -640,6 +640,8 @@ void CWorld :: Spawn( void )
 	Precache( );
 
 	SetModel( GetModel() );
+
+	pev->fuser1 = 100.0f; // default sunlight scale (1.0 x 100)
 }
 
 bool show_server_buildtime = false;
@@ -652,7 +654,7 @@ void CWorld :: Precache( void )
 		ALERT( at_console, "^2Server DLL build date^7: ^5%s %s^7\n", BUILD_DATE, BUILD_TIME );
 		show_server_buildtime = true;
 	}
-	
+
 	g_pLastSpawn = NULL;
 	g_pWorld = this;
 	WorldPhysic->InitPhysic();	// initialize physic world

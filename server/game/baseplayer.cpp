@@ -6635,6 +6635,10 @@ void CBasePlayer :: UpdateClientData( void )
 			m_iStartMessage = 1; //send player init messages
 		}
 
+		// entity state of the world is not sent to client so have to do this :(
+		edict_t *pWorld = INDEXENT( 0 );
+		int sunlightscale = pWorld->v.fuser1;
+
 		// this must be reset it seems (jump and sprint conditions)
 		MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
 			WRITE_BYTE( TE_PLAYERPARAMS );
@@ -6652,6 +6656,7 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_BYTE( CanShoot );
 			WRITE_BYTE( DrunkLevel );
 			WRITE_BYTE( CanUseDrone );
+			WRITE_BYTE( sunlightscale );
 		MESSAGE_END();
 		CanJump_CL = CanJump;
 		CanSprint_CL = CanSprint;
@@ -6667,6 +6672,7 @@ void CBasePlayer :: UpdateClientData( void )
 		CanShoot_CL = CanShoot;
 		DrunkLevel_CL = DrunkLevel;
 		CanUseDrone_CL = CanUseDrone;
+		SunLightScale_CL = sunlightscale;
 		
 		// update zoom state
 		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, pev );
@@ -6733,6 +6739,9 @@ void CBasePlayer :: UpdateClientData( void )
 		MESSAGE_END();
 		// cache FOV change at end of function, so weapon updates can see that FOV has changed
 	}
+
+	edict_t *pWorld = INDEXENT( 0 );
+	int sunlightscale = pWorld->v.fuser1;
 	
 	if( (CanJump != CanJump_CL) 
 		|| (CanSprint != CanSprint_CL) 
@@ -6748,6 +6757,7 @@ void CBasePlayer :: UpdateClientData( void )
 		|| (DrunkLevel != DrunkLevel_CL)
 		|| (CanShoot != CanShoot_CL)
 		|| (CanUseDrone != CanUseDrone_CL)
+		|| (sunlightscale != SunLightScale_CL)
 		)
 	{
 		// HACKHACK I send this through tempent :)
@@ -6767,6 +6777,7 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_BYTE( CanShoot );
 			WRITE_BYTE( DrunkLevel );
 			WRITE_BYTE( CanUseDrone );
+			WRITE_BYTE( sunlightscale );
 		MESSAGE_END();
 
 		CanJump_CL = CanJump;
@@ -6783,6 +6794,7 @@ void CBasePlayer :: UpdateClientData( void )
 		CanShoot_CL = CanShoot;
 		DrunkLevel_CL = DrunkLevel;
 		CanUseDrone_CL = CanUseDrone;
+		SunLightScale_CL = sunlightscale;
 	}
 
 	// diffusion - setup c-c-c-crosshair!!!

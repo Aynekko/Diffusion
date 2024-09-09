@@ -534,7 +534,7 @@ void R_AnimateLight( void )
 
 	if( !worldmodel )
 		return;
-
+	
 	scale = r_lighting_modulate->value;
 
 	// light animations
@@ -559,6 +559,11 @@ void R_AnimateLight( void )
 		{
 			tr.lightstylevalue[i] = 256 * scale;
 			tr.lightstyles[i] = 256.0f * scale;
+			if( tr.sunlightscale > 0.0f && i == LS_SKY )
+			{
+				tr.lightstylevalue[i] *= tr.sunlightscale;
+				tr.lightstyles[i] *= tr.sunlightscale;
+			}
 			continue;
 		}
 		else if( ls->length == 1 )
@@ -566,12 +571,22 @@ void R_AnimateLight( void )
 			// single length style so don't bother interpolating
 			tr.lightstylevalue[i] = ls->map[0] * 22 * scale;
 			tr.lightstyles[i] = ls->map[0] * 22.0f * scale;
+			if( tr.sunlightscale > 0.0f && i == LS_SKY )
+			{
+				tr.lightstylevalue[i] *= tr.sunlightscale;
+				tr.lightstyles[i] *= tr.sunlightscale;
+			}
 			continue;
 		}
 		else if( !ls->interp || !r_lightstyle_lerping->value )
 		{
 			tr.lightstylevalue[i] = ls->map[flight%ls->length] * 22 * scale;
 			tr.lightstyles[i] = ls->map[flight%ls->length] * 22.0f * scale;
+			if( tr.sunlightscale > 0.0f && i == LS_SKY )
+			{
+				tr.lightstylevalue[i] *= tr.sunlightscale;
+				tr.lightstyles[i] *= tr.sunlightscale;
+			}
 			continue;
 		}
 

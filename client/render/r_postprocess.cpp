@@ -1151,7 +1151,7 @@ void LensFlare( void )
 	ASSERT( RI->currentshader != NULL );
 
 	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, (float)(glState.width), (float)(glState.height) );
-	pglUniform1fARB( RI->currentshader->u_Accum, gHUD.LensFlareAlpha * pow( DotP, 10 ) * (1.0f - gHUD.Weather_Intensity) );
+	pglUniform1fARB( RI->currentshader->u_Accum, gHUD.LensFlareAlpha * pow( DotP, 10 ) * (1.0f - gHUD.Weather_Intensity) * tr.sunlightscale );
 	pglUniform2fARB( RI->currentshader->u_LightOrigin, view.x, view.y );
 
 	RenderFSQ( glState.width, glState.height );

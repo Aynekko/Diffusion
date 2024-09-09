@@ -471,6 +471,8 @@ typedef struct
 
 	int volumetric_light_texture;
 
+	float sunlightscale;
+
 	int test; // counter/bool for testing purposes
 } ref_globals_t;
 
