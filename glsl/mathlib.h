@@ -173,51 +173,37 @@ float min3( vec3 v )
 	return min( min( v.x, v.y ), v.z );
 }
 
-vec3 VectorRotate( vec3 In, vec3 Rotation )
+vec3 VectorRotate( vec3 vIn, vec3 vAng )
 {
-	vec3 ang = Rotation; // entity angles
+	vec3 RotatedVec = vIn;
 
-	vec3 RotatedVec = In;
+	float angX = vAng.x * 0.0175 + M_PI;
+	float angY = vAng.y * 0.0175 + M_PI;
+	float angZ = vAng.z * 0.0175 + M_PI;
 
-	float angX = ang.x * 0.0175 + M_PI;
-	float angY = ang.y * 0.0175 + M_PI;
-	float angZ = ang.z * 0.0175 + M_PI;
+	mat3 m = mat3( 0.0 );
+	m[0][0] = RotatedVec.x;
+	m[1][1] = -RotatedVec.y * cos( angZ );
+	m[2][1] = RotatedVec.z * sin( angZ );
+	m[1][2] = -RotatedVec.y * sin( angZ );
+	m[2][2] = -RotatedVec.z * cos( angZ );
 
-	mat3 m3;
-	m3[0][0] = RotatedVec.x;
-	m3[1][0] = 0;
-	m3[2][0] = 0;
-	m3[0][1] = 0;
-	m3[1][1] = -RotatedVec.y * cos( angZ );
-	m3[2][1] = RotatedVec.z * sin( angZ );
-	m3[0][2] = 0;
-	m3[1][2] = -RotatedVec.y * sin( angZ );
-	m3[2][2] = -RotatedVec.z * cos( angZ );
+	RotatedVec = m * vec3( 1.0 );
 
-	RotatedVec = m3 * vec3( 1.0 );
+	m = mat3( 0.0 );
+	m[0][0] = -RotatedVec.x * cos( angX );
+	m[2][0] = -RotatedVec.z * sin( angX );
+	m[1][1] = RotatedVec.y;
+	m[0][2] = RotatedVec.x * sin( angX );
+	m[2][2] = -RotatedVec.z * cos( angX );
 
-	mat3 m2;
-	m2[0][0] = -RotatedVec.x * cos( angX );
-	m2[1][0] = 0;
-	m2[2][0] = -RotatedVec.z * sin( angX );
-	m2[0][1] = 0;
-	m2[1][1] = RotatedVec.y;
-	m2[2][1] = 0;
-	m2[0][2] = RotatedVec.x * sin( angX );
-	m2[1][2] = 0;
-	m2[2][2] = -RotatedVec.z * cos( angX );
+	RotatedVec = m * vec3( 1.0 );
 
-	RotatedVec = m2 * vec3( 1.0 );
-
-	mat3 m;
+	m = mat3( 0.0 );
 	m[0][0] = -RotatedVec.x * cos( angY );
 	m[1][0] = RotatedVec.y * sin( angY );
-	m[2][0] = 0;
 	m[0][1] = -RotatedVec.x * sin( angY );
 	m[1][1] = -RotatedVec.y * cos( angY );
-	m[2][1] = 0;
-	m[0][2] = 0;
-	m[1][2] = 0;
 	m[2][2] = RotatedVec.z;
 
 	RotatedVec = m * vec3( 1.0 );
