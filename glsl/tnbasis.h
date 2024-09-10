@@ -22,11 +22,11 @@ attribute vec3		attr_Binormal;
 
 mat3 ComputeTBN( const in mat4 modelMatrix )
 {
-	mat3	tbn;
+	mat3 tbn;
 
-	tbn[0] = ( modelMatrix * vec4( normalize( attr_Tangent ), 0.0 )).xyz;
-	tbn[1] = ( modelMatrix * vec4( normalize( attr_Binormal ), 0.0 )).xyz;
-	tbn[2] = ( modelMatrix * vec4( normalize( attr_Normal ), 0.0 )).xyz;
+	tbn[0] = mat3( modelMatrix ) * normalize( attr_Tangent );
+	tbn[1] = mat3( modelMatrix ) * normalize( attr_Binormal );
+	tbn[2] = mat3( modelMatrix ) * normalize( attr_Normal );
 
 	return tbn;
 }

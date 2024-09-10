@@ -114,7 +114,7 @@ vec4 textureBicubic( sampler2D sampler, vec2 texCoords, float LOD, vec2 texSize 
 	vec4 xcubic = cubic( fxy.x );
 	vec4 ycubic = cubic( fxy.y );
 
-	vec4 c = texCoords.xxyy + vec2( -0.5, +1.5 ).xyxy;
+	vec4 c = texCoords.xxyy + vec2( -0.5, 1.5 ).xyxy;
 
 	vec4 s = vec4( xcubic.xz + xcubic.yw, ycubic.xz + ycubic.yw );
 	vec4 offset = c + vec4( xcubic.yw, ycubic.yw ) / s;
@@ -158,11 +158,11 @@ vec4 sharpen( in sampler2D tex, in vec2 coords, in vec2 ScreenSizeInv )
 	float dx = ScreenSizeInv.x;
 	float dy = ScreenSizeInv.y;
 	vec4 sum = vec4( 0.0 );
-	sum += -1. * texture2DLod( tex, coords + vec2( -1.0 * dx, 0.0 * dy ), 0.0 );
-	sum += -1. * texture2DLod( tex, coords + vec2( 0.0 * dx, -1.0 * dy ), 0.0 );
+	sum -= texture2DLod( tex, coords + vec2( -1.0 * dx, 0.0 * dy ), 0.0 );
+	sum -= texture2DLod( tex, coords + vec2( 0.0 * dx, -1.0 * dy ), 0.0 );
 	sum += 5. * texture2DLod( tex, coords + vec2( 0.0 * dx, 0.0 * dy ), 0.0 );
-	sum += -1. * texture2DLod( tex, coords + vec2( 0.0 * dx, 1.0 * dy ), 0.0 );
-	sum += -1. * texture2DLod( tex, coords + vec2( 1.0 * dx, 0.0 * dy ), 0.0 );
+	sum -= texture2DLod( tex, coords + vec2( 0.0 * dx, 1.0 * dy ), 0.0 );
+	sum -= texture2DLod( tex, coords + vec2( 1.0 * dx, 0.0 * dy ), 0.0 );
 	return sum;
 }
 

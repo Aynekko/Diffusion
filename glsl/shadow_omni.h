@@ -24,10 +24,10 @@ uniform samplerCubeShadow	u_ShadowMap;
 
 float depthCube( const in vec3 coord, const float scale, const float bias )
 {
-	float fs_z = max( abs( coord.x ), max( abs( coord.y ), abs( coord.z ))) - 4.0;	// acne remove factor
-	float depth = (( fs_z * scale + bias ) / fs_z ) * 0.5 + 0.5;
+	float fs_z = max( abs( coord.x ), max( abs( coord.y ), abs( coord.z ) ) ) - 4.0;	// acne remove factor
+	float depth = ((fs_z * scale + bias) / fs_z) * 0.5 + 0.5;
 
-	return shadowCube( u_ShadowMap, vec4( coord, depth )).r;
+	return shadowCube( u_ShadowMap, vec4( coord, depth ) ).r;
 }
 
 float ShadowOmni( const in vec3 I, const in vec4 params )
@@ -41,13 +41,13 @@ float ShadowOmni( const in vec3 I, const in vec4 params )
 #endif
 
 #if defined( SHADOW_PCF2X2 ) || defined( SHADOW_PCF3X3 )
-	#if defined( SHADOW_PCF2X2 )
-		float filterWidth = params.x * length( I ) * 2.0;	// PCF2X2
-	#elif defined( SHADOW_PCF3X3 )
-		float filterWidth = params.x * length( I ) * 3.0;	// PCF3X3
-	#else	// dead code
-		float filterWidth = params.x * length( I );	 // Hardware PCF1X1
-	#endif
+#if defined( SHADOW_PCF2X2 )
+	float filterWidth = params.x * length( I ) * 2.0;	// PCF2X2
+#elif defined( SHADOW_PCF3X3 )
+	float filterWidth = params.x * length( I ) * 3.0;	// PCF3X3
+#else	// dead code
+	float filterWidth = params.x * length( I );	 // Hardware PCF1X1
+#endif
 	// compute step size for iterating through the kernel
 	float stepSize = NUM_SAMPLES * filterWidth / NUM_SAMPLES;
 
@@ -60,20 +60,48 @@ float ShadowOmni( const in vec3 I, const in vec4 params )
 	}
 
 	// return average of the samples
-	shadow *= ( 4.0 / ( NUM_SAMPLES * NUM_SAMPLES ));
+	shadow *= (4.0 / (NUM_SAMPLES * NUM_SAMPLES));
 	return shadow;
 #elif defined( SHADOW_VOGEL_DISK )
-	float stepSize = 0.8;//1.1;
-	float rotation = InterleavedGradientNoise(gl_FragCoord.xy) * 6.2832;
+	const float stepSize = 0.8;//1.1;
+	float rotation = InterleavedGradientNoise( gl_FragCoord.xy ) * 6.2832;
 
-	for( int i = 0; i < 16; ++i)
-	{
-		vec2 vogel = stepSize * VogelDiskSample(i, 16, rotation); 
-		shadow += depthCube(I + right * vogel.x + up * vogel.y, params.z, params.w );
-	}
-	
-	shadow *= 0.0625;	
-	return shadow;	
+	vec2 vogel;
+	vogel = stepSize * VogelDiskSample( 0, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 1, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 2, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 3, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 4, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 5, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 6, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 7, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 8, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 9, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 10, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 11, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 12, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 13, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 14, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+	vogel = stepSize * VogelDiskSample( 15, 16, rotation );
+	shadow += depthCube( I + right * vogel.x + up * vogel.y, params.z, params.w );
+
+	shadow *= 0.0625;
+	return shadow;
 #else
 	return depthCube( I, params.z, params.w ); // no shadow smoothing at all
 #endif
