@@ -257,6 +257,19 @@ void ClientPutInServer( edict_t *pEntity )
 //==================================================================================
 void SaySounds( char *Text, CBasePlayer *pPlayer )
 {	
+	// crashes in single player
+	if( g_pGameRules->TotalServerSounds_lol <= 0 || g_pGameRules->TotalServerSounds_meow <= 0 )
+		return;
+
+	// TODO: make a proper text file for server to load so server can specify their own custom chat commands and sounds
+	/* example:
+	* "lol"
+	* {
+	* "sound/server/lol1.wav"
+	* "sound/server/lol2.wav"
+	* }
+	*/
+	
 	for( int i = 0; Text[i] != 0; i++ )
 		Text[i] = tolower( Text[i] );
 	
