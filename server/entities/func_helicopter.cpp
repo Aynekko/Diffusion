@@ -45,6 +45,8 @@ BEGIN_DATADESC( CHelicopter )
 	DEFINE_FIELD( pCarHurt, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pDriverMdl, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pChassisMdl, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pTankTower, FIELD_CLASSPTR ), // I honestly still don't get it - why do I have to put this here again if it's already defined in the saverestore table in the base class, where this variable is taken from?
+	DEFINE_FIELD( pDoorHandle, FIELD_CLASSPTR ),
 	DEFINE_KEYFIELD( m_iszEngineSnd, FIELD_STRING, "enginesnd" ),
 	DEFINE_KEYFIELD( m_iszIdleSnd, FIELD_STRING, "idlesnd" ),
 	DEFINE_FIELD( AllowCamera, FIELD_BOOLEAN ),
@@ -62,6 +64,9 @@ LINK_ENTITY_TO_CLASS( func_helicopter, CHelicopter );
 int CHelicopter::ObjectCaps( void )
 {
 	if( HasSpawnFlags( SF_HELI_ONLYTRIGGER ) )
+		return 0;
+
+	if( pDoorHandle )
 		return 0;
 
 	return FCAP_IMPULSE_USE;
@@ -227,6 +232,9 @@ void CHelicopter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 		// reset player's angles, look in the vehicle direction
 		pPlayer->SetAbsAngles( GetAbsAngles() );
 		pPlayer->pev->fixangle = TRUE;
+		CamUnlocked = false;
+		if( pTankTower )
+			pTankTower->SetAbsAngles( GetAbsAngles() );
 
 		if( pPlayer == hDriver )
 		{
@@ -333,6 +341,8 @@ void CHelicopter::Setup( void )
 	pCamera2 = UTIL_FindEntityByTargetname( NULL, STRING( camera2 ) );
 	pBlade = UTIL_FindEntityByTargetname( NULL, STRING( blade ) );
 	pBlade2 = UTIL_FindEntityByTargetname( NULL, STRING( blade2 ) );
+	pTankTower = UTIL_FindEntityByTargetname( NULL, STRING( tank_tower ) );
+	pDoorHandle = UTIL_FindEntityByTargetname( NULL, STRING( door_handle ) );
 
 	if( pChassisMdl )
 	{
@@ -441,6 +451,28 @@ void CHelicopter::Setup( void )
 		pFreeCam->pev->effects |= EF_SKIPPVS;
 		if( !FreeCameraDistance )
 			FreeCameraDistance = CameraDistance;
+	}
+
+	if( pDoorHandle )
+	{
+		// reset USE flag, car can be USE-pressed through handle only
+		ObjectCaps();
+		if( pChassisMdl )
+			pDoorHandle->SetParent( pChassisMdl );
+		else
+			pDoorHandle->SetParent( this );
+
+		pDoorHandle->pev->owner = edict();
+	}
+
+	if( pTankTower )
+	{
+		if( pChassisMdl )
+			pTankTower->SetParent( pChassisMdl );
+		else if( pChassis )
+			pTankTower->SetParent( pChassis );
+		else
+			pTankTower->SetParent( this );
 	}
 
 	if( pev->iuser1 ) // rotate vehicle
@@ -951,7 +983,35 @@ void CHelicopter::Drive( void )
 		}
 	}
 
-	if( (gpGlobals->time > LastShootTime + 0.5) && (hDriver->pev->button & IN_ATTACK) )
+	if( pTankTower && CamUnlocked )
+	{
+		// rotate tower
+		Vector TowerAngles = ChassisAng;
+		if( pChassisMdl )
+			TowerAngles = pChassisMdl->GetLocalAngles();
+
+		// turret moves almost freely because we use it as a camera
+		TowerAngles = hDriver->pev->v_angle;
+		TowerAngles.x *= 0.4f; // let's not get carried away...
+		pTankTower->SetAbsAngles( TowerAngles );
+
+		if( (hDriver->pev->button & IN_ATTACK) && (gpGlobals->time > LastShootTime + 0.125f) )
+		{
+			// use forward vector of the tower
+			UTIL_MakeVectors( TowerAngles );
+			Vector RocketOrg = pTankTower->GetAbsOrigin() + gpGlobals->v_forward * 50;
+			Vector RocketAng = TowerAngles;
+
+			hDriver->FireBullets( 1, pTankTower->GetAbsOrigin(), gpGlobals->v_forward, VECTOR_CONE_3DEGREES, 16384, BULLET_MONSTER_12MM, 1, 30.0f, hDriver->pev );
+			PlayClientSound( pTankTower, 247 );
+			UTIL_ScreenShakeLocal( hDriver, pTankTower->GetAbsOrigin(), 1.5f, 100, 0.2, 300, true );
+			LastShootTime = gpGlobals->time;
+
+			// bring back the car vectors
+			UTIL_MakeVectors( GetAbsAngles() );
+		}
+	}
+	else if( (gpGlobals->time > LastShootTime + 0.5) && (hDriver->pev->button & IN_ATTACK) )
 	{
 		Vector RocketOrg = GetAbsOrigin() + gpGlobals->v_forward * 200 - gpGlobals->v_up * 30;
 		Vector RocketAng = pChassis->GetAbsAngles();
@@ -975,6 +1035,8 @@ void CHelicopter::Drive( void )
 
 		LastShootTime = gpGlobals->time;
 	}
+	else if( pTankTower )
+		pTankTower->SetAbsAngles( GetAbsAngles() );
 
 	//----------------------------
 	// chassis (body) model

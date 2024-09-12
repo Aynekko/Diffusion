@@ -2328,6 +2328,7 @@ void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoV
 	int Channel = CHAN_WEAPON;
 	bool localanim = (LocalWeaponAnims() && UTIL_IsLocal( entindex ) && entindex == player->index && !CL_IsThirdPerson());
 	float attenuation = 0.6f;
+	int pitch = RANDOM_LONG( 98, 103 );
 
 	switch( sndnum )
 	{
@@ -2466,6 +2467,13 @@ void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoV
 		sndname[0] = "weapons/rocketfire1.wav";
 		num = 0;
 	break;
+	case 247: // helicopter minigun
+		// reuse sniper sounds with higher pitch
+		sndname[0] = "weapons/sniper_wpn_fire.wav";
+		sndname_d[0] = "weapons/sniper_wpn_fire_d.wav";
+		num = 0;
+		pitch *= 1.75f;
+		break;
 	case 248: // apc projectile shooting
 		sndname[0] = "car/apc_fire.wav";
 		sndname_d[0] = "car/apc_fire_d.wav";
@@ -2513,8 +2521,6 @@ void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoV
 
 	if( num == -1 )
 		return;
-
-	int pitch = RANDOM_LONG( 98, 103 );
 
 	// play normal sound
 	if( sndname[num] != NULL )

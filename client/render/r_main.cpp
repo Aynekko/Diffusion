@@ -2118,6 +2118,7 @@ void R_SetupRefParams( const ref_viewpass_t *rvp )
 	RI->viewport[2] = rvp->viewport[2];
 	RI->viewport[3] = rvp->viewport[3];
 	RI->vieworg = rvp->vieworigin;
+	RI->viewangles = rvp->viewangles;
 
 	bool Drone_View = (GET_ENTITY( rvp->viewentity ) == tr.pDrone);
 
@@ -2135,12 +2136,11 @@ void R_SetupRefParams( const ref_viewpass_t *rvp )
 		RI->fov_y = rvp->fov_y;
 	}
 
-	RI->viewangles = rvp->viewangles;
-	RI->pvsorigin = rvp->vieworigin;
+	RI->pvsorigin = RI->vieworg; // use RI in case we edited it, like for the drone above
 	RI->viewentity = rvp->viewentity;
 	RI->num_subview_faces = 0;
 
-	tr.cached_vieworigin = rvp->vieworigin;
+	tr.cached_vieworigin = RI->vieworg;
 	tr.cached_viewangles = rvp->viewangles;
 
 	// setup skyparams

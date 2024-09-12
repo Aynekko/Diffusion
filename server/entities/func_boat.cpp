@@ -238,6 +238,9 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 		// reset player's angles, look in the vehicle direction
 		pPlayer->SetAbsAngles( GetAbsAngles() );
 		pPlayer->pev->fixangle = TRUE;
+		CamUnlocked = false;
+		if( pTankTower )
+			pTankTower->SetAbsAngles( GetAbsAngles() );
 
 		if( pPlayer == hDriver )
 		{
