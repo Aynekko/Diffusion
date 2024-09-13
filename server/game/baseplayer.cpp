@@ -4897,6 +4897,13 @@ void CBasePlayer::Dash(void)
 		pev->velocity.x *= 10;
 		pev->velocity.y *= 10;
 
+		if( pev->flags & FL_ONGROUND )
+		{
+			// add extra if touching floor
+			pev->velocity.x *= 1.35f;
+			pev->velocity.y *= 1.35f;
+		}
+
 		m_flStaminaValue -= 30;
 		UTIL_ScreenShakeLocal( this, GetAbsOrigin(), 2.0, 1000.0, 0.5, 100, true );
 		if( pev->waterlevel == 3 )
