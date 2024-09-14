@@ -325,10 +325,10 @@ void R_DrawLightScissors( void )
 
 		RI->currentlight = pl;
 
-		if( !Mod_CheckBoxVisible( pl->absmin, pl->absmax ))
+		if( R_CullBox( pl->absmin, pl->absmax ))
 			continue;
 
-		if( R_CullBox( pl->absmin, pl->absmax ))
+		if( !Mod_CheckBoxVisible( pl->absmin, pl->absmax ) )
 			continue;
 
 		if( !UTIL_IsLocal( pl->key ) || FBitSet( RI->params, RP_THIRDPERSON ))

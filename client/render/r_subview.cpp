@@ -722,10 +722,9 @@ void R_FindBmodelSubview( cl_entity_t *e )
 		absmax = e->origin + clmodel->maxs;
 	}
 
-	if( !Mod_CheckBoxVisible( absmin, absmax ))
+	if( R_CullModel( e, absmin, absmax ) )
 		return;
-
-	if( R_CullModel( e, absmin, absmax ))
+	if( !Mod_CheckBoxVisible( absmin, absmax ))
 		return;
 
 	if( FBitSet( e->curstate.effects, EF_SCREEN|EF_PORTAL ))
@@ -946,9 +945,10 @@ static void R_RenderStudioScreen( cl_entity_t *e )
 	
 	Vector absmin = e->origin + e->curstate.mins;
 	Vector absmax = e->origin + e->curstate.maxs;
-	if( !Mod_CheckBoxVisible( absmin, absmax ) )
-		return;
+
 	if( R_CullModel( e, absmin, absmax ) )
+		return;
+	if( !Mod_CheckBoxVisible( absmin, absmax ) )
 		return;
 	
 	Vector origin, angles, forward;

@@ -603,10 +603,10 @@ void R_RenderShadowmaps(void)
 
 		if( !UTIL_IsLocal( pl->entindex ) ) // do not perform culling for this player's flashlight - it's always visible
 		{
-			if( !Mod_CheckBoxVisible( pl->absmin, pl->absmax ) )
+			if( R_CullBox( pl->absmin, pl->absmax ) )
 				continue;
 
-			if( R_CullBox( pl->absmin, pl->absmax ) )
+			if( !Mod_CheckBoxVisible( pl->absmin, pl->absmax ) )
 				continue;
 		}
 

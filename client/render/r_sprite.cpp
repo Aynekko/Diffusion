@@ -324,10 +324,10 @@ bool CSpriteModelRenderer :: CullSpriteModel( void )
 
 	SpriteComputeBBox( m_pCurrentEntity, NULL );
 
-	if( !Mod_CheckBoxVisible( sprite_absmin, sprite_absmax ))
+	if( R_CullModel( m_pCurrentEntity, sprite_absmin, sprite_absmax ) )
 		return true;
 
-	return R_CullModel( m_pCurrentEntity, sprite_absmin, sprite_absmax );
+	return !Mod_CheckBoxVisible( sprite_absmin, sprite_absmax );
 }
 
 /*

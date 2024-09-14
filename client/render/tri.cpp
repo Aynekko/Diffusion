@@ -52,9 +52,10 @@ void HUD_DrawNormalTriangles( void )
 
 		Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
 		Vector absmax = RI->currententity->origin + RI->currententity->curstate.maxs;
-		if( !Mod_CheckBoxVisible( absmin, absmax ) )
-			continue;
+		
 		if( R_CullModel( RI->currententity, absmin, absmax ) )
+			continue;
+		if( !Mod_CheckBoxVisible( absmin, absmax ) )
 			continue;
 
 		if( r_drawentities->value == 7 )
@@ -98,9 +99,10 @@ void HUD_DrawTransparentTriangles( void )
 
 			Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
 			Vector absmax = RI->currententity->origin + RI->currententity->curstate.maxs;
-			if( !Mod_CheckBoxVisible( absmin, absmax ) )
-				continue;
+
 			if( R_CullModel( RI->currententity, absmin, absmax ) )
+				continue;
+			if( !Mod_CheckBoxVisible( absmin, absmax ) )
 				continue;
 
 			if( r_drawentities->value == 7 )

@@ -4502,11 +4502,11 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 		if( !StudioComputeBBox( m_pCurrentEntity ) )
 			return 0; // invalid sequence
 
-		if( !Mod_CheckBoxVisible( m_pModelInstance->absmin, m_pModelInstance->absmax ) )
-			return 0;
-
 		// see if the bounding box lets us trivially reject, also sets
 		if( R_CullModel( m_pCurrentEntity, m_pModelInstance->absmin, m_pModelInstance->absmax ) )
+			return 0;
+
+		if( !Mod_CheckBoxVisible( m_pModelInstance->absmin, m_pModelInstance->absmax ) )
 			return 0;
 		
 		m_pModelInstance->visframe = tr.realframecount; // visible

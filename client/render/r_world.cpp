@@ -3229,10 +3229,9 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 		absmax = e->origin + clmodel->maxs;
 	}
 
-	if( !Mod_CheckBoxVisible( absmin, absmax ) )
-		return;
-
 	if( R_CullModel( e, absmin, absmax ) )
+		return;
+	if( !Mod_CheckBoxVisible( absmin, absmax ) )
 		return;
 
 	tr.num_draw_surfaces = 0;
@@ -3338,10 +3337,9 @@ void R_DrawBrushModelShadow( cl_entity_t *e )
 		absmax = e->origin + clmodel->maxs;
 	}
 
-	if( !Mod_CheckBoxVisible( absmin, absmax ) )
-		return;
-
 	if( R_CullModel( e, absmin, absmax ) )
+		return;
+	if( !Mod_CheckBoxVisible( absmin, absmax ) )
 		return;
 
 	tr.num_draw_surfaces = 0;
