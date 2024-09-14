@@ -155,11 +155,12 @@
 #define EF_SKIPPVS			BIT(20)	// this entity skips PVS check in AddToFullPack, thus always present at all times
 #define EF_ROTATING			BIT(21) // client-side func_rotating - non-solid and very simple
 #define EF_UPSIDEDOWN		BIT(22) // player is upside down
+// BIT(23) // unused
 #define EF_NOREFLECT		BIT(24)	// Entity won't reflecting in mirrors
 #define EF_REFLECTONLY		BIT(25)	// Entity will be drawing only in mirrors
 #define EF_WATERSIDES		BIT(26)	// Do not remove sides for func_water entity
-//#define ...			BIT(27) // unused
-//#define ...			BIT(28) // unused
+#define EF_FULLBRIGHT		BIT(27) // used in engine
+#define EF_NOSHADOW			BIT(28) // used in engine
 #define EF_MERGE_VISIBILITY	BIT(29)	// this entity allowed to merge vis (e.g. env_sky or portal camera)
 #define EF_REQUEST_PHS		BIT(30)	// This entity requested phs bitvector instead of pvsbitvector in AddToFullPack calls
 
@@ -173,7 +174,7 @@
 #define CF_MOVIE_SOUND		(1<<2)	// allow sound
 
 // custom flags for env_projector
-//#define CF_NOATTEN			BIT(0)	// don't use attenuation for this light // diffusion - NOW UNUSED
+// BIT(0)	// unused
 #define CF_TEXTURE			BIT(1)	// custom texture specified
 #define CF_SPRITE			BIT(2)	// custom sprite specified
 #define CF_MOVIE			BIT(3)	// custom movie specified

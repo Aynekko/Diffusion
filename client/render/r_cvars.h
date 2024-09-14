@@ -68,6 +68,7 @@ extern cvar_t	*r_fade_props;
 extern cvar_t	*r_show_cubemaps;
 extern cvar_t	*r_bloom_sprites;
 extern cvar_t	*r_bloom;
+extern cvar_t *r_cached_box_culling;
 extern cvar_t *r_blur;
 extern cvar_t *r_blur_threshold;
 extern cvar_t *r_blur_strength;

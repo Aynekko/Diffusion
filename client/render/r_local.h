@@ -307,6 +307,7 @@ typedef struct
 
 	float		viewplanedist;
 	mplane_t		clipPlane;
+	int bBoxVisible[8192]; // cache cull state for an entity here if the leaf is unchanged !!! NORMALPASS ONLY (I'm scared to break stuff in other passes yet)
 } ref_instance_t;
 
 typedef struct

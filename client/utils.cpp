@@ -286,6 +286,15 @@ bool Mod_BoxVisible( const Vector mins, const Vector maxs, const byte *visbits )
 	if( !visbits || !mins || !maxs )
 		return true;
 
+	// during normalpass, use cached cull value, if the viewleaf is the same as last frame.
+	// this culling is expensive stuff
+	bool use_cache = (r_cached_box_culling->value > 0 && RI->currententity != NULL && (RI->currententity->index > 0) && (RI->currententity->curstate.origin == RI->currententity->prevstate.origin) && RP_NORMALPASS());
+	if( use_cache )
+	{
+		if( RI->bBoxVisible[RI->currententity->index] != -1 )
+			return RI->bBoxVisible[RI->currententity->index] > 0 ? true : false;
+	}
+
 	count = Mod_BoxLeafnums( mins, maxs, leafList, SIZEOFARRAY( leafList ), &headnode );
 
 	if( count < SIZEOFARRAY( leafList ))
@@ -293,12 +302,23 @@ bool Mod_BoxVisible( const Vector mins, const Vector maxs, const byte *visbits )
 
 	for( i = 0; i < count; i++ )
 	{
-		if( CHECKVISBIT( visbits, leafList[i] ))
+		if( CHECKVISBIT( visbits, leafList[i] ) )
+		{
+			if( use_cache )
+				RI->bBoxVisible[RI->currententity->index] = 1;
 			return true;
+		}
 	}
 
-	if( Mod_HeadnodeVisible( headnode, visbits ))
+	if( Mod_HeadnodeVisible( headnode, visbits ) )
+	{
+		if( use_cache )
+			RI->bBoxVisible[RI->currententity->index] = 1;
 		return true;
+	}
+
+	if( use_cache )
+		RI->bBoxVisible[RI->currententity->index] = 0;
 
 	return false;
 }
