@@ -661,6 +661,32 @@ void ClientCommand( edict_t *pEntity )
 		else
 			ALERT( at_console, "\"e_c\" is cheat protected.\n" );
 	}
+	else if( FIStrEq( pcmd, "e_t" ) ) // diffusion - teleport the named entity in front of you
+	{
+		if( Cheats )
+		{
+			if( CMD_ARGC() > 1 )
+			{
+				// yes, we want to find only one entity to prevent pile-up...
+				CBaseEntity *pTarget = UTIL_FindEntityByTargetname( NULL, CMD_ARGV( 1 ) );
+
+				if( pTarget )
+				{
+					UTIL_MakeVectors( pPlayer->pev->v_angle );
+					Vector TargetOrg = pPlayer->GetAbsOrigin() + gpGlobals->v_forward * 64;
+					Vector ang = pTarget->GetAbsAngles();
+					Vector vel = g_vecZero;
+					pTarget->Teleport( &TargetOrg, &ang, &vel );
+				}
+				else
+					ALERT( at_console, "Can't find this entity to teleport.\n" );
+			}
+			else
+				ALERT( at_console, "-- Teleports one entity with the name in front of you.\n-- Usage: e_t <targetname>\n" );
+		}
+		else
+			ALERT( at_console, "\"e_t\" is cheat protected.\n" );
+	}
 	else if( FIStrEq( pcmd, "upside_down" ) ) // diffusion 
 	{
 		if( Cheats )
