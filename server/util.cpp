@@ -577,6 +577,7 @@ void UTIL_Teleport( CBaseEntity *pSource, TeleportListEntry_t &entry, const Vect
 			{
 				CBasePlayer *pPlayer = (CBasePlayer *)pTeleport;
 				pPlayer->SnapEyeAngles( *newAngles );
+				pPlayer->SetAbsAngles( *newAngles );
 			}
 
 			if( pTeleport->IsRigidBody( ))

@@ -324,6 +324,12 @@ void CBaseDoor::Spawn( void )
 			m_vecPosition2 = m_vecPosition1;
 			m_vecPosition1 = GetLocalOrigin();
 		}
+
+		// swap custom speeds
+		float tmp_custom_open_speed = CustomOpenSpeed;
+		float tmp_custom_close_speed = CustomCloseSpeed;
+		CustomOpenSpeed = tmp_custom_close_speed;
+		CustomCloseSpeed = tmp_custom_open_speed;
 	}
 	else
 		UTIL_SetOrigin( this, m_vecPosition1 );
