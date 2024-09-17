@@ -38,6 +38,7 @@ public:
 	int PlayingDrums;
 	int DrunkLevel;
 	int CanUseDrone;
+	bool DeletePlayerTurrets;
 	string_t DroneTarget_OnDeploy;
 	string_t DroneTarget_OnReturn;
 	string_t DroneTarget_OnEnteringFirstPerson;
@@ -72,6 +73,7 @@ BEGIN_DATADESC(CPlayerCustomize)
 	DEFINE_KEYFIELD( PlayingDrums, FIELD_INTEGER, "drums" ),
 	DEFINE_KEYFIELD( DrunkLevel, FIELD_INTEGER, "drunklevel"),
 	DEFINE_KEYFIELD( CanUseDrone, FIELD_INTEGER, "canusedrone" ),
+	DEFINE_KEYFIELD( DeletePlayerTurrets, FIELD_BOOLEAN, "delturrets" ),
 	DEFINE_KEYFIELD( DroneTarget_OnDeploy, FIELD_STRING, "ondeploydrone" ),
 	DEFINE_KEYFIELD( DroneTarget_OnReturn, FIELD_STRING, "onreturndrone" ),
 	DEFINE_KEYFIELD( DroneTarget_OnEnteringFirstPerson, FIELD_STRING, "onentering1stperson" ),
@@ -183,6 +185,11 @@ void CPlayerCustomize::KeyValue(KeyValueData* pkvd)
 	else if( FStrEq( pkvd->szKeyName, "canusedrone" ) )
 	{
 		CanUseDrone = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "delturrets" ) )
+	{
+		DeletePlayerTurrets = (Q_atoi( pkvd->szValue ) > 0);
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "ondeploydrone" ) )
@@ -493,5 +500,21 @@ void CPlayerCustomize::Affect( CBasePlayer *pPlayer )
 			pPlayer->DroneTarget_OnLeavingFirstPerson = NULL;
 		else
 			pPlayer->DroneTarget_OnLeavingFirstPerson = DroneTarget_OnLeavingFirstPerson;
+	}
+
+	if( DeletePlayerTurrets )
+	{
+		CBaseEntity *pTurret = NULL;
+		while( (pTurret = UTIL_FindEntityByClassname( pTurret, "_playersentry" )) != NULL )
+		{
+			// not sure but just in case - a turret already marked for deletion
+			if( pTurret->pev->flags & FL_KILLME )
+				continue;
+			
+			// only deleting the turrets of specific player
+			CBaseEntity *pTurretOwner = CBaseEntity::Instance( pTurret->pev->owner );
+			if( pTurretOwner && pTurretOwner == pPlayer )
+				UTIL_Remove( pTurret );
+		}
 	}
 }
