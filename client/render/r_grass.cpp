@@ -440,7 +440,7 @@ R_DrawGrassMesh
 render grass with diffuse or skyambient lighting
 ================
 */
-void R_DrawGrassMesh( grass_t *grass, int tex, word &hLastShader, word &hCachedMatrix )
+void R_DrawGrassMesh( grass_t *grass, int tex, word &hLastShader, word &hCachedMatrix, int &hLastTexture, int &hLastBumpMap )
 {
 	bool UseBump = (gl_bump->value > 0 && grasstexs[tex].gl_normalmapnum > 0);
 	
@@ -467,11 +467,22 @@ void R_DrawGrassMesh( grass_t *grass, int tex, word &hLastShader, word &hCachedM
 
 	if( r_lightmap->value && !r_fullbright->value )
 		GL_Bind( GL_TEXTURE0, tr.whiteTexture );
-	else GL_Bind( GL_TEXTURE0, grasstexs[tex].gl_texturenum );
+	else
+	{
+		if( hLastTexture != grasstexs[tex].gl_texturenum )
+		{
+			GL_Bind( GL_TEXTURE0, grasstexs[tex].gl_texturenum );
+			hLastTexture = grasstexs[tex].gl_texturenum;
+		}
+	}
 
 	if( UseBump )
 	{
-		GL_Bind( GL_TEXTURE1, grasstexs[tex].gl_normalmapnum );
+		if( hLastBumpMap != grasstexs[tex].gl_normalmapnum )
+		{
+			GL_Bind( GL_TEXTURE1, grasstexs[tex].gl_normalmapnum );
+			hLastBumpMap = grasstexs[tex].gl_normalmapnum;
+		}
 		pglUniform1fARB( RI->currentshader->u_GenericCondition, 1.0f );
 	}
 	else
@@ -521,16 +532,18 @@ void R_RenderGrassOnList( void )
 {
 	word hCachedMatrix = -1;
 	word hLastShader = -1;
+	int hLastTexture = -1;
+	int hLastBumpMap = -1;
 
 	if( !CVAR_TO_BOOL( r_grass ) || !FBitSet( world->features, WORLD_HAS_GRASS ))
 		return; // don't waste time
 	
 	GL_Cull( GL_NONE );	// grass is double-sided poly
-	
+
 	for( int i = 0; i < GRASS_TEXTURES; i++ )
 	{
 		for( grass_t *g = grass_surfaces[i]; g != NULL; g = g->chain )
-			R_DrawGrassMesh( g, i, hLastShader, hCachedMatrix );
+			R_DrawGrassMesh( g, i, hLastShader, hCachedMatrix, hLastTexture, hLastBumpMap );
 	}
 
 	pglBindVertexArray( world->vertex_array_object ); // restore old binding
