@@ -42,26 +42,28 @@ vec3 circle( vec2 p, float size, vec3 color, float dist, vec2 mouse, float hexSh
 
 void main( void )
 {	
-	const float rnd20 = fract( sin( 20.0 ) * 1000.0 ) * 3.0 - 0.3;
-	const float rnd40 = fract( sin( 40.0 ) * 1000.0 ) * 3.0 - 0.3;
-	const float rnd60 = fract( sin( 60.0 ) * 1000.0 ) * 3.0 - 0.3;
-	const float rnd80 = fract( sin( 80.0 ) * 1000.0 ) * 3.0 - 0.3;
-	const float rnd100 = fract( sin( 100.0 ) * 1000.0 ) * 3.0 - 0.3;
-	const float rnd120 = fract( sin( 120.0 ) * 1000.0 ) * 3.0 - 0.3;
-	const float rnd140 = fract( sin( 140.0 ) * 1000.0 ) * 3.0 - 0.3;
-	const float rnd160 = fract( sin( 160.0 ) * 1000.0 ) * 3.0 - 0.3;
-	const float rnd180 = fract( sin( 180.0 ) * 1000.0 ) * 3.0 - 0.3;
-	const float rnd200 = fract( sin( 200.0 ) * 1000.0 ) * 3.0 - 0.3;
-	const float rnd2000 = pow( fract( sin( 2000.0 ) * 1000.0 ), 2.0 ) + 1.41;
-	const float rnd4000 = pow( fract( sin( 4000.0 ) * 1000.0 ), 2.0 ) + 1.41;
-	const float rnd6000 = pow( fract( sin( 6000.0 ) * 1000.0 ), 2.0 ) + 1.41;
-	const float rnd8000 = pow( fract( sin( 8000.0 ) * 1000.0 ), 2.0 ) + 1.41;
-	const float rnd10000 = pow( fract( sin( 10000.0 ) * 1000.0 ), 2.0 ) + 1.41;
-	const float rnd12000 = pow( fract( sin( 12000.0 ) * 1000.0 ), 2.0 ) + 1.41;
-	const float rnd14000 = pow( fract( sin( 14000.0 ) * 1000.0 ), 2.0 ) + 1.41;
-	const float rnd16000 = pow( fract( sin( 16000.0 ) * 1000.0 ), 2.0 ) + 1.41;
-	const float rnd18000 = pow( fract( sin( 18000.0 ) * 1000.0 ), 2.0 ) + 1.41;
-	const float rnd20000 = pow( fract( sin( 20000.0 ) * 1000.0 ), 2.0 ) + 1.41;
+	// I have to use [x - floor(x)] instead of [fract(x)]
+	// because Nvidia driver 341.81 is bitching about "non constant expression in initialization"
+	const float rnd20 = (( sin( 20.0 ) * 1000.0 ) - floor( sin( 20.0 ) * 1000.0 )) * 3.0 - 0.3;
+	const float rnd40 = (( sin( 40.0 ) * 1000.0 ) - floor( sin( 40.0 ) * 1000.0 )) * 3.0 - 0.3;
+	const float rnd60 = (( sin( 60.0 ) * 1000.0 ) - floor( sin( 60.0 ) * 1000.0 )) * 3.0 - 0.3;
+	const float rnd80 = (( sin( 80.0 ) * 1000.0 ) - floor( sin( 80.0 ) * 1000.0 )) * 3.0 - 0.3;
+	const float rnd100 = (( sin( 100.0 ) * 1000.0 ) - floor( sin( 100.0 ) * 1000.0 )) * 3.0 - 0.3;
+	const float rnd120 = (( sin( 120.0 ) * 1000.0 ) - floor( sin( 120.0 ) * 1000.0 )) * 3.0 - 0.3;
+	const float rnd140 = (( sin( 140.0 ) * 1000.0 ) - floor( sin( 140.0 ) * 1000.0 )) * 3.0 - 0.3;
+	const float rnd160 = (( sin( 160.0 ) * 1000.0 ) - floor( sin( 160.0 ) * 1000.0 )) * 3.0 - 0.3;
+	const float rnd180 = (( sin( 180.0 ) * 1000.0 ) - floor( sin( 180.0 ) * 1000.0 )) * 3.0 - 0.3;
+	const float rnd200 = (( sin( 200.0 ) * 1000.0 ) - floor( sin( 200.0 ) * 1000.0 )) * 3.0 - 0.3;
+	const float rnd2000 = pow( (( sin( 2000.0 ) * 1000.0 ) - floor( sin( 2000.0 ) * 1000.0 )), 2.0 ) + 1.41;
+	const float rnd4000 = pow( (( sin( 4000.0 ) * 1000.0 ) - floor( sin( 4000.0 ) * 1000.0 )), 2.0 ) + 1.41;
+	const float rnd6000 = pow( (( sin( 6000.0 ) * 1000.0 ) - floor( sin( 6000.0 ) * 1000.0 )), 2.0 ) + 1.41;
+	const float rnd8000 = pow( (( sin( 8000.0 ) * 1000.0 ) - floor( sin( 8000.0 ) * 1000.0 )), 2.0 ) + 1.41;
+	const float rnd10000 = pow( (( sin( 10000.0 ) * 1000.0 ) - floor( sin( 10000.0 ) * 1000.0 )), 2.0 ) + 1.41;
+	const float rnd12000 = pow( (( sin( 12000.0 ) * 1000.0 ) - floor( sin( 12000.0 ) * 1000.0 )), 2.0 ) + 1.41;
+	const float rnd14000 = pow( (( sin( 14000.0 ) * 1000.0 ) - floor( sin( 14000.0 ) * 1000.0 )), 2.0 ) + 1.41;
+	const float rnd16000 = pow( (( sin( 16000.0 ) * 1000.0 ) - floor( sin( 16000.0 ) * 1000.0 )), 2.0 ) + 1.41;
+	const float rnd18000 = pow( (( sin( 18000.0 ) * 1000.0 ) - floor( sin( 18000.0 ) * 1000.0 )), 2.0 ) + 1.41;
+	const float rnd20000 = pow( (( sin( 20000.0 ) * 1000.0 ) - floor( sin( 20000.0 ) * 1000.0 )), 2.0 ) + 1.41;
 	
 	vec2 uv = gl_FragCoord.xy / u_ScreenSizeInv - 0.5;
 	//uv=uv*2.-1.0;
