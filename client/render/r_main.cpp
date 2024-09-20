@@ -1954,7 +1954,7 @@ void HUD_PrintStats( void )
 		R_Speeds_Printf( "%3i static entities\n%3i normal entities\n%3i fading entities\n%3i faded entities\n", r_numStatics, r_numEntities - r_numStatics, r_stats.num_fading_ents, r_stats.num_faded_ents );
 		break;
 	case 4:
-		R_Speeds_Printf( "DIP count %3i\nShader bind %3i\n", r_stats.num_flushes, r_stats.num_shader_binds );
+		R_Speeds_Printf( "DIP count %3i\nShader bind %3i\n", r_stats.dip_count, r_stats.num_shader_binds );
 		R_Speeds_Printf( "Total GLSL shaders %3i\n", Q_max( num_glsl_programs - 1, 0 ));
 		R_Speeds_Printf( "frame total tris %3i\n\n", r_stats.c_total_tris );
 		if( glConfig.hardware_type == GLHW_NVIDIA )

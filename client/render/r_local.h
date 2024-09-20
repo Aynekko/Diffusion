@@ -510,7 +510,7 @@ typedef struct
 	unsigned int	num_passes;
 
 	unsigned int	num_shader_binds;
-	unsigned int	num_flushes;
+	unsigned int	dip_count;
 
 	unsigned int	num_faded_ents;  // completely faded ents
 	unsigned int	num_fading_ents; // ents which became transparent, but still being drawn

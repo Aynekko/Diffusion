@@ -4892,7 +4892,7 @@ void CStudioModelRenderer::DrawMeshFromBuffer( const vbomesh_t *mesh )
 		pglDrawElements( GL_TRIANGLES, mesh->numElems, GL_UNSIGNED_INT, 0 );
 
 	r_stats.c_total_tris += (mesh->numElems / 3);
-	r_stats.num_flushes++;
+	r_stats.dip_count++;
 }
 
 void CStudioModelRenderer::AddStudioToLightList( plight_t *pl )

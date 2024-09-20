@@ -430,7 +430,7 @@ void R_DrawGrassMeshFromBuffer( const grass_t *mesh )
 
 	r_stats.c_total_tris += (mesh->vbo.numVerts / 2);
 	r_stats.c_grass_polys += (mesh->vbo.numVerts / 4);
-	r_stats.num_flushes++;
+	r_stats.dip_count++;
 }
 
 /*
@@ -1636,7 +1636,7 @@ void R_DrawGrass( qboolean lightpass )
 				r_stats.c_total_tris += (numverts / 2);
 				pglDrawArrays( GL_QUADS, 0, numverts );
 				grasspos = grassverts;
-				r_stats.num_flushes++;
+				r_stats.dip_count++;
 				numverts = 0;
 			}
 		}
@@ -1647,7 +1647,7 @@ void R_DrawGrass( qboolean lightpass )
 			r_stats.c_grass_polys += (numverts / 4);
 			r_stats.c_total_tris += (numverts / 2);
 			pglDrawArrays( GL_QUADS, 0, numverts );
-			r_stats.num_flushes++;
+			r_stats.dip_count++;
 		}
 
 		grasstexs[i].grasschain = NULL;

@@ -159,7 +159,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			else pglDrawElements( GL_QUADS, m_iNumIndex, GL_UNSIGNED_SHORT, m_indexarray );
 			r_stats.c_total_tris += (m_iNumVerts / 2);
 			m_iNumVerts = m_iNumIndex = 0;
-			r_stats.num_flushes++;
+			r_stats.dip_count++;
 		}
 
 		// fadeout
@@ -632,7 +632,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		else
 			pglDrawElements( GL_QUADS, m_iNumIndex, GL_UNSIGNED_SHORT, m_indexarray );
 		r_stats.c_total_tris += (int)(m_iNumVerts * 0.5f);
-		r_stats.num_flushes++;
+		r_stats.dip_count++;
 	}
 
 	pglDisableClientState( GL_TEXTURE_COORD_ARRAY );
@@ -1077,6 +1077,8 @@ bool CQuakePart::Evaluate( float gravity )
 		GL_AlphaTest( GL_FALSE );
 		GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	}
+
+	r_stats.dip_count++;
 
 	return true;
 }

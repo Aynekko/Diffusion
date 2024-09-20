@@ -1259,7 +1259,7 @@ void CStudioModelRenderer :: DrawDecalMaterial( DecalMaterial_t& decalMaterial, 
 	else pglDrawElements( GL_TRIANGLES, m_nNumArrayElems, GL_UNSIGNED_INT, m_arrayelems );
 
 	r_stats.c_total_tris += (m_nNumArrayElems / 3);
-	r_stats.num_flushes++;
+	r_stats.dip_count++;
 }
 
 //-----------------------------------------------------------------------------
