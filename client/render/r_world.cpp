@@ -2778,7 +2778,6 @@ void R_DrawBrushList( void )
 	Vector4D brush_params[3];
 	Vector2D screensizeinv = Vector2D( 1.0f / (float)glState.width, 1.0f / (float)glState.height );
 	float waveHeight = 0.0f;
-	bool apply_cubemap = false;
 
 	int i;
 	gl_bmodelface_t *entry;
@@ -2872,7 +2871,6 @@ void R_DrawBrushList( void )
 
 			// diffusioncubemaps
 			cached_cubemap = NULL;
-			apply_cubemap = false;
 
 			cached_glossscale = -1.0f;
 			cached_glosssmoothness = -1.0f;
@@ -2885,7 +2883,6 @@ void R_DrawBrushList( void )
 		{
 			mtexinfo_t *tx = s->texinfo;
 			mfaceinfo_t *land = tx->faceinfo;
-			apply_cubemap = false;
 
 			if( FBitSet( s->flags, SURF_REFLECT | SURF_PORTAL | SURF_SCREEN ) && es->subtexture[glState.stack_position] )
 			{
@@ -2915,31 +2912,6 @@ void R_DrawBrushList( void )
 				else
 					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
 				GL_LoadIdentityTexMatrix();
-			}
-
-			if( cached_lightmap != es->lightmaptexturenum )
-			{
-				if( R_FullBright() )
-				{
-					// bind stubs (helper to reduce conditions in shader)
-					GL_Bind( GL_TEXTURE1, tr.whiteTexture );
-					GL_Bind( GL_TEXTURE2, tr.whiteTexture );
-				}
-				else
-				{
-					// bind real data
-					GL_Bind( GL_TEXTURE1, tr.lightmaps[es->lightmaptexturenum].lightmap );
-					if( FBitSet( s->flags, SURF_WATER ) )
-						GL_Bind( GL_TEXTURE2, tr.whiteTexture ); // FIXME for some reason deluxmap is visible on water on AMD card...wtf?
-					else
-					{
-						if( tr.lowmemory )
-							GL_Bind( GL_TEXTURE2, tr.grayTexture );
-						else
-							GL_Bind( GL_TEXTURE2, tr.lightmaps[es->lightmaptexturenum].deluxmap );
-					}
-				}
-				cached_lightmap = es->lightmaptexturenum;
 			}
 
 			if( FBitSet( s->flags, SURF_LANDSCAPE ) )
@@ -3041,21 +3013,35 @@ void R_DrawBrushList( void )
 			else
 				R_SetRenderColor( RI->currententity );
 
-			if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
-			{
-				if( tr.materials[es->gl_texturenum].ReflectScale != cached_reflectscale )
-				{
-					pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale );
-					cached_reflectscale = tr.materials[es->gl_texturenum].ReflectScale;
-				}
-
-				apply_cubemap = true;
-			}
-
 			cached_mirror = es->subtexture[glState.stack_position];
 			cached_texture = es->gl_texturenum;
 			cached_texofs[0] = -1.0f;
 			cached_texofs[1] = -1.0f;
+		}
+
+		if( cached_lightmap != es->lightmaptexturenum )
+		{
+			if( R_FullBright() )
+			{
+				// bind stubs (helper to reduce conditions in shader)
+				GL_Bind( GL_TEXTURE1, tr.whiteTexture );
+				GL_Bind( GL_TEXTURE2, tr.whiteTexture );
+			}
+			else
+			{
+				// bind real data
+				GL_Bind( GL_TEXTURE1, tr.lightmaps[es->lightmaptexturenum].lightmap );
+				if( FBitSet( s->flags, SURF_WATER ) )
+					GL_Bind( GL_TEXTURE2, tr.whiteTexture ); // FIXME for some reason deluxmap is visible on water on AMD card...wtf?
+				else
+				{
+					if( tr.lowmemory )
+						GL_Bind( GL_TEXTURE2, tr.grayTexture );
+					else
+						GL_Bind( GL_TEXTURE2, tr.lightmaps[es->lightmaptexturenum].deluxmap );
+				}
+			}
+			cached_lightmap = es->lightmaptexturenum;
 		}
 
 		if( tr.viewparams.waterlevel >= 3 && RP_NORMALPASS() && FBitSet( s->flags, SURF_WATER ) )
@@ -3072,34 +3058,43 @@ void R_DrawBrushList( void )
 			cached_texofs[1] = es->texofs[1];
 		}
 
-		if( apply_cubemap ) // diffusioncubemaps
+		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
 		{
+			if( tr.materials[es->gl_texturenum].ReflectScale != cached_reflectscale )
+			{
+				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale );
+				cached_reflectscale = tr.materials[es->gl_texturenum].ReflectScale;
+			}
+
 			int cubemap_tex_unit = GL_TEXTURE6;
 			if( FBitSet( s->flags, SURF_WATER ) )
 				cubemap_tex_unit = GL_TEXTURE2;
 
-			if( es->cubemap != NULL )
+			if( es->cubemap )
 			{
-				GL_Bind( cubemap_tex_unit, es->cubemap->texture );
-				// box mins
-				cubemap_params[0] = es->cubemap->mins;
-				// box maxs
-				cubemap_params[1] = es->cubemap->maxs;
-				// origin
-				cubemap_params[2] = es->cubemap->origin;
+				if( cached_cubemap != es->cubemap )
+				{
+					GL_Bind( cubemap_tex_unit, es->cubemap->texture );
+					// box mins
+					cubemap_params[0] = es->cubemap->mins;
+					// box maxs
+					cubemap_params[1] = es->cubemap->maxs;
+					// origin
+					cubemap_params[2] = es->cubemap->origin;
+
+					pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
+					cached_cubemap = es->cubemap;
+				}
 			}
-			else
+			else // surface doesn't have a cubemap
 			{
 				GL_Bind( cubemap_tex_unit, tr.blackCubeTexture );
 				cubemap_params[0] = g_vecZero;
 				cubemap_params[1] = g_vecZero;
 				cubemap_params[2] = g_vecZero;
+				pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
+				cached_cubemap = NULL;
 			}
-
-			// send through one call!
-			pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
-
-			cached_cubemap = es->cubemap;
 		}
 
 		if( es->firstvertex < startv )
