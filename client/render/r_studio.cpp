@@ -139,7 +139,7 @@ void CStudioModelRenderer::VidInit( void )
 
 void CStudioModelRenderer::ResetRenderCache( void )
 {
-	mcubemap_t *cached_cubemap = NULL;
+	cached_cubemap = NULL;
 	cached_glossscale = -1.0f;
 	cached_glosssmoothness = -1.0f;
 	cached_embossscale = -1.0f;
@@ -175,6 +175,14 @@ static int SortSolidMeshes( gl_studiomesh_t &a, gl_studiomesh_t &b )
 {
 	if( a.hProgram != b.hProgram )
 		return a.hProgram > b.hProgram;
+
+	return 0;
+}
+
+static int SortSolidMeshesByAdditive( gl_studiomesh_t &a, gl_studiomesh_t &b )
+{
+	if( a.additive != b.additive )
+		return a.additive < b.additive;
 
 	return 0;
 }
@@ -5270,9 +5278,13 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	GL_DepthMask( GL_TRUE );
 
 	// sorting list to reduce shader switches
-	if( !CVAR_TO_BOOL( r_nosort ) ) 
+	if( !CVAR_TO_BOOL( r_nosort ) )
+	{
 	//	QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
 		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes - 1, SortSolidMeshes );
+		// then push additive meshes to be the last to draw
+		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes - 1, SortSolidMeshesByAdditive );
+	}
 
 	// sorting list to reduce shader switches
 	for( i = 0; i < m_nNumDrawMeshes; i++ )
@@ -5402,7 +5414,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 		if( cached_texture == -1 || cached_texture != mat->gl_diffuse_id )
 		{
-			num_binds++;
 			if( r_lightmap->value && !r_fullbright->value )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 			else if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )

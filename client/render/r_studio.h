@@ -712,7 +712,6 @@ public:
 	void	ClearLightCache( void );
 
 	// rendering cache
-	int num_binds;
 	int cached_texture;
 	mcubemap_t *cached_cubemap;
 	float cached_glossscale;

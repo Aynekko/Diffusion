@@ -154,7 +154,7 @@ void main( void )
 	float GlossSmoothness = 0.0;
 	float EmbossScale = 0.0;
 
-	// compute the matetial defines
+	// compute the material defines
 #if defined( BMODEL_MULTI_LAYERS )
 	float InitGlossScale[TERRAIN_NUM_LAYERS];
 	float InitGlossSmoothness[TERRAIN_NUM_LAYERS];
