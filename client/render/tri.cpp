@@ -210,7 +210,7 @@ void R_SetupCable( cl_entity_t *e )
 		}
 
 		if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
-			falldepth += sin( SwayPhase * ((float( (e->index % 4) + 1 ) * 2.0f / 4.0f)) ) * ((falldepth * tr.cableSwayIntensity[e->index]) / 10.0f);
+			falldepth += sin( SwayPhase * ((float( (e->index % 4) + 1 ) * 0.5f)) ) * ((falldepth * tr.cableSwayIntensity[e->index]) * 0.1f);
 
 		// Calculate dropping point
 		vdirection = vposition2 - vposition1;
@@ -225,9 +225,7 @@ void R_SetupCable( cl_entity_t *e )
 		for( int i = 0; i < inumpoints; i++ )
 		{
 			float f = (float)i / (float)isegments;
-			vpoints[i][0] = vposition1[0] * ((1 - f) * (1 - f)) + vdroppoint[0] * ((1 - f) * f * 2) + vposition2[0] * (f * f);
-			vpoints[i][1] = vposition1[1] * ((1 - f) * (1 - f)) + vdroppoint[1] * ((1 - f) * f * 2) + vposition2[1] * (f * f);
-			vpoints[i][2] = vposition1[2] * ((1 - f) * (1 - f)) + vdroppoint[2] * ((1 - f) * f * 2) + vposition2[2] * (f * f);
+			vpoints[i] = vposition1 * ((1.0f - f) * (1.0f - f)) + vdroppoint * ((1.0f - f) * f * 2.0f) + vposition2 * (f * f);
 			if( i == ParticlePointNum ) // randomly choosen point for water drop particle
 				vParticlePoint = vpoints[i];
 		}
@@ -246,7 +244,7 @@ void R_SetupCable( cl_entity_t *e )
 		for( int j = 0; j < inumpoints; j++ )
 		{
 			if( j == 0 ){ vTangent = vpoints[0] - vpoints[1]; }
-			else { vTangent = vpoints[0] - vpoints[j]; }
+			else { vTangent = vpoints[j-1] - vpoints[j]; }
 
 			vDir = vpoints[j] - RI->vieworg;
 			vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
@@ -255,7 +253,7 @@ void R_SetupCable( cl_entity_t *e )
 			if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
 			{
 				if( j != 0 && j != inumpoints - 1 ) // bacontsu - dont animate last and first vertex
-					vVertex = vVertex + (right * 1.5f * tr.cableSwayIntensity[e->index] * 5 * cos( SwayPhase * (float( (e->index % 4) + 1 ) * 2.0f / 4.0f) + j * 0.2f ));
+					vVertex = vVertex + (right * 1.5f * tr.cableSwayIntensity[e->index] * 5.f * cos( SwayPhase * (float( (e->index % 4) + 1 ) * 0.5f) + j * 0.2f ));
 			}
 			CableVertexesArray[cable_numverts] = vVertex;
 			CableColorArray[cable_numverts][0] = e->curstate.rendercolor.r;
@@ -279,7 +277,7 @@ void R_SetupCable( cl_entity_t *e )
 			if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
 			{
 				if( j != 0 && j != inumpoints - 1 ) // bacontsu - dont animate last and first vertex
-					vVertex = vVertex + (right * 1.5f * tr.cableSwayIntensity[e->index] * 5 * cos( SwayPhase * (float( (e->index % 4) + 1 ) * 2.0f / 4.0f) + j * 0.2f ));
+					vVertex = vVertex + (right * 1.5f * tr.cableSwayIntensity[e->index] * 5.f * cos( SwayPhase * (float( (e->index % 4) + 1 ) * 0.5f) + j * 0.2f ));
 			}
 			CableVertexesArray[cable_numverts] = vVertex;
 			CableColorArray[cable_numverts][0] = e->curstate.rendercolor.r;
@@ -332,6 +330,7 @@ void R_RenderCables( void )
 	if( tr.fogEnabled )
 	{
 		GL_BindShader( glsl.genericFog );
+		GL_Bind( GL_TEXTURE0, tr.whiteTexture ); // need to bind something otherwise cables can disappear
 		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 	}
 
@@ -355,6 +354,7 @@ void R_RenderCables( void )
 		GL_BindShader( GL_NONE );
 
 	r_stats.c_cables++;
+	r_stats.dip_count++;
 }
 
 //============================================================================================
@@ -581,4 +581,6 @@ void R_RenderVolumetricLights( void )
 	
 	GL_Blend( GL_FALSE );
 	GL_Cull( GL_FRONT );
+
+	r_stats.dip_count++;
 }
