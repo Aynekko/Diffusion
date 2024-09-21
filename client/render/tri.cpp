@@ -22,6 +22,7 @@
 #include "r_local.h"
 #include "edict.h"
 #include "r_sprite.h"
+#include "r_shader.h"
 
 #define MAX_CABLE_VERTS 65536
 Vector CableVertexesArray[MAX_CABLE_VERTS];
@@ -328,6 +329,12 @@ void R_RenderCables( void )
 		GL_DepthMask( GL_TRUE );
 	}
 
+	if( tr.fogEnabled )
+	{
+		GL_BindShader( glsl.genericFog );
+		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+	}
+
 	pglBindVertexArray( NULL );
 	pglEnableClientState( GL_VERTEX_ARRAY );
 	pglVertexPointer( 3, GL_FLOAT, sizeof( Vector ), CableVertexesArray );
@@ -343,6 +350,9 @@ void R_RenderCables( void )
 	GL_DepthMask( GL_TRUE );
 	GL_Blend( GL_FALSE );
 	GL_Cull( GL_FRONT );
+
+	if( tr.fogEnabled )
+		GL_BindShader( GL_NONE );
 
 	r_stats.c_cables++;
 }
