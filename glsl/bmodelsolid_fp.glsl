@@ -150,9 +150,9 @@ void main( void )
 
 	// compute the matetial defines
 #if defined( BMODEL_MULTI_LAYERS )
-	float InitGlossScale[TERRAIN_NUM_LAYERS] = float[TERRAIN_NUM_LAYERS]( 0.0 );
-	float InitGlossSmoothness[TERRAIN_NUM_LAYERS] = float[TERRAIN_NUM_LAYERS]( 0.0 );
-	float InitEmbossScale[TERRAIN_NUM_LAYERS] = float[TERRAIN_NUM_LAYERS]( 0.0 );
+	float InitGlossScale[TERRAIN_NUM_LAYERS];
+	float InitGlossSmoothness[TERRAIN_NUM_LAYERS];
+	float InitEmbossScale[TERRAIN_NUM_LAYERS];
 	#if defined( BMODEL_EMBOSS )
 	InitEmbossScale = u_EmbossScale;
 	#endif
