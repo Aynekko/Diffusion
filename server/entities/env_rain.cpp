@@ -90,6 +90,11 @@ void CEnvRainModify::KeyValue(KeyValueData* pkvd)
 		pev->dmg = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "RainUseSmoke" ) )
+	{
+		pev->iuser3 = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		BaseClass::KeyValue(pkvd);
@@ -148,5 +153,6 @@ void CEnvRainModify::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 		pEnt->pev->fuser4 = pev->fuser4;
 		pEnt->pev->iuser1 = gpGlobals->time + pev->dmg;
 		pEnt->pev->iuser2 = pev->impulse; // impulse is already busy with "mode"
+		pEnt->pev->iuser3 = pev->iuser3;
 	}
 }

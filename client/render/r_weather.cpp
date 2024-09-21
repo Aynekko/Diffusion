@@ -39,6 +39,7 @@ struct
 	float	randX, randY;
 	int	weatherMode;	// 0 - snow, 1 - rain
 	float	globalHeight;
+	bool bUseSmoke;
 } Rain;
 
 MemBlock<cl_drip>	g_dripsArray( MAXDRIPS );
@@ -148,21 +149,24 @@ void ProcessRain( void )
 			}
 
 			// diffusion - add steam/smoke particle
-			bool SmokeParticle = (RANDOM_LONG(0,8) == 3);
-			if( SmokeParticle && (Rain.weatherMode == MODE_RAIN ) )
+			if( Rain.bUseSmoke )
 			{
-				CQuakePart rainsmoke = InitializeParticle();
-				rainsmoke.m_vecOrigin = curDrip->origin;
-				rainsmoke.m_vecOrigin.z = curDrip->minHeight + 10;
-				rainsmoke.m_flAlpha = 0.25;
-				rainsmoke.m_flAlphaVelocity = -0.1;
-				rainsmoke.m_flRadius = RANDOM_LONG( 20, 50 );
-				rainsmoke.m_flRadiusVelocity = 0.2;
-				rainsmoke.m_flRotation = RANDOM_LONG( 0, 359 );
-				rainsmoke.m_flRotationVelocity = RANDOM_LONG( -20, 20 );
-				rainsmoke.m_flDistance = 700;
-				rainsmoke.ParticleType = TYPE_SMOKE;
-				g_pParticles.AddParticle( &rainsmoke, g_pParticles.m_hSmoke, FPART_FADEIN | FPART_VERTEXLIGHT );
+				bool SmokeParticle = (RANDOM_LONG( 0, 8 ) == 3);
+				if( SmokeParticle && (Rain.weatherMode == MODE_RAIN) )
+				{
+					CQuakePart rainsmoke = InitializeParticle();
+					rainsmoke.m_vecOrigin = curDrip->origin;
+					rainsmoke.m_vecOrigin.z = curDrip->minHeight + 10;
+					rainsmoke.m_flAlpha = 0.25;
+					rainsmoke.m_flAlphaVelocity = -0.1;
+					rainsmoke.m_flRadius = RANDOM_LONG( 20, 50 );
+					rainsmoke.m_flRadiusVelocity = 0.2;
+					rainsmoke.m_flRotation = RANDOM_LONG( 0, 359 );
+					rainsmoke.m_flRotationVelocity = RANDOM_LONG( -20, 20 );
+					rainsmoke.m_flDistance = 700;
+					rainsmoke.ParticleType = TYPE_SMOKE;
+					g_pParticles.AddParticle( &rainsmoke, g_pParticles.m_hSmoke, FPART_FADEIN | FPART_VERTEXLIGHT );
+				}
 			}
 			
 			g_dripsArray.DeleteCurrent();
@@ -537,6 +541,7 @@ void R_ParseRainMessage( void )
 	Rain.randY = READ_COORD();
 	Rain.weatherMode = READ_SHORT();
 	Rain.globalHeight = READ_COORD();
+	Rain.bUseSmoke = READ_BYTE();
 }
 
 //-----------------------------------------------------

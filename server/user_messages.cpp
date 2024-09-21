@@ -118,7 +118,7 @@ void LinkUserMessages( void )
 	gmsgKillPart = REG_USER_MSG( "KillPart", 2 );
 	gmsgKillDecals = REG_USER_MSG( "KillDecals", 2 );
 	//	gmsgStudioDecal = REG_USER_MSG("StudioDecal", 33); // diffusion - studiodecalsfpslossissue
-	gmsgRainData = REG_USER_MSG( "RainData", 16 );
+	gmsgRainData = REG_USER_MSG( "RainData", 17 );
 	gmsgMusicFade = REG_USER_MSG( "MusicFade", 2 );
 	gmsgStatusIcon = REG_USER_MSG( "StatusIcon", -1 );
 	gmsgStatusIconTutor = REG_USER_MSG( "StatusIconTutor", -1 );

@@ -7126,6 +7126,7 @@ void CBasePlayer :: UpdateClientData( void )
 				WRITE_COORD( m_flRainRandY );
 				WRITE_SHORT( rainmode );
 				WRITE_COORD( rainheight );
+				WRITE_BYTE( pEnt->pev->iuser3 ); // 1 = use smoke particles on ground
 			MESSAGE_END();
 
 			if( m_iRainDripsPerSecond )
