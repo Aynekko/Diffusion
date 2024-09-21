@@ -306,6 +306,18 @@ static int SortModels( cl_entity_t *a, cl_entity_t *b )
 	return 0;
 }
 
+static int SortModelsDistance( cl_entity_t *a, cl_entity_t *b )
+{
+	Vector center_a = (a->curstate.mins + a->curstate.maxs) * 0.5f + a->curstate.origin;
+	Vector center_b = (b->curstate.mins + b->curstate.maxs) * 0.5f + b->curstate.origin;
+	float dist_to_a = (RI->vieworg - center_a).Length();
+	float dist_to_b = (RI->vieworg - center_b).Length();
+	if( dist_to_a != dist_to_b )
+		return dist_to_a > dist_to_b;
+
+	return 0;
+}
+
 qboolean R_WorldToScreen( const Vector &point, Vector &screen )
 {
 	matrix4x4	worldToScreen;
@@ -1650,6 +1662,8 @@ void R_DrawTranslucentEntities(void)
 
 	// sort by modelindex
 	std::sort( tr.trans_entities, tr.trans_entities + tr.num_trans_entities, SortModels );
+	// then sort by distance
+	std::sort( tr.trans_entities, tr.trans_entities + tr.num_trans_entities, SortModelsDistance );
 
 	// brushes:
 	for( i = 0; i < tr.num_trans_entities; i++ )
