@@ -17,6 +17,9 @@ varying vec4	var_Vertex;
 varying vec3 	var_Normal;
 varying vec2	var_TexCoord;
 varying vec3	var_VertexColor;
+#if defined( FOG_USE_ALPHA )
+varying float	var_VertexAlpha;
+#endif
 
 void main( void )
 {
@@ -25,6 +28,9 @@ void main( void )
 	var_Normal = gl_Normal;
 	var_TexCoord = gl_MultiTexCoord0.xy;
 	var_VertexColor = gl_Color.rgb;
+	#if defined( FOG_USE_ALPHA )
+	var_VertexAlpha = gl_Color.a;
+	#endif
 
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
 }

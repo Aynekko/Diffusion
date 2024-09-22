@@ -167,6 +167,7 @@ typedef struct
 	glsl_program_t *drawSunShafts;		// sunshafts effect
 	glsl_program_t *skyboxEnv;		// skybox & sun
 	glsl_program_t *genericFog;		// apply fog
+	glsl_program_t *genericFogUseAlpha;
 	glsl_program_t *bmodelDepthFill;		// shadow pass for world
 	glsl_program_t *studioDepthFill[2];	// shadow pass for studio (unweighted, weighted)
 	glsl_program_t *grassDepthFill;		// shadow pass for grass

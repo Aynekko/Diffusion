@@ -329,7 +329,7 @@ void R_RenderCables( void )
 
 	if( tr.fogEnabled )
 	{
-		GL_BindShader( glsl.genericFog );
+		GL_BindShader( glsl.genericFogUseAlpha );
 		GL_Bind( GL_TEXTURE0, tr.whiteTexture ); // need to bind something otherwise cables can disappear
 		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 	}

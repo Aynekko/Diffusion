@@ -2421,6 +2421,8 @@ void GL_InitGPUShaders( void )
 	// fog processing
 	glsl.genericFog = shader = GL_InitGPUShader( "GenericFog", "generic", "generic" );
 	GL_InitGenericFogUniforms( shader );
+	glsl.genericFogUseAlpha = shader = GL_InitGPUShader( "GenericFogUseAlpha", "generic", "generic", "#define FOG_USE_ALPHA\n" );
+	GL_InitGenericFogUniforms( shader );
 
 	// HACKHACK: precache generic light shaders
 	GL_UberShaderForDlightGeneric( &pl );
