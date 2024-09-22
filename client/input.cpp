@@ -667,20 +667,37 @@ int CL_ButtonBits( int bResetState )
 		bits |= IN_DUCK;
 	}
  
-	if( (in_jump.state & (BUTTON_DOWN|IMPULSE_DOWN)) && gHUD.CanJump)
+	if( (in_jump.state & (BUTTON_DOWN|IMPULSE_DOWN)) )
 	{
-		if( !(gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) ) // make sure we are not viewing a note
+		if( !(gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) && gHUD.CanJump ) // make sure we are not viewing a note
 			bits |= IN_JUMP;
+		else
+			gHUD.m_PseudoGUI.scrolled_lines = 0; // "jump" to top :)
 	}
 
 	if( in_forward.state & (BUTTON_DOWN|IMPULSE_DOWN) )
 	{
-		bits |= IN_FORWARD;
+		if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+		{
+			gHUD.m_PseudoGUI.scrolled_lines--; // scroll up
+			in_forward.state &= ~IMPULSE_DOWN;
+			in_forward.state &= ~BUTTON_DOWN;
+		}
+		else
+			bits |= IN_FORWARD;
+
 	}
 	
 	if( in_back.state & (BUTTON_DOWN|IMPULSE_DOWN) )
 	{
-		bits |= IN_BACK;
+		if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+		{
+			gHUD.m_PseudoGUI.scrolled_lines++; // scroll down
+			in_back.state &= ~IMPULSE_DOWN;
+			in_back.state &= ~BUTTON_DOWN;
+		}
+		else
+			bits |= IN_BACK;
 	}
 
 	if( in_use.state & (BUTTON_DOWN|IMPULSE_DOWN))
