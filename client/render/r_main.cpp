@@ -1587,7 +1587,8 @@ void R_DrawSolidEntities(void)
 	GL_AlphaTest( GL_FALSE ); // just in case
 
 	// sort by modelindex
-	std::sort( tr.solid_entities, tr.solid_entities + tr.num_solid_entities, SortModels );
+//	std::sort( tr.solid_entities, tr.solid_entities + tr.num_solid_entities, SortModels );
+	std::sort( tr.solid_entities, tr.solid_entities + tr.num_solid_entities, SortModelsDistance );
 	
 	// 1: brush entities
 	for( i = 0; i < tr.num_solid_entities; i++ )
@@ -1661,7 +1662,7 @@ void R_DrawTranslucentEntities(void)
 	GL_AlphaTest( GL_FALSE ); // just in case
 
 	// sort by modelindex
-	std::sort( tr.trans_entities, tr.trans_entities + tr.num_trans_entities, SortModels );
+//	std::sort( tr.trans_entities, tr.trans_entities + tr.num_trans_entities, SortModels );
 	// then sort by distance
 	std::sort( tr.trans_entities, tr.trans_entities + tr.num_trans_entities, SortModelsDistance );
 
@@ -1839,8 +1840,8 @@ void R_RenderScene( void )
 	if( RP_NORMALPASS() )
 	{
 		GL_Setup2D();
-		SSAO();
 		HorizontalBlur();
+		MotionBlur();
 		GL_Setup3D();
 		R_DrawViewModel();
 	}
@@ -1880,6 +1881,7 @@ void R_DrawPostEffects(void)
 	if( RP_NORMALPASS() )
 	{
 		ToneMap();
+		SSAO();
 		HeatDistortionShader();
 		ScreenWater();
 		WaterDrops();
@@ -1887,7 +1889,6 @@ void R_DrawPostEffects(void)
 		DroneScreenShader();
 		LensFlare();
 		Monochrome();
-		MotionBlur();
 		Enhance();
 	}
 
