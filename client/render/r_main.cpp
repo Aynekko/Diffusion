@@ -1078,11 +1078,11 @@ static void R_SetupFrame( void )
 	// setup viewplane dist
 	RI->viewplanedist = DotProduct( RI->vieworg, RI->vforward );
 
-	if( !CVAR_TO_BOOL( r_nosort ))
-	{
-		// sort translucents entities by rendermode and distance
-		qsort( tr.trans_entities, tr.num_trans_entities, sizeof( cl_entity_t* ), (cmpfunc)R_TransEntityCompare );
-	}
+//	if( !CVAR_TO_BOOL( r_nosort ))
+//	{
+//		// sort translucents entities by rendermode and distance
+//		qsort( tr.trans_entities, tr.num_trans_entities, sizeof( cl_entity_t* ), (cmpfunc)R_TransEntityCompare );
+//	}
 
 	// current viewleaf
 	if( !FBitSet( RI->params, RP_OLDVIEWLEAF ))
