@@ -1593,11 +1593,11 @@ void R_DrawSolidEntities(void)
 	// 1: brush entities
 	for( i = 0; i < tr.num_solid_entities; i++ )
 	{
+		if( tr.solid_entities[i]->model->type != mod_brush )
+			continue;
+		
 		RI->currententity = tr.solid_entities[i];
 		RI->currentmodel = RI->currententity->model;
-
-		if( RI->currentmodel->type != mod_brush )
-			continue;
 
 		// tell engine about current entity
 		SET_CURRENT_ENTITY( RI->currententity );
@@ -1612,11 +1612,11 @@ void R_DrawSolidEntities(void)
 	g_StudioRenderer.ResetRenderCache();
 	for( i = 0; i < tr.num_solid_entities; i++ )
 	{
+		if( tr.solid_entities[i]->model->type != mod_studio )
+			continue;
+		
 		RI->currententity = tr.solid_entities[i];
 		RI->currentmodel = RI->currententity->model;
-
-		if( RI->currentmodel->type != mod_studio )
-			continue;
 
 		SET_CURRENT_ENTITY( RI->currententity );
 
@@ -1630,11 +1630,11 @@ void R_DrawSolidEntities(void)
 	g_SpriteRenderer.ResetRenderCache();
 	for( i = 0; i < tr.num_solid_entities; i++ )
 	{
+		if( tr.solid_entities[i]->model->type != mod_sprite )
+			continue;
+		
 		RI->currententity = tr.solid_entities[i];
 		RI->currentmodel = RI->currententity->model;
-
-		if( RI->currentmodel->type != mod_sprite )
-			continue;
 
 		if( RI->currententity->curstate.iuser3 == -669 )
 			continue; // env_cable
@@ -1669,11 +1669,11 @@ void R_DrawTranslucentEntities(void)
 	// brushes:
 	for( i = 0; i < tr.num_trans_entities; i++ )
 	{
+		if( tr.trans_entities[i]->model->type != mod_brush )
+			continue;
+		
 		RI->currententity = tr.trans_entities[i];
 		RI->currentmodel = RI->currententity->model;
-
-		if( RI->currentmodel->type != mod_brush )
-			continue;
 
 		// tell engine about current entity
 		SET_CURRENT_ENTITY( RI->currententity );
@@ -1701,11 +1701,11 @@ void R_DrawTranslucentEntities(void)
 	g_StudioRenderer.ResetRenderCache();
 	for( i = 0; i < tr.num_trans_entities; i++ )
 	{
+		if( tr.trans_entities[i]->model->type != mod_studio )
+			continue;
+		
 		RI->currententity = tr.trans_entities[i];
 		RI->currentmodel = RI->currententity->model;
-
-		if( RI->currentmodel->type != mod_studio )
-			continue;
 
 		SET_CURRENT_ENTITY( RI->currententity );
 
@@ -1739,17 +1739,17 @@ void R_DrawTranslucentEntities(void)
 	g_SpriteRenderer.ResetRenderCache();
 	for( i = 0; i < tr.num_trans_entities; i++ )
 	{
-		RI->currententity = tr.trans_entities[i];
-		RI->currentmodel = RI->currententity->model;
-
-		if( RI->currentmodel->type != mod_sprite )
+		if( tr.trans_entities[i]->model->type != mod_sprite )
 			continue;
 
-		if( RI->currententity->curstate.iuser3 == -669 )
+		if( tr.trans_entities[i]->curstate.iuser3 == -669 )
 			continue; // env_cable
 
-		if( RI->currententity->curstate.iuser3 == -664 )
+		if( tr.trans_entities[i]->curstate.iuser3 == -664 )
 			continue; // env_volumetric_light
+		
+		RI->currententity = tr.trans_entities[i];
+		RI->currentmodel = RI->currententity->model;
 
 		SET_CURRENT_ENTITY( RI->currententity );
 
