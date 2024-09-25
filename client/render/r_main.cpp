@@ -774,9 +774,6 @@ void R_ClearScene( void )
 	tr.time = GET_CLIENT_TIME();
 	tr.oldtime = GET_CLIENT_OLDTIME();
 
-	if( cl_viewsize != NULL && cl_viewsize->value != 120.0f )
-		CVAR_SET_FLOAT( "viewsize", 120.0f );
-
 	memset( &r_stats, 0, sizeof( r_stats ));
 	tr.num_cached_states = 0;
 
@@ -1104,11 +1101,13 @@ static void R_SetupGL( void )
 	if( RP_NORMALPASS( ))
 	{
 		// setup main viewport
-		int x = floor( RI->viewport[0] * glState.width / glState.width );
-		int x2 = ceil(( RI->viewport[0] + RI->viewport[2] ) * glState.width / glState.width );
-		int y = floor( glState.height - RI->viewport[1] * glState.height / glState.height );
-		int y2 = ceil( glState.height - ( RI->viewport[1] + RI->viewport[3] ) * glState.height / glState.height );
-		pglViewport( x, y2, x2 - x, y - y2 );
+		// diffusion - this was probably for viewsize?
+	//	int x = floor( RI->viewport[0] * glState.width / glState.width );
+	//	int x2 = ceil(( RI->viewport[0] + RI->viewport[2] ) * glState.width / glState.width );
+	//	int y = floor( glState.height - RI->viewport[1] * glState.height / glState.height );
+	//	int y2 = ceil( glState.height - ( RI->viewport[1] + RI->viewport[3] ) * glState.height / glState.height );
+	//	pglViewport( x, y2, x2 - x, y - y2 );
+		pglViewport( 0, 0, glState.width, glState.height );
 	}
 	else
 	{

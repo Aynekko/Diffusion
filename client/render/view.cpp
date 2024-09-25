@@ -81,7 +81,6 @@ cvar_t *cl_weaponlag;
 cvar_t *cl_vsmoothing;
 cvar_t *v_centermove;
 cvar_t *v_centerspeed;
-cvar_t *cl_viewsize;
 cvar_t *gl_renderer;
 cvar_t *gl_check_errors;
 cvar_t *r_finish;
@@ -338,7 +337,6 @@ void V_Init( void )
 	r_speeds = CVAR_GET_POINTER( "r_speeds" );
 	gl_test = CVAR_GET_POINTER( "gl_test" );
 	gl_anisotropy = CVAR_GET_POINTER( "gl_anisotropy" );
-	cl_viewsize = CVAR_GET_POINTER( "viewsize" );
 
 	r_novis = CVAR_GET_POINTER( "r_novis" );
 	r_nocull = CVAR_GET_POINTER( "r_nocull" );
@@ -1991,17 +1989,6 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	float VelY = -pparams->simvel[1] * 0.004;
 	VelY = bound( 0, VelY, 1 );
 	view->origin.y += VelY;
-
-	// fudge position around to keep amount of weapon visible
-	// roughly equal with different FOV
-	if( pparams->viewsize == 110 )
-		view->origin[2] += 1;
-	else if( pparams->viewsize == 100 )
-		view->origin[2] += 2;
-	else if( pparams->viewsize == 90 )
-		view->origin[2] += 1;
-	else if( pparams->viewsize == 80 )
-		view->origin[2] += 0.5;
 
 	// move weapon back if there's an obstacle
 	if( !RP_OUTSIDE( RI->viewleaf ) )

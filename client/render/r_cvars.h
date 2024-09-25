@@ -25,7 +25,6 @@ extern cvar_t	*r_shadows;	//original HL shadows
 extern cvar_t	*r_finish;
 extern cvar_t	*r_clear;
 extern cvar_t	*r_speeds;
-extern cvar_t	*cl_viewsize;
 extern cvar_t *cl_hitsound;
 extern cvar_t *cl_muzzlelight;
 extern cvar_t *cl_localweaponanims;
