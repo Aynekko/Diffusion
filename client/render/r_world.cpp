@@ -1954,6 +1954,9 @@ static void Mod_LoadWorld( model_t *mod, const byte *buf )
 	tr.fResetVis = true;
 
 	// time to place grass
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for( i = 0; i < worldmodel->numsurfaces; i++ )
 	{
 		// place to initialize our grass
