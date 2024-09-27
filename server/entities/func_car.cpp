@@ -2410,14 +2410,15 @@ void CCar::Camera(void)
 	if( CarSpeed < -10 ) // going backwards
 		vRight = -vRight;
 
-	float max_camera_lean = CarSpeed * 0.025f;
+	float max_camera_lean = bound( 0.f, CarSpeed * 0.025f, 10.f );
 
 	if( CarSpeed > 0.01f && (bBack() || bUp()) ) // braking
 	{	
 		if( bUp() && (IsHeli || IsBoat) ) // boats don't have handbrake
 			CameraBrakeOffsetX = UTIL_Approach( 0, CameraBrakeOffsetX, 9 * gpGlobals->frametime );
 		else
-			CameraBrakeOffsetX = UTIL_Approach( max_camera_lean, CameraBrakeOffsetX, bound( 3, CarSpeed * 0.01f, 9 ) * gpGlobals->frametime );
+		//	CameraBrakeOffsetX = UTIL_Approach( max_camera_lean, CameraBrakeOffsetX, bound( 3, CarSpeed * 0.01f, 9 ) * gpGlobals->frametime );
+			CameraBrakeOffsetX = lerp( CameraBrakeOffsetX, max_camera_lean, gpGlobals->frametime * 1.25f );
 	}
 	else
 		CameraBrakeOffsetX = UTIL_Approach( 0, CameraBrakeOffsetX, bound( 3, CarSpeed * 0.01f, 9 ) * gpGlobals->frametime );
@@ -2465,9 +2466,15 @@ void CCar::Camera(void)
 			if( AbsCarSpeed > 50 )
 			{
 				if( CarSpeed > 50 && !bForward() )
-					CamDistAdjust = UTIL_Approach( 0.65f, CamDistAdjust, (bBack() ? 0.2f : 0.1f) * gpGlobals->frametime );
+				{
+					if( bBack() ) // different lerp for brakes
+						CamDistAdjust = lerp( CamDistAdjust, 0.65f, gpGlobals->frametime );
+					else
+						CamDistAdjust = UTIL_Approach( 0.65f, CamDistAdjust, 0.1f * gpGlobals->frametime );
+				}
 				else
-					CamDistAdjust = UTIL_Approach( 1.0f, CamDistAdjust, 0.2f * gpGlobals->frametime );
+				//	CamDistAdjust = UTIL_Approach( 1.0f, CamDistAdjust, 0.2f * gpGlobals->frametime );
+					CamDistAdjust = lerp( CamDistAdjust, 1.0f, gpGlobals->frametime );
 			}
 			SET_VIEW( hDriver->edict(), pCamera1->edict() );
 			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * CameraDistance * CamDistAdjust, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
