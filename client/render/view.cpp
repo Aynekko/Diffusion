@@ -1058,9 +1058,10 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 	}
 
 	// diffusion - addidle for weapon model
-	origin[ROLL] += sin( pparams->time * 0.5 ) * 0.05;
-	origin[PITCH] += sin( pparams->time ) * 0.15;
-	origin[YAW] += sin( pparams->time * 2 ) * 0.15;
+	float wpn_idle_scale = CL_IsCrouching() ? 0.4f : 0.75f;
+	origin[ROLL] += sin( pparams->time * 0.5 ) * 0.05 * wpn_idle_scale;
+	origin[PITCH] += sin( pparams->time ) * 0.15 * wpn_idle_scale;
+	origin[YAW] += sin( pparams->time * 2 ) * 0.15 * wpn_idle_scale;
 
 	// diffusion - lower the weapon
 	static float add = 0.0f;
