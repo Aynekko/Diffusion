@@ -107,12 +107,13 @@ int CHudHealthVisual :: Draw(float flTime)
 	float cell_start_y = pos_y;
 	int cell;
 
+	float transp = (health_val < 25.f) ? (Transparency + fabs( sin( tr.time * 3 ) ) * 0.25f) : Transparency;
 	for( cell = 0; cell < total_cells; cell++ )
 	{
 		if( cell >= health_val * 0.5f ) // draw grey cells
 			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
 		else
-			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, (health_val < 25.f) ? (Transparency + fabs( sin( tr.time * 3 ) ) * 0.25f) : Transparency ) );
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, transp ) );
 		cell_start_x += cell_width + cell_margin;
 	}
 

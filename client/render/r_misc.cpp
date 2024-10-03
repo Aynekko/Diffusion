@@ -2021,7 +2021,6 @@ void R_NewMap( void )
 
 	tr.realframecount = 0;
 	RI->viewleaf = NULL; // it's may be data from previous map
-	memset( RI->bBoxVisible, -1, sizeof( RI->bBoxVisible ) ); // reset entity cached cull state
 
 	// setup the skybox sides
 	for( i = 0; i < 6; i++ )

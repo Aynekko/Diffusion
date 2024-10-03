@@ -1055,14 +1055,6 @@ void R_FindViewLeaf( void )
 {
 	RI->oldviewleaf = RI->viewleaf;
 	RI->viewleaf = Mod_PointInLeaf( RI->pvsorigin, worldmodel->nodes );
-	if( RP_NORMALPASS() ) // yes, normalpass only. just in case - don't mess with other passes...
-	{
-		if( RI->viewleaf != RI->oldviewleaf )
-		{
-			memset( RI->bBoxVisible, -1, sizeof( RI->bBoxVisible ) ); // reset entity cached cull state
-		//	Msg( "cull cache reset!\n" );
-		}
-	}
 }
 
 /*

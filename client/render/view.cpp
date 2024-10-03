@@ -124,7 +124,6 @@ cvar_t *r_fade_props;
 cvar_t *r_show_cubemaps;
 cvar_t *r_bloom_sprites;
 cvar_t *r_bloom;
-cvar_t *r_cached_box_culling;
 cvar_t *thirdperson;
 cvar_t *r_sun_allowed;
 cvar_t *cl_hitsound;
@@ -383,7 +382,6 @@ void V_Init( void )
 	r_fade_props = CVAR_REGISTER( "r_fade_props", "1", FCVAR_ARCHIVE );
 	r_show_cubemaps = CVAR_REGISTER( "r_show_cubemaps", "0", FCVAR_ARCHIVE );
 	r_bloom_sprites = CVAR_REGISTER( "r_bloom_sprites", "0", FCVAR_ARCHIVE );
-	r_cached_box_culling = CVAR_REGISTER( "r_cached_box_culling", "1", FCVAR_ARCHIVE );
 	r_bloom = CVAR_REGISTER( "r_bloom", "0", FCVAR_ARCHIVE );
 	thirdperson = CVAR_REGISTER( "thirdperson", "0", FCVAR_CHEAT );
 	r_blur = CVAR_REGISTER( "r_blur", "1", FCVAR_ARCHIVE );

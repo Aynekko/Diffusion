@@ -439,113 +439,63 @@ bool GL_UsingAlphaToCoverage( void )
 	return (CVAR_GET_FLOAT( "gl_msaa" ) > 0.0f);
 }
 
-//=====================================================================================
+//=============================================================================================================
 // FillRoundedRGBA
-// credits: https://stackoverflow.com/users/2521214/spektre
-//=====================================================================================
-void FillRoundedRGBA( float posx, float posy, float w, float h, float r, Vector4D rgba )
+// credits: https://stackoverflow.com/questions/5369507/opengl-es-1-0-2d-rounded-rectangle by user6458202
+//=============================================================================================================
+#define GLW_SMALL_ROUNDED_CORNER_SLICES 5  // How many vertexes you want of each corner
+static Vector2D glwRoundedCorners[GLW_SMALL_ROUNDED_CORNER_SLICES] = { Vector2D( 0, 0 ) }; // This array keep the generated vertexes of one corner
+static void createRoundedCorners( Vector2D *arr, int num )
 {
-	// so it would have the same behavior as FillRGBA
-	posx += w * 0.5f;
-	posy += h * 0.5f;
+	// Generate the corner vertexes
+	float slice = M_PI / 2 / num;
+	float a = 0;
+	for( int i = 0; i < num; a += slice, ++i )
+	{
+		arr[i].x = cosf( a );
+		arr[i].y = sinf( a );
+	}
+}
+void FillRoundedRGBA( float x, float y, float width, float height, float radius, Vector4D rgba )
+{
+	if( glwRoundedCorners[0].x + glwRoundedCorners[0].y == 0 )
+		createRoundedCorners( glwRoundedCorners, GLW_SMALL_ROUNDED_CORNER_SLICES );
+
 	rgba.x = bound( 0.0f, rgba.x, 1.0f );
 	rgba.y = bound( 0.0f, rgba.y, 1.0f );
 	rgba.z = bound( 0.0f, rgba.z, 1.0f );
 	rgba.w = bound( 0.0f, rgba.w, 1.0f );
-	if( r > w * 0.5f ) r = w * 0.5f;
-	if( r > h * 0.5f ) r = h * 0.5f;
 
+	float left = x;
+	float top = y;
+	float bottom = y + height - 1;
+	float right = x + width - 1;
 	int i;
-	float x0, y0, x, y;
-	const float sina[45] = { 
-		0,
-		0.1736482,
-		0.3420201,
-		0.5,
-		0.6427876,
-		0.7660444,
-		0.8660254,
-		0.9396926,
-		0.9848077,
-		1,
-		0.9848078,
-		0.9396927,
-		0.8660255,
-		0.7660446,
-		0.6427878,
-		0.5000002,
-		0.3420205,
-		0.1736485,
-		3.894144E-07,
-		-0.1736478,
-		-0.3420197,
-		-0.4999996,
-		-0.6427872,
-		-0.7660443,
-		-0.8660252,
-		-0.9396925,
-		-0.9848077,
-		-1,
-		-0.9848078,
-		-0.9396928,
-		-0.8660257,
-		-0.7660449,
-		-0.6427881,
-		-0.5000006,
-		-0.3420208,
-		-0.1736489,
-		0,
-		0.1736482,
-		0.3420201,
-		0.5,
-		0.6427876,
-		0.7660444,
-		0.8660254,
-		0.9396926,
-		0.9848077 };
-	const float *cosa = sina + 9;
-	w -= r + r;
-	h -= r + r;
-
+	if( radius > width * 0.5f ) radius = width * 0.5f;
+	if( radius > height * 0.5f ) radius = height * 0.5f;
+	pglDisable( GL_TEXTURE_2D );
 	GL_Texture2D( GL_FALSE );
 	GL_Blend( GL_TRUE );
 	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	GL_Color4f( rgba.x, rgba.y, rgba.z, rgba.w );
-
-	pglBegin( GL_TRIANGLE_FAN );
-	pglVertex2f( posx, posy );
-	x0 = posx + (0.5 * w);
-	y0 = posy + (0.5 * h);
-	for( i = 0; i < 9; i++ )
+	pglBegin( GL_QUAD_STRIP );
+	// Draw left rounded side.
+	for( i = 0; i < GLW_SMALL_ROUNDED_CORNER_SLICES; ++i )
 	{
-		x = x0 + (r * cosa[i]);
-		y = y0 + (r * sina[i]);
-		pglVertex2f( x, y );
+		pglVertex2f( left + radius - radius * glwRoundedCorners[i].x,
+			bottom - radius + radius * glwRoundedCorners[i].y );
+		pglVertex2f( left + radius - radius * glwRoundedCorners[i].x,
+			top + radius - radius * glwRoundedCorners[i].y );
 	}
-	x0 -= w;
-	for( ; i < 18; i++ )
+	// Draw right rounded side.
+	for( i = GLW_SMALL_ROUNDED_CORNER_SLICES - 1; i >= 0; --i )
 	{
-		x = x0 + (r * cosa[i]);
-		y = y0 + (r * sina[i]);
-		pglVertex2f( x, y );
+		pglVertex2f( right - radius + radius * glwRoundedCorners[i].x,
+			bottom - radius + radius * glwRoundedCorners[i].y );
+		pglVertex2f( right - radius + radius * glwRoundedCorners[i].x,
+			top + radius - radius * glwRoundedCorners[i].y );
 	}
-	y0 -= h;
-	for( ; i < 27; i++ )
-	{
-		x = x0 + (r * cosa[i]);
-		y = y0 + (r * sina[i]);
-		pglVertex2f( x, y );
-	}
-	x0 += w;
-	for( ; i < 36; i++ )
-	{
-		x = x0 + (r * cosa[i]);
-		y = y0 + (r * sina[i]);
-		pglVertex2f( x, y );
-	}
-	pglVertex2f( x, posy + (0.5 * h) );
 	pglEnd();
-
 	GL_Texture2D( GL_TRUE );
 	GL_Blend( GL_FALSE );
 }

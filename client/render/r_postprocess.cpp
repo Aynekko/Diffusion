@@ -857,7 +857,7 @@ void SSAO( void )
 
 	// unbind shader
 	GL_BindShader( NULL );
-	GL_CleanUpTextureUnits( 0 );
+	GL_CleanupAllTextureUnits();
 
 	r_stats.sh_ssao_pass++;
 }
