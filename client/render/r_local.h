@@ -40,6 +40,13 @@ GNU General Public License for more details.
 #define MAX_ANIMATIONS 64
 #define WATER_TEXTURES 29
 
+// matches engine
+#define REF_DEFAULT_TEXTURE  "*default"
+#define REF_GRAY_TEXTURE     "*gray"
+#define REF_WHITE_TEXTURE    "*white"
+#define REF_BLACK_TEXTURE    "*black"
+#define REF_PARTICLE_TEXTURE "*particle"
+
 // refparams
 #define RP_NONE		0
 #define RP_MIRRORVIEW	BIT( 0 )	// lock pvs at vieworg
@@ -322,6 +329,7 @@ typedef struct
 
 	int		whiteTexture;
 	int		grayTexture;
+	int		blackTexture;
 	int		depthTexture;	// stub
 	int		defaultTexture;   	// use for bad textures
 	int		alphaContrastTexture;

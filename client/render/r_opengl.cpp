@@ -850,9 +850,10 @@ static void GL_InitTextures( void )
 {
 	// NOTE: these textures already created by engine
 	// get their texturenums for local using
-	tr.defaultTexture = FIND_TEXTURE( "*default" );   	// use for bad textures
-	tr.whiteTexture = FIND_TEXTURE( "*white" );
-	tr.grayTexture = FIND_TEXTURE( "*gray" );
+	tr.defaultTexture = FIND_TEXTURE( REF_DEFAULT_TEXTURE );   	// use for bad textures
+	tr.whiteTexture = FIND_TEXTURE( REF_WHITE_TEXTURE );
+	tr.grayTexture = FIND_TEXTURE( REF_GRAY_TEXTURE );
+	tr.blackTexture = FIND_TEXTURE( REF_BLACK_TEXTURE );
 	tr.depthTexture = CREATE_TEXTURE( "*depth", 8, 8, NULL, TF_SHADOW ); 
 
 	R_InitStubCubemaps();

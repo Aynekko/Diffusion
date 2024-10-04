@@ -3035,7 +3035,7 @@ void R_DrawBrushList( void )
 				// bind real data
 				GL_Bind( GL_TEXTURE1, tr.lightmaps[es->lightmaptexturenum].lightmap );
 				if( FBitSet( s->flags, SURF_WATER ) )
-					GL_Bind( GL_TEXTURE2, tr.whiteTexture ); // FIXME for some reason deluxmap is visible on water on AMD card...wtf?
+					GL_Bind( GL_TEXTURE2, tr.blackTexture ); // FIXME for some reason deluxmap is visible on water on AMD card...wtf?
 				else
 				{
 					if( tr.lowmemory )
