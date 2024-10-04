@@ -888,21 +888,15 @@ static void R_RenderDroneView( void )
 	origin += forward * 4;
 
 	// setup the screen fov
-	float fov = 100;
+	float fov = 90;
 
-	RI->viewport[2] = RI->viewport[3] = 512;
+	// kinda 16/9, looks well on the tablet
+	RI->viewport[2] = 384 * 1.7;
+	RI->viewport[3] = 384;
 
 	// setup the screen FOV
-	if( RI->viewport[2] == RI->viewport[3] )
-	{
-		RI->fov_x = fov;
-		RI->fov_y = fov;
-	}
-	else
-	{
-		RI->fov_x = fov;
-		RI->fov_y = V_CalcFov( RI->fov_x, RI->viewport[2], RI->viewport[3] );
-	}
+	RI->fov_x = fov;
+	RI->fov_y = V_CalcFov( RI->fov_x, RI->viewport[2], RI->viewport[3] );
 
 	RI->viewangles[0] = anglemod( angles[0] );
 	RI->viewangles[1] = anglemod( angles[1] );

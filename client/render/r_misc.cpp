@@ -161,7 +161,7 @@ void SetupFlashlight( cl_entity_t *pEnt )
 
 		pl->brightness *= gHUD.m_Flash.m_flTurnOn;
 
-		if( r_shadowquality->value > 1 ) // don't allow diffused light on low and medium shadow settings
+		if( r_shadowquality->value > 0 ) // don't allow diffused light on low shadow settings
 		{
 			// kind of a diffuse light?..
 			plight_t *pld = CL_AllocPlight( FLASHLIGHT_DIFFUSE_KEY );

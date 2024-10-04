@@ -269,6 +269,9 @@ void RenderSunShafts( void )
 	if( !CheckShader( glsl.genSunShafts ) || !CheckShader( glsl.drawSunShafts ) || !CheckShader( glsl.blurShader ) )
 		return;
 
+	if( gHUD.Weather_Intensity > 0.99f )
+		return;
+
 	float Brightness = 0.0f; // don't worry, shader sets to 1.0 in this case
 
 	if( tr.shader_modifier != NULL ) // mapper set custom settings
@@ -285,6 +288,8 @@ void RenderSunShafts( void )
 		if( Brightness == 0.0f )
 			Brightness = 1.0f;
 	}
+
+	float ScaledWeatherBrightness = 1.0f - gHUD.Weather_Intensity;
 
 	float blur = gl_sunshafts_blur->value;
 	float zFar = Q_max( 256.0f, RI->farClip );
@@ -360,7 +365,7 @@ void RenderSunShafts( void )
 
 	Vector4D sunshafts_params[2];
 	// light origin + brightness
-	sunshafts_params[0] = Vector4D( view.x / glState.width, view.y / glState.height, view.z, Brightness * OverriddenBrightness );
+	sunshafts_params[0] = Vector4D( view.x / glState.width, view.y / glState.height, view.z, Brightness * OverriddenBrightness * ScaledWeatherBrightness );
 	// light diffuse
 	sunshafts_params[1] = Vector4D( skyColor.x, skyColor.y, skyColor.z, 0.0f );
 	pglUniform4fvARB( RI->currentshader->u_Sunshafts, 2, &sunshafts_params[0][0] );
