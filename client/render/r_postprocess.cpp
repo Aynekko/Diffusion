@@ -71,7 +71,7 @@ int noise_texture = 0;
 void InitAutoExposure(void)
 {
 	// init average luminance
-	const int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
+	int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
 
 	if( tr.avg_luminance_texture )
 	{
@@ -94,6 +94,7 @@ void InitAutoExposure(void)
 			pglGenFramebuffers( 1, &tr.avg_luminance_fbo_mip[i] );
 		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, tr.avg_luminance_fbo_mip[i] );
 		pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM(PARM_TEX_TEXNUM, tr.avg_luminance_texture), i );
+		ValidateFBO();
 	}
 
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
@@ -171,15 +172,13 @@ void InitBloom( void )
 	GL_Bind( GL_TEXTURE0, 0 );
 
 	// mips
-	if( !tr.screen_fbo_mip[0] )
-		pglGenFramebuffers( 6, tr.screen_fbo_mip );
-
 	for( int i = 0; i < 6; i++ )
 	{
-		if( tr.screen_fbo_mip[i] <= 0 )
+		if( !tr.screen_fbo_mip[i] )
 			pglGenFramebuffers( 1, &tr.screen_fbo_mip[i] );
 		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, tr.screen_fbo_mip[i] );
 		pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, tr.screen_fbo_texture_color ), i + 1 );
+		ValidateFBO();
 	}
 
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
@@ -895,6 +894,9 @@ void Bloom( void )
 		w /= 2;
 		h /= 2;
 
+		w = Q_max( w, 1 );
+		h = Q_max( h, 1 );
+
 		pglViewport( 0, 0, w, h );
 
 		pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)w, 1.0f / (float)h );
@@ -937,7 +939,7 @@ int RenderExposureStorage(void)
 	const int sourceIndex = Index % 2;
 	const int destIndex = (Index + 1) % 2;
 
-	const int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
+	int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
 
 	GL_BindShader( glsl.GenExposure );
 	ASSERT( RI->currentshader != NULL );
@@ -973,7 +975,7 @@ void ToneMap(void)
 	if( R_FullBright() || r_lightmap->value )
 		return;
 
-	const int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
+	int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
 
 	// render luminance to first mip
 	GL_Bind( GL_TEXTURE0, tr.avg_luminance_texture );

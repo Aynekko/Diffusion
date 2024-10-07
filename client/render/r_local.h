@@ -450,7 +450,7 @@ typedef struct
 	float cableSwayPhase[8192];
 
 	int	avg_luminance_texture;
-	uint avg_luminance_fbo_mip[11];
+	uint avg_luminance_fbo_mip[16];
 
 	uint screen_fbo_mip[6];
 	int screen_fbo_texture_color;
