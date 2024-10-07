@@ -186,7 +186,7 @@ void main( void )
 			planar_reflection = texture2DProj( u_ColorMap, var_TexMirror );
 			diffuse.rgb = Q_mix( planar_reflection.rgb, diffuse.rgb, u_PlanarReflectScale );
 		#endif
-		glossmap = vec3( 0.5 );
+		glossmap = vec3( 0.0 );
 	#elif defined( BMODEL_PORTAL )
 		diffuse = texture2DProj( u_ColorMap, var_TexMirror );
 	#else
@@ -205,7 +205,7 @@ void main( void )
 	diffuse = texture2D( u_ColorMap, var_TexDiffuse );
 	#if defined( BMODEL_SPECULAR )
 		#if defined( BMODEL_WATER )
-			glossmap = vec3( 0.5 );
+			glossmap = vec3( 0.0 );
 		#else
 			glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
 		#endif
