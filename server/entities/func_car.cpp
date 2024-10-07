@@ -2393,7 +2393,7 @@ void CCar::Camera(void)
 	{
 		NewCameraAngle = UTIL_ApproachAngle( pChassis->pev->angles.y - 180, NewCameraAngle, 200 * gpGlobals->frametime ); // smooth it out
 	}
-	else if( CarSpeed > 25 )
+	else if( CarSpeed > 25 || IsBoat || IsHeli )
 	{
 		if( AbsCarSpeed < MaxCarSpeed * 0.2f )
 			NewCameraAngle = UTIL_ApproachAngle( pChassis->pev->angles.y, NewCameraAngle, 200 * gpGlobals->frametime );
