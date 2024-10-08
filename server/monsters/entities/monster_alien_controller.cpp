@@ -1012,7 +1012,7 @@ void CController::Stop( void )
 #define DIST_TO_CHECK	200
 void CController :: Move ( float flInterval ) 
 {
-	flInterval = gpGlobals->frametime * 0.5f; // diffusion - constant, because monsters are thinking every frame
+	flInterval = gpGlobals->frametime * 0.35f; // diffusion - constant, because monsters are thinking every frame
 	
 	float		flWaypointDist;
 	float		flCheckDist;
@@ -1246,7 +1246,7 @@ void CController::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, fl
 	if ( m_IdealActivity != m_movementActivity )
 		m_IdealActivity = m_movementActivity;
 
-	flInterval = gpGlobals->frametime * 0.5f; // diffusion - constant, because monsters are thinking every frame
+	flInterval = gpGlobals->frametime * 0.35f; // diffusion - constant, because monsters are thinking every frame
 
 	// ALERT( at_console, "move %.4f %.4f %.4f : %f\n", vecDir.x, vecDir.y, vecDir.z, flInterval );
 
@@ -2148,6 +2148,8 @@ public:
 
 	float snd_pitch;
 
+	bool sndrestart;
+
 	DECLARE_DATADESC();
 };
 
@@ -2412,8 +2414,6 @@ Schedule_t* CDrone :: GetScheduleOfType ( int Type )
 
 void CDrone :: RunAI( void )
 {
-	static bool sndrestart;
-
 	if( HasFlag( F_PLAYER_DRONE ) && (pev->waterlevel > 0) )
 	{
 		// retrieve the drone instantly on water contact
@@ -2682,39 +2682,42 @@ void CDrone :: RunTask ( Task_t *pTask )
 				}
 				else
 				{
-					FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, DroneDmg[g_iSkillLevel] );
+					if( !HasConditions( bits_COND_ENEMY_OCCLUDED ) )
+					{
+						FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, DroneDmg[g_iSkillLevel] );
 
-					PlayClientSound( this, 253 );
+						PlayClientSound( this, 253 );
 
-					pev->effects |= EF_MUZZLEFLASH;
+						pev->effects |= EF_MUZZLEFLASH;
 
-					Vector	vecShellVelocity = pev->velocity
-						+ gpGlobals->v_right * RANDOM_FLOAT( 50, 70 )
-						+ gpGlobals->v_up * RANDOM_FLOAT( 100, 150 )
-						+ gpGlobals->v_forward * 25;
+						Vector	vecShellVelocity = pev->velocity
+							+ gpGlobals->v_right * RANDOM_FLOAT( 50, 70 )
+							+ gpGlobals->v_up * RANDOM_FLOAT( 100, 150 )
+							+ gpGlobals->v_forward * 25;
 
-					Vector ShellPos = GetAbsOrigin();
-					ShellPos.z += 30;
-					EjectBrass( ShellPos
-						+ gpGlobals->v_up * -(RANDOM_LONG( 10, 15 ))
-						+ gpGlobals->v_forward * RANDOM_LONG( 15, 25 )
-						+ gpGlobals->v_right * RANDOM_LONG( 2, 6 ), vecShellVelocity,
-						pev->angles.y, SHELL_9MM, TE_BOUNCE_SHELL );
+						Vector ShellPos = GetAbsOrigin();
+						ShellPos.z += 30;
+						EjectBrass( ShellPos
+							+ gpGlobals->v_up * -(RANDOM_LONG( 10, 15 ))
+							+ gpGlobals->v_forward * RANDOM_LONG( 15, 25 )
+							+ gpGlobals->v_right * RANDOM_LONG( 2, 6 ), vecShellVelocity,
+							pev->angles.y, SHELL_9MM, TE_BOUNCE_SHELL );
 
-					MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecShootOrigin );
-					WRITE_BYTE( TE_DLIGHT );
-					WRITE_COORD( vecShootOrigin.x );		// origin
-					WRITE_COORD( vecShootOrigin.y );
-					WRITE_COORD( vecShootOrigin.z );
-					WRITE_BYTE( 15 );	// radius
-					WRITE_BYTE( 255 );	// R
-					WRITE_BYTE( 255 );	// G
-					WRITE_BYTE( 180 );	// B
-					WRITE_BYTE( 0 );	// life * 10
-					WRITE_BYTE( 0 ); // decay
-					WRITE_BYTE( 125 ); // brightness
-					WRITE_BYTE( 0 ); // shadows
-					MESSAGE_END();
+						MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecShootOrigin );
+						WRITE_BYTE( TE_DLIGHT );
+						WRITE_COORD( vecShootOrigin.x );		// origin
+						WRITE_COORD( vecShootOrigin.y );
+						WRITE_COORD( vecShootOrigin.z );
+						WRITE_BYTE( 15 );	// radius
+						WRITE_BYTE( 255 );	// R
+						WRITE_BYTE( 255 );	// G
+						WRITE_BYTE( 180 );	// B
+						WRITE_BYTE( 0 );	// life * 10
+						WRITE_BYTE( 0 ); // decay
+						WRITE_BYTE( 125 ); // brightness
+						WRITE_BYTE( 0 ); // shadows
+						MESSAGE_END();
+					}
 
 					m_flShootTime += 0.1;
 				}
@@ -2936,6 +2939,9 @@ void CDrone::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTyp
 
 void CDrone::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return;
+	
 	if( pev->owner )
 	{
 		if( (pevAttacker->flags & FL_CLIENT) && (VARS(pev->owner) == pevAttacker) )
@@ -2952,6 +2958,9 @@ void CDrone::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir,
 
 int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return 0;
+	
 	if( pev->owner )
 	{
 		if( (pevAttacker->flags & FL_CLIENT) && (VARS( pev->owner ) == pevAttacker) )
@@ -3482,7 +3491,7 @@ void CDroneAlien :: RunTask ( Task_t *pTask )
 
 void CDroneAlien::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval )
 {
-	flInterval = gpGlobals->frametime * 0.5f; // diffusion - constant, because monsters are thinking every frame
+	flInterval = gpGlobals->frametime * 0.35f; // diffusion - constant, because monsters are thinking every frame
 	
 	if ( m_IdealActivity != m_movementActivity )
 		m_IdealActivity = m_movementActivity;
@@ -3578,6 +3587,9 @@ void CDroneAlien :: IdleSound(void)
 
 void CDroneAlien::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return;
+	
 	if (RANDOM_LONG(0,3) == 0)
 		UTIL_Ricochet( ptr->vecEndPos, 1.0 );
 
@@ -3588,6 +3600,9 @@ void CDroneAlien::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector ve
 
 int CDroneAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return 0;
+	
 	// HACK HACK -- until we fix this.
 	if ( IsAlive() )
 		PainSound();
@@ -4226,6 +4241,9 @@ void CAlienShip :: IdleSound(void)
 
 void CAlienShip::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return;
+	
 	if (RANDOM_LONG(0,3) == 0)
 		UTIL_Ricochet( ptr->vecEndPos, 1.0 );
 
@@ -4236,6 +4254,9 @@ void CAlienShip::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 
 int CAlienShip::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return 0;
+
 	// HACK HACK -- until we fix this.
 	if ( IsAlive() )
 		PainSound();
