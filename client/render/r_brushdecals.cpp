@@ -251,6 +251,7 @@ void DrawDecalsBatch(void)
 	std::sort( decal_list, decal_list + num_render_decals, SortDecals );
 
 	GL_AlphaTest( GL_TRUE );
+	GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
 	GL_Blend( GL_TRUE );
 	GL_BlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 	GL_DepthMask(GL_FALSE);
