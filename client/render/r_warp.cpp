@@ -459,7 +459,7 @@ void R_DrawSkyBox( void )
 		pglUniform3fARB( RI->currentshader->u_LightDir, sky_vec.x, sky_vec.y, sky_vec.z );
 		pglUniform3fARB( RI->currentshader->u_LightDiffuse, sky_color.x, sky_color.y, sky_color.z );
 		pglUniform3fARB( RI->currentshader->u_ViewOrigin, RI->vieworg.x, RI->vieworg.y, RI->vieworg.z );
-		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity * 0.0125f );
+		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], (RI->params & RP_SKYPORTALVIEW) ? tr.fogDensity * 0.0125f : tr.fogDensity * 0.125f );
 		pglUniform1fARB( RI->currentshader->u_GenericCondition, (float)sundisk );
 	}
 
