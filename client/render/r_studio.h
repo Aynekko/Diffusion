@@ -579,6 +579,7 @@ private:
 
 	virtual void LoadStudioMaterials( void );
 	virtual void FreeStudioMaterials( void );
+	bool TryReloadingAnimation( mstudiomaterial_t *mat );
 
 	virtual void UpdateInstanceMaterials( void );
 	virtual void ClearInstanceData( bool create );

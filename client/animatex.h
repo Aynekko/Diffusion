@@ -32,4 +32,6 @@ public:
 	int GetAnimationCurFrame( void );
 	void AdvanceFrame( float Speed );
 	bool IsLastFrame( void );
+
+	char start_tex[MAX_PATH]; // texture which was put into Init() - just for caching purposes for studio models to reference
 };

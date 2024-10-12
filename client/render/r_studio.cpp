@@ -1960,11 +1960,61 @@ void CStudioModelRenderer::LoadStudioMaterials( void )
 		Q_snprintf( tr.materials[pmaterial->gl_diffuse_id].name, sizeof( tr.materials[pmaterial->gl_diffuse_id].name ), "%s/%s", mdlname, texname );
 		LoadMaterialSettingsForTexture( pmaterial->gl_diffuse_id );
 
+		// cache the animation into material to reload if needed, because they are purged on map unload, but studio models can stay
+		int anim_id = tr.materials[pmaterial->gl_diffuse_id].animation_id;
+		if( anim_id >= 0 )
+		{
+			pmaterial->anim_framerate = tr.anim_spd[anim_id];
+			Q_strcpy( pmaterial->anim_starttex, tr.animation[anim_id].start_tex );
+		}
+
 		// precache as many shaders as possible
 		GL_UberShaderForSolidStudio( pmaterial, false, bone_weights, false, m_pStudioHeader->numbones );
 		// diffusion - precache lights too to minimize stutters
 	//	GL_UberShaderForDlightStudio( &tr.defSpotlight, pmaterial, bone_weights, m_pStudioHeader->numbones );
 	//	GL_UberShaderForDlightStudio( &tr.defOmnilight, pmaterial, bone_weights, m_pStudioHeader->numbones );
+	}
+}
+
+//============================================================================================================
+// TryReloadingAnimation: this function tries to hot-reload animation during rendering process,
+// because all animation are purged on the map unload, but models and materials are not (if the same model
+// is present on the next map). If this fails, animation is disabled whatsoever, and material uses default
+// texture to indicate the error.
+//============================================================================================================
+bool CStudioModelRenderer::TryReloadingAnimation( mstudiomaterial_t *mat )
+{
+	// find a free slot
+	int f = 0;
+	while( f < MAX_ANIMATIONS )
+	{
+		if( !tr.animation[f].Initialized() )
+		{
+			tr.animation[f].Init( mat->anim_starttex );
+			if( tr.animation[f].Initialized() )
+			{
+				tr.materials[mat->gl_diffuse_id].animation_id = f;
+				tr.anim_spd[f] = mat->anim_framerate;
+			}
+
+			break;
+		}
+		f++;
+	}
+
+	// check again
+	int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
+	if( tr.animation[anim_id].Initialized() )
+	{
+		return true;
+	}
+	else // animation failed to load, probably missing texture
+	{
+		// disable animation (so it won't try to load again)
+		// and set error texture for this material
+		tr.materials[mat->gl_diffuse_id].animation_id = -1;
+		mat->gl_diffuse_id = tr.defaultTexture;
+		return false;
 	}
 }
 
@@ -5425,7 +5475,17 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			else if( mat->gl_diffuse_id != tr.defaultTexture && tr.materials[mat->gl_diffuse_id].animation_id >= 0 )
 			{
 				int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
-				GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
+				if( tr.animation[anim_id].Initialized() )
+				{
+					GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
+				}
+				else // animation not initialized - try to load it, only once!
+				{
+					if( TryReloadingAnimation( mat ) )
+						GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
+					else
+						GL_Bind( GL_TEXTURE0, tr.defaultTexture );
+				}
 			}
 			else if( tr.materials[mat->gl_diffuse_id].drone_view )
 				GL_Bind( GL_TEXTURE0, tr.DroneViewTex );

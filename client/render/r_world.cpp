@@ -2023,14 +2023,13 @@ static void Mod_FreeWorld( model_t *mod )
 	memset( world, 0, sizeof( gl_world_t ) );
 	tr.grass_total_size = 0;
 
-#if 0 // studio models are freeing this too and never loading back unlike brushes...
+	// free all animations
 	for( int i = 0; i < MAX_ANIMATIONS; i++ )
 	{
 		if( tr.animation[i].Initialized() )
 			tr.animation[i].Free();
 	}
 	memset( tr.anim_spd, 0, sizeof( tr.anim_spd ) );
-#endif
 }
 
 /*

@@ -693,6 +693,10 @@ typedef struct mstudiomat_s
 	unsigned short	glsl_sequence;		// cache sequence
 	unsigned short	glsl_sequence_omni[2];		// same as above but for omnilights
 	unsigned short	glsl_sequence_proj[2];	// same as above but for projlights
+
+	// animation cache in case of hot reload (see TryReloadingAnimation())
+	char anim_starttex[260];
+	int anim_framerate;
 } mstudiomaterial_t;
 
 typedef struct
