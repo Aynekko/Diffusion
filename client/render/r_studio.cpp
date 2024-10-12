@@ -1982,7 +1982,7 @@ void CStudioModelRenderer::LoadStudioMaterials( void )
 // is present on the next map). If this fails, animation is disabled whatsoever, and material uses default
 // texture to indicate the error.
 //============================================================================================================
-bool CStudioModelRenderer::TryReloadingAnimation( mstudiomaterial_t *mat )
+void CStudioModelRenderer::TryReloadingAnimation( mstudiomaterial_t *mat )
 {
 	// find a free slot
 	int f = 0;
@@ -2004,17 +2004,13 @@ bool CStudioModelRenderer::TryReloadingAnimation( mstudiomaterial_t *mat )
 
 	// check again
 	int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
-	if( tr.animation[anim_id].Initialized() )
+	if( !tr.animation[anim_id].Initialized() )
 	{
-		return true;
-	}
-	else // animation failed to load, probably missing texture
-	{
+		// animation failed to load, probably missing texture
 		// disable animation (so it won't try to load again)
 		// and set error texture for this material
 		tr.materials[mat->gl_diffuse_id].animation_id = -1;
 		mat->gl_diffuse_id = tr.defaultTexture;
-		return false;
 	}
 }
 
@@ -4715,6 +4711,21 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 
 			r_stats.c_studio_models_drawn++;
 		}
+
+		// check for texture animations
+		if( !FBitSet( m_pModelInstance->info_flags, MF_TEXTURE_ANIMS_DONE ) )
+		{
+			// reload material animations
+			mstudiomaterial_t *pmat = (mstudiomaterial_t *)m_pRenderModel->materials;
+			for( int i = 0; i < m_pStudioHeader->numtextures; i++, pmat++ )
+			{
+				int anim_id = tr.materials[pmat->gl_diffuse_id].animation_id;
+				if( anim_id >= 0 )
+					TryReloadingAnimation( pmat );
+			}
+
+			m_pModelInstance->info_flags |= MF_TEXTURE_ANIMS_DONE;
+		}
 		
 		StudioRenderModel();
 	}
@@ -5475,17 +5486,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			else if( mat->gl_diffuse_id != tr.defaultTexture && tr.materials[mat->gl_diffuse_id].animation_id >= 0 )
 			{
 				int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
-				if( tr.animation[anim_id].Initialized() )
-				{
-					GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
-				}
-				else // animation not initialized - try to load it, only once!
-				{
-					if( TryReloadingAnimation( mat ) )
-						GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
-					else
-						GL_Bind( GL_TEXTURE0, tr.defaultTexture );
-				}
+				GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
 			}
 			else if( tr.materials[mat->gl_diffuse_id].drone_view )
 				GL_Bind( GL_TEXTURE0, tr.DroneViewTex );

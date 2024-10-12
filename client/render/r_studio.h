@@ -41,6 +41,7 @@ GNU General Public License for more details.
 #define MF_INIT_SMOOTHSTAIRS	BIT( 3 )
 #define MF_ATTACHMENTS_DONE		BIT( 4 )
 #define MF_STATIC_LIGHTING_DONE BIT( 5 ) // diffusion - calculate lighting vector for env_static only once
+#define MF_TEXTURE_ANIMS_DONE	BIT( 6 ) // diffusion - check for model animations
 
 #define QSORT_MAX_STACKDEPTH		(MAX_MODEL_MESHES)
 
@@ -579,7 +580,7 @@ private:
 
 	virtual void LoadStudioMaterials( void );
 	virtual void FreeStudioMaterials( void );
-	bool TryReloadingAnimation( mstudiomaterial_t *mat );
+	void TryReloadingAnimation( mstudiomaterial_t *mat );
 
 	virtual void UpdateInstanceMaterials( void );
 	virtual void ClearInstanceData( bool create );
