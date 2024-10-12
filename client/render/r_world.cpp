@@ -411,12 +411,12 @@ void LoadMaterialSettingsForTexture( int texnum )
 				if( afile && token[0] > 0 )
 				{
 					if( tr.animation[f].Initialized() )
-						tr.anim_spd[f] = Q_atoi( token );
+						tr.animation[f].framerate = Q_atoi( token );
 				}
 				else // no framerate set, use default
 				{
 					if( tr.animation[f].Initialized() )
-						tr.anim_spd[f] = 10;
+						tr.animation[f].framerate = 10;
 				}
 			}
 			else
@@ -2029,7 +2029,6 @@ static void Mod_FreeWorld( model_t *mod )
 		if( tr.animation[i].Initialized() )
 			tr.animation[i].Free();
 	}
-	memset( tr.anim_spd, 0, sizeof( tr.anim_spd ) );
 }
 
 /*

@@ -468,7 +468,6 @@ typedef struct
 	bool lowmemory; // -lowmem parameter in the shortcut
 
 	CAnimatex animation[MAX_ANIMATIONS];
-	int anim_spd[MAX_ANIMATIONS];
 
 	int DroneViewTex;
 	cl_entity_t *pDrone;

@@ -1964,7 +1964,7 @@ void CStudioModelRenderer::LoadStudioMaterials( void )
 		int anim_id = tr.materials[pmaterial->gl_diffuse_id].animation_id;
 		if( anim_id >= 0 )
 		{
-			pmaterial->anim_framerate = tr.anim_spd[anim_id];
+			pmaterial->anim_framerate = tr.animation[anim_id].framerate;
 			Q_strcpy( pmaterial->anim_starttex, tr.animation[anim_id].start_tex );
 		}
 
@@ -1994,7 +1994,7 @@ bool CStudioModelRenderer::TryReloadingAnimation( mstudiomaterial_t *mat )
 			if( tr.animation[f].Initialized() )
 			{
 				tr.materials[mat->gl_diffuse_id].animation_id = f;
-				tr.anim_spd[f] = mat->anim_framerate;
+				tr.animation[f].framerate = mat->anim_framerate;
 			}
 
 			break;

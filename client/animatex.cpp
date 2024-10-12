@@ -74,6 +74,7 @@ void CAnimatex::Free( void )
 	}
 
 	iTotalFrames = 0;
+	framerate = 0;
 }
 
 void CAnimatex::SetPos( int x_min, int y_min, int x_max, int y_max )

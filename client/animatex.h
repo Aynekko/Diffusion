@@ -11,6 +11,7 @@ class CAnimatex
 public:
 	int iTotalFrames;
 	int iFrame;
+	int framerate;
 	int Texture[MAX_ANIMATEX_FRAMES];
 	float fCurFrame;
 	int xmin, ymin, xmax, ymax;

@@ -2347,7 +2347,7 @@ void R_Animatex( void )
 		if( !tr.animation[i].Initialized() )
 			break;
 
-		tr.animation[i].AdvanceFrame( tr.anim_spd[i] );
+		tr.animation[i].AdvanceFrame( tr.animation[i].framerate );
 		i++;
 	}
 }
