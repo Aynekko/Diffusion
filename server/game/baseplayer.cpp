@@ -2529,6 +2529,8 @@ void CBasePlayer :: TransferReset( void )
 	// rebuild key-catcheres after changelevel
 	// g-cont. may be put in Restore?
 	UpdateKeyCatchers();
+
+	CreateFlashlightMonster();
 }
 
 void CBasePlayer :: UpdateKeyCatchers( void )
@@ -2543,6 +2545,28 @@ void CBasePlayer :: UpdateKeyCatchers( void )
 			m_hKeyCatchers[m_iNumKeyCatchers++] = pTarget;
 		pTarget = UTIL_FindEntityByClassname( pTarget, "player_keycatcher" );
 	}
+}
+
+void CBasePlayer::CreateFlashlightMonster( void )
+{
+	m_pFlashlightMonster = NULL;
+
+	if( gpGlobals->maxClients != 1 )
+		return;
+
+	CBaseEntity *tmp = NULL;
+	// delete all flashlight monsters (maybe there's a few...just in case O.O)
+	while( (tmp = UTIL_FindEntityByClassname( tmp, "_flashlight" )) != NULL )
+		UTIL_Remove( tmp );
+
+	// create a new one
+	m_pFlashlightMonster = CBaseEntity::Create( "_flashlight", GetAbsOrigin(), g_vecZero, edict() );
+	if( !FlashlightIsOn() )
+		m_pFlashlightMonster->pev->effects |= EF_NODRAW;
+//	m_pFlashlightMonster->SetModel( "sprites/laserdot.spr" );
+//	m_pFlashlightMonster->pev->rendermode = kRenderGlow;
+//	m_pFlashlightMonster->pev->renderfx = kRenderFxNoDissipation;
+//	m_pFlashlightMonster->pev->renderamt = 255;
 }
 
 //==========================================================================
@@ -4343,24 +4367,6 @@ void CBasePlayer::PostThink()
 	// ----------------flashlight "dot" which monsters can see-----------------------------
 	if( gpGlobals->maxClients == 1 ) // UNDONE must be tested in multiplayer with monsters and other players, single-player for now
 	{
-		// try to search for the entity first
-		if( !m_pFlashlightMonster )
-		{
-			bool found_flashlight = false;
-			if( (m_pFlashlightMonster = UTIL_FindEntityByClassname( NULL, "_flashlight" )) != NULL )
-				found_flashlight = true;
-
-			if( !found_flashlight ) // create a new one
-			{
-				m_pFlashlightMonster = CBaseEntity::Create( "_flashlight", GetAbsOrigin(), g_vecZero, edict() );
-				m_pFlashlightMonster->pev->effects |= EF_NODRAW;
-			//	m_pFlashlightMonster->SetModel( "sprites/laserdot.spr" );
-			//	m_pFlashlightMonster->pev->rendermode = kRenderGlow;
-			//	m_pFlashlightMonster->pev->renderfx = kRenderFxNoDissipation;
-			//	m_pFlashlightMonster->pev->renderamt = 255;
-			}
-		}
-
 		if( m_pFlashlightMonster )
 		{
 			if( !(m_pFlashlightMonster->pev->effects & EF_NODRAW) )
@@ -5280,6 +5286,8 @@ void CBasePlayer::Spawn( void )
 	DroneColor = Vector( 255, 255, 255 );
 	DroneAmmo = 500;
 	DroneHealth = 500;
+
+	CreateFlashlightMonster();
 }
 
 void CBasePlayer::SetHUDTexts(void)
@@ -5647,6 +5655,8 @@ int CBasePlayer::Restore( CRestore &restore )
 		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
 
 	RenewItems();
+
+	CreateFlashlightMonster();
 
 	return status;
 }
@@ -6599,7 +6609,6 @@ void CBasePlayer :: UpdateClientData( void )
 {
 	if (m_fInitHUD)
 	{
-		m_pFlashlightMonster = NULL; // nullify the flashlight monster, force search again...
 		m_fInitHUD = FALSE;
 		gInitHUD = FALSE;
 

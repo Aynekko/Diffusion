@@ -8,6 +8,7 @@ class CFlashlightMonster : public CBaseMonster
 	DECLARE_CLASS( CFlashlightMonster, CBaseMonster );
 public:
 	void Spawn( void );
+	int ObjectCaps( void ) { return FCAP_DONT_SAVE; }
 };
 
 LINK_ENTITY_TO_CLASS( _flashlight, CFlashlightMonster );
