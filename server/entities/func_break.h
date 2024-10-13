@@ -29,6 +29,7 @@
 #define SF_PUSH_HOLDABLE		BIT(9)	// item can be picked up by player
 #define SF_PUSH_BSPCOLLISION	BIT(10)	// use BSP tree instead of bbox
 #define SF_PUSH_NOTSOLID		BIT(11) // not solid
+#define SF_PUSH_USEPUSH			BIT(12) // diffusion - only push and pull with USE button, no touch
 
 typedef enum { expRandom, expDirected } ExplType;
 typedef enum { matGlass = 0, matWood, matMetal, matFlesh, matCinderBlock, matCeilingTile, matComputer, matUnbreakableGlass, matRocks, matNone, matLastMaterial } Materials;

@@ -109,13 +109,26 @@ void CPushable::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 		return;
 	}
 
-	if (pActivator->GetAbsVelocity() != g_vecZero)
-		Move(pActivator, 0);
+	if( HasSpawnFlags( SF_PUSH_USEPUSH ) )
+	{
+		// add force in player's direction
+		if( (pActivator->pev->button & IN_FORWARD) && GetAbsVelocity().IsNull() )
+		{
+			UTIL_MakeVectors( pActivator->GetAbsAngles() );
+			SetAbsVelocity( gpGlobals->v_forward * 300 );
+		}
+	}
+
+	if( pActivator->GetAbsVelocity() != g_vecZero )
+		Move( pActivator, 0 );
 }
 
 
 void CPushable::Touch(CBaseEntity* pOther)
 {
+	if( HasSpawnFlags( SF_PUSH_USEPUSH ) )
+		return;
+	
 	if (pOther == g_pWorld)
 		return;
 
@@ -126,7 +139,8 @@ void CPushable::Touch(CBaseEntity* pOther)
 void CPushable::Move(CBaseEntity* pOther, int push)
 {
 	entvars_t* pevToucher = pOther->pev;
-	int playerTouch = 0;
+	bool playerTouch = false;
+	bool bUsePush = HasSpawnFlags( SF_PUSH_USEPUSH );
 
 	// Now crossbow bolts, grenades roaches and other stuff with null size can't moving pushables anyway
 	if (pOther->IsPointSized())
@@ -146,23 +160,41 @@ void CPushable::Move(CBaseEntity* pOther, int push)
 	}
 
 	// g-cont. fix pushable acceleration bug
-	if (pOther->IsPlayer())
+	if( pOther->IsPlayer() )
 	{
-		// Don't push unless the player is pushing forward and NOT use (pull)
-		if (push && !(pevToucher->button & (IN_FORWARD | IN_MOVERIGHT | IN_MOVELEFT | IN_BACK)))
-			return;
-		if (!push && !(pevToucher->button & (IN_BACK))) return;
-		playerTouch = 1;
+		if( !bUsePush )
+		{
+			// Don't push unless the player is pushing forward and NOT use (pull)
+			if( push && !(pevToucher->button & (IN_FORWARD | IN_MOVERIGHT | IN_MOVELEFT | IN_BACK)) )
+				return;
+			// Require player walking back when applying '+use' on pushable
+			if( !push && !(pevToucher->button & (IN_BACK)) )
+				return;
+		}
+
+		playerTouch = true;
 	}
+	else
+		bUsePush = false;
 
 	TraceResult tr = UTIL_GetGlobalTrace();
 
 	float factor = DotProduct(pevToucher->velocity.Normalize(), tr.vecPlaneNormal);
 
-	if (push && factor >= -0.3f)
+	if( bUsePush )
+	{
+		// quite simple, really
+		Vector vPlayerVel = pOther->GetAbsVelocity().Normalize() * 100;
+		pOther->SetAbsVelocity( vPlayerVel );
+		SetAbsVelocity( vPlayerVel );
+
+		return;
+	}
+
+	if( push && factor >= -0.3f )
 		return;	// just touching not pushed
 
-	if (playerTouch)
+	if( playerTouch )
 	{
 		if (!(pevToucher->flags & FL_ONGROUND))	// Don't push away from jumping/falling players unless in water
 		{
@@ -179,10 +211,23 @@ void CPushable::Move(CBaseEntity* pOther, int push)
 
 	Vector vecAbsVelocity = GetAbsVelocity();
 
-	vecAbsVelocity.x += pevToucher->velocity.x * factor;
-	vecAbsVelocity.y += pevToucher->velocity.y * factor;
+	float length = vecAbsVelocity.Length2D();
 
-	float length = sqrt(vecAbsVelocity.x * vecAbsVelocity.x + vecAbsVelocity.y * vecAbsVelocity.y);
+	// diffusion - do not overaccelerate when pulling
+	if( !push )
+	{
+		if( length < 150 )
+		{
+			vecAbsVelocity.x += pevToucher->velocity.x * factor;
+			vecAbsVelocity.y += pevToucher->velocity.y * factor;
+		}
+	}
+	else
+	{
+		vecAbsVelocity.x += pevToucher->velocity.x * factor;
+		vecAbsVelocity.y += pevToucher->velocity.y * factor;
+	}
+
 	if (push && (length > MaxSpeed()))
 	{
 		vecAbsVelocity.x = (vecAbsVelocity.x * MaxSpeed() / length);
@@ -191,7 +236,7 @@ void CPushable::Move(CBaseEntity* pOther, int push)
 
 	SetAbsVelocity(vecAbsVelocity);
 
-	if (playerTouch)
+	if( playerTouch )
 	{
 		Vector vecToucherVelocity = pOther->GetAbsVelocity();
 		vecToucherVelocity.x = vecAbsVelocity.x;
