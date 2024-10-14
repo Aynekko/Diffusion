@@ -571,7 +571,7 @@ void R_RenderShadowCubeSide( plight_t *pl, int side )
 
 void R_RenderShadowmaps(void)
 {	
-	if (R_FullBright() || !CVAR_TO_BOOL(r_shadows) || tr.fGamePaused || tr.shadows_notsupport)
+	if (R_FullBright() || !CVAR_TO_BOOL( gl_shadows ) || tr.fGamePaused || tr.shadows_notsupport)
 		return;
 
 	if( IsBuildingCubemaps() )

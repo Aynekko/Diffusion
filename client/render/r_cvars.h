@@ -21,7 +21,7 @@ extern cvar_t	*gl_anisotropy;
 extern cvar_t	*gl_test;	// just cvar for testify new effects
 extern cvar_t	*r_debug;	//show renderer info
 extern cvar_t	*r_extensions;
-extern cvar_t	*r_shadows;	//original HL shadows
+extern cvar_t	*gl_shadows;
 extern cvar_t	*r_finish;
 extern cvar_t	*r_clear;
 extern cvar_t	*r_speeds;

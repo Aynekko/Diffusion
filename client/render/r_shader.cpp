@@ -1709,7 +1709,7 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 {
 	bool shadows = (!FBitSet( pl->flags, CF_NOSHADOWS )) ? true : false;
 
-	if( tr.shadows_notsupport || !CVAR_TO_BOOL(r_shadows) )
+	if( tr.shadows_notsupport || !CVAR_TO_BOOL( gl_shadows ) )
 		shadows = false;
 
 	if( pl->pointlight && tr.omni_shadows_notsupport )
@@ -1894,7 +1894,7 @@ word GL_UberShaderForGrassDlight( plight_t *pl, struct grass_s *g )
 {
 	bool shadows = (!FBitSet( pl->flags, CF_NOSHADOWS )) ? true : false;
 
-	if( tr.shadows_notsupport || !CVAR_TO_BOOL( r_shadows ) )
+	if( tr.shadows_notsupport || !CVAR_TO_BOOL( gl_shadows ) )
 		shadows = false;
 
 	if( pl->pointlight && tr.omni_shadows_notsupport )
@@ -2095,7 +2095,7 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 {
 	bool shadows = (!FBitSet( pl->flags, CF_NOSHADOWS )) ? true : false;
 
-	if( tr.shadows_notsupport || !CVAR_TO_BOOL( r_shadows ) )
+	if( tr.shadows_notsupport || !CVAR_TO_BOOL( gl_shadows ) )
 		shadows = false;
 
 	if( pl->pointlight && tr.omni_shadows_notsupport )
@@ -2226,7 +2226,7 @@ word GL_UberShaderForDlightGeneric( const plight_t *pl )
 {
 	bool shadows = (!FBitSet( pl->flags, CF_NOSHADOWS )) ? true : false;
 
-	if( tr.shadows_notsupport || !CVAR_TO_BOOL( r_shadows ) )
+	if( tr.shadows_notsupport || !CVAR_TO_BOOL( gl_shadows ) )
 		shadows = false;
 
 	if( pl->pointlight && tr.omni_shadows_notsupport )

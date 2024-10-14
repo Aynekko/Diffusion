@@ -559,9 +559,9 @@ void R_CheckChanges( void )
 		settings_changed = true;
 	}
 
-	if( FBitSet( r_shadows->flags, FCVAR_CHANGED ))
+	if( FBitSet( gl_shadows->flags, FCVAR_CHANGED ))
 	{
-		ClearBits( r_shadows->flags, FCVAR_CHANGED );
+		ClearBits( gl_shadows->flags, FCVAR_CHANGED );
 		settings_changed = true;
 	}
 

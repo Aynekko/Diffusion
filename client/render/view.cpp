@@ -91,7 +91,7 @@ cvar_t *r_nocull;
 cvar_t *r_nosort;
 cvar_t *r_lockpvs;
 cvar_t *r_dynamic;
-cvar_t *r_shadows;
+cvar_t *gl_shadows;
 cvar_t *r_lightmap;
 cvar_t *vid_gamma;
 cvar_t *vid_brightness;
@@ -360,7 +360,7 @@ void V_Init( void )
 	gl_allow_portals = CVAR_REGISTER( "gl_allow_portals", "1", FCVAR_ARCHIVE | FCVAR_CLIENTDLL );
 	gl_allow_screens = CVAR_REGISTER( "gl_allow_screens", "1", FCVAR_ARCHIVE | FCVAR_CLIENTDLL );
 	gl_renderer = CVAR_REGISTER( "gl_renderer", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
-	r_shadows = CVAR_REGISTER( "r_shadows", "2", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
+	gl_shadows = CVAR_REGISTER( "gl_shadows", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
 	r_allow_3dsky = CVAR_REGISTER( "gl_allow_3dsky", "1", FCVAR_CHEAT );
 	r_recursion_depth = CVAR_REGISTER( "gl_recursion_depth", "1", FCVAR_ARCHIVE );
 	r_recursive_world_node = CVAR_REGISTER( "gl_recursive_world_node", "0", FCVAR_ARCHIVE );
