@@ -115,7 +115,7 @@ void CPushable::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useT
 		if( (pActivator->pev->button & IN_FORWARD) && GetAbsVelocity().IsNull() )
 		{
 			UTIL_MakeVectors( pActivator->GetAbsAngles() );
-			SetAbsVelocity( gpGlobals->v_forward * 300 );
+			SetAbsVelocity( gpGlobals->v_forward * 500 );
 		}
 	}
 
@@ -184,8 +184,14 @@ void CPushable::Move(CBaseEntity* pOther, int push)
 	if( bUsePush )
 	{
 		// quite simple, really
-		Vector vPlayerVel = pOther->GetAbsVelocity().Normalize() * 100;
-		pOther->SetAbsVelocity( vPlayerVel );
+		Vector vPlayerVel = pOther->GetAbsVelocity();
+		if( vPlayerVel.Length() > 100 )
+		{
+			// clamp player speed
+			vPlayerVel = vPlayerVel.Normalize() * 100;
+			pOther->SetAbsVelocity( vPlayerVel );
+		}
+		
 		SetAbsVelocity( vPlayerVel );
 
 		return;
