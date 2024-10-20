@@ -223,15 +223,18 @@ int CHudCrosshairStatic::Draw( float flTime )
 		}
 
 		// draw a square image with the scope crosshair
+		int x1 = (ScreenWidth / 2) - (ScreenHeight / 2);
+		int x2 = (ScreenWidth / 2) + (ScreenHeight / 2);
+
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-		DrawQuad( (ScreenWidth / 2) - (ScreenHeight / 2), 0, (ScreenWidth / 2) + (ScreenHeight / 2), ScreenHeight );
+		DrawQuad( x1, 0, x2, ScreenHeight );
 		gEngfuncs.pTriAPI->End();
 
 		// draw blackness to the left
-		gEngfuncs.pfnFillRGBABlend( 0, 0, (ScreenWidth - ScreenHeight) / 2, ScreenHeight, 0, 0, 0, 255 );
+		gEngfuncs.pfnFillRGBABlend( 0, 0, x1, ScreenHeight, 0, 0, 0, 255 );
 
 		// draw blackness to the right
-		gEngfuncs.pfnFillRGBABlend( (ScreenWidth / 2) + (ScreenHeight / 2), 0, (ScreenWidth - ScreenHeight) / 2, ScreenHeight, 0, 0, 0, 255 );
+		gEngfuncs.pfnFillRGBABlend( x2, 0, x1, ScreenHeight, 0, 0, 0, 255 );
 	}
 	else // draw normal crosshairs
 	{
