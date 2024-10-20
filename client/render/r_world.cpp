@@ -1880,7 +1880,10 @@ static void Mod_LoadWorld( model_t *mod, const byte *buf )
 		// mark surfs in local space
 		msurface_t *surf = worldmodel->surfaces + bm->firstface;
 		for( int j = 0; j < bm->numfaces; j++, surf++ )
+		{
 			SetBits( surf->flags, SURF_LOCAL_SPACE );
+			surf->info->origin += bm->origin; // diffusion - I need the origin in worldspace for cubemaps to work.
+		}
 	}
 
 	if( extrahdr->id == IDEXTRAHEADER && extrahdr->version == EXTRA_VERSION )
