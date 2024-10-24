@@ -1828,7 +1828,12 @@ void UTIL_FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEnt
 		if(!( pTarget->pev->flags & FL_KILLME ))
 		{
 			if( useType == USE_REMOVE )
+			{
+				// diffusion - hack for ambient generic - stop sound if we are deleting this entity
+				if( FClassnameIs( pTarget, "ambient_generic" ) )
+					pTarget->Use( pActivator, pCaller, USE_OFF, 0 );
 				UTIL_Remove( pTarget );
+			}
 			else
 			{
 				pTarget->Use( pActivator, pCaller, useType, value );
