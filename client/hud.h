@@ -475,6 +475,24 @@ private:
 	wrect_t *m_prc_droneicon;
 };
 
+class CHudPuzzle : public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw( float flTime );
+	int MsgFunc_Puzzle( const char *pszName, int iSize, void *pbuf );
+	void Start( void );
+	void MoveActiveBlock( int button );
+	void MoveCorrectBlock( int direction );
+
+	int field_size; // square field [field_size x field_size]
+	Vector2D active_block_id;
+	Vector2D correct_block_id;
+	bool solved;
+	float move_time; // difficulty - move the correct block with desired period
+};
+
 //
 //-----------------------------------------------------
 //
@@ -1002,6 +1020,7 @@ public:
 	CHudCodeInput m_CodeInput;
 	CPseudoGUI m_PseudoGUI;
 	CHudTriggerTimer m_TriggerTimer;
+	CHudPuzzle m_Puzzle;
 	
 	void Init( void );
 	void VidInit( void );

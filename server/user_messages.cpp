@@ -45,6 +45,7 @@ int gmsgSpectator = 0;
 int gmsgWeaponAnim = 0;
 int gmsgHealthbars = 0;
 int gmsgCodeInput = 0;
+int gmsgPuzzle = 0;
 // g-cont. begin custom Xash messages
 int gmsgParticle = 0;
 int gmsgKillPart = 0;
@@ -113,6 +114,7 @@ void LinkUserMessages( void )
 	gmsgWeaponAnim = REG_USER_MSG( "WeaponAnim", 3 );
 	gmsgHealthbars = REG_USER_MSG( "Healthbars", -1 );
 	gmsgCodeInput = REG_USER_MSG( "CodeInput", -1 );
+	gmsgPuzzle = REG_USER_MSG( "Puzzle", -1 );
 
 	gmsgParticle = REG_USER_MSG( "Particle", -1 );
 	gmsgKillPart = REG_USER_MSG( "KillPart", 2 );

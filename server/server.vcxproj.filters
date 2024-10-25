@@ -797,6 +797,9 @@
     <ClCompile Include="entities\env_sunlight_scale.cpp">
       <Filter>Source Files\entities</Filter>
     </ClCompile>
+    <ClCompile Include="entities\trigger_puzzle.cpp">
+      <Filter>Source Files\entities</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="monsters\activity.h">

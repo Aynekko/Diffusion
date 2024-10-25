@@ -677,7 +677,14 @@ int CL_ButtonBits( int bResetState )
 
 	if( in_forward.state & (BUTTON_DOWN|IMPULSE_DOWN) )
 	{
-		if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE )
+		{
+			// use movement buttons to move the block
+			gHUD.m_Puzzle.MoveActiveBlock( IN_FORWARD );
+			in_forward.state &= ~IMPULSE_DOWN;
+			in_forward.state &= ~BUTTON_DOWN;
+		}
+		else if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
 		{
 			gHUD.m_PseudoGUI.scrolled_lines--; // scroll up
 			in_forward.state &= ~IMPULSE_DOWN;
@@ -690,7 +697,14 @@ int CL_ButtonBits( int bResetState )
 	
 	if( in_back.state & (BUTTON_DOWN|IMPULSE_DOWN) )
 	{
-		if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE )
+		{
+			// use movement buttons to move the block
+			gHUD.m_Puzzle.MoveActiveBlock( IN_BACK );
+			in_back.state &= ~IMPULSE_DOWN;
+			in_back.state &= ~BUTTON_DOWN;
+		}
+		else if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
 		{
 			gHUD.m_PseudoGUI.scrolled_lines++; // scroll down
 			in_back.state &= ~IMPULSE_DOWN;
@@ -722,12 +736,28 @@ int CL_ButtonBits( int bResetState )
 	
 	if( in_moveleft.state & (BUTTON_DOWN|IMPULSE_DOWN) )
 	{
-		bits |= IN_MOVELEFT;
+		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE )
+		{
+			// use movement buttons to move the block
+			gHUD.m_Puzzle.MoveActiveBlock( IN_MOVELEFT );
+			in_moveleft.state &= ~IMPULSE_DOWN;
+			in_moveleft.state &= ~BUTTON_DOWN;
+		}
+		else
+			bits |= IN_MOVELEFT;
 	}
 	
 	if( in_moveright.state & (BUTTON_DOWN|IMPULSE_DOWN) )
 	{
-		bits |= IN_MOVERIGHT;
+		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE )
+		{
+			// use movement buttons to move the block
+			gHUD.m_Puzzle.MoveActiveBlock( IN_MOVERIGHT );
+			in_moveright.state &= ~IMPULSE_DOWN;
+			in_moveright.state &= ~BUTTON_DOWN;
+		}
+		else
+			bits |= IN_MOVERIGHT;
 	}
 
 	if( in_attack2.state & (BUTTON_DOWN|IMPULSE_DOWN))

@@ -50,6 +50,9 @@ int CUseIcon::Draw( float flTime )
 
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
+
+	if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE )
+		return 0;
 	
 	int r, g, b;
 	Vector blue;

@@ -607,6 +607,17 @@ void ClientCommand( edict_t *pEntity )
 				pCodeEnt->Use( pPlayer, pPlayer, USE_ON, (float)Code );
 		}
 	}
+	else if( FIStrEq( pcmd, "solvepuzzle" ) )
+	{
+		if( CMD_ARGC() > 2 ) // we have entindex and a code
+		{
+			int EntIndex = Q_atoi( CMD_ARGV( 1 ) );
+			int Code = Q_atoi( CMD_ARGV( 2 ) );
+			CBaseEntity *pCodeEnt = CBaseEntity::Instance( INDEXENT( EntIndex ) );
+			if( pCodeEnt && FClassnameIs( pCodeEnt, "trigger_puzzle" ) )
+				pCodeEnt->Use( pPlayer, pPlayer, USE_ON, Code );
+		}
+	}
 	else if ( FIStrEq(pcmd, "give" ) ) // diffusion - created entities despawn instantly now
 	{
 		if ( Cheats )

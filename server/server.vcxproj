@@ -429,6 +429,7 @@
     <ClCompile Include="entities\test_effect.cpp" />
     <ClCompile Include="entities\trains.cpp" />
     <ClCompile Include="entities\trigger_codeinput.cpp" />
+    <ClCompile Include="entities\trigger_puzzle.cpp" />
     <ClCompile Include="entities\trigger_timer.cpp" />
     <ClCompile Include="game\client.cpp" />
     <ClCompile Include="game\combat.cpp" />
