@@ -96,7 +96,7 @@ void CEnvVolumetricLight::Spawn( void )
 	}
 
 	SetNullModel();
-	UTIL_SetSize( pev, Vector( -256, -256, -256 ), Vector( 256, 256, 256 ) ); // FIXME calculate something here...
+	UTIL_SetSize( pev, Vector( -256, -256, -256 ), Vector( 256, 256, 256 ) ); // FIXME this is a default size if entity is parented - such volumetrics are not culled!
 
 	// make sure it gets to transparent entity list on client
 	pev->rendermode = kRenderTransAdd;
@@ -132,6 +132,22 @@ void CEnvVolumetricLight::Spawn( void )
 
 	if( HasSpawnFlags( SF_VOLLIGHT_DUSTPARTICLES ) )
 		pev->vuser2.z = 1.0f;
+
+	if( !m_hParent ) // static entity, make bounds for correct culling
+	{
+		// compute mins/maxs
+		UTIL_MakeVectors( GetAbsAngles() );
+		Vector mins, maxs;
+		ClearBounds( mins, maxs );
+		for( int i = 0; i < pev->vuser1.z; i++ )
+		{
+			Vector vposition1 = gpGlobals->v_up * sunflower[i].x * 100 * pev->vuser2.x + gpGlobals->v_right * sunflower[i].y * 100 * pev->vuser2.x;
+			Vector vposition2 = gpGlobals->v_forward * pev->vuser1.x + gpGlobals->v_up * sunflower[i].x * 100 * pev->vuser2.y + gpGlobals->v_right * sunflower[i].y * 100 * pev->vuser2.y;
+			AddPointToBounds( vposition1, mins, maxs );
+			AddPointToBounds( vposition2, mins, maxs );
+		}
+		UTIL_SetSize( this, mins, maxs );
+	}
 }
 
 void CEnvVolumetricLight::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )

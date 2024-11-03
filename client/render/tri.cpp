@@ -115,7 +115,20 @@ void HUD_DrawTransparentTriangles( void )
 		{
 			SET_CURRENT_ENTITY( RI->currententity );
 
-			// FIXME no culling here yet...
+			// FIXME culling is not performed if this entity was parented (moving)
+			if( RI->currententity->curstate.mins.x != -256.0f && RI->currententity->curstate.maxs != 256.0f )
+			{
+				Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
+				Vector absmax = RI->currententity->origin + RI->currententity->curstate.maxs;
+
+				if( R_CullModel( RI->currententity, absmin, absmax ) )
+					continue;
+				if( !Mod_CheckBoxVisible( absmin, absmax ) )
+					continue;
+
+				if( r_drawentities->value == 7 )
+					DBG_DrawBBox( absmin, absmax );
+			}
 
 			R_SetupVolumetricLight( RI->currententity );
 		}
@@ -360,65 +373,12 @@ void R_RenderCables( void )
 //============================================================================================
 // diffusion - sprite-based volumetric light
 //============================================================================================
-const Vector2D sunflower[50] =
-{
-	Vector2D( 0.000, 0.000 ),
-	Vector2D( -0.019, -0.068 ),
-	Vector2D( -0.105, 0.064 ),
-	Vector2D( 0.116, 0.108 ),
-	Vector2D( 0.086, -0.167 ),
-	Vector2D( -0.208, -0.043 ),
-	Vector2D( 0.016, 0.235 ),
-	Vector2D( 0.241, -0.086 ),
-	Vector2D( -0.158, -0.224 ),
-	Vector2D( -0.184, 0.227 ),
-	Vector2D( 0.283, 0.123 ),
-	Vector2D( 0.044, -0.322 ),
-	Vector2D( -0.337, 0.046 ),
-	Vector2D( 0.141, 0.325 ),
-	Vector2D( 0.286, -0.232 ),
-	Vector2D( -0.312, -0.220 ),
-	Vector2D( -0.132, 0.372 ),
-	Vector2D( 0.406, 0.028 ),
-	Vector2D( -0.085, -0.411 ),
-	Vector2D( -0.383, 0.198 ),
-	Vector2D( 0.302, 0.323 ),
-	Vector2D( 0.236, -0.388 ),
-	Vector2D( -0.448, -0.125 ),
-	Vector2D( 0.000, 0.476 ),
-	Vector2D( 0.468, -0.131 ),
-	Vector2D( -0.258, -0.424 ),
-	Vector2D( -0.346, 0.370 ),
-	Vector2D( 0.458, 0.237 ),
-	Vector2D( 0.107, -0.515 ),
-	Vector2D( -0.534, 0.037 ),
-	Vector2D( 0.182, 0.513 ),
-	Vector2D( 0.452, -0.319 ),
-	Vector2D( -0.437, -0.355 ),
-	Vector2D( -0.228, 0.524 ),
-	Vector2D( 0.575, 0.079 ),
-	Vector2D( -0.080, -0.583 ),
-	Vector2D( -0.548, 0.238 ),
-	Vector2D( 0.382, 0.470 ),
-	Vector2D( 0.354, -0.502 ),
-	Vector2D( -0.586, -0.208 ),
-	Vector2D( -0.043, 0.629 ),
-	Vector2D( 0.625, -0.130 ),
-	Vector2D( -0.298, -0.573 ),
-	Vector2D( -0.477, 0.447 ),
-	Vector2D( 0.565, 0.343 ),
-	Vector2D( 0.180, -0.644 ),
-	Vector2D( -0.676, 0.001 ),
-	Vector2D( 0.185, 0.658 ),
-	Vector2D( 0.591, -0.359 ),
-	Vector2D( -0.510, -0.477 ),
-};
 
 void R_SetupVolumetricLight( cl_entity_t *e )
 {
 	if( !tr.volumetric_light_texture )
 		return;
-	
+
 	Vector vTangent, vDir, vRight, vVertex;
 	Vector v_angles = e->curstate.angles;
 	Vector ang_forward, ang_right, ang_up;
