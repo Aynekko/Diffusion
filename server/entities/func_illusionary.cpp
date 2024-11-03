@@ -23,6 +23,7 @@ void CFuncIllusionary::Spawn(void)
 {
 	pev->movetype = MOVETYPE_NONE;
 	pev->solid = SOLID_NOT; // always solid_not 
+	SetLocalAngles( g_vecZero );
 	SET_MODEL(edict(), GetModel());
 
 	// diffusion - toggle visibility
