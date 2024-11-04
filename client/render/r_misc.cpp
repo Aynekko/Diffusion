@@ -411,7 +411,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 			}
 		}
 
-		if( ent->curstate.renderfx == kRenderFxParticle )
+		if( ent->curstate.renderfx == kRenderFxParticle ) // env_particle
 		{
 			if( ent->curstate.fuser1 <= 0.0f )
 				return 0; // something bad happened with the timing (check delta.lst?)
@@ -473,6 +473,12 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				if( tr.time < tr.ParticleTime[ParticleEntIndex] )
 					break;
 				g_pParticles.CreateEffect( ParticleEntIndex, "clouds_night", ent->curstate.origin, g_vecZero );
+				tr.ParticleTime[ParticleEntIndex] = tr.time + ent->curstate.fuser1;
+				break;
+			case 9: // purple_leaves
+				if( tr.time < tr.ParticleTime[ParticleEntIndex] )
+					break;
+				g_pParticles.CreateEffect( ParticleEntIndex, "purple_leaves", ent->curstate.origin, g_vecZero );
 				tr.ParticleTime[ParticleEntIndex] = tr.time + ent->curstate.fuser1;
 				break;
 			}
