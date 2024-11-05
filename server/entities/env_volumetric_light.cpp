@@ -127,7 +127,7 @@ void CEnvVolumetricLight::Spawn( void )
 	pev->vuser2.z = 0.0f;
 
 	// diffusion - important. when mapper didn't set angles, it doesn't assume that it's zero vector
-	if( GetAbsAngles() == g_vecZero )
+	if( !m_hParent && GetAbsAngles() == g_vecZero )
 		SetAbsAngles( g_vecZero );
 
 	if( HasSpawnFlags( SF_VOLLIGHT_DUSTPARTICLES ) )
