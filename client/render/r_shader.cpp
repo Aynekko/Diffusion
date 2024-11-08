@@ -1561,6 +1561,9 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	{
 		if( (RI->currententity->curstate.renderfx == kRenderFxFullbright) || (RI->currententity->curstate.renderfx == kRenderFxFullbrightNoShadows) )
 			fullBright = true;
+
+		if( RI->currententity->curstate.rendermode == kRenderTransTexture )
+			GL_AddShaderDirective( options, "BMODEL_DEFAULTALPHATEST" ); // do not use 0.5 threshold
 	}
 
 	if( FBitSet( s->flags, SURF_FULLBRIGHT ) || R_FullBright( ) || fullBright )

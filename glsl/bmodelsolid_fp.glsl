@@ -227,7 +227,9 @@ void main( void )
 #endif
 
 #if !defined( BMODEL_INTERIOR )
+	#if !defined( BMODEL_DEFAULTALPHATEST )
 	if( diffuse.a < 0.5 ) discard;
+	#endif
 #endif
 
 #if defined( BMODEL_MONOCHROME )
