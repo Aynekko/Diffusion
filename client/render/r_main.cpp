@@ -617,14 +617,14 @@ CL_FxBlend
 */
 int CL_FxBlend( cl_entity_t *e )
 {
-	int	blend = 0;
-	float offset, dist;
-	Vector	tmp;
-
-	if( RENDER_GET_PARM( PARAM_GAMEPAUSED, 0 ))
+	if( RENDER_GET_PARM( PARAM_GAMEPAUSED, 0 ) || e->curstate.renderfx <= 0 )
 		return e->curstate.renderamt;
 
-	offset = ((int)e->index ) * 363.0f; // Use ent index to de-sync these fx
+	int	blend = 0;
+	float dist;
+	Vector tmp;
+
+	float offset = ((int)e->index ) * 363.0f; // Use ent index to de-sync these fx
 
 	switch( e->curstate.renderfx ) 
 	{
