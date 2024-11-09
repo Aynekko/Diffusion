@@ -3924,8 +3924,9 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 		}
 	}
 	
-	if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) || FBitSet( ent->curstate.iuser1, CF_STATIC_ENTITY ) )
+	if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) /*|| FBitSet( ent->curstate.iuser1, CF_STATIC_ENTITY )*/ )
 	{
+		/*
 		if( !(m_pModelInstance->info_flags & MF_STATIC_LIGHTING_DONE) )
 		{
 			alight_t lighting;
@@ -3937,12 +3938,31 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 			r_dynamic->value = 0.0f; // ignore dlights
 			IEngineStudio.StudioDynamicLight( ent, &lighting );
 			r_dynamic->value = dynamic;
+			if( lighting.plightvec[2] < -0.8 )
+			{
+				lighting.ambientlight *= vid_gamma->value * 0.65f + vid_brightness->value * 0.35f; // this is strangely fitting. maybe the gamma doesn't work?...
+				lighting.ambientlight *= 3.0f; // MAGIC
+				if( lighting.ambientlight > 128 )
+					lighting.ambientlight = 128;
+				lighting.shadelight *= vid_gamma->value * 0.65f + vid_brightness->value * 0.35f;
+				lighting.shadelight *= 3.0f; // MAGIC
+				if( lighting.shadelight > 192 )
+					lighting.shadelight = 192;
+			}
+			else
+			{
+				if( tr.sunlightscale > 0.0f )
+				{
+					lighting.ambientlight *= tr.sunlightscale;
+					lighting.shadelight *= tr.sunlightscale;
+				}
+			}
 			m_pModelInstance->lighting.ambientlight = lighting.ambientlight;
 			m_pModelInstance->lighting.shadelight = lighting.shadelight;
 			m_pModelInstance->lighting.color = lighting.color;
 			m_pModelInstance->lighting.plightvec = m_pModelInstance->m_plightmatrix.VectorIRotate( lighting.plightvec ); // turn back to model space
 			SetBits( m_pModelInstance->info_flags, MF_STATIC_LIGHTING_DONE );
-		}
+		}*/
 	}
 	else // dynamic entity or without vertex light
 	{
@@ -3964,9 +3984,11 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 		if( lighting.plightvec[2] < -0.8 )
 		{
 			lighting.ambientlight *= vid_gamma->value * 0.65f + vid_brightness->value * 0.35f; // this is strangely fitting. maybe the gamma doesn't work?...
+			lighting.ambientlight *= 2.0f; // MAGIC
 			if( lighting.ambientlight > 128 )
 				lighting.ambientlight = 128;
 			lighting.shadelight *= vid_gamma->value * 0.65f + vid_brightness->value * 0.35f;
+			lighting.shadelight *= 2.0f; // MAGIC
 			if( lighting.shadelight > 192 )
 				lighting.shadelight = 192;
 		}
@@ -5885,7 +5907,12 @@ void CStudioModelRenderer::DrawViewModel( void )
 
 void CStudioModelRenderer::ClearLightCache( void )
 {
+	/*
 	// force to recalc static light again
 	for( int i = m_ModelInstances.Count(); --i >= 0; )
+	{
 		ModelInstance_t *inst = &m_ModelInstances[i];
+		if( inst )
+			inst->info_flags &= ~MF_STATIC_LIGHTING_DONE;
+	}*/
 }
