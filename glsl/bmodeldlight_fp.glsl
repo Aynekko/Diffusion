@@ -217,9 +217,9 @@ void main( void )
 #if defined( BMODEL_INTERIOR )
 	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec, var_Position ); // u_realtime is currently not used
 #endif
-
+#if !defined( BMODEL_KRENDERTRANSTEXTURE )
 	if( diffuse.a < 0.5 ) discard;
-
+#endif
 #if defined( BMODEL_BUMP )
 	// now, rotate normalmap to worldspace
 	N = normalize( var_MatrixTBN * N );
