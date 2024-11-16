@@ -3220,7 +3220,7 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 
 	gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
 
-	if( e->angles != g_vecZero )
+	if( e->curstate.angles != g_vecZero )
 		TransformAABB( glm->transform, clmodel->mins, clmodel->maxs, absmin, absmax );
 	else
 	{
@@ -3235,7 +3235,7 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 
 	tr.num_draw_surfaces = 0;
 
-	if( e->angles != g_vecZero )
+	if( e->curstate.angles != g_vecZero )
 		tr.modelorg = glm->transform.VectorITransform( RI->vieworg );
 	else
 		tr.modelorg = RI->vieworg - e->origin;
