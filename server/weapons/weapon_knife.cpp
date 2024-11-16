@@ -58,6 +58,7 @@ void CKnife::Precache( void )
 	PRECACHE_SOUND("weapons/cbar_hitbod2.wav");
 	PRECACHE_SOUND("weapons/cbar_hitbod3.wav");
 	PRECACHE_SOUND("weapons/cbar_miss1.wav");
+	PRECACHE_SOUND( "weapons/cbar_uw.wav" ); // "miss" underwater
 }
 
 int CKnife::GetItemInfo(ItemInfo *p)
@@ -104,10 +105,19 @@ void CKnife::PrimaryAttack( void )
 	// and we have a silent swoosh, with visible punchangle and no hit!
 	// update: increased "bullet fire" more to make an easier hit.
 	TraceResult trCenter;
-	UTIL_TraceLine( m_pPlayer->GetGunPosition( ), m_pPlayer->GetGunPosition( ) + gpGlobals->v_forward * 75, dont_ignore_monsters, ENT( m_pPlayer->pev ), &trCenter );
+	Vector tracevec = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 75;
+	UTIL_TraceLine( m_pPlayer->GetGunPosition( ), tracevec, dont_ignore_monsters, ENT( m_pPlayer->pev ), &trCenter );
 	
 	if( trCenter.flFraction >= 1 )
-		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/cbar_miss1.wav", 1, ATTN_NORM, 0, 94 + RANDOM_LONG(0,0xF));
+	{
+		if( m_pPlayer->pev->waterlevel == 3 )
+		{
+			EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/cbar_uw.wav", 1, ATTN_NORM, 0, 94 + RANDOM_LONG( 0, 0xF ) );
+			UTIL_Bubbles( tracevec - Vector( 20, 20, 20 ), tracevec + Vector( 20, 20, 20 ), RANDOM_LONG( 8, 14 ) );
+		}
+		else
+			EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/cbar_miss1.wav", 1, ATTN_NORM, 0, 94 + RANDOM_LONG( 0, 0xF ) );
+	}
 	else
 	{
 		UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
@@ -125,9 +135,18 @@ void CKnife::SecondaryAttack( void )
 	m_pPlayer->pev->punchangle.y = RANDOM_FLOAT( -3, -2 );
 
 	TraceResult tr;
-	UTIL_TraceLine( m_pPlayer->GetGunPosition( ), m_pPlayer->GetGunPosition( ) + gpGlobals->v_forward * 75, dont_ignore_monsters, ENT( m_pPlayer->pev ), &tr );
+	Vector tracevec = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 75;
+	UTIL_TraceLine( m_pPlayer->GetGunPosition( ), tracevec, dont_ignore_monsters, ENT( m_pPlayer->pev ), &tr );
 	if( tr.flFraction >= 1 )
-		EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/cbar_miss1.wav", 1, ATTN_NORM, 0, 94 + RANDOM_LONG(0,0xF));
+	{
+		if( m_pPlayer->pev->waterlevel == 3 )
+		{
+			EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/cbar_uw.wav", 1, ATTN_NORM, 0, 94 + RANDOM_LONG( 0, 0xF ) );
+			UTIL_Bubbles( tracevec - Vector( 20, 20, 20 ), tracevec + Vector( 20, 20, 20 ), RANDOM_LONG( 8, 14 ) );
+		}
+		else
+			EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/cbar_miss1.wav", 1, ATTN_NORM, 0, 94 + RANDOM_LONG( 0, 0xF ) );
+	}
 	else
 	{
 		UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
