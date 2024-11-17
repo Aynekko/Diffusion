@@ -34,6 +34,7 @@ uniform vec4		u_LightParams[7];
 varying vec2		var_TexDiffuse;
 varying vec3		var_LightVec;
 varying vec3		var_Normal;
+varying vec4		var_ViewSpace;
 
 #if defined( GRASS_LIGHT_PROJECTION )
 varying vec4		var_ProjCoord;
@@ -84,4 +85,6 @@ void main( void )
 	// these things are in worldspace and not a normalized
 	var_Normal = -GetNormalForVertex( int( attr_Position.w ));
 	var_LightVec = ( u_LightOrigin.xyz - worldpos.xyz );
+
+	var_ViewSpace = gl_Position;
 }

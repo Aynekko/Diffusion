@@ -20,7 +20,8 @@ uniform vec2		u_TexOffset;
 uniform mat4		u_ModelMatrix;
 
 varying vec2		var_TexCoord;	// for alpha-testing
-varying vec3 var_VertexColor;
+varying vec3		var_VertexColor;
+varying vec4		var_ViewSpace;
 
 void main( void )
 {
@@ -33,4 +34,5 @@ void main( void )
 
 	var_TexCoord = attr_TexCoord0 + u_TexOffset;
 	var_VertexColor = vec3(0.0);
+	var_ViewSpace = gl_Position;
 }

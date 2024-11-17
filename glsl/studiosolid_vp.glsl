@@ -64,6 +64,8 @@ varying vec3		var_WorldNormal;
 varying mat3		var_MatrixTBN;
 #endif
 
+varying vec4		var_ViewSpace;
+
 void main( void )
 {
 	vec4 position = vec4( attr_Position, 1.0 );
@@ -216,4 +218,6 @@ void main( void )
 	var_Position = worldpos.xyz;
 	var_MatrixTBN = tbn;
 #endif
+
+	var_ViewSpace = gl_Position;
 }

@@ -22,6 +22,7 @@ uniform vec4		u_FogParams;
 
 varying vec2	var_TexCoord;
 varying vec3	var_VertexColor;
+varying vec4	var_ViewSpace;
 #if defined( FOG_USE_ALPHA )
 varying float	var_VertexAlpha;
 #endif
@@ -39,8 +40,12 @@ void main( void )
 		#if defined( FOG_USE_ALPHA )
 		diffuse.a *= var_VertexAlpha;
 		#endif
-		float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-		diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
+		// apply global fog
+		float dist = length( var_ViewSpace );
+	//	fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
+		float fogFactor = 1.0 / exp(dist * u_FogParams.w );
+		fogFactor = clamp( fogFactor, 0.0, 1.0 );
+		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}
 	gl_FragColor = diffuse;
 }

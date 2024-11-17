@@ -34,6 +34,7 @@ uniform vec4 u_GrassParams[3];
 varying vec2		var_TexDiffuse;
 varying vec3		var_VertexLight;
 varying vec3		var_ViewVec;
+varying vec4		var_ViewSpace;
 
 void main( void )
 {
@@ -98,4 +99,5 @@ void main( void )
 #endif//GRASS_FULLBRIGHT
 
 	var_ViewVec = ( u_ViewOrigin - worldpos.xyz );
+	var_ViewSpace = gl_Position;
 }

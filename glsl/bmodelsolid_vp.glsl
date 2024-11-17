@@ -48,9 +48,11 @@ varying vec4		var_TexMirror;	// mirror coords
 #endif
 
 #if defined( REFLECTION_CUBEMAP ) || defined( BMODEL_INTERIOR )
-varying vec3	        var_Position;
-varying vec3	        var_WorldNormal;
+varying vec3		var_Position;
+varying vec3		var_WorldNormal;
 #endif
+
+varying vec4		var_ViewSpace;
 
 void main( void )
 {
@@ -116,5 +118,6 @@ void main( void )
 	var_WorldNormal = srcN;
 #endif
 
+	var_ViewSpace = gl_Position;
 	var_MatrixTBN = tbn;
 }

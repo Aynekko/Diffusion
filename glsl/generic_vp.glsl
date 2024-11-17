@@ -17,6 +17,7 @@ varying vec4	var_Vertex;
 varying vec3 	var_Normal;
 varying vec2	var_TexCoord;
 varying vec3	var_VertexColor;
+varying vec4	var_ViewSpace;
 #if defined( FOG_USE_ALPHA )
 varying float	var_VertexAlpha;
 #endif
@@ -33,4 +34,5 @@ void main( void )
 	#endif
 
 	gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
+	var_ViewSpace = gl_Position;
 }

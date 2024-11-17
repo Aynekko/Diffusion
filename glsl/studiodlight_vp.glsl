@@ -52,6 +52,7 @@ varying vec3		var_LightVec;
 varying vec3		var_ViewVec;
 varying vec3		var_Position;
 varying vec3		var_Normal;
+varying vec4		var_ViewSpace;
 
 #if defined( STUDIO_BUMP ) || defined( STUDIO_INTERIOR )
 varying mat3	        var_MatrixTBN;
@@ -136,4 +137,6 @@ void main( void )
 #if defined( STUDIO_BUMP ) || defined( STUDIO_INTERIOR )
 	var_MatrixTBN = tbn;
 #endif
+
+	var_ViewSpace = gl_Position;
 }

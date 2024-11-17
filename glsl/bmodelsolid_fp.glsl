@@ -96,6 +96,8 @@ varying vec3		var_Position;
 varying vec3		var_WorldNormal;
 #endif
 
+varying vec4		var_ViewSpace;
+
 void main( void )
 {
 	vec4 diffuse = vec4( 0.0 );
@@ -337,11 +339,14 @@ void main( void )
 		diffuse.rgb = mix( diffuse.rgb, planar_reflection.rgb, fresnel );
 	#endif
 
+	// apply global fog
 	if( EnableFog )
 	{
-		vec4 FogParams = u_FogParams;
-		fogFactor = saturate( exp2( -FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-		diffuse.rgb = Q_mix( FogParams.xyz, diffuse.rgb, fogFactor );
+		float dist = length( var_ViewSpace );
+	//	fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
+		fogFactor = 1.0 / exp(dist * u_FogParams.w );
+		fogFactor = clamp( fogFactor, 0.0, 1.0 );
+		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}
 
 	vec3 borderSmooth = mix( screenmap, screenmap * WaterColor.rgb, WaterBorderFactor ); // smooth transition between water and ground
@@ -374,8 +379,11 @@ void main( void )
 	// apply global fog
 	if( EnableFog )
 	{
-		fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-		diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
+		float dist = length( var_ViewSpace );
+	//	fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
+		fogFactor = 1.0 / exp(dist * u_FogParams.w );
+		fogFactor = clamp( fogFactor, 0.0, 1.0 );
+		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}
 	
 	gl_FragColor = vec4( diffuse.rgb, diffuse.a * alpha );

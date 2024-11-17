@@ -28,7 +28,8 @@ uniform vec4 u_GrassParams[2];
 #define u_GrassFadeEnd		u_GrassParams[1].z
 
 varying vec2		var_TexCoord;
-varying vec3 var_VertexColor;
+varying vec3		var_VertexColor;
+varying vec4		var_ViewSpace;
 
 void main( void )
 {
@@ -63,4 +64,5 @@ void main( void )
 	var_TexCoord = GetTexCoordsForVertex( int( attr_Position.w ));
 	gl_ClipVertex = gl_ModelViewMatrix * worldpos;
 	var_VertexColor = vec3(0.0);
+	var_ViewSpace = gl_Position;
 }

@@ -41,6 +41,7 @@ varying vec3		var_ViewVec;
 varying vec3		var_Normal;
 varying mat3		var_MatrixTBN;
 varying vec3		var_Position;
+varying vec4		var_ViewSpace;
 
 #if defined( BMODEL_LIGHT_PROJECTION )
 varying vec4		var_ProjCoord;
@@ -93,4 +94,5 @@ void main( void )
 	var_Position = worldpos.xyz;
 #endif
 	var_TexGlobal = attr_TexCoord0.zw;
+	var_ViewSpace = gl_Position;
 }
