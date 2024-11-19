@@ -67,16 +67,16 @@ const float SecurityGeneralCombatWaitTime[] =
 const int AndrewHealth[] =
 {
 	0,
+	2000,
 	2500,
-	3000,
-	3500
+	3000
 };
 
 const float AndrewCombatWaitTime[] =
 {
 	0.0f,
-	0.3f,
-	0.2f,
+	0.5f,
+	0.25f,
 	0.1f
 };
 
@@ -177,12 +177,15 @@ public:
 	bool AndrewDash;
 	float AndrewDashTime;
 	Vector AndrewRespawnPoint[MAX_ANDREW_SPAWNS]; // an array of origins of spawn points (collected on spawn)
-	Vector AndrewEscapePoint; // the origin of an escape point
 	int RespawnPoints; // total number of escape points found
-	bool AndrewHidden; // escaped to remote location
+	bool AndrewSpecialMode; // in recharging mode
 	float AndrewEscapeTime; // next time in the future when he will be able to escape again
-	float AndrewHidingTime; // sets when Andrew is escaped
-	int AccumulatedDamage; // he will try to escape after total damage exceeds this amount, then start over
+	float AccumulatedDamage; // he will try to escape after total damage exceeds this amount, then start over
+	float FireRocketTime;
+	int RocketCount;
+	float SpecialModeHealth;
+	int m_iTrail;
+	void WarpEffect( void );
 };
 
 //=========================================================

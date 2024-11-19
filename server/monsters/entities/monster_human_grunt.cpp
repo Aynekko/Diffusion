@@ -182,12 +182,13 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD( AndrewDash, FIELD_BOOLEAN ),
 	DEFINE_FIELD( AndrewDashTime, FIELD_TIME ),
 	DEFINE_ARRAY( AndrewRespawnPoint, FIELD_VECTOR, MAX_ANDREW_SPAWNS ),
-	DEFINE_FIELD( AndrewEscapePoint, FIELD_VECTOR),
-	DEFINE_FIELD( AndrewHidden, FIELD_BOOLEAN ),
+	DEFINE_FIELD( AndrewSpecialMode, FIELD_BOOLEAN ),
 	DEFINE_FIELD( AndrewEscapeTime, FIELD_TIME ),
 	DEFINE_FIELD( RespawnPoints, FIELD_INTEGER ),
-	DEFINE_FIELD( AndrewHidingTime, FIELD_TIME ),
-	DEFINE_FIELD( AccumulatedDamage, FIELD_INTEGER ),
+	DEFINE_FIELD( FireRocketTime, FIELD_TIME ),
+	DEFINE_FIELD( AccumulatedDamage, FIELD_FLOAT ),
+	DEFINE_FIELD( RocketCount, FIELD_INTEGER ),
+	DEFINE_FIELD( SpecialModeHealth, FIELD_FLOAT ),
 END_DATADESC()
 
 IMPLEMENT_SAVERESTORE(CHGrunt, CSquadMonster);
@@ -1313,6 +1314,12 @@ void CHGrunt :: RunAI( void )
 //=========================================================
 void CHGrunt :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType)
 {
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return;
+	
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return;
+
 	// check for helmet shot
 	if (ptr->iHitgroup == 11)
 	{
@@ -1342,6 +1349,9 @@ void CHGrunt :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecD
 int CHGrunt :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
 	if( HasSpawnFlags(SF_MONSTER_NODAMAGE) )
+		return 0;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 	
 	Forget( bits_MEMORY_INCOVER );
@@ -3230,6 +3240,12 @@ void CHGruntAlien::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector v
 //	if (RANDOM_LONG(0,3) == 0)
 //		UTIL_Ricochet( ptr->vecEndPos, 0.5 );
 
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return;
+
 	UTIL_Sparks ( ptr->vecEndPos );
 
 	switch(RANDOM_LONG(0,4))
@@ -3247,6 +3263,9 @@ void CHGruntAlien::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector v
 int CHGruntAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {		
 	if( HasSpawnFlags(SF_MONSTER_NODAMAGE) )
+		return 0;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 	
 	Forget( bits_MEMORY_INCOVER );
@@ -4494,6 +4513,9 @@ int CHGruntSecurityGeneral::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAt
 	if( HasSpawnFlags(SF_MONSTER_NODAMAGE) )
 		return 0;
 
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return 0;
+
 	Forget(bits_MEMORY_INCOVER);
 	return CSquadMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
@@ -5328,6 +5350,9 @@ int CHGruntSecurity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker,
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return 0;
+
 	Forget(bits_MEMORY_INCOVER);
 	return CSquadMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
 }
@@ -5367,6 +5392,7 @@ public:
 	void Shoot( void );
 	void SetYawSpeed( void );
 	void SetActivity( Activity NewActivity );
+	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 	int IRelationship( CBaseEntity *pTarget );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
@@ -5376,6 +5402,7 @@ public:
 	void CollectPoints( void );
 	void Andrew_Respawn( void );
 	void Andrew_Escape( void );
+	void WarpEffect( void );
 
 	float RegenRemander;
 	float AndrewLastHurt;
@@ -5481,8 +5508,6 @@ void CAndrewGrunt::Spawn()
 
 	pev->renderamt = 255;
 
-	CollectPoints();
-
 	MonsterInit();
 }
 
@@ -5512,6 +5537,11 @@ void CAndrewGrunt::Precache()
 
 	PRECACHE_SOUND( "zombie/claw_miss2.wav" );// because we use the basemonster SWIPE animation event
 
+	PRECACHE_SOUND( "hgrunt/rich_warp.wav" );
+	PRECACHE_SOUND( "hgrunt/rich_rocket.wav" );
+
+	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
+
 	m_voicePitch = 100;
 }
 
@@ -5533,7 +5563,7 @@ void CAndrewGrunt::CollectPoints(void)
 	{
 		if( RespawnPoints > MAX_ANDREW_SPAWNS - 1 ) // fixed limit for now
 		{
-			ALERT( at_aiconsole, "Andrew Grunt found too many respawn points! Max. is %i.\n", MAX_ANDREW_SPAWNS );
+			ALERT( at_aiconsole, "^2Andrew Grunt:^7 found too many spawn points! Max. is %i.\n", MAX_ANDREW_SPAWNS );
 			break;
 		}
 
@@ -5543,21 +5573,7 @@ void CAndrewGrunt::CollectPoints(void)
 		RespawnPoints++;
 	}
 
-	ALERT( at_aiconsole, "Andrew Grunt: found %i respawn points.\n", RespawnPoints );
-	
-	// then find the escape point - can be only one
-	CBaseEntity *pAndrewEscapePoint = NULL;
-	if( (pAndrewEscapePoint = UTIL_FindEntityByClassname( pAndrewEscapePoint, "info_andrew_escape_point" )) != NULL )
-	{
-		AndrewEscapePoint = pAndrewEscapePoint->GetAbsOrigin();
-		UTIL_Remove( pAndrewEscapePoint );
-		ALERT( at_aiconsole, "Andrew Grunt: found the escape point.\n" );
-	}
-	else
-	{
-		ALERT( at_error, "Andrew Grunt couldn't find info_andrew_escape_point, the monster won't function properly!\n" );
-		AndrewEscapePoint = g_vecZero; // just use world center...
-	}
+	ALERT( at_aiconsole, "^2Andrew Grunt^7: found %i spawn points.\n", RespawnPoints );
 }
 
 void CAndrewGrunt::SetActivity( Activity NewActivity )
@@ -5566,9 +5582,7 @@ void CAndrewGrunt::SetActivity( Activity NewActivity )
 	void *pmodel = GET_MODEL_PTR( ENT( pev ) );
 
 	// reset renderfx with new activity
-	pev->rendermode = kRenderNormal;
 	pev->renderfx = 0;
-	pev->renderamt = 255;
 
 	switch( NewActivity )
 	{
@@ -5587,9 +5601,7 @@ void CAndrewGrunt::SetActivity( Activity NewActivity )
 		{
 			iSequence = LookupSequence( "runfast" );
 			AndrewDashTime = gpGlobals->time;
-			pev->rendermode = kRenderTransTexture;
 			pev->renderfx = kRenderFxGlowShell;
-			pev->renderamt = 100;
 		}
 		else
 			iSequence = LookupActivity( NewActivity );
@@ -5641,7 +5653,7 @@ void CAndrewGrunt::Shoot( void )
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT( 40, 90 ) + gpGlobals->v_up * RANDOM_FLOAT( 75, 200 ) + gpGlobals->v_forward * RANDOM_FLOAT( -40, 40 );
 	EjectBrass( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_556, TE_BOUNCE_SHELL );
-	FireBullets( 1, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_10DEGREES : VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 7 ); // 7 dmg per bullet
+	FireBullets( 1, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_10DEGREES : VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 4 ); // 4 dmg per bullet
 
 	pev->effects |= EF_MUZZLEFLASH;
 
@@ -5651,11 +5663,94 @@ void CAndrewGrunt::Shoot( void )
 	SetBlending( 0, -angDir.x );
 }
 
+//===================================================================
+// env_warpball copypaste with changes
+//===================================================================
+void CAndrewGrunt::WarpEffect( void )
+{
+	int iTimes = 0;
+	int iDrawn = 0;
+	TraceResult tr;
+	Vector vecDest;
+	CBeam *pBeam;
+	Vector vecOrigin = Center();
+
+	EMIT_SOUND( edict(), CHAN_BODY, "hgrunt/rich_warp.wav", 1, 0.1 );
+	UTIL_ScreenShake( vecOrigin, 6, 160, 1.0, 666 );
+	CSprite *pSpr = CSprite::SpriteCreate( "sprites/Fexplo1.spr", vecOrigin, TRUE );
+	pSpr->AnimateAndDie( 18 );
+	pSpr->SetTransparency( kRenderGlow, 77, 210, 130, 255, kRenderFxNoDissipation );
+	pSpr->SetScale( 2.0f );
+	int iBeams = RANDOM_LONG( 20, 40 );
+	while( iDrawn < iBeams && iTimes < (iBeams * 3) )
+	{
+		vecDest = 300 * (Vector( RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ), RANDOM_FLOAT( -1, 1 ) ).Normalize());
+		UTIL_TraceLine( vecOrigin, vecOrigin + vecDest, ignore_monsters, NULL, &tr );
+		if( tr.flFraction != 1.0 )
+		{
+			// we hit something.
+			iDrawn++;
+			pBeam = CBeam::BeamCreate( "sprites/lgtning.spr", 200 );
+			pBeam->PointsInit( vecOrigin, tr.vecEndPos );
+			if( RANDOM_LONG(0,100) > 80 ) // chance for red beam
+				pBeam->SetColor( 255, 25, 25 );
+			else // shades of blue-ish
+			{
+				pBeam->pev->rendercolor.x = 90;
+				pBeam->pev->rendercolor.y = RANDOM_LONG( 110, 140 );
+				pBeam->pev->rendercolor.z = 240;
+			}
+			pBeam->SetNoise( 65 );
+			pBeam->SetBrightness( 220 );
+			pBeam->SetWidth( 15 );
+			pBeam->SetScrollRate( 35 );
+			pBeam->SetThink( &CBeam::SUB_Remove );
+			pBeam->pev->nextthink = gpGlobals->time + RANDOM_FLOAT( 0.5, 1.6 );
+		}
+		iTimes++;
+	}
+
+	Vector LightOrg = Center();
+	MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, LightOrg );
+	WRITE_BYTE( TE_DLIGHT );
+	WRITE_COORD( LightOrg.x );		// origin
+	WRITE_COORD( LightOrg.y );
+	WRITE_COORD( LightOrg.z );
+	WRITE_BYTE( 35 );	// radius
+	WRITE_BYTE( 150 );	// R
+	WRITE_BYTE( 220 );	// G
+	WRITE_BYTE( 230 );	// B
+	WRITE_BYTE( 10 );	// life * 10
+	WRITE_BYTE( 25 ); // decay
+	WRITE_BYTE( 125 ); // brightness
+	WRITE_BYTE( 0 ); // shadows
+	MESSAGE_END();
+}
+
 void CAndrewGrunt::RunAI( void )
 {
-	float RegenRate = 0.5;
-	if( AndrewHidden == true )
-		RegenRate = 0.85;
+	float RegenRate;
+
+	if( AndrewSpecialMode )
+	{
+		switch( g_iSkillLevel )
+		{
+		default:
+		case SKILL_EASY: RegenRate = 0.4f; break;
+		case SKILL_MEDIUM: RegenRate = 0.5f; break;
+		case SKILL_HARD: RegenRate = 0.6f; break;
+		}
+	}
+	else
+	{
+		switch( g_iSkillLevel )
+		{
+		default:
+		case SKILL_EASY: RegenRate = 0.1f; break;
+		case SKILL_MEDIUM: RegenRate = 0.15f; break;
+		case SKILL_HARD: RegenRate = 0.2f; break;
+		}
+	}
 	
 	if( pev->health < pev->max_health && IsAlive() )
 	{
@@ -5671,6 +5766,68 @@ void CAndrewGrunt::RunAI( void )
 		}
 	}
 
+	static int cnt = 0;
+	cnt++;
+	if( cnt > 50 )
+	{
+		ALERT( at_aiconsole, "hp = %i, SM = %i\n", (int)pev->health, (int)AndrewSpecialMode );
+		cnt = 0;
+	}
+
+	if( AndrewSpecialMode ) // do not run monster AI when in this mode
+	{
+		pev->sequence = 16; // loop crouching_idle
+		pev->framerate = 0.5;
+		pev->renderfx = kRenderFxGlowShell;
+
+		// fire the rockets
+		if( FireRocketTime > 0 && gpGlobals->time > FireRocketTime )
+		{
+			Vector vecTarget = m_hEnemy->GetAbsOrigin() + m_hEnemy->pev->velocity + m_hEnemy->pev->basevelocity;
+			// make sure player is not too close
+			float dist = (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length();
+			if( dist > 500 )
+			{
+				Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, gSkillData.hgruntGrenadeSpeed, 0.5 );
+				if( vecToss != g_vecZero )
+				{
+					EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/rich_rocket.wav", 1.0, 0.1 );
+					UTIL_MakeVectors( GetAbsAngles() );
+					CBaseEntity *pRocket = CGrenade::ShootContact( pev, Center() - gpGlobals->v_forward * 4, vecToss );
+					if( pRocket )
+					{
+						// rocket trail
+						MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+
+						WRITE_BYTE( TE_BEAMFOLLOW );
+						WRITE_SHORT( pRocket->entindex() );	// entity
+						WRITE_SHORT( m_iTrail );	// model
+						WRITE_BYTE( 15 ); // life
+						WRITE_BYTE( 5 );  // width
+						WRITE_BYTE( 224 );   // r, g, b
+						WRITE_BYTE( 224 );   // r, g, b
+						WRITE_BYTE( 255 );   // r, g, b
+						WRITE_BYTE( 255 );	// brightness
+
+						MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
+					}
+					RocketCount++;
+					FireRocketTime = gpGlobals->time + 0.5f;
+
+					if( RocketCount >= 5 )
+						FireRocketTime = 0; // max 5 rockets
+				}
+			}
+		}
+
+		// restored to full health, back to fight! (wth is player doing?)
+		// (or the shield is broken)
+		if( SpecialModeHealth <= 0 || pev->health >= pev->max_health )
+			Andrew_Respawn();
+
+		return;
+	}
+
 	if( AccumulatedDamage > ACCUMULATED_DMG_THRESHOLD )
 	{
 		if( IsAlive() && ( gpGlobals->time > AndrewEscapeTime ))
@@ -5680,10 +5837,46 @@ void CAndrewGrunt::RunAI( void )
 		AccumulatedDamage = 0;
 	}
 
-	if( (AndrewHidden == true) && (gpGlobals->time > AndrewHidingTime + 10) )
-		Andrew_Respawn();
-
 	CBaseMonster::RunAI();
+}
+
+void CAndrewGrunt::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
+{
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return;
+
+	if( AndrewSpecialMode )
+	{
+		switch( RANDOM_LONG( 0, 4 ) )
+		{
+		case 0: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit1.wav", 1, ATTN_NORM ); break;
+		case 1: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit2.wav", 1, ATTN_NORM ); break;
+		case 2: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit3.wav", 1, ATTN_NORM ); break;
+		case 3: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit4.wav", 1, ATTN_NORM ); break;
+		case 4: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit5.wav", 1, ATTN_NORM ); break;
+		}
+
+		Vector LightOrg = Center();
+		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, LightOrg );
+		WRITE_BYTE( TE_DLIGHT );
+		WRITE_COORD( LightOrg.x );		// origin
+		WRITE_COORD( LightOrg.y );
+		WRITE_COORD( LightOrg.z );
+		WRITE_BYTE( 25 );	// radius
+		WRITE_BYTE( 255 );	// R
+		WRITE_BYTE( 25 );	// G
+		WRITE_BYTE( 25 );	// B
+		WRITE_BYTE( 10 );	// life * 10
+		WRITE_BYTE( 50 ); // decay
+		WRITE_BYTE( 150 ); // brightness
+		WRITE_BYTE( 0 ); // shadows
+		MESSAGE_END();
+	}
+
+	CSquadMonster::TraceAttack( pevAttacker, flDamage, vecDir, ptr, bitsDamageType );
 }
 
 int CAndrewGrunt::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
@@ -5691,16 +5884,35 @@ int CAndrewGrunt::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	if( HasSpawnFlags(SF_MONSTER_NODAMAGE) )
 		return 0;
 
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return 0;
+
+	bitsDamageType |= DMG_NEVERGIB;
+
 	if( pev->health < pev->max_health )
 		AndrewLastHurt = gpGlobals->time;
 
-	AccumulatedDamage += (int)flDamage;
+	if( AndrewSpecialMode )
+		SpecialModeHealth -= flDamage; // decrease "virtual health" of the shield - when it breaks, he goes back to fight
+	else
+		AccumulatedDamage += flDamage;
+
 	Forget( bits_MEMORY_INCOVER );
+
 	return CSquadMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 }
 
 int CAndrewGrunt::IRelationship( CBaseEntity *pTarget )
 {
+	CBaseMonster *pMonster = (CBaseMonster *)pTarget;
+
+	// pay attention to player at most times, ignore his drone
+	if( pMonster->IsPlayer() )
+	{
+		if( pMonster->Classify() != Classify() )
+			return R_NM;
+	}
+
 	return CSquadMonster::IRelationship( pTarget );
 }
 
@@ -5716,7 +5928,7 @@ void CAndrewGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 	case HGRUNT_AE_RELOAD:
 	{
-		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/gr_reload_mp5.wav", 1, ATTN_NORM );
+		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/gr_reload_mp5.wav", 1, 0.5 );
 		m_cAmmoLoaded = m_cClipSize;
 		ClearConditions( bits_COND_NO_AMMO_LOADED );
 	}
@@ -5724,7 +5936,7 @@ void CAndrewGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 	case HGRUNT_AE_GREN_LAUNCH:
 	{
-		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "weapons/glauncher.wav", 0.8, ATTN_NORM );
+		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "weapons/glauncher.wav", 0.8, 0.5 );
 		CGrenade::ShootContact( pev, GetGunPosition(), m_vecTossVelocity );
 		m_fThrowGrenade = FALSE;
 		if( g_iSkillLevel == SKILL_HARD )
@@ -5738,11 +5950,7 @@ void CAndrewGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 	{
 		Shoot();
 
-		// the first round of the three round burst plays the sound and puts a sound in the world sound list.
-		if( RANDOM_LONG( 0, 1 ) )
-			EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/gr_mgun1.wav", 1, ATTN_NORM );
-		else
-			EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/gr_mgun2.wav", 1, ATTN_NORM );
+		PlayClientSound( this, 252, 0, (m_cAmmoLoaded <= 15 ? m_cAmmoLoaded : 0), Center() );
 
 		CSoundEnt::InsertSound( bits_SOUND_COMBAT, GetAbsOrigin(), 1024, 0.3, ENTINDEX(edict()) );
 	}
@@ -5835,12 +6043,6 @@ Schedule_t *CAndrewGrunt::GetSchedule( void )
 				{
 					SENTENCEG_PlayRndSz( ENT( pev ), "HG_GREN", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
 					JustSpoke();
-				}
-
-				if( gpGlobals->time > AndrewEscapeTime )
-				{
-					Andrew_Escape();
-					return GetScheduleOfType( SCHED_FAIL ); // just need something to return
 				}
 
 				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
@@ -6162,12 +6364,62 @@ Schedule_t *CAndrewGrunt::GetScheduleOfType( int Type )
 
 //=================================================================================
 // Andrew_Escape: teleport away in an attempt to escape from player's grenade, or after taking too much damage.
+// Fire the rockets, start recharging health, and make glowshell
 //=================================================================================
 void CAndrewGrunt::Andrew_Escape(void)
 {
-	Teleport( &AndrewEscapePoint, &GetAbsAngles(), &g_vecZero );
-	AndrewHidden = true;
-	AndrewHidingTime = gpGlobals->time;
+	if( RespawnPoints == 0 )
+		CollectPoints();
+	
+	int Tries = 0; // to prevent a possible loop, when all points are close to player (wtf?)
+
+	// check if the player is too close to this point. if so, choose another
+	edict_t *pPlayer = INDEXENT( 1 );
+	Vector PlayerOrigin = pPlayer->v.origin;
+
+ChooseAnEscapePoint:
+	int RandomPointNum = RANDOM_LONG( 0, RespawnPoints - 1 );
+
+	if( RespawnPoints == 0 )
+	{
+		ALERT( at_aiconsole, "^2Andrew Grunt:^7 ERROR: no spawn points, choosing origin!\n" );
+		AndrewRespawnPoint[RandomPointNum] = GetAbsOrigin();
+	}
+	else if( Tries > 10 ) // too many tries - just choose any point
+	{
+		RandomPointNum = RANDOM_LONG( 0, RespawnPoints - 1 );
+	}
+	else if( (PlayerOrigin - AndrewRespawnPoint[RandomPointNum]).Length() < 1250 ) // need far distance
+	{
+		ALERT( at_aiconsole, "^2Andrew Grunt:^7 spawn point %i is too close to the player, choosing another...\n", RandomPointNum );
+		Tries++;
+		goto ChooseAnEscapePoint;
+	}
+
+	// create a warp beam between starting and ending locations
+	CBeam *pBeam = CBeam::BeamCreate( "sprites/lgtning.spr", 200 );
+	pBeam->PointsInit( Center(), AndrewRespawnPoint[RandomPointNum] );
+	pBeam->pev->rendercolor.x = 90;
+	pBeam->pev->rendercolor.y = RANDOM_LONG( 110, 140 );
+	pBeam->pev->rendercolor.z = 240;
+	pBeam->SetNoise( 20 );
+	pBeam->SetBrightness( 255 );
+	pBeam->SetWidth( 50 );
+	pBeam->SetScrollRate( 35 );
+	pBeam->SetThink( &CBeam::SUB_Remove );
+	pBeam->pev->nextthink = gpGlobals->time + 2.0;
+
+	// now teleport
+	WarpEffect();
+	pev->velocity = g_vecZero;
+	ClearSchedule();
+	Teleport( &AndrewRespawnPoint[RandomPointNum], &GetAbsAngles(), &g_vecZero );
+	AndrewSpecialMode = true;
+	SpecialModeHealth = 150;
+	FireRocketTime = gpGlobals->time + 2;
+	RocketCount = 0;
+	AccumulatedDamage = 0;
+	pev->renderfx = kRenderFxGlowShell;
 }
 
 //=================================================================================
@@ -6185,28 +6437,47 @@ ChooseAPoint:
 	Vector PlayerOrigin = pPlayer->v.origin;
 
 	// too many tries or spawn points were never collected
-	if( Tries > 10 || (RespawnPoints == 0) )
+	if( RespawnPoints == 0 )
 	{
-		// enough! just put him on the player's head!
-		PlayerOrigin.z += 100;
-		Teleport( &PlayerOrigin, &GetAbsAngles(), &g_vecZero );
-		ALERT( at_error, "Andrew Grunt: unable to choose a spawn point, all are busy!\n" );
-		AndrewHidden = false;
-		AndrewEscapeTime = gpGlobals->time + 20;
-		return;
+		ALERT( at_aiconsole, "^2Andrew Grunt:^7 ERROR: no spawn points, choosing origin!\n" );
+		AndrewRespawnPoint[RandomPointNum] = GetAbsOrigin();
 	}
-
-	// FIXME probably should have used "find entity in sphere" but this is faster and probably suffice
-	if( (PlayerOrigin - AndrewRespawnPoint[RandomPointNum]).Length() < 500 )
+	else if( Tries > 10 )  // too many tries - just choose any point
 	{
-		ALERT( at_aiconsole, "Andrew Grunt: spawn point %i is too close to the player, choosing another...\n", RandomPointNum );
+		RandomPointNum = RANDOM_LONG( 0, RespawnPoints - 1 );
+	}
+	else if( (PlayerOrigin - AndrewRespawnPoint[RandomPointNum]).Length() < 750 )
+	{
+		ALERT( at_aiconsole, "^2Andrew Grunt:^7 spawn point %i is too close to the player, choosing another...\n", RandomPointNum );
 		Tries++;
 		goto ChooseAPoint;
 	}
+
+	// create a warp beam between starting and ending locations
+	CBeam *pBeam = CBeam::BeamCreate( "sprites/lgtning.spr", 200 );
+	pBeam->PointsInit( Center(), AndrewRespawnPoint[RandomPointNum] );
+	pBeam->pev->rendercolor.x = 90;
+	pBeam->pev->rendercolor.y = RANDOM_LONG( 110, 140 );
+	pBeam->pev->rendercolor.z = 240;
+	pBeam->SetNoise( 20 );
+	pBeam->SetBrightness( 255 );
+	pBeam->SetWidth( 50 );
+	pBeam->SetScrollRate( 35 );
+	pBeam->SetThink( &CBeam::SUB_Remove );
+	pBeam->pev->nextthink = gpGlobals->time + 2.0;
 	
+	// now teleport
+	WarpEffect();
 	Teleport( &AndrewRespawnPoint[RandomPointNum], &GetAbsAngles(), &g_vecZero );
-	AndrewHidden = false;
+	AndrewSpecialMode = false;
 	AndrewEscapeTime = gpGlobals->time + 20; // when the next escape attempt happens
+	RocketCount = 0;
+	FireRocketTime = 0;
+	SpecialModeHealth = 0;
+	AccumulatedDamage = 0;
+
+	pev->rendermode = kRenderNormal;
+	pev->renderfx = 0;
 }
 
 
@@ -6214,25 +6485,6 @@ ChooseAPoint:
 
 
 
-
-
-//=================================================================================
-// CAndrewEscapePoint: dummy entity where Andrew will teleport to safety (i.e. a room out of the map) - can be only one
-//=================================================================================
-class CAndrewEscapePoint : public CPointEntity
-{
-	DECLARE_CLASS( CAndrewEscapePoint, CPointEntity );
-public:
-	void Spawn( void );
-};
-
-LINK_ENTITY_TO_CLASS( info_andrew_escape_point, CAndrewEscapePoint );
-
-void CAndrewEscapePoint::Spawn( void )
-{
-	pev->solid = SOLID_NOT;
-	SetBits( m_iFlags, MF_POINTENTITY );
-}
 
 //=================================================================================
 // CAndrewSpawnPoint: dummy entity where Andrew will spawn again (a few different points in the battlefield)

@@ -151,7 +151,11 @@ void CCrossbowBolt::PlayTouchSound( CBaseEntity *pOther )
 {
 	if( pOther->HasSpawnFlags(SF_MONSTER_NODAMAGE) )
 		return;
-	
+
+	// !!! always assumed that bolt belongs to player.
+	if( pOther->HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) )
+		return;
+
 	// FIXME this is not looking good
 	if( !pOther->pev->takedamage || FClassnameIs(pOther->pev, "monster_alice") || FClassnameIs(pOther->pev, "_playerdrone") || FClassnameIs( pOther->pev, "_playersentry" ) )
 		return;

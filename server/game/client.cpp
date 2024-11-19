@@ -2084,7 +2084,8 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 
 	// This non-player entity is being moved by the game .dll and not the physics simulation system
 	//  make sure that we interpolate it's position on the client if it moves
-	if( !player && ent->v.animtime && ent->v.velocity == g_vecZero && pEntity->m_hParent == NULL )
+	// diffusion - added check for player control. When the drone is stationary, it messes up the mouse movement.
+	if( !player && !pEntity->HasFlag( F_PLAYER_CONTROL ) && ent->v.animtime && ent->v.velocity == g_vecZero && pEntity->m_hParent == NULL )
 		state->eflags |= EFLAG_SLERP;
 
 	if( FClassnameIs( &ent->v, "info_intermission" ))

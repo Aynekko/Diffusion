@@ -959,4 +959,7 @@ const Vector2D sunflower[50] =
 	Vector2D( -0.510, -0.477 ),
 };
 
+#define DRONE_MAX_HEALTH 200
+#define DRONE_MAX_AMMO 250
+
 #endif//CONST_H

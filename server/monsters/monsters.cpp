@@ -573,12 +573,12 @@ void CBaseMonster :: MonsterThink ( void )
 	
 	if( HasSpawnFlags( SF_MONSTER_ASLEEP ) || ai_disable.value )
 		return;
-
+	
 	float flInterval = StudioFrameAdvance( ); // animate
 	DispatchAnimEvents( flInterval );
-
+	
 	RunAI();
-
+	
 	// start or end a fidget
 	// This needs a better home -- switching animations over time should be encapsulated on a per-activity basis
 	// perhaps MaintainActivity() or a ShiftAnimationOverTime() or something.

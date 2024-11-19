@@ -1801,6 +1801,12 @@ void SecAssAlien::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector ve
 //	if (RANDOM_LONG(0,3) == 0)
 //		UTIL_Ricochet( ptr->vecEndPos, 0.5 );
 
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return;
+
 	UTIL_Sparks ( ptr->vecEndPos );
 
 	switch(RANDOM_LONG(0,4))
@@ -1818,6 +1824,9 @@ void SecAssAlien::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector ve
 int SecAssAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return 0;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 
 	if( pevInflictor->owner == edict() )

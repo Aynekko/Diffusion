@@ -209,6 +209,9 @@ bool CStudioModelRenderer::StudioSetEntity( cl_entity_t *pEnt )
 	if( !pEnt || !pEnt->model || pEnt->model->type != mod_studio )
 		return false;
 
+	if( tr.pDrone && pEnt == tr.pDrone && RP_NORMALPASS() && GET_ENTITY( RI->viewentity ) == tr.pDrone )
+		return false;
+
 	m_pCurrentEntity = RI->currententity = pEnt;
 	SET_CURRENT_ENTITY( m_pCurrentEntity );
 	m_pPlayerInfo = NULL;
@@ -2414,6 +2417,11 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 	{
 		// can't use curstate for origin because camera falls behind in spectate
 		origin = m_pCurrentEntity->origin;
+	}
+	else if( tr.pDrone && m_pCurrentEntity == tr.pDrone && GET_ENTITY( RI->viewentity ) == tr.pDrone )
+	{
+		// diffusion - do not rotate drone pitch when in first person
+		angles[PITCH] = 0;
 	}
 
 	Vector scale = Vector( 1.0f, 1.0f, 1.0f );

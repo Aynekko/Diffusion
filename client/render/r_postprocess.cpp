@@ -1235,7 +1235,7 @@ void DroneScreenShader( void )
 	if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_PLAYERUSINGCAMERA )
 		return;
 
-	float out_amount = 1.5f - (gHUD.m_DroneBars.DroneHealth / 500.0f);
+	float out_amount = 1.5f - (gHUD.m_DroneBars.DroneHealth / (float)DRONE_MAX_HEALTH);
 
 	// capture screen
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
@@ -1267,12 +1267,14 @@ void HeatDistortionShader( void )
 			return;
 	}
 
+	float angle = fabs( tr.viewparams.viewangles.x );
+
 	// do not allow this effect if we look too much up or down
-	if( (tr.viewparams.viewangles.x < -45) || (tr.viewparams.viewangles.x > 45) )
+	if( angle > 45 )
 		return;
 
 	// otherwise scale it
-	float scale = 1.0f - (fabs(tr.viewparams.viewangles.x) / 45.0f);
+	float scale = 1.0f - (angle / 45.0f);
 	
 	// capture screen
 	GL_Bind( GL_TEXTURE0, tr.screen_color );

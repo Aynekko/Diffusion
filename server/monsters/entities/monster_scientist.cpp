@@ -833,6 +833,9 @@ int CScientist :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	if( HasSpawnFlags(SF_MONSTER_NODAMAGE) )
 		return 0;
 
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return 0;
+
 	if ( pevInflictor && pevInflictor->flags & FL_CLIENT )
 	{
 		Remember( bits_MEMORY_PROVOKED );
@@ -1236,6 +1239,9 @@ void CDeadScientist :: Spawn( )
 int CDeadScientist :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType)
 {
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return 0;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 
 	return CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);

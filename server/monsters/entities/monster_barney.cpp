@@ -693,6 +693,9 @@ int CBarney :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 {
 	if( HasSpawnFlags(SF_MONSTER_NODAMAGE))
 		return 0;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return 0;
 	
 	// make sure friends talk about it if player hurts talkmonsters...
 	int ret = CTalkMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
@@ -1293,38 +1296,36 @@ int CAlice :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float
 	
 	if (pevAttacker->flags & FL_CLIENT) // player can't hurt Alice!
 		return 0;
-	else
-	{	
-		if( bitsDamageType & DMG_BLAST )
-		{
-			if( g_iSkillLevel == SKILL_EASY ) // immunity (almost) from explosion damage in easy mode
-				flDamage *= 0.01;
-			else if( g_iSkillLevel == SKILL_MEDIUM ) // half-dmg from explosions in medium mode
-				flDamage *= 0.5;
-		}
 
-		if( g_iSkillLevel == SKILL_EASY )  // some chance that incoming damage will be almost nullified
-		{
-			switch( RANDOM_LONG( 0, 3 ) )
-			{
-			case 0: flDamage *= 0.01; break;
-			}
-		}
-		else if( g_iSkillLevel == SKILL_MEDIUM )  // some chance that incoming damage will be halved
-		{
-			switch( RANDOM_LONG( 0, 3 ) )
-			{
-			case 0: flDamage *= 0.5; break;
-			}
-		}
-
-		int ret = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
-
-		if ( !IsAlive() || pev->deadflag == DEAD_DYING )
-			return ret;
-
-		return ret;
+	if( bitsDamageType & DMG_BLAST )
+	{
+		if( g_iSkillLevel == SKILL_EASY ) // immunity (almost) from explosion damage in easy mode
+			flDamage *= 0.01;
+		else if( g_iSkillLevel == SKILL_MEDIUM ) // half-dmg from explosions in medium mode
+			flDamage *= 0.5;
 	}
+
+	if( g_iSkillLevel == SKILL_EASY )  // some chance that incoming damage will be almost nullified
+	{
+		switch( RANDOM_LONG( 0, 3 ) )
+		{
+		case 0: flDamage *= 0.01; break;
+		}
+	}
+	else if( g_iSkillLevel == SKILL_MEDIUM )  // some chance that incoming damage will be halved
+	{
+		switch( RANDOM_LONG( 0, 3 ) )
+		{
+		case 0: flDamage *= 0.5; break;
+		}
+	}
+
+	int ret = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, flDamage, bitsDamageType);
+
+	if ( !IsAlive() || pev->deadflag == DEAD_DYING )
+		return ret;
+
+	return ret;
 }
 
 void CAlice :: RunAI(void) // health regeneration

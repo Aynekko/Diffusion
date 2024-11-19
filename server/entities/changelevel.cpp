@@ -259,7 +259,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 	if( pPlayerx )
 	{
 		pPlayerx->DroneHealth = 0;
-		pPlayerx->DroneAmmo = 500;
+		pPlayerx->DroneAmmo = DRONE_MAX_AMMO;
 		if( pPlayerx->m_hDrone != NULL )
 		{
 			UTIL_Remove( pPlayerx->m_hDrone );

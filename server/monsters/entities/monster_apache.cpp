@@ -966,6 +966,9 @@ int CApache :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return 0;
+
 	if (bitsDamageType & DMG_BLAST)
 		flDamage *= 2;
 

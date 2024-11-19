@@ -451,6 +451,13 @@ Schedule_t	slGargSwipe[] =
 	},
 };
 
+const int BigRoboHealth[] =
+{
+	0,
+	2000,
+	2500,
+	3000
+};
 
 
 DEFINE_CUSTOM_SCHEDULES( CGargantua )
@@ -477,14 +484,7 @@ void CGargantua :: Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= DONT_BLEED;
 	if( !pev->health )
-	{
-		if( g_iSkillLevel == 1 )
-			pev->health = 2000;
-		else if( g_iSkillLevel == 2 )
-			pev->health = 2500;
-		else
-			pev->health = 3000;
-	}
+		pev->health = BigRoboHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	//pev->view_ofs		= Vector ( 0, 0, 96 );// taken from mdl file
 	m_flFieldOfView = VIEW_FIELD_WIDE;// width of forward view cone ( as a dotproduct result )
@@ -575,14 +575,14 @@ void CGargantua :: Precache()
 
 void CGargantua :: RunAI( void )
 {	
-	if( (IsShooting == true) && (gpGlobals->time > ShootStartTime + 4) )
+	if( IsShooting && (gpGlobals->time > ShootStartTime + 5) )
 	{
 		IsShooting = false;
-		ShootTime = gpGlobals->time + 2;
+		ShootTime = gpGlobals->time + 1;
 		ShootStartTime = 0;
 	}
 
-	if( IsAlive() && (pev->health <= pev->max_health / 5) )
+	if( IsAlive() && (pev->health <= pev->max_health * 0.2f) )
 	{
 		if( gpGlobals->time > LastSparkTime )
 		{
@@ -590,7 +590,7 @@ void CGargantua :: RunAI( void )
 			LastSparkTime = gpGlobals->time + RANDOM_FLOAT(0.5,2.5);
 		}
 
-		if( LastWarningSound == false )
+		if( !LastWarningSound )
 		{
 			EMIT_SOUND( edict(), CHAN_STATIC, "robo/warning2.wav", 1, ATTN_NORM );
 			LastWarningSound = true;
@@ -605,7 +605,7 @@ void CGargantua :: ShootBullets ( void )
 	if (m_hEnemy == NULL)
 		return;
 
-	if( IsShooting == false )
+	if( !IsShooting )
 	{
 		ShootStartTime = gpGlobals->time;
 		IsShooting = true;
@@ -921,7 +921,7 @@ BOOL CGargantua::CheckRangeAttack2( float flDot, float flDist )
 {
 	if( gpGlobals->time > ShootTime )
 	{
-		if (flDot >= 0.8 && flDist < 2048)
+		if (flDot >= 0.8 && flDist < 4096)
 		{
 			if( flDist > GARG_ATTACKDIST )
 				return TRUE;
@@ -941,7 +941,7 @@ BOOL CGargantua::CheckRangeAttack1( float flDot, float flDist )
 {
 	if ( gpGlobals->time > m_seeTime )
 	{
-		if (flDot >= 0.7 && flDist > GARG_ATTACKDIST + 200)
+		if (flDot >= 0.7 && flDist > GARG_ATTACKDIST + 400)
 			return TRUE;
 	}
 

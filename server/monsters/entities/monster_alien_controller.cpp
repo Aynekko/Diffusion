@@ -2675,7 +2675,22 @@ void CDrone :: RunTask ( Task_t *pTask )
 							MESSAGE_END();
 						}
 						else
-							EMIT_SOUND( edict(), CHAN_WEAPON, "drone/drone_emptyclip.wav", 1, ATTN_NORM );
+						{
+							// EMIT_SOUND( edict(), CHAN_WEAPON, "drone/drone_emptyclip.wav", 1, ATTN_NORM );
+							// retrieve the drone instead, if ammo is out...
+							if( pPlayerOwner )
+							{
+								// "retrieve" the drone (give the new one, technically)
+								pPlayerOwner->DroneHealth = pev->health;
+								pPlayerOwner->DroneAmmo = 0;
+								pPlayerOwner->DroneDeployed = false;
+								pPlayerOwner->GiveAmmo( 1, "drone", 1 );
+								DontThink();
+								m_fInCombat = FALSE;
+								UTIL_Remove( this );
+								return;
+							}
+						}
 					}
 
 					m_flShootTime += 0.1;
@@ -2941,6 +2956,9 @@ void CDrone::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir,
 {
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return;
 	
 	if( pev->owner )
 	{
@@ -2960,12 +2978,19 @@ int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 {
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return 0;
 	
 	if( pev->owner )
 	{
 		if( (pevAttacker->flags & FL_CLIENT) && (VARS( pev->owner ) == pevAttacker) )
 			return 0;
 	}
+
+	// Andrew can kill the player's drone fast
+	if( HasFlag( F_PLAYER_DRONE ) && FClassnameIs( pevAttacker, "monster_andrew_grunt" ) )
+		flDamage *= 3.0f;
 	
 	// HACK HACK -- until we fix this.
 	if ( IsAlive() )
@@ -3589,6 +3614,9 @@ void CDroneAlien::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector ve
 {
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return;
 	
 	if (RANDOM_LONG(0,3) == 0)
 		UTIL_Ricochet( ptr->vecEndPos, 1.0 );
@@ -3601,6 +3629,9 @@ void CDroneAlien::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector ve
 int CDroneAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return 0;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 	
 	// HACK HACK -- until we fix this.
@@ -4243,6 +4274,9 @@ void CAlienShip::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 {
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+		return;
 	
 	if (RANDOM_LONG(0,3) == 0)
 		UTIL_Ricochet( ptr->vecEndPos, 1.0 );
@@ -4255,6 +4289,9 @@ void CAlienShip::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 int CAlienShip::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return 0;
+
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 
 	// HACK HACK -- until we fix this.

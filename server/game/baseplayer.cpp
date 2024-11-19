@@ -4391,13 +4391,13 @@ void CBasePlayer::PostThink()
 	if( m_hDrone == NULL )
 	{
 		// regenerate drone hp and ammo when it's not active
-		if( DroneHealth < 500 )
+		if( DroneHealth < DRONE_MAX_HEALTH )
 			DroneHealth += 5 * gpGlobals->frametime;
 		// ammo regenerating speed depends on health
-		if( DroneAmmo < 500 )
+		if( DroneAmmo < DRONE_MAX_AMMO )
 			DroneAmmo += DroneHealth * 0.1f * gpGlobals->frametime;
-		DroneHealth = bound( 0, DroneHealth, 500 );
-		DroneAmmo = bound( 1, DroneAmmo, 500 );
+		DroneHealth = bound( 0, DroneHealth, DRONE_MAX_HEALTH );
+		DroneAmmo = bound( 1, DroneAmmo, DRONE_MAX_AMMO );
 	//	ALERT( at_console, "hp %f ammo %f\n", DroneHealth, DroneAmmo );
 	}
 
@@ -5235,8 +5235,8 @@ void CBasePlayer::Spawn( void )
 	IsShowingObjective = false;
 
 	CanUseDrone = false; // drone can be used only in special zones defined by game
-	DroneHealth = 500;
-	DroneAmmo = 500;
+	DroneHealth = DRONE_MAX_HEALTH;
+	DroneAmmo = DRONE_MAX_AMMO;
 	DroneDistance = 0;
 	CameraEntity[0] = '\0';
 
@@ -5284,8 +5284,8 @@ void CBasePlayer::Spawn( void )
 	RefreshScore();
 
 	DroneColor = Vector( 255, 255, 255 );
-	DroneAmmo = 500;
-	DroneHealth = 500;
+	DroneAmmo = DRONE_MAX_AMMO;
+	DroneHealth = DRONE_MAX_HEALTH;
 
 	CreateFlashlightMonster();
 }

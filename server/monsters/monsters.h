@@ -57,6 +57,7 @@
 #define	SF_MONSTER_NOFOLLOW				BIT(12)	// diffusion - following not available
 #define SF_MONSTER_DONTFORGET			BIT(13)	// diffusion - don't forget the enemy
 #define SF_MONSTER_ASLEEP				BIT(14) // diffusion - monster doesn't run its logic to save CPU (I use pre-spawned monsters on my maps and they are sitting idle in the box)
+#define	SF_MONSTER_NOPLAYERDAMAGE		BIT(15)	// diffusion - ignore damage from player only
 #define SF_MONSTER_FALL_TO_GROUND		0x80000000
 
 // specialty spawnflags

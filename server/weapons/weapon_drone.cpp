@@ -343,7 +343,7 @@ void CWpnDrone::PrimaryAttack( void )
 			// see CBaseMonster :: RunAI for details
 			pDrone->pev->effects |= EF_MERGE_VISIBILITY;
 			pDrone->pev->health = DroneHealth;
-			pDrone->pev->max_health = 500;
+			pDrone->pev->max_health = DRONE_MAX_HEALTH;
 			pDrone->m_iCounter = DroneAmmo;
 			pDrone->pev->iuser3 = -662; // a flag so we can render drone's camera in viewmodel screen
 			pDrone->pev->rendercolor = m_pPlayer->DroneColor; // apply custom color

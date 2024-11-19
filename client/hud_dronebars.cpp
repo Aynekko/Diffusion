@@ -71,7 +71,7 @@ int CHudDroneBars::Draw( float flTime )
 	b = 0;
 	SPR_Set( m_hBarHealth, r, g, b );
 	temp_rect = *m_prc_barhealth;
-	offset = bar_height * (1.0f - (DroneHealth / 500.0f));
+	offset = bar_height * (1.0f - (DroneHealth / (float)DRONE_MAX_HEALTH ) );
 	if( offset >= 128 ) offset = 127;
 	temp_rect.top += offset;
 	SPR_DrawAdditive( 0, x, y + offset, &temp_rect );
@@ -84,7 +84,7 @@ int CHudDroneBars::Draw( float flTime )
 	x = default_x + 24;
 	SPR_Set( m_hBarAmmo, r, g, b );
 	temp_rect = *m_prc_barammo;
-	offset = bar_height * (1.0f - (DroneAmmo / 500.0f));
+	offset = bar_height * (1.0f - (DroneAmmo / (float)DRONE_MAX_AMMO ) );
 	if( offset >= 128 ) offset = 127;
 	temp_rect.top += offset;
 	SPR_DrawAdditive( 0, x, y + offset, &temp_rect );

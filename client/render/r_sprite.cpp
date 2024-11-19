@@ -618,6 +618,18 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	if( tr.nullmodelindex > 0 && m_pCurrentEntity->curstate.modelindex == tr.nullmodelindex )
 		return;
 
+	// diffusion - check for drone sprite and don't draw it from first person view
+	if( m_pCurrentEntity->curstate.movetype == MOVETYPE_FOLLOW )
+	{
+		cl_entity_t *parent = NULL;
+
+		if( m_pCurrentEntity->curstate.aiment > 0 )
+			parent = GET_ENTITY( m_pCurrentEntity->curstate.aiment );
+
+		if( parent && tr.pDrone && parent == tr.pDrone && RP_NORMALPASS() && GET_ENTITY( RI->viewentity ) == tr.pDrone )
+			return;
+	}
+
 	m_pSpriteHeader = (msprite_t *)Mod_Extradata( m_pRenderModel );
 
 	float scale = m_pCurrentEntity->curstate.scale;
