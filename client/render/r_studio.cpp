@@ -3984,6 +3984,9 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 		IEngineStudio.StudioDynamicLight( ent, &lighting );
 		r_dynamic->value = dynamic;
 
+		if( gl_sunshafts_adaptive->value > 0 && RP_NORMALPASS() && (ent == GET_VIEWMODEL() || UTIL_IsLocal( ent->index )) )
+			gHUD.player_lighting = lighting.ambientlight + lighting.shadelight;
+
 		// diffusion - here's the thing with this half-life lighting
 		// ambient and shade seem to be too dark if taken from the floor, compared to those takes from the sunlight, which seem to be absolutely fine (???)
 		// so I want to make them brighter, in the floor case only, but how to determine if we took the lighting from the floor?

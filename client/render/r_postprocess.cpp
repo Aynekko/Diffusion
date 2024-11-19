@@ -271,7 +271,7 @@ void RenderSunShafts( void )
 	if( gHUD.Weather_Intensity > 0.99f )
 		return;
 
-	float Brightness = 0.0f; // don't worry, shader sets to 1.0 in this case
+	float Brightness = 1.0f;
 
 	if( tr.shader_modifier != NULL ) // mapper set custom settings
 	{
@@ -280,15 +280,26 @@ void RenderSunShafts( void )
 			return; // mapper disabled this shader in the modifier
 	}
 
-	float OverriddenBrightness = 1.0f;
-	if( gl_sunshafts_brightness->value > 0 )
+	if( gl_sunshafts_brightness->value > 0.0f )
 	{
-		OverriddenBrightness = gl_sunshafts_brightness->value;
-		if( Brightness == 0.0f )
-			Brightness = 1.0f;
+		// scale the brightness on this particular map
+		Brightness *= gl_sunshafts_brightness->value;
 	}
 
 	float ScaledWeatherBrightness = 1.0f - gHUD.Weather_Intensity;
+	Brightness *= ScaledWeatherBrightness;
+
+	// another multiplier...sigh
+	if( gl_sunshafts_adaptive->value > 0 && RP_NORMALPASS() && gHUD.player_lighting > 0.0f )
+	{
+		float PlayerLightingMultiplier = 1.5f * (1.0f - (gHUD.player_lighting / 320.0f));
+		PlayerLightingMultiplier *= PlayerLightingMultiplier;
+		PlayerLightingMultiplier += 0.75f;
+		static float mul = 0.0f;
+		mul = lerp( mul, PlayerLightingMultiplier, g_fFrametime * 3.f );
+		Brightness *= mul;
+	//	gEngfuncs.Con_NPrintf( 1, "PlayerLightingMultiplier %f, total %f\n", mul, Brightness );
+	}
 
 	float blur = gl_sunshafts_blur->value;
 	float zFar = Q_max( 256.0f, RI->farClip );
@@ -364,7 +375,7 @@ void RenderSunShafts( void )
 
 	Vector4D sunshafts_params[2];
 	// light origin + brightness
-	sunshafts_params[0] = Vector4D( view.x / glState.width, view.y / glState.height, view.z, Brightness * OverriddenBrightness * ScaledWeatherBrightness );
+	sunshafts_params[0] = Vector4D( view.x / glState.width, view.y / glState.height, view.z, Brightness );
 	// light diffuse
 	sunshafts_params[1] = Vector4D( skyColor.x, skyColor.y, skyColor.z, 0.0f );
 	pglUniform4fvARB( RI->currentshader->u_Sunshafts, 2, &sunshafts_params[0][0] );

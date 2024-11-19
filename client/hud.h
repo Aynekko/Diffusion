@@ -1082,6 +1082,8 @@ public:
 	bool emptyclipspawned[TOTAL_WEAPONS];
 
 	char m_szServerName[96];
+
+	float player_lighting;
 };
 
 extern CHud	gHUD;

@@ -44,7 +44,6 @@ void main( void )
 	sunVec *= 0.1 * u_LightOrigin.z;
 
 	float Brightness = u_Brightness;
-	if( Brightness <= 0 ) Brightness = 1.0;
 
 	vec4 accum = texture2D( u_ColorMap, tc );
 	float fShaftsMask = saturate( 1.00001 - accum.w );

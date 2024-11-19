@@ -142,6 +142,7 @@ cvar_t *cl_showdamage;
 cvar_t *gl_sunshafts;
 cvar_t *gl_sunshafts_blur;
 cvar_t *gl_sunshafts_brightness;
+cvar_t *gl_sunshafts_adaptive;
 cvar_t *gl_ssao;
 cvar_t *gl_ssao_debug;
 cvar_t *gl_tonemap;
@@ -317,7 +318,7 @@ void V_Init( void )
 	cl_muzzlelight = CVAR_REGISTER( "cl_muzzlelight", "1", FCVAR_ARCHIVE );
 	cl_showmsgs = CVAR_REGISTER( "cl_showmsgs", "0", FCVAR_ARCHIVE );
 	cl_viewmodelblend = CVAR_REGISTER( "cl_viewmodelblend", "0", FCVAR_ARCHIVE );
-	cl_viewmodel_extras = CVAR_REGISTER( "cl_viewmodel_extras", "1.0", FCVAR_ARCHIVE );
+	cl_viewmodel_extras = CVAR_REGISTER( "cl_viewmodel_extras", "0.5", FCVAR_ARCHIVE );
 	cl_viewmodel_offset_x = CVAR_REGISTER( "cl_viewmodel_offset_x", "0", FCVAR_ARCHIVE );
 	cl_viewmodel_offset_y = CVAR_REGISTER( "cl_viewmodel_offset_y", "0", FCVAR_ARCHIVE );
 	cl_viewmodel_offset_z = CVAR_REGISTER( "cl_viewmodel_offset_z", "0", FCVAR_ARCHIVE );
@@ -391,6 +392,7 @@ void V_Init( void )
 	gl_sunshafts = CVAR_REGISTER( "gl_sunshafts", "1", FCVAR_ARCHIVE );
 	gl_sunshafts_blur = CVAR_REGISTER( "gl_sunshafts_blur", "0.15", FCVAR_ARCHIVE );
 	gl_sunshafts_brightness = CVAR_REGISTER( "gl_sunshafts_brightness", "0", FCVAR_ARCHIVE );
+	gl_sunshafts_adaptive = CVAR_REGISTER( "gl_sunshafts_adaptive", "0", FCVAR_ARCHIVE );
 	gl_ssao = CVAR_REGISTER( "gl_ssao", "1", FCVAR_ARCHIVE );
 	gl_ssao_debug = CVAR_REGISTER( "gl_ssao_debug", "0", FCVAR_CHEAT );
 	gl_tonemap = CVAR_REGISTER( "gl_tonemap", "0", FCVAR_ARCHIVE );

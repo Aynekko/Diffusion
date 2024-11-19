@@ -73,6 +73,7 @@ extern cvar_t *r_blur_strength;
 extern cvar_t *gl_sunshafts;
 extern cvar_t *gl_sunshafts_blur;
 extern cvar_t *gl_sunshafts_brightness;
+extern cvar_t *gl_sunshafts_adaptive;
 extern cvar_t *gl_ssao;
 extern cvar_t *gl_ssao_debug;
 extern cvar_t *gl_tonemap;
