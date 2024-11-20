@@ -5394,6 +5394,7 @@ public:
 	void SetActivity( Activity NewActivity );
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+	void Killed( entvars_t *pevAttacker, int iGib );
 	int IRelationship( CBaseEntity *pTarget );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	Schedule_t *GetSchedule( void );
@@ -6368,6 +6369,9 @@ Schedule_t *CAndrewGrunt::GetScheduleOfType( int Type )
 //=================================================================================
 void CAndrewGrunt::Andrew_Escape(void)
 {
+	if( !IsAlive() )
+		return;
+	
 	if( RespawnPoints == 0 )
 		CollectPoints();
 	
@@ -6427,6 +6431,9 @@ ChooseAnEscapePoint:
 //=================================================================================
 void CAndrewGrunt::Andrew_Respawn( void )
 {
+	if( !IsAlive() )
+		return;
+
 	int Tries = 0; // to prevent a possible loop, when all points are close to player (wtf?)
 
 ChooseAPoint:	
@@ -6480,6 +6487,18 @@ ChooseAPoint:
 	pev->renderfx = 0;
 }
 
+void CAndrewGrunt::Killed( entvars_t *pevAttacker, int iGib )
+{
+	AndrewSpecialMode = false;
+	AccumulatedDamage = 0;
+	RocketCount = 0;
+	FireRocketTime = 0;
+	SpecialModeHealth = 0;
+	pev->rendermode = kRenderNormal;
+	pev->renderfx = 0;
+
+	CSquadMonster::Killed( pevAttacker, iGib );
+}
 
 
 

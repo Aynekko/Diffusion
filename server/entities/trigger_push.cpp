@@ -71,7 +71,7 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 	if( pOther->IsProjectile() ) // diffusion - don't affect projectiles
 		return;
 
-	if( HasSpawnFlags( SF_TRIG_PUSH_CLIENTSONLY ) && !pOther->IsPlayer() )
+	if( HasSpawnFlags( SF_TRIG_PUSH_CLIENTSONLY ) && !pOther->IsPlayer() && !pOther->HasFlag(F_PLAYER_CONTROL) ) // also include player's drone
 		return;
 
 	// UNDONE: Is there a better way than health to detect things that have physics? (clients/monsters)

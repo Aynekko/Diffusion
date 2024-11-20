@@ -21,6 +21,8 @@ GNU General Public License for more details.
 #include "r_view.h"
 #include "r_cvars.h"
 #include "pm_movevars.h"
+#include "entity_types.h"
+#include "event_api.h"
 
 #define MIRROR_PLANE_EPSILON		32.0f	// g-cont. tune this by taste
 
@@ -817,14 +819,10 @@ static void R_RenderDroneView( void )
 
 	if( !screen_static.Initialized() )
 		screen_static.Init( "textures/anim_noise/noise" );
-	
-	// don't bother if the drone is not selected at all
-	if( gHUD.m_Ammo.WeaponID != WEAPON_DRONE )
-		return;
 
 	// reset drone pointer
 	tr.pDrone = NULL;
-	
+
 	for( int i = 0; i < tr.num_subview_entities; i++ )
 	{
 		RI->currententity = tr.subview_entities[i];
@@ -838,6 +836,37 @@ static void R_RenderDroneView( void )
 			}
 		}
 	}
+
+	if( tr.pDrone && tr.time != tr.oldtime )
+	{
+		float dist_to_drone = (tr.pDrone->curstate.origin - RI->vieworg).Length();
+		if( dist_to_drone > 500 )
+		{
+			TEMPENTITY *pTemp;
+			int modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/glow01.spr" );
+			if( pTemp = gEngfuncs.pEfxAPI->CL_TempEntAllocHigh( (float *)&tr.pDrone->curstate.origin, IEngineStudio.GetModelByIndex( modelIndex ) ) )
+			{
+				int val = bound( 500, dist_to_drone, 1000 );
+				val = RemapVal( val, 500, 1000, 0, 255 );
+				pTemp->entity.curstate.rendermode = kRenderConstantGlow;
+				pTemp->entity.curstate.renderamt = val * 0.5;
+				pTemp->entity.curstate.renderfx = kRenderFxNoDissipation;
+				pTemp->entity.curstate.rendercolor.r = 25;
+				pTemp->entity.curstate.rendercolor.g = 255;
+				pTemp->entity.curstate.rendercolor.b = 25;
+				pTemp->die = tr.time; // die at next frame
+				pTemp->entity.curstate.scale = (val * 2.0f) / 255.0f;
+				pTemp->entity.curstate.aiment = tr.pDrone->index;
+				pTemp->entity.curstate.movetype = MOVETYPE_FOLLOW;
+
+				gEngfuncs.CL_CreateVisibleEntity( ET_TEMPENTITY, &pTemp->entity );
+			}
+		}
+	}
+	
+	// don't bother if the drone is not selected at all
+	if( gHUD.m_Ammo.WeaponID != WEAPON_DRONE )
+		return;
 
 	// advance noise when drone is absent
 	if( screen_static.Initialized() )
