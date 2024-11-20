@@ -23,6 +23,7 @@ GNU General Public License for more details.
 #include "r_view.h"
 #include "r_cvars.h"
 #include "r_world.h"
+#include "triangleapi.h"
 
 void AngleMatrix( const Vector &angles, matrix3x4 &matrix )
 {
@@ -268,6 +269,9 @@ void RenderSunShafts( void )
 	if( !CheckShader( glsl.genSunShafts ) || !CheckShader( glsl.drawSunShafts ) || !CheckShader( glsl.blurShader ) )
 		return;
 
+	if( !tr.bSkySurfFound )
+		return;
+
 	if( gHUD.Weather_Intensity > 0.99f )
 		return;
 
@@ -288,18 +292,6 @@ void RenderSunShafts( void )
 
 	float ScaledWeatherBrightness = 1.0f - gHUD.Weather_Intensity;
 	Brightness *= ScaledWeatherBrightness;
-
-	// another multiplier...sigh
-	if( gl_sunshafts_adaptive->value > 0 && RP_NORMALPASS() && gHUD.player_lighting > 0.0f )
-	{
-		float PlayerLightingMultiplier = 1.5f * (1.0f - (gHUD.player_lighting / 320.0f));
-		PlayerLightingMultiplier *= PlayerLightingMultiplier;
-		PlayerLightingMultiplier += 0.75f;
-		static float mul = 0.0f;
-		mul = lerp( mul, PlayerLightingMultiplier, g_fFrametime * 3.f );
-		Brightness *= mul;
-	//	gEngfuncs.Con_NPrintf( 1, "PlayerLightingMultiplier %f, total %f\n", mul, Brightness );
-	}
 
 	float blur = gl_sunshafts_blur->value;
 	float zFar = Q_max( 256.0f, RI->farClip );
@@ -324,6 +316,33 @@ void RenderSunShafts( void )
 	view.z = DotProduct( -skyVec, RI->vforward );
 
 	if( view.z < 0.01f ) return; // fade out
+
+	// another multiplier...sigh
+	if( gl_sunshafts_adaptive->value > 0 && RP_NORMALPASS() )
+	{
+		static float next_light_update = 0;
+		static float lighting = 1.0f;
+		if( next_light_update > tr.time + 0.25f )
+			next_light_update = 0;
+		if( tr.time > next_light_update )
+		{
+
+			Vector light;
+			gEngfuncs.pTriAPI->LightAtPoint( RI->vieworg, light );
+			light *= (1.0f / 255.0f);
+			// gather dynamic lighting
+		//	light += R_LightsForPoint( RI->vieworg, 256 );
+			lighting = light.Length();
+			next_light_update = tr.time + 0.2f;
+		}
+		float PlayerLightingMultiplier = 1.5f * (1.0f - lighting);
+		PlayerLightingMultiplier *= PlayerLightingMultiplier;
+		PlayerLightingMultiplier += 0.75f;
+		static float mul = 0.0f;
+		mul = lerp( mul, PlayerLightingMultiplier, g_fFrametime * 3.f );
+		Brightness *= mul;
+	//	gEngfuncs.Con_NPrintf( 1, "PlayerLightingMultiplier %f, total %f\n", mul, Brightness );
+	}
 
 	// request screen color
 	GL_Bind( GL_TEXTURE1, tr.screen_color );
