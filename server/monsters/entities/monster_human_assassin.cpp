@@ -104,6 +104,7 @@ public:
 	void IdleSound ( void );
 	void SetActivity(Activity NewActivity);
 	void ClearEffects(void);
+	BOOL HasHumanGibs( void ) { return TRUE; };
 	CUSTOM_SCHEDULES;
 
 	DECLARE_DATADESC();
@@ -779,7 +780,8 @@ void CHAssassin :: Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= BLOOD_COLOR_RED;
 	pev->effects		= 0;
-	if (!pev->health) pev->health	= RANDOM_LONG(80,85);
+	if (!pev->health) pev->health = 80;
+	pev->max_health = pev->health;
 	m_flFieldOfView		= VIEW_FIELD_WIDE; // indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_afCapability		= bits_CAP_MELEE_ATTACK1 | bits_CAP_DOORS_GROUP;
@@ -1350,7 +1352,8 @@ void SecAss :: Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= BLOOD_COLOR_RED;
 	pev->effects		= 0;
-	if (!pev->health) pev->health	= RANDOM_LONG(120,125);
+	if (!pev->health) pev->health = 95;
+	pev->max_health = pev->health;
 	m_flFieldOfView		= VIEW_FIELD_WIDE; // indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 	m_afCapability		= bits_CAP_MELEE_ATTACK1 | bits_CAP_DOORS_GROUP;

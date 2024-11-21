@@ -44,6 +44,7 @@ int gmsgStatusValue = 0;
 int gmsgSpectator = 0;
 int gmsgWeaponAnim = 0;
 int gmsgHealthbars = 0;
+int gmsgHealthbarCenter = 0;
 int gmsgCodeInput = 0;
 int gmsgPuzzle = 0;
 // g-cont. begin custom Xash messages
@@ -113,6 +114,7 @@ void LinkUserMessages( void )
 	gmsgSpectator = REG_USER_MSG( "Spectator", 2 );	// sends observer status on entering and exiting observer mode (it is not used in client dll)
 	gmsgWeaponAnim = REG_USER_MSG( "WeaponAnim", 3 );
 	gmsgHealthbars = REG_USER_MSG( "Healthbars", -1 );
+	gmsgHealthbarCenter = REG_USER_MSG( "HealthbarCenter", -1 );
 	gmsgCodeInput = REG_USER_MSG( "CodeInput", -1 );
 	gmsgPuzzle = REG_USER_MSG( "Puzzle", -1 );
 

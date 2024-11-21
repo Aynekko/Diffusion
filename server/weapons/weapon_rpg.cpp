@@ -473,6 +473,14 @@ BEGIN_DATADESC( CRoboRocket2 )
 	DEFINE_FUNCTION( RocketExplode ),
 END_DATADESC()
 
+const int RoboRocketDamage[] = 
+{
+	0,
+	30,
+	40,
+	50,
+};
+
 void CRoboRocket2 :: Spawn( void )
 {
 	Precache( );
@@ -498,12 +506,7 @@ void CRoboRocket2 :: Spawn( void )
 
 	SetNextThink( 0.4 );
 
-	if( g_iSkillLevel == SKILL_EASY )
-		pev->dmg = 25;
-	else if( g_iSkillLevel == SKILL_MEDIUM )
-		pev->dmg = 40;
-	else if( g_iSkillLevel == SKILL_HARD )
-		pev->dmg = 50;
+	pev->dmg = RoboRocketDamage[g_iSkillLevel];
 
 	if( pev->owner )
 	{
@@ -692,6 +695,7 @@ void CRoboRocket2 :: FollowThink( void  )
 	vecTarget = gpGlobals->v_forward;
 	flMax = 4096;
 	
+	/* disable auto-following
 	if (m_hEnemy != NULL)
 	{
 		Vector vecEnemyOrigin = m_hEnemy->GetAbsOrigin();
@@ -715,7 +719,7 @@ void CRoboRocket2 :: FollowThink( void  )
 				vecTarget = vecDir;
 			}
 		}
-	}
+	}*/
 
 	SetLocalAngles( UTIL_VecToAngles( vecTarget ));
 

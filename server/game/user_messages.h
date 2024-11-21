@@ -41,6 +41,7 @@ extern int gmsgStatusValue;
 extern int gmsgSpectator;
 extern int gmsgWeaponAnim;
 extern int gmsgHealthbars;
+extern int gmsgHealthbarCenter;
 extern int gmsgCodeInput;
 extern int gmsgPuzzle;
 // g-cont. begin custom Xash messages

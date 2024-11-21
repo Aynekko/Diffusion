@@ -104,6 +104,7 @@ public:
 	void SetActivity(Activity NewActivity);
 	void StartTask(Task_t *pTask);
 	void RunTask(Task_t *pTask);
+	BOOL HasHumanGibs( void ) { return TRUE; };
 
 	bool BodyTurn( const Vector &vecTarget );
 	bool RunningShooting; // if true, we are firing bullets while running
@@ -186,6 +187,10 @@ public:
 	float SpecialModeHealth;
 	int m_iTrail;
 	void WarpEffect( void );
+	float DifficultyScaler;
+	float ScaleDifficultyTime;
+	bool AndrewHealthbar; // don't save
+	int cached_hp; // don't save
 };
 
 //=========================================================

@@ -695,8 +695,8 @@ void CGargantua::RocketAttack(void)
 	
 	if (pRocket)
 	{
-		if( m_hEnemy != NULL )
-			pRocket->m_hEnemy = m_hEnemy;
+	//	if( m_hEnemy != NULL ) // disable auto-following, it's too hard!
+	//		pRocket->m_hEnemy = m_hEnemy;
 		pRocket->SetAbsVelocity( GetAbsVelocity() + gpGlobals->v_forward * 100 );
 	}
 

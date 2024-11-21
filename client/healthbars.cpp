@@ -14,10 +14,12 @@ barsize:
 */
 
 DECLARE_MESSAGE( m_Healthbars, Healthbars );
+DECLARE_MESSAGE( m_Healthbars, HealthbarCenter );
 
 int CHealthbars::Init( void )
 {
 	HOOK_MESSAGE( Healthbars );
+	HOOK_MESSAGE( HealthbarCenter );
 	gHUD.AddHudElem( this );
 	return 1;
 }
@@ -32,6 +34,8 @@ int CHealthbars::VidInit( void )
 	m_prc_full = &gHUD.GetSpriteRect( bar_fullh );
 	m_iBarWidth = m_prc_full->right - m_prc_full->left;
 	entindex = 0;
+	m_iFlags |= HUD_ACTIVE;
+	MonsterName[0] = '\0';
 	
 	return 1;
 }
@@ -46,14 +50,6 @@ int CHealthbars::MsgFunc_Healthbars( const char *pszName, int iSize, void *pbuf 
 
 	END_READ();
 
-	if( entindex == 0 )
-	{
-		m_iFlags &= ~HUD_ACTIVE;
-		return 1;
-	}
-	else
-		m_iFlags |= HUD_ACTIVE;
-
 	if( barsize > 2 )
 	{
 		bCentered = true;
@@ -65,15 +61,93 @@ int CHealthbars::MsgFunc_Healthbars( const char *pszName, int iSize, void *pbuf 
 	return 1;
 }
 
+int CHealthbars::MsgFunc_HealthbarCenter( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pszName, pbuf, iSize );
+
+	health_center = READ_BYTE(); // %
+	if( health_center == 255 )
+		MonsterName[0] = '\0';
+	else
+		sprintf_s( MonsterName, READ_STRING() );
+
+	END_READ();
+
+	return 1;
+}
+
+void CHealthbars::DrawCentralBar( void )
+{
+	if( MonsterName[0] == '\0' )
+		return;
+
+	// 600 width, 30 height
+
+	int tex_background = LOAD_TEXTURE( "sprites/healthbar5.dds", NULL, 0, 0 );
+	int tex_bar = LOAD_TEXTURE( "sprites/healthbar6.dds", NULL, 0, 0 );
+
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+
+	// draw the background texture
+	gEngfuncs.pTriAPI->Color4f( 0.275f, 0.663f, 1.0f, 1.0f ); // 70 169 255
+	GL_SelectTexture( 0 );
+	GL_Bind( 0, tex_background );
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	float x_start = ScreenWidth * 0.5f;
+	float y_start = ScreenHeight * 0.125f;
+	DrawQuad( x_start - 300, y_start - 15, x_start + 300, y_start + 15 );
+	gEngfuncs.pTriAPI->End();
+
+	// draw the red health bar on top
+	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f ); // red is baked into texture for now
+	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
+	GL_SelectTexture( 0 );
+	GL_Bind( 0, tex_bar );
+
+	float hp = bound( 0, health_center, 100 );
+	float newwidth = 300 * (hp / 100.0f) * 2; // no idea how but it works
+	float xmin = x_start - 300;
+	float ymin = y_start - 15;
+	float xmax = x_start - 300 + newwidth;
+	float ymax = y_start + 15;
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	// top left
+	gEngfuncs.pTriAPI->TexCoord2f( 0, 0 ); gEngfuncs.pTriAPI->Vertex3f( xmin, ymin, 0 );
+	// bottom left
+	gEngfuncs.pTriAPI->TexCoord2f( 0, 1 ); gEngfuncs.pTriAPI->Vertex3f( xmin, ymax, 0 );
+	// bottom right
+	gEngfuncs.pTriAPI->TexCoord2f( (hp / 100.0f), 1 ); gEngfuncs.pTriAPI->Vertex3f( xmax, ymax, 0 );
+	// top right
+	gEngfuncs.pTriAPI->TexCoord2f( (hp / 100.0f), 0 ); gEngfuncs.pTriAPI->Vertex3f( xmax, ymin, 0 );
+	gEngfuncs.pTriAPI->End();
+
+	// draw the name above the bar
+	const char *buf;
+
+	// calculate width to align center...
+	buf = MonsterName;
+	int width = 0;
+	while( *buf )
+	{
+		unsigned char c = *buf;
+		width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+		buf++;
+	}
+
+	DrawString( (int)((ScreenWidth - width) * 0.5f), (ScreenHeight * 0.125f) - 15 - (gHUD.m_scrinfo.iCharHeight * 1.25f), MonsterName, 255, 255, 255 );
+}
+
 int CHealthbars::Draw( float flTime )
 {	
+	if( tr.time == tr.oldtime ) // not in paused
+		return 1;
+
+	DrawCentralBar(); // it is drawn regardless of healthbars cvar
+	
 	if( !cl_showhealthbars->value )
 		return 1;
 	
 	if( entindex == 0 )
-		return 1;
-
-	if( tr.time == tr.oldtime ) // not in paused
 		return 1;
 
 	if( CVAR_TO_BOOL( ui_is_active ) )

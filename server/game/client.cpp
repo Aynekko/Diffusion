@@ -912,6 +912,15 @@ void ClientCommand( edict_t *pEntity )
 		if( Cheats && CMD_ARGC() > 1 )
 			pPlayer->CanUseDrone = (Q_atoi( CMD_ARGV(1) ) > 0);
 	}
+	else if( FIStrEq( pcmd, "blastability" ) )
+	{
+		if( Cheats && CMD_ARGC() > 1 )
+		{
+			int level = bound( 0, Q_atoi( CMD_ARGV( 1 ) ), 3 );
+			pPlayer->BlastAbilityLVL = level;
+			pPlayer->BlastChargesReady = level;
+		}
+	}
 	else if ( FIStrEq(pcmd, "spectate"))
 	{
 		if (!(g_pGameRules->IsMultiplayer()))

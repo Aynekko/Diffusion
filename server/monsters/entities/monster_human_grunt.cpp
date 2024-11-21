@@ -189,6 +189,8 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD( AccumulatedDamage, FIELD_FLOAT ),
 	DEFINE_FIELD( RocketCount, FIELD_INTEGER ),
 	DEFINE_FIELD( SpecialModeHealth, FIELD_FLOAT ),
+	DEFINE_FIELD( DifficultyScaler, FIELD_FLOAT ),
+	DEFINE_FIELD( ScaleDifficultyTime, FIELD_TIME ),
 END_DATADESC()
 
 IMPLEMENT_SAVERESTORE(CHGrunt, CSquadMonster);
@@ -5405,7 +5407,6 @@ public:
 	void Andrew_Escape( void );
 	void WarpEffect( void );
 
-	float RegenRemander;
 	float AndrewLastHurt;
 };
 
@@ -5508,6 +5509,9 @@ void CAndrewGrunt::Spawn()
 	SetFlag( F_MONSTER_CANT_LOSE_ENEMY );
 
 	pev->renderamt = 255;
+
+	DifficultyScaler = 1.0f;
+	ScaleDifficultyTime = 0;
 
 	MonsterInit();
 }
@@ -5730,112 +5734,142 @@ void CAndrewGrunt::WarpEffect( void )
 
 void CAndrewGrunt::RunAI( void )
 {
-	float RegenRate;
+	if( !HasMemory( bits_MEMORY_KILLED ) ) // fully alive, not dying
+	{
+		float RegenRate; // added health per second
 
-	if( AndrewSpecialMode )
-	{
-		switch( g_iSkillLevel )
+		if( m_MonsterState == MONSTERSTATE_COMBAT )
 		{
-		default:
-		case SKILL_EASY: RegenRate = 0.4f; break;
-		case SKILL_MEDIUM: RegenRate = 0.5f; break;
-		case SKILL_HARD: RegenRate = 0.6f; break;
-		}
-	}
-	else
-	{
-		switch( g_iSkillLevel )
-		{
-		default:
-		case SKILL_EASY: RegenRate = 0.1f; break;
-		case SKILL_MEDIUM: RegenRate = 0.15f; break;
-		case SKILL_HARD: RegenRate = 0.2f; break;
-		}
-	}
-	
-	if( pev->health < pev->max_health && IsAlive() )
-	{
-		if( gpGlobals->time > AndrewLastHurt + 2 )
-		{
-			RegenRemander += RegenRate;
+			// enable difficulty scaler only once in combat
+			if( ScaleDifficultyTime == 0 )
+				ScaleDifficultyTime = gpGlobals->time + 30;
 
-			if( RegenRemander >= 1 )
+			if( !AndrewHealthbar )
 			{
-				TakeHealth( RegenRemander, DMG_GENERIC );
-				RegenRemander = 0;
+				cached_hp = (int)((pev->health / pev->max_health) * 100);
+				MESSAGE_BEGIN( MSG_ALL, gmsgHealthbarCenter, NULL );
+				WRITE_BYTE( cached_hp ); // hp in percents
+				WRITE_STRING( "Andrew Rich" );
+				MESSAGE_END();
+
+				AndrewHealthbar = true;
 			}
 		}
-	}
 
-	static int cnt = 0;
-	cnt++;
-	if( cnt > 50 )
-	{
-		ALERT( at_aiconsole, "hp = %i, SM = %i\n", (int)pev->health, (int)AndrewSpecialMode );
-		cnt = 0;
-	}
-
-	if( AndrewSpecialMode ) // do not run monster AI when in this mode
-	{
-		pev->sequence = 16; // loop crouching_idle
-		pev->framerate = 0.5;
-		pev->renderfx = kRenderFxGlowShell;
-
-		// fire the rockets
-		if( FireRocketTime > 0 && gpGlobals->time > FireRocketTime )
+		if( AndrewHealthbar )
 		{
-			Vector vecTarget = m_hEnemy->GetAbsOrigin() + m_hEnemy->pev->velocity + m_hEnemy->pev->basevelocity;
-			// make sure player is not too close
-			float dist = (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length();
-			if( dist > 500 )
+			int new_hp = (int)((pev->health / pev->max_health) * 100);
+			if( new_hp != cached_hp )
 			{
-				Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, gSkillData.hgruntGrenadeSpeed, 0.5 );
-				if( vecToss != g_vecZero )
+				MESSAGE_BEGIN( MSG_ALL, gmsgHealthbarCenter, NULL );
+				WRITE_BYTE( new_hp ); // hp in percents
+				WRITE_STRING( "Andrew Rich" );
+				MESSAGE_END();
+				cached_hp = new_hp;
+				ALERT( at_console, "sending %i percent, current scaler %.2f\n", new_hp, DifficultyScaler );
+			}
+		}
+
+		// every minute, decrease the regeneration rate, to prevent endless fights
+		if( ScaleDifficultyTime > 0 && gpGlobals->time > ScaleDifficultyTime )
+		{
+			if( DifficultyScaler > 0.1f )
+				DifficultyScaler -= 0.1f;
+
+			ScaleDifficultyTime = gpGlobals->time + 60;
+		}
+
+		if( AndrewSpecialMode )
+		{
+			switch( g_iSkillLevel )
+			{
+			default:
+			case SKILL_EASY: RegenRate = 40 * DifficultyScaler; break;
+			case SKILL_MEDIUM: RegenRate = 50 * DifficultyScaler; break;
+			case SKILL_HARD: RegenRate = 60 * DifficultyScaler; break;
+			}
+		}
+		else
+		{
+			switch( g_iSkillLevel )
+			{
+			default:
+			case SKILL_EASY: RegenRate = 20 * DifficultyScaler; break;
+			case SKILL_MEDIUM: RegenRate = 25 * DifficultyScaler; break;
+			case SKILL_HARD: RegenRate = 30 * DifficultyScaler; break;
+			}
+		}
+
+		if( pev->health < pev->max_health && (pev->deadflag == DEAD_NO) )
+		{
+			if( AndrewSpecialMode || gpGlobals->time > AndrewLastHurt + 3 )
+			{
+				TakeHealth( RegenRate * gpGlobals->frametime, DMG_GENERIC );
+			}
+		}
+
+		if( AndrewSpecialMode ) // do not run monster AI when in this mode
+		{
+			pev->sequence = 16; // loop crouching_idle
+			pev->framerate = 0.5;
+			pev->renderfx = kRenderFxGlowShell;
+
+			// fire the rockets
+			if( FireRocketTime > 0 && gpGlobals->time > FireRocketTime )
+			{
+				Vector vecTarget = m_hEnemy->GetAbsOrigin() + m_hEnemy->pev->velocity + m_hEnemy->pev->basevelocity;
+				// make sure player is not too close
+				float dist = (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length();
+				if( dist > 500 )
 				{
-					EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/rich_rocket.wav", 1.0, 0.1 );
-					UTIL_MakeVectors( GetAbsAngles() );
-					CBaseEntity *pRocket = CGrenade::ShootContact( pev, Center() - gpGlobals->v_forward * 4, vecToss );
-					if( pRocket )
+					Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, gSkillData.hgruntGrenadeSpeed, 0.5 );
+					if( vecToss != g_vecZero )
 					{
-						// rocket trail
-						MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+						EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/rich_rocket.wav", 1.0, 0.1 );
+						UTIL_MakeVectors( GetAbsAngles() );
+						CBaseEntity *pRocket = CGrenade::ShootContact( pev, Center() - gpGlobals->v_forward * 4, vecToss );
+						if( pRocket )
+						{
+							// rocket trail
+							MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 
-						WRITE_BYTE( TE_BEAMFOLLOW );
-						WRITE_SHORT( pRocket->entindex() );	// entity
-						WRITE_SHORT( m_iTrail );	// model
-						WRITE_BYTE( 15 ); // life
-						WRITE_BYTE( 5 );  // width
-						WRITE_BYTE( 224 );   // r, g, b
-						WRITE_BYTE( 224 );   // r, g, b
-						WRITE_BYTE( 255 );   // r, g, b
-						WRITE_BYTE( 255 );	// brightness
+							WRITE_BYTE( TE_BEAMFOLLOW );
+							WRITE_SHORT( pRocket->entindex() );	// entity
+							WRITE_SHORT( m_iTrail );	// model
+							WRITE_BYTE( 15 ); // life
+							WRITE_BYTE( 5 );  // width
+							WRITE_BYTE( 224 );   // r, g, b
+							WRITE_BYTE( 224 );   // r, g, b
+							WRITE_BYTE( 255 );   // r, g, b
+							WRITE_BYTE( 255 );	// brightness
 
-						MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
+							MESSAGE_END();  // move PHS/PVS data sending into here (SEND_ALL, SEND_PVS, SEND_PHS)
+						}
+						RocketCount++;
+						FireRocketTime = gpGlobals->time + 0.5f;
+
+						if( RocketCount >= 5 )
+							FireRocketTime = 0; // max 5 rockets
 					}
-					RocketCount++;
-					FireRocketTime = gpGlobals->time + 0.5f;
-
-					if( RocketCount >= 5 )
-						FireRocketTime = 0; // max 5 rockets
 				}
 			}
+
+			// restored to full health, back to fight! (wth is player doing?)
+			// (or the shield is broken)
+			if( SpecialModeHealth <= 0 || pev->health >= pev->max_health )
+				Andrew_Respawn();
+
+			return;
 		}
 
-		// restored to full health, back to fight! (wth is player doing?)
-		// (or the shield is broken)
-		if( SpecialModeHealth <= 0 || pev->health >= pev->max_health )
-			Andrew_Respawn();
+		if( AccumulatedDamage > ACCUMULATED_DMG_THRESHOLD )
+		{
+			if( gpGlobals->time > AndrewEscapeTime )
+				Andrew_Escape();
 
-		return;
-	}
-
-	if( AccumulatedDamage > ACCUMULATED_DMG_THRESHOLD )
-	{
-		if( IsAlive() && ( gpGlobals->time > AndrewEscapeTime ))
-			Andrew_Escape();
-
-		// we reset this anyway, he could have teleported because of a grenade
-		AccumulatedDamage = 0;
+			// we reset this anyway, he could have teleported because of a grenade
+			AccumulatedDamage = 0;
+		}
 	}
 
 	CBaseMonster::RunAI();
@@ -5890,13 +5924,16 @@ int CAndrewGrunt::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 
 	bitsDamageType |= DMG_NEVERGIB;
 
-	if( pev->health < pev->max_health )
-		AndrewLastHurt = gpGlobals->time;
-
 	if( AndrewSpecialMode )
+	{
 		SpecialModeHealth -= flDamage; // decrease "virtual health" of the shield - when it breaks, he goes back to fight
+		return 0;
+	}
 	else
 		AccumulatedDamage += flDamage;
+
+	if( pev->health < pev->max_health )
+		AndrewLastHurt = gpGlobals->time;
 
 	Forget( bits_MEMORY_INCOVER );
 
@@ -6496,6 +6533,10 @@ void CAndrewGrunt::Killed( entvars_t *pevAttacker, int iGib )
 	SpecialModeHealth = 0;
 	pev->rendermode = kRenderNormal;
 	pev->renderfx = 0;
+
+	MESSAGE_BEGIN( MSG_ALL, gmsgHealthbarCenter, NULL );
+	WRITE_BYTE( 255 ); // 255 disables the healthbar
+	MESSAGE_END();
 
 	CSquadMonster::Killed( pevAttacker, iGib );
 }

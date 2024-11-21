@@ -846,12 +846,16 @@ public:
 	int VidInit( void );
 	int Draw( float flTime );
 	int MsgFunc_Healthbars( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_HealthbarCenter( const char *pszName, int iSize, void *pbuf );
 	int health;
 	int barsize;
 	int entindex;
 	int hptex;
 	int hptex2;
 	bool bCentered;
+	void DrawCentralBar( void );
+	char MonsterName[256]; // for central bar only
+	int health_center; // for center bar
 
 	SpriteHandle m_hBarEmpty;
 	SpriteHandle m_hBarFull;
