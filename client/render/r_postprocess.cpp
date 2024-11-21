@@ -269,6 +269,9 @@ void RenderSunShafts( void )
 	if( !CheckShader( glsl.genSunShafts ) || !CheckShader( glsl.drawSunShafts ) || !CheckShader( glsl.blurShader ) )
 		return;
 
+	if( !(world->features & WORLD_HAS_SKYBOX) )
+		return; // don't waste time on tracing
+
 	if( !tr.bSkySurfFound )
 		return;
 
@@ -322,26 +325,69 @@ void RenderSunShafts( void )
 	{
 		static float next_light_update = 0;
 		static float lighting = 1.0f;
-		if( next_light_update > tr.time + 0.25f )
+		static float PlayerLightingMultiplier = 1.0f;
+		if( next_light_update > tr.time + 0.2f )
 			next_light_update = 0;
 		if( tr.time > next_light_update )
 		{
+			int maxLoops = 4;
+			int ignoreent = -1;	// first, ignore no entity
+			cl_entity_t *ent = NULL;
+			Vector vecStart = tr.viewparams.vieworg;
+			vecStart.z += 8.0f;
+			Vector vecEnd = vecStart - skyVec * 100000;
+			pmtrace_t trace;
+			while( maxLoops > 0 )
+			{
+				gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+				gEngfuncs.pEventAPI->EV_PlayerTrace( vecStart, vecEnd, PM_TRACELINE_PHYSENTSONLY, ignoreent, &trace );
 
-			Vector light;
-			gEngfuncs.pTriAPI->LightAtPoint( RI->vieworg, light );
-			light *= (1.0f / 255.0f);
-			// gather dynamic lighting
-		//	light += R_LightsForPoint( RI->vieworg, 256 );
-			lighting = light.Length();
+				if( trace.ent <= 0 ) break; // we hit the world or nothing, stop trace
+
+				ent = GET_ENTITY( PM_GetPhysEntInfo( trace.ent ) );
+				if( ent == NULL ) break;
+
+				if( ent->curstate.rendermode == kRenderNormal )
+					break;
+
+				if( ent->curstate.rendermode == kRenderTransTexture && ent->curstate.renderamt == 0 ) // invisible brush "collision", so it's likely a model
+					break;
+
+				if( ent->curstate.rendermode == kRenderTransColor && ent->curstate.renderamt == 255 )
+					break;
+
+				// if close enough to end pos, stop, otherwise continue trace
+				if( (vecEnd - trace.endpos).Length() < 1.0f )
+					break;
+				else
+				{
+					ignoreent = trace.ent;	// ignore last hit entity
+					vecStart = trace.endpos;
+				}
+				maxLoops--;
+			}
+
+			if( POINT_CONTENTS( trace.endpos ) == CONTENTS_SKY )
+				PlayerLightingMultiplier = 1.0f;
+			else // player likely in the shadow - calculate lighting around player
+			{
+				Vector light;
+				gEngfuncs.pTriAPI->LightAtPoint( tr.viewparams.vieworg, light );
+				light *= (1.0f / 255.0f);
+				// gather dynamic lighting
+			//	light += R_LightsForPoint( RI->vieworg, 256 );
+				lighting = light.Length();
+				PlayerLightingMultiplier = 1.5f * (1.0f - lighting);
+				PlayerLightingMultiplier *= PlayerLightingMultiplier;
+				PlayerLightingMultiplier += 0.75f;
+			}
+
 			next_light_update = tr.time + 0.2f;
 		}
-		float PlayerLightingMultiplier = 1.5f * (1.0f - lighting);
-		PlayerLightingMultiplier *= PlayerLightingMultiplier;
-		PlayerLightingMultiplier += 0.75f;
 		static float mul = 0.0f;
 		mul = lerp( mul, PlayerLightingMultiplier, g_fFrametime * 3.f );
 		Brightness *= mul;
-	//	gEngfuncs.Con_NPrintf( 1, "PlayerLightingMultiplier %f, total %f\n", mul, Brightness );
+		gEngfuncs.Con_NPrintf( 1, "PlayerLightingMultiplier %f, total %f\n", mul, Brightness );
 	}
 
 	// request screen color
@@ -527,7 +573,7 @@ void GaussBlur( void )
 		PlayerOrg = tr.viewparams.vieworg;
 		PlayerAngles = tr.viewparams.viewangles;
 		gEngfuncs.pfnAngleVectors( PlayerAngles, Forward, NULL, NULL );
-		VecEnd = PlayerOrg + Forward * 50000;
+		VecEnd = PlayerOrg + Forward * 100000;
 		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
 		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, VecEnd, PM_GLASS_IGNORE, -1, &ptr );
 		
