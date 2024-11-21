@@ -104,7 +104,8 @@ void CHealthbars::DrawCentralBar( void )
 	GL_SelectTexture( 0 );
 	GL_Bind( 0, tex_bar );
 
-	float hp = bound( 0, health_center, 100 );
+	static float hp = 0;
+	hp = lerp( hp, health_center, g_fFrametime * 5 );
 	float newwidth = 300 * (hp / 100.0f) * 2; // no idea how but it works
 	float xmin = x_start - 300;
 	float ymin = y_start - 15;

@@ -387,7 +387,7 @@ void RenderSunShafts( void )
 		static float mul = 0.0f;
 		mul = lerp( mul, PlayerLightingMultiplier, g_fFrametime * 3.f );
 		Brightness *= mul;
-		gEngfuncs.Con_NPrintf( 1, "PlayerLightingMultiplier %f, total %f\n", mul, Brightness );
+	//	gEngfuncs.Con_NPrintf( 1, "PlayerLightingMultiplier %f, total %f\n", mul, Brightness );
 	}
 
 	// request screen color

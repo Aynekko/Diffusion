@@ -5766,17 +5766,17 @@ void CAndrewGrunt::RunAI( void )
 				WRITE_STRING( "Andrew Rich" );
 				MESSAGE_END();
 				cached_hp = new_hp;
-				ALERT( at_console, "sending %i percent, current scaler %.2f\n", new_hp, DifficultyScaler );
+				ALERT( at_aiconsole, "hp %i percent, current scaler %.2f\n", new_hp, DifficultyScaler );
 			}
 		}
 
-		// every minute, decrease the regeneration rate, to prevent endless fights
+		// every half a minute, decrease the regeneration rate, to prevent endless fights
 		if( ScaleDifficultyTime > 0 && gpGlobals->time > ScaleDifficultyTime )
 		{
 			if( DifficultyScaler > 0.1f )
 				DifficultyScaler -= 0.1f;
 
-			ScaleDifficultyTime = gpGlobals->time + 60;
+			ScaleDifficultyTime = gpGlobals->time + 30;
 		}
 
 		if( AndrewSpecialMode )
