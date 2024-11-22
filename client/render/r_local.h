@@ -493,6 +493,7 @@ typedef struct
 
 	unsigned int	c_active_tents_count;
 	unsigned int	c_studio_models_drawn;
+	unsigned int	c_studio_meshes_drawn;
 	unsigned int	c_sprite_models_drawn;
 	unsigned int	c_cables;
 	unsigned int	c_particles_total;

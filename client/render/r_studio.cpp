@@ -4992,6 +4992,7 @@ void CStudioModelRenderer::DrawMeshFromBuffer( const vbomesh_t *mesh )
 
 	r_stats.c_total_tris += (mesh->numElems / 3);
 	r_stats.dip_count++;
+	r_stats.c_studio_meshes_drawn++;
 }
 
 void CStudioModelRenderer::AddStudioToLightList( plight_t *pl )
