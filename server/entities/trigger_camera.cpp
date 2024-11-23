@@ -44,6 +44,7 @@ public:
 	float SnapSpeed; // diffusion - how quickly the camera will turn its view to the target
 	int CameraFOV; // diffusion - set desired fov for camera view
 	int m_state;
+	bool bFirstTurn; // diffusion - when the camera turned on the first time, snap the angles immediately to the target
 };
 
 LINK_ENTITY_TO_CLASS(trigger_camera, CTriggerCamera);
@@ -238,6 +239,8 @@ void CTriggerCamera::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 			m_hPlayer->pev->effects |= EF_PLAYERUSINGCAMERA;
 	}
 
+	bFirstTurn = false;
+
 	SetFlag(F_ENTITY_BUSY);
 	// follow the player down
 	SetThink(&CTriggerCamera::FollowTarget);
@@ -313,28 +316,37 @@ void CTriggerCamera::FollowTarget(void)
 	if (angles.y < 0)
 		angles.y += 360;
 
-	SetLocalAngles(angles);
+	if( !bFirstTurn ) // snap angles instantly
+	{
+		SetLocalAngles( vecGoal );
+		bFirstTurn = true;
+	}
+	else
+	{
 
-	float dx = vecGoal.x - angles.x;
-	float dy = vecGoal.y - angles.y;
+		SetLocalAngles( angles );
 
-	if (dx < -180)
-		dx += 360;
-	if (dx > 180)
-		dx = dx - 360;
+		float dx = vecGoal.x - angles.x;
+		float dy = vecGoal.y - angles.y;
 
-	if (dy < -180)
-		dy += 360;
-	if (dy > 180)
-		dy = dy - 360;
+		if( dx < -180 )
+			dx += 360;
+		if( dx > 180 )
+			dx = dx - 360;
 
-	Vector vecAvel;
+		if( dy < -180 )
+			dy += 360;
+		if( dy > 180 )
+			dy = dy - 360;
 
-	vecAvel.x = dx * SnapSpeed * 0.01;  // 0.01 instead of frametime
-	vecAvel.y = dy * SnapSpeed * 0.01;
-	vecAvel.z = 0;
+		Vector vecAvel;
 
-	SetLocalAvelocity(vecAvel);
+		vecAvel.x = dx * SnapSpeed * 0.01;  // 0.01 instead of frametime
+		vecAvel.y = dy * SnapSpeed * 0.01;
+		vecAvel.z = 0;
+
+		SetLocalAvelocity( vecAvel );
+	}
 
 	if (!(FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL)))
 	{
@@ -370,6 +382,7 @@ void CTriggerCamera::Stop(void)
 	SetLocalAvelocity(g_vecZero);
 	DontThink();
 	m_state = 0;
+	bFirstTurn = false;
 }
 
 void CTriggerCamera::Move(void)

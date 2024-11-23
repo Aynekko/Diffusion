@@ -1272,28 +1272,28 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 
 				pparams->vieworg += viewpos + forward * 8;	// best value for humans
 				// NOTE: fov computation moved into r_main.cpp
-			}
 
-			// this is smooth stair climbing in thirdperson mode but not affected for client model :(
-			if( !pparams->smoothing && pparams->onground && view->origin[2] - oldz > 0.0f && viewmonster != NULL )
-			{
-				float steptime;
+				// this is smooth stair climbing in thirdperson mode but not affected for client model :(
+				if( !pparams->smoothing && pparams->onground && view->origin[2] - oldz > 0.0f && viewmonster != NULL )
+				{
+					float steptime;
 
-				steptime = pparams->time - lasttime;
-				if( steptime < 0 ) steptime = 0;
+					steptime = pparams->time - lasttime;
+					if( steptime < 0 ) steptime = 0;
 
-				oldz += steptime * 150.0f;
+					oldz += steptime * 150.0f;
 
-				if( oldz > view->origin[2] )
+					if( oldz > view->origin[2] )
+						oldz = view->origin[2];
+					if( view->origin[2] - oldz > pparams->movevars->stepsize )
+						oldz = view->origin[2] - pparams->movevars->stepsize;
+
+					pparams->vieworg[2] += oldz - view->origin[2];
+				}
+				else
+				{
 					oldz = view->origin[2];
-				if( view->origin[2] - oldz > pparams->movevars->stepsize )
-					oldz = view->origin[2] - pparams->movevars->stepsize;
-
-				pparams->vieworg[2] += oldz - view->origin[2];
-			}
-			else
-			{
-				oldz = view->origin[2];
+				}
 			}
 
 			lasttime = pparams->time;
