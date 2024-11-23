@@ -585,9 +585,7 @@ void R_CheckChanges( void )
 		for( int i = 0; i < worldmodel->numsurfaces; i++ )
 			SetBits( worldmodel->surfaces[i].flags, SURF_LM_UPDATE );
 		R_StudioClearLightCache();
-		// put the gamma into GLSL-friendly array
-		for( int i = 0; i < 256; i++ )
-			tr.gamma_table[i / 4][i % 4] = (float)TEXTURE_TO_TEXGAMMA( i ) / 255.0f;
+		tr.bGammaTableUpdate = true;
 		settings_changed = true;
 	}
 

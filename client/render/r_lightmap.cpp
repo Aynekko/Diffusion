@@ -183,9 +183,7 @@ void GL_EndBuildingLightmaps( bool lightmap, bool deluxmap )
 {
 	LM_UploadPages( lightmap, deluxmap );
 
-	// put the gamma into GLSL-friendly array
-	for( int i = 0; i < 256; i++ )
-		tr.gamma_table[i/4][i%4] = (float)TEXTURE_TO_TEXGAMMA( i ) / 255.0f;
+	tr.bGammaTableUpdate = true;
 }
 
 /*

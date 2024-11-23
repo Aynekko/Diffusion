@@ -288,6 +288,15 @@ void HUD_Frame( double time )
 #ifdef XASH_64BIT
 	discord_integration::on_frame();
 #endif
+
+	if( tr.bGammaTableUpdate )
+	{
+		// put the gamma into GLSL-friendly array
+		for( int i = 0; i < 256; i++ )
+			tr.gamma_table[i / 4][i % 4] = (float)TEXTURE_TO_TEXGAMMA( i ) / 255.0f;
+
+		tr.bGammaTableUpdate = false;
+	}
 }
 
 int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )

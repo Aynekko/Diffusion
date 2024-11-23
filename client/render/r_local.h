@@ -426,6 +426,7 @@ typedef struct
 	unsigned short	glsl_sequence_proj[2];	// same as above but for projlights
 
 	Vector4D		gamma_table[64];
+	bool bGammaTableUpdate;
 
 	// original player vieworg and angles
 	Vector		cached_vieworigin;
