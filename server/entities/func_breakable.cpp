@@ -611,6 +611,9 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 	DamageSound();
 
+	if( HasSpawnFlags( SF_BREAK_NOGIBS ) )
+		return 1;
+
 	// diffusion - make a gib as well
 	char cFlag = 0;
 	switch( m_Material )
@@ -788,39 +791,43 @@ void CBreakable::Die( CBaseEntity *pActivator )
 	}
 
 	vecSpot = GetAbsOrigin() + (pev->mins + pev->maxs) * 0.5f;
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
-		WRITE_BYTE( TE_BREAKMODEL);
 
-		// position
-		WRITE_COORD( vecSpot.x );
-		WRITE_COORD( vecSpot.y );
-		WRITE_COORD( vecSpot.z );
+	if( !HasSpawnFlags( SF_BREAK_NOGIBS ) )
+	{
+		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
+			WRITE_BYTE( TE_BREAKMODEL );
 
-		// size
-		WRITE_COORD( pev->size.x);
-		WRITE_COORD( pev->size.y);
-		WRITE_COORD( pev->size.z);
+			// position
+			WRITE_COORD( vecSpot.x );
+			WRITE_COORD( vecSpot.y );
+			WRITE_COORD( vecSpot.z );
 
-		// velocity
-		WRITE_COORD( vecVelocity.x ); 
-		WRITE_COORD( vecVelocity.y );
-		WRITE_COORD( vecVelocity.z );
+			// size
+			WRITE_COORD( pev->size.x );
+			WRITE_COORD( pev->size.y );
+			WRITE_COORD( pev->size.z );
 
-		// randomization
-		WRITE_BYTE( 10 ); 
+			// velocity
+			WRITE_COORD( vecVelocity.x );
+			WRITE_COORD( vecVelocity.y );
+			WRITE_COORD( vecVelocity.z );
 
-		// Model
-		WRITE_SHORT( m_idShard );	//model id#
+			// randomization
+			WRITE_BYTE( 10 );
 
-		// # of shards
-		WRITE_BYTE( 0 );	// let client decide
+			// Model
+			WRITE_SHORT( m_idShard );	//model id#
 
-		// duration
-		WRITE_BYTE( 25 );// 2.5 seconds
+			// # of shards
+			WRITE_BYTE( 0 );	// let client decide
 
-		// flags
-		WRITE_BYTE( cFlag );
-	MESSAGE_END();
+			// duration
+			WRITE_BYTE( 25 );// 2.5 seconds
+
+			// flags
+			WRITE_BYTE( cFlag );
+		MESSAGE_END();
+	}
 
 	float size = pev->size.x;
 	if ( size < pev->size.y )

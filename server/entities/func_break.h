@@ -22,6 +22,7 @@
 #define SF_BREAK_NOELECTROBLAST BIT(3)	// no damage from player's electroblast
 #define SF_BREAK_NOBULLET		BIT(4)	// no bullet damage
 #define SF_BREAK_NOEXPLOSIONS	BIT(5)	// no explosion damage
+#define SF_BREAK_NOGIBS			BIT(6)	// no gibs spawning
 #define SF_BREAK_CROWBAR		BIT(8)	// instant break if hit with crowbar
 
 // func_pushable (it's also func_breakable, so don't collide with those flags)
