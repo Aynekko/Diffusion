@@ -1610,8 +1610,11 @@ void CBasePlayer::WaterMove()
 	if( pev->waterlevel == 0 ) // cache the velocity
 		NotInWaterVelocity = GetAbsVelocity();
 
-	if (pev->movetype == MOVETYPE_NOCLIP)
+	if( pev->movetype == MOVETYPE_NOCLIP )
+	{
+		pev->air_finished = gpGlobals->time + AIRTIME;
 		return;
+	}
 
 	if (pev->health < 0)
 		return;
