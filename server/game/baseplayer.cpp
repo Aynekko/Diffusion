@@ -1881,11 +1881,55 @@ void CBasePlayer::PlayerDeathThink(void)
 // if the player has been dead for one second longer than allowed by forcerespawn, 
 // forcerespawn isn't on. Send the player off to an intermission camera until they 
 // choose to respawn.
-	if( g_pGameRules->IsMultiplayer() && (gpGlobals->time > (m_fDeadTime + 5)) && !(m_afPhysicsFlags & PFLAG_OBSERVER) )
-		StartDeathCam(); // go to dead camera. 
+	if( g_pGameRules->IsMultiplayer() )
+	{
+		if( mp_killercamera.value > 0 && m_hKiller != NULL )
+		{
+			if( !m_hKiller->IsAlive() )
+			{
+				m_hKiller = NULL;
+				StartDeathCam(); // go to dead camera.
+			}
+			else
+			{
+				if( !(m_afPhysicsFlags & PFLAG_OBSERVER) )
+				{
+					CopyToBodyQue( this );
+					m_afPhysicsFlags |= PFLAG_OBSERVER;
+					pev->solid = SOLID_NOT;
+					pev->takedamage = DAMAGE_NO;
+					pev->movetype = MOVETYPE_NOCLIP;
+					pev->effects = EF_NODRAW;
+				}
+
+				if( m_afPhysicsFlags & PFLAG_OBSERVER ) // observe the killer position
+				{
+					Vector MyOrg = GetAbsOrigin();
+					Vector KillerOrg = m_hKiller->GetAbsOrigin();
+					float dist_to_killer = bound( 1.0f, (MyOrg - KillerOrg).Length(), 1000.0f );
+					if( dist_to_killer < 15.0f )
+					{
+						SetAbsOrigin( KillerOrg );
+					}
+					else // lerp into killer's position
+					{
+						Vector dest = MyOrg;
+						float lerpspeed = (2000 * gpGlobals->frametime) / dist_to_killer;
+						VectorLerp( MyOrg, lerpspeed, KillerOrg, dest );
+						SetAbsOrigin( dest );
+
+					}
+				}
+			}
+		}
+		else if( (gpGlobals->time > (m_fDeadTime + 5)) && !(m_afPhysicsFlags & PFLAG_OBSERVER) )
+		{
+			StartDeathCam(); // go to dead camera.
+		}
+	}
 
 	// return if player is spectating
-	if (pev->iuser1)
+	if( pev->iuser1 )
 		return;
 
 	if( gpGlobals->time > HUDtextTime + HUD_TEXT_DELAY )
@@ -5291,6 +5335,8 @@ void CBasePlayer::Spawn( void )
 	DroneHealth = DRONE_MAX_HEALTH;
 
 	CreateFlashlightMonster();
+
+	m_hKiller = NULL;
 }
 
 void CBasePlayer::SetHUDTexts(void)

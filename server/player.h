@@ -654,6 +654,8 @@ public:
 	float gtbdPrev; // for CheckTimeBasedDamage()
 
 	bool IsShowingObjective; // not saved
+
+	EHANDLE m_hKiller;
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

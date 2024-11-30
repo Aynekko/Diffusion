@@ -63,6 +63,7 @@ cvar_t  ai_disable = { "ai_disable", "0", FCVAR_CHEAT };
 cvar_t  sv_ignore_triggers = { "sv_ignore_triggers", "0", FCVAR_CHEAT };
 cvar_t	mp_dash_air = { "mp_dash_air", "1", FCVAR_SERVER };
 cvar_t	mp_alwaysgib = { "mp_alwaysgib", "0", FCVAR_SERVER };
+cvar_t	mp_killercamera = { "mp_killercamera", "1", FCVAR_SERVER };
 cvar_t	mp_weaponbonus = { "mp_weaponbonus", "1", FCVAR_SERVER };
 cvar_t	mp_hidecorpses = { "mp_hidecorpses", "0", FCVAR_SERVER };
 cvar_t	mp_spectator_cmd_delay = { "mp_spectator_cmd_delay", "2", FCVAR_SERVER };
@@ -1078,6 +1079,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sv_ignore_triggers );
 	CVAR_REGISTER( &mp_dash_air );
 	CVAR_REGISTER( &mp_alwaysgib );
+	CVAR_REGISTER( &mp_killercamera );
 	CVAR_REGISTER( &mp_weaponbonus );
 	CVAR_REGISTER( &mp_healthbonus );
 	CVAR_REGISTER( &mp_hidecorpses );

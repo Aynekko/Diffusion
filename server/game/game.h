@@ -47,6 +47,7 @@ extern cvar_t defaultteam;
 extern cvar_t allowmonsters;
 extern cvar_t mp_dash_air;
 extern cvar_t mp_alwaysgib;
+extern cvar_t mp_killercamera;
 extern cvar_t sv_ignore_triggers;
 extern cvar_t mp_weaponbonus;
 extern cvar_t mp_healthbonus;
