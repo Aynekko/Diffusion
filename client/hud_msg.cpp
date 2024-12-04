@@ -562,7 +562,7 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		gHUD.InCar = (READ_BYTE() > 0);
 		gHUD.BreathingEffect = (READ_BYTE() > 0);
 		gHUD.WigglingEffect = (READ_BYTE() > 0);
-		gHUD.ShieldOn = (READ_BYTE() > 0);
+		bool ShieldOn = (READ_BYTE() > 0);
 		gHUD.PlayingDrums = (READ_BYTE() > 0);
 		gHUD.WeaponLowered = (READ_BYTE() > 0);
 		gHUD.CanShoot = (READ_BYTE() > 0);
@@ -570,8 +570,10 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		gHUD.m_DroneBars.CanUseDrone = (READ_BYTE() > 0);
 		tr.sunlightscale = READ_BYTE() * 0.01f;
 
-		if( gHUD.ShieldOn ) // play turn on sound
+		if( !gHUD.ShieldOn && ShieldOn ) // play turn on sound
 			gEngfuncs.pEventAPI->EV_PlaySound( gEngfuncs.GetLocalPlayer()->index, NULL, CHAN_STATIC, "player/shield_on.wav", VOL_NORM, 0, 0, PITCH_NORM );
+
+		gHUD.ShieldOn = ShieldOn;
 	}
 	break;
 
