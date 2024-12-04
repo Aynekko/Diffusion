@@ -102,6 +102,7 @@ void main( void )
 	vec4 diffuse = vec4( 0.0 );
 	vec3 glossmap = vec3( 0.0 );
 	vec3 emboss = vec3( 1.0 );
+	float shadow = 1.0;
 
         // compute the masks for terrain
 #if defined( BMODEL_MULTI_LAYERS )
@@ -122,8 +123,24 @@ void main( void )
 	float fov = ( u_LightDir.w * FOV_MULT * ( M_PI / 180.0 ));
 	float spotCos = cos( fov + fov );
 	if( spotDot < spotCos ) discard;
+
+	vec4 tex_projection = texture2DProj( u_ProjectMap, var_ProjCoord );
+
+	// ignore black pixels of the flashlight/projection texture
+	if( tex_projection.r + tex_projection.g + tex_projection.b == 0.0 )
+		discard;
+
+	#if defined( BMODEL_HAS_SHADOWS )
+		// compute shadow early to ignore the rest of the shader
+		shadow = ShadowProj( var_ShadowCoord, u_ShadowParams.xy, dot( normalize( var_Normal ), L ));
+		if( shadow <= 0.0 ) discard; // fast reject
+	#endif
 #elif defined( BMODEL_LIGHT_OMNIDIRECTIONAL )
 	L = normalize( var_LightVec );
+	#if defined( BMODEL_HAS_SHADOWS )
+		shadow = ShadowOmni( -var_LightVec, u_ShadowParams );
+		if( shadow <= 0.0 ) discard; // fast reject
+	#endif
 #endif
 
 	vec3 V = normalize( var_ViewVec );
@@ -249,7 +266,6 @@ void main( void )
 #endif 
 
 	vec3 light = vec3( 1.0 );
-	float shadow = 1.0;
 	float RenderModeModifier = 1.0;
 
 #if defined( BMODEL_KRENDERTRANSTEXTURE )
@@ -264,19 +280,11 @@ void main( void )
 	light = u_LightDiffuse.rgb * DLIGHT_SCALE;	// light color
 
 	// texture or procedural spotlight
-	light *= 2 * Brightness * RenderModeModifier * texture2DProj( u_ProjectMap, var_ProjCoord ).rgb;
-	#if defined( BMODEL_HAS_SHADOWS )
-		shadow = ShadowProj( var_ShadowCoord, u_ShadowParams.xy, dot( N, L ));
-		if( shadow <= 0.0 ) discard; // fast reject
-	#endif
+	light *= 2 * Brightness * RenderModeModifier * tex_projection.rgb;
 #elif defined( BMODEL_LIGHT_OMNIDIRECTIONAL )
 	light = u_LightDiffuse.rgb;
 
 	light *= Brightness * RenderModeModifier * textureCube( u_ProjectMap, -var_LightVec ).rgb;
-	#if defined( BMODEL_HAS_SHADOWS )
-		shadow = ShadowOmni( -var_LightVec, u_ShadowParams );
-		if( shadow <= 0.0 ) discard; // fast reject
-	#endif
 #endif
 
 	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
@@ -296,7 +304,7 @@ void main( void )
 
 	// apply specular lighting
 	#if defined( BMODEL_SPECULAR )
-		float NdotLGloss = saturate( dot( N, L ));
+		float NdotLGloss = saturate( NdotL );
 		vec3 gloss = ComputeSpecular( N, V, L, glossmap, GlossSmoothness, GlossScale ) * ( light * 0.5 ) * NdotLGloss * atten * shadow;
 		#if defined( BMODEL_EMBOSS )
 			gloss *= emboss;
@@ -304,6 +312,7 @@ void main( void )
 		#if defined( BMODEL_WATER_REFRACTION ) 
 			gloss *= RenderModeModifier;       
 		#endif
+		diffuse.rgb *= MicroShadow( pow(glossmap.b, 2.2), NdotLGloss );
 		diffuse.rgb += gloss * shadow;
 	#endif
 

@@ -15,6 +15,15 @@ vec3 DiffuseToGlossmap( sampler2D ColorMap, vec2 texcoord )
     return glossmap;
 }
 
+// taken from ncuxonaT's shaders - thank you
+float MicroShadow( float ao, float NdotL )	
+{	
+	// from CoD WWII
+	float cos_theta = sqrt( 1.0 - ao );
+	float ms = clamp( NdotL / cos_theta, 0.0, 1.0 );
+	return ms * ms;
+}
+
 #if defined( BMODEL_MULTI_LAYERS )
 vec3 DiffuseToGlossmapTerrain( sampler2DArray ColorMap, vec2 texcoord, vec4 mask0, vec4 mask1, vec4 mask2, vec4 mask3 )
 {

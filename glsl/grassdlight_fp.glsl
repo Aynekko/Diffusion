@@ -70,6 +70,12 @@ void main( void )
 	float fov = ( u_LightDir.w * 0.25 * ( M_PI / 180 ));
 	float spotCos = cos( fov + fov );
 	if( spotDot < spotCos ) discard;
+
+	vec4 tex_projection = texture2DProj( u_ProjectMap, var_ProjCoord );
+
+	// ignore black pixels of the flashlight/projection texture
+	if( tex_projection.r + tex_projection.g + tex_projection.b == 0.0 )
+		discard;
 #elif defined( GRASS_LIGHT_OMNIDIRECTIONAL )
 	L = normalize( var_LightVec );
 #endif
@@ -99,21 +105,22 @@ void main( void )
 		N = normalize( var_Normal );
 
 #if defined( GRASS_LIGHT_PROJECTION )
-	light = u_LightDiffuse.rgb;	// light color
-
-	// texture or procedural spotlight
-	light *= 1.5 * Brightness * texture2DProj( u_ProjectMap, var_ProjCoord ).rgb;
 	#if defined( GRASS_HAS_SHADOWS )
 		shadow = ShadowProj( var_ShadowCoord, u_ShadowParams.xy, dot( N, L ));
 		if( shadow <= 0.0 ) discard; // fast reject
 	#endif
+
+	light = u_LightDiffuse.rgb;	// light color
+
+	// texture or procedural spotlight
+	light *= 1.5 * Brightness * tex_projection.rgb;
 #elif defined( GRASS_LIGHT_OMNIDIRECTIONAL )
-	light = u_LightDiffuse.rgb;
-	light *= 1.5 * Brightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 	#if defined( GRASS_HAS_SHADOWS )
 		shadow = ShadowOmni( -var_LightVec, u_ShadowParams );
 		if( shadow <= 0.0 ) discard; // fast reject
 	#endif
+	light = u_LightDiffuse.rgb;
+	light *= 1.5 * Brightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 #endif
 
 	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )

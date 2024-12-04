@@ -87,11 +87,12 @@ varying mat3	        var_MatrixTBN;
 #endif
 
 void main( void )
-{		
+{
 	float dist = length( var_LightVec );
 	float atten = 1.0 - saturate( pow( dist * u_LightOrigin.w, u_LightDiffuse.a ));
 	if( atten <= 0.0 ) discard; // fast reject
 	vec3 L = vec3( 0.0 );
+	float shadow = 1.0;
 
 #if defined( STUDIO_LIGHT_PROJECTION )
 	L = normalize( var_LightVec );
@@ -101,8 +102,26 @@ void main( void )
 	float fov = ( u_LightDir.w * FOV_MULT * ( M_PI / 180.0 ));
 	float spotCos = cos( fov + fov );
 	if( spotDot < spotCos ) discard;
+
+	vec4 tex_projection = texture2DProj( u_ProjectMap, var_ProjCoord );
+
+	// ignore black pixels of the flashlight/projection texture
+	if( tex_projection.r + tex_projection.g + tex_projection.b == 0.0 )
+		discard;
+
+	#if defined( STUDIO_HAS_SHADOWS )
+		// compute shadow early to ignore the rest of the shader
+		shadow = ShadowProj( var_ShadowCoord, u_ShadowParams.xy, dot( normalize( var_Normal ), L ));
+		if( shadow <= 0.0 ) discard; // fast reject
+	#endif
 #elif defined( STUDIO_LIGHT_OMNIDIRECTIONAL )
 	L = normalize( var_LightVec );
+
+	#if defined( STUDIO_HAS_SHADOWS )
+		vec3 ShadowVec = VectorRotate( var_LightVec, u_MeshParams[1] ); // rotate entity angles to worldspace
+		shadow = ShadowOmni( -ShadowVec, u_ShadowParams );
+		if( shadow <= 0.0 ) discard; // fast reject
+	#endif
 #endif
 
 	vec3 V = normalize( var_ViewVec );
@@ -130,14 +149,6 @@ void main( void )
 
 	// compute the diffuse, emboss and specular term
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
-#if defined( STUDIO_SPECULAR )
-	vec3 glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
-#endif
-        // apply emboss filter
-#if defined( STUDIO_EMBOSS )
-	vec3 emboss = EmbossFilter( u_ColorMap, var_TexDiffuse, EmbossScale );
-	diffuse.rgb *= emboss;
-#endif
 
 #if defined( STUDIO_HAS_COLORMASK )
 	vec4 colormask = texture2D( u_ColorMask, var_TexDiffuse );
@@ -159,35 +170,14 @@ void main( void )
 #endif
 
 	vec3 light = vec3( 1.0 );
-	float shadow = 1.0;
 
 #if defined( STUDIO_LIGHT_PROJECTION )
 	light = u_LightDiffuse.rgb * DLIGHT_SCALE;	// light color
-
 	// texture or procedural spotlight
-	light *= 2.0 * Brightness * texture2DProj( u_ProjectMap, var_ProjCoord ).rgb;
-
-	#if defined( STUDIO_HAS_SHADOWS )
-		shadow = ShadowProj( var_ShadowCoord, u_ShadowParams.xy, dot( N, L ));
-		if( shadow <= 0.0 ) discard; // fast reject
-	#endif
+	light *= 2.0 * Brightness * tex_projection.rgb;
 #elif defined( STUDIO_LIGHT_OMNIDIRECTIONAL )
 	light = u_LightDiffuse.rgb * DLIGHT_SCALE;
 	light *= 2 * Brightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
-
-	#if defined( STUDIO_HAS_SHADOWS )
-
-	// fix shadows?
-	// the original line was: shadow = ShadowOmni( -var_LightVec, u_ShadowParams);
-	// that's all. everything below (between the lines) is my mess trying to compensate
-	// but I think it works :)
-
-	vec3 MeshAngles = u_MeshParams[1];
-	vec3 ShadowVec = VectorRotate( var_LightVec, MeshAngles ); // rotate entity angles to worldspace
-	shadow = ShadowOmni( -ShadowVec, u_ShadowParams );
-
-	if( shadow <= 0.0 ) discard; // fast reject
-	#endif
 #endif
 
 	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
@@ -203,15 +193,23 @@ void main( void )
 	float NdotL = max(( dot( N, L ) + ( SHADE_LAMBERT - 1.0 )) / SHADE_LAMBERT, 0.0 );
 	if( NdotL <= 0.0 ) discard; // fast reject
 
+	// apply emboss filter
+#if defined( STUDIO_EMBOSS )
+	vec3 emboss = EmbossFilter( u_ColorMap, var_TexDiffuse, EmbossScale );
+	diffuse.rgb *= emboss;
+#endif
+
 	diffuse.rgb *= light.rgb * NdotL * atten * shadow;
 
 	// apply specular lighting
 #if defined( STUDIO_SPECULAR )
-	float NdotLGloss = saturate( dot( N, L ));
+	vec3 glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
+	float NdotLGloss = saturate( NdotL );
 	vec3 gloss = ComputeSpecular( N, V, L, glossmap, GlossSmoothness, GlossScale ) * ( light * 0.5 ) * NdotLGloss * atten * shadow;
 	#if defined( STUDIO_EMBOSS )
 		gloss *= emboss;
 	#endif
+	diffuse.rgb *= MicroShadow( pow(glossmap.b, 2.2), NdotLGloss );
 	diffuse.rgb += gloss * shadow;
 #endif
 
