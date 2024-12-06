@@ -976,12 +976,12 @@ void FuncRotatingClient( cl_entity_t *e )
 		e->baseline.angles.z += e->curstate.iuser2 * g_fFrametime * e->curstate.vuser1.z;
 	}
 
-	if( e->baseline.angles.x > 359 ) e->baseline.angles.x = 0;
-	if( e->baseline.angles.y > 359 ) e->baseline.angles.y = 0;
-	if( e->baseline.angles.z > 359 ) e->baseline.angles.z = 0;
-	if( e->baseline.angles.x < -359 ) e->baseline.angles.x = 0;
-	if( e->baseline.angles.y < -359 ) e->baseline.angles.y = 0;
-	if( e->baseline.angles.z < -359 ) e->baseline.angles.z = 0;
+	if( e->baseline.angles.x > 359.99f ) e->baseline.angles.x = 0;
+	if( e->baseline.angles.y > 359.99f ) e->baseline.angles.y = 0;
+	if( e->baseline.angles.z > 359.99f ) e->baseline.angles.z = 0;
+	if( e->baseline.angles.x < -359.99f ) e->baseline.angles.x = 0;
+	if( e->baseline.angles.y < -359.99f ) e->baseline.angles.y = 0;
+	if( e->baseline.angles.z < -359.99f ) e->baseline.angles.z = 0;
 
 	e->curstate.angles = e->baseline.angles;
 }

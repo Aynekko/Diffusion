@@ -1419,9 +1419,12 @@ qboolean R_AddEntity( struct cl_entity_s *clent, int entityType )
 	if( clent->model->type == mod_brush )
 	{
 		if( clent->curstate.effects & EF_ROTATING )
+		{
 			FuncRotatingClient( clent );
+			clent->angles += clent->curstate.angles;
+		}
 
-		clent->hCachedMatrix = GL_CacheState( clent->curstate.origin, clent->curstate.angles );
+		clent->hCachedMatrix = GL_CacheState( clent->origin, clent->angles );
 
 		// check for possible subview textures (mirror and water)
 		bool add_subview_ent = false;
