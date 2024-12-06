@@ -30,6 +30,7 @@ varying vec3		var_TexLight0;
 varying vec3		var_TexLight1;
 varying vec3		var_TexLight2;
 varying vec3		var_TexLight3;
+varying vec4		var_ViewSpace;
 
 void main( void )
 {
@@ -63,4 +64,6 @@ void main( void )
 	var_TexLight3.xy = attr_TexCoord2.zw;
 	var_TexLight3.z = u_LightStyleValues[int( attr_LightStyles[3] )];
 #endif
+
+	var_ViewSpace = gl_Position;
 }
