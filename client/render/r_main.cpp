@@ -464,7 +464,6 @@ void R_CheckChanges( void )
 
 	if( FBitSet( gl_anisotropy->flags, FCVAR_CHANGED ) )
 	{
-		ClearBits( gl_anisotropy->flags, FCVAR_CHANGED );
 		// diffusion - need to reset bloom fbo after changing anisotropy
 		if( tr.screen_fbo_texture_color )
 		{
