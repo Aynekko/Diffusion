@@ -14,7 +14,6 @@ uniform vec4 u_GenericCondition;
 
 varying vec2 var_TexCoord;
 varying vec3 var_VertexColor;
-varying vec4 var_ViewSpace;
 
 float rand(vec2 co)
 {
