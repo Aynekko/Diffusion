@@ -28,6 +28,7 @@ struct ViewLockData_t
 };
 
 void V_Init( void );
+void V_VidInit( void );
 void V_StartPitchDrift( void );
 void V_StopPitchDrift( void );
 

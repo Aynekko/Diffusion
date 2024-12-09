@@ -151,6 +151,8 @@ int HUD_VidInit(void)
 
 	R_VidInit();
 
+	V_VidInit();
+
 	return 1;
 }
 

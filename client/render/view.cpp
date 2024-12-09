@@ -60,6 +60,7 @@ float		v_frametime, v_lastDistance;
 float		v_cameraRelaxAngle = 5.0f;
 float		v_cameraFocusAngle = 35.0f;
 qboolean	v_resetCamera = 1;
+float gun_roll_angle = 0;
 
 #define	HL2_BOB_CYCLE_MIN	1.0f
 #define	HL2_BOB_CYCLE_MAX	0.45f
@@ -419,6 +420,13 @@ void V_Init( void )
 	ui_is_active = CVAR_REGISTER( "ui_is_active", "0", FCVAR_UNLOGGED );
 	ui_videooptions_active = CVAR_REGISTER( "ui_videooptions_active", "0", FCVAR_UNLOGGED );
 	cl_background = CVAR_GET_POINTER( "cl_background" );
+}
+
+void V_VidInit( void )
+{
+	PrevViewAngles = g_vecZero;
+	PrevViewOrg = g_vecZero;
+	gun_roll_angle = 0;
 }
 
 float V_CalcBob( struct ref_params_s *pparams )
@@ -1009,10 +1017,44 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 		}
 
 		// FIXME:  Needs to be predictable?
-		gHUD.m_vecLastFacing = gHUD.m_vecLastFacing + vDifference * (flSpeed * pparams->frametime);
+		gHUD.m_vecLastFacing += vDifference * (flSpeed * pparams->frametime);
 		// Make sure it doesn't grow out of control!!!
 		gHUD.m_vecLastFacing = gHUD.m_vecLastFacing.Normalize();
 		origin = origin + (vDifference * -1.0f) * flSpeed * 0.25;  // diffusion *0.25
+
+		// add subtle rolls
+		// ----------------------------------------------------
+		if( PrevViewAngles != g_vecZero && fabs(vOriginalAngles.x) < 45 )
+		{
+			float anglediff = (PrevViewAngles.y - pparams->viewangles.y);
+			float dir = anglediff >= 0 ? 1.0f : -1.0f;
+			if( fabs( anglediff ) < 0.01f )
+				gun_roll_angle = lerp( gun_roll_angle, 0.0f, pparams->frametime * 5 );
+			else
+			{
+				// fighting sudden countersteer, looks better
+				if( dir == -1.0f && gun_roll_angle > 0.05f )
+					gun_roll_angle = CL_UTIL_Approach( 0.0f, gun_roll_angle, pparams->frametime * 3.0f );
+				else if( dir == 1.0f && gun_roll_angle < -0.05f )
+					gun_roll_angle = CL_UTIL_Approach( 0.0f, gun_roll_angle, pparams->frametime * 3.0f );
+				else
+					gun_roll_angle = lerp( gun_roll_angle, flDiff * dir, pparams->frametime * 5.0f );
+			}
+		}
+		else
+			gun_roll_angle = CL_UTIL_Approach( 0.0f, gun_roll_angle, pparams->frametime * 3.0f );
+
+		if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN )
+		{
+			angles.z -= gun_roll_angle * 5.0f;
+			angles.y -= gun_roll_angle * 2.0f;
+		}
+		else
+		{
+			angles.z += gun_roll_angle * 5.0f;
+			angles.y -= gun_roll_angle * 2.0f;
+		}
+		// ----------------------------------------------------
 	}
 
 	AngleVectors( original_angles, forward, right, up );
@@ -1043,17 +1085,17 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 	{
 		if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN )
 		{
-			origin = origin + forward * (-(pitch + 180) * 0.015f);  // diffusion - was 0.035f
-			origin = origin + right * (-(pitch + 180) * 0.01f);    // was 0.03f
+			origin += forward * (-(pitch + 180) * 0.015f);  // diffusion - was 0.035f
+			origin += right * (-(pitch + 180) * 0.01f);    // was 0.03f
 			if( pitch > -180.0f )
-				origin = origin + up * (-(pitch + 180) * 0.02f);
+				origin += up * (-(pitch + 180) * 0.02f);
 		}
 		else
 		{
-			origin = origin + forward * (-pitch * 0.015f);  // diffusion - was 0.035f
-			origin = origin + right * (-pitch * 0.01f);    // was 0.03f
+			origin += forward * (-pitch * 0.015f);  // diffusion - was 0.035f
+			origin += right * (-pitch * 0.01f);    // was 0.03f
 			if( pitch > 0.0f ) // by Lev's request - lower weapon when looking down, but don't move it when looking up
-				origin = origin + up * (-pitch * 0.02f);
+				origin += up * (-pitch * 0.02f);
 		}
 	}
 
