@@ -1242,7 +1242,7 @@ void R_CheckFog( void )
 	// eyes above water
 	if( tr.viewparams.waterlevel < 3 )
 	{
-		if( tr.movevars->fog_settings != 0x00000000 )
+		if( tr.movevars->fog_settings != 0x00000000 || CustomFogFor3DSky )
 		{
 			// enable global exponential color
 			if( CustomFogFor3DSky )
