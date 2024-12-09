@@ -133,7 +133,11 @@ bool DrawSingleDecal( decal_t* decal, bool project )
 		pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 
 		pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
-		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+
+		Vector4D fogParams[2];
+		fogParams[0] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+		fogParams[1] = Vector4D( RI->vieworg.x, RI->vieworg.y, RI->vieworg.z, 0.0f );
+		pglUniform4fvARB( RI->currentshader->u_FogParams, 2, &fogParams[0][0] );
 	}
 
 	mextrasurf_t* es = decal->psurface->info;

@@ -454,7 +454,7 @@ void R_DrawGrassMesh( grass_t *grass, int tex, word &hLastShader, word &hCachedM
 		pglUniform4fvARB( RI->currentshader->u_GammaTable, 64, &tr.gamma_table[0][0] );
 		Vector4D grass_params[3];
 		// view origin + real time
-		grass_params[0] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, tr.time );
+		grass_params[0] = Vector4D( RI->vieworg.x, RI->vieworg.y, RI->vieworg.z, tr.time );
 		// fog params
 		grass_params[1] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 		// grass params
@@ -682,7 +682,7 @@ void R_RenderShadowGrassOnList( void )
 
 	Vector4D grass_params[2];
 	// view origin + real time
-	grass_params[0] = Vector4D( tr.cached_vieworigin.x, tr.cached_vieworigin.y, tr.cached_vieworigin.z, tr.time );
+	grass_params[0] = Vector4D( RI->vieworg.x, RI->vieworg.y, RI->vieworg.z, tr.time );
 	// grass params
 	grass_params[1] = Vector4D( m_flGrassFadeStart, m_flGrassFadeDist, m_flGrassFadeEnd, 0.0f );
 	// send!

@@ -29,7 +29,7 @@ uniform vec4 u_GrassParams[2];
 
 varying vec2		var_TexCoord;
 varying vec3		var_VertexColor;
-varying vec4		var_ViewSpace;
+varying vec3		var_ViewVec;
 
 void main( void )
 {
@@ -64,5 +64,5 @@ void main( void )
 	var_TexCoord = GetTexCoordsForVertex( int( attr_Position.w ));
 	gl_ClipVertex = gl_ModelViewMatrix * worldpos;
 	var_VertexColor = vec3(0.0);
-	var_ViewSpace = gl_Position;
+	var_ViewVec = ( u_ViewOrigin - worldpos.xyz );
 }

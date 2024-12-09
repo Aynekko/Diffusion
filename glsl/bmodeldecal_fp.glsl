@@ -20,14 +20,15 @@ uniform sampler2D		u_DecalMap;
 uniform sampler2D		u_ColorMap;	// surface under decal
 uniform sampler2D		u_LightMap;
 
-uniform vec4		u_FogParams;
+uniform vec4		u_FogParams[2];
+uniform vec3		u_ViewOrigin;
 
 varying vec4		var_TexDiffuse;
 varying vec3		var_TexLight0;
 varying vec3		var_TexLight1;
 varying vec3		var_TexLight2;
 varying vec3		var_TexLight3;
-varying vec4		var_ViewSpace;
+varying vec3		var_ViewVec;
 
 void main( void )
 {
@@ -64,14 +65,12 @@ void main( void )
 	diffuse.rgb *= light;
 #endif
 
-	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	if( u_FogParams[0].x + u_FogParams[0].y + u_FogParams[0].z + u_FogParams[0].w > 0.0 )
 	{
-	//	float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-	//	diffuse.rgb = Q_mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
-		float dist = length( var_ViewSpace );
-		float fogFactor = 1.0 / exp(dist * u_FogParams.w );
+		float dist = length( var_ViewVec );
+		float fogFactor = 1.0 / exp( dist * u_FogParams[0].w );
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );
-		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
+		diffuse.rgb = mix( u_FogParams[0].xyz, diffuse.rgb, fogFactor );
 	}
 
 	gl_FragColor = diffuse;

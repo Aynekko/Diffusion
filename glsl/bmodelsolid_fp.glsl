@@ -96,8 +96,6 @@ varying vec3		var_Position;
 varying vec3		var_WorldNormal;
 #endif
 
-varying vec4		var_ViewSpace;
-
 void main( void )
 {
 	vec4 diffuse = vec4( 0.0 );
@@ -342,9 +340,8 @@ void main( void )
 	// apply global fog
 	if( EnableFog )
 	{
-		float dist = length( var_ViewSpace );
-	//	fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-		fogFactor = 1.0 / exp(dist * u_FogParams.w );
+		float dist = length( var_ViewVec );
+		fogFactor = 1.0 / exp( dist * u_FogParams.w );
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );
 		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}
@@ -379,9 +376,8 @@ void main( void )
 	// apply global fog
 	if( EnableFog )
 	{
-		float dist = length( var_ViewSpace );
-	//	fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
-		fogFactor = 1.0 / exp(dist * u_FogParams.w );
+		float dist = length( var_ViewVec );
+		fogFactor = 1.0 / exp( dist * u_FogParams.w );
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );
 		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}

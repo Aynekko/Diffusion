@@ -24,13 +24,15 @@ attribute vec4		attr_LightStyles;
 
 uniform float		u_LightStyleValues[MAX_LIGHTSTYLES];
 uniform mat4		u_ModelMatrix;
+uniform vec4		u_FogParams[2];
+#define u_ViewOrigin u_FogParams[1].xyz
 
 varying vec4		var_TexDiffuse;
 varying vec3		var_TexLight0;
 varying vec3		var_TexLight1;
 varying vec3		var_TexLight2;
 varying vec3		var_TexLight3;
-varying vec4		var_ViewSpace;
+varying vec3		var_ViewVec;
 
 void main( void )
 {
@@ -65,5 +67,5 @@ void main( void )
 	var_TexLight3.z = u_LightStyleValues[int( attr_LightStyles[3] )];
 #endif
 
-	var_ViewSpace = gl_Position;
+	var_ViewVec = u_ViewOrigin - worldpos.xyz;
 }

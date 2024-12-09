@@ -118,6 +118,5 @@ void main( void )
 	var_WorldNormal = srcN;
 #endif
 
-	var_ViewSpace = gl_Position;
 	var_MatrixTBN = tbn;
 }
