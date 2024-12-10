@@ -57,6 +57,7 @@ varying vec2		var_TexDiffuse;
 varying vec3		var_LightVec;
 varying vec3		var_ViewVec;
 varying vec3		var_Normal;
+varying float		var_Distance;
 
 #if defined( REFLECTION_CUBEMAP ) || defined( STUDIO_INTERIOR )
 varying vec3		var_Position;
@@ -211,6 +212,8 @@ void main( void )
 	var_ViewVec = srcV * MeshScale;
 	var_Normal = srcN;
 #endif
+
+	var_Distance = length( srcV * MeshScale );
 
 #if defined( REFLECTION_CUBEMAP ) || defined( STUDIO_INTERIOR )
 	var_Position = worldpos.xyz;
