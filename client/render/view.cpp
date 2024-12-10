@@ -1026,6 +1026,8 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 		// ----------------------------------------------------
 		if( PrevViewAngles != g_vecZero && fabs(vOriginalAngles.x) < 45 )
 		{
+			Vector2D vDifference2D = { vDifference.x, vDifference.y };
+			float flDiff2D = vDifference2D.Length();
 			float anglediff = (PrevViewAngles.y - pparams->viewangles.y);
 			float dir = anglediff >= 0 ? 1.0f : -1.0f;
 			if( fabs( anglediff ) < 0.01f )
@@ -1034,11 +1036,11 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 			{
 				// fighting sudden countersteer, looks better
 				if( dir == -1.0f && gun_roll_angle > 0.05f )
-					gun_roll_angle = CL_UTIL_Approach( 0.0f, gun_roll_angle, pparams->frametime * 3.0f );
+					gun_roll_angle = CL_UTIL_Approach( 0.0f, gun_roll_angle, pparams->frametime * (3.0f + fabs( anglediff )) );
 				else if( dir == 1.0f && gun_roll_angle < -0.05f )
-					gun_roll_angle = CL_UTIL_Approach( 0.0f, gun_roll_angle, pparams->frametime * 3.0f );
+					gun_roll_angle = CL_UTIL_Approach( 0.0f, gun_roll_angle, pparams->frametime * (3.0f + fabs( anglediff )) );
 				else
-					gun_roll_angle = lerp( gun_roll_angle, flDiff * dir, pparams->frametime * 5.0f );
+					gun_roll_angle = lerp( gun_roll_angle, flDiff2D * dir, pparams->frametime * 5.0f );
 			}
 		}
 		else
