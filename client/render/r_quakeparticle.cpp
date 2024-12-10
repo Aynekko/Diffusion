@@ -27,6 +27,7 @@ GNU General Public License for more details.
 #include "r_sprite.h"
 #include "pm_movevars.h"
 #include "WEAPONINFO.H"
+#include "r_shader.h"
 
 CQuakePartSystem g_pParticles;
 
@@ -1675,6 +1676,12 @@ void CQuakePartSystem :: Update( void )
 	pglBindVertexArray( GL_FALSE ); // just in case
 
 	GL_Blend( GL_TRUE );
+
+	if( tr.fogEnabled )
+	{
+		GL_BindShader( glsl.genericFogUseAlpha );
+		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+	}
 
 	DrawParticles( ParticleArray_Default );
 	DrawParticles( ParticleArray_Dustmote );

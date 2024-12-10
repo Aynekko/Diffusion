@@ -31,8 +31,10 @@ void main( void )
 {
 	vec4 diffuse = texture2D( u_ColorMap, var_TexCoord );
 
-	if( diffuse.a < 0.5 )
+#if !defined( FOG_USE_ALPHA )
+	if( diffuse.a < 0.5 ) // solid things can use textures with transparency
 		discard;
+#endif
 
 	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
 	{
