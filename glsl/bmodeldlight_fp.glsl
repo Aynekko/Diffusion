@@ -310,7 +310,6 @@ void main( void )
 		#if defined( BMODEL_WATER_REFRACTION ) 
 			gloss *= RenderModeModifier;       
 		#endif
-		diffuse.rgb *= MicroShadow( pow(glossmap.b, 2.2), NdotLGloss );
 		diffuse.rgb += gloss * shadow;
 	#endif
 
