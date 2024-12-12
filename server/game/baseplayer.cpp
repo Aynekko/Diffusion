@@ -1720,6 +1720,9 @@ void CBasePlayer::WaterMove()
 
 				// "shoot" into water to figure out splash particle location
 				MakeWaterSplash( PlayerOrg + Vector( 0, 0, 200 ), PlayerOrg - Vector( 0, 0, ((pev->flags & FL_DUCKING) ? 17 : 35) ), 1 );
+
+				// create a box of bubbles under the player (if there's not enough water they just won't spawn so it's okay)
+				UTIL_Bubbles( GetAbsOrigin() - Vector( 64, 64, 196 ), GetAbsOrigin() + Vector( 64, 64, -32 ), 100 );
 			}
 			else
 			{
