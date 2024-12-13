@@ -5201,6 +5201,13 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 		if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
 			cached_texture = -1;
 
+		float newdynlightscale = pl->brightness * tr.materials[mat->gl_diffuse_id].DynlightScale;
+		if( newdynlightscale != cached_dynlightscale )
+		{
+			pglUniform1fARB( RI->currentshader->u_DynLightBrightness, newdynlightscale );
+			cached_dynlightscale = newdynlightscale;
+		}
+
 		if( cached_texture == -1 || cached_texture != mat->gl_diffuse_id )
 		{		
 			if( r_lightmap->value && !r_fullbright->value )
@@ -5232,13 +5239,6 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			{
 				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[mat->gl_diffuse_id].InteriorGrid.x, tr.materials[mat->gl_diffuse_id].InteriorGrid.y, (float)tr.materials[mat->gl_diffuse_id].InteriorLightState );
 				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_interiormap_id ); // u_InteriorMap
-			}
-
-			float newdynlightscale = pl->brightness * tr.materials[mat->gl_diffuse_id].DynlightScale;
-			if( newdynlightscale != cached_dynlightscale )
-			{
-				pglUniform1fARB( RI->currentshader->u_DynLightBrightness, newdynlightscale );
-				cached_dynlightscale = newdynlightscale;
 			}
 
 			if( gl_specular->value > 0 && tr.materials[mat->gl_diffuse_id].GlossScale > 0.0f )
