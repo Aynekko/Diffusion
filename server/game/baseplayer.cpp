@@ -5721,7 +5721,7 @@ void CBasePlayer::SelectNextItem( int iItem )
 	
 	if (!pItem)
 		return;
-
+	
 	if (pItem == m_pActiveItem)
 	{
 		// select the next one in the chain
@@ -5845,6 +5845,17 @@ void CBasePlayer::SelectLastItem( void )
 		return;
 
 	m_flLastWeaponSwitchTime = gpGlobals->time + 0.5;
+
+	if( !m_pLastItem->CanDeploy() ) // last item is out of ammo?
+	{
+		m_pLastItem = m_pActiveItem;
+		if( g_pGameRules->GetNextBestWeapon( this, m_pActiveItem ) )
+			return;
+		else
+			m_pLastItem = NULL;
+
+		return;
+	}
 
 	ResetAutoaim( );
 
