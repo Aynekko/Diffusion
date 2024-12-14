@@ -268,21 +268,16 @@ void R_SetupLightProjectionTexture( plight_t *pl, cl_entity_t *pEnt )
 	}
 	else if( pl->flags & CF_MOVIE )
 	{
-		if( pl->projectionTexture == tr.spotlightTexture )
-			return;	// bad video texture
+	//	if( pl->projectionTexture == tr.spotlightTexture )
+	//		return;	// bad video texture
 
 		// found the corresponding cinstate
 		const char *cinname = gRenderfuncs.GetFileByIndex( pEnt->curstate.sequence );
 		int hCin = R_PrecacheCinematic( cinname );
 
-	//	if( hCin >= 0 && !tr.pl_cinTextures[pEnt->index] )
-	//	{
-	//		tr.pl_cinTextures[pEnt->index] = R_AllocateCinematicTexture( TF_SPOTLIGHT );
-	//	}
 		if( hCin >= 0 && !pl->cinTexturenum )
 			pl->cinTexturenum = R_AllocateCinematicTexture( TF_SPOTLIGHT );
 
-	//	if( hCin == -1 || tr.pl_cinTextures[pEnt->index] <= 0 || CIN_IS_ACTIVE( tr.cinematics[hCin].state ) == false )
 		if( hCin == -1 || pl->cinTexturenum <= 0 || !CIN_IS_ACTIVE( tr.cinematics[hCin].state ) )
 		{
 			// cinematic textures limit exceeded or movie not found
@@ -324,7 +319,6 @@ void R_SetupLightProjectionTexture( plight_t *pl, cl_entity_t *pEnt )
 		}
 
 		// have valid cinematic texture
-	//	pl->projectionTexture = tr.cinTextures[tr.pl_cinTextures[pEnt->index] -1];
 		pl->projectionTexture = tr.cinTextures[pl->cinTexturenum - 1];
 	}
 	else

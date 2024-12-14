@@ -3583,6 +3583,7 @@ void R_WorldMarkVisibleFaces( void )
 	mextrasurf_t *esrf;
 	mworldleaf_t *leaf;
 	int i, j;
+	bool bBuildingCubemaps = IsBuildingCubemaps();
 
 	if( RP_NORMALPASS() )
 		tr.bSkySurfFound = false;
@@ -3591,7 +3592,7 @@ void R_WorldMarkVisibleFaces( void )
 	for( i = 1, leaf = &world->leafs[1]; i < world->numleafs; i++, leaf++ )
 	{
 		// during cubemap pass, all faces are visible - this way pvs is ignored and all faces have correct gamma. Fix it properly?
-		if( (CHECKVISBIT( RI->visbytes, leaf->cluster ) || IsBuildingCubemaps()) && (leaf->efrags || leaf->nummarksurfaces) )
+		if( (CHECKVISBIT( RI->visbytes, leaf->cluster ) || bBuildingCubemaps) && (leaf->efrags || leaf->nummarksurfaces) )
 		{
 			if( RI->frustum.CullBox( leaf->mins, leaf->maxs ) )
 				continue;
@@ -3634,7 +3635,7 @@ void R_WorldMarkVisibleFaces( void )
 						dist = surf->plane->normal[2];
 					else dist = PlaneDiff( tr.modelorg, surf->plane );
 
-					if( !IsBuildingCubemaps() )
+					if( !bBuildingCubemaps )
 					{
 						if( (backplane && dist >= -BACKFACE_EPSILON) || (!backplane && dist <= BACKFACE_EPSILON) )
 							continue; // wrong side
