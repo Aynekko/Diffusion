@@ -393,7 +393,11 @@ void CL_DecayLights( void )
 
 	for( i = 0, pl = cl_plights; i < MAX_USER_PLIGHTS; i++, pl++ )
 	{
-		if( !pl->radius ) continue;
+		if( !pl->radius )
+			continue;
+
+		if( pl->flags & CF_MOVIE )
+			continue; // can't clear this light
 
 		pl->radius -= (tr.time - tr.oldtime) * pl->decay;
 		if( pl->radius < 0 ) pl->radius = 0;
