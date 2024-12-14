@@ -520,6 +520,9 @@ void CBreakable::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 
 void CBreakable::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
 {
+	if( pev->takedamage == DAMAGE_NO )
+		return;
+	
 	// random spark if this is a 'computer' object
 	if (RANDOM_LONG(0,1) )
 	{
@@ -554,6 +557,9 @@ void CBreakable::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 //=========================================================
 int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
+	if( pev->takedamage == DAMAGE_NO )
+		return 0;
+
 	// damage amount is below the set threshold
 	if( pev->frags > 0 && flDamage < pev->frags )
 		return 0;
