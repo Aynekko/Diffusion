@@ -125,19 +125,27 @@ void CEnvProjector::Spawn(void)
 	if( HasSpawnFlags( SF_PROJECTOR_ONLYFORCEDSHADOWS ) )
 		pev->iuser1 |= CF_ONLYFORCEDSHADOWS;
 
-	// determine texture type by extension
-	if (!FStringNull(pev->message))
-	{
-		const char* ext = UTIL_FileExtension(STRING(pev->message));
+	if( HasSpawnFlags( SF_PROJECTOR_MOVIESOUND ) )
+		pev->iuser1 |= CF_MOVIE_SOUND;
 
-		if( !Q_stricmp( ext, "tga" ) || !Q_stricmp( ext, "mip" ) || !Q_stricmp( ext, "dds" ) )
-			pev->iuser1 |= CF_TEXTURE;
-		else if( !Q_stricmp( ext, "spr" ) )
-			pev->iuser1 |= CF_SPRITE;
-		else if( !Q_stricmp( ext, "avi" ) )
-			pev->iuser1 |= CF_MOVIE;
+	// determine texture type by extension
+	if( !FStringNull( pev->message ) )
+	{
+		bool movie = UTIL_ValidMovieFileExtension( STRING( pev->message ) );
+
+		if( !movie )
+		{
+			const char *ext = UTIL_FileExtension( STRING( pev->message ) );
+
+			if( !Q_stricmp( ext, "tga" ) || !Q_stricmp( ext, "mip" ) || !Q_stricmp( ext, "dds" ) )
+				pev->iuser1 |= CF_TEXTURE;
+			else if( !Q_stricmp( ext, "spr" ) )
+				pev->iuser1 |= CF_SPRITE;
+			else
+				ALERT( at_error, "env_projector \"%s\": unsupported texture extension!\n", GetTargetname() );
+		}
 		else
-			ALERT( at_error, "env_projector \"%s\": unsupported texture extension!\n", GetTargetname() );
+;			pev->iuser1 |= CF_MOVIE;
 	}
 
 	Precache();

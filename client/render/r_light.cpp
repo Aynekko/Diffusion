@@ -275,10 +275,15 @@ void R_SetupLightProjectionTexture( plight_t *pl, cl_entity_t *pEnt )
 		const char *cinname = gRenderfuncs.GetFileByIndex( pEnt->curstate.sequence );
 		int hCin = R_PrecacheCinematic( cinname );
 
+	//	if( hCin >= 0 && !tr.pl_cinTextures[pEnt->index] )
+	//	{
+	//		tr.pl_cinTextures[pEnt->index] = R_AllocateCinematicTexture( TF_SPOTLIGHT );
+	//	}
 		if( hCin >= 0 && !pl->cinTexturenum )
 			pl->cinTexturenum = R_AllocateCinematicTexture( TF_SPOTLIGHT );
 
-		if( hCin == -1 || pl->cinTexturenum <= 0 || !CIN_IS_ACTIVE( tr.cinematics[hCin].state ))
+	//	if( hCin == -1 || tr.pl_cinTextures[pEnt->index] <= 0 || CIN_IS_ACTIVE( tr.cinematics[hCin].state ) == false )
+		if( hCin == -1 || pl->cinTexturenum <= 0 || !CIN_IS_ACTIVE( tr.cinematics[hCin].state ) )
 		{
 			// cinematic textures limit exceeded or movie not found
 			pl->projectionTexture = tr.spotlightTexture;
@@ -287,23 +292,40 @@ void R_SetupLightProjectionTexture( plight_t *pl, cl_entity_t *pEnt )
 
 		gl_movie_t *cin = &tr.cinematics[hCin];
 
-		// advances cinematic time
-		float cin_time = fmod( pEnt->curstate.fuser2, cin->length );
-
-		// read the next frame
-		int cin_frame = CIN_GET_FRAME_NUMBER( cin->state, cin_time );
-
-		if( cin_frame != pl->lastframe )
+		if( !cin->finished )
 		{
-			// upload the new frame
-			byte *raw = CIN_GET_FRAMEDATA( cin->state, cin_frame );
-			CIN_UPLOAD_FRAME( tr.cinTextures[pl->cinTexturenum-1],
-				cin->xres, cin->yres, cin->xres, cin->yres, raw );
-			pl->lastframe = cin_frame;
+			if( !cin->texture_set )
+			{
+				CIN_SET_PARM( cin->state, AVI_RENDER_TEXNUM, tr.cinTextures[pl->cinTexturenum - 1],
+					AVI_RENDER_W, cin->xres,
+					AVI_RENDER_H, cin->yres,
+					AVI_PARM_LAST );
+				cin->texture_set = true;
+			}
+
+			if( !cin->sound_set )
+			{
+				int volume = FBitSet( pEnt->curstate.iuser1, CF_MOVIE_SOUND ) ? static_cast<int>(VOL_NORM * 255) : 0;
+				CIN_SET_PARM( cin->state,
+					AVI_ENTNUM, pEnt->index,
+					AVI_VOLUME, volume,
+					AVI_ATTN, ATTN_NORM,
+					AVI_PARM_LAST );
+				cin->sound_set = true;
+			}
+
+			// running think here because we're usually thinking with audio, but dlight doesn't have audio
+			if( !CIN_THINK( cin->state ) ) // probably should be moved to some kind of global manager that will tick each frame
+			{
+				if( FBitSet( pEnt->curstate.iuser1, CF_LOOPED_MOVIE ) )
+					CIN_SET_PARM( cin->state, AVI_REWIND, AVI_PARM_LAST );
+				else cin->finished = true;
+			}
 		}
 
 		// have valid cinematic texture
-		pl->projectionTexture = tr.cinTextures[pl->cinTexturenum-1];
+	//	pl->projectionTexture = tr.cinTextures[tr.pl_cinTextures[pEnt->index] -1];
+		pl->projectionTexture = tr.cinTextures[pl->cinTexturenum - 1];
 	}
 	else
 	{

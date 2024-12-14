@@ -13,14 +13,9 @@
 
 #define COM_CheckString( string ) ( ( !string || !*string ) ? 0 : 1 )
 
-//============
-// UTIL_FileExtension
-// returns file extension
-//============
 const char *UTIL_FileExtension( const char *in )
 {
 	const char *separator, *backslash, *colon, *dot;
-
 	separator = Q_strrchr( in, '/' );
 	backslash = Q_strrchr( in, '\\' );
 	if( !separator || separator < backslash )
@@ -29,9 +24,15 @@ const char *UTIL_FileExtension( const char *in )
 	if( !separator || separator < colon )
 		separator = colon;
 	dot = Q_strrchr( in, '.' );
-	if( dot == NULL || (separator && ( dot < separator )))
+	if( dot == NULL || (separator && (dot < separator)) )
 		return "";
 	return dot + 1;
+}
+
+bool UTIL_ValidMovieFileExtension( const char *filepath )
+{
+	const char *ext = UTIL_FileExtension( filepath );
+	return (Q_stricmp( ext, "avi" ) == 0 || Q_stricmp( ext, "webm" ) == 0 || Q_stricmp( ext, "mp4" ) == 0);
 }
 
 void Q_strnupr( const char *in, char *out, size_t size_out )

@@ -142,10 +142,13 @@ typedef void (*pfnShaderCallback)( struct glsl_prog_s *shader );
 
 typedef struct gl_movie_s
 {
-	char		name[32];
-	void		*state;
-	float		length;		// total cinematic length
-	long		xres, yres;	// size of cinematic
+	char name[32];
+	struct movie_state_s *state;
+	float length;		// total cinematic length
+	int xres, yres;	// size of cinematic
+	bool finished;
+	bool sound_set;
+	bool texture_set;
 } gl_movie_t;
 
 typedef struct gl_texbuffer_s

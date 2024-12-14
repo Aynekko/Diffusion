@@ -1514,6 +1514,7 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	bool portal = false;
 	bool using_cubemaps = false;
 	bool IsLandscape = FBitSet( s->flags, SURF_LANDSCAPE );
+	bool movie = FBitSet( s->flags, SURF_MOVIE );
 
 	ASSERT( worldmodel != NULL );
 
@@ -1547,9 +1548,6 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 			GL_AddShaderDirective( options, "BMODEL_MONOCHROME" );
 		fullBright = true;
 	}
-
-	if( FBitSet( s->flags, SURF_MOVIE ))
-		fullBright = true;
 
 	// solid water with lightmaps looks ugly
 	// diffusion - allow water to use lightmap

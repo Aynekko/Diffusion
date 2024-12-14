@@ -475,7 +475,7 @@ void R_UpdateSurfaceParams( msurface_t *surf )
 	// update texture animation if needs
 	tex = R_TextureAnimation( surf );
 
-	if( FBitSet( surf->flags, SURF_MOVIE ) && RI->currententity->curstate.body )
+	if( FBitSet( surf->flags, SURF_MOVIE ) && e->curstate.body )
 	{
 		esrf->gl_texturenum = tr.cinTextures[esrf->cintexturenum-1];
 	}

@@ -9,7 +9,6 @@
 
 #define MAX_TOKEN_CHARS	1024
 
-extern const char *UTIL_FileExtension( const char *in );
 extern void Q_strnupr( const char *in, char *out, size_t size_out );
 extern void Q_strnlwr( const char *in, char *out, size_t size_out );
 extern bool Q_isdigit( const char *str );
@@ -34,6 +33,8 @@ int Q_snprintf( char *buffer, size_t buffersize, const char *format, ... );
 int Q_sprintf( char *buffer, const char *format, ... );
 char *Q_pretifymem( float value, int digitsafterdecimal );
 char *va( const char *format, ... );
+const char *UTIL_FileExtension( const char *in );
+bool UTIL_ValidMovieFileExtension( const char *filepath );
 
 #define Q_strupr( in, out ) Q_strnupr( in, out, 99999 )
 #define Q_strlwr( in, out ) Q_strnlwr( in, out, 99999 )

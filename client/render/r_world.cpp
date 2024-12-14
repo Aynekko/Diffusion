@@ -2390,14 +2390,14 @@ void R_DrawLightForSurfList( plight_t *pl )
 			mtexinfo_t *tx = s->texinfo;
 			mfaceinfo_t *land = tx->faceinfo;
 			
-			if( FBitSet( s->flags, SURF_MOVIE ) && RI->currententity->curstate.body )
-			{
-				GL_Bind( GL_TEXTURE0, tr.cinTextures[es->cintexturenum - 1] );
-				GL_LoadIdentityTexMatrix();
-			}
-			else if( r_lightmap->value )
+			if( r_lightmap->value )
 			{
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
+				GL_LoadIdentityTexMatrix();
+			}
+			else if( FBitSet( s->flags, SURF_MOVIE ) && e->curstate.body )
+			{
+				GL_Bind( GL_TEXTURE0, tr.cinTextures[es->cintexturenum - 1] );
 				GL_LoadIdentityTexMatrix();
 			}
 			else if( FBitSet( s->flags, SURF_LANDSCAPE ) )
@@ -2459,7 +2459,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 			else
 			{
-				float newdynlightscale = pl->brightness * tr.materials[es->gl_texturenum].DynlightScale;
+				float newdynlightscale = FBitSet( s->flags, SURF_MOVIE ) ? pl->brightness : (pl->brightness * tr.materials[es->gl_texturenum].DynlightScale);
 				if( newdynlightscale != cached_dynlightscale )
 				{
 					pglUniform1fARB( RI->currentshader->u_DynLightBrightness, newdynlightscale );
@@ -2904,7 +2904,9 @@ void R_DrawBrushList( void )
 			}
 			else
 			{
-				if( FBitSet( s->flags, SURF_LANDSCAPE ) )
+				if( FBitSet( s->flags, SURF_MOVIE ) && e->curstate.body )
+					GL_Bind( GL_TEXTURE0, tr.cinTextures[es->cintexturenum - 1] );
+				else if( FBitSet( s->flags, SURF_LANDSCAPE ) )
 					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
 				else if( tr.materials[es->gl_texturenum].gl_fallbacktex_id > 0 )
 					GL_Bind( GL_TEXTURE0, tr.materials[es->gl_texturenum].gl_fallbacktex_id );
@@ -2915,6 +2917,7 @@ void R_DrawBrushList( void )
 				}
 				else
 					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
+
 				GL_LoadIdentityTexMatrix();
 			}
 

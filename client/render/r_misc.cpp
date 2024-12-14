@@ -707,8 +707,11 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 			
 			float radius = ent->curstate.iuser3 ? ent->curstate.iuser3 : 500; // default light radius
 			float fov = ent->curstate.iuser2 ? ent->curstate.iuser2 : 50;
-			pl->die = tr.time; // die at next frame
 			pl->flags = ent->curstate.iuser1;
+			if( pl->flags & CF_MOVIE )
+				pl->die = tr.time + 0.05; // die at next frame - must be kept alive for a movie
+			else
+				pl->die = tr.time; // die at the end of this frame
 			pl->brightness = ent->curstate.fuser1;
 			pl->entindex = ent->index;
 
