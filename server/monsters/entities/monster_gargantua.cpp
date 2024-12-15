@@ -241,11 +241,12 @@ public:
 	void RunAI(void);
 	void FlameControls( float angleX, float angleY );
 
-	int ShootAttachment;
+	bool ShootAttachment;
 	float ShootTime; // the time when the bullet attack can start
 	bool IsShooting; // shooting bullets right now
 	float ShootStartTime; // when robo starts shooting
 	void ShootBullets(void);
+	float NextRocketSuppressTime;
 
 	int m_iSoundState;
 	float LastSparkTime;
@@ -451,6 +452,53 @@ Schedule_t	slGargSwipe[] =
 	},
 };
 
+//=========================================================
+// Suppress
+//=========================================================
+Task_t	tlGargSuppressRocket[] =
+{
+	{ TASK_STOP_MOVING,		(float)0		},
+	{ TASK_FACE_ENEMY,		(float)0		},
+	{ TASK_RANGE_ATTACK1,	(float)0		},
+};
+
+Schedule_t slGargSuppressRocket[] =
+{
+	{
+		tlGargSuppressRocket,
+		SIZEOFARRAY( tlGargSuppressRocket ),
+		0,
+		0,
+		"Robo Suppress Rocket",
+	},
+};
+
+Task_t	tlGargSuppressBullets[] =
+{
+	{ TASK_STOP_MOVING,		(float)0		},
+	{ TASK_FACE_ENEMY,		(float)0		},
+	{ TASK_RANGE_ATTACK2,	(float)0		},
+	{ TASK_RANGE_ATTACK2,	(float)0		},
+	{ TASK_RANGE_ATTACK2,	(float)0		},
+	{ TASK_RANGE_ATTACK2,	(float)0		},
+	{ TASK_RANGE_ATTACK2,	(float)0		},
+	{ TASK_RANGE_ATTACK2,	(float)0		},
+	{ TASK_RANGE_ATTACK2,	(float)0		},
+	{ TASK_RANGE_ATTACK2,	(float)0		},
+	{ TASK_RANGE_ATTACK2,	(float)0		},
+};
+
+Schedule_t slGargSuppressBullets[] =
+{
+	{
+		tlGargSuppressBullets,
+		SIZEOFARRAY( tlGargSuppressBullets ),
+		0,
+		0,
+		"Robo Suppress Bullets",
+	},
+};
+
 const int BigRoboHealth[] =
 {
 	0,
@@ -464,6 +512,8 @@ DEFINE_CUSTOM_SCHEDULES( CGargantua )
 {
 //	slGargFlame,
 	slGargSwipe,
+	slGargSuppressRocket,
+	slGargSuppressBullets
 }; IMPLEMENT_CUSTOM_SCHEDULES( CGargantua, CBaseMonster );
 
 //=========================================================
@@ -487,7 +537,7 @@ void CGargantua :: Spawn()
 		pev->health = BigRoboHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	//pev->view_ofs		= Vector ( 0, 0, 96 );// taken from mdl file
-	m_flFieldOfView = VIEW_FIELD_WIDE;// width of forward view cone ( as a dotproduct result )
+	m_flFieldOfView = VIEW_FIELD_FULL;// width of forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
 
 	MonsterInit();
@@ -505,6 +555,8 @@ void CGargantua :: Spawn()
 	m_afCapability &= ~bits_CAP_CANSEEFLASHLIGHT;
 
 	m_flDistTooFar = 2200;
+
+	ShootAttachment = false;
 }
 
 
@@ -571,11 +623,13 @@ void CGargantua :: Precache()
 	PRECACHE_SOUND("robo/warning2.wav");
 
 	UTIL_PrecacheOther( "robo_rocket2" );
+
+	ShootAttachment = false;
 }
 
 void CGargantua :: RunAI( void )
 {	
-	if( IsShooting && (gpGlobals->time > ShootStartTime + 5) )
+	if( HasConditions( bits_COND_ENEMY_OCCLUDED ) || (IsShooting && (gpGlobals->time > ShootStartTime + 5)) )
 	{
 		IsShooting = false;
 		ShootTime = gpGlobals->time + 1;
@@ -602,7 +656,7 @@ void CGargantua :: RunAI( void )
 
 void CGargantua :: ShootBullets ( void )
 {
-	if (m_hEnemy == NULL)
+	if( m_hEnemy == NULL )
 		return;
 
 	if( !IsShooting )
@@ -614,58 +668,56 @@ void CGargantua :: ShootBullets ( void )
 	MakeIdealYaw( m_hEnemy->GetAbsOrigin() );
 	ChangeYaw ( pev->yaw_speed );
 
-	Vector vecEnemyOrigin = m_hEnemy->GetAbsOrigin();
+	// FIX THIS
+	if( (GetAbsOrigin() - m_vecEnemyLKP).Length() < 200 )
+		m_vecEnemyLKP = m_hEnemy->GetAbsOrigin();
 	
-	Vector	vecGunPos = GetGunPosition();
-	Vector	vecGunAngles = vecEnemyOrigin - GetAbsOrigin();
+	Vector vecGunPos;
+	Vector vecGunAngles;
 
 	// switch between hands each shot
-	if( ShootAttachment == 0 )
-	{
+	if( ShootAttachment )
 		GetAttachment(1, vecGunPos, vecGunAngles);
-		ShootAttachment = 1;
-	}
-	else if( ShootAttachment == 1 )
-	{
+	else
 		GetAttachment(2, vecGunPos, vecGunAngles);
-		ShootAttachment = 0;
-	}
+
+	ShootAttachment = !ShootAttachment;
 	
 	UTIL_MakeVectors( GetAbsAngles() );
-	Vector vecStart = vecGunPos;// + gpGlobals->v_forward * 35;
+	Vector vecStart = vecGunPos;
 	Vector vecAim = ShootAtEnemy( vecStart );
-	vecGunAngles = UTIL_VecToAngles(vecAim);
 
 	// MAKE 3 SOUNDS ON CLIENT !!!!!
 	EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "robo/shoot1.wav", 1, 0.4, 0, RANDOM_LONG(90,110));
 
-	int BulletDmg = 3;
-
-	if( g_iSkillLevel == SKILL_MEDIUM )
-		BulletDmg = 4;
-	else if( g_iSkillLevel == SKILL_HARD )
-		BulletDmg = 5;
-
+	float BulletDmg;
+	switch( g_iSkillLevel )
+	{
+	default:
+	case SKILL_EASY: BulletDmg = 4.0f; break;
+	case SKILL_MEDIUM: BulletDmg = 5.0f; break;
+	case SKILL_HARD: BulletDmg = 6.0f; break;
+	}
+	
 	FireBullets(1, vecStart, vecAim, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_12MM, 1, BulletDmg );
 	
 	pev->effects |= EF_MUZZLEFLASH;
 
 	CSoundEnt::InsertSound ( bits_SOUND_COMBAT, GetAbsOrigin(), 768, 0.3, ENTINDEX(edict()) );
 
-	Vector angles = g_vecZero;
-
+	Vector angles;
 	Vector org = GetAbsOrigin();
 	org.z += 64;
 	Vector dir = m_hEnemy->BodyTarget(org) - org;
 	angles = UTIL_VecToAngles( dir );
 	angles.y -= GetAbsAngles().y;
 
-	FlameControls( angles.x, angles.y );
+//	FlameControls( angles.x, angles.y );
 }
 
 void CGargantua::RocketAttack(void)
 {
-	if (m_hEnemy == NULL)
+	if( m_hEnemy == NULL )
 		return;
 
 	MakeIdealYaw( m_hEnemy->GetAbsOrigin() );
@@ -675,21 +727,21 @@ void CGargantua::RocketAttack(void)
 	Vector	vecGunAngles;
 
 	// switch between hands each shot
-	if( ShootAttachment == 0 )
-	{
+	if( ShootAttachment )
 		GetAttachment(0, vecGunPos, vecGunAngles);
-		ShootAttachment = 1;
-	}
-	else if( ShootAttachment == 1 )
-	{
+	else
 		GetAttachment(3, vecGunPos, vecGunAngles);
-		ShootAttachment = 0;
-	}
+
+	ShootAttachment = !ShootAttachment;
+
+	// FIX THIS
+	if( (GetAbsOrigin() - m_vecEnemyLKP).Length() < 200 )
+		m_vecEnemyLKP = m_hEnemy->GetAbsOrigin();
 	
 	UTIL_MakeVectors( GetAbsAngles() );
 	Vector vecStart = vecGunPos + gpGlobals->v_forward * 35;
 	Vector vecAim = ShootAtEnemy( vecStart );
-	vecGunAngles = UTIL_VecToAngles(vecAim);
+	vecGunAngles = UTIL_VecToAngles( vecAim );
 
 	CBaseMonster *pRocket = (CBaseMonster*)Create( "robo_rocket2", vecStart, vecGunAngles, edict() );
 	
@@ -697,22 +749,19 @@ void CGargantua::RocketAttack(void)
 	{
 	//	if( m_hEnemy != NULL ) // disable auto-following, it's too hard!
 	//		pRocket->m_hEnemy = m_hEnemy;
-		pRocket->SetAbsVelocity( GetAbsVelocity() + gpGlobals->v_forward * 100 );
+		pRocket->SetAbsVelocity( vecAim * 100 );
 	}
 
-	Vector angles = g_vecZero;
-	if ( m_hEnemy != NULL )
-	{
-		Vector org = GetAbsOrigin();
-		org.z += 64;
-		Vector dir = m_hEnemy->BodyTarget(org) - org;
-		angles = UTIL_VecToAngles( dir );
-		angles.y -= GetAbsAngles().y;
-	}
+	Vector angles;
+	Vector org = GetAbsOrigin();
+	org.z += 64;
+	Vector dir = m_hEnemy->BodyTarget(org) - org;
+	angles = UTIL_VecToAngles( dir );
+	angles.y -= GetAbsAngles().y;
 
 	CSoundEnt::InsertSound ( bits_SOUND_COMBAT, GetAbsOrigin(), 1024, 0.3, ENTINDEX(edict()) );
 
-	FlameControls( angles.x, angles.y );
+//	FlameControls( angles.x, angles.y );
 }
 
 void CGargantua :: FlameControls( float angleX, float angleY )
@@ -757,7 +806,7 @@ void CGargantua :: SetYawSpeed ( void )
 		break;
 	case ACT_TURN_LEFT:
 	case ACT_TURN_RIGHT:
-		ys = 45;
+		ys = 80;
 		break;
 	case ACT_WALK:
 	case ACT_RUN:
@@ -765,7 +814,7 @@ void CGargantua :: SetYawSpeed ( void )
 		break;
 
 	default:
-		ys = 60;
+		ys = 80;
 		break;
 	}
 
@@ -997,7 +1046,10 @@ void CGargantua::HandleAnimEvent(MonsterEvent_t *pEvent)
 		if( m_hEnemy != NULL )
 		{
 			RocketAttack();
-			m_seeTime = gpGlobals->time + 10;
+			if( HasConditions(bits_COND_ENEMY_OCCLUDED) )
+				m_seeTime = gpGlobals->time + 1;
+			else
+				m_seeTime = gpGlobals->time + 10;
 		}
 		else
 			m_seeTime = gpGlobals->time + 1;
@@ -1069,7 +1121,16 @@ Schedule_t *CGargantua::GetScheduleOfType( int Type )
 //			return slGargFlame;
 		case SCHED_MELEE_ATTACK1:
 			return slGargSwipe;
-		break;
+		case SCHED_CHASE_ENEMY_FAILED:
+			if( gpGlobals->time > NextRocketSuppressTime )
+			{
+				NextRocketSuppressTime = gpGlobals->time + RANDOM_FLOAT( 5.0f, 10.0f );
+				return slGargSuppressRocket;
+			}
+			else if( RANDOM_LONG( 0, 99 ) > 75 )
+				return slGargSuppressBullets;
+			else
+				break;
 	}
 
 	return CBaseMonster::GetScheduleOfType( Type );

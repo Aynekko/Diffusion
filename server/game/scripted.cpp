@@ -953,6 +953,8 @@ BOOL CBaseMonster :: CineCleanup( void )
 	if( HasFlag(F_ENTITY_BUSY) )
 		RemoveFlag(F_ENTITY_BUSY);
 
+	RouteClear();
+
 	return TRUE;
 }
 

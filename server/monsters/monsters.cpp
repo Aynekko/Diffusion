@@ -3776,8 +3776,8 @@ Vector CBaseMonster :: ShootAtEnemy( const Vector &shootOrigin )
 {
 	CBaseEntity *pEnemy = m_hEnemy;
 
-	if ( pEnemy )
-		return ( (pEnemy->BodyTarget( shootOrigin ) - pEnemy->GetAbsOrigin()) + m_vecEnemyLKP - shootOrigin ).Normalize();
+	if( pEnemy )
+		return ((pEnemy->BodyTarget( shootOrigin ) - pEnemy->GetAbsOrigin()) + m_vecEnemyLKP - shootOrigin).Normalize();
 	else
 		return gpGlobals->v_forward;
 }
