@@ -39,6 +39,8 @@ extern float localanim_NextSAttackTime;
 extern int localanim_WeaponID;
 extern bool localanim_AllowRpgShoot;
 
+static float y_lerper[MAX_WEAPON_SLOTS];
+
 int WeaponsResource :: HasAmmo( WEAPON *p )
 {
 	if( !p )
@@ -291,6 +293,8 @@ void CHudAmmo::Reset( void )
 
 	AmmoSetCrosshair( 0, nullRc, 0, 0, 0 );	// reset crosshair
 	m_pWeapon = NULL;			// reset last weapon
+
+	memset( y_lerper, 0.0f, sizeof( y_lerper ) );
 }
 
 void CHudAmmo::AmmoSetCrosshair(SpriteHandle hspr, wrect_t rc, int r, int g, int b)
@@ -309,7 +313,7 @@ int CHudAmmo::VidInit( void )
 	m_HUD_divider = gHUD.GetSpriteIndex( "divider" );
 
 	ghsprBuckets = gHUD.GetSprite( m_HUD_bucket0 );
-	giBucketWidth = gHUD.GetSpriteRect( m_HUD_bucket0 ).right - gHUD.GetSpriteRect( m_HUD_bucket0 ).left;
+	giBucketWidth = 50;// gHUD.GetSpriteRect( m_HUD_bucket0 ).right - gHUD.GetSpriteRect( m_HUD_bucket0 ).left;
 	giBucketHeight = gHUD.GetSpriteRect( m_HUD_bucket0 ).bottom - gHUD.GetSpriteRect( m_HUD_bucket0 ).top;
 
 	gHR.iHistoryGap = max( gHR.iHistoryGap, gHUD.GetSpriteRect( m_HUD_bucket0 ).bottom - gHUD.GetSpriteRect( m_HUD_bucket0 ).top );
@@ -319,14 +323,16 @@ int CHudAmmo::VidInit( void )
 
 	if( ScreenWidth >= 640 )
 	{
-		giABWidth = 20;
-		giABHeight = 4;
+		giABWidth = 70;
+		giABHeight = 5;
 	}
 	else
 	{
 		giABWidth = 10;
 		giABHeight = 2;
 	}
+
+	memset( y_lerper, 0.0f, sizeof( y_lerper ) );
 
 	return 1;
 }
@@ -380,6 +386,8 @@ void CHudAmmo::Think( void )
 		case 1: PlaySound( "common/wpn_select2.wav", 1 ); break;
 		case 2: PlaySound( "common/wpn_select3.wav", 1 ); break;
 		}
+
+		memset( y_lerper, 0.0f, sizeof( y_lerper ) );
 	}
 
 }
@@ -1014,7 +1022,7 @@ int CHudAmmo::Draw( float flTime )
 
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
-
+	
 	// Draw Weapon Menu
 	DrawWList( flTime );
 
@@ -1311,20 +1319,19 @@ void DrawAmmoBar( WEAPON *p, int x, int y, int width, int height )
 //
 int CHudAmmo::DrawWList( float flTime )
 {
-	int r, g, b, a;
-	int x, y, i;
-
 	if( !gpActiveSel )
 		return 0;
 
 	int iActiveSlot;
+	int r, g, b, a;
+	int x, y, i;
 
 	if( gpActiveSel == (WEAPON *)1 )
 		iActiveSlot = -1;	// current slot has no weapons
 	else 
 		iActiveSlot = gpActiveSel->iSlot;
 
-	x = 10; //!!!
+	x = 20 + (gHUD.fCenteredPadding * 0.75f); //!!!
 	y = 10; //!!!
 
 	// Ensure that there are available choices in the active slot
@@ -1371,17 +1378,21 @@ int CHudAmmo::DrawWList( float flTime )
 	}
 
 	a = 128; //!!!
-	x = 10;
+	x = 20 + (gHUD.fCenteredPadding * 0.75f); //!!!
 
 	// Draw all of the buckets
 	for( i = 0; i < MAX_WEAPON_SLOTS; i++ )
 	{
-		y = giBucketHeight + 10;
+		y = (giBucketHeight + 10);
 
 		// If this is the active slot, draw the bigger pictures,
 		// otherwise just draw boxes
 		if( i == iActiveSlot )
 		{
+			y_lerper[i] = lerp( y_lerper[i], 1.0f, g_fFrametime * 25.0f );
+			if( 1.0f - y_lerper[i] <= 0.01f )
+				y_lerper[i] = 1.0f;
+
 			WEAPON *p = gWR.GetFirstPos( i );
 			int iWidth = giBucketWidth;
 
@@ -1434,8 +1445,8 @@ int CHudAmmo::DrawWList( float flTime )
 				}
 
 				// Draw Ammo Bar
-				DrawAmmoBar( p, x + giABWidth / 2, y, giABWidth, giABHeight );
-				y += p->rcActive.bottom - p->rcActive.top + 5;
+				DrawAmmoBar( p, x + 10, y + 10, giABWidth, giABHeight );
+				y += (p->rcActive.bottom - p->rcActive.top + 5) * y_lerper[i];
 			}
 
 			x += iWidth + 5;
@@ -1443,6 +1454,8 @@ int CHudAmmo::DrawWList( float flTime )
 		}
 		else
 		{
+			y_lerper[i] = 0.0f;
+
 			// Draw Row of weapons.
 			UnpackRGB( r, g, b, gHUD.m_iHUDColor );
 
