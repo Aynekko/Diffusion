@@ -140,6 +140,8 @@ cvar_t *cl_viewmodel_offset_z;
 cvar_t *cl_tutor;
 cvar_t *cl_showhealthbars;
 cvar_t *cl_showdamage;
+cvar_t *cl_largehud;
+cvar_t *cl_centerhud;
 cvar_t *gl_sunshafts;
 cvar_t *gl_sunshafts_blur;
 cvar_t *gl_sunshafts_brightness;
@@ -297,7 +299,6 @@ void PlayFlingWhooshSound( struct ref_params_s *pparams )
 	gEngfuncs.pEventAPI->EV_PlaySound( gEngfuncs.GetLocalPlayer()->index, NULL, CHAN_STATIC, "player/fling_whoosh.wav", woosh_vol, 0, SND_CHANGE_VOL | SND_CHANGE_PITCH, PITCH_NORM );
 }
 
-
 //==========================
 // V_Init
 //==========================
@@ -330,6 +331,8 @@ void V_Init( void )
 	cl_useicon = CVAR_REGISTER( "cl_useicon", "1", FCVAR_ARCHIVE );
 	cl_showdamage = CVAR_REGISTER( "cl_showdamage", "1", FCVAR_ARCHIVE );
 	cl_oldammohud = CVAR_REGISTER( "cl_oldammohud", "0", FCVAR_ARCHIVE ); // Camblu request
+	cl_largehud = CVAR_REGISTER( "cl_largehud", "2", FCVAR_ARCHIVE );
+	cl_centerhud = CVAR_REGISTER( "cl_centerhud", "0", FCVAR_ARCHIVE );
 
 	// setup some engine cvars for custom rendering
 	r_extensions = CVAR_GET_POINTER( "gl_allow_extensions" );

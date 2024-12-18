@@ -10,16 +10,16 @@ DECLARE_MESSAGE( m_HealthVisual, HealthVisual )
 
 float OFFLINEFlashAlphaH = 0;
 int health_icon = 0;
-const int icon_size = 30;
+static float icon_size = 30;
 
 // size of an invisible drawing field...
-const int full_frame_h = 64;
-const int full_frame_w = 280;
-const int total_cells_width = full_frame_w - 20; // 10px borders from left and right
-const int total_cells = 50;
-const float cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / (float)total_cells_width);
-const float cell_height = full_frame_h / 3.0f;
-const float cell_margin = cell_width * 0.25f;
+static float full_frame_h = 64;
+static float full_frame_w = 280;
+static float total_cells_width = full_frame_w - 20; // 10px borders from left and right
+static const int total_cells = 50;
+static float cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / total_cells_width);
+static float cell_height = full_frame_h / 3.0f;
+static float cell_margin = cell_width * 0.25f;
 
 int CHudHealthVisual :: Init(void)
 {
@@ -32,6 +32,15 @@ int CHudHealthVisual :: Init(void)
 int CHudHealthVisual :: VidInit(void)
 {
 	health_icon = LOAD_TEXTURE( "sprites/diffusion/health.dds", NULL, 0, 0 );
+
+	full_frame_h = 64 * gHUD.fScale;
+	full_frame_w = 280 * gHUD.fScale;
+	total_cells_width = full_frame_w - 20; // 10px borders from left and right
+	cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / total_cells_width);
+	cell_height = full_frame_h / 3.0f;
+	cell_margin = cell_width * 0.25f;
+	icon_size = 30.0f * gHUD.fScale;
+
 	return 1;
 };
 
@@ -61,13 +70,14 @@ int CHudHealthVisual :: Draw(float flTime)
 		return 0;
 
 	float pos_x = (ScreenWidth / 32) - 30;
-	float pos_y = ScreenHeight - 75;
+	pos_x += gHUD.fCenteredPadding;
+	float pos_y = ScreenHeight - (75 * gHUD.fScale);
 
 	if( health_icon )
 	{
 		GL_Bind( 0, health_icon );
 		gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
-		GL_Color4f( 70.f / 255.f, 169.f / 255.f, 1.0f, 1.0f );
+		GL_Color4f( 0.275f, 0.663f, 1.0f, 1.0f ); // 70 169 255
 
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 		DrawQuad( pos_x, pos_y - 5, pos_x + icon_size, pos_y + icon_size - 5 );

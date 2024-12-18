@@ -1053,11 +1053,11 @@ int CHudAmmo::Draw( float flTime )
 
 	// width is 280px
 	// diffusion hud color is 70 169 255
-	const int ammo_frame_h = 64;
-	const int ammo_frame_w = 280;
-	const int icon_size = 0;
-	int pos_x = ScreenWidth - ammo_frame_w - icon_size - 10; // 10px border
-	int pos_y = ScreenHeight - 75; // same as hud_health
+	float ammo_frame_h = 64 * gHUD.fScale;
+	float ammo_frame_w = 280 * gHUD.fScale;
+	float pos_x = ScreenWidth - ammo_frame_w - 10; // 10px border
+	pos_x -= gHUD.fCenteredPadding;
+	float pos_y = ScreenHeight - (75 * gHUD.fScale); // same as hud_health
 
 	// Does weapon have any ammo at all?
 	if( m_pWeapon->iAmmoType > 0 )
@@ -1126,10 +1126,11 @@ int CHudAmmo::Draw( float flTime )
 			{
 				float line_pos_x = pos_x + 10;
 				float line_pos_y = cell_start_y + cell_height + 5;
+				float line_h = 5 * gHUD.fScale;
 				// draw the full bar (dark)
-				FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - 28, 5, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+				FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - 28, line_h, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
 				// draw the bar of actual ammo on top of it
-				FillRoundedRGBA( line_pos_x, line_pos_y, ((((float)total_cells_width - 28) / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType )), 5, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+				FillRoundedRGBA( line_pos_x, line_pos_y, ((((float)total_cells_width - 28) / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType )), line_h, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
 				char ammo[8];
 				sprintf_s( ammo, "%i", gWR.CountAmmo( pw->iAmmoType ) );
 				DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, ammo, 70, 169, 255 );

@@ -9,6 +9,9 @@
 
 bool g_bDuckToggled; // diffusion - http://articles.thewavelength.net/378
 
+#define SCALE_2K 1.5f
+#define SCALE_4K 1.8f
+
 void CHud :: Init( void )
 {
 	InitHUDMessages();
@@ -88,6 +91,36 @@ int CHud :: GetSpriteIndex( const char *SpriteName )
 	return -1; // invalid sprite
 }
 
+void CHud::SetupScale( void )
+{
+	fScale = 1.0f;
+	fCenteredPadding = 0.0f;
+
+	if( cl_largehud->value == 1 )
+	{
+		fScale = SCALE_2K;
+		if( ScreenWidth > 2560 && ScreenHeight > 1440 ) // even larger for above 2K
+			fScale = SCALE_4K;
+	}
+	else if( cl_largehud->value > 0 ) // automatic
+	{
+		// use larger size if screen is bigger than FullHD
+		if( ScreenWidth > 1920 && ScreenHeight > 1080 )
+			fScale = SCALE_2K;
+		else if( ScreenWidth > 2560 && ScreenHeight > 1440 ) // even larger for above 2K
+			fScale = SCALE_4K;
+	}
+
+	// this will probably help for ultrawide monitors, I guess (applies to health, ammo, and maybe something else)
+	if( cl_centerhud->value > 0 )
+	{
+		float wideness = (float)ScreenWidth / (float)ScreenHeight;
+		fCenteredPadding = ((float)ScreenWidth * 0.1f) * wideness;
+		if( fCenteredPadding > (float)ScreenWidth * 0.2f )
+			fCenteredPadding = (float)ScreenWidth * 0.2f;
+	}
+}
+
 void CHud :: VidInit( void )
 {
 	m_scrinfo.iSize = sizeof( m_scrinfo );
@@ -102,6 +135,8 @@ void CHud :: VidInit( void )
 	if( ScreenWidth < 640 )
 		m_iRes = 320;
 	else m_iRes = 640;
+
+	SetupScale();
 	
 	// Only load this once
 	if( !m_pSpriteList )

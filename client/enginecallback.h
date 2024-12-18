@@ -59,6 +59,7 @@ extern render_api_t gRenderfuncs;
 #define SPR_Draw		(*gEngfuncs.pfnSPR_Draw)
 #define SPR_DrawHoles	(*gEngfuncs.pfnSPR_DrawHoles)
 #define SPR_DrawAdditive	(*gEngfuncs.pfnSPR_DrawAdditive)
+#define SPR_DrawGeneric (*gEngfuncs.pfnSPR_DrawGeneric)
 #define SPR_EnableScissor	(*gEngfuncs.pfnSPR_EnableScissor)
 #define SPR_DisableScissor	(*gEngfuncs.pfnSPR_DisableScissor)
 #define FillRGBA		(*gEngfuncs.pfnFillRGBA)

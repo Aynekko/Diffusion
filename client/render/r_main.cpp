@@ -576,6 +576,18 @@ void R_CheckChanges( void )
 		settings_changed = true;
 	}
 
+	if( FBitSet( cl_largehud->flags, FCVAR_CHANGED ) )
+	{
+		gHUD.VidInit();
+		ClearBits( cl_largehud->flags, FCVAR_CHANGED );
+	}
+
+	if( FBitSet( cl_centerhud->flags, FCVAR_CHANGED ) )
+	{
+		gHUD.VidInit();
+		ClearBits( cl_centerhud->flags, FCVAR_CHANGED );
+	}
+
 	if( FBitSet( vid_gamma->flags, FCVAR_CHANGED ) || FBitSet( vid_brightness->flags, FCVAR_CHANGED ) )
 	{
 		#ifdef _OPENMP

@@ -84,11 +84,14 @@ int CHudFlashlight::Draw( float flTime )
 	int r, g, b, x, y, a;
 	wrect_t rc;
 
+	rc = *m_prc1;
+
 	// draw main case
 	x = (ScreenWidth / 32) - 35;
-	y = ScreenHeight - 200;
-
-	rc = *m_prc1;
+	if( gHUD.fCenteredPadding > 0.0f )
+		y = ScreenHeight - (72 * gHUD.fScale) - (rc.bottom - rc.top);
+	else
+		y = ScreenHeight - (200 * gHUD.fScale);
 
 	// when not used and fully charged, slowly fade out the icon
 	if( m_flBat == 1.0f )

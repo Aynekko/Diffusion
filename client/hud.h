@@ -1038,6 +1038,9 @@ public:
 	int UpdateClientData( client_data_t *cdata, float time );
 
 	void SetFOV( int newfov );
+	void SetupScale( void );
+	float fScale;
+	float fCenteredPadding;
 
 	CHud() : m_iSpriteCount(0), m_pHudList(NULL) {}
 	~CHud();	// destructor, frees allocated memory

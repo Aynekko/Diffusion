@@ -10,7 +10,15 @@
 float OFFLINEFlashAlpha = 0;
 float StaminaLowSoundTime = 0;
 int stamina_icon = 0;
-const int icon_size = 30;
+static float icon_size = 30;
+// size of an invisible drawing field...
+static float full_frame_h = 64;
+static float full_frame_w = 280;
+static float total_cells_width = full_frame_w - 20; // 10px borders from left and right
+static const int total_cells = 50;
+static float cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / (float)total_cells_width);
+static float cell_height = full_frame_h / 3.0f;
+static float cell_margin = cell_width * 0.25f;
 
 DECLARE_MESSAGE( m_Stamina, Stamina )
 
@@ -34,6 +42,15 @@ int CHudStamina:: MsgFunc_Stamina( const char *pszName,  int iSize, void *pbuf )
 int CHudStamina :: VidInit(void)
 {
 	stamina_icon = LOAD_TEXTURE( "sprites/diffusion/stamina.dds", NULL, 0, 0 );
+
+	icon_size = 30.0f * gHUD.fScale;
+	full_frame_h = 64 * gHUD.fScale;
+	full_frame_w = 280 * gHUD.fScale;
+	total_cells_width = full_frame_w - 20; // 10px borders from left and right
+	cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / (float)total_cells_width);
+	cell_height = full_frame_h / 3.0f;
+	cell_margin = cell_width * 0.25f;
+
 	return 1;
 };
 
@@ -51,12 +68,9 @@ int CHudStamina :: Draw(float flTime)
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
 
-	// size of an invisible drawing field...
-	const int full_frame_h = 64;
-	const int full_frame_w = 280;
-
 	float pos_x = (ScreenWidth / 32) - 30;
-	float pos_y = ScreenHeight - 75;
+	pos_x += gHUD.fCenteredPadding;
+	float pos_y = ScreenHeight - (75 * gHUD.fScale);
 	pos_y += (full_frame_h / 3.0f) + 10; // accounting for health bar
 
 	if( stamina_icon )
@@ -90,11 +104,6 @@ int CHudStamina :: Draw(float flTime)
 		a += fabs( sin( tr.time * 3 ) ) * 0.25f;
 	}
 
-	const int total_cells_width = full_frame_w - 20; // 10px borders from left and right
-	const int total_cells = 50;
-	const float cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / (float)total_cells_width);
-	const float cell_height = full_frame_h / 3.0f;
-	const float cell_margin = cell_width * 0.25f;
 	float cell_start_x = pos_x + icon_size + 10;
 	float cell_start_y = pos_y;
 	int cell;
