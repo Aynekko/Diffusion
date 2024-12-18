@@ -20,6 +20,196 @@ GNU General Public License for more details.
 #include "r_local.h"
 #include <mathlib.h>
 #include "r_efx.h"
+#include <algorithm>
+
+char *V_strupr( char *start )
+{
+	unsigned char *str = (unsigned char *)start;
+	while( *str )
+	{
+		if( (unsigned char)(*str - 'a') <= ('z' - 'a') )
+			*str -= 'a' - 'A';
+		else if( (unsigned char)*str >= 0x80 ) // non-ascii, fall back to CRT
+			*str = toupper( *str );
+		str++;
+	}
+	return start;
+}
+
+//======================================================================================
+// UTIL_LocalizeKey: localize special keys like MOUSE1 to titles.txt replacement
+//======================================================================================
+char *UTIL_LocalizeKey( const char *key )
+{
+	client_textmessage_t *title = NULL; // titles.txt
+
+	if( !strcmp( key, "MOUSE1" ) )
+	{
+		title = TextMessageGet( "KEY_MOUSE1" );
+		return title ? (char*)title->pMessage : NULL;
+	}
+	else if( !strcmp( key, "MOUSE2" ) )
+	{
+		title = TextMessageGet( "KEY_MOUSE2" );
+		return title ? (char *)title->pMessage : NULL;
+	}
+
+	return NULL;
+}
+
+void UTIL_ReplaceKeyBindings( const char *inbuf, int inbufsizebytes, char *outbuf )
+{
+	// copy to a new buf if there are vars
+	outbuf[0] = '\0';
+
+	if( !inbuf || !inbuf[0] )
+		return;
+
+	int pos = 0;
+	const char *inbufend = NULL;
+	if( inbufsizebytes > 0 )
+	{
+		inbufend = inbuf + (inbufsizebytes / 2);
+	}
+
+	while( inbuf != inbufend && *inbuf != 0 )
+	{
+		// check for variables
+		if( *inbuf == '%' )
+		{
+			++inbuf;
+
+			const char *end = strchr( inbuf, '%' );
+			if( end && (end != inbuf) ) // make sure we handle %% in the string, which should be treated in the output as %
+			{
+				char token[64];
+				strncpy( token, inbuf, end - inbuf );
+				token[end - inbuf] = 0;
+
+				inbuf += end - inbuf;
+
+				// lookup key names
+				char binding[64];
+				sprintf_s( binding, token );
+
+				const char *key = gEngfuncs.Key_LookupBinding( binding );
+				if( !key )
+				{
+					key = "< not bound >";
+				}
+
+				//!! change some key names into better names
+				char friendlyName[64];
+				bool bAddBrackets = true;
+				Q_snprintf( friendlyName, sizeof( friendlyName ), "%s", key );
+				V_strupr( friendlyName );
+
+				char *locName = UTIL_LocalizeKey( friendlyName );
+				if( !locName )
+					locName = friendlyName;
+
+				outbuf[pos] = '\0';
+				if( bAddBrackets )
+				{
+					strcat( outbuf, "[" );
+					pos += 1;
+				}
+				strcat( outbuf, locName );
+				pos += strlen( locName );
+				if( bAddBrackets )
+				{
+					strcat( outbuf, "]" );
+					pos += 1;
+				}
+			}
+			else
+			{
+				outbuf[pos] = *inbuf;
+				++pos;
+			}
+		}
+		else
+		{
+			outbuf[pos] = *inbuf;
+			++pos;
+		}
+
+		++inbuf;
+	}
+
+	outbuf[pos] = '\0';
+}
+
+//======================================================================================
+// UTIL_GetImageFromMessage: gets path to image from titles.txt message and loads it
+// example %textures/image.dds%, output is texture and text without the path
+//======================================================================================
+void UTIL_GetImageFromMessage( const char *inbuf, int inbufsizebytes, char *outbuf, int *texture )
+{
+	outbuf[0] = '\0';
+	bool bTexFound = false;
+
+	if( !inbuf || !inbuf[0] )
+		return;
+
+	int pos = 0;
+	const char *inbufend = NULL;
+	if( inbufsizebytes > 0 )
+	{
+		inbufend = inbuf + (inbufsizebytes / 2);
+	}
+
+	while( inbuf != inbufend && *inbuf != 0 )
+	{
+		// check for texture, only once
+		if( !bTexFound && *inbuf == '%' )
+		{
+			++inbuf;
+
+			const char *end = strchr( inbuf, '%' );
+			if( end && (end != inbuf) ) // make sure we handle %% in the string, which should be treated in the output as %
+			{
+				bTexFound = true; // go ahead and set it, don't search again
+				char token[64];
+				strncpy( token, inbuf, end - inbuf );
+				token[end - inbuf] = 0;
+
+				inbuf += end - inbuf + 2; // add 2 symbols to dismiss two %s
+
+				// lookup texture
+				if( FILE_EXISTS( token ) )
+				{
+					*texture = LOAD_TEXTURE( token, NULL, 0, 0 );
+					outbuf[pos] = '\0';
+				}
+				else
+				{
+					outbuf[pos] = '\0';
+					strcat( outbuf, "%" );
+					pos++;
+					strcat( outbuf, token );
+					pos += strlen( token );
+					strcat( outbuf, "%" );
+					pos++;
+				}
+			}
+			else
+			{
+				outbuf[pos] = *inbuf;
+				++pos;
+			}
+		}
+		else
+		{
+			outbuf[pos] = *inbuf;
+			++pos;
+		}
+
+		++inbuf;
+	}
+
+	outbuf[pos] = '\0';
+}
 
 /*
 =============

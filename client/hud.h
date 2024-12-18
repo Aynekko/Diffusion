@@ -616,8 +616,14 @@ public:
 	float TutorStartTime;
 	bool IsTutorDrawing;
 	bool x_direction; // false - right, true - left
-	void EnableTutorial(char* pszIconName );
+	void EnableTutorial( char *pszTutorialName );
 	int CurrentImage;
+	void MessageDraw( client_textmessage_t *pMessage, int x, int y, bool GetSize = false );
+
+	client_textmessage_t *tutorial;
+	char tutorial_text[1536];
+	int Twidth;
+	int Theight;
 };
 
 class CHudAchievement: public CHudBase
@@ -776,7 +782,6 @@ public:
 	int Draw( float flTime );
 	void DrawVignette( void );
 	void DrawCinematicBorder( void );
-	void DrawDroneScreen( void );
 	void DrawSpeedometer( void );
 	void DrawShieldVignette( void );
 	void DrawGameSaved( void );
