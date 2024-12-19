@@ -36,6 +36,7 @@ void main( void )
 		discard;
 #endif
 
+#if !defined( NO_FOG )
 	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
 	{
 		diffuse.rgb *= var_VertexColor;
@@ -48,5 +49,6 @@ void main( void )
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );
 		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}
+#endif
 	gl_FragColor = diffuse;
 }

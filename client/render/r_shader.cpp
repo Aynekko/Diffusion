@@ -2425,18 +2425,18 @@ void GL_InitGPUShaders( void )
 	GL_InitSkyBoxUniforms( shader );
 
 	// studio shadowing
-	glsl.studioDepthFill[0] = shader = GL_InitGPUShader( "StudioDepth", "StudioDepth", "generic" );
+	glsl.studioDepthFill[0] = shader = GL_InitGPUShader( "StudioDepth", "StudioDepth", "generic", "#define NO_FOG\n" );
 	GL_InitStudioDepthFillUniforms( shader );
 
-	glsl.studioDepthFill[1] = shader = GL_InitGPUShader( "StudioDepth", "StudioDepth", "generic", "#define STUDIO_BONEWEIGHTING\n"  );
+	glsl.studioDepthFill[1] = shader = GL_InitGPUShader( "StudioDepth", "StudioDepth", "generic", "#define STUDIO_BONEWEIGHTING\n#define NO_FOG\n"  );
 	GL_InitStudioDepthFillUniforms( shader );
 
 	// bmodel shadowing
-	glsl.bmodelDepthFill = shader = GL_InitGPUShader( "BrushDepth", "BmodelDepth", "generic" );
+	glsl.bmodelDepthFill = shader = GL_InitGPUShader( "BrushDepth", "BmodelDepth", "generic", "#define NO_FOG\n" );
 	GL_InitBmodelDepthFillUniforms( shader );
 
 	// grass shadowing
-	glsl.grassDepthFill = shader = GL_InitGPUShader( "GrassDepth", "GrassDepth", "generic" );
+	glsl.grassDepthFill = shader = GL_InitGPUShader( "GrassDepth", "GrassDepth", "generic", "#define NO_FOG\n" );
 	GL_InitGrassSolidUniforms( shader );
 
 	// fog processing

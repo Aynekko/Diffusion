@@ -49,9 +49,9 @@ void main( void )
 #endif
 	
 #if 1 // bicubic filter + sharpen
-	vec4 filter = textureBicubic( u_ColorMap, var_TexCoord );
+	vec4 Filter = textureBicubic( u_ColorMap, var_TexCoord );
 	vec4 sharpen = sharpen( u_ColorMap, var_TexCoord, u_ScreenSizeInv );
 
-	gl_FragColor = vec4( mix( filter.rgb, sharpen.rgb, u_GenericCondition ), 1.0 );
+	gl_FragColor = vec4( mix( Filter.rgb, sharpen.rgb, u_GenericCondition ), 1.0 );
 #endif
 }
