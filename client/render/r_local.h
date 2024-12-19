@@ -483,6 +483,7 @@ typedef struct
 	int volumetric_light_texture;
 
 	float sunlightscale;
+	float renderscale;
 
 	int test; // counter/bool for testing purposes
 } ref_globals_t;
@@ -875,6 +876,7 @@ void WaterDrops( void );
 void DroneScreenShader( void );
 void HeatDistortionShader( void );
 void LensFlare( void );
+void DownScale( void );
 
 //
 // r_shadows.cpp

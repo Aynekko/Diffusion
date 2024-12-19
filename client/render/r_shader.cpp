@@ -1324,6 +1324,22 @@ static void GL_InitEnhanceUniforms( glsl_program_t *shader )
 	GL_ShowProgramUniforms( shader );
 }
 
+static void GL_InitDownScaleUniforms( glsl_program_t *shader )
+{
+	ASSERT( shader != NULL );
+
+	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
+	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
+	shader->u_GenericCondition = pglGetUniformLocationARB( shader->handle, "u_GenericCondition" );
+
+	GL_BindShader( shader );
+	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
+	GL_BindShader( GL_NONE );
+
+	GL_ValidateProgram( shader );
+	GL_ShowProgramUniforms( shader );
+}
+
 static void GL_InitBloomUniforms( glsl_program_t *shader )
 {
 	ASSERT( shader != NULL );
@@ -2352,6 +2368,10 @@ void GL_InitGPUShaders( void )
 	// various screen effects - sharpen, saturation...
 	glsl.Enhance = shader = GL_InitGPUShader( "Enhance", "generic", "enhance" );
 	GL_InitEnhanceUniforms( shader );
+
+	// just basic shader
+	glsl.DownScale = shader = GL_InitGPUShader( "DownScale", "generic", "downscale" );
+	GL_InitDownScaleUniforms( shader );
 
 	// screen water
 	glsl.ScreenWater = shader = GL_InitGPUShader( "ScreenWater", "generic", "screenwater" );

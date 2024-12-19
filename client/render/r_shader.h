@@ -191,6 +191,7 @@ typedef struct
 	glsl_program_t *HeatDistortion;
 	glsl_program_t *BilateralBlur;
 	glsl_program_t *LensFlare;
+	glsl_program_t *DownScale;
 } ref_shaders_t;
 
 void GL_AddShaderDirective( char *options, const char *directive );

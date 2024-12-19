@@ -146,6 +146,7 @@ cvar_t *gl_sunshafts;
 cvar_t *gl_sunshafts_blur;
 cvar_t *gl_sunshafts_brightness;
 cvar_t *gl_sunshafts_adaptive;
+cvar_t *gl_renderscale;
 cvar_t *gl_ssao;
 cvar_t *gl_ssao_debug;
 cvar_t *gl_tonemap;
@@ -413,6 +414,7 @@ void V_Init( void )
 	cubeshot = CVAR_REGISTER( "cubeshot", "0", FCVAR_UNLOGGED );
 	r_flashlightlockposition = CVAR_REGISTER( "r_flashlightlockposition", "0", FCVAR_CHEAT );
 	gl_heateffect_force = CVAR_REGISTER( "gl_heateffect_force", "0", FCVAR_CHEAT );
+	gl_renderscale = CVAR_REGISTER( "gl_renderscale", "1.0", FCVAR_ARCHIVE );
 
 	// cubemaps
 	gEngfuncs.pfnAddCommand( "buildcubemaps", CL_BuildCubemaps_f );

@@ -1137,6 +1137,35 @@ void Enhance( void )
 	GL_CleanUpTextureUnits( 0 );
 }
 
+void DownScale( void )
+{
+	if( gl_renderscale->value >= 1.0f )
+		return;
+
+	GL_Setup2D();
+
+	float w = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 );
+	float h = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 );
+
+	// capture screen
+	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+
+	pglViewport( 0, 0, w, h );
+
+	GL_BindShader( glsl.DownScale );
+	ASSERT( RI->currentshader != NULL );
+
+	// do filtering and sharpening
+	pglUniform1fARB( RI->currentshader->u_GenericCondition, 0.1f );
+	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / w, 1.0f / h );
+
+	RenderFSQ( glState.width, glState.height );
+
+	GL_BindShader( NULL );
+	GL_CleanUpTextureUnits( 0 );
+}
+
 void LensFlare( void )
 {
 	if( gl_lensflare->value <= 0 )

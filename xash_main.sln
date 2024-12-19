@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.31515.178
+# Visual Studio Version 17
+VisualStudioVersion = 17.12.35527.113 d17.12
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "client", "client\client.vcxproj", "{CDA7A4B9-EE49-4476-98D1-FC596AC58084}"
 EndProject
@@ -23,6 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "glsl", "glsl", "{76F81493-9
 		glsl\const.h = glsl\const.h
 		glsl\cubemap.h = glsl\cubemap.h
 		glsl\deluxemap.h = glsl\deluxemap.h
+		glsl\downscale_fp.glsl = glsl\downscale_fp.glsl
 		glsl\drawshafts_fp.glsl = glsl\drawshafts_fp.glsl
 		glsl\drawssao_fp.glsl = glsl\drawssao_fp.glsl
 		glsl\dronescreen_fp.glsl = glsl\dronescreen_fp.glsl
@@ -31,10 +32,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "glsl", "glsl", "{76F81493-9
 		glsl\gaussblur_fp.glsl = glsl\gaussblur_fp.glsl
 		glsl\generate_exposure_fp.glsl = glsl\generate_exposure_fp.glsl
 		glsl\generate_luminance_fp.glsl = glsl\generate_luminance_fp.glsl
-		glsl\generic_fp.glsl = glsl\generic_fp.glsl
-		glsl\generic_vp.glsl = glsl\generic_vp.glsl
 		glsl\genericdlight_fp.glsl = glsl\genericdlight_fp.glsl
 		glsl\genericdlight_vp.glsl = glsl\genericdlight_vp.glsl
+		glsl\generic_fp.glsl = glsl\generic_fp.glsl
+		glsl\generic_vp.glsl = glsl\generic_vp.glsl
 		glsl\genshafts_fp.glsl = glsl\genshafts_fp.glsl
 		glsl\genssao_fp.glsl = glsl\genssao_fp.glsl
 		glsl\glitch_fp.glsl = glsl\glitch_fp.glsl

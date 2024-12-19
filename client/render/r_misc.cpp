@@ -2098,9 +2098,16 @@ void R_VidInit( void )
 	if( !g_fRenderInitialized )
 		return;
 
+	if( gl_renderscale->value <= 0.0f )
+		CVAR_SET_FLOAT( "gl_renderscale", 1.0f );
+
+	tr.renderscale = bound( 0.25f, gl_renderscale->value, 1.0f );
+
 	// get the actual screen size
-	glState.width = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 );
-	glState.height = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 );
+	glState.width = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 ) * tr.renderscale;
+	glState.height = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 ) * tr.renderscale;
+
+	Msg( "^2Rendering resolution:^7 %ix%i, scale: %f\n", glState.width, glState.height, tr.renderscale );
 
 	// release old subview textures
 	for( i = 0; i < MAX_SUBVIEW_TEXTURES; i++ )

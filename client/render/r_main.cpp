@@ -600,6 +600,12 @@ void R_CheckChanges( void )
 		settings_changed = true;
 	}
 
+	if( FBitSet( gl_renderscale->flags, FCVAR_CHANGED ) )
+	{
+		R_VidInit();
+		ClearBits( gl_renderscale->flags, FCVAR_CHANGED );
+	}
+
 	if( tr.fogEnabled != fog_enabled_old )
 	{
 		fog_enabled_old = tr.fogEnabled;
@@ -1108,6 +1114,7 @@ static void R_SetupGL( void )
 	//	int y = floor( glState.height - RI->viewport[1] * glState.height / glState.height );
 	//	int y2 = ceil( glState.height - ( RI->viewport[1] + RI->viewport[3] ) * glState.height / glState.height );
 	//	pglViewport( x, y2, x2 - x, y - y2 );
+	//	pglViewport( 0, 0, glState.width, glState.height );
 		pglViewport( 0, 0, glState.width, glState.height );
 	}
 	else
@@ -2142,7 +2149,9 @@ void R_SetupRefParams( const ref_viewpass_t *rvp )
 	RI->viewport[0] = rvp->viewport[0];
 	RI->viewport[1] = rvp->viewport[1];
 	RI->viewport[2] = rvp->viewport[2];
+	RI->viewport[2] *= tr.renderscale;
 	RI->viewport[3] = rvp->viewport[3];
+	RI->viewport[3] *= tr.renderscale;
 	RI->vieworg = rvp->vieworigin;
 	RI->viewangles = rvp->viewangles;
 
@@ -2232,6 +2241,8 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 
 	// draw main view
 	R_RenderScene();
+
+	DownScale();
 
 	R_RestoreGLState();
 
