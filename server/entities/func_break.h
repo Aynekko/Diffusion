@@ -88,6 +88,7 @@ public:
 	float	m_angle;
 	int	m_iszGibModel;
 	int	m_iszSpawnObject;
+	string_t m_iszFireOnRespawn;
 };
 
 class CPushable : public CBreakable

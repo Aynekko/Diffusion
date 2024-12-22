@@ -132,6 +132,11 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 		}
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "FireOnRespawn" ) )
+	{
+		m_iszFireOnRespawn = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if (FStrEq(pkvd->szKeyName, "lip") )
 		pkvd->fHandled = TRUE;
 	else
@@ -154,6 +159,7 @@ BEGIN_DATADESC( CBreakable )
 	DEFINE_FUNCTION( Die ),
 	DEFINE_FUNCTION( BreakRespawn ),
 	DEFINE_KEYFIELD( RespawnTime, FIELD_INTEGER, "respawntime"),
+	DEFINE_KEYFIELD( m_iszFireOnRespawn, FIELD_STRING, "FireOnRespawn" ),
 END_DATADESC()
 
 void CBreakable::Spawn( void )
@@ -912,6 +918,9 @@ void CBreakable::BreakRespawn(void)
 	pev->deadflag = DEAD_NO;
 	pev->effects &= ~EF_NODRAW;
 	pev->health = pev->max_health;
+
+	if( m_iszFireOnRespawn )
+		UTIL_FireTargets( m_iszFireOnRespawn, this, this, USE_TOGGLE, 0 );
 }
 
 BOOL CBreakable :: IsBreakable( void ) 
