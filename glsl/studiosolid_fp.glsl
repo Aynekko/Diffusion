@@ -79,6 +79,19 @@ void main( void )
 	vec3 MeshOrigin = u_MeshParams[0];
 	vec3 light_diffuse;
 
+	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+
+#if defined( ALPHA_RESCALING )
+	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
+#endif
+
+#if !defined( STUDIO_INTERIOR )
+	#if !defined( STUDIO_DEFAULTALPHATEST )
+		if( diffuse.a < 0.5f )
+			discard;
+	#endif
+#endif
+
 	// compute the normal term
 #if defined( STUDIO_BUMP )
 	#if defined( STUDIO_INTERIOR )
@@ -106,8 +119,7 @@ void main( void )
 	#endif
 
 	// compute the diffuse, emboss and specular term
-	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
-
+	
 #if defined( STUDIO_TEXTURE_BLEND )
 	vec4 blend_texture = texture2D( u_BlendTexture, var_TexDiffuse );
 	// blend them together
@@ -137,13 +149,6 @@ void main( void )
 #if defined( STUDIO_INTERIOR )
 	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec, var_Position ); // u_realtime is currently not used
 #endif
-
-#if defined( ALPHA_RESCALING )
-	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
-#endif
-
-	if( diffuse.a < 0.5f )
-		discard;
 
 	// apply specular lighting
 #if defined( STUDIO_SPECULAR )

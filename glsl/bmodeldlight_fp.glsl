@@ -142,6 +142,19 @@ void main( void )
 	#endif
 #endif
 
+	// get diffuse texture and check alpha
+#if defined( BMODEL_MULTI_LAYERS )
+	diffuse = TerrainApplyDiffuse( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3 );
+#else
+	diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+#endif
+
+#if !defined( BMODEL_INTERIOR )
+	#if !defined( BMODEL_KRENDERTRANSTEXTURE )
+		if( diffuse.a < 0.5 ) discard;
+	#endif
+#endif
+
 	vec3 V = normalize( var_ViewVec );
 	vec3 N;
 
@@ -203,9 +216,8 @@ void main( void )
 	float Brightness = u_DynLightBrightness; 
 #endif
 
-	// compute the diffuse, specular and emboss term
+	// compute specular and emboss term
 #if defined( BMODEL_MULTI_LAYERS )
-	diffuse = TerrainApplyDiffuse( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3 );
 	#if defined( BMODEL_SPECULAR )
 		glossmap = DiffuseToGlossmapTerrain( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3 );
 	#endif
@@ -213,7 +225,6 @@ void main( void )
 		emboss = EmbossFilterTerrain( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3, EmbossScale );
 	#endif
 #else
-	diffuse = texture2D( u_ColorMap, var_TexDiffuse );
 	#if defined( BMODEL_SPECULAR )
 		#if defined( BMODEL_WATER ) && defined( BMODEL_WATER_REFRACTION )
 			glossmap = vec3( 0.5 );
@@ -234,9 +245,7 @@ void main( void )
 #if defined( BMODEL_INTERIOR )
 	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec, var_Position ); // u_realtime is currently not used
 #endif
-#if !defined( BMODEL_KRENDERTRANSTEXTURE )
-	if( diffuse.a < 0.5 ) discard;
-#endif
+
 #if defined( BMODEL_BUMP )
 	// now, rotate normalmap to worldspace
 	N = normalize( var_MatrixTBN * N );

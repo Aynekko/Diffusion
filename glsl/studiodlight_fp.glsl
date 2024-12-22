@@ -149,6 +149,13 @@ void main( void )
 	// compute the diffuse, emboss and specular term
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
 
+#if !defined( STUDIO_INTERIOR )
+	#if !defined( STUDIO_DEFAULTALPHATEST )
+		if( diffuse.a < 0.5f )
+			discard;
+	#endif
+#endif
+
 #if defined( STUDIO_HAS_COLORMASK )
 	vec4 colormask = texture2D( u_ColorMask, var_TexDiffuse );
 	if( colormask.a > 0.5 )
@@ -160,8 +167,6 @@ void main( void )
 #if defined( STUDIO_INTERIOR )
 	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec * var_MatrixTBN, var_Position ); // u_realtime is currently not used
 #endif
-
-	if( diffuse.a < 0.5 ) discard; // no glowing on tex with alpha
 
 #if defined( STUDIO_BUMP )
 	// now, rotate normalmap to worldspace

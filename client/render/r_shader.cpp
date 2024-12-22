@@ -2002,6 +2002,9 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 	if( tr.materials[mat->gl_diffuse_id].monitor )
 		fullbright = true;
 
+	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransTexture )
+		GL_AddShaderDirective( options, "STUDIO_DEFAULTALPHATEST" ); // do not use 0.5 threshold
+
 	if( numbones > 0 && glConfig.max_skinning_bones < MAXSTUDIOBONES && glConfig.uniforms_economy )
 	{
 		int num_bones = Q_min( numbones, glConfig.max_skinning_bones );
@@ -2188,6 +2191,9 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 
 	if( shadows )
 		GL_AddShaderDirective( options, "STUDIO_HAS_SHADOWS" );
+
+	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransTexture )
+		GL_AddShaderDirective( options, "STUDIO_DEFAULTALPHATEST" ); // do not use 0.5 threshold
 
 	glsl_program_t *shader = GL_FindUberShader( glname, options, &GL_InitStudioDlightUniforms );
 	if( !shader )

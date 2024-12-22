@@ -107,17 +107,40 @@ void main( void )
 	vec3 cubemap_reflection = vec3( 0.0 );
 	vec3 screenmap;
 
+	// get diffuse and read alpha
+#if defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR ) || defined( BMODEL_PORTAL )
+	#if defined( BMODEL_WATER_PLANAR )
+		diffuse = texture2D( u_WaterTex, var_TexDiffuse );
+	#elif defined( BMODEL_PORTAL )
+		diffuse = texture2DProj( u_ColorMap, var_TexMirror );
+	#else
+		planar_reflection = reflectmap2D( u_ColorMap, var_TexMirror, N, gl_FragCoord.xyz, 0.15 ) * u_PlanarReflectScale;
+		diffuse = planar_reflection;
+	#endif
+#elif defined( BMODEL_MULTI_LAYERS )
+	// compute the masks for terrain
+	vec4 mask0, mask1, mask2, mask3;
+	TerrainReadMask( var_TexGlobal, mask0, mask1, mask2, mask3 );
+	diffuse = TerrainApplyDiffuse( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3 );
+#else
+	diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+#endif
+
+#if defined( ALPHA_RESCALING )
+	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
+#endif
+
+#if !defined( BMODEL_INTERIOR )
+	#if !defined( BMODEL_DEFAULTALPHATEST )
+	if( diffuse.a < 0.5 ) discard;
+	#endif
+#endif
+
 	float alpha = u_RenderColor.a;
 	float fogFactor = 0.0f;
 	float fresnel = 0.0f;
 
 	bool EnableFog = bool( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 );
-
-	// compute the masks for terrain
-#if defined( BMODEL_MULTI_LAYERS )
-	vec4 mask0, mask1, mask2, mask3;
-	TerrainReadMask( var_TexGlobal, mask0, mask1, mask2, mask3 );
-#endif
 
 	vec3 V = normalize( var_ViewVec * var_MatrixTBN );
 
@@ -181,20 +204,18 @@ void main( void )
 	// compute the diffuse, specular and emboss term
 #if defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR ) || defined( BMODEL_PORTAL )
 	#if defined( BMODEL_WATER_PLANAR )
-		diffuse = texture2D( u_WaterTex, var_TexDiffuse );
 		#if !defined( BMODEL_WATER_REFRACTION ) // will be calc-ed later
 			planar_reflection = texture2DProj( u_ColorMap, var_TexMirror );
 			diffuse.rgb = Q_mix( planar_reflection.rgb, diffuse.rgb, u_PlanarReflectScale );
 		#endif
 		glossmap = vec3( 0.0 );
 	#elif defined( BMODEL_PORTAL )
-		diffuse = texture2DProj( u_ColorMap, var_TexMirror );
+		// nothing here
 	#else
 		planar_reflection = reflectmap2D( u_ColorMap, var_TexMirror, N, gl_FragCoord.xyz, 0.15 ) * u_PlanarReflectScale;
 		diffuse = planar_reflection;
 	#endif
 #elif defined( BMODEL_MULTI_LAYERS )
-	diffuse = TerrainApplyDiffuse( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3 );
 	#if defined( BMODEL_SPECULAR )
 		glossmap = DiffuseToGlossmapTerrain( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3 );
 	#endif
@@ -202,7 +223,6 @@ void main( void )
 		emboss = EmbossFilterTerrain( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3, EmbossScale );
 	#endif
 #else
-	diffuse = texture2D( u_ColorMap, var_TexDiffuse );
 	#if defined( BMODEL_SPECULAR )
 		#if defined( BMODEL_WATER )
 			glossmap = vec3( 0.0 );
@@ -221,16 +241,6 @@ void main( void )
 #endif
 
 	diffuse.rgb *= u_RenderColor.rgb; // kRenderTransColor
-
-#if defined( ALPHA_RESCALING )
-	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
-#endif
-
-#if !defined( BMODEL_INTERIOR )
-	#if !defined( BMODEL_DEFAULTALPHATEST )
-	if( diffuse.a < 0.5 ) discard;
-	#endif
-#endif
 
 #if defined( BMODEL_MONOCHROME )
 	diffuse.rgb = vec3( GetLuminance( diffuse.rgb )); 
