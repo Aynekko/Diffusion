@@ -1144,7 +1144,7 @@ void CQuakePartSystem :: Clear( void )
 	m_hExplosion = LOAD_TEXTURE( "gfx/particles/explosion", NULL, 0, TF_CLAMP );
 	m_hBubble = LOAD_TEXTURE( "gfx/particles/bubble", NULL, 0, TF_CLAMP );
 	m_hBeamRing = LOAD_TEXTURE( "gfx/particles/beamring", NULL, 0, TF_CLAMP );
-	m_hRainDrop = LOAD_TEXTURE( "gfx/particles/raindrop", NULL, 0, 0 );
+	m_hRainDrop = LOAD_TEXTURE( "gfx/particles/raindrop2", NULL, 0, 0 );
 	m_hSingleDrop = LOAD_TEXTURE( "gfx/particles/singledrop", NULL, 0, 0 );
 	m_hWaterFall = LOAD_TEXTURE( "gfx/particles/splash", NULL, 0, 0 );
 
@@ -1736,6 +1736,9 @@ void CQuakePartSystem :: Update( void )
 	GL_Blend( GL_FALSE );
 	if( glState.drawTrans )
 		GL_DepthMask( GL_TRUE );
+
+	if( tr.fogEnabled )
+		GL_BindShader( NULL );
 
 //	ExplosionOrg = g_vecZero;
 }
@@ -2543,7 +2546,7 @@ void CQuakePartSystem::WaterDripLine( const Vector &start, const Vector &end, in
 	src.m_vecOrigin = start + forward * RANDOM_FLOAT( 0.0f, dist );
 	src.m_vecAccel = Vector( 0, 0, -tr.movevars->gravity );
 	src.m_flDistance = Distance;
-	int flags = FPART_NOTINSOLID | FPART_NOTWATER | FPART_ADDITIVE | FPART_VERTEXLIGHT_INSTANT;
+	int flags = FPART_NOTINSOLID | FPART_NOTWATER | FPART_VERTEXLIGHT_INSTANT;
 
 	AddParticle( &src, m_hRainDrop, flags );
 }
@@ -2558,7 +2561,7 @@ void CQuakePartSystem::WaterDrop( int EntIndex, const Vector &pos )
 	src.m_vecOrigin = pos;
 	src.m_vecAccel = Vector( 0, 0, -tr.movevars->gravity );
 	src.EntIndex = EntIndex;
-	int flags = FPART_NOTINSOLID | FPART_NOTWATER | FPART_ADDITIVE | FPART_VERTEXLIGHT_INSTANT;
+	int flags = FPART_NOTINSOLID | FPART_NOTWATER | FPART_VERTEXLIGHT_INSTANT;
 
 	AddParticle( &src, m_hRainDrop, flags );
 }

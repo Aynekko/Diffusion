@@ -147,7 +147,8 @@ void main( void )
 	diffuse.rgb *= light_diffuse; // apply lighting
 
 #if defined( STUDIO_INTERIOR )
-	diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec, var_Position ); // u_realtime is currently not used
+	if( diffuse.a < 0.98 )
+		diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec, var_Position ); // u_realtime is currently not used
 #endif
 
 	// apply specular lighting
