@@ -326,7 +326,7 @@
       <ProgramDatabaseFile>.\..\x64\Release\server\server.pdb</ProgramDatabaseFile>
       <ProfileGuidedDatabase>.\..\x64\Release\server\server.pgd</ProfileGuidedDatabase>
       <LinkTimeCodeGenerationObjectFile>.\..\x64\Release\server\server.iobj</LinkTimeCodeGenerationObjectFile>
-      <LinkTimeCodeGeneration>Default</LinkTimeCodeGeneration>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <PreBuildEvent>
       <Command>copy /b buildtime.h +,,</Command>
