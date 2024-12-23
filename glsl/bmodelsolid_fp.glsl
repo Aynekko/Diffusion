@@ -137,8 +137,8 @@ void main( void )
 #endif
 
 	float alpha = u_RenderColor.a;
-	float fogFactor = 0.0f;
-	float fresnel = 0.0f;
+	float fogFactor = 0.0;
+	float fresnel = 0.0;
 
 	bool EnableFog = bool( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 );
 
@@ -312,7 +312,7 @@ void main( void )
 	fSampledDepth = RemapVal( fSampledDepth, Z_NEAR, u_zFar, 0.0, 1.0 );
 	float depthDelta = abs( fOwnDepth - fSampledDepth );
 
-	if( bool( u_UnderWater == 1.0f ))
+	if( bool( u_UnderWater == 1.0 ))
 	{
 		WaterAbsorbScale = clamp( alpha - ( 1.0 / 255.0 ), 0.0, 1.0 ) * 10.0;
 		WaterBorderFactor = 1.0 - saturate( exp2( -192.0 * 100.0 * depthDelta ));

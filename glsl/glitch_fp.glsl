@@ -17,9 +17,10 @@ uniform vec4 u_Glitch;
 
 #define UI0 1597334673U
 #define UI1 3812015801U
+#define UI11 2798796415U
 #define UI2 uvec2(UI0, UI1)
-#define UI3 uvec3(UI0, UI1, 2798796415U)
-const float UIF = (1.0f / float(0xffffffffU));
+#define UI3 uvec3(UI0, UI1, UI11)
+const float UIF = (1.0 / float(0xffffffffU));
 
 // Hash by David_Hoskins
 vec3 hash33(vec3 p)
