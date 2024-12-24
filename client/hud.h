@@ -138,7 +138,6 @@ public:
 
 	// to reduce calls to the engine, because I use different crosshairs
 	void AmmoSetCrosshair(SpriteHandle hspr, wrect_t rc, int r, int g, int b);
-	void SetWeaponNameText( void );
 	int GetPrimaryClipSize( void );
 	bool PaintLowAmmo( void );
 
@@ -151,7 +150,6 @@ private:
 	int	m_HUD_selection;
 	int m_HUD_divider;
 	int iId; // weapon id
-	char hud_wpn_name[64];
 };
 
 //
@@ -584,7 +582,7 @@ public:
 
 	// had to make these public so CHud could access them (to enable concussion icon)
 	// could use a friend declaration instead...
-	void EnableIcon( char *pszIconName, unsigned char red, unsigned char green, unsigned char blue );
+	void EnableIcon( char *pszIconName, byte red, byte green, byte blue );
 	void DisableIcon( char *pszIconName );
 
 private:
@@ -1041,6 +1039,8 @@ public:
 	void SetupScale( void );
 	float fScale;
 	float fCenteredPadding;
+	void GL_HUD_StartConstantSize( bool aligned_right = false );
+	void GL_HUD_EndConstantSize( void );
 
 	CHud() : m_iSpriteCount(0), m_pHudList(NULL) {}
 	~CHud();	// destructor, frees allocated memory

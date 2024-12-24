@@ -76,6 +76,49 @@ CHud :: ~CHud()
 	}
 }
 
+//========================================================================
+// keeps some HUD elements fixed size - no need to use hud_scale because
+// it scales the whole HUD
+// don't forget to reset viewport after using this!
+// thx to Yanny for this function :)
+//========================================================================
+#define GetHeightByWidth(width) (int)((width) * (ScreenHeight / (float)ScreenWidth))
+#define ScaleWidth(x) (int)(ScreenWidth * (ScreenWidth / (float)x))
+void CHud::GL_HUD_StartConstantSize( bool aligned_right )
+{
+	if( fScale == 1.0f )
+		return;
+
+	int width = 1920; // for 2K and 4K
+
+	const int new_scale = ScaleWidth( width );
+
+	if( !aligned_right )
+	{
+		pglViewport(
+			0,
+			(ScreenHeight - GetHeightByWidth( new_scale )),
+			new_scale, GetHeightByWidth( new_scale )
+		);
+	}
+	else
+	{
+		pglViewport(
+			(ScreenWidth - new_scale),
+			0,
+			new_scale, GetHeightByWidth( new_scale )
+		);
+	}
+}
+
+void CHud::GL_HUD_EndConstantSize( void )
+{
+	if( fScale == 1.0f )
+		return;
+
+	pglViewport( 0, 0, ScreenWidth, ScreenHeight );
+}
+
 // GetSpriteIndex()
 // searches through the sprite list loaded from hud.txt for a name matching SpriteName
 // returns an index into the gHUD.m_rghSprites[] array

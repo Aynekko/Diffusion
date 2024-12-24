@@ -101,6 +101,7 @@ public:
 	int	GetAmmo( int iId ) { return iId; }
 	void	SetAmmo( int iId, int iCount ) { riAmmo[ iId ] = iCount;	}
 	SpriteHandle	*GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rect );
+	int GetWeaponIdForAmmo( int iAmmoId, int *ammotype );
 
 	int CountAmmo( int iId ) 
 	{
@@ -130,6 +131,7 @@ private:
 		float DisplayTime;  // the time at which this item should be removed from the history
 		int iCount;
 		int iId;
+		float x_lerp;
 	};
 
 	HIST_ITEM	rgAmmoHistory[MAX_HISTORY];
@@ -152,6 +154,7 @@ public:
 
 	void CheckClearHistory( void );
 	int DrawAmmoHistory( float flTime );
+	void GetAmmoTextForWeapon( int iAmmoId, const char &text );
 };
 
 extern HistoryResource gHR;

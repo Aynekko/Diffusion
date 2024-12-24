@@ -41,6 +41,35 @@ extern bool localanim_AllowRpgShoot;
 
 static float y_lerper[MAX_WEAPON_SLOTS];
 
+const char WeaponNames[TOTAL_WEAPONS][32] =
+{
+	"'\0'", // WEAPON_NONE
+	"'\0'", // WEAPON_KNIFE
+	"Beretta M9", // WEAPON_BERETTA
+	"Desert Eagle", // WEAPON_DEAGLE
+	"Crye MR-C", // WEAPON_MRC
+	"'\0'", // WEAPON_CYCLER
+	"Crossbow", // WEAPON_CROSSBOW
+	"Kel-Tec KSG", // WEAPON_SHOTGUN
+	"Laser-guided Rocket Launcher", // WEAPON_RPG
+	"Alien Sniper Rifle", // WEAPON_GAUSS
+	"'\0'", // WEAPON_EGON
+	"'\0'", // WEAPON_HORNETGUN
+	"CT XM49 HE Grenade", // WEAPON_HANDGRENADE
+	"CT LM05 Laser Mine", // WEAPON_TRIPMINE
+	"Explosive Pack", // WEAPON_SATCHEL
+	"'\0'", // WEAPON_SNARK
+	"Alien Rifle", // WEAPON_AR2
+	"'\0'", // WEAPON_DRONE
+	"'\0'", // WEAPON_SENTRY
+	"H&K MP5", // WEAPON_HKMP5
+	"FN Five-seven", // WEAPON_FIVESEVEN
+	"Barrett M82", // WEAPON_SNIPER
+	"Benelli M1014", // WEAPON_SHOTGUN_XM
+	"H&K G36C", // WEAPON_G36C
+	"CT M69 Smoke Grenade", // WEAPON_SMOKEGRENADE
+};
+
 int WeaponsResource :: HasAmmo( WEAPON *p )
 {
 	if( !p )
@@ -411,6 +440,27 @@ SpriteHandle* WeaponsResource :: GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rec
 		}
 	}
 	return NULL;
+}
+
+int WeaponsResource::GetWeaponIdForAmmo( int iAmmoId, int *ammotype )
+{
+	*ammotype = 0;
+	for( int i = 0; i < MAX_WEAPONS; i++ )
+	{
+		if( rgWeapons[i].iAmmoType == iAmmoId )
+		{
+			*ammotype = 1;
+			if( rgWeapons[i].iId == WEAPON_DRONE || rgWeapons[i].iId == WEAPON_SENTRY )
+				*ammotype = 0; // HACK
+			return rgWeapons[i].iId;
+		}
+		else if( rgWeapons[i].iAmmo2Type == iAmmoId )
+		{
+			*ammotype = 2;
+			return rgWeapons[i].iId;
+		}
+	}
+	return 0;
 }
 
 
@@ -869,75 +919,6 @@ void CHudAmmo::UserCmd_PrevWeapon( void )
 	gpActiveSel = NULL;
 }
 
-void CHudAmmo::SetWeaponNameText( void )
-{
-	switch( WeaponID )
-	{
-	default:
-	case WEAPON_NONE:
-	case WEAPON_KNIFE:
-	case WEAPON_CYCLER:
-	case WEAPON_EGON:
-	case WEAPON_HORNETGUN:
-	case WEAPON_SNARK:
-	case WEAPON_DRONE:
-	case WEAPON_SENTRY:
-		hud_wpn_name[0] = '\0';
-		break;
-	case WEAPON_BERETTA:
-		sprintf_s( hud_wpn_name, "Beretta M9" );
-		break;
-	case WEAPON_DEAGLE:
-		sprintf_s( hud_wpn_name, "Desert Eagle" );
-		break;
-	case WEAPON_MRC:
-		sprintf_s( hud_wpn_name, "Crye MR-C" );
-		break;
-	case WEAPON_CROSSBOW:
-		sprintf_s( hud_wpn_name, "Crossbow" );
-		break;
-	case WEAPON_SHOTGUN:
-		sprintf_s( hud_wpn_name, "Kel-Tec KSG" );
-		break;
-	case WEAPON_RPG:
-		sprintf_s( hud_wpn_name, "Laser-guided Rocket Launcher" );
-		break;
-	case WEAPON_GAUSS:
-		sprintf_s( hud_wpn_name, "Alien Sniper Rifle" );
-		break;
-	case WEAPON_HANDGRENADE:
-		sprintf_s( hud_wpn_name, "CT XM49 HE Grenade" );
-		break;
-	case WEAPON_TRIPMINE:
-		sprintf_s( hud_wpn_name, "CT LM05 Laser Mine" );
-		break;
-	case WEAPON_SATCHEL:
-		sprintf_s( hud_wpn_name, "Explosive Pack" );
-		break;
-	case WEAPON_AR2:
-		sprintf_s( hud_wpn_name, "Alien Rifle" );
-		break;
-	case WEAPON_HKMP5:
-		sprintf_s( hud_wpn_name, "H&K MP5" );
-		break;
-	case WEAPON_FIVESEVEN:
-		sprintf_s( hud_wpn_name, "FN Five-seven" );
-		break;
-	case WEAPON_SNIPER:
-		sprintf_s( hud_wpn_name, "Barrett M82" );
-		break;
-	case WEAPON_SHOTGUN_XM:
-		sprintf_s( hud_wpn_name, "Benelli M1014" );
-		break;
-	case WEAPON_G36C:
-		sprintf_s( hud_wpn_name, "H&K G36C" );
-		break;
-	case WEAPON_SMOKEGRENADE:
-		sprintf_s( hud_wpn_name, "CT M69 Smoke Grenade" );
-		break;
-	}
-}
-
 int CHudAmmo::GetPrimaryClipSize( void )
 {
 	switch( WeaponID )
@@ -1245,13 +1226,11 @@ int CHudAmmo::Draw( float flTime )
 	if( cl_oldammohud->value <= 0 )
 	{
 		// lastly, draw the weapon name
-		SetWeaponNameText();
-		if( hud_wpn_name[0] != '\0' )
+		if( WeaponNames[WeaponID][0] != '\0' )
 		{
 			int text_pos_x = pos_x + 10;
 			int text_pos_y = pos_y + 2;
-			//	DrawConsoleString( text_pos_x, text_pos_y, hud_wpn_name );
-			DrawString( text_pos_x, text_pos_y, hud_wpn_name, 70, 169, 255 );
+			DrawString( text_pos_x, text_pos_y, WeaponNames[WeaponID], 70, 169, 255 );
 		}
 	}
 
