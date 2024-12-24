@@ -182,7 +182,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 		pWeapon->hActive = gHUD.m_hHudError;
 		pWeapon->rcActive = gHUD.GetSpriteRect( gHUD.m_HUD_error );
 	}
-
+	/* // diffusion - not using these anymore
 	p = GetSpriteList( pList, "ammo", iRes, i );
 	if( p )
 	{
@@ -202,6 +202,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 		gHR.iHistoryGap = max( gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top );
 	}
 	else pWeapon->hAmmo2 = 0;
+	*/
 }
 
 // Returns the first weapon for a given slot.

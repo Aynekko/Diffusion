@@ -118,6 +118,7 @@ void HistoryResource :: AddToHistory( int iType, int iId, int iCount )
 	freeslot->iCount = iCount;
 	freeslot->DisplayTime = gHUD.m_flTime + HISTORY_DRAW_TIME;
 	freeslot->x_lerp = 1.0f;
+	freeslot->ypos_lerp = ScreenHeight - 200;
 }
 
 void HistoryResource :: AddToHistory( int iType, const char *szName, int iCount )
@@ -145,6 +146,7 @@ void HistoryResource :: AddToHistory( int iType, const char *szName, int iCount 
 	HISTORY_DRAW_TIME = CVAR_GET_FLOAT( "hud_drawhistory_time" );
 	freeslot->DisplayTime = gHUD.m_flTime + HISTORY_DRAW_TIME;
 	freeslot->x_lerp = 1.0f;
+	freeslot->ypos_lerp = ScreenHeight - 200;
 }
 
 
@@ -165,6 +167,8 @@ void HistoryResource :: CheckClearHistory( void )
 int HistoryResource :: DrawAmmoHistory( float flTime )
 {
 	gHUD.GL_HUD_StartConstantSize( true );
+
+	float ypos = ScreenHeight - 200;
 
 	for( int i = 0; i < MAX_HISTORY; i++ )
 	{
@@ -187,7 +191,12 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 					continue;
 
 				const char *ammoname = (ammotype == 1 ? AmmoNames[wpn_id] : Ammo2Names[wpn_id] );
-				float ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * 0.5f * i));
+
+				// get position, lerp to it
+				ypos -= 30 + gHUD.m_scrinfo.iCharHeight;
+				rgAmmoHistory[i].ypos_lerp = lerp( rgAmmoHistory[i].ypos_lerp, ypos, 5 * g_fFrametime );
+				float ypos_new = rgAmmoHistory[i].ypos_lerp;
+
 				float xpos = ScreenWidth - 60;
 				client_textmessage_t *pMsg = TextMessageGet( ammoname );
 				int text_width = 0;
@@ -205,25 +214,25 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				if( text_width > 0 )
 				{
 					// lerp to position
-					rgAmmoHistory[i].x_lerp = lerp( rgAmmoHistory[i].x_lerp, 0.0f, 5 * g_fFrametime * (i + 1) );
+					rgAmmoHistory[i].x_lerp = lerp( rgAmmoHistory[i].x_lerp, 0.0f, 5 * g_fFrametime * ((i * 0.5f) + 1) );
 					xpos += 300 * rgAmmoHistory[i].x_lerp;
 
 					// RGB 70 169 255
 					// draw frame and amount
 					float scale = ((rgAmmoHistory[i].DisplayTime - flTime) * 80);
-					FillRoundedRGBA( xpos - text_width - 60, ypos - 10, text_width + 80, gHUD.m_scrinfo.iCharHeight + 20, 10, Vector4D( 0.25f, 0.25f, 0.25f, 0.002f * scale ) ); // grey frame background
-					FillRoundedRGBA( xpos - text_width - 10, ypos - 5, text_width + 25, gHUD.m_scrinfo.iCharHeight + 10, 10, Vector4D( 0.275f, 0.663f, 1.0f, 0.002f * scale ) ); // blue frame for text
+					FillRoundedRGBA( xpos - text_width - 60, ypos_new - 10, text_width + 80, gHUD.m_scrinfo.iCharHeight + 20, 10, Vector4D( 0.25f, 0.25f, 0.25f, 0.002f * scale ) ); // grey frame background
+					FillRoundedRGBA( xpos - text_width - 10, ypos_new - 5, text_width + 25, gHUD.m_scrinfo.iCharHeight + 10, 10, Vector4D( 0.275f, 0.663f, 1.0f, 0.002f * scale ) ); // blue frame for text
 					int r, g, b;
 					UnpackRGB( r, g, b, gHUD.m_iHUDColor );
 					ScaleColors( r, g, b, min( scale, 255 ) );
-					gHUD.DrawHudNumberString( xpos - text_width - 30, ypos, xpos - text_width - 100, rgAmmoHistory[i].iCount, r, g, b );
+					gHUD.DrawHudNumberString( xpos - text_width - 30, ypos_new, xpos - text_width - 100, rgAmmoHistory[i].iCount, r, g, b );
 					// draw text
 					pText = pMsg ? pMsg->pMessage : ammoname;
 					int textpos_x = xpos - text_width;
 					
 					r = 255; g = 255; b = 255;
 					ScaleColors( r, g, b, min( scale, 255 ) );
-					DrawString( textpos_x, ypos, pText, r, g, b );
+					DrawString( textpos_x, ypos_new, pText, r, g, b );
 				}
 			}
 			else if( rgAmmoHistory[i].type == HISTSLOT_WEAP )
@@ -231,7 +240,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				WEAPON *weap = gWR.GetWeapon( rgAmmoHistory[i].iId );
 
 				if( !weap )
-					return 1;  // we don't know about the weapon yet, so don't draw anything
+					continue;  // we don't know about the weapon yet, so don't draw anything
 				
 				int r, g, b;
 				UnpackRGB( r,g,b, gHUD.m_iHUDColor );
@@ -242,15 +251,18 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
 				ScaleColors( r, g, b, min( scale, 255 ));
 
-				float ypos = ScreenHeight - ( AMMO_PICKUP_PICK_HEIGHT + ( AMMO_PICKUP_GAP * 1.25f * i ));
+				// get position, lerp to it
+				ypos -= 35 + AMMO_PICKUP_PICK_HEIGHT;
+				rgAmmoHistory[i].ypos_lerp = lerp( rgAmmoHistory[i].ypos_lerp, ypos, 5 * g_fFrametime );
+				float ypos_new = rgAmmoHistory[i].ypos_lerp;
 				float xpos = ScreenWidth - ( weap->rcInactive.right - weap->rcInactive.left );
 
 				// lerp to position
-				rgAmmoHistory[i].x_lerp = lerp( rgAmmoHistory[i].x_lerp, 0.0f, 5 * g_fFrametime * (i + 1) );
+				rgAmmoHistory[i].x_lerp = lerp( rgAmmoHistory[i].x_lerp, 0.0f, 5 * g_fFrametime * ((i * 0.5f) + 1) );
 				xpos += 300 * rgAmmoHistory[i].x_lerp;
 
 				SPR_Set( weap->hInactive, r, g, b );
-				SPR_DrawAdditive( 0, xpos, ypos, &weap->rcInactive );
+				SPR_DrawAdditive( 0, xpos, ypos_new, &weap->rcInactive );
 			}
 			else if( rgAmmoHistory[i].type == HISTSLOT_ITEM )
 			{
@@ -265,11 +277,14 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				float scale = ( rgAmmoHistory[i].DisplayTime - flTime ) * 80;
 				ScaleColors( r, g, b, min( scale, 255 ));
 
-				int ypos = ScreenHeight - ( AMMO_PICKUP_PICK_HEIGHT + ( AMMO_PICKUP_GAP * i ));
+				// get position, lerp to it
+				ypos -= 30 + AMMO_PICKUP_PICK_HEIGHT;
+				rgAmmoHistory[i].ypos_lerp = lerp( rgAmmoHistory[i].ypos_lerp, ypos, 5 * g_fFrametime );
+				float ypos_new = rgAmmoHistory[i].ypos_lerp;
 				int xpos = ScreenWidth - (rect.right - rect.left) - 10;
 
 				SPR_Set( gHUD.GetSprite( rgAmmoHistory[i].iId ), r, g, b );
-				SPR_DrawAdditive( 0, xpos, ypos, &rect );
+				SPR_DrawAdditive( 0, xpos, ypos_new, &rect );
 			}
 		}
 	}

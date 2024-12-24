@@ -131,7 +131,8 @@ private:
 		float DisplayTime;  // the time at which this item should be removed from the history
 		int iCount;
 		int iId;
-		float x_lerp;
+		float x_lerp; // multiplier 0.0 - 1.0
+		float ypos_lerp; // actual Y position to lerp from
 	};
 
 	HIST_ITEM	rgAmmoHistory[MAX_HISTORY];
