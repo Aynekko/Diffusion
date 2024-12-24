@@ -99,6 +99,7 @@ typedef struct
 
 	float curambientlight;
 	float curshadelight;
+	Vector curplightvec;
 } mstudiolight_t;
 
 // 52 bytes here
