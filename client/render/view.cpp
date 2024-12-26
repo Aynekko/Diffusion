@@ -1121,8 +1121,8 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 	if( add > 0.0f )
 	{
 		angles.x += add;
-		angles.y += add;
-		origin += forward * add * 0.1f + right * add * 0.2f;
+		angles.z -= add * 0.75f;
+		origin += forward * add * 0.1f + right * add * 0.1f;
 		origin.z += add * 0.05f;
 	}
 
