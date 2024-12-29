@@ -2752,17 +2752,19 @@ R_DrawBrushList
 */
 void R_DrawBrushList( void )
 {
+	if( !tr.num_draw_surfaces )
+		return;
+	
 	int	cached_mirror = -1;
 	int	cached_lightmap = -1;
 	int	cached_texture = -1;
-	qboolean flush_buffer = false;
+	bool flush_buffer = false;
 	cl_entity_t *e = RI->currententity;
 	float cached_texofs[2] = { -1.0f, -1.0f };
 	int startv, endv;
 	mcubemap_t *cached_cubemap = NULL;
 
-	if( !tr.num_draw_surfaces )
-		return;
+	bool bUseRefractedWater = (!tr.lowmemory && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction));
 
 	RI->currentmodel = e->model;
 	R_LoadIdentity();
@@ -2974,7 +2976,7 @@ void R_DrawBrushList( void )
 			}
 
 			// diffusion - refracted water!!!
-			if( !tr.lowmemory && FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
+			if( FBitSet( s->flags, SURF_WATER ) && bUseRefractedWater )
 			{
 				// request screen depth
 				GL_Bind( GL_TEXTURE6, tr.screen_depth ); // u_DepthMap
@@ -3738,7 +3740,7 @@ void R_DrawWorld( void )
 	R_MarkLeaves();
 	start = Sys_DoubleTime();
 
-	if( CVAR_TO_BOOL( r_recursive_world_node ) )
+	if( CVAR_TO_BOOL( r_recursive_world_node ) ) [[unlikely]]
 		R_RecursiveWorldNode( world->nodes, RI->frustum.GetClipFlags() );
 	else
 		R_WorldMarkVisibleFaces();

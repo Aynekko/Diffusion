@@ -613,6 +613,11 @@ bool Mod_CheckBoxVisible( const Vector &absmin, const Vector &absmax )
 	if( RI->currententity == GET_VIEWMODEL() )
 		return true;
 
+	// we don't really need this culling in this case, frustum is enough
+	// NOTE: it might be useful in case of cascading shadows (no such thing here) or huge lights (I don't have these in practice)
+	if( RI->params & RP_SHADOWPASS )
+		return true;
+
 	return Mod_BoxVisible( absmin, absmax, Mod_GetCurrentVis( ));
 }
 

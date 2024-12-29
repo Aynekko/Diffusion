@@ -5874,7 +5874,7 @@ void CStudioModelRenderer::DrawViewModel( void )
 		gEngfuncs.Cvar_SetValue( "cl_viewmodel_fov", 120 );
 
 	// Find the offset our current FOV is from the default value
-	float flFOVOffset = gHUD.default_fov->value - (float)RI->fov_x;
+	float flFOVOffset = gHUD.default_fov->value - RI->fov_x;
 
 	// Adjust the viewmodel's FOV to move with any FOV offsets on the viewer's end
 	m_flViewmodelFov = m_pCvarViewmodelFov->value - flFOVOffset;
