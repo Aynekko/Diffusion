@@ -192,6 +192,8 @@ void CUseIcon::EnableIcon( int UsePressed )
 	// the sprite must be listed in hud.txt
 	UseIconSprite = gHUD.GetSpriteIndex( pszIconName );
 	m_UseIcon.spr = gHUD.GetSprite( UseIconSprite );
+	if( !m_UseIcon.spr )
+		return;
 	m_UseIcon.rc = gHUD.GetSpriteRect( UseIconSprite );
 	Q_strcpy( m_UseIcon.szSpriteName, pszIconName );
 }
