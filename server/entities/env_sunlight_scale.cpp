@@ -10,7 +10,8 @@
 
 // fuser1 - new scale when ON
 // fuser2 - new scale when OFF
-// frags - speed
+// fuser3 - speed when going OFF
+// frags - speed when going ON
 // dmg - current target value
 
 class CEnvSunlightScale : public CBaseDelay
@@ -32,14 +33,18 @@ END_DATADESC();
 
 void CEnvSunlightScale::Spawn( void )
 {
-	if( pev->fuser1 <= 0 )
-		pev->fuser1 = 0.1f; // go dark
+	pev->fuser1 = bound( 0.1f, pev->fuser1, 2.5f ); // go dark (2.5 because 255 will be the byte limit)
 
 	if( pev->fuser2 <= 0 )
 		pev->fuser2 = 1.0f; // bring back default sunlight
 
+	pev->fuser2 = bound( 0.1f, pev->fuser2, 2.5f );
+
 	if( pev->frags <= 0 )
 		pev->frags = 25.0f;
+
+	if( pev->fuser3 <= 0 )
+		pev->fuser3 = 75.0f;
 
 	// because we will send byte through player's code
 	pev->fuser1 *= 100.f;
@@ -64,6 +69,11 @@ void CEnvSunlightScale::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 		m_iState = STATE_OFF;
 	}
 
+	// is there another entity messing with the sunlight right now? we need to stop them before proceeding
+	CBaseEntity *pOther = NULL;
+	while( (pOther = UTIL_FindEntityByClassname( pOther, "env_sunlight_scale" )) != NULL )
+		pOther->DontThink();
+
 	SetThink( &CEnvSunlightScale::UpdateSunlightScale );
 	SetNextThink( 0 );
 }
@@ -72,7 +82,7 @@ void CEnvSunlightScale::UpdateSunlightScale( void )
 {
 	edict_t *pWorld = INDEXENT( 0 );
 
-	pWorld->v.fuser1 = UTIL_Approach( pev->dmg, pWorld->v.fuser1, pev->frags * gpGlobals->frametime );
+	pWorld->v.fuser1 = UTIL_Approach( pev->dmg, pWorld->v.fuser1, (m_iState ? pev->frags : pev->fuser3) * gpGlobals->frametime );
 
 	if( pWorld->v.fuser1 == pev->dmg )
 	{
