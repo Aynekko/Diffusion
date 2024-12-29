@@ -668,6 +668,7 @@
 #define TE_PLAYER_GLITCH 141
 #define TE_DRONEPARAMS 142
 #define TE_TRIGGERTIMER 143 // trigger_timer parameters
+#define TE_SUNLIGHT_SCALE 144
 
 #define MSG_BROADCAST		0	// unreliable to all
 #define MSG_ONE			1	// reliable to one (msg_entity)

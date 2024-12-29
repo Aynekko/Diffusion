@@ -568,12 +568,17 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		gHUD.CanShoot = (READ_BYTE() > 0);
 		gHUD.DrunkLevel = READ_BYTE();
 		gHUD.m_DroneBars.CanUseDrone = (READ_BYTE() > 0);
-		tr.sunlightscale = READ_BYTE() * 0.01f;
 
 		if( !gHUD.ShieldOn && ShieldOn ) // play turn on sound
 			gEngfuncs.pEventAPI->EV_PlaySound( gEngfuncs.GetLocalPlayer()->index, NULL, CHAN_STATIC, "player/shield_on.wav", VOL_NORM, 0, 0, PITCH_NORM );
 
 		gHUD.ShieldOn = ShieldOn;
+	}
+	break;
+
+	case TE_SUNLIGHT_SCALE:
+	{
+		tr.sunlightscale = READ_SHORT() * 0.01f;
 	}
 	break;
 

@@ -6735,7 +6735,10 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_BYTE( CanShoot );
 			WRITE_BYTE( DrunkLevel );
 			WRITE_BYTE( CanUseDrone );
-			WRITE_BYTE( sunlightscale );
+		MESSAGE_END();
+		MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
+			WRITE_BYTE( TE_SUNLIGHT_SCALE );
+			WRITE_SHORT( sunlightscale );
 		MESSAGE_END();
 		CanJump_CL = CanJump;
 		CanSprint_CL = CanSprint;
@@ -6818,9 +6821,6 @@ void CBasePlayer :: UpdateClientData( void )
 		MESSAGE_END();
 		// cache FOV change at end of function, so weapon updates can see that FOV has changed
 	}
-
-	edict_t *pWorld = INDEXENT( 0 );
-	int sunlightscale = pWorld->v.fuser1;
 	
 	if( (CanJump != CanJump_CL) 
 		|| (CanSprint != CanSprint_CL) 
@@ -6836,7 +6836,6 @@ void CBasePlayer :: UpdateClientData( void )
 		|| (DrunkLevel != DrunkLevel_CL)
 		|| (CanShoot != CanShoot_CL)
 		|| (CanUseDrone != CanUseDrone_CL)
-		|| (sunlightscale != SunLightScale_CL)
 		)
 	{
 		// HACKHACK I send this through tempent :)
@@ -6856,7 +6855,6 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_BYTE( CanShoot );
 			WRITE_BYTE( DrunkLevel );
 			WRITE_BYTE( CanUseDrone );
-			WRITE_BYTE( sunlightscale );
 		MESSAGE_END();
 
 		CanJump_CL = CanJump;
@@ -6873,6 +6871,16 @@ void CBasePlayer :: UpdateClientData( void )
 		CanShoot_CL = CanShoot;
 		DrunkLevel_CL = DrunkLevel;
 		CanUseDrone_CL = CanUseDrone;
+	}
+
+	edict_t *pWorld = INDEXENT( 0 );
+	int sunlightscale = pWorld->v.fuser1;
+	if( sunlightscale != SunLightScale_CL )
+	{
+		MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
+			WRITE_BYTE( TE_SUNLIGHT_SCALE );
+			WRITE_SHORT( sunlightscale );
+		MESSAGE_END();
 		SunLightScale_CL = sunlightscale;
 	}
 

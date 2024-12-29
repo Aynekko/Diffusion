@@ -33,12 +33,12 @@ END_DATADESC();
 
 void CEnvSunlightScale::Spawn( void )
 {
-	pev->fuser1 = bound( 0.1f, pev->fuser1, 2.5f ); // go dark (2.5 because 255 will be the byte limit)
+	pev->fuser1 = bound( 0.1f, pev->fuser1, 25.0f ); // go dark
 
 	if( pev->fuser2 <= 0 )
 		pev->fuser2 = 1.0f; // bring back default sunlight
 
-	pev->fuser2 = bound( 0.1f, pev->fuser2, 2.5f );
+	pev->fuser2 = bound( 0.1f, pev->fuser2, 25.0f );
 
 	if( pev->frags <= 0 )
 		pev->frags = 25.0f;
@@ -46,7 +46,7 @@ void CEnvSunlightScale::Spawn( void )
 	if( pev->fuser3 <= 0 )
 		pev->fuser3 = 75.0f;
 
-	// because we will send byte through player's code
+	// because we will send short through player's code
 	pev->fuser1 *= 100.f;
 	pev->fuser2 *= 100.f;
 
