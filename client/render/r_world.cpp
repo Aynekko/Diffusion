@@ -3416,6 +3416,7 @@ void R_MarkLeaves( void )
 		ClearBits( r_novis->flags, FCVAR_CHANGED );
 		tr.fResetVis = false;
 		RI->viewleaf = NULL;
+		memset( RI->bBoxVisible, -1, sizeof( RI->bBoxVisible ) ); // reset entity cached cull state
 	}
 
 	if( RI->viewleaf == RI->oldviewleaf && RI->viewleaf != NULL )

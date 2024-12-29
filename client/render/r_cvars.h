@@ -50,6 +50,7 @@ extern cvar_t	*r_lighting_modulate;
 extern cvar_t	*r_lightstyle_lerping;
 extern cvar_t	*r_lighting_extended;
 extern cvar_t	*r_recursive_world_node;
+extern cvar_t	*r_cached_box_culling;
 extern cvar_t	*r_polyoffset;
 extern cvar_t	*r_grass;
 extern cvar_t	*r_grass_lighting;

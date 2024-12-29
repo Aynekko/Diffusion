@@ -111,6 +111,7 @@ cvar_t *r_lighting_modulate;
 cvar_t *r_lighting_extended;
 cvar_t *r_lightstyle_lerping;
 cvar_t *r_recursive_world_node;
+cvar_t *r_cached_box_culling;
 cvar_t *r_polyoffset;
 cvar_t *r_grass;
 cvar_t *r_grass_lighting;
@@ -371,6 +372,7 @@ void V_Init( void )
 	r_recursion_depth = CVAR_REGISTER( "gl_recursion_depth", "1", FCVAR_ARCHIVE );
 	r_recursive_world_node = CVAR_REGISTER( "gl_recursive_world_node", "0", FCVAR_ARCHIVE );
 	r_drawmodels = CVAR_REGISTER( "r_drawmodels", "1", FCVAR_CHEAT );
+	r_cached_box_culling = CVAR_REGISTER( "r_cached_box_culling", "1", FCVAR_ARCHIVE );
 
 	r_grass = CVAR_REGISTER( "r_grass", "1", FCVAR_ARCHIVE );
 	r_grass_lighting = CVAR_REGISTER( "r_grass_lighting", "1", FCVAR_ARCHIVE );
