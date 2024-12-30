@@ -82,7 +82,12 @@ void CEnvSunlightScale::UpdateSunlightScale( void )
 {
 	edict_t *pWorld = INDEXENT( 0 );
 
-	pWorld->v.fuser1 = UTIL_Approach( pev->dmg, pWorld->v.fuser1, (m_iState ? pev->frags : pev->fuser3) * gpGlobals->frametime );
+	float speed = (m_iState ? pev->frags : pev->fuser3);
+
+	if( speed >= 9999.0f ) // just do instant
+		pWorld->v.fuser1 = pev->dmg;
+	else
+		pWorld->v.fuser1 = UTIL_Approach( pev->dmg, pWorld->v.fuser1, speed * gpGlobals->frametime );
 
 	if( pWorld->v.fuser1 == pev->dmg )
 	{
