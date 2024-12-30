@@ -135,42 +135,62 @@ void ProcessRain( void )
 		AddPointToBounds( curDrip->origin, rain_mins, rain_maxs );
 #endif		
 		// remove drip if its origin lower than minHeight
-		if( curDrip->origin.z < curDrip->minHeight ) 
+		if( curDrip->origin.z <= curDrip->minHeight ) 
 		{
-			if( curDrip->landInWater )
-				WaterLandingEffect( curDrip ); // create water rings
-			else // diffusion - add landing droplets
-				g_pParticles.WaterLandingDroplet( 0, curDrip->origin );
-
-			if( cl_debug_rain->value )
+			if( Rain.weatherMode == MODE_SNOW )
 			{
-				debug_lifetime += (rain_curtime - curDrip->birthTime);
-				debug_howmany++;
-			}
+				// let the snow be on the ground for a while
+				curDrip->origin.z = curDrip->minHeight;
+				curDrip->xDelta = 0.0f;
+				curDrip->yDelta = 0.0f;
+				curDrip->alpha -= 0.1f * g_fFrametime;
 
-			// diffusion - add steam/smoke particle
-			if( Rain.bUseSmoke )
-			{
-				bool SmokeParticle = (RANDOM_LONG( 0, 8 ) == 3);
-				if( SmokeParticle && (Rain.weatherMode == MODE_RAIN) )
+				if( curDrip->alpha <= 0.0f )
 				{
-					CQuakePart rainsmoke = InitializeParticle();
-					rainsmoke.m_vecOrigin = curDrip->origin;
-					rainsmoke.m_vecOrigin.z = curDrip->minHeight + 10;
-					rainsmoke.m_flAlpha = 0.25;
-					rainsmoke.m_flAlphaVelocity = -0.1;
-					rainsmoke.m_flRadius = RANDOM_LONG( 20, 50 );
-					rainsmoke.m_flRadiusVelocity = 0.2;
-					rainsmoke.m_flRotation = RANDOM_LONG( 0, 359 );
-					rainsmoke.m_flRotationVelocity = RANDOM_LONG( -20, 20 );
-					rainsmoke.m_flDistance = 700;
-					rainsmoke.ParticleType = TYPE_SMOKE;
-					g_pParticles.AddParticle( &rainsmoke, g_pParticles.m_hSmoke, FPART_FADEIN | FPART_VERTEXLIGHT );
+					g_dripsArray.DeleteCurrent();
+					dripcounter--;
 				}
+				else
+					g_dripsArray.MoveNext();
+
 			}
-			
-			g_dripsArray.DeleteCurrent();
-			dripcounter--;
+			else
+			{
+				if( curDrip->landInWater )
+					WaterLandingEffect( curDrip ); // create water rings
+				else// diffusion - add landing droplets
+					g_pParticles.WaterLandingDroplet( 0, curDrip->origin );
+
+				if( cl_debug_rain->value )
+				{
+					debug_lifetime += (rain_curtime - curDrip->birthTime);
+					debug_howmany++;
+				}
+
+				// diffusion - add steam/smoke particle
+				if( Rain.bUseSmoke )
+				{
+					bool SmokeParticle = (RANDOM_LONG( 0, 8 ) == 3);
+					if( SmokeParticle && (Rain.weatherMode == MODE_RAIN) )
+					{
+						CQuakePart rainsmoke = InitializeParticle();
+						rainsmoke.m_vecOrigin = curDrip->origin;
+						rainsmoke.m_vecOrigin.z = curDrip->minHeight + 10;
+						rainsmoke.m_flAlpha = 0.25;
+						rainsmoke.m_flAlphaVelocity = -0.1;
+						rainsmoke.m_flRadius = RANDOM_LONG( 20, 50 );
+						rainsmoke.m_flRadiusVelocity = 0.2;
+						rainsmoke.m_flRotation = RANDOM_LONG( 0, 359 );
+						rainsmoke.m_flRotationVelocity = RANDOM_LONG( -20, 20 );
+						rainsmoke.m_flDistance = 700;
+						rainsmoke.ParticleType = TYPE_SMOKE;
+						g_pParticles.AddParticle( &rainsmoke, g_pParticles.m_hSmoke, FPART_FADEIN | FPART_VERTEXLIGHT );
+					}
+				}
+
+				g_dripsArray.DeleteCurrent();
+				dripcounter--;
+			}
 		}
 		else
 			g_dripsArray.MoveNext();
