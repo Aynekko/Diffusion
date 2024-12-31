@@ -547,7 +547,9 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 						Density = 40.0f;
 				}
 
-				int Count = (SmV_Size.x *SmV_Size.y + SmV_Size.y * SmV_Size.z + SmV_Size.z * SmV_Size.x) / (3 * Density * Density);
+				int Count = ent->curstate.fuser4;
+				if( Count <= 0 )
+					Count = (SmV_Size.x *SmV_Size.y + SmV_Size.y * SmV_Size.z + SmV_Size.z * SmV_Size.x) / (3 * Density * Density);
 				Count = bound( 1, Count, 1024 );
 				Vector vecSpot;
 				int i, j;

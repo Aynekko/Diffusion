@@ -15,6 +15,7 @@ iuser2 = particle visible distance
 fuser1 = particle size
 fuser2 = density
 fuser3 = delay between emissions
+fuser4 = number of particles at a time
 renderamt = transparency
 vuser1 = add velocity on spawn
 vuser2 = randomize velocity direction (+/-)
