@@ -55,7 +55,7 @@ void main( void )
 	if( u_FogParams.w > 0.0 )
 	{
 		float dist = length( var_ViewVec ); // var_ViewVec is not correct here for ranged fog
-		float fogFactor = 1.0 / exp( dist * u_FogParams.w );
+		float fogFactor = exp( -dist * u_FogParams.w );
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );
 		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}

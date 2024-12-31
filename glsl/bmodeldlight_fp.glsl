@@ -299,7 +299,7 @@ void main( void )
 	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
 	{
 		float dist = length( var_ViewVec );
-		float fogFactor = 1.0 / exp( dist * u_FogParams.w );
+		float fogFactor = exp( -dist * u_FogParams.w );
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );
 		atten = mix( 0.0, atten, fogFactor );
 	}

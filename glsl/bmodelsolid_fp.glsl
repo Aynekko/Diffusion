@@ -352,7 +352,7 @@ void main( void )
 	if( EnableFog )
 	{
 		float dist = length( var_ViewVec );
-		fogFactor = 1.0 / exp( dist * u_FogParams.w );
+		fogFactor = exp( -dist * u_FogParams.w );
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );
 		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}
@@ -388,7 +388,7 @@ void main( void )
 	if( EnableFog )
 	{
 		float dist = length( var_ViewVec );
-		fogFactor = 1.0 / exp( dist * u_FogParams.w );
+		fogFactor = exp( -dist * u_FogParams.w );
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );
 		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}

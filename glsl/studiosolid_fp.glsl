@@ -181,7 +181,7 @@ void main( void )
 	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
 	{
 		float dist = var_Distance;
-		float fogFactor = 1.0 / exp( dist * u_FogParams.w );
+		float fogFactor = exp( -dist * u_FogParams.w );
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );
 		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}
