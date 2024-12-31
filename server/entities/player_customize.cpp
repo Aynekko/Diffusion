@@ -8,7 +8,7 @@
 //================================================================================
 //diffusion - player customize
 //================================================================================
-
+extern DLL_GLOBAL bool g_bAllowSaves;
 #define SF_PLCUSTOMIZE_AFFECTALL BIT(0) // affect all players
 
 class CPlayerCustomize : public CBaseDelay
@@ -39,6 +39,7 @@ public:
 	int DrunkLevel;
 	int CanUseDrone;
 	bool DeletePlayerTurrets;
+	int AllowSaveGame;
 	string_t DroneTarget_OnDeploy;
 	string_t DroneTarget_OnReturn;
 	string_t DroneTarget_OnEnteringFirstPerson;
@@ -74,6 +75,7 @@ BEGIN_DATADESC(CPlayerCustomize)
 	DEFINE_KEYFIELD( DrunkLevel, FIELD_INTEGER, "drunklevel"),
 	DEFINE_KEYFIELD( CanUseDrone, FIELD_INTEGER, "canusedrone" ),
 	DEFINE_KEYFIELD( DeletePlayerTurrets, FIELD_BOOLEAN, "delturrets" ),
+	DEFINE_KEYFIELD( AllowSaveGame, FIELD_INTEGER, "allowsavegame" ),
 	DEFINE_KEYFIELD( DroneTarget_OnDeploy, FIELD_STRING, "ondeploydrone" ),
 	DEFINE_KEYFIELD( DroneTarget_OnReturn, FIELD_STRING, "onreturndrone" ),
 	DEFINE_KEYFIELD( DroneTarget_OnEnteringFirstPerson, FIELD_STRING, "onentering1stperson" ),
@@ -190,6 +192,11 @@ void CPlayerCustomize::KeyValue(KeyValueData* pkvd)
 	else if( FStrEq( pkvd->szKeyName, "delturrets" ) )
 	{
 		DeletePlayerTurrets = (Q_atoi( pkvd->szValue ) > 0);
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "allowsavegame" ) )
+	{
+		AllowSaveGame = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "ondeploydrone" ) )
@@ -516,5 +523,12 @@ void CPlayerCustomize::Affect( CBasePlayer *pPlayer )
 			if( pTurretOwner && pTurretOwner == pPlayer )
 				UTIL_Remove( pTurret );
 		}
+	}
+
+	switch( AllowSaveGame )
+	{
+	case 1: g_bAllowSaves = !g_bAllowSaves; break; // toggle
+	case 2: g_bAllowSaves = true; break;
+	case 3: g_bAllowSaves = false; break;
 	}
 }

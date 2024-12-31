@@ -38,6 +38,7 @@ GNU General Public License for more details.
 // implementation of physic pushers
 CPhysicsPushedEntities	s_PushedEntities;
 CPhysicsPushedEntities	*g_pPushedEntities = &s_PushedEntities;
+extern DLL_GLOBAL bool g_bAllowSaves;
 
 unsigned int EngineSetFeatures( void )
 {
@@ -233,6 +234,11 @@ void PrepWorldFrame( void )
 	WorldPhysic->EndFrame();
 }
 
+int EngineAllowSaveGame( void )
+{
+	return g_bAllowSaves;
+}
+
 //
 // Xash3D physics interface
 //
@@ -243,7 +249,7 @@ static physics_interface_t gPhysicsInterface =
 	DispatchPhysicsEntity,
 	DispatchSpawnEntities,
 	DispatchUpdatePlayerBaseVelocity,
-	NULL,	// not needs
+	EngineAllowSaveGame,
 	NULL,	// not needs
 	EngineSetFeatures,
 	DrawDebugTriangles,

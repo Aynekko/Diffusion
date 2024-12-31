@@ -204,3 +204,32 @@ void CTriggerInOut::OnRemove(void)
 	// Prune handles all Intersects tests and fires targets as appropriate
 	m_pRegister = m_pRegister->Prune();
 }
+
+//===================================================================================
+// trigger_nosave: taken from Paranoia 2
+//===================================================================================
+extern DLL_GLOBAL bool g_bAllowSaves;
+class CTriggerNoSave : public CTriggerInOut
+{
+public:
+	virtual void FireOnEntry( CBaseEntity *pOther );
+	virtual void FireOnLeaving( CBaseEntity *pOther );
+};
+
+LINK_ENTITY_TO_CLASS( trigger_nosave, CTriggerNoSave );
+
+void CTriggerNoSave::FireOnEntry( CBaseEntity *pOther )
+{
+	if( UTIL_IsMasterTriggered( m_sMaster, pOther ) )
+	{
+		g_bAllowSaves = false;
+	}
+}
+
+void CTriggerNoSave::FireOnLeaving( CBaseEntity *pEnt )
+{
+	if( UTIL_IsMasterTriggered( m_sMaster, pEnt ) )
+	{
+		g_bAllowSaves = true;
+	}
+}

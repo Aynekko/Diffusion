@@ -64,7 +64,7 @@ extern DLL_GLOBAL ULONG		g_ulFrameCount;
 
 extern void CopyToBodyQue( CBaseEntity *pCorpse );
 extern int giPrecacheGrunt;
-
+extern DLL_GLOBAL bool g_bAllowSaves;
 extern int g_teamplay;
 
 /*
@@ -1195,6 +1195,9 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 
 	// Every call to ServerActivate should be matched by a call to ServerDeactivate
 	g_serveractive = 1;
+
+	// allow save in case we restart the map
+	g_bAllowSaves = true;
 
 	LinkUserMessages ();
 
