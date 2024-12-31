@@ -4020,9 +4020,9 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 		m_pModelInstance->lighting.color = LerpRGB( m_pModelInstance->lighting.color, lighting.color, g_fFrametime );
 
 		m_pModelInstance->lighting.curplightvec = m_pModelInstance->m_plightmatrix.VectorIRotate( lighting.plightvec ); // turn back to model space
-		m_pModelInstance->lighting.plightvec.x = lerp( m_pModelInstance->lighting.plightvec.x, m_pModelInstance->lighting.curplightvec.x, 5 * g_fFrametime );
-		m_pModelInstance->lighting.plightvec.y = lerp( m_pModelInstance->lighting.plightvec.y, m_pModelInstance->lighting.curplightvec.y, 5 * g_fFrametime );
-		m_pModelInstance->lighting.plightvec.z = lerp( m_pModelInstance->lighting.plightvec.z, m_pModelInstance->lighting.curplightvec.z, 5 * g_fFrametime );
+		m_pModelInstance->lighting.plightvec.x = lerp( m_pModelInstance->lighting.plightvec.x, m_pModelInstance->lighting.curplightvec.x, 20 * g_fFrametime );
+		m_pModelInstance->lighting.plightvec.y = lerp( m_pModelInstance->lighting.plightvec.y, m_pModelInstance->lighting.curplightvec.y, 20 * g_fFrametime );
+		m_pModelInstance->lighting.plightvec.z = lerp( m_pModelInstance->lighting.plightvec.z, m_pModelInstance->lighting.curplightvec.z, 20 * g_fFrametime );
 	}
 }
 
