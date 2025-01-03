@@ -104,7 +104,6 @@ extern cvar_t *gl_specular;
 extern cvar_t *gl_cubemaps;
 extern cvar_t *gl_bump;
 extern cvar_t *gl_heateffect_force;
-extern cvar_t *cubeshot;
 extern cvar_t *cl_notbn;
 extern cvar_t *r_show_tbn;
 extern cvar_t *r_flashlightlockposition;

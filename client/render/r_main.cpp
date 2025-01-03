@@ -424,31 +424,6 @@ void R_CheckChanges( void )
 		ClearBits( r_recursion_depth->flags, FCVAR_CHANGED );
 	}
 
-	// diffusion - advanced envshot command
-	if( FBitSet( cubeshot->flags, FCVAR_CHANGED ) )
-	{
-		if( CMD_ARGC() > 4 )
-		{
-			char filename[32];
-			Vector cube_origin = g_vecZero;
-			int cubesize = 512;
-			cube_origin.x = Q_atoi( CMD_ARGV( 1 ) );
-			cube_origin.y = Q_atoi( CMD_ARGV( 2 ) );
-			cube_origin.z = Q_atoi( CMD_ARGV( 3 ) );
-			sprintf_s( filename, (char *)CMD_ARGV( 4 ) );
-			if( CMD_ARGC() > 5 )
-				cubesize = Q_atoi( CMD_ARGV( 5 ) );
-
-			ConPrintf( "Making a cubeshot at origin (%i %i %i), \"%s\", size = %i...\n", (int)cube_origin.x, (int)cube_origin.y, (int)cube_origin.z, filename, cubesize );
-			ENV_SHOT( cube_origin, filename, false, cubesize );
-		}
-		else if( CMD_ARGC() > 0 )
-			ConPrintf( "Usage: cubeshot <org.x> <org.y> <org.z> <filename> <cubesize>\n" );
-
-		CVAR_SET_FLOAT( "cubeshot", 0 );
-		ClearBits( cubeshot->flags, FCVAR_CHANGED );
-	}
-
 	if( FBitSet( r_drawentities->flags, FCVAR_CHANGED ))
 	{
 		ClearBits( r_drawentities->flags, FCVAR_CHANGED );

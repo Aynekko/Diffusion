@@ -31,9 +31,7 @@ void V_Init( void );
 void V_VidInit( void );
 void V_StartPitchDrift( void );
 void V_StopPitchDrift( void );
-
 void V_CalcFirstPersonRefdef( struct ref_params_s *pparams );
-
 void V_ChangeView(void);
 
 extern void V_GetInEyePos(int target, Vector& origin, Vector& angles);
