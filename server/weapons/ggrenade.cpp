@@ -445,6 +445,8 @@ void CGrenade :: BounceSound( void )
 		}
 
 		LastBounceSoundTime = gpGlobals->time;
+
+		pev->pain_finished++; // bounce counter for smoke grenade
 	}
 }
 
@@ -563,12 +565,14 @@ CGrenade *CGrenade::ShootSmoke( entvars_t *pevOwner, Vector vecStart, Vector vec
 	pGrenade->pev->sequence = RANDOM_LONG( 3, 5 );
 	pGrenade->pev->body = 1;
 
+	pGrenade->pev->pain_finished = 0; // bounce counter for smoke grenade
+
 	return pGrenade;
 }
 
 void CGrenade::SmokeGrenadeThink( void )
 {
-	if( pev->flags & FL_ONGROUND )
+	if( pev->flags & FL_ONGROUND || pev->pain_finished > 5 )
 	{
 		pev->framerate = 1.0f;
 		SetThink( &CGrenade::SmokeGrenadeExplode );
@@ -576,12 +580,7 @@ void CGrenade::SmokeGrenadeThink( void )
 		return;
 	}
 
-	pev->framerate = GetAbsVelocity().Length() / 150.0;
-
-	if( pev->framerate > 1.5f )
-		pev->framerate = 1.5f;
-	else if( pev->framerate < 0.75f )
-		pev->framerate = 0.75f;
+	pev->framerate = bound( 0.75f, GetAbsVelocity().Length() / 150.0f, 1.35f );
 
 	// watersplash upon contact with water surface
 	if( pev->waterlevel != 0 )
