@@ -1224,11 +1224,15 @@ static void GL_InitDrawSSAOUniforms( glsl_program_t *shader )
 
 	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
 	shader->u_AOMap = pglGetUniformLocationARB( shader->handle, "u_AOMap" );
+	shader->u_DepthMap = pglGetUniformLocationARB( shader->handle, "u_DepthMap" );
 	shader->u_GenericCondition = pglGetUniformLocationARB( shader->handle, "u_GenericCondition" );
+	shader->u_FogParams = pglGetUniformLocationARB( shader->handle, "u_FogParams" );
+	shader->u_zFar = pglGetUniformLocationARB( shader->handle, "u_zFar" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE0 );
 	pglUniform1iARB( shader->u_AOMap, GL_TEXTURE1 );
+	pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE2 );
 	GL_BindShader( GL_NONE );
 
 	GL_ValidateProgram( shader );

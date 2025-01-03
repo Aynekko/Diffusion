@@ -81,7 +81,7 @@ void InitAutoExposure(void)
 	}
 
 	if( !tr.avg_luminance_texture )
-		tr.avg_luminance_texture = CREATE_TEXTURE( "*avg_luminance_texture", glState.width, glState.height, NULL, TF_COLORBUFFER ); // was TF_CLAMP | TF_HAS_ALPHA | TF_ARB_16BIT
+		tr.avg_luminance_texture = CREATE_TEXTURE( "*avg_luminance_texture", glState.width, glState.height, NULL, TF_LUMINANCE );
 
 	GL_Bind( GL_TEXTURE0, tr.avg_luminance_texture );
 	pglGenerateMipmap( GL_TEXTURE_2D );
@@ -150,7 +150,7 @@ void InitSSAO( void )
 	}
 
 	if( !ScreenAO )
-		ScreenAO = CREATE_TEXTURE( "*screenao", glState.width, glState.height, NULL, TF_COLORBUFFER );
+		ScreenAO = CREATE_TEXTURE( "*screenao", glState.width, glState.height, NULL, TF_LUMINANCE );
 }
 
 void InitBloom( void )
@@ -214,9 +214,9 @@ void InitPostTextures( void )
 	if( !tr.target_rgb[0] )
 	{
 		if( tr.lowmemory )
-			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE, TARGET_SIZE, NULL, TF_SCREEN ); // 128
+			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE, TARGET_SIZE, NULL, TF_SCREEN | TF_LUMINANCE ); // 128
 		else
-			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE512, TARGET_SIZE512, NULL, TF_SCREEN );
+			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE512, TARGET_SIZE512, NULL, TF_SCREEN | TF_LUMINANCE );
 	}
 
 	if( ScreenWaterTexture )
@@ -931,8 +931,17 @@ void SSAO( void )
 	GL_BindShader( glsl.drawSSAO );
 	ASSERT( RI->currentshader != NULL );
 
+	if( tr.fogEnabled )
+		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+	else
+		pglUniform4fARB( RI->currentshader->u_FogParams, 0.0f, 0.0f, 0.0f, 0.0f );
 	pglUniform1fARB( RI->currentshader->u_GenericCondition, Debug );
+	pglUniform1fARB( RI->currentshader->u_zFar, zFar );
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
+
+	// request screen depth
+	GL_Bind( GL_TEXTURE2, tr.screen_depth );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 	RenderFSQ( width, height );
 
 	// unbind shader

@@ -1549,6 +1549,13 @@ void R_DrawEntitiesOnList( void )
 
 	GL_CheckForErrors();
 
+	if( RP_NORMALPASS() )
+	{
+		GL_Setup2D();
+		SSAO();
+		GL_Setup3D();
+	}
+
 	// then translucent ents
 	R_DrawTranslucentEntities();
 	
@@ -1873,8 +1880,6 @@ void R_DrawPostEffects(void)
 
 	if( RP_NORMALPASS() )
 	{
-		ToneMap();
-		SSAO();
 		HeatDistortionShader();
 		ScreenWater();
 		WaterDrops();
@@ -1883,6 +1888,7 @@ void R_DrawPostEffects(void)
 		LensFlare();
 		Monochrome();
 		Enhance();
+		ToneMap();
 	}
 
 	GaussBlur();

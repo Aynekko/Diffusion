@@ -42,12 +42,10 @@ float Bayer16( vec2 a )
 
 void main( void )
 {
-	float zfar = u_zFar;	// camera clipping end	
-	vec2 tx = var_TexCoord;
 	float radius = 0.55;
 
-	float fSampledDepth = texture2D( u_DepthMap, tx ).r;
-	fSampledDepth = linearizeDepth( fSampledDepth, znear, zfar ); // get z-eye
+	float fSampledDepth = texture2D( u_DepthMap, var_TexCoord ).r;
+	fSampledDepth = linearizeDepth( fSampledDepth, znear, u_zFar ); // get z-eye
 
 	float ssao = 0.0;
 	float rotation = Bayer16( fract( gl_FragCoord.xy / 16.0 ) * 16.0 ) * 6.2831853;	
@@ -56,11 +54,11 @@ void main( void )
 	{   
 		vec2 offset = VogelDiskSampleAO( float( i ), rotation );
 
-		float zSample = texture2D( u_DepthMap, tx + radius * offset / fSampledDepth ).r;
-		zSample = linearizeDepth( zSample, znear, zfar );
+		float zSample = texture2D( u_DepthMap, var_TexCoord + radius * offset / fSampledDepth ).r;
+		zSample = linearizeDepth( zSample, znear, u_zFar );
    
-		float dist = max( zSample - fSampledDepth, 0.0 ) / distScale;    
-		float occl = 15 * max( dist * ( 1.5 - dist ), 0.0 );
+		float dist = max( fSampledDepth - zSample , 0.0 ) / distScale;
+		float occl = 15.0 * max( dist * ( 1.5 - dist ), 0.0 );
       
 		ssao += 1.0 / (( 1.0 + occl * occl ));
 		radius += 0.125;

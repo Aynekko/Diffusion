@@ -3,26 +3,39 @@
 
 uniform sampler2D	u_ScreenMap;
 uniform sampler2D	u_AOMap;
-uniform float           u_GenericCondition;
+uniform sampler2D   u_DepthMap;
+uniform float		u_GenericCondition;
+uniform vec4		u_FogParams;
+uniform float		u_zFar;
 
-varying vec2	        var_TexCoord;
+varying vec2		var_TexCoord;
 
 void main( void )
 {
-    vec2 tx = var_TexCoord;
-    vec3 color = texture2D( u_ScreenMap, tx ).rgb;
-    vec3 ssao = texture2D( u_AOMap, tx ).rgb;
+    vec3 color = texture2D( u_ScreenMap, var_TexCoord ).rgb;
+    float ssao = texture2D( u_AOMap, var_TexCoord ).r;
 
-    const float lumInfluence = 1.0;   
-    float lum = GetLuminance( color.rgb );
-    vec3 luminance = vec3( lum, lum, lum );    
+    float lum = GetLuminance( color.rgb );   
    
     vec3 final;
-    if( bool( u_GenericCondition == 0.0f ))
-		final = vec3( color * mix( vec3(ssao), vec3(1.0), luminance * lumInfluence )); 
-    else
-		final = vec3( mix(vec3(ssao), vec3(1.0), luminance * lumInfluence )) * 0.28; //only AO for test
+    if( bool( u_GenericCondition == 0.0f )) // normal mode
+	{
+		if( u_FogParams.w > 0.0 ) // fog on
+		{
+			float fSampledDepth = texture2D( u_DepthMap, var_TexCoord ).r;
+			fSampledDepth = linearizeDepth( fSampledDepth, Z_NEAR , u_zFar ); // get z-eye
+			float fogFactor = exp( -fSampledDepth * u_FogParams.w );
+			fogFactor = clamp( fogFactor, 0.0, 1.0 );
+
+			final = mix( u_FogParams.xyz * (1.0 - fogFactor), color, ssao );
+		}
+		else // fog off
+			final = vec3( color * mix( vec3(ssao), vec3(1.0), lum ));
+	}
+    else // only AO for test (gl_ssao_debug 1)
+		final = vec3( mix(vec3(ssao), vec3(1.0), lum )) * 0.28;
    
+
     gl_FragColor = vec4( final, 1.0 );
 }
 
