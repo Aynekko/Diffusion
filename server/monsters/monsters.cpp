@@ -2732,12 +2732,6 @@ float	CBaseMonster::FlYawDiff ( void )
 
 float CBaseMonster::ChangeYaw ( int yawSpeed )
 {	
-	if( FClassnameIs( this, "monster_security_general") )
-	{
-		float x = 0;
-		float z = 0;
-	}
-	
 	float ideal, current, move, speed;
 	Vector angles = GetAbsAngles();
 
@@ -2755,11 +2749,15 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 		// turn head in desired direction only if they have a turnable head
 		if (m_afCapability & bits_CAP_TURN_HEAD)
 		{
-			float yaw = pev->ideal_yaw - angles.y;
-			if (yaw > 180) yaw -= 360;
-			if (yaw < -180) yaw += 360;
-			headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime, true );
-			SetBoneController( 0, headyaw );
+			// make sure that headyaw is not already controlled by talking
+			if( m_flTalkTime < gpGlobals->time && m_hTalkTarget == NULL )
+			{
+				float yaw = pev->ideal_yaw - angles.y;
+				if( yaw > 180 ) yaw -= 360;
+				if( yaw < -180 ) yaw += 360;
+				headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime, true );
+				SetBoneController( 0, headyaw );
+			}
 		}
 
 		SetAbsAngles( angles );

@@ -138,7 +138,7 @@ public:
 	CBaseEntity		*EnumFriends( CBaseEntity *pentPrevious, int listNumber, BOOL bTrace );
 	void			AlertFriends( void );
 	void			ShutUpFriends( void );
-	BOOL			IsTalking( void );
+	bool			IsTalking( void );
 	void			Talk( float flDuration );	
 	// For following
 	BOOL			CanFollow( void );
@@ -166,7 +166,7 @@ public:
 	int		m_iszSpeakAs;		// Change the prefix for all this monster's speeches LRC
 
 	float		m_flLastSaidSmelled;	// last time we talked about something that stinks
-	float		m_flStopTalkTime;		// when in the future that I'll be done saying this sentence.
+//	float		m_flStopTalkTime;		// when in the future that I'll be done saying this sentence. // diffusion - use m_flTalkTime in basemonster
 
 //	EHANDLE		m_hTalkTarget;		// who to look at while talking // diffusion - moved to basemonster
 	CUSTOM_SCHEDULES;

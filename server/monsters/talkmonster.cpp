@@ -40,7 +40,7 @@ BEGIN_DATADESC( CTalkMonster )
 	DEFINE_KEYFIELD( m_iszSpeakAs, FIELD_STRING, "SpeakAs" ), //LRC
 	DEFINE_KEYFIELD( m_voicePitch, FIELD_INTEGER, "voicepitch" ), // diffusion
 	DEFINE_FIELD( m_flLastSaidSmelled, FIELD_TIME ),
-	DEFINE_FIELD( m_flStopTalkTime, FIELD_TIME ),
+//	DEFINE_FIELD( m_flStopTalkTime, FIELD_TIME ), // diffusion - moved to basemonster (m_flTalkTime)
 //	DEFINE_FIELD( m_hTalkTarget, FIELD_EHANDLE ), // diffusion - moved to basemonster
 	DEFINE_FUNCTION( FollowerUse ),
 END_DATADESC()
@@ -552,7 +552,20 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 	case TASK_TLK_EYECONTACT:
 		if (!IsMoving() && IsTalking() && m_hTalkTarget != NULL)
 		{
-			// ALERT( at_console, "waiting %f\n", m_flStopTalkTime - gpGlobals->time );
+			// ALERT( at_console, "waiting %f\n", m_flTalkTime - gpGlobals->time );
+			MakeIdealYaw( m_hTalkTarget->GetAbsOrigin() );
+			// diffusion - allow scientist to turn head more before actually turning body
+			// I don't edit the 45 value in SetTurnActivity function in case it's used elsewhere
+			if( fabs( FlYawDiff() ) > 80 )
+				SetTurnActivity();
+
+			if( m_IdealActivity == ACT_TURN_LEFT || m_IdealActivity == ACT_TURN_RIGHT )
+			{
+				ChangeYaw( pev->yaw_speed );
+				if( fabs( FlYawDiff() ) < 10 )
+					m_IdealActivity = ACT_IDLE;
+			}
+
 			IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
 			if( HasConditions( bits_COND_CLIENT_PUSH ) ) // interrupt, start moving!
 				TaskComplete();
@@ -596,7 +609,7 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		}
 
 		CBaseMonster::RunTask( pTask );
-		if( TaskIsComplete() )
+		if( TaskIsComplete() && !( IsTalking() && m_hTalkTarget != NULL ) )
 		{
 			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
 			SetBoneController( 0, headyaw );
@@ -1139,7 +1152,7 @@ int CTalkMonster :: FIdleSpeak ( void )
 		CTalkMonster *pTalkMonster = (CTalkMonster *)pFriend;
 		m_hTalkTarget = pFriend;
 		pTalkMonster->SetAnswerQuestion( this ); // UNDONE: This is EVIL!!!
-		pTalkMonster->m_flStopTalkTime = m_flStopTalkTime;
+		pTalkMonster->m_flTalkTime = m_flTalkTime;
 
 		m_nSpeak++;
 		return TRUE;
@@ -1201,9 +1214,9 @@ void CTalkMonster::PlaySentence( const char *pszSentence, float duration, float 
 void CTalkMonster :: Talk( float flDuration )
 {
 	if ( flDuration <= 0 )
-		m_flStopTalkTime = gpGlobals->time + 3; // no duration :(
+		m_flTalkTime = gpGlobals->time + 3; // no duration :(
 	else
-		m_flStopTalkTime = gpGlobals->time + flDuration;
+		m_flTalkTime = gpGlobals->time + flDuration;
 }
 
 // Prepare this talking monster to answer question
@@ -1335,14 +1348,12 @@ Schedule_t* CTalkMonster :: GetScheduleOfType ( int Type )
 //=========================================================
 // IsTalking - am I saying a sentence right now?
 //=========================================================
-BOOL CTalkMonster :: IsTalking( void )
+bool CTalkMonster :: IsTalking( void )
 {
-	if ( m_flStopTalkTime > gpGlobals->time )
-	{
-		return TRUE;
-	}
+	if( m_flTalkTime > gpGlobals->time )
+		return true;
 
-	return FALSE;
+	return false;
 }
 
 //=========================================================

@@ -366,27 +366,28 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 	case TASK_WAIT:
 	case TASK_WAIT_RANDOM:
 		{
-			// diffusion - turn head when talking (scripted_sentence entity was unfinished)
-			// look at who I'm talking to
-			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
+			if( !IsMoving() && m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
 			{
-				if( !TurnSet ) // hack - to do this only once...
-				{
-					SetTurnActivity();
-					TurnSet = true;
-				}
+				// ALERT( at_console, "waiting %f\n", m_flTalkTime - gpGlobals->time );
+
 				MakeIdealYaw( m_hTalkTarget->GetAbsOrigin() );
-				ChangeYaw( pev->yaw_speed );
+				// diffusion - allow scientist to turn head more before actually turning body
+				// I don't edit the 45 value in SetTurnActivity function in case it's used elsewhere
+				if( fabs( FlYawDiff() ) > 80 )
+					SetTurnActivity();
+
+				if( m_IdealActivity == ACT_TURN_LEFT || m_IdealActivity == ACT_TURN_RIGHT )
+				{
+					ChangeYaw( pev->yaw_speed );
+					if( fabs( FlYawDiff() ) < 10 )
+						m_IdealActivity = ACT_IDLE;
+				}
+
 				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
 			}
-			else
-				TurnSet = false;
-		
+
 			if( gpGlobals->time >= m_flWaitFinished )
-			{
 				TaskComplete();
-				TurnSet = false;
-			}
 
 			break;
 		}
@@ -549,8 +550,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 //=========================================================
 void CBaseMonster :: SetTurnActivity ( void )
 {
-	float flYD;
-	flYD = FlYawDiff();
+	float flYD = FlYawDiff();
 
 	if ( flYD <= -45 && LookupActivity ( ACT_TURN_RIGHT ) != ACTIVITY_NOT_AVAILABLE )
 	{// big right turn

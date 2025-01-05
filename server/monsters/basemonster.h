@@ -117,7 +117,6 @@ public:
 	// diffusion - trying to fix scripted_sentence issue (it was unfinished)
 	EHANDLE		m_hTalkTarget;		// who to look at while talking
 	float m_flTalkTime;
-	bool TurnSet; // HACK!!! only used in TASK_WAIT_RANDOM, not saved
 
 // Scripted sequence Info
 	SCRIPTSTATE	m_scriptState;		// internal cinematic state
