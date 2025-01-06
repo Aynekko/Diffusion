@@ -303,25 +303,30 @@ void HUD_Frame( double time )
 
 int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 {
-	if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE && !Q_strcmp( pszCurrentBinding, "escape" ) )
+	bool bUseButton = !Q_strcmp( pszCurrentBinding, "+use" );
+	bool bEscButton = false;
+	if( !bUseButton )
+		bEscButton = !Q_strcmp( pszCurrentBinding, "escape" );
+	
+	if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE && bEscButton )
 	{
 		gHUD.m_Puzzle.m_iFlags &= ~HUD_ACTIVE;
 		return 0;
 	}
-	
-	if( (gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) && (keynum == K_ENTER || keynum == K_MOUSE1 || !Q_strcmp(pszCurrentBinding, "+attack") || !Q_strcmp( pszCurrentBinding, "escape" )) )
+
+	if( (gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) && (keynum == K_ENTER || keynum == K_MOUSE1 || bUseButton || !Q_strcmp(pszCurrentBinding, "+attack") || bEscButton) )
 	{
 		gHUD.m_PseudoGUI.CloseWindow( keynum == K_MOUSE1 || !Q_strcmp( pszCurrentBinding, "+attack" ) );
 		return 0;
 	}
 
-	if( gHUD.m_CodeInput.CodeInputScreenIsOn && !Q_strcmp( pszCurrentBinding, "escape" ) )
+	if( gHUD.m_CodeInput.CodeInputScreenIsOn && bEscButton )
 	{
 		gHUD.m_CodeInput.DisableCodeScreen();
 		return 0;
 	}
 
-	if( !Q_strcmp(pszCurrentBinding, "+use") )
+	if( bUseButton )
 	{
 		// currently drawing a tutor
 		if( gHUD.m_StatusIconsTutor.IsTutorDrawing && (gHUD.m_flTime > gHUD.m_StatusIconsTutor.TutorStartTime + 1) && !gHUD.m_StatusIconsTutor.x_direction )
