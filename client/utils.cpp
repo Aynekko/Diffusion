@@ -246,7 +246,7 @@ void ALERT( ALERT_TYPE level, char *szFmt, ... )
 	}
 }
 
-float g_hullcolor[8][3] = 
+const float g_hullcolor[8][3] = 
 {
 { 1.0f, 1.0f, 1.0f },
 { 1.0f, 0.5f, 0.5f },
@@ -258,7 +258,7 @@ float g_hullcolor[8][3] =
 { 1.0f, 1.0f, 1.0f },
 };
 
-int g_boxpnt[6][4] =
+const int g_boxpnt[6][4] =
 {
 { 0, 4, 6, 2 }, // +X
 { 0, 1, 5, 4 }, // +Y

@@ -91,8 +91,8 @@ bool Sys_RemoveFile(const char* path);
 #define XPROJECT( x )	(( 1.0f + (x)) * ScreenWidth * 0.5f )
 #define YPROJECT( y )	(( 1.0f - (y)) * ScreenHeight * 0.5f )
 
-extern float g_hullcolor[8][3];
-extern int g_boxpnt[6][4];
+extern const float g_hullcolor[8][3];
+extern const int g_boxpnt[6][4];
 
 template<typename T, size_t N>
 char( &ArraySizeHelper( T( & )[N] ) )[N];
