@@ -81,7 +81,7 @@ void InitAutoExposure(void)
 	}
 
 	if( !tr.avg_luminance_texture )
-		tr.avg_luminance_texture = CREATE_TEXTURE( "*avg_luminance_texture", glState.width, glState.height, NULL, TF_LUMINANCE );
+		tr.avg_luminance_texture = CREATE_TEXTURE( "*avg_luminance_texture", glState.width, glState.height, NULL, TF_SCREEN );
 
 	GL_Bind( GL_TEXTURE0, tr.avg_luminance_texture );
 	pglGenerateMipmap( GL_TEXTURE_2D );
@@ -150,7 +150,7 @@ void InitSSAO( void )
 	}
 
 	if( !ScreenAO )
-		ScreenAO = CREATE_TEXTURE( "*screenao", glState.width, glState.height, NULL, TF_LUMINANCE );
+		ScreenAO = CREATE_TEXTURE( "*screenao", glState.width, glState.height, NULL, TF_SCREEN );
 }
 
 void InitBloom( void )
@@ -214,9 +214,9 @@ void InitPostTextures( void )
 	if( !tr.target_rgb[0] )
 	{
 		if( tr.lowmemory )
-			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE, TARGET_SIZE, NULL, TF_SCREEN | TF_LUMINANCE ); // 128
+			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE, TARGET_SIZE, NULL, TF_SCREEN ); // 128
 		else
-			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE512, TARGET_SIZE512, NULL, TF_SCREEN | TF_LUMINANCE );
+			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE512, TARGET_SIZE512, NULL, TF_SCREEN );
 	}
 
 	if( ScreenWaterTexture )
