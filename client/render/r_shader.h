@@ -157,6 +157,7 @@ typedef struct glsl_prog_s
 	GLint u_TimeDelta;
 	GLint u_BloomFirstPass;
 	GLint u_HDRExposure;
+	GLint u_HBAOParams;
 } glsl_program_t;
 
 typedef struct
@@ -177,6 +178,7 @@ typedef struct
 	glsl_program_t *Glitch;
 	glsl_program_t *Monochrome;
 	glsl_program_t *genSSAO;
+	glsl_program_t *genHBAO;
 	glsl_program_t *drawSSAO;
 	glsl_program_t *ToneMap;
 	glsl_program_t *BlurMip;

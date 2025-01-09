@@ -149,6 +149,7 @@ cvar_t *gl_sunshafts_brightness;
 cvar_t *gl_sunshafts_adaptive;
 cvar_t *gl_renderscale;
 cvar_t *gl_ssao;
+cvar_t *gl_hbao;
 cvar_t *gl_ssao_debug;
 cvar_t *gl_tonemap;
 cvar_t *gl_lensflare;
@@ -399,7 +400,8 @@ void V_Init( void )
 	gl_sunshafts_blur = CVAR_REGISTER( "gl_sunshafts_blur", "0.15", FCVAR_ARCHIVE );
 	gl_sunshafts_brightness = CVAR_REGISTER( "gl_sunshafts_brightness", "0", FCVAR_ARCHIVE );
 	gl_sunshafts_adaptive = CVAR_REGISTER( "gl_sunshafts_adaptive", "0", FCVAR_ARCHIVE );
-	gl_ssao = CVAR_REGISTER( "gl_ssao", "1", FCVAR_ARCHIVE );
+	gl_ssao = CVAR_REGISTER( "gl_ssao", "0", FCVAR_ARCHIVE );
+	gl_hbao = CVAR_REGISTER( "gl_hbao", "1", FCVAR_ARCHIVE );
 	gl_ssao_debug = CVAR_REGISTER( "gl_ssao_debug", "0", FCVAR_CHEAT );
 	gl_tonemap = CVAR_REGISTER( "gl_tonemap", "0", FCVAR_ARCHIVE );
 	r_shadowquality = CVAR_REGISTER( "r_shadowquality", "0", FCVAR_ARCHIVE );

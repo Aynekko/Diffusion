@@ -7,7 +7,7 @@ uniform float       u_zFar;
 varying vec2        var_TexCoord;
 
 const float znear = 1.0; // camera clipping start
-const float distScale = 2.0;
+const float distScale = 1.0;
 
 const float Samples = 8.0;
 const float InvSamples = ( 1.0 / Samples );
@@ -42,7 +42,7 @@ float Bayer16( vec2 a )
 
 void main( void )
 {
-	float radius = 0.55;
+	float radius = 0.25;
 
 	float fSampledDepth = texture2D( u_DepthMap, var_TexCoord ).r;
 	fSampledDepth = linearizeDepth( fSampledDepth, znear, u_zFar ); // get z-eye
@@ -58,13 +58,13 @@ void main( void )
 		zSample = linearizeDepth( zSample, znear, u_zFar );
    
 		float dist = max( fSampledDepth - zSample , 0.0 ) / distScale;
-		float occl = 15.0 * max( dist * ( 1.5 - dist ), 0.0 );
+		float occl = 15.0 * smoothstep( 0.0, 1.0, max( dist * ( 3.5 - dist ), 0.0 ));
       
 		ssao += 1.0 / (( 1.0 + occl * occl ));
 		radius += 0.125;
 	}
     
-    ssao = clamp( ssao * 0.25, 0.0, 1.0 );
+    ssao = clamp( ssao * 0.28, 0.0, 1.0 );
     
     gl_FragColor = vec4( ssao );
 }

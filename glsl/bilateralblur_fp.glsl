@@ -24,12 +24,11 @@
 
 uniform sampler2D	u_ScreenMap;
 uniform sampler2D	u_DepthMap;
-uniform float		u_zFar;
 uniform vec2		u_ScreenSizeInv;
 
 varying vec2		var_TexCoord;
 
-const float KERNEL_RADIUS = 3;
+const float KERNEL_RADIUS = 5.0;
 const float g_Sharpness = 2.0;
 
 vec4 BlurFunction( vec2 uv, float r, vec4 center_c, float center_d, inout float w_total )

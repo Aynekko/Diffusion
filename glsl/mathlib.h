@@ -66,7 +66,7 @@ float linearizeDepth( float zfar, float depth )
 
 float linearizeDepth( float depth, float znear, float zfar )
 {
-	return zfar * znear / (depth * (zfar - znear) - zfar);
+	return -zfar * znear / (depth * (zfar - znear) - zfar);
 }
 
 float ComputeStaticBump( const vec3 L, const vec3 N )
