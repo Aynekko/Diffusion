@@ -8,7 +8,8 @@
 // ========================== A TRIGGER THAT PUSHES YOU ===============================
 
 #define SF_TRIG_PUSH_ONCE	BIT( 0 )
-#define SF_TRIG_PUSH_CLIENTSONLY BIT(5) // diffusion - only affect clients
+#define SF_TRIG_PUSH_CLIENTSONLY BIT(5) // diffusion - only affect clients and drone
+#define SF_TRIG_PUSH_NOPLAYERDRONE BIT(6) // diffusion - don't push player's drone
 #define SF_TRIG_PUSH_SETUP	BIT( 31 )
 
 class CTriggerPush : public CBaseTrigger
@@ -71,9 +72,6 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 	if( pOther->IsProjectile() ) // diffusion - don't affect projectiles
 		return;
 
-	if( HasSpawnFlags( SF_TRIG_PUSH_CLIENTSONLY ) && !pOther->IsPlayer() && !pOther->HasFlag(F_PLAYER_CONTROL) ) // also include player's drone
-		return;
-
 	// UNDONE: Is there a better way than health to detect things that have physics? (clients/monsters)
 	switch (pevToucher->movetype)
 	{
@@ -82,6 +80,16 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 	case MOVETYPE_NOCLIP:
 	case MOVETYPE_FOLLOW:
 		return;
+	}
+
+	if( HasSpawnFlags( SF_TRIG_PUSH_CLIENTSONLY ) && !pOther->IsPlayer() ) // also include player's drone
+	{
+		// this trigger pushes clients and their drones, but can allow the drone to pass
+		// HACK kind of: use -662 check for player's drone (it sets on drone spawn)
+		if( HasSpawnFlags( SF_TRIG_PUSH_NOPLAYERDRONE ) && pOther->pev->iuser3 == -662 )
+			return;
+		else if( pOther->pev->iuser3 != -662 )
+			return;
 	}
 
 	// FIXME: If something is hierarchically attached, should we try to push the parent?
