@@ -4100,10 +4100,23 @@ void CAlienShip :: RunTask ( Task_t *pTask )
 								pDrone->SetConditions( bits_COND_NEW_ENEMY );
 								pDrone->m_IdealMonsterState = m_IdealMonsterState;
 							}
-							pDrone->m_flDistTooFar = 4096; // those drones can shoot from afar
+
 							DroneSpawnTime = gpGlobals->time + RANDOM_LONG( 20, 30 );
 							SpawnedDrones++;
 							EMIT_SOUND_DYN( edict(), CHAN_STATIC, "drone/alienship_dronespawn.wav", 1, 0.2, 0, RANDOM_LONG( 90, 110 ) );
+
+							// copy these parameters too to act similarly
+							pDrone->m_flDistLook = m_flDistLook;
+							pDrone->m_flDistTooClose = m_flDistTooClose;
+							pDrone->m_flDistTooFar = m_flDistTooFar;
+
+							// add targetname too
+							if( GetTargetname()[0] != '\0' )
+							{
+								char newname[64];
+								sprintf_s( newname, "%s_drone", GetTargetname() );
+								pDrone->pev->targetname = MAKE_STRING( newname );
+							}
 						}
 					}
 				}

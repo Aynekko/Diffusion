@@ -1642,6 +1642,19 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 								pDrone->SetConditions( bits_COND_NEW_ENEMY );
 								pDrone->m_IdealMonsterState = m_IdealMonsterState; // do not strip the enemy after spawn
 							}
+
+							// copy these parameters too to act similarly
+							pDrone->m_flDistLook = m_flDistLook;
+							pDrone->m_flDistTooClose = m_flDistTooClose;
+							pDrone->m_flDistTooFar = m_flDistTooFar;
+
+							// add targetname too
+							if( GetTargetname()[0] != '\0' )
+							{
+								char newname[64];
+								sprintf_s( newname, "%s_drone", GetTargetname() );
+								pDrone->pev->targetname = MAKE_STRING( newname );
+							}
 						}
 
 						DroneSpawned = true; // the drone is now spawned, grunt can't spawn any more drones and will use the grenade
@@ -4609,6 +4622,19 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 						pDrone->SetEnemy( m_hEnemy );
 						pDrone->SetConditions( bits_COND_NEW_ENEMY );
 						pDrone->m_IdealMonsterState = m_IdealMonsterState; // do not strip the enemy after spawn
+					}
+
+					// copy these parameters too to act similarly
+					pDrone->m_flDistLook = m_flDistLook;
+					pDrone->m_flDistTooClose = m_flDistTooClose;
+					pDrone->m_flDistTooFar = m_flDistTooFar;
+
+					// add targetname too
+					if( GetTargetname()[0] != '\0' )
+					{
+						char newname[64];
+						sprintf_s( newname, "%s_drone", GetTargetname() );
+						pDrone->pev->targetname = MAKE_STRING( newname );
 					}
 				}
 				DroneSpawned = true; // the drone is now spawned, grunt can't spawn any more drones and will use the grenade
