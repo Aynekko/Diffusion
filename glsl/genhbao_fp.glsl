@@ -22,12 +22,12 @@ vec2 AORes = ScreenRes * 0.5;
 vec2 InvAORes = 1.0 / AORes;
 vec2 NoiseScale = AORes * 0.25;
 
-const float AOStrength = 1.6;
-const float R = 8.0;
-const float R2 = R * R;
+const float AOStrength = 1.1;
+const float R = 4.0;
+const float R2 = R * R * R * 2;
 const float NegInvR2 = - 1.0 / R2;
-const float TanBias = tan( 4.0 * M_PI / 180.0 );
-const float MaxRadiusPixels = 48.0;
+const float TanBias = tan( 8.0 * M_PI / 180.0 );
+const float MaxRadiusPixels = 36.0;
 
 const int NumDirections = 5;
 const int NumSamples = 4;
@@ -54,9 +54,9 @@ vec3 GetViewPos(vec2 uv)
 	return UVToViewSpace(uv, z);
 }
 
-float TanToSin(float x)
+float Length2(vec3 V)
 {
-	return x * inversesqrt(x*x + 1.0);
+	return dot(V, V);
 }
 
 float InvLength(vec2 V)
@@ -64,24 +64,19 @@ float InvLength(vec2 V)
 	return inversesqrt(dot(V, V));
 }
 
-float Tangent(vec3 V)
-{
-	return V.z * InvLength(V.xy);
-}
-
-float BiasedTangent(vec3 V)
-{
-	return V.z * InvLength(V.xy) + TanBias;
-}
-
 float Tangent(vec3 P, vec3 S)
 {
 	return -(P.z - S.z) * InvLength(S.xy - P.xy);
 }
 
-float Length2(vec3 V)
+float BiasedTangent(vec3 V)
 {
-	return dot(V, V);
+	return (V.z * 3.0) * InvLength(V.xy) + TanBias;
+}
+
+float TanToSin(float x)
+{
+	return x * inversesqrt(x*x + 1.0);
 }
 
 vec3 MinDiff(vec3 P, vec3 Pr, vec3 Pl)
@@ -99,48 +94,6 @@ vec2 SnapUVOffset(vec2 uv)
 float Falloff(float d2)
 {
 	return d2 * NegInvR2 + 1.0;
-}
-
-float HorizonOcclusion(vec2 deltaUV, vec3 P, vec3 dPdu, vec3 dPdv, float randstep, float numSamples)
-{
-	float ao = 0;
-
-	// Offset the first coord with some noise
-	vec2 uv = var_TexCoord + SnapUVOffset( randstep * deltaUV );
-	deltaUV = SnapUVOffset( deltaUV );
-
-	// Calculate the tangent vector
-	vec3 T = deltaUV.x * dPdu + deltaUV.y * dPdv;
-
-	// Get the angle of the tangent vector from the viewspace axis
-	float tanH = BiasedTangent( T );
-	float sinH = TanToSin( tanH );
-
-	float tanS;
-	float d2;
-	vec3 S;
-
-	// Sample to find the maximum angle
-	for( float s = 1; s <= numSamples; ++s )
-	{
-		uv += deltaUV;
-		S = GetViewPos( uv );
-		tanS = Tangent( P, S );
-		d2 = Length2( S - P ) * 0.1;
-
-		// Is the sample within the radius and the angle greater?
-		if( d2 < R2 && tanS > tanH )
-		{
-			float sinS = TanToSin( tanS );
-			// Apply falloff based on the distance
-			ao += Falloff( d2 ) * ( sinS - sinH );
-
-			tanH = tanS;
-			sinH = sinS;
-		}
-	}
-
-	return ao;
 }
 
 vec2 RotateDirections(vec2 Dir, vec2 CosSin)
@@ -168,6 +121,48 @@ void ComputeSteps(inout vec2 stepSizeUv, inout float numSteps, float rayRadiusPi
 
 	// Step size in uv space
 	stepSizeUv = stepSizePix * InvAORes;
+}
+
+float HorizonOcclusion(vec2 deltaUV, vec3 P, vec3 dPdu, vec3 dPdv, float randstep, float numSamples)
+{
+	float ao = 0;
+
+	// Offset the first coord with some noise
+	vec2 uv = var_TexCoord + SnapUVOffset( randstep * deltaUV );
+	deltaUV = SnapUVOffset( deltaUV );
+
+	// Calculate the tangent vector
+	vec3 T = deltaUV.x * dPdu + deltaUV.y * dPdv;
+
+	// Get the angle of the tangent vector from the viewspace axis
+	float tanH = BiasedTangent( T );
+	float sinH = TanToSin( tanH );
+
+	float tanS;
+	float d2;
+	vec3 S;
+
+	// Sample to find the maximum angle
+	for( float s = 1; s <= numSamples; ++s )
+	{
+		uv += deltaUV;
+		S = GetViewPos( uv );
+		tanS = Tangent( P, S );
+		d2 = Length2( S - P ) * 0.2;
+
+		// Is the sample within the radius and the angle greater?
+		if( d2 < R2 && tanS > tanH )
+		{
+			float sinS = TanToSin( tanS );
+			// Apply falloff based on the distance
+			ao += Falloff( d2 ) * ( sinS - sinH );
+
+			tanH = tanS;
+			sinH = sinS;
+		}
+	}
+
+	return ao;
 }
 
 void main(void)
