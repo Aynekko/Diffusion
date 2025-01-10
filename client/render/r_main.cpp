@@ -1273,39 +1273,42 @@ void R_CheckFog( void )
 		}
 		return;
 	}
-
-	waterEntity = WATER_ENTITY( RI->vieworg );
-	if( waterEntity >= 0 && waterEntity < tr.viewparams.max_entities )
-		ent = GET_ENTITY( waterEntity );
-
-	// check for water texture
-	if( ent && ent->model && ent->model->type == mod_brush )
+	else // underwater
 	{
-		for( int i = 0; i < ent->model->nummodelsurfaces; i++ )
+		waterEntity = WATER_ENTITY( RI->vieworg );
+		if( waterEntity >= 0 && waterEntity < tr.viewparams.max_entities )
+			ent = GET_ENTITY( waterEntity );
+
+		// check for water texture
+		if( ent && ent->model && ent->model->type == mod_brush )
 		{
-			msurface_t *surf = &ent->model->surfaces[ent->model->firstmodelsurface+i];
-			if( FBitSet( surf->flags, SURF_WATER ))
+			for( int i = 0; i < ent->model->nummodelsurfaces; i++ )
 			{
-				texture = surf->texinfo->texture->gl_texturenum;
-				break;
+				msurface_t *surf = &ent->model->surfaces[ent->model->firstmodelsurface + i];
+				if( FBitSet( surf->flags, SURF_WATER ) )
+				{
+					texture = surf->texinfo->texture->gl_texturenum;
+					break;
+				}
 			}
 		}
-	}
-	else if( RI->viewleaf )
-	{
-		texture = R_RecursiveFindWaterTexture( RI->viewleaf->parent, NULL, false );
-	}
-	if( texture == -1 ) return; // no valid fogs
+		else if( RI->viewleaf )
+		{
+			texture = R_RecursiveFindWaterTexture( RI->viewleaf->parent, NULL, false );
+		}
+		if( texture == -1 ) return; // no valid fogs
 
-	// extract fog settings from texture palette
-	GET_EXTRA_PARAMS( texture, &fogColor.r, &fogColor.g, &fogColor.b, &fogDensity );
+		// extract fog settings from texture palette
+		GET_EXTRA_PARAMS( texture, &fogColor.r, &fogColor.g, &fogColor.b, &fogDensity );
 
-	// copy fog params
-	tr.fogColor[0] = fogColor.r / 255.0f;
-	tr.fogColor[1] = fogColor.g / 255.0f;
-	tr.fogColor[2] = fogColor.b / 255.0f;
-	tr.fogDensity = fogDensity * 0.000005f;
-	tr.fogEnabled = true;
+		// copy fog params
+		tr.fogColor[0] = fogColor.r / 255.0f;
+		tr.fogColor[1] = fogColor.g / 255.0f;
+		tr.fogColor[2] = fogColor.b / 255.0f;
+		tr.fogDensity = fogDensity * 0.000005f;
+		if( tr.fogDensity > 0.01f )
+			tr.fogEnabled = true;
+	}
 }
 
 /*
