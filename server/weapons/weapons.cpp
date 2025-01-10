@@ -747,6 +747,11 @@ BOOL CanAttack( float attack_time, float curtime, BOOL isPredicted )
 
 void CBasePlayerWeapon::ItemPostFrame( void )
 {
+	// this can happen if we had nothing but one grenade, we threw it out, and viewmodel disappeared
+	// when we get another nade make it re-deploy
+	if( m_pPlayer->pev->viewmodel == NULL && iMaxClip() == -1 && m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0 )
+		Deploy();
+	
 	if( m_pPlayer->m_afButtonPressed & IN_RELOAD )
 		AskedForReload = true;
 	
@@ -1274,7 +1279,7 @@ void CBasePlayerAmmo :: DefaultTouch( CBaseEntity *pOther )
 int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon )
 {
 	int iReturn = 0;
-
+	
 	if ( pszAmmo1() != NULL )
 	{
 		// blindly call with m_iDefaultAmmo. It's either going to be a value or zero. If it is zero,
@@ -1285,7 +1290,7 @@ int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon )
 
 	if ( pszAmmo2() != NULL )
 		iReturn = pWeapon->AddSecondaryAmmo( 0, (char *)pszAmmo2(), iMaxAmmo2() );
-
+	
 	return iReturn;
 }
 

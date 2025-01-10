@@ -228,8 +228,7 @@ void CWpnSentry::PrimaryAttack()
 	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
 	{
 		// last sentry was spawned, switch to another weapon right away
-		SendWeaponAnim( SENTRY_NOSENTRY );
-		m_flNextPrimaryAttack = gpGlobals->time + 0.1;
+		RetireWeapon();
 		return;
 	}
 	else
@@ -272,6 +271,9 @@ void CWpnSentry::SecondaryAttack(void)
 
 void CWpnSentry::WeaponIdle( void )
 {
+	if( !m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
+		return;
+	
 	ResetEmptySound( );
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
