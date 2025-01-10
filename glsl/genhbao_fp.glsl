@@ -26,7 +26,7 @@ const float AOStrength = 1.1;
 const float R = 4.0;
 const float R2 = R * R * R * 2;
 const float NegInvR2 = - 1.0 / R2;
-const float TanBias = tan( 8.0 * M_PI / 180.0 );
+const float TanBias = sin( 8.0 * M_PI / 180.0 ) / cos( 8.0 * M_PI / 180.0 );
 const float MaxRadiusPixels = 36.0;
 
 const int NumDirections = 5;
