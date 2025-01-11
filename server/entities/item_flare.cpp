@@ -122,11 +122,13 @@ void CFlare::BounceTouch(CBaseEntity* pOther)
 
 	if (!HasFlag(F_CUSTOMFLAG1))
 	{
-		if (pOther->IsMonster() && !(pOther->HasFlag(F_ENTITY_ONFIRE | F_FIRE_IMMUNE)))
+		if( pOther->IsMonster() && !(pOther->HasFlag( F_ENTITY_ONFIRE | F_FIRE_IMMUNE )) )
 		{
-			pOther->SetFlag(F_ENTITY_ONFIRE);
+			pOther->SetFlag( F_ENTITY_ONFIRE );
 			//	ALERT(at_console, "set on fire\n");
 		}
+		else if( FClassnameIs( pOther, "prop_explosive_barrel" ) )
+			pOther->Use( this, this, USE_TOGGLE, 0 );
 	}
 }
 
