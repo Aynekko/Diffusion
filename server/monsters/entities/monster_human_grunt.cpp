@@ -1235,7 +1235,7 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 	if( HasWeapon( HGRUNT_HANDGRENADE ))
 	{
 		Vector vecToss;
-		if( !DroneSpawned )
+		if( CanSpawnDrone && !DroneSpawned )
 		{
 			// for drone spawn just use a default forward vector, we don't perform a toss, just looking in the enemy direction
 			UTIL_MakeVectors( GetAbsAngles() );
@@ -1246,12 +1246,23 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 
 		if( vecToss != g_vecZero )
 		{
-			m_vecTossVelocity = vecToss;
+			float check = flCheckThrowDistance( pev, GetGunPosition(), vecToss );
+			if( check < 300.0f )
+			{
+				// don't throw
+				m_fThrowGrenade = FALSE;
+				// don't check again for a while.
+				m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
+			}
+			else
+			{
+				m_vecTossVelocity = vecToss;
 
-			// throw a hand grenade
-			m_fThrowGrenade = TRUE;
-			// don't check again for a while.
-			m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
+				// throw a hand grenade
+				m_fThrowGrenade = TRUE;
+				// don't check again for a while.
+				m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
+			}
 		}
 		else
 		{
@@ -1261,18 +1272,29 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
 		}
 	}
-	else
+	else // grenade launcher
 	{
 		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, gSkillData.hgruntGrenadeSpeed, 0.5 );
 
 		if( vecToss != g_vecZero )
 		{
-			m_vecTossVelocity = vecToss;
+			float check = flCheckThrowDistance( pev, GetGunPosition(), vecToss );
+			if( check < 300.0f )
+			{
+				// don't throw
+				m_fThrowGrenade = FALSE;
+				// don't check again for a while.
+				m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
+			}
+			else
+			{
+				m_vecTossVelocity = vecToss;
 
-			// throw a hand grenade
-			m_fThrowGrenade = TRUE;
-			// don't check again for a while.
-			m_flNextGrenadeCheck = gpGlobals->time + 0.3; // 1/3 second.
+				// throw a hand grenade
+				m_fThrowGrenade = TRUE;
+				// don't check again for a while.
+				m_flNextGrenadeCheck = gpGlobals->time + 0.3; // 1/3 second.
+			}
 		}
 		else
 		{

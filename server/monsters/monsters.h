@@ -81,6 +81,7 @@ extern void UTIL_MoveToOrigin( edict_t* pent, const Vector &vecGoal, float flDis
 
 Vector VecCheckToss ( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot2, float flGravityAdj = 1.0 );
 Vector VecCheckThrow ( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot2, float flSpeed, float flGravityAdj = 1.0 );
+float flCheckThrowDistance( entvars_t *pev, Vector vecStart, Vector vecGrenadeVel );
 extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern DLL_GLOBAL CONSTANT float g_flMeleeRange;
 extern DLL_GLOBAL CONSTANT float g_flMediumRange;

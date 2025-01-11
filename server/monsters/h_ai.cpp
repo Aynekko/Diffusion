@@ -184,7 +184,7 @@ Vector VecCheckThrow ( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot2, 
 	
 	// diffusion - begin from the higher point, as the grunts still tend to kill themselves
 	Vector Spot1 = vecSpot1;
-	Spot1.z += 32;
+//	Spot1.z += 32; // upd: maybe not needed?
 	
 	TraceResult tr;
 	UTIL_TraceLine(Spot1, vecApex, dont_ignore_monsters, ENT(pev), &tr);
@@ -203,6 +203,46 @@ Vector VecCheckThrow ( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot2, 
 
 
 	return vecGrenadeVel;
+}
+
+//========================================================================================
+// diffusion
+// flCheckThrowDistance: the grenade will be thrown at a desired velocity.
+// Check the length of the toss vector to make sure the grenade won't hit the ceiling or
+// some other things on the way. The grenade can bounce off and soldiers could kill themselves.
+//========================================================================================
+float flCheckThrowDistance( entvars_t *pev, Vector vecStart, Vector vecGrenadeVel )
+{
+	TraceResult tr;
+	Vector vecEnd = vecStart + vecGrenadeVel;
+	UTIL_TraceLine( vecStart, vecEnd, dont_ignore_monsters, ENT( pev ), &tr );
+
+	/* // debug thing
+	extern short g_sModelIndexLaser;
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+	WRITE_BYTE( TE_BEAMPOINTS );
+	WRITE_COORD( vecStart.x );
+	WRITE_COORD( vecStart.y );
+	WRITE_COORD( vecStart.z );
+
+	WRITE_COORD( vecEnd.x );
+	WRITE_COORD( vecEnd.y );
+	WRITE_COORD( vecEnd.z );
+	WRITE_SHORT( g_sModelIndexLaser );
+	WRITE_BYTE( 0 ); // framerate
+	WRITE_BYTE( 0 ); // framerate
+	WRITE_BYTE( 50 ); // life
+	WRITE_BYTE( 40 );  // width
+	WRITE_BYTE( 0 );   // noise
+	WRITE_BYTE( 255 );   // r, g, b
+	WRITE_BYTE( 255 );   // r, g, b
+	WRITE_BYTE( 255 );   // r, g, b
+	WRITE_BYTE( 255 );	// brightness
+	WRITE_BYTE( 0 );		// speed
+	MESSAGE_END();
+	*/
+
+	return (vecStart - tr.vecEndPos).Length();
 }
 
 
