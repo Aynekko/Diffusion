@@ -631,8 +631,7 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	switch( m_Material )
 	{
 	case matGlass:
-		cFlag = BREAK_GLASS;
-		break;
+		return 1; // no glass gibs when taking damage
 	case matWood:
 		cFlag = BREAK_WOOD;
 		break;
