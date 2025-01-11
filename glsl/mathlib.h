@@ -162,10 +162,9 @@ float randomFunction( in float seed, in vec2 uv )
 
 float randomFunction2( in float seed, in vec2 co )
 {
-	float dt = dot( co.xy, vec2( 12.9898, 8.233 ) * seed );
-	float sn = mod( dt, 3.14 );
-
-	return fract( sin( sn ) * 43758.5453 );
+	// gold noise
+	const float PHI = 1.61803398874989484820459; // Golden Ratio   
+	return fract( tan( distance( co * PHI, co ) * seed ) * co.x );
 }
 
 float min3( vec3 v )
