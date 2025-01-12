@@ -296,4 +296,8 @@ void CTriggerRandomizer::FireRandomTarget( void )
 		if( LastUsedTarget == 16 ) { FireRandomTarget(); }
 		else { UTIL_FireTargets( firetarget16, pActivator, this, useType ); LastUsedTarget = 16; } break;
 	}
+
+	// activate a common target along with the random targets
+	if( pev->target )
+		UTIL_FireTargets( pev->target, this, this, USE_TOGGLE );
 }
