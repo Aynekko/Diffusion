@@ -70,7 +70,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 	tr.materials[texnum].EmbossScale = 0.0f;
 	tr.materials[texnum].InteriorGrid = Vector2D( 1.0f, 1.0f );
 	tr.materials[texnum].InteriorLightState = 0;
-	tr.materials[texnum].ReflectScale = 0.0f;
+	tr.materials[texnum].ReflectScale = { 0.0f, 0.0f };
 	tr.materials[texnum].PlanarReflectScale = 0.0f;
 	tr.materials[texnum].FoliageSwayHeight = 0;
 	tr.materials[texnum].ApplyColor = false;
@@ -91,7 +91,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 	if( tr.materials[texnum].name[0] == '!' ) // water
 	{
 		tr.materials[texnum].GlossSmoothness = 0.75f;
-		tr.materials[texnum].ReflectScale = 0.5f;
+		tr.materials[texnum].ReflectScale = { 0.5f, 0.0f };
 	}
 	
 	char AddPath[10] = "textures/";
@@ -185,7 +185,23 @@ void LoadMaterialSettingsForTexture( int texnum )
 				flValue = Q_atof( token );
 				flValue = bound( 0.0f, flValue, 1.0f );
 				if( !tr.lowmemory )
-					tr.materials[texnum].ReflectScale = flValue;
+					tr.materials[texnum].ReflectScale[0] = flValue;
+			}
+			else
+			{
+				Error = true;
+				break;
+			}
+		}
+		else if( !Q_stricmp( token, "ReflectLod" ) )
+		{
+			// parse value for this setting
+			afile = COM_ParseLine( afile, token );
+			if( afile && token[0] > 0 )
+			{
+				flValue = Q_atof( token );
+				if( !tr.lowmemory )
+					tr.materials[texnum].ReflectScale[1] = (int)flValue;
 			}
 			else
 			{
@@ -2779,7 +2795,7 @@ void R_DrawBrushList( void )
 	float cached_glosssmoothness = -1.0f;
 	float cached_embossscale = -1.0f;
 	float cached_fresnel = -1.0f;
-	float cached_reflectscale = -1.0f;
+	Vector2D cached_reflectscale = { -1.0f, 0.0f };
 	Vector cubemap_params[3];
 	Vector4D brush_params[3];
 	Vector2D screensizeinv = Vector2D( 1.0f / (float)glState.width, 1.0f / (float)glState.height );
@@ -2814,7 +2830,7 @@ void R_DrawBrushList( void )
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
 			flush_buffer = true;
 
-		if( tr.materials[es->gl_texturenum].ReflectScale > 0.01f )
+		if( tr.materials[es->gl_texturenum].ReflectScale[0] > 0.01f )
 		{
 			if( cached_cubemap != es->cubemap )
 				flush_buffer = true;
@@ -2882,7 +2898,7 @@ void R_DrawBrushList( void )
 			cached_glosssmoothness = -1.0f;
 			cached_embossscale = -1.0f;
 			cached_fresnel = -1.0f;
-			cached_reflectscale = -1.0f;
+			cached_reflectscale = { -1.0f, 0.0f };
 		}
 
 		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != es->gl_texturenum) )
@@ -3067,14 +3083,8 @@ void R_DrawBrushList( void )
 			cached_texofs[1] = es->texofs[1];
 		}
 
-		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
+		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale[0] > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
 		{
-			if( tr.materials[es->gl_texturenum].ReflectScale != cached_reflectscale )
-			{
-				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale );
-				cached_reflectscale = tr.materials[es->gl_texturenum].ReflectScale;
-			}
-
 			int cubemap_tex_unit = GL_TEXTURE6;
 			if( FBitSet( s->flags, SURF_WATER ) )
 				cubemap_tex_unit = GL_TEXTURE2;
@@ -3103,6 +3113,12 @@ void R_DrawBrushList( void )
 				cubemap_params[2] = g_vecZero;
 				pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
 				cached_cubemap = NULL;
+			}
+
+			if( tr.materials[es->gl_texturenum].ReflectScale != cached_reflectscale )
+			{
+				pglUniform2fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale[0], cached_cubemap != NULL ? bound( 0, tr.materials[es->gl_texturenum].ReflectScale[1], cached_cubemap->numMips ) : 0.0f );
+				cached_reflectscale = tr.materials[es->gl_texturenum].ReflectScale;
 			}
 		}
 

@@ -73,7 +73,7 @@ void main( void )
 	vec4 tex_projection = texture2DProj( u_ProjectMap, var_ProjCoord );
 
 	// ignore black pixels of the flashlight/projection texture
-	if( tex_projection.r + tex_projection.g + tex_projection.b == 0.0 )
+	if( length( tex_projection.rgb ) == 0.0 )
 		discard;
 #elif defined( GRASS_LIGHT_OMNIDIRECTIONAL )
 	L = normalize( var_LightVec );
@@ -122,7 +122,7 @@ void main( void )
 	light *= 1.5 * Brightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 #endif
 
-	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	if( u_FogParams.w > 0.0 )
 	{
 		float fogFactor = exp( -dist * u_FogParams.w );
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );

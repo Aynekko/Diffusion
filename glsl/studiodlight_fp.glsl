@@ -63,7 +63,7 @@ uniform float	        u_GlossScale;
 uniform float	        u_EmbossScale;
 #endif
 uniform float		u_DynLightBrightness;
-uniform float           u_RealTime;
+uniform float		u_RealTime;
 uniform vec3		u_MeshParams[3];
 
 // shared variables
@@ -105,7 +105,7 @@ void main( void )
 	vec4 tex_projection = texture2DProj( u_ProjectMap, var_ProjCoord );
 
 	// ignore black pixels of the flashlight/projection texture
-	if( tex_projection.r + tex_projection.g + tex_projection.b == 0.0 )
+	if( length( tex_projection.rgb ) == 0.0 )
 		discard;
 
 	#if defined( STUDIO_HAS_SHADOWS )
@@ -135,16 +135,6 @@ void main( void )
 
 	// two side materials support
 	if( bool( gl_FrontFacing )) N = -N;
-
-	// compute the material defines
-	#if defined( STUDIO_SPECULAR )
-	float GlossScale = u_GlossScale; 
-	float GlossSmoothness = u_GlossSmoothness;
-	#endif
-	#if defined( STUDIO_EMBOSS )
-	float EmbossScale = u_EmbossScale;
-	#endif
-	float Brightness = u_DynLightBrightness; 
 
 	// compute the diffuse, emboss and specular term
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
@@ -179,13 +169,13 @@ void main( void )
 #if defined( STUDIO_LIGHT_PROJECTION )
 	light = u_LightDiffuse.rgb * DLIGHT_SCALE;	// light color
 	// texture or procedural spotlight
-	light *= 2.0 * Brightness * tex_projection.rgb;
+	light *= 2.0 * u_DynLightBrightness * tex_projection.rgb;
 #elif defined( STUDIO_LIGHT_OMNIDIRECTIONAL )
 	light = u_LightDiffuse.rgb * DLIGHT_SCALE;
-	light *= 2 * Brightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
+	light *= 2 * u_DynLightBrightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 #endif
 
-	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	if( u_FogParams.w > 0.0 )
 	{
 		float dist = length( var_ViewVec );
 		float fogFactor = exp( -dist * u_FogParams.w );
@@ -199,7 +189,7 @@ void main( void )
 
 	// apply emboss filter
 #if defined( STUDIO_EMBOSS )
-	vec3 emboss = EmbossFilter( u_ColorMap, var_TexDiffuse, EmbossScale );
+	vec3 emboss = EmbossFilter( u_ColorMap, var_TexDiffuse, u_EmbossScale );
 	diffuse.rgb *= emboss;
 #endif
 
@@ -209,7 +199,7 @@ void main( void )
 #if defined( STUDIO_SPECULAR )
 	vec3 glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
 	float NdotLGloss = saturate( NdotL );
-	vec3 gloss = ComputeSpecular( N, V, L, glossmap, GlossSmoothness, GlossScale ) * ( light * 0.5 ) * NdotLGloss * atten * shadow;
+	vec3 gloss = ComputeSpecular( N, V, L, glossmap, u_GlossSmoothness, u_GlossScale ) * ( light * 0.5 ) * NdotLGloss * atten * shadow;
 	#if defined( STUDIO_EMBOSS )
 		gloss *= emboss;
 	#endif

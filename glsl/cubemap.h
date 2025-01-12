@@ -47,22 +47,22 @@ vec3 CubemapBoxParallaxCorrected( const vec3 vReflVec, vec3 vPosition, const vec
 	return (vInterectionPos - vCubePos);
 }
 
-vec3 GetReflectionProbe( const vec3 vPos, const vec3 vView, const vec3 nWorld, const vec3 glossmap, const float smoothness )
+vec3 GetReflectionProbe( const vec3 vPos, const vec3 vView, const vec3 nWorld, const float CubeLod )
 {
 	vec3 I = normalize( vPos - vView ); // in world space
 	vec3 NW = normalize( nWorld );
 	vec3 wRef = normalize( reflect( I, NW ) );
 
 	vec3 R = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin, BoxMins, BoxMaxs );
-	vec3 Cubemap = textureCube( u_CubemapBox, R, smoothness ).rgb;
+	vec3 Cubemap = textureCubeLod( u_CubemapBox, R, CubeLod ).rgb;
 
 	return Cubemap;
 }
 
-vec3 CubemapReflectionProbe( const vec3 vPos, const vec3 wRef, const vec3 glossmap )
+vec3 CubemapReflectionProbe( const vec3 vPos, const vec3 wRef, const float CubeLod )
 {
 	vec3 R = CubemapBoxParallaxCorrected( wRef, vPos, CubeOrigin, BoxMins, BoxMaxs );
-	vec3 Cubemap = textureCube( u_CubemapBox, R, glossmap.r ).rgb;
+	vec3 Cubemap = textureCubeLod( u_CubemapBox, R, CubeLod ).rgb;
 
 	return Cubemap;
 }

@@ -126,7 +126,7 @@ void main( void )
 	vec4 tex_projection = texture2DProj( u_ProjectMap, var_ProjCoord );
 
 	// ignore black pixels of the flashlight/projection texture
-	if( tex_projection.r + tex_projection.g + tex_projection.b == 0.0 )
+	if( length( tex_projection.rgb ) == 0.0 )
 		discard;
 
 	#if defined( BMODEL_HAS_SHADOWS )
@@ -255,7 +255,7 @@ void main( void )
 #if defined( BMODEL_WATER_REFRACTION )
 	
 	float alpha = u_RenderColor.a;
-	alpha = RemapVal( alpha, 0.0, 1.0, 0.263, 0.500 );
+	alpha = RemapVal( alpha, vec4( 0.0, 1.0, 0.263, 0.500 ) );
 	alpha *= 0.015; // magic as well...
 
 	float WaterAbsorbFactor = 1.0;
@@ -263,11 +263,11 @@ void main( void )
 
 	float fOwnDepth = gl_FragCoord.z;
 	fOwnDepth = linearizeDepth( u_zFar, fOwnDepth );
-	fOwnDepth = RemapVal( fOwnDepth, Z_NEAR, u_zFar, 0.0, 1.0 );
+	fOwnDepth = RemapVal( fOwnDepth, vec4( Z_NEAR, u_zFar, 0.0, 1.0 ) );
 
 	float fSampledDepth = texture2D( u_DepthMap, gl_FragCoord.xy * u_ScreenSizeInv ).r;
 	fSampledDepth = linearizeDepth( u_zFar, fSampledDepth );
-	fSampledDepth = RemapVal( fSampledDepth, Z_NEAR, u_zFar, 0.0, 1.0 );
+	fSampledDepth = RemapVal( fSampledDepth, vec4( Z_NEAR, u_zFar, 0.0, 1.0 ) );
 
 	float depthDelta = abs( fOwnDepth - fSampledDepth );
 	float WaterAbsorbScale = clamp( alpha - (1.0 / 255.0), 0.0, 1.0 ) * 50.0;
@@ -296,7 +296,7 @@ void main( void )
 	light *= Brightness * RenderModeModifier * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 #endif
 
-	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	if( u_FogParams.w > 0.0 )
 	{
 		float dist = length( var_ViewVec );
 		float fogFactor = exp( -dist * u_FogParams.w );

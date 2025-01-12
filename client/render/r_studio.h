@@ -721,7 +721,7 @@ public:
 	float cached_glosssmoothness;
 	float cached_embossscale;
 	float cached_fresnel;
-	float cached_reflectscale;
+	Vector2D cached_reflectscale;
 	float cached_dynlightscale;
 	int cached_normalmap;
 };

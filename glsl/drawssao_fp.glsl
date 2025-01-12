@@ -10,6 +10,8 @@ uniform float		u_zFar;
 
 varying vec2		var_TexCoord;
 
+const float lumInfluence = 1.25;
+
 void main( void )
 {
     vec3 color = texture2D( u_ScreenMap, var_TexCoord ).rgb;
@@ -27,13 +29,14 @@ void main( void )
 			float fogFactor = exp( -fSampledDepth * u_FogParams.w );
 			fogFactor = clamp( fogFactor, 0.0, 1.0 );
 
-			final = mix( u_FogParams.xyz * (1.0 - fogFactor), color, ssao );
+			ssao = mix( ssao, 1.0, lum * lumInfluence );
+			final = mix( u_FogParams.xyz * ( 1.0 - fogFactor ), color, ssao );
 		}
 		else // fog off
-			final = vec3( color * mix( vec3(ssao), vec3(1.0), lum ));
+			final = vec3( color * mix( ssao, 1.0, lum * lumInfluence ));
 	}
     else // only AO for test (gl_ssao_debug 1)
-		final = vec3( mix(vec3(ssao), vec3(1.0), lum )) * 0.28;
+		final = vec3( mix( ssao, 1.0, lum * lumInfluence )) * 0.28;
    
 
     gl_FragColor = vec4( final, 1.0 );

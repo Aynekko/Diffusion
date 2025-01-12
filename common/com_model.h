@@ -70,7 +70,7 @@ typedef struct material_s
 	float GlossScale;
 	float GlossSmoothness;
 	float EmbossScale;
-	float ReflectScale;
+	Vector2D ReflectScale;
 	float PlanarReflectScale;
 	int FoliageSwayHeight;
 	bool ApplyColor;

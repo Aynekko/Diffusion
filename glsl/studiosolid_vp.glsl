@@ -47,6 +47,8 @@ uniform vec4		u_GammaTable[64];
 #endif
 
 uniform vec3		u_MeshParams[3];
+#define MeshScale	u_MeshParams[2].x
+#define MeshAngles	u_MeshParams[1]
 uniform vec4		u_StudioParams[3];
 #define u_ViewOrigin	u_StudioParams[0].xyz
 #define u_RealTime		u_StudioParams[0].w
@@ -68,7 +70,6 @@ varying mat3		var_MatrixTBN;
 void main( void )
 {
 	vec4 position = vec4( attr_Position, 1.0 );
-	float MeshScale = u_MeshParams[2].x;
 
 #if defined( STUDIO_SWAY_FOLIAGE )
 	if( position.z > u_FoliageSwayHeight )
@@ -110,8 +111,6 @@ void main( void )
 
 	// compute TBN
 	mat3 tbn = ComputeTBN( boneMatrix );
-
-	vec3 MeshAngles = u_MeshParams[1];
 	tbn[0] = VectorRotate( tbn[0], MeshAngles );
 	tbn[1] = VectorRotate( tbn[1], MeshAngles );
 	tbn[2] = VectorRotate( tbn[2], MeshAngles );

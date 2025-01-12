@@ -1,5 +1,5 @@
 /*
-StudioDiffuse_fp.glsl - draw solid and alpha-test surfaces
+StudioSolid_fp.glsl - draw solid and alpha-test surfaces
 Copyright (C) 2014 Uncle Mike
 
 This program is free software: you can redistribute it and/or modify
@@ -43,8 +43,9 @@ uniform float		u_GlossSmoothness;
 #if defined( STUDIO_EMBOSS )
 uniform float		u_EmbossScale;
 #endif
-uniform float		u_ReflectScale;
+uniform vec2		u_ReflectScale;
 uniform vec3		u_MeshParams[3];
+#define MeshOrigin	u_MeshParams[0]
 uniform vec4		u_StudioParams[3];
 #define u_ViewOrigin	u_StudioParams[0].xyz
 #define u_FogParams		u_StudioParams[2]
@@ -76,7 +77,6 @@ void main( void )
 	vec3 L = normalize( var_LightVec );		
 	vec3 V = normalize( var_ViewVec );
 	vec3 N;
-	vec3 MeshOrigin = u_MeshParams[0];
 	vec3 light_diffuse;
 
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
@@ -109,21 +109,12 @@ void main( void )
 	// two side materials support
 	if( bool( gl_FrontFacing )) N = -N;
 
-	// compute the material defines
-	#if defined( STUDIO_SPECULAR )
-	float GlossScale = u_GlossScale; 
-	float GlossSmoothness = u_GlossSmoothness;
-	#endif
-	#if defined( STUDIO_EMBOSS )
-	float EmbossScale = u_EmbossScale;
-	#endif
-
 	// compute the diffuse, emboss and specular term
 	
 #if defined( STUDIO_TEXTURE_BLEND )
 	vec4 blend_texture = texture2D( u_BlendTexture, var_TexDiffuse );
 	// blend them together
-	diffuse.rgb = Q_mix( diffuse.rgb, blend_texture.rgb, u_BlendAmount );
+	diffuse.rgb = mix( diffuse.rgb, blend_texture.rgb, u_BlendAmount );
 #endif
 
 	vec3 glossmap = vec3(1.0);
@@ -132,7 +123,7 @@ void main( void )
 	#endif
         // apply emboss filter
 	#if defined( STUDIO_EMBOSS )
-		vec3 emboss = EmbossFilter( u_ColorMap, var_TexDiffuse, EmbossScale );
+		vec3 emboss = EmbossFilter( u_ColorMap, var_TexDiffuse, u_EmbossScale );
 		diffuse.rgb *= emboss;
 	#endif
 
@@ -154,12 +145,12 @@ void main( void )
 	// apply specular lighting
 #if defined( STUDIO_SPECULAR )
 	float NdotLGloss = saturate( dot( N, L ));
-	vec3 gloss = ComputeSpecular( N, V, L, glossmap, GlossSmoothness, GlossScale ) * NdotLGloss;
+	vec3 gloss = ComputeSpecular( N, V, L, glossmap, u_GlossSmoothness, u_GlossScale ) * NdotLGloss;
 	diffuse.rgb *= saturate( 1.0 - GetLuminance( gloss ));
 	#if defined( STUDIO_EMBOSS )
 		gloss *= emboss;
 	#endif
-	diffuse.rgb += gloss * var_LightDiffuse;
+	diffuse.rgb += gloss * light_diffuse;
 #endif
 
 	// apply cubemap reflection
@@ -172,13 +163,13 @@ void main( void )
 		VW = normalize( tbnBasis * VW );
 	#endif
 	vec3 R = reflect( -VW, NW );
-	float fresnel = GetFresnel( VW, NW, u_Fresnel, u_ReflectScale );
-	vec3 cubemap_reflection = CubemapReflectionProbe( MeshOrigin, R, glossmap ) * u_ReflectScale;
+	float fresnel = GetFresnel( VW, NW, u_Fresnel, u_ReflectScale.x );
+	vec3 cubemap_reflection = CubemapReflectionProbe( MeshOrigin, R, u_ReflectScale.y ) * u_ReflectScale.x;
 	diffuse.rgb += cubemap_reflection * fresnel * var_LightDiffuse;
 #endif
 
 	// apply global fog
-	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	if( u_FogParams.w > 0.0 )
 	{
 		float dist = var_Distance;
 		float fogFactor = exp( -dist * u_FogParams.w );

@@ -31,7 +31,7 @@ void main( void )
 {
 	float fSampledDepth = texture2D( u_DepthMap, var_TexCoord ).r;
 	fSampledDepth = linearizeDepth( 4096, fSampledDepth );
-	fSampledDepth = RemapVal( fSampledDepth, Z_NEAR, 4096, 0.0, 1.0 );
+	fSampledDepth = RemapVal( fSampledDepth, vec4( Z_NEAR, 4096, 0.0, 1.0 ) );
 
 	if( fSampledDepth <= 0.5 )
 		discard;

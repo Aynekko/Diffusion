@@ -32,7 +32,8 @@ uniform vec4		u_LightParams[7];
 #define u_ViewOrigin	u_LightParams[4].xyz // local space of model
 #define u_ViewRight		u_LightParams[5].xyz // local space of model
 
-uniform vec3		u_MeshParams[3];	
+uniform vec3		u_MeshParams[3];
+#define MeshScale	u_MeshParams[2].x
 
 #if defined( STUDIO_SWAY_FOLIAGE )
 uniform float		u_RealTime;
@@ -62,7 +63,6 @@ varying mat3	        var_MatrixTBN;
 void main( void )
 {
 	vec4 position = vec4( attr_Position, 1.0 );
-	float MeshScale = u_MeshParams[2].x;
 
 #if defined( STUDIO_SWAY_FOLIAGE )
 	if( position.z > u_FoliageSwayHeight )

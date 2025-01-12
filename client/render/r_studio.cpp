@@ -144,7 +144,7 @@ void CStudioModelRenderer::ResetRenderCache( void )
 	cached_glosssmoothness = -1.0f;
 	cached_embossscale = -1.0f;
 	cached_fresnel = -1.0f;
-	cached_reflectscale = -1.0f;
+	cached_reflectscale = { -1.0f, 0.0f };
 	cached_dynlightscale = -1.0f;
 	cached_texture = -1;
 	cached_normalmap = -1;
@@ -5437,7 +5437,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				cached_glosssmoothness = -1.0f;
 				cached_embossscale = -1.0f;
 				cached_fresnel = -1.0f;
-				cached_reflectscale = -1.0f;
+				cached_reflectscale = { -1.0f, 0.0f };
 				cached_normalmap = -1;
 			}
 
@@ -5601,7 +5601,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			R_SetRenderColor( m_pCurrentEntity );
 
 		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready
-			&& (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f)
+			&& (tr.materials[mat->gl_diffuse_id].ReflectScale[0] > 0.01f)
 			&& !IsBuildingCubemaps() ) // diffusioncubemaps
 		{
 			if( m_pModelInstance->cubemap )
@@ -5632,7 +5632,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 			if( tr.materials[mat->gl_diffuse_id].ReflectScale != cached_reflectscale )
 			{
-				pglUniform1fARB( RI->currentshader->u_ReflectScale, tr.materials[mat->gl_diffuse_id].ReflectScale );
+				pglUniform2fARB( RI->currentshader->u_ReflectScale, tr.materials[mat->gl_diffuse_id].ReflectScale[0], cached_cubemap != NULL ? bound( 0, tr.materials[mat->gl_diffuse_id].ReflectScale[1], cached_cubemap->numMips) : 0.0f );
 				cached_reflectscale = tr.materials[mat->gl_diffuse_id].ReflectScale;
 			}
 

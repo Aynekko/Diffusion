@@ -52,7 +52,7 @@ void main( void )
 	diffuse.rgb *= light_diffuse;
 #endif//GRASS_FULLBRIGHT
 
-	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	if( u_FogParams.w > 0.0 )
 	{
 		float dist = length( var_ViewVec );
 		float fogFactor = exp( -dist * u_FogParams.w );

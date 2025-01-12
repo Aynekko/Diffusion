@@ -22,14 +22,14 @@ vec2 AORes = ScreenRes * 0.5;
 vec2 InvAORes = 1.0 / AORes;
 vec2 NoiseScale = AORes * 0.25;
 
-const float AOStrength = 1.1;
+const float AOStrength = 1.2;
 const float R = 4.0;
 const float R2 = R * R * R * 2;
 const float NegInvR2 = - 1.0 / R2;
 const float TanBias = sin( 8.0 * M_PI / 180.0 ) / cos( 8.0 * M_PI / 180.0 );
-const float MaxRadiusPixels = 36.0;
+const float MaxRadiusPixels = 48.0;
 
-const int NumDirections = 5;
+const int NumDirections = 6;
 const int NumSamples = 4;
 
 
@@ -66,12 +66,12 @@ float InvLength(vec2 V)
 
 float Tangent(vec3 P, vec3 S)
 {
-	return -(P.z - S.z) * InvLength(S.xy - P.xy);
+	return -((P.z - S.z) * 2.0) * InvLength(S.xy - P.xy);
 }
 
 float BiasedTangent(vec3 V)
 {
-	return (V.z * 3.0) * InvLength(V.xy) + TanBias;
+	return (V.z * 2.0) * InvLength(V.xy) + TanBias;
 }
 
 float TanToSin(float x)
@@ -128,8 +128,8 @@ float HorizonOcclusion(vec2 deltaUV, vec3 P, vec3 dPdu, vec3 dPdv, float randste
 	float ao = 0;
 
 	// Offset the first coord with some noise
-	vec2 uv = var_TexCoord + SnapUVOffset( randstep * deltaUV );
-	deltaUV = SnapUVOffset( deltaUV );
+	vec2 uv = var_TexCoord + SnapUVOffset( randstep * deltaUV * 1.5 );
+	deltaUV = SnapUVOffset( deltaUV * 2.5 );
 
 	// Calculate the tangent vector
 	vec3 T = deltaUV.x * dPdu + deltaUV.y * dPdv;

@@ -1689,7 +1689,7 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	}
 
 	// diffusioncubemaps	
-	if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[tx->gl_texturenum].ReflectScale > 0.01f) && !IsBuildingCubemaps() )
+	if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[tx->gl_texturenum].ReflectScale[0] > 0.01f) && !IsBuildingCubemaps() )
 	{
 		GL_AddShaderDirective( options, "REFLECTION_CUBEMAP" );
 		using_cubemaps = true;
@@ -2094,7 +2094,7 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 	}*/
 
 	// diffusioncubemaps		
-	if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[mat->gl_diffuse_id].ReflectScale > 0.01f) && !IsBuildingCubemaps() )
+	if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[mat->gl_diffuse_id].ReflectScale[0] > 0.01f) && !IsBuildingCubemaps() )
 	{
 		GL_AddShaderDirective( options, "REFLECTION_CUBEMAP" );
 		using_cubemaps = true;

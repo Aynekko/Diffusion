@@ -37,7 +37,7 @@ void main( void )
 #endif
 
 #if !defined( NO_FOG )
-	if( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 )
+	if( u_FogParams.w > 0.0 )
 	{
 		diffuse.rgb *= var_VertexColor;
 		#if defined( FOG_USE_ALPHA )

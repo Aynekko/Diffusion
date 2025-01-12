@@ -26,7 +26,7 @@ void main( void )
 {
 	float sceneDepth = linearizeDepth( u_zFar, texture2D( u_DepthMap, var_TexCoord ).r );
 	vec4 sceneColor = texture2D( u_ScreenMap, var_TexCoord );
-	float fShaftsMask = RemapVal( sceneDepth, Z_NEAR, u_zFar, 0.0, 1.0 ); // now it's blend, not depth
+	float fShaftsMask = RemapVal( sceneDepth, vec4( Z_NEAR, u_zFar, 0.0, 1.0 ) ); // now it's blend, not depth
 	sceneColor.rgb = vec3( GetLuminance( sceneColor.rgb ));
 
 	// g-cont. use linear depth scale to prevent parazite lighting

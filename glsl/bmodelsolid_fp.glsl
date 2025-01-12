@@ -53,7 +53,7 @@ uniform float		u_GlossScale;
 #if defined( BMODEL_EMBOSS )
 uniform float		u_EmbossScale;
 #endif
-uniform float		u_ReflectScale;
+uniform vec2		u_ReflectScale;
 #endif
 
 #if defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR )
@@ -140,8 +140,6 @@ void main( void )
 	float fogFactor = 0.0;
 	float fresnel = 0.0;
 
-	bool EnableFog = bool( u_FogParams.x + u_FogParams.y + u_FogParams.z + u_FogParams.w > 0.0 );
-
 	vec3 V = normalize( var_ViewVec * var_MatrixTBN );
 
 	// compute the normal term
@@ -206,7 +204,7 @@ void main( void )
 	#if defined( BMODEL_WATER_PLANAR )
 		#if !defined( BMODEL_WATER_REFRACTION ) // will be calc-ed later
 			planar_reflection = texture2DProj( u_ColorMap, var_TexMirror );
-			diffuse.rgb = Q_mix( planar_reflection.rgb, diffuse.rgb, u_PlanarReflectScale );
+			diffuse.rgb = mix( planar_reflection.rgb, diffuse.rgb, u_PlanarReflectScale );
 		#endif
 		glossmap = vec3( 0.0 );
 	#elif defined( BMODEL_PORTAL )
@@ -300,16 +298,16 @@ void main( void )
 	const float u_zFar = -4096; // for consistency
 
 	// alpha works well between 67-135~... so I need to remap 0-255 to 67-135~. how to fix this?
-	alpha = RemapVal( alpha, 0.0, 1.0, 0.263, 0.500 );
+	alpha = RemapVal( alpha, vec4( 0.0, 1.0, 0.263, 0.500 ) );
 	alpha *= 0.015; // magic as well...
 
 	float fOwnDepth = gl_FragCoord.z;
 	fOwnDepth = linearizeDepth( u_zFar, fOwnDepth );
-	fOwnDepth = RemapVal( fOwnDepth, Z_NEAR, u_zFar, 0.0, 1.0 );
+	fOwnDepth = RemapVal( fOwnDepth, vec4( Z_NEAR, u_zFar, 0.0, 1.0 ) );
 
 	float fSampledDepth = texture2D( u_DepthMap, gl_FragCoord.xy * u_ScreenSizeInv ).r;
 	fSampledDepth = linearizeDepth( u_zFar, fSampledDepth );
-	fSampledDepth = RemapVal( fSampledDepth, Z_NEAR, u_zFar, 0.0, 1.0 );
+	fSampledDepth = RemapVal( fSampledDepth, vec4( Z_NEAR, u_zFar, 0.0, 1.0 ) );
 	float depthDelta = abs( fOwnDepth - fSampledDepth );
 
 	if( bool( u_UnderWater == 1.0 ))
@@ -329,7 +327,7 @@ void main( void )
 
 	float fDistortedDepth = texture2D( u_DepthMap, GetDistortedTexCoords( N, WaterRefractFactor, RefractScale )).r;
 	fDistortedDepth = linearizeDepth( u_zFar, fDistortedDepth );
-	fDistortedDepth = RemapVal( fDistortedDepth, Z_NEAR, u_zFar, 0.0, 1.0 );
+	fDistortedDepth = RemapVal( fDistortedDepth, vec4( Z_NEAR, u_zFar, 0.0, 1.0 ) );
 
 	WaterRefractFactor *= step( fDistortedDepth, fOwnDepth );
 
@@ -337,8 +335,8 @@ void main( void )
 	vec4 WaterColor = u_RenderColor;
 
 	#if defined( REFLECTION_CUBEMAP ) && !defined( BMODEL_WATER_PLANAR )
-		cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, N, glossmap, 0.5 ) * u_ReflectScale; 
-		fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale );
+		cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, N, u_ReflectScale.y ) * u_ReflectScale.x; 
+		fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale.x );
 		diffuse.rgb = mix( diffuse.rgb, cubemap_reflection, fresnel );
 
 	#elif defined( BMODEL_WATER_PLANAR ) && defined( REFLECTION_CUBEMAP ) || defined( BMODEL_WATER_PLANAR ) && !defined( REFLECTION_CUBEMAP )
@@ -349,7 +347,7 @@ void main( void )
 	#endif
 
 	// apply global fog
-	if( EnableFog )
+	if( u_FogParams.w > 0.0 )
 	{
 		float dist = length( var_ViewVec );
 		fogFactor = exp( -dist * u_FogParams.w );
@@ -376,8 +374,8 @@ void main( void )
 	#else
 		vec3 NW = var_WorldNormal;
 	#endif
-        fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale );
-	cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, NW, glossmap, GlossSmoothness ) * u_ReflectScale;
+	fresnel = GetFresnel( V, N, u_Fresnel, u_ReflectScale.x );
+	cubemap_reflection = GetReflectionProbe( var_Position, u_ViewOrigin, NW, u_ReflectScale.y ) * u_ReflectScale.x;
 		//	vec3 testmix = mix( diffuse.rgb, cubemap_reflection.rgb, 0.85 );
 		//	gl_FragColor = vec4( testmix, 1.0 );
 		//	return;
@@ -385,7 +383,7 @@ void main( void )
 #endif
 
 	// apply global fog
-	if( EnableFog )
+	if( u_FogParams.w > 0.0 )
 	{
 		float dist = length( var_ViewVec );
 		fogFactor = exp( -dist * u_FogParams.w );

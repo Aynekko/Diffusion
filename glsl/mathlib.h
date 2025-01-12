@@ -31,8 +31,6 @@ GNU General Public License for more details.
 #define UnpackVector( c )	fract( c * vec3( 1.0, 256.0, 65536.0 ))
 #define UnpackNormal( c )	(( fract( c * vec3( 1.0, 256.0, 65536.0 )) - 0.5 ) * 2.0 )
 
-#define Q_mix( A, B, frac )	( A + ( B - A ) * frac )
-
 #define RAD2DEG( x )	( x * (180.0 / M_PI))
 #define DEG2RAD( x )	( x * (M_PI / 180.0))
 
@@ -40,12 +38,6 @@ GNU General Public License for more details.
 float RemapVal( float val, const in vec4 bounds )
 {
 	return bounds.z + (bounds.w - bounds.z) * (val - bounds.x) / (bounds.y - bounds.x);
-}
-
-// remap a value in the range [A,B] to [C,D].
-float RemapVal( float val, float A, float B, float C, float D )
-{
-	return C + (D - C) * (val - A) / (B - A);
 }
 
 float GetLuminance( vec3 color )
@@ -75,7 +67,7 @@ float ComputeStaticBump( const vec3 L, const vec3 N )
 	const float ambientClip = 0.1;
 
 	// remap static bump to positive range
-	srcB.z = RemapVal( srcB.z, -1.0, 1.0, ambientClip, 1.0 );
+	srcB.z = RemapVal( srcB.z, vec4( -1.0, 1.0, ambientClip, 1.0 ) );
 	vec3 B = normalize( srcB );
 
 	return saturate( dot( N, B ) );
