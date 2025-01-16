@@ -173,6 +173,9 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		float curLength = curParticle->m_flLength + curParticle->m_flLengthVelocity * time;
 		float curRotation = curParticle->m_flRotation + curParticle->m_flRotationVelocity * time;
 		Vector curColor = curParticle->m_vecColor + curParticle->m_vecColorVelocity * time;
+		curColor.x = bound( 0.0f, curColor.x, 1.0f );
+		curColor.y = bound( 0.0f, curColor.y, 1.0f );
+		curColor.z = bound( 0.0f, curColor.z, 1.0f );
 		
 		if( curParticle->ParticleType == TYPE_DUSTMOTE )
 		{
@@ -716,6 +719,9 @@ bool CQuakePart::Evaluate( float gravity )
 	}
 
 	Vector curColor = m_vecColor + m_vecColorVelocity * time;
+	curColor.x = bound( 0.0f, curColor.x, 1.0f );
+	curColor.y = bound( 0.0f, curColor.y, 1.0f );
+	curColor.z = bound( 0.0f, curColor.z, 1.0f );
 
 	m_vecVelocity += m_vecAddedVelocity;
 

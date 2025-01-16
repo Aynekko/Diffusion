@@ -897,7 +897,8 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 		dl->flags |= CF_NOSHADOWS;
 	}
 
-	dl->die = tr.time + 0.05f;
+	dl->die = tr.time + 0.075f;
+	dl->decaybrightness = 16.0f;
 	
 	// default parameters - monsters (and other players...?)
 	int R = 255;
@@ -2275,7 +2276,7 @@ void R_Explosion( Vector pos, int model, float scale, float framerate, int flags
 		if( !FBitSet( flags, TE_EXPLFLAG_NODLIGHTS ) )
 		{
 			plight_t *dl;
-
+			
 			// big flash
 			dl = CL_AllocPlight( 0 );
 			dl->pointlight = true;
@@ -2286,8 +2287,8 @@ void R_Explosion( Vector pos, int model, float scale, float framerate, int flags
 			dl->color.r = 250;
 			dl->color.g = 250;
 			dl->color.b = 150;
-			dl->die = tr.time + 0.05f;
-			dl->decay = 80;
+			dl->die = tr.time + 0.075f;
+			dl->decaybrightness = 18.0f;
 			dl->brightness = 1.5;
 			R_SetupLightProjection( dl, pos, g_vecZero, dl->radius, 90.0f );
 			R_SetupLightAttenuationTexture( dl );
@@ -2302,7 +2303,7 @@ void R_Explosion( Vector pos, int model, float scale, float framerate, int flags
 			dl->color.g = 190;
 			dl->color.b = 40;
 			dl->die = tr.time + 1.0f;
-			dl->decay = 200;
+			dl->decaybrightness = 2.0f;
 			R_SetupLightProjection( dl, pos, g_vecZero, dl->radius, 90.0f );
 			R_SetupLightAttenuationTexture( dl );
 

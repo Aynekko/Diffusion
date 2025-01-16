@@ -176,6 +176,7 @@ typedef struct plight_s
 	color24		color;		// ignored for spotlights, they have a texture
 	float		die;		// stop lighting after this time
 	float		decay;		// drop this each second
+	float		decaybrightness;
 	int		key;
 	bool		pointlight;	// it's a point light (may be with cubemap)
 	bool		update;		// light needs update

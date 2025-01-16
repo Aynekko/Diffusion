@@ -399,10 +399,15 @@ void CL_DecayLights( void )
 		if( pl->flags & CF_MOVIE )
 			continue; // can't clear this light
 
-		pl->radius -= (tr.time - tr.oldtime) * pl->decay;
+		if( pl->decaybrightness > 0.0f )
+			pl->brightness -= (tr.time - tr.oldtime) * pl->decaybrightness;
+
+		if( pl->decay > 0.0f )
+			pl->radius -= (tr.time - tr.oldtime) * pl->decay;
+
 		if( pl->radius < 0 ) pl->radius = 0;
 
-		if( pl->die < tr.time || !pl->radius ) 
+		if( pl->die < tr.time || !pl->radius || pl->brightness <= 0.0f ) 
 			memset( pl, 0, sizeof( *pl ));
 	}
 }
