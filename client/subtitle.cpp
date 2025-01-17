@@ -28,15 +28,15 @@ int CHudSubtitle::VidInit( void )
 	pName[0] = '\0';
 	pText[0] = '\0';
 	draw_time = 0.0f;
-	char_height = gHUD.m_scrinfo.iCharHeight * 1.2; // add some space between lines
+	char_height = gHUD.m_scrinfo.iCharHeight + 5; // add some space between lines
 	return 1;
 }
 
 int CHudSubtitle::MsgFunc_Subtitle( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pszName, pbuf, iSize );
-	strncpy_s( pName, READ_STRING(), 64 );
-	strncpy_s( pText, READ_STRING(), 2048 );
+	strncpy_s( pName, READ_STRING(), 63 );
+	strncpy_s( pText, READ_STRING(), 2047 );
 	END_READ();
 
 	// get the name of the speaker from titles.txt
@@ -159,8 +159,7 @@ int CHudSubtitle::Draw( float flTime )
 	while( *tmp_text )
 	{
 		c = *tmp_text;
-		TextMessageDrawChar( tmp_x, tmp_y, c, r, g, b );
-		tmp_x += TextMessageDrawChar( tmp_x, tmp_y, c, r, g, b ); // draw one more time for more brightness :D
+		tmp_x += TextMessageDrawChar( tmp_x, tmp_y, c, r, g, b );
 
 		tmp_text++;
 	}
@@ -184,8 +183,7 @@ int CHudSubtitle::Draw( float flTime )
 		}
 		else
 		{
-			TextMessageDrawChar( tmp_x, tmp_y, c, r, g, b );
-			tmp_x += TextMessageDrawChar( tmp_x, tmp_y, c, r, g, b ); // draw one more time for more brightness :D
+			tmp_x += TextMessageDrawChar( tmp_x, tmp_y, c, r, g, b );
 		}
 		tmp_text++;
 	}
