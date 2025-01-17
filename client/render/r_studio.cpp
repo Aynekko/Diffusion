@@ -5152,7 +5152,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			Vector meshparams[3];
 			meshparams[0] = m_pCurrentEntity->curstate.origin;
 			meshparams[1] = ang;
-			meshparams[2] = Vector( scale, 0, 0 );
+			meshparams[2] = Vector( scale, m_pCurrentEntity->curstate.fuser2, 0.0f ); // fuser2 is the dirt on the car body/wheels
 			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
 
 			if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
@@ -5242,6 +5242,10 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			{
 				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[mat->gl_diffuse_id].InteriorGrid.x, tr.materials[mat->gl_diffuse_id].InteriorGrid.y, (float)tr.materials[mat->gl_diffuse_id].InteriorLightState );
 				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_interiormap_id ); // u_InteriorMap
+			}
+			else if( tr.materials[mat->gl_diffuse_id].gl_blendtex_id > 0 )
+			{
+				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_blendtex_id ); // u_BlendTexture
 			}
 
 			if( gl_specular->value > 0 && tr.materials[mat->gl_diffuse_id].GlossScale > 0.0f )

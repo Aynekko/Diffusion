@@ -912,6 +912,10 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 		shader->u_InteriorMap = pglGetUniformLocationARB( shader->handle, "u_InteriorMap" );
 		shader->u_InteriorParams = pglGetUniformLocationARB( shader->handle, "u_InteriorParams" );
 	}
+	else if( GL_FindShaderDirective( shader, "STUDIO_TEXTURE_BLEND" ) )
+	{
+		shader->u_BlendTexture = pglGetUniformLocationARB( shader->handle, "u_BlendTexture" );
+	}
 
 	if( GL_FindShaderDirective( shader, "STUDIO_VERTEX_LIGHTING" ))
 	{ 
@@ -976,6 +980,10 @@ static void GL_InitStudioDlightUniforms( glsl_program_t *shader )
 		shader->u_InteriorMap = pglGetUniformLocationARB( shader->handle, "u_InteriorMap" );
 		shader->u_InteriorParams = pglGetUniformLocationARB( shader->handle, "u_InteriorParams" );
 	}
+	else if( GL_FindShaderDirective( shader, "STUDIO_TEXTURE_BLEND" ) )
+	{
+		shader->u_BlendTexture = pglGetUniformLocationARB( shader->handle, "u_BlendTexture" );
+	}
 
 	shader->u_RealTime = pglGetUniformLocationARB( shader->handle, "u_RealTime" );
 	shader->u_FoliageSwayHeight = pglGetUniformLocationARB( shader->handle, "u_FoliageSwayHeight" );
@@ -987,6 +995,9 @@ static void GL_InitStudioDlightUniforms( glsl_program_t *shader )
 	pglUniform1iARB( shader->u_NormalMap, GL_TEXTURE3 );
 	if( GL_FindShaderDirective( shader, "STUDIO_INTERIOR" ) )
 		pglUniform1iARB( shader->u_InteriorMap, GL_TEXTURE4 );
+	else if( GL_FindShaderDirective( shader, "STUDIO_TEXTURE_BLEND" ) )
+		pglUniform1iARB( shader->u_BlendTexture, GL_TEXTURE4 );
+
 	if( GL_FindShaderDirective( shader, "STUDIO_HAS_COLORMASK" ) )
 		pglUniform1iARB( shader->u_ColorMask, GL_TEXTURE5 );
 
@@ -2202,6 +2213,8 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 
 	if( tr.materials[mat->gl_diffuse_id].gl_interiormap_id > 0 )
 		GL_AddShaderDirective( options, "STUDIO_INTERIOR" );
+	else if( tr.materials[mat->gl_diffuse_id].gl_blendtex_id > 0 )
+		GL_AddShaderDirective( options, "STUDIO_TEXTURE_BLEND" );
 
 	if( tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
 		GL_AddShaderDirective( options, "STUDIO_HAS_COLORMASK" );

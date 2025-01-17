@@ -75,6 +75,11 @@ varying vec4		var_ProjCoord;
 varying vec4		var_ShadowCoord;
 #endif
 
+#if defined( STUDIO_TEXTURE_BLEND )
+uniform sampler2D	u_BlendTexture;
+#define u_BlendAmount u_MeshParams[2].y
+#endif
+
 varying vec2		var_TexDiffuse;
 varying vec3		var_LightVec;
 varying vec3		var_ViewVec;
@@ -138,6 +143,12 @@ void main( void )
 
 	// compute the diffuse, emboss and specular term
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+
+#if defined( STUDIO_TEXTURE_BLEND )
+	vec4 blend_texture = texture2D( u_BlendTexture, var_TexDiffuse );
+	// blend them together
+	diffuse.rgb = mix( diffuse.rgb, blend_texture.rgb, u_BlendAmount );
+#endif
 
 #if !defined( STUDIO_INTERIOR )
 	#if !defined( STUDIO_DEFAULTALPHATEST )
