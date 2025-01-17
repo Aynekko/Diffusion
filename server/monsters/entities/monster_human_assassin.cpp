@@ -1238,9 +1238,16 @@ Schedule_t *CHAssassin :: GetSchedule ( void )
 					return GetScheduleOfType ( SCHED_COMBAT_FACE );
 
 				// new enemy
-				if ( HasConditions ( bits_COND_NEW_ENEMY ) )
-					// ALERT( at_console, "take cover\n");
-					return GetScheduleOfType ( SCHED_TAKE_COVER_FROM_ENEMY );
+				if( HasConditions( bits_COND_NEW_ENEMY ) )
+				{
+					if( HasConditions( bits_COND_ENEMY_FACING_ME ) )
+						// ALERT( at_console, "take cover\n");
+						return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+					else if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+						return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+					else
+						return GetScheduleOfType( SCHED_CHASE_ENEMY );
+				}
 
 				// ALERT( at_console, "stand\n");
 				return GetScheduleOfType ( SCHED_ALERT_STAND );
