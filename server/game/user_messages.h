@@ -64,5 +64,6 @@ extern int gmsgWaterSplash;
 extern int gmsgBlastIcons;
 extern int gmsgGaussHUD;
 extern int gmsgShowNote;
+extern int gmsgSubtitle;
 
 void LinkUserMessages( void );

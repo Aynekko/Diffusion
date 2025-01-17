@@ -67,6 +67,7 @@ int gmsgWaterSplash = 0;
 int gmsgBlastIcons = 0;
 int gmsgGaussHUD = 0;
 int gmsgShowNote = 0;
+int gmsgSubtitle = 0;
 
 void LinkUserMessages( void )
 {
@@ -136,4 +137,5 @@ void LinkUserMessages( void )
 	gmsgBlastIcons = REG_USER_MSG( "BlastIcons", 3 );
 	gmsgGaussHUD = REG_USER_MSG( "GaussHUD", 2 );
 	gmsgShowNote = REG_USER_MSG( "ShowNote", -1 );
+	gmsgSubtitle = REG_USER_MSG( "Subtitle", -1 );
 }

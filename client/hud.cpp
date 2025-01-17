@@ -48,6 +48,7 @@ void CHud :: Init( void )
 	m_TriggerTimer.Init();
 	m_Puzzle.Init();
 	m_Message.Init(); // hud text messages (like subtitles) go next to last - always visible
+	m_Subtitle.Init();
 	m_Cursor.Init(); // cursor is last
 		
 //	MsgFunc_ResetHUD( 0, 0, NULL ); // diffusion - now server does this
@@ -289,6 +290,7 @@ void CHud :: VidInit( void )
 	m_TriggerTimer.VidInit();
 	m_Puzzle.VidInit();
 	m_Message.VidInit();
+	m_Subtitle.VidInit();
 	m_Cursor.VidInit();
 
 	memset( &gHUD.shake, 0.0f, sizeof( gHUD.shake ) ); // diffusion - reset screen shake

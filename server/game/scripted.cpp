@@ -1144,10 +1144,8 @@ void CScriptedSentence :: FindThink( void )
 	{
 		StartSentence( pMonster );
 
-		if( !FStringNull(name) )
-			UTIL_ShowMessageAll( STRING(name) );
-		if( !FStringNull(msg) )
-			UTIL_ShowMessageAll( STRING(msg) );
+		if( !FStringNull( name ) && !FStringNull( msg ) )
+			UTIL_SendSubtitle( STRING( name ), STRING( msg ) );
 
 		if ( pev->spawnflags & SF_SENTENCE_ONCE )
 			UTIL_Remove( this );

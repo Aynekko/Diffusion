@@ -1382,6 +1382,22 @@ void UTIL_ShowMessageAll( const char *pString )
 	}
 }
 
+void UTIL_SendSubtitle( const char *pNameString, const char *pDialogueString )
+{
+	// loop through all players
+	for( int i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		CBaseEntity *pPlayer = UTIL_PlayerByIndex( i );
+		if( pPlayer && pPlayer->IsNetClient() )
+		{
+			MESSAGE_BEGIN( MSG_ONE, gmsgSubtitle, NULL, pPlayer->edict() );
+				WRITE_STRING( pNameString );
+				WRITE_STRING( pDialogueString );
+			MESSAGE_END();
+		}
+	}
+}
+
 // Overloaded to add IGNORE_GLASS
 void UTIL_TraceLine( const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, edict_t *pentIgnore, TraceResult *ptr )
 {

@@ -367,6 +367,7 @@ extern void UTIL_ScreenShakeAll		( const Vector &center, float amplitude, float 
 extern void UTIL_ScreenShakeLocal	(CBaseEntity* pEntity, const Vector& center, float amplitude, float frequency, float duration, float radius, bool bAllowInAir );
 extern void UTIL_ShowMessage		( const char *pString, CBaseEntity *pPlayer );
 extern void UTIL_ShowMessageAll		( const char *pString );
+extern void UTIL_SendSubtitle		( const char *pNameString, const char *pDialogueString );
 extern void UTIL_ScreenFadeAll		( const Vector &color, float fadeTime, float holdTime, int alpha, int flags );
 extern void UTIL_ScreenFade			( CBaseEntity *pEntity, const Vector &color, float fadeTime, float fadeHold, int alpha, int flags );
 extern void UTIL_FireTargets( const char *targetName, CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value = 0 );

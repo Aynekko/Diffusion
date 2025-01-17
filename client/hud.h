@@ -748,6 +748,23 @@ public:
 	bool critical;
 };
 
+class CHudSubtitle : public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw( float flTime );
+	int MsgFunc_Subtitle( const char *pszName, int iSize, void *pbuf );
+
+	float draw_time;
+	float drawstart_time;
+	float alpha;
+	char pText[2048];
+	char pName[128];
+	int subtitle_width;
+	int subtitle_height;
+};
+
 class CHudCodeInput : public CHudBase
 {
 public:
@@ -1028,6 +1045,7 @@ public:
 	CPseudoGUI m_PseudoGUI;
 	CHudTriggerTimer m_TriggerTimer;
 	CHudPuzzle m_Puzzle;
+	CHudSubtitle m_Subtitle;
 	
 	void Init( void );
 	void VidInit( void );
