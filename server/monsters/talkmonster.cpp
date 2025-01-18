@@ -617,16 +617,8 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		break;
 
 	default:
-		if (IsTalking() && m_hTalkTarget != NULL)
-		{
-			IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
-		}
-		else
-		{
-			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
-			SetBoneController( 0, headyaw );
-		}
 		CBaseMonster::RunTask( pTask );
+		break;
 	}
 }
 

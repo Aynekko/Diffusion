@@ -385,6 +385,11 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 
 				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
 			}
+			else
+			{
+				headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
+				SetBoneController( 0, headyaw );
+			}
 
 			if( gpGlobals->time >= m_flWaitFinished )
 				TaskComplete();
@@ -439,6 +444,15 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 			{
 				TaskComplete();
 				RouteClear();		// Stop moving
+			}
+			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
+			{
+				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+			}
+			else
+			{
+				headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
+				SetBoneController( 0, headyaw );
 			}
 			break;
 		}
@@ -540,6 +554,17 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 			}
 			break;
 		}
+	default:
+		if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
+		{
+			IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+		}
+		else
+		{
+			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
+			SetBoneController( 0, headyaw );
+		}
+		break;
 	}
 }
 
