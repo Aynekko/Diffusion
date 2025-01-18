@@ -570,7 +570,7 @@ void CGargantua :: RunAI( void )
 		{
 			// compare vectors, to figure out if we can shoot
 			Vector ang_to_enemy = UTIL_VecToAngles( vectoenemy );
-			UTIL_MakeVectors( ang_to_enemy + Vector( 0.0f, body_controller_yaw, 0.0f ) );
+			UTIL_MakeVectors( ang + Vector( 0.0f, body_controller_yaw, 0.0f ) );
 			Vector one = gpGlobals->v_forward;
 			UTIL_MakeVectors( ang_to_enemy );
 			Vector two = gpGlobals->v_forward;
