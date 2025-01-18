@@ -29,6 +29,7 @@ int CHudSubtitle::VidInit( void )
 	pText[0] = '\0';
 	draw_time = 0.0f;
 	char_height = gHUD.m_scrinfo.iCharHeight + 5; // add some space between lines
+	alpha = 0.0f;
 	return 1;
 }
 
@@ -94,7 +95,6 @@ int CHudSubtitle::MsgFunc_Subtitle( const char *pszName, int iSize, void *pbuf )
 	// average reading speed is 238 WPM which is ~20 CPS
 	// with this in mind, calculate how long the subtitle is going to be visible on screen
 	draw_time = tr.time + (float)num_chars / 20.0f;
-	alpha = 0.0f;
 
 	return 1;
 }
