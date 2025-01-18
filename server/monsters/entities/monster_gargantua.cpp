@@ -1032,12 +1032,20 @@ Schedule_t *CGargantua::GetScheduleOfType( int Type )
 		case SCHED_MELEE_ATTACK1:
 			return slGargSwipe;
 		case SCHED_CHASE_ENEMY_FAILED:
-			if( gpGlobals->time > NextRocketSuppressTime )
+			if( m_hEnemy == NULL )
+				break;
+			TraceResult	tr;
+			Vector vecSrc = EyePosition();
+			Vector vecEnd = m_hEnemy->BodyTarget( vecSrc );
+			// verify that a bullet fired from the gun will travel an acceptable distance
+			UTIL_TraceLine( vecSrc, vecEnd, ignore_monsters, ignore_glass, ENT( pev ), &tr );
+			float dist = (vecSrc - tr.vecEndPos).Length();
+			if( dist > 500 && gpGlobals->time > NextRocketSuppressTime )
 			{
 				NextRocketSuppressTime = gpGlobals->time + RANDOM_FLOAT( 5.0f, 10.0f );
 				return slGargSuppressRocket;
 			}
-			else if( RANDOM_LONG( 0, 99 ) > 75 )
+			else if( dist > 200 && RANDOM_LONG( 0, 99 ) > 75 )
 				return slGargSuppressBullets;
 			else
 				break;
