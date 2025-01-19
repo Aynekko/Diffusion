@@ -80,7 +80,6 @@ public:
 	CBeam	*m_pBeam[ISLAVE_MAX_BEAMS];
 	int	m_iBeams;
 	float	m_flNextAttack;
-	int	m_voicePitch;
 
 	EHANDLE	m_hDead;
 
@@ -98,7 +97,6 @@ BEGIN_DATADESC( CISlave )
 	DEFINE_ARRAY( m_pBeam, FIELD_CLASSPTR, ISLAVE_MAX_BEAMS ),
 	DEFINE_FIELD( m_iBeams, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flNextAttack, FIELD_TIME ),
-	DEFINE_FIELD( m_voicePitch, FIELD_INTEGER ),
 	DEFINE_FIELD( m_hDead, FIELD_EHANDLE ),
 END_DATADESC()
 

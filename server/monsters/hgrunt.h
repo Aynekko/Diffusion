@@ -23,6 +23,53 @@
 #define ACCUMULATED_DMG_THRESHOLD 500
 #define ANDREW_GRUNT_MODEL "models/npc/andrewgrunt.mdl"
 
+// values are picked using g_iSkillLevel, so the first value is always zero
+//===================================
+// health
+//===================================
+const int ArmyGuyHealth[] =
+{
+	0,
+	85,
+	90,
+	95
+};
+
+const int AlienRoboHealth[] =
+{
+	0,
+	92,
+	97,
+	105
+};
+
+const int SecurityGuyHealth[] =
+{
+	0,
+	95,
+	100,
+	110
+};
+
+const int SecurityGeneralHealth[] =
+{
+	0,
+	500,
+	666,
+	800
+};
+
+const int AndrewHealth[] =
+{
+	0,
+	2000,
+	2500,
+	3000
+};
+
+//===================================
+// damage
+//===================================
 const int GruntShotgunDamage[] =
 {
 	0,
@@ -31,6 +78,9 @@ const int GruntShotgunDamage[] =
 	10
 };
 
+//===================================
+// combat reaction time
+//===================================
 const float HGruntCombatWaitTime[] =
 {
 	0.0f,
@@ -55,21 +105,12 @@ const float SecurityGruntCombatWaitTime[] =
 	0.2f
 };
 
-
 const float SecurityGeneralCombatWaitTime[] =
 {
 	0.0f,
 	0.4f,
 	0.25f,
 	0.1f
-};
-
-const int AndrewHealth[] =
-{
-	0,
-	2000,
-	2500,
-	3000
 };
 
 const float AndrewCombatWaitTime[] =
@@ -165,7 +206,6 @@ public:
 	BOOL	m_fStanding;
 	BOOL	m_fFirstEncounter;// only put on the handsign show in the squad's first encounter.
 	int		m_cClipSize;
-	int		m_voicePitch;
 	int		m_iSentence;
 
 	static const char *pGruntSentences[];

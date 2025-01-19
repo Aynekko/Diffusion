@@ -158,7 +158,6 @@ public:
 	
 	int		m_bitsSaid;		// set bits for sentences we don't want repeated
 	int		m_nSpeak;			// number of times initiated talking
-	int		m_voicePitch;		// pitch of voice for this head
 	const char	*m_szGrp[TLK_CGROUPS];	// sentence group names
 	int		m_iszUse;			// Custom +USE sentence group (follow)
 	int		m_iszUnUse;		// Custom +USE sentence group (stop following)

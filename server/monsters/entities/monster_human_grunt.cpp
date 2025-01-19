@@ -160,7 +160,6 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD(m_fStanding, FIELD_BOOLEAN),
 	DEFINE_FIELD(m_fFirstEncounter, FIELD_BOOLEAN),
 	DEFINE_FIELD(m_cClipSize, FIELD_INTEGER),
-	DEFINE_FIELD(m_voicePitch, FIELD_INTEGER),
 	DEFINE_FIELD(m_iSentence, FIELD_INTEGER),
 	DEFINE_FIELD(CanSpawnDrone, FIELD_BOOLEAN),
 	DEFINE_FIELD(DroneSpawned, FIELD_BOOLEAN),
@@ -1246,22 +1245,31 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 
 		if( vecToss != g_vecZero )
 		{
-			float check = flCheckThrowDistance( pev, GetGunPosition(), vecToss );
-			if( check < 300.0f )
-			{
-				// don't throw
-				m_fThrowGrenade = FALSE;
-				// don't check again for a while.
-				m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
-			}
-			else
+			if( CanSpawnDrone && !DroneSpawned )
 			{
 				m_vecTossVelocity = vecToss;
-
-				// throw a hand grenade
+				// throw a drone
 				m_fThrowGrenade = TRUE;
 				// don't check again for a while.
 				m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
+			}
+			else
+			{
+				if( flCheckThrowDistance( pev, GetGunPosition(), vecToss ) < 300.0f )
+				{
+					// don't throw
+					m_fThrowGrenade = FALSE;
+					// don't check again for a while.
+					m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
+				}
+				else
+				{
+					m_vecTossVelocity = vecToss;
+					// throw a hand grenade
+					m_fThrowGrenade = TRUE;
+					// don't check again for a while.
+					m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
+				}
 			}
 		}
 		else
@@ -1624,7 +1632,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_GREN_TOSS:
 		{
-			if( CanSpawnDrone == true ) // I can spawn drones.
+			if( CanSpawnDrone ) // I can spawn drones.
 			{
 				if( !DroneSpawned ) // I didn't spawn any of them yet, so check if I'm able to
 				{
@@ -1844,11 +1852,7 @@ void CHGrunt::Spawn(void)
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= BLOOD_COLOR_RED;
 	pev->effects		= 0;
-	if (!pev->health) pev->health	= RANDOM_LONG(85,90);//gSkillData.hgruntHealth;
-	if( g_iSkillLevel > SKILL_EASY )
-		pev->health += 5;
-	if( g_iSkillLevel > SKILL_MEDIUM )
-		pev->health += 5;
+	if( !pev->health ) pev->health = ArmyGuyHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	m_flFieldOfView		= 0;//180      0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -2005,7 +2009,7 @@ void CHGrunt :: Precache()
 	PRECACHE_SOUND("zombie/claw_miss2.wav");// because we use the basemonster SWIPE animation event
 
 	// get voice pitch
-	m_voicePitch = 97 + RANDOM_LONG(0,6);
+	if( !m_voicePitch ) m_voicePitch = 97 + RANDOM_LONG(0,6);
 
 	PRECACHE_SOUND( "weapons/punch1.wav" );
 	PRECACHE_SOUND( "weapons/punch2.wav" );
@@ -3011,11 +3015,7 @@ void CHGruntAlien :: Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= DONT_BLEED;
 	pev->effects		= 0;
-	if (!pev->health) pev->health	= RANDOM_LONG(95,100);
-	if( g_iSkillLevel > SKILL_EASY )
-		pev->health += 5;
-	if( g_iSkillLevel > SKILL_MEDIUM )
-		pev->health += 5;
+	if( !pev->health ) pev->health = AlienRoboHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	m_flFieldOfView		= VIEW_FIELD_WIDE;//180         0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -3196,7 +3196,7 @@ void CHGruntAlien :: Precache()
 	PRECACHE_SOUND("zombie/claw_miss2.wav");// because we use the basemonster SWIPE animation event
 
 	// get voice pitch
-	m_voicePitch = 97 + RANDOM_LONG(0,6);
+	if( !m_voicePitch ) m_voicePitch = 97 + RANDOM_LONG(0,6);
 
 	PRECACHE_MODEL( "sprites/xspark4.spr");
 	PRECACHE_MODEL( ALIEN_EYE );
@@ -4295,7 +4295,10 @@ public:
 	void HandleAnimEvent(MonsterEvent_t* pEvent);
 	Schedule_t* GetSchedule(void);
 	Schedule_t* GetScheduleOfType(int Type);
-	BOOL CheckRangeAttack2Impl(float grenadeSpeed, float flDot, float flDist);
+	BOOL CheckRangeAttack2( float flDot, float flDist );
+	BOOL CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist );
+
+	bool bUseGrenLauncher;
 };
 
 LINK_ENTITY_TO_CLASS(monster_security_general, CHGruntSecurityGeneral);
@@ -4357,14 +4360,14 @@ void CHGruntSecurityGeneral::Spawn()
 	pev->movetype = MOVETYPE_STEP;
 	m_bloodColor = BLOOD_COLOR_RED;
 	pev->effects = 0;
-	if (!pev->health) pev->health = 1000; // diffusion - tough guy
+	if( !pev->health ) pev->health = SecurityGeneralHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	m_flFieldOfView = -1;   // 360
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_flNextGrenadeCheck = gpGlobals->time + 1;
 	m_flNextPainTime = gpGlobals->time;
 	m_iSentence = HGRUNT_SENT_NONE;
-
+	bUseGrenLauncher = false;
 	m_afCapability = bits_CAP_SQUAD | bits_CAP_TURN_HEAD | bits_CAP_DOORS_GROUP;
 
 	m_fEnemyEluded = FALSE;
@@ -4375,8 +4378,9 @@ void CHGruntSecurityGeneral::Spawn()
 	// diffusion - the general is using only these weapons
 	if (!m_bHaveWeapons)
 	{
-		AddWeapon(HGRUNT_9MMAR);
-		AddWeapon(HGRUNT_HANDGRENADE);
+		AddWeapon( HGRUNT_9MMAR );
+		AddWeapon( HGRUNT_HANDGRENADE );
+		AddWeapon( HGRUNT_GRENADELAUNCHER );
 	}
 
 	m_cClipSize = GRUNT_CLIP_SIZE;
@@ -4392,9 +4396,8 @@ void CHGruntSecurityGeneral::Spawn()
 
 	CTalkMonster::g_talkWaitTime = 0;
 
+	CanSpawnDrone = true;
 	DroneSpawned = false; // when true, grunt can't spawn any more drones
-
-//	pev->scale = 1.15; // bigger than other grunts //scaled in the model itself
 
 	CombatWaitTime = SecurityGeneralCombatWaitTime[g_iSkillLevel];
 
@@ -4436,12 +4439,184 @@ void CHGruntSecurityGeneral::Precache()
 	UTIL_PrecacheOther("monster_security_drone");
 
 	// get voice pitch
-	m_voicePitch = 94 + RANDOM_LONG(0, 6); // a bit lower
+	if( !m_voicePitch ) m_voicePitch = 93; // a bit lower
 }
 
 int	CHGruntSecurityGeneral::Classify(void)
 {
 	return m_iClass ? m_iClass : 14; // Faction A
+}
+
+BOOL CHGruntSecurityGeneral::CheckRangeAttack2( float flDot, float flDist )
+{
+	return CheckRangeAttack2Impl( gSkillData.hgruntGrenadeSpeed, flDot, flDist );
+}
+
+BOOL CHGruntSecurityGeneral::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist )
+{
+	if( !HasWeapon( HGRUNT_HANDGRENADE ) && !HasWeapon( HGRUNT_GRENADELAUNCHER ) )
+	{
+		return FALSE;
+	}
+
+	// if the grunt isn't moving, it's ok to check.
+	if( m_flGroundSpeed != 0 )
+	{
+		m_fThrowGrenade = FALSE;
+		return m_fThrowGrenade;
+	}
+
+	// assume things haven't changed too much since last time
+	if( gpGlobals->time < m_flNextGrenadeCheck )
+	{
+		return m_fThrowGrenade;
+	}
+
+	if( (!FBitSet( m_hEnemy->pev->flags, FL_ONGROUND )) && (m_hEnemy->pev->waterlevel == 0) && (m_vecEnemyLKP.z > pev->absmax.z) && (!HasWeapon( HGRUNT_GRENADELAUNCHER )) )
+	{
+		//!!!BUGBUG - we should make this check movetype and make sure it isn't FLY? Players who jump a lot are unlikely to 
+		// be grenaded.
+		// don't throw grenades at anything that isn't on the ground!
+		// diffusion - allow grenade launcher attack
+		m_fThrowGrenade = FALSE;
+		return m_fThrowGrenade;
+	}
+
+	Vector vecTarget;
+
+	if( HasWeapon( HGRUNT_HANDGRENADE ) && !bUseGrenLauncher )
+	{
+		// find feet
+		if( RANDOM_LONG( 0, 1 ) || (m_vecEnemyLKP == g_vecZero) )
+		{
+			// magically know where they are
+			vecTarget = Vector( m_hEnemy->pev->origin.x, m_hEnemy->pev->origin.y, m_hEnemy->pev->absmin.z );
+		}
+		else
+		{
+			// toss it to where you last saw them
+			vecTarget = m_vecEnemyLKP;
+		}
+		// vecTarget = m_vecEnemyLKP + (m_hEnemy->BodyTarget( pev->origin ) - m_hEnemy->pev->origin);
+		// estimate position
+		// vecTarget = vecTarget + m_hEnemy->pev->velocity * 2;
+	}
+	else if( HasWeapon( HGRUNT_GRENADELAUNCHER ) && bUseGrenLauncher )
+	{
+		// find target
+		// vecTarget = m_hEnemy->BodyTarget( pev->origin );
+		vecTarget = m_vecEnemyLKP + (m_hEnemy->BodyTarget( pev->origin ) - m_hEnemy->pev->origin);
+		// estimate position
+		if( HasConditions( bits_COND_SEE_ENEMY ) )
+			vecTarget = vecTarget + ((vecTarget - pev->origin).Length() / gSkillData.hgruntGrenadeSpeed) * m_hEnemy->pev->velocity;
+	}
+	else
+		return FALSE;
+
+	// are any of my squad members near the intended grenade impact area?
+	if( InSquad() )
+	{
+		if( SquadMemberInRange( vecTarget, 256 ) )
+		{
+			// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
+			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
+			m_fThrowGrenade = FALSE;
+		}
+	}
+
+	if( (vecTarget - pev->origin).Length2D() <= 256 )
+	{
+		// crap, I don't want to blow myself up
+		m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
+		m_fThrowGrenade = FALSE;
+		return m_fThrowGrenade;
+	}
+
+	if( HasWeapon( HGRUNT_HANDGRENADE ) && !bUseGrenLauncher )
+	{
+		Vector vecToss;
+		if( CanSpawnDrone && !DroneSpawned )
+		{
+			// for drone spawn just use a default forward vector, we don't perform a toss, just looking in the enemy direction
+			UTIL_MakeVectors( GetAbsAngles() );
+			vecToss = gpGlobals->v_forward;
+		}
+		else
+			vecToss = VecCheckToss( pev, GetGunPosition(), vecTarget, 0.5 );
+
+		if( vecToss != g_vecZero )
+		{
+			if( CanSpawnDrone && !DroneSpawned )
+			{
+				m_vecTossVelocity = vecToss;
+				// throw a drone
+				m_fThrowGrenade = TRUE;
+				// don't check again for a while.
+				m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
+			}
+			else
+			{
+				if( flCheckThrowDistance( pev, GetGunPosition(), vecToss ) < 300.0f )
+				{
+					// don't throw
+					m_fThrowGrenade = FALSE;
+					// don't check again for a while.
+					m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
+				}
+				else
+				{
+					m_vecTossVelocity = vecToss;
+					// throw a hand grenade
+					m_fThrowGrenade = TRUE;
+					// don't check again for a while.
+					m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
+				}
+			}
+		}
+		else
+		{
+			// don't throw
+			m_fThrowGrenade = FALSE;
+			// don't check again for a while.
+			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
+		}
+	}
+	else if( HasWeapon( HGRUNT_GRENADELAUNCHER ) && bUseGrenLauncher ) // grenade launcher
+	{
+		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, gSkillData.hgruntGrenadeSpeed, 0.5 );
+
+		if( vecToss != g_vecZero )
+		{
+			float check = flCheckThrowDistance( pev, GetGunPosition(), vecToss );
+			if( check < 300.0f )
+			{
+				// don't throw
+				m_fThrowGrenade = FALSE;
+				// don't check again for a while.
+				m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
+			}
+			else
+			{
+				m_vecTossVelocity = vecToss;
+
+				// throw a hand grenade
+				m_fThrowGrenade = TRUE;
+				// don't check again for a while.
+				m_flNextGrenadeCheck = gpGlobals->time + 0.3; // 1/3 second.
+			}
+		}
+		else
+		{
+			// don't throw
+			m_fThrowGrenade = FALSE;
+			// don't check again for a while.
+			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
+		}
+	}
+	else
+		return FALSE;
+
+	return m_fThrowGrenade;
 }
 
 void CHGruntSecurityGeneral::SetActivity(Activity NewActivity)
@@ -4481,7 +4656,10 @@ void CHGruntSecurityGeneral::SetActivity(Activity NewActivity)
 		}
 		break;
 	case ACT_RANGE_ATTACK2:
-		iSequence = LookupSequence("throwgrenade");
+		if( bUseGrenLauncher )
+			iSequence = LookupSequence( "launchgrenade" );
+		else
+			iSequence = LookupSequence( "throwgrenade" );
 		break;
 	case ACT_RUN:
 		iSequence = LookupActivity(NewActivity);
@@ -4650,6 +4828,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 					pDrone->m_flDistLook = m_flDistLook;
 					pDrone->m_flDistTooClose = m_flDistTooClose;
 					pDrone->m_flDistTooFar = m_flDistTooFar;
+					pDrone->pev->health *= 2.0f; // the general's drone has twice more hp
 
 					// add targetname too
 					if( GetTargetname()[0] != '\0' )
@@ -4759,17 +4938,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 		break;
 	}
 }
-/*
-BOOL CHGruntSecurityGeneral::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist )
-{
-	if (DroneSpawned == 1)
-		return FALSE;
 
-	m_flNextGrenadeCheck = gpGlobals->time + 2;
-
-	return m_fThrowGrenade;
-}
-*/
 Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 {
 	if ( HasConditions(bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE) && !HasConditions(bits_COND_SEE_ENEMY))
@@ -4844,9 +5013,9 @@ Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 		}
 
 		// new enemy
-		if (HasConditions(bits_COND_NEW_ENEMY))
+		if( HasConditions( bits_COND_NEW_ENEMY ) )
 		{
-			if (FOkToSpeak() && (m_hEnemy != NULL))// && RANDOM_LONG(0,1))
+			if( FOkToSpeak() && (m_hEnemy != NULL) )// && RANDOM_LONG(0,1))
 			{
 				if( m_hEnemy->IsPlayer() )
 				{
@@ -4855,67 +5024,67 @@ Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 					else
 						SENTENCEG_PlayRndSz( ENT( pev ), "HG_ALERT", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
 				}
-				else if (
+				else if(
 					(m_hEnemy->Classify() != CLASS_PLAYER_ALLY) &&
 					(m_hEnemy->Classify() != CLASS_HUMAN_PASSIVE) &&
 					(m_hEnemy->Classify() != CLASS_MACHINE)
 					)
 					// monster
-					SENTENCEG_PlayRndSz(ENT(pev), "HG_MONST", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+					SENTENCEG_PlayRndSz( ENT( pev ), "HG_MONST", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
 
 				JustSpoke();
 			}
 
 			if( (OccupySlot( bits_SLOTS_HGRUNT_GRENADE )) && !DroneSpawned ) // HasConditions ( bits_COND_CAN_RANGE_ATTACK2 )
-				return GetScheduleOfType(SCHED_RANGE_ATTACK2); // spawn a drone
+				return GetScheduleOfType( SCHED_RANGE_ATTACK2 ); // spawn a drone
 
-			if (HasConditions(bits_COND_CAN_RANGE_ATTACK1))
-				return GetScheduleOfType(SCHED_GRUNT_SUPPRESS);
+			if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+				return GetScheduleOfType( SCHED_GRUNT_SUPPRESS );
 			else
 				return CBaseMonster::GetSchedule(); //return GetScheduleOfType ( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 		}
 		// no ammo
-		else if (HasConditions(bits_COND_NO_AMMO_LOADED))
+		else if( HasConditions( bits_COND_NO_AMMO_LOADED ) )
 		{
 			//!!!KELLY - this individual just realized he's out of bullet ammo. 
 			// He's going to try to find cover to run to and reload, but rarely, if 
 			// none is available, he'll drop and reload in the open here. 
-			return GetScheduleOfType(SCHED_GRUNT_COVER_AND_RELOAD);
+			return GetScheduleOfType( SCHED_GRUNT_COVER_AND_RELOAD );
 		}
 
 		// damaged just a little
-		else if (HasConditions(bits_COND_LIGHT_DAMAGE))
+		else if( HasConditions( bits_COND_LIGHT_DAMAGE ) )
 		{
-			if (pev->health < pev->max_health / 4) // the general now has 1/4 of his HP. 30% chance of flinch
+			if( pev->health < pev->max_health * 0.1f ) // he's tired and almost dead. run away or try to fire back
 			{
-				switch (RANDOM_LONG(0, 2))
+				switch( RANDOM_LONG( 0, 1 ) )
 				{
-				case 0: return GetScheduleOfType(SCHED_SMALL_FLINCH); break;
-				case 1: return GetScheduleOfType(SCHED_RANGE_ATTACK1); break;
-				case 2: return GetScheduleOfType(SCHED_GRUNT_SUPPRESS); break;
+				case 0: return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY ); break;
+				case 1: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
 				}
 			}
-
-			if (pev->health < pev->max_health / 10) // he's tired and almost dead. run away or try to fire back
+			else if( pev->health < pev->max_health * 0.25f ) // the general now has 1/4 of his HP. 30% chance of flinch
 			{
-				switch (RANDOM_LONG(0, 1))
+				switch( RANDOM_LONG( 0, 2 ) )
 				{
-				case 0: return GetScheduleOfType(SCHED_TAKE_COVER_FROM_ENEMY); break;
-				case 1: return GetScheduleOfType(SCHED_RANGE_ATTACK1); break;
+				case 0: return GetScheduleOfType( SCHED_SMALL_FLINCH ); break;
+				case 1: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
+				case 2: return GetScheduleOfType( SCHED_GRUNT_SUPPRESS ); break;
 				}
 			}
-			return GetScheduleOfType(SCHED_RANGE_ATTACK1);
+			return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
 		}
 		// can kick
-		else if (HasConditions(bits_COND_CAN_MELEE_ATTACK1))
+		else if( HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
 		{
-			return GetScheduleOfType(SCHED_MELEE_ATTACK1);
+			return GetScheduleOfType( SCHED_MELEE_ATTACK1 );
 		}
 		// can grenade launch
 
-		else if (HasWeapon(HGRUNT_GRENADELAUNCHER) && HasConditions(bits_COND_CAN_RANGE_ATTACK2) && OccupySlot(bits_SLOTS_HGRUNT_GRENADE))
+		else if( CanSpawnDrone && DroneSpawned && HasWeapon( HGRUNT_GRENADELAUNCHER ) && RANDOM_LONG(0,100) > 60 && HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) && OccupySlot( bits_SLOTS_HGRUNT_GRENADE ) )
 		{
 			// shoot a grenade if you can
+			bUseGrenLauncher = true;
 			return GetScheduleOfType(SCHED_RANGE_ATTACK2);
 		}
 		// can shoot
@@ -4947,7 +5116,7 @@ Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 		// can't see enemy
 		else if (HasConditions(bits_COND_ENEMY_OCCLUDED))
 		{
-		if( HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) && OccupySlot( bits_SLOTS_HGRUNT_GRENADE ) && DroneSpawned ) // diffusion - undone sentences
+		if( HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) && CanSpawnDrone && DroneSpawned && OccupySlot( bits_SLOTS_HGRUNT_GRENADE ) ) // diffusion - undone sentences
 			{
 				//!!!KELLY - this grunt is about to throw or fire a grenade at the player. Great place for "fire in the hole"  "frag out" etc
 				if (FOkToSpeak())
@@ -4955,6 +5124,7 @@ Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 					SENTENCEG_PlayRndSz(ENT(pev), "HG_THROW", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
 					JustSpoke();
 				}
+				bUseGrenLauncher = false;
 				return GetScheduleOfType(SCHED_RANGE_ATTACK2);
 			}
 			else if (OccupySlot(bits_SLOTS_HGRUNT_ENGAGE))
@@ -5191,11 +5361,7 @@ void CHGruntSecurity::Spawn()
 	pev->movetype = MOVETYPE_STEP;
 	m_bloodColor = BLOOD_COLOR_RED;
 	pev->effects = 0;
-	if (!pev->health) pev->health = RANDOM_LONG(105, 110);
-	if( g_iSkillLevel > SKILL_EASY )
-		pev->health += 5;
-	if( g_iSkillLevel > SKILL_MEDIUM )
-		pev->health += 5;
+	if( !pev->health ) pev->health = SecurityGuyHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	m_flFieldOfView = 0; //180 deg // indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -5385,7 +5551,7 @@ void CHGruntSecurity::Precache()
 	PRECACHE_SOUND("zombie/claw_miss2.wav");// because we use the basemonster SWIPE animation event
 
 	// get voice pitch
-	m_voicePitch = 97 + RANDOM_LONG(0, 6);
+	if( !m_voicePitch ) m_voicePitch = 97 + RANDOM_LONG(0, 6);
 
 	UTIL_PrecacheOther("monster_security_drone");
 }
@@ -5595,7 +5761,7 @@ void CAndrewGrunt::Precache()
 
 	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
 
-	m_voicePitch = 100;
+	if( !m_voicePitch ) m_voicePitch = 100;
 }
 
 int	CAndrewGrunt::Classify( void )
@@ -6185,22 +6351,21 @@ Schedule_t *CAndrewGrunt::GetSchedule( void )
 		// damaged just a little
 		else if( HasConditions( bits_COND_LIGHT_DAMAGE ) )
 		{
-			if( pev->health < pev->max_health / 4 ) // the general now has 1/4 of his HP. 30% chance of flinch
+			if( pev->health < pev->max_health * 0.1f ) // he's tired and almost dead. run away or try to fire back
+			{
+				switch( RANDOM_LONG( 0, 1 ) )
+				{
+				case 0: return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY ); break;
+				case 1: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
+				}
+			}
+			else if( pev->health < pev->max_health * 0.25f ) // Andrew now has 1/4 of his HP. 30% chance of flinch
 			{
 				switch( RANDOM_LONG( 0, 2 ) )
 				{
 				case 0: return GetScheduleOfType( SCHED_SMALL_FLINCH ); break;
 				case 1: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
 				case 2: return GetScheduleOfType( SCHED_GRUNT_SUPPRESS ); break;
-				}
-			}
-
-			if( pev->health < pev->max_health / 10 ) // he's tired and almost dead. run away or try to fire back
-			{
-				switch( RANDOM_LONG( 0, 1 ) )
-				{
-				case 0: return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY ); break;
-				case 1: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
 				}
 			}
 			return GetScheduleOfType( SCHED_RANGE_ATTACK1 );

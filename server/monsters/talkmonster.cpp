@@ -38,7 +38,7 @@ BEGIN_DATADESC( CTalkMonster )
 	DEFINE_KEYFIELD( m_iszUnUse, FIELD_STRING, "UnUseSentence" ),
 	DEFINE_KEYFIELD( m_iszDecline, FIELD_STRING, "RefusalSentence" ), //LRC
 	DEFINE_KEYFIELD( m_iszSpeakAs, FIELD_STRING, "SpeakAs" ), //LRC
-	DEFINE_KEYFIELD( m_voicePitch, FIELD_INTEGER, "voicepitch" ), // diffusion
+//	DEFINE_KEYFIELD( m_voicePitch, FIELD_INTEGER, "voicepitch" ), // diffusion - moved to basemonster
 	DEFINE_FIELD( m_flLastSaidSmelled, FIELD_TIME ),
 //	DEFINE_FIELD( m_flStopTalkTime, FIELD_TIME ), // diffusion - moved to basemonster (m_flTalkTime)
 //	DEFINE_FIELD( m_hTalkTarget, FIELD_EHANDLE ), // diffusion - moved to basemonster
@@ -588,6 +588,15 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 				TaskComplete();
 				RouteClear();		// Stop moving
 			}
+
+			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
+			{
+				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+			}
+			else
+			{
+				ResetHeadTurn();
+			}
 		}
 		break;
 	case TASK_WAIT_FOR_MOVEMENT:
@@ -598,8 +607,7 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		}
 		else
 		{
-			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
-			SetBoneController( 0, headyaw );
+			ResetHeadTurn();
 			// override so that during walk, a scientist may talk and greet player
 			FIdleHello();
 			if (RANDOM_LONG(0,m_nSpeak * 20) == 0)
@@ -611,8 +619,7 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		CBaseMonster::RunTask( pTask );
 		if( TaskIsComplete() && !( IsTalking() && m_hTalkTarget != NULL ) )
 		{
-			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
-			SetBoneController( 0, headyaw );
+			ResetHeadTurn();
 		}
 		break;
 
@@ -1494,11 +1501,6 @@ void CTalkMonster::KeyValue( KeyValueData *pkvd )
 	else if (FStrEq(pkvd->szKeyName, "SpeakAs")) //LRC
 	{
 		m_iszSpeakAs = ALLOC_STRING(pkvd->szValue);
-		pkvd->fHandled = TRUE;
-	}
-	else if (FStrEq(pkvd->szKeyName, "voicepitch")) // diffusion
-	{
-		m_voicePitch = Q_atoi(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else 

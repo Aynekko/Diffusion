@@ -300,6 +300,15 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 			if ( FacingIdeal() )
 				TaskComplete();
 
+			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
+			{
+				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+			}
+			else
+			{
+				ResetHeadTurn();
+			}
+
 			break;
 		}
 
@@ -348,6 +357,11 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 		{
 			ChangeYaw( pev->yaw_speed );
 
+			if( m_flTalkTime < gpGlobals->time && m_hTalkTarget == NULL )
+			{
+				ResetHeadTurn();
+			}
+
 			if ( FacingIdeal() )
 				TaskComplete();
 			break;
@@ -387,8 +401,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 			}
 			else
 			{
-				headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
-				SetBoneController( 0, headyaw );
+				ResetHeadTurn();
 			}
 
 			if( gpGlobals->time >= m_flWaitFinished )
@@ -434,6 +447,15 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 					m_movementActivity = ACT_WALK;
 				else if ( distance >= 270 && m_movementActivity != ACT_RUN )
 					m_movementActivity = ACT_RUN;
+
+				if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
+				{
+					IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+				}
+				else
+				{
+					ResetHeadTurn();
+				}
 			}
 
 			break;
@@ -451,8 +473,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 			}
 			else
 			{
-				headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
-				SetBoneController( 0, headyaw );
+				ResetHeadTurn();
 			}
 			break;
 		}
@@ -533,6 +554,10 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 			// look at who I'm talking to
 			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
 				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+			else
+			{
+				ResetHeadTurn();
+			}
 
 			if ( m_pCine->m_iDelay <= 0 && gpGlobals->time >= m_pCine->m_startTime )
 			{
@@ -548,6 +573,14 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 		}
 	case TASK_PLAY_SCRIPT:
 		{
+			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
+			{
+				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+			}
+			else
+			{
+				ResetHeadTurn();
+			}
 			if (m_fSequenceFinished)
 			{
 				m_pCine->SequenceDone( this );
@@ -561,8 +594,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 		}
 		else
 		{
-			headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
-			SetBoneController( 0, headyaw );
+			ResetHeadTurn();
 		}
 		break;
 	}

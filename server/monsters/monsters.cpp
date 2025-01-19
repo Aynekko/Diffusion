@@ -102,7 +102,7 @@ BEGIN_DATADESC( CBaseMonster )
 
 	DEFINE_FIELD( m_flOcclusionTime, FIELD_TIME ), // diffusion
 	DEFINE_FIELD( FlashlightCap, FIELD_BOOLEAN ),
-
+	DEFINE_KEYFIELD( m_voicePitch, FIELD_INTEGER, "voicepitch" ),
 	DEFINE_FIELD( m_flTalkTime, FIELD_TIME ),
 	DEFINE_FIELD( m_hTalkTarget, FIELD_EHANDLE ),
 
@@ -2745,7 +2745,7 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 			delta = 0.25f;
 		speed = yawSpeed * delta;
 		angles.y = UTIL_ApproachAngle( ideal, current, speed, true );
-
+		/*
 		// turn head in desired direction only if they have a turnable head
 		if (m_afCapability & bits_CAP_TURN_HEAD)
 		{
@@ -2759,6 +2759,7 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 				SetBoneController( 0, headyaw );
 			}
 		}
+		*/
 
 		SetAbsAngles( angles );
 	}
@@ -3399,6 +3400,11 @@ void CBaseMonster :: KeyValue( KeyValueData *pkvd )
 		HealthbarDisabled = (Q_atoi( pkvd->szValue ) > 0);
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "voicepitch" ) ) // diffusion
+	{
+		m_voicePitch = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "healthbartype"))
 	{
 		HealthBarType = Q_atoi( pkvd->szValue );
@@ -3818,6 +3824,9 @@ void CBaseMonster::PlaySentence( const char *pszSentence, float duration, float 
 {
 	if ( pszSentence && IsAlive() )
 	{
+		int pitch = PITCH_NORM;
+		if( m_voicePitch > 0 )
+			pitch = m_voicePitch;
 		if( pszSentence[0] == '!' )
 		{
 			if( SpeakFrom )
@@ -3825,17 +3834,17 @@ void CBaseMonster::PlaySentence( const char *pszSentence, float duration, float 
 				CBaseEntity *pSpeakFromEnt = NULL;
 				if( (pSpeakFromEnt = UTIL_FindEntityByTargetname( pSpeakFromEnt, STRING( SpeakFrom ) )) != NULL )
 				{
-					EMIT_SOUND_DYN( pSpeakFromEnt->edict(), CHAN_STATIC, pszSentence, volume, attenuation, 0, PITCH_NORM );
-					EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, 0.05f, 0.0f, 0, PITCH_NORM ); // diffusion HACKHACK - OPEN YOUR MOUTH DAMN IT!
+					EMIT_SOUND_DYN( pSpeakFromEnt->edict(), CHAN_STATIC, pszSentence, volume, attenuation, 0, pitch );
+					EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, 0.05f, 0.0f, 0, pitch ); // diffusion HACKHACK - OPEN YOUR MOUTH DAMN IT!
 				}
 				else
 					ALERT( at_error, "PlaySentence: SpeakFrom ent is not found!\n" );
 			}
 			else
-				EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, PITCH_NORM );
+				EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, pitch );
 		}
 		else
-			SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, PITCH_NORM );
+			SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, pitch );
 	}
 }
 
@@ -3855,22 +3864,36 @@ void CBaseMonster::SentenceStop( void )
 	EMIT_SOUND( edict(), CHAN_VOICE, "common/null.wav", 0, ATTN_IDLE ); // diffusion - volume changed from 1 to 0
 }
 
-// turn head towards supplied origin
+//==============================================================================
+// IdleHeadTurn: turn head towards supplied origin
+//==============================================================================
 void CBaseMonster::IdleHeadTurn( const Vector &vecFriend )
 {
 	// turn head in desired direction only if ent has a turnable head
-	if( m_afCapability & bits_CAP_TURN_HEAD )
-	{
-		float yaw = VecToYaw( vecFriend - GetAbsOrigin() ) - GetAbsAngles().y;
+	if( !(m_afCapability & bits_CAP_TURN_HEAD) )
+		return;
 
-		if( yaw > 180 ) yaw -= 360;
-		if( yaw < -180 ) yaw += 360;
+	float yaw = VecToYaw( vecFriend - GetAbsOrigin() ) - GetAbsAngles().y;
 
-		headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime, true );
+	if( yaw > 180 ) yaw -= 360;
+	if( yaw < -180 ) yaw += 360;
 
-		// turn towards vector
-		SetBoneController( 0, headyaw );
-	}
+	headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime, true );
+
+	// turn towards vector
+	SetBoneController( 0, headyaw );
+}
+
+//==============================================================================
+// ResetHeadTurn: smoothly move head controller to default position
+//==============================================================================
+void CBaseMonster::ResetHeadTurn( void )
+{
+	if( !(m_afCapability & bits_CAP_TURN_HEAD) )
+		return;
+
+	headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
+	SetBoneController( 0, headyaw );
 }
 
 void CBaseMonster::CorpseFallThink( void )

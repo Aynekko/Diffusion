@@ -148,7 +148,9 @@ public:
 	virtual BOOL	ShouldFadeOnDeath( void );
 
 	void			IdleHeadTurn( const Vector &vecFriend );
+	void ResetHeadTurn( void );
 	float headyaw;
+	int m_voicePitch;
 
 	BOOL		HasWeapon( int weaponnum ) { return FBitSet( m_iWeapons[weaponnum >> 3], BIT( weaponnum & 7 )); }
 	void		AddWeapon( int weaponnum ) { SetBits( m_iWeapons[weaponnum >> 3], BIT( weaponnum & 7 )); }
@@ -373,7 +375,7 @@ public:
 	bool FlashlightCap; // this monster has flashlight
 
 	CBaseEntity* DropItem ( char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
-
+	
 	float NextUpdateTime; // don't update the monster logic every frame
 
 	int iTest; // just for testing purposes
