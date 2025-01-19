@@ -305,15 +305,14 @@ void main( void )
 	}
 
 	// do modified hemisperical lighting
-	float NdotL = max(( dot( N, L ) + ( SHADE_LAMBERT - 1.0 )) / SHADE_LAMBERT, 0.0 );
+	float NdotL = saturate( dot( N, L ));
 	if( NdotL <= 0.0 ) discard; // fast reject
 
 	diffuse.rgb *= light.rgb * NdotL * atten * shadow;
 
 	// apply specular lighting
 	#if defined( BMODEL_SPECULAR )
-		float NdotLGloss = saturate( NdotL );
-		vec3 gloss = ComputeSpecular( N, V, L, glossmap, GlossSmoothness, GlossScale ) * ( light * 0.5 ) * NdotLGloss * atten * shadow;
+		vec3 gloss = ComputeSpecular( N, V, L, glossmap, GlossSmoothness, GlossScale ) * ( light * 0.5 ) * NdotL * atten * shadow;
 		#if defined( BMODEL_EMBOSS )
 			gloss *= emboss;
 		#endif

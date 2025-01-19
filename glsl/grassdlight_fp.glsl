@@ -130,7 +130,7 @@ void main( void )
 	}
 
 	// do modified hemisperical lighting
-	float NdotL = max( (dot( N, L ) + ( SHADE_LAMBERT - 1.0f )) / SHADE_LAMBERT, 0.0 );
+	float NdotL = clamp( dot( N, L ), 0.4, 1.0 ); // make light slightly visible on the opposite side
 	diffuse.rgb *= light.rgb * NdotL * atten * DLIGHT_SCALE;
 
 	// compute final color
