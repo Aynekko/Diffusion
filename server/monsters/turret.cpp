@@ -344,7 +344,7 @@ void CTurret::Spawn()
 		SET_MODEL(ENT(pev), STRING(pev->model)); //LRC
 	else
 		SET_MODEL(ENT(pev), "models/turret.mdl");
-	if (!pev->health) pev->health	= gSkillData.turretHealth;
+	if (!pev->health) pev->health = g_turretHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	m_HackedGunPos		= Vector( 0, 0, 12.75 );
 	m_flMaxSpin =		TURRET_MAXSPIN;
@@ -388,7 +388,7 @@ void CMiniTurret::Spawn()
 		SET_MODEL(ENT(pev), STRING(pev->model)); //LRC
 	else
 		SET_MODEL(ENT(pev), "models/miniturret.mdl");
-	if (!pev->health) pev->health	= gSkillData.miniturretHealth;
+	if( !pev->health ) pev->health = g_miniturretHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	m_HackedGunPos		= Vector( 0, 0, 12.75 );
 	m_flMaxSpin = 0;
@@ -1415,7 +1415,7 @@ void CSentry::Spawn()
 	else
 		SET_MODEL(ENT(pev), "models/sentry.mdl");
 
-	if (!pev->health) pev->health	= gSkillData.sentryHealth;
+	if( !pev->health ) pev->health = g_sentryHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	m_HackedGunPos		= Vector( 0, 0, 48 );
 	pev->view_ofs.z		= 48;

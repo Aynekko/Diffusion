@@ -50,13 +50,13 @@ public:
 
 	CLaserSpot *m_pSpot;
 	int m_cActiveRockets;// how many missiles in flight from this launcher right now?
-	int m_fSpotActive;
+	bool m_bSpotActive;
 };
 
 LINK_ENTITY_TO_CLASS( weapon_rpg, CRpg );
 
 BEGIN_DATADESC( CRpg )
-	DEFINE_FIELD( m_fSpotActive, FIELD_INTEGER ),
+	DEFINE_FIELD( m_bSpotActive, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_cActiveRockets, FIELD_INTEGER ),
 END_DATADESC()
 
@@ -473,14 +473,6 @@ BEGIN_DATADESC( CRoboRocket2 )
 	DEFINE_FUNCTION( RocketExplode ),
 END_DATADESC()
 
-const int RoboRocketDamage[] = 
-{
-	0,
-	30,
-	40,
-	50,
-};
-
 void CRoboRocket2 :: Spawn( void )
 {
 	Precache( );
@@ -506,7 +498,7 @@ void CRoboRocket2 :: Spawn( void )
 
 	SetNextThink( 0.4 );
 
-	pev->dmg = RoboRocketDamage[g_iSkillLevel];
+	pev->dmg = g_RoboRocketDamage[g_iSkillLevel];
 
 	if( pev->owner )
 	{
@@ -768,16 +760,6 @@ void CRoboRocket2 :: FollowThink( void  )
 
 //----------------------------------------------------------------------------------------
 
-// rocket for heavy drone
-
-const int DroneRocketDamage[] =
-{
-	0,
-	20,
-	25,
-	30
-};
-
 class CDroneRocket: public CGrenade
 {
 	DECLARE_CLASS( CDroneRocket, CGrenade );
@@ -834,7 +816,7 @@ void CDroneRocket::Spawn( void )
 
 	SetNextThink( 0.4 );
 
-	pev->dmg = DroneRocketDamage[g_iSkillLevel];
+	pev->dmg = g_DroneRocketDamage[g_iSkillLevel];
 
 	if( pev->owner )
 	{
@@ -1065,7 +1047,7 @@ void CRpg::Spawn( void )
 	m_iId = WEAPON_RPG;
 
 	SET_MODEL(ENT(pev), "models/weapons/w_rpg.mdl");
-	m_fSpotActive = 1;
+	m_bSpotActive = true;
 
 	if ( g_pGameRules->IsMultiplayer() )
 	{
@@ -1138,7 +1120,7 @@ BOOL CRpg::Deploy( )
 
 BOOL CRpg::CanHolster( void )
 {
-	if ( m_fSpotActive && m_cActiveRockets > 0 )
+	if( m_bSpotActive && m_cActiveRockets > 0 )
 	{
 		// can't put away while guiding a missile.
 		return FALSE;
@@ -1210,9 +1192,9 @@ void CRpg::PrimaryAttack()
 
 void CRpg::SecondaryAttack()
 {
-	m_fSpotActive = ! m_fSpotActive;
+	m_bSpotActive = !m_bSpotActive;
 
-	if (!m_fSpotActive && m_pSpot)
+	if( !m_bSpotActive && m_pSpot )
 	{
 		m_pSpot->Killed( NULL, GIB_NORMAL );
 		m_pSpot = NULL;
@@ -1243,14 +1225,14 @@ void CRpg::Reload( void )
 	
 	m_flNextPrimaryAttack = gpGlobals->time + RPG_RELOAD_TIME;
 
-	if ( m_cActiveRockets > 0 && m_fSpotActive )
+	if ( m_cActiveRockets > 0 && m_bSpotActive )
 	{
 		// no reloading when there are active missiles tracking the designator.
 		// ward off future autoreload attempts by setting next attack time into the future for a bit. 
 		return;
 	}
 
-	if (m_pSpot && m_fSpotActive)
+	if( m_pSpot && m_bSpotActive )
 	{
 		m_pSpot->Suspend( RPG_RELOAD_TIME );
 		m_flNextSecondaryAttack = gpGlobals->time + RPG_RELOAD_TIME;
@@ -1280,7 +1262,7 @@ void CRpg::WeaponIdle( void )
 	{
 		int iAnim;
 		float flRand = RANDOM_FLOAT(0, 1);
-		if (flRand <= 0.75 || m_fSpotActive)
+		if( flRand <= 0.75 || m_bSpotActive )
 		{
 			if ( m_iClip == 0 )
 				iAnim = RPG_IDLE_UL;
@@ -1309,7 +1291,7 @@ void CRpg::WeaponIdle( void )
 
 void CRpg::UpdateSpot( void )
 {
-	if (m_fSpotActive)
+	if( m_bSpotActive )
 	{
 		if (!m_pSpot)
 		{

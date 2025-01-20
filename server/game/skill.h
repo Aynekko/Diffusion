@@ -15,143 +15,168 @@
 //=========================================================
 // skill.h - skill level concerns
 //=========================================================
-
-struct skilldata_t
+ 
+// values are picked using g_iSkillLevel, so the first value is always zero
+ 
+// monster_gargantua --------------------------------------
+const int g_RoboRocketDamage[] =
 {
-
-	int iSkillLevel; // game skill level
-
-// Monster Health & Damage
-	float	agruntHealth;
-	float agruntDmgPunch;
-
-	float apacheHealth;
-	
-	float barneyHealth;
-
-	float bigmommaHealthFactor;		// Multiply each node's health by this
-	float bigmommaDmgSlash;			// melee attack damage
-	float bigmommaDmgBlast;			// mortar attack damage
-	float bigmommaRadiusBlast;		// mortar attack radius
-
-	float bullsquidHealth;
-	float bullsquidDmgBite;
-	float bullsquidDmgWhip;
-	float bullsquidDmgSpit;
-
-	float gargantuaHealth;
-	float gargantuaDmgSlash;
-	float gargantuaDmgFire;
-	float gargantuaDmgStomp;
-
-	float hassassinHealth;
-
-	float headcrabHealth;
-	float headcrabDmgBite;
-
-	float hgruntHealth;
-	float hgruntDmgKick;
-	float hgruntShotgunPellets;
-	float hgruntGrenadeSpeed;
-
-	float houndeyeHealth;
-	float houndeyeDmgBlast;
-
-	float strooperHealth;
-	float strooperDmgKick;
-	float strooperGrenadeSpeed;
-	float strooperMaxCharge;
-	float strooperRchgSpeed;
-	float plrDmgSpore;
-	float plrDmgShockroachMultiplayer;
-	float plrDmgShockroachSingleplayer;
-	float sroachHealth;
-	float sroachLifespan;
-
-	float slaveHealth;
-	float slaveDmgClaw;
-	float slaveDmgClawrake;
-	float slaveDmgZap;
-
-	float ichthyosaurHealth;
-	float ichthyosaurDmgShake;
-
-	float leechHealth;
-	float leechDmgBite;
-
-	float controllerHealth;
-	float controllerDmgZap;
-	float controllerSpeedBall;
-	float controllerDmgBall;
-
-	float nihilanthHealth;
-	float nihilanthZap;
-
-	float scientistHealth;
-
-	float snarkHealth;
-	float snarkDmgBite;
-	float snarkDmgPop;
-
-	float zombieHealth;
-	float zombieDmgOneSlash;
-	float zombieDmgBothSlash;
-
-	float turretHealth;
-	float miniturretHealth;
-	float sentryHealth;
-
-
-// Player Weapons
-	float plrDmgCrowbar;
-	float plrDmg9MM;
-	float plrDmg357;
-	float plrDmgMP5;
-	float plrDmgM203Grenade;
-	float plrDmgBuckshot;
-	float plrDmgCrossbowClient;
-	float plrDmgCrossbowMonster;
-	float plrDmgRPG;
-	float plrDmgGauss;
-	float plrDmgEgonNarrow;
-	float plrDmgEgonWide;
-	float plrDmgHornet;
-	float plrDmgHandGrenade;
-	float plrDmgSatchel;
-	float plrDmgTripmine;
-	
-// weapons shared by monsters
-	float monDmg9MM;
-	float monDmgMP5;
-	float monDmg12MM;
-	float monDmgHornet;
-
-// health/suit charge
-	float suitchargerCapacity;
-	float batteryCapacity;
-	float healthchargerCapacity;
-	float healthkitCapacity;
-	float scientistHeal;
-
-// monster damage adj
-	float monHead;
-	float monChest;
-	float monStomach;
-	float monLeg;
-	float monArm;
-
-// player damage adj
-	float plrHead;
-	float plrChest;
-	float plrStomach;
-	float plrLeg;
-	float plrArm;
+	0,
+	30,
+	40,
+	50,
 };
 
-extern	DLL_GLOBAL	skilldata_t	gSkillData;
+// monster_security_heavydrone ----------------------------
+const int g_DroneRocketDamage[] =
+{
+	0,
+	20,
+	25,
+	30
+};
+
+// turrets ------------------------------------------------
+const int g_turretHealth[] =
+{
+	0,
+	50,
+	55,
+	60
+};
+
+const int g_miniturretHealth[] =
+{
+	0,
+	40,
+	45,
+	50
+};
+
+const int g_sentryHealth[] =
+{
+	0,
+	60,
+	65,
+	70
+};
+
+// scientist (male/female) --------------------------------
+const int g_scientistHealth = 25;
+const int g_scientistHeal = 20;
+
+// dweller ------------------------------------------------
+const int g_dwellerZapDamage = 25;
+const int g_dwellerClawDamage = 10;
+const int g_dwellerClawRakeDamage = 25;
+
+// leech (unused really) ----------------------------------
+const int g_leechHealth = 2;
+const int g_leechDmgBite = 2;
+
+// HL controller monster ----------------------------------
+const int g_controllerHealth = 75;
+const int g_controllerDmgZap = 20;
+const int g_controllerSpeedBall = 666;
+const int g_controllerDmgBall = 5;
+
+// soldiers / health---------------------------------------
+const int g_ArmyGuyHealth[] =
+{
+	0,
+	85,
+	90,
+	95
+};
+
+const int g_AlienRoboHealth[] =
+{
+	0,
+	92,
+	97,
+	105
+};
+
+const int g_SecurityGuyHealth[] =
+{
+	0,
+	95,
+	100,
+	110
+};
+
+const int g_SecurityGeneralHealth[] =
+{
+	0,
+	500,
+	666,
+	800
+};
+
+const int g_AndrewHealth[] =
+{
+	0,
+	2000,
+	2500,
+	3000
+};
+
+// soldiers / damage --------------------------------------
+const int g_GruntShotgunDamage[] =
+{
+	0,
+	6,
+	8,
+	10
+};
+
+const int g_GruntKickDamage = 10;
+const int g_GruntGrenadeSpeed = 500;
+
+// soldiers / reaction times ------------------------------
+const float g_HGruntCombatWaitTime[] =
+{
+	0.0f,
+	0.8f,
+	0.5f,
+	0.3f
+};
+
+const float g_AlienCombatWaitTime[] =
+{
+	0.0f,
+	0.6f,
+	0.4f,
+	0.2f
+};
+
+const float g_SecurityGruntCombatWaitTime[] =
+{
+	0.0f,
+	0.7f,
+	0.5f,
+	0.2f
+};
+
+const float g_SecurityGeneralCombatWaitTime[] =
+{
+	0.0f,
+	0.4f,
+	0.25f,
+	0.1f
+};
+
+const float g_AndrewCombatWaitTime[] =
+{
+	0.0f,
+	0.5f,
+	0.25f,
+	0.1f
+};
+
 float GetSkillCvar( char *pName );
 
-extern DLL_GLOBAL int		g_iSkillLevel;
+extern DLL_GLOBAL int g_iSkillLevel;
 
 #define SKILL_EASY		1
 #define SKILL_MEDIUM	2

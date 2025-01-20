@@ -134,9 +134,6 @@
     <ClCompile Include="weapons\weapon_fiveseven.cpp">
       <Filter>Source Files\weapons</Filter>
     </ClCompile>
-    <ClCompile Include="weapons\weapon_egon.cpp">
-      <Filter>Source Files\weapons</Filter>
-    </ClCompile>
     <ClCompile Include="weapons\weapon_drone.cpp">
       <Filter>Source Files\weapons</Filter>
     </ClCompile>
@@ -194,9 +191,6 @@
     <ClCompile Include="entities\env_rope.cpp">
       <Filter>Source Files\entities</Filter>
     </ClCompile>
-    <ClCompile Include="entities\func_recharge.cpp">
-      <Filter>Source Files\entities</Filter>
-    </ClCompile>
     <ClCompile Include="entities\func_tank.cpp">
       <Filter>Source Files\entities</Filter>
     </ClCompile>
@@ -215,9 +209,6 @@
     <ClCompile Include="entities\shock_beam.cpp">
       <Filter>Source Files\entities</Filter>
     </ClCompile>
-    <ClCompile Include="entities\sporegrenade.cpp">
-      <Filter>Source Files\entities</Filter>
-    </ClCompile>
     <ClCompile Include="monsters\tempmonster.cpp">
       <Filter>Source Files\monsters</Filter>
     </ClCompile>
@@ -227,37 +218,13 @@
     <ClCompile Include="monsters\entities\monster_alien_controller.cpp">
       <Filter>Source Files\monsters\entities</Filter>
     </ClCompile>
-    <ClCompile Include="monsters\entities\monster_alien_grunt.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
     <ClCompile Include="monsters\entities\monster_apache.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\monster_barnacle.cpp">
       <Filter>Source Files\monsters\entities</Filter>
     </ClCompile>
     <ClCompile Include="monsters\entities\monster_barney.cpp">
       <Filter>Source Files\monsters\entities</Filter>
     </ClCompile>
-    <ClCompile Include="monsters\entities\monster_bigmomma.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\monster_bullsquid.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\monster_bloater.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
     <ClCompile Include="monsters\entities\monster_flyer_flock.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\monster_gman.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\monster_houndeye.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\monster_headcrab.cpp">
       <Filter>Source Files\monsters\entities</Filter>
     </ClCompile>
     <ClCompile Include="monsters\entities\monster_human_assassin.cpp">
@@ -266,31 +233,13 @@
     <ClCompile Include="monsters\entities\monster_human_grunt.cpp">
       <Filter>Source Files\monsters\entities</Filter>
     </ClCompile>
-    <ClCompile Include="monsters\entities\monster_ichthyosaur.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
     <ClCompile Include="monsters\entities\monster_leech.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\monster_nihilanth.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\monster_tentacle.cpp">
       <Filter>Source Files\monsters\entities</Filter>
     </ClCompile>
     <ClCompile Include="monsters\entities\monster_vortigaunt.cpp">
       <Filter>Source Files\monsters\entities</Filter>
     </ClCompile>
-    <ClCompile Include="monsters\entities\monster_zombie.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
     <ClCompile Include="monsters\entities\monster_gargantua.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="weapons\weapon_hornetgun.cpp">
-      <Filter>Source Files\weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\monster_shocktrooper.cpp">
       <Filter>Source Files\monsters\entities</Filter>
     </ClCompile>
     <ClCompile Include="entities\mortar.cpp">
@@ -311,9 +260,6 @@
     <ClCompile Include="game\rules_singleplayer.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
-    <ClCompile Include="game\skill.cpp">
-      <Filter>Source Files\game</Filter>
-    </ClCompile>
     <ClCompile Include="game\spectator.cpp">
       <Filter>Source Files\game</Filter>
     </ClCompile>
@@ -322,9 +268,6 @@
     </ClCompile>
     <ClCompile Include="game\rules_teamplay.cpp">
       <Filter>Source Files\game</Filter>
-    </ClCompile>
-    <ClCompile Include="entities\item_airtank.cpp">
-      <Filter>Source Files\entities</Filter>
     </ClCompile>
     <ClCompile Include="game\client.cpp">
       <Filter>Source Files\game</Filter>
@@ -335,19 +278,10 @@
     <ClCompile Include="entities\func_physbox.cpp">
       <Filter>Source Files\entities</Filter>
     </ClCompile>
-    <ClCompile Include="entities\item_healthkit.cpp">
-      <Filter>Source Files\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="entities\func_healthcharger.cpp">
-      <Filter>Source Files\entities</Filter>
-    </ClCompile>
     <ClCompile Include="entities\ents_items.cpp">
       <Filter>Source Files\entities</Filter>
     </ClCompile>
     <ClCompile Include="monsters\entities\monster_osprey.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\hornet.cpp">
       <Filter>Source Files\monsters\entities</Filter>
     </ClCompile>
     <ClCompile Include="monsters\nodes.cpp">
@@ -364,12 +298,6 @@
     </ClCompile>
     <ClCompile Include="entities\path_track.cpp">
       <Filter>Source Files\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="weapons\weapon_snark.cpp">
-      <Filter>Source Files\weapons</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\monster_snark.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
     </ClCompile>
     <ClCompile Include="game\baseplayer.cpp">
       <Filter>Source Files\game</Filter>
@@ -536,9 +464,6 @@
     <ClCompile Include="monsters\entities\monster_cockroach.cpp">
       <Filter>Source Files\monsters</Filter>
     </ClCompile>
-    <ClCompile Include="game\stats.cpp">
-      <Filter>Source Files\game</Filter>
-    </ClCompile>
     <ClCompile Include="entities\func_pushable.cpp">
       <Filter>Source Files\entities</Filter>
     </ClCompile>
@@ -607,9 +532,6 @@
     </ClCompile>
     <ClCompile Include="entities\player_keycatcher.cpp">
       <Filter>Source Files\entities</Filter>
-    </ClCompile>
-    <ClCompile Include="monsters\entities\monster_hevsuit_dead.cpp">
-      <Filter>Source Files\monsters\entities</Filter>
     </ClCompile>
     <ClCompile Include="entities\info_target.cpp">
       <Filter>Source Files\entities</Filter>
@@ -898,13 +820,7 @@
     <ClInclude Include="monsters\gearbox_weapons.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="monsters\headcrab.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="monsters\hgrunt.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="monsters\entities\hornet.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="items.h">
@@ -980,9 +896,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game\spectator.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="entities\sporegrenade.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\engine\sprite.h">

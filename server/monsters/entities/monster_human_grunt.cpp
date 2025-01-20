@@ -38,7 +38,6 @@
 #include	"weapons/weapons.h"
 #include	"talkmonster.h"
 #include	"entities/soundent.h"
-#include	"entities/sporegrenade.h"
 #include	"effects.h"
 #include	"customentity.h"
 #include	"hgrunt.h"
@@ -1150,7 +1149,7 @@ BOOL CHGrunt :: CheckRangeAttack1 ( float flDot, float flDist )
 
 BOOL CHGrunt::CheckRangeAttack2( float flDot, float flDist )
 {
-	return CheckRangeAttack2Impl(gSkillData.hgruntGrenadeSpeed, flDot, flDist);
+	return CheckRangeAttack2Impl( g_GruntGrenadeSpeed, flDot, flDist);
 }
 
 BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist )
@@ -1209,7 +1208,7 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 		vecTarget = m_vecEnemyLKP + ( m_hEnemy->BodyTarget( pev->origin ) - m_hEnemy->pev->origin );
 		// estimate position
 		if( HasConditions( bits_COND_SEE_ENEMY ) )
-			vecTarget = vecTarget + ( ( vecTarget - pev->origin).Length() / gSkillData.hgruntGrenadeSpeed ) * m_hEnemy->pev->velocity;
+			vecTarget = vecTarget + ( ( vecTarget - pev->origin).Length() / (float)g_GruntGrenadeSpeed ) * m_hEnemy->pev->velocity;
 	}
 
 	// are any of my squad members near the intended grenade impact area?
@@ -1282,7 +1281,7 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 	}
 	else // grenade launcher
 	{
-		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, gSkillData.hgruntGrenadeSpeed, 0.5 );
+		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, g_GruntGrenadeSpeed, 0.5 );
 
 		if( vecToss != g_vecZero )
 		{
@@ -1575,7 +1574,7 @@ void CHGrunt :: Shotgun ( void )
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass ( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL); 
-	FireBullets(gSkillData.hgruntShotgunPellets, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_15DEGREES : VECTOR_CONE_7DEGREES, 4096, BULLET_PLAYER_BUCKSHOT, 0, GruntShotgunDamage[g_iSkillLevel] ); // shoot +-7.5 degrees // diffusion 4096, was 2048
+	FireBullets( 4, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_15DEGREES : VECTOR_CONE_7DEGREES, 4096, BULLET_PLAYER_BUCKSHOT, 0, g_GruntShotgunDamage[g_iSkillLevel] ); // shoot +-7.5 degrees // diffusion 4096, was 2048
 
 	pev->effects |= EF_MUZZLEFLASH;
 	
@@ -1814,7 +1813,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				UTIL_MakeVectors( GetAbsAngles() );
 				pHurt->pev->punchangle.x = 15;
 				pHurt->SetAbsVelocity( pHurt->GetAbsVelocity() + gpGlobals->v_forward * 100 + gpGlobals->v_up * 50 );
-				pHurt->TakeDamage( pev, pev, gSkillData.hgruntDmgKick, DMG_CLUB );
+				pHurt->TakeDamage( pev, pev, g_GruntKickDamage, DMG_CLUB );
 			}
 		}
 		break;
@@ -1852,7 +1851,7 @@ void CHGrunt::Spawn(void)
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= BLOOD_COLOR_RED;
 	pev->effects		= 0;
-	if( !pev->health ) pev->health = ArmyGuyHealth[g_iSkillLevel];
+	if( !pev->health ) pev->health = g_ArmyGuyHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	m_flFieldOfView		= 0;//180      0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -1953,7 +1952,7 @@ void CHGrunt::Spawn(void)
 
 	CTalkMonster::g_talkWaitTime = 0;
 
-	CombatWaitTime = HGruntCombatWaitTime[g_iSkillLevel];
+	CombatWaitTime = g_HGruntCombatWaitTime[g_iSkillLevel];
 
 	if( m_iFlashlightCap > 0 )
 	{
@@ -3015,7 +3014,7 @@ void CHGruntAlien :: Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= DONT_BLEED;
 	pev->effects		= 0;
-	if( !pev->health ) pev->health = AlienRoboHealth[g_iSkillLevel];
+	if( !pev->health ) pev->health = g_AlienRoboHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	m_flFieldOfView		= VIEW_FIELD_WIDE;//180         0.2;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -3149,7 +3148,7 @@ void CHGruntAlien :: Spawn()
 	else
 		CanInvestigate = 0;
 
-	CombatWaitTime = AlienCombatWaitTime[g_iSkillLevel];
+	CombatWaitTime = g_AlienCombatWaitTime[g_iSkillLevel];
 
 	SetFlag(F_METAL_MONSTER);
 
@@ -3986,8 +3985,7 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_GREN_DROP: // not used
 		{
-			UTIL_MakeVectors( GetAbsAngles() );
-			CSporeGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 17 - gpGlobals->v_right * 27 + gpGlobals->v_up * 6, g_vecZero, 3 );
+			
 		}
 		break;
 
@@ -4053,7 +4051,7 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				UTIL_MakeVectors( GetAbsAngles() );
 				pHurt->pev->punchangle.x = 15;
 				pHurt->SetAbsVelocity( pHurt->GetAbsVelocity() + gpGlobals->v_forward * 100 + gpGlobals->v_up * 50 );
-				pHurt->TakeDamage( pev, pev, gSkillData.hgruntDmgKick, DMG_CLUB );
+				pHurt->TakeDamage( pev, pev, g_GruntKickDamage, DMG_CLUB );
 			}
 		}
 		break;
@@ -4360,7 +4358,7 @@ void CHGruntSecurityGeneral::Spawn()
 	pev->movetype = MOVETYPE_STEP;
 	m_bloodColor = BLOOD_COLOR_RED;
 	pev->effects = 0;
-	if( !pev->health ) pev->health = SecurityGeneralHealth[g_iSkillLevel];
+	if( !pev->health ) pev->health = g_SecurityGeneralHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	m_flFieldOfView = -1;   // 360
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -4399,7 +4397,7 @@ void CHGruntSecurityGeneral::Spawn()
 	CanSpawnDrone = true;
 	DroneSpawned = false; // when true, grunt can't spawn any more drones
 
-	CombatWaitTime = SecurityGeneralCombatWaitTime[g_iSkillLevel];
+	CombatWaitTime = g_SecurityGeneralCombatWaitTime[g_iSkillLevel];
 
 	SetFlag(F_MONSTER_CANT_LOSE_ENEMY);
 
@@ -4449,7 +4447,7 @@ int	CHGruntSecurityGeneral::Classify(void)
 
 BOOL CHGruntSecurityGeneral::CheckRangeAttack2( float flDot, float flDist )
 {
-	return CheckRangeAttack2Impl( gSkillData.hgruntGrenadeSpeed, flDot, flDist );
+	return CheckRangeAttack2Impl( g_GruntGrenadeSpeed, flDot, flDist );
 }
 
 BOOL CHGruntSecurityGeneral::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDist )
@@ -4508,7 +4506,7 @@ BOOL CHGruntSecurityGeneral::CheckRangeAttack2Impl( float grenadeSpeed, float fl
 		vecTarget = m_vecEnemyLKP + (m_hEnemy->BodyTarget( pev->origin ) - m_hEnemy->pev->origin);
 		// estimate position
 		if( HasConditions( bits_COND_SEE_ENEMY ) )
-			vecTarget = vecTarget + ((vecTarget - pev->origin).Length() / gSkillData.hgruntGrenadeSpeed) * m_hEnemy->pev->velocity;
+			vecTarget = vecTarget + ((vecTarget - pev->origin).Length() / (float)g_GruntGrenadeSpeed ) * m_hEnemy->pev->velocity;
 	}
 	else
 		return FALSE;
@@ -4583,7 +4581,7 @@ BOOL CHGruntSecurityGeneral::CheckRangeAttack2Impl( float grenadeSpeed, float fl
 	}
 	else if( HasWeapon( HGRUNT_GRENADELAUNCHER ) && bUseGrenLauncher ) // grenade launcher
 	{
-		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, gSkillData.hgruntGrenadeSpeed, 0.5 );
+		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, g_GruntGrenadeSpeed, 0.5 );
 
 		if( vecToss != g_vecZero )
 		{
@@ -4918,7 +4916,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 			UTIL_MakeVectors(GetAbsAngles());
 			pHurt->pev->punchangle.x = 15;
 			pHurt->SetAbsVelocity(pHurt->GetAbsVelocity() + gpGlobals->v_forward * 100 + gpGlobals->v_up * 50);
-			pHurt->TakeDamage(pev, pev, gSkillData.hgruntDmgKick, DMG_CLUB);
+			pHurt->TakeDamage(pev, pev, g_GruntKickDamage, DMG_CLUB);
 		}
 	}
 	break;
@@ -5361,7 +5359,7 @@ void CHGruntSecurity::Spawn()
 	pev->movetype = MOVETYPE_STEP;
 	m_bloodColor = BLOOD_COLOR_RED;
 	pev->effects = 0;
-	if( !pev->health ) pev->health = SecurityGuyHealth[g_iSkillLevel];
+	if( !pev->health ) pev->health = g_SecurityGuyHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	m_flFieldOfView = 0; //180 deg // indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState = MONSTERSTATE_NONE;
@@ -5495,7 +5493,7 @@ void CHGruntSecurity::Spawn()
 
 	CTalkMonster::g_talkWaitTime = 0;
 
-	CombatWaitTime = SecurityGruntCombatWaitTime[g_iSkillLevel];
+	CombatWaitTime = g_SecurityGruntCombatWaitTime[g_iSkillLevel];
 
 	if( m_iFlashlightCap > 0 )
 	{
@@ -5683,7 +5681,7 @@ void CAndrewGrunt::Spawn()
 	pev->effects = 0;
 
 	if( !pev->health )
-		pev->health = AndrewHealth[g_iSkillLevel];
+		pev->health = g_AndrewHealth[g_iSkillLevel];
 
 	pev->max_health = pev->health;
 
@@ -5718,7 +5716,7 @@ void CAndrewGrunt::Spawn()
 	CanSpawnDrone = false; // no drones
 	AndrewEscapeTime = AndrewDashTime = gpGlobals->time;
 
-	CombatWaitTime = AndrewCombatWaitTime[g_iSkillLevel];
+	CombatWaitTime = g_AndrewCombatWaitTime[g_iSkillLevel];
 
 	SetFlag( F_MONSTER_CANT_LOSE_ENEMY );
 
@@ -6036,7 +6034,7 @@ void CAndrewGrunt::RunAI( void )
 				float dist = (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length();
 				if( dist > 500 )
 				{
-					Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, gSkillData.hgruntGrenadeSpeed, 0.5 );
+					Vector vecToss = VecCheckThrow( pev, GetGunPosition(), vecTarget, g_GruntGrenadeSpeed, 0.5 );
 					if( vecToss != g_vecZero )
 					{
 						EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "hgrunt/rich_rocket.wav", 1.0, 0.1 );
@@ -6228,7 +6226,7 @@ void CAndrewGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			UTIL_MakeVectors( GetAbsAngles() );
 			pHurt->pev->punchangle.x = 15;
 			pHurt->SetAbsVelocity( pHurt->GetAbsVelocity() + gpGlobals->v_forward * 100 + gpGlobals->v_up * 50 );
-			pHurt->TakeDamage( pev, pev, gSkillData.hgruntDmgKick, DMG_CLUB );
+			pHurt->TakeDamage( pev, pev, g_GruntKickDamage, DMG_CLUB );
 		}
 	}
 	break;

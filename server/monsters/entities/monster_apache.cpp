@@ -119,6 +119,13 @@ BEGIN_DATADESC( CApache )
 	DEFINE_FUNCTION( NullThink ),
 END_DATADESC()
 
+const int ApacheHealth[] =
+{
+	0,
+	350,
+	400,
+	500
+};
 
 void CApache :: Spawn( void )
 {
@@ -137,12 +144,7 @@ void CApache :: Spawn( void )
 	pev->flags |= FL_MONSTER;
 	pev->takedamage		= DAMAGE_AIM;
 
-	pev->health = 500;
-	if( g_iSkillLevel == SKILL_EASY )
-		pev->health = 350;
-	else if( g_iSkillLevel == SKILL_MEDIUM )
-		pev->health = 400;
-
+	if( !pev->health ) pev->health = ApacheHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 
 	m_flFieldOfView = -0.707; // 270 degrees

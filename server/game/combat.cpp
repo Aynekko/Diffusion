@@ -1457,26 +1457,17 @@ void CBaseMonster :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector
 
 		switch ( ptr->iHitgroup )
 		{
+		default:
 		case HITGROUP_GENERIC:
-			break;
-		case HITGROUP_HEAD:
-			flDamage *= gSkillData.monHead;
-			break;
 		case HITGROUP_CHEST:
-			flDamage *= gSkillData.monChest;
-			break;
 		case HITGROUP_STOMACH:
-			flDamage *= gSkillData.monStomach;
-			break;
 		case HITGROUP_LEFTARM:
 		case HITGROUP_RIGHTARM:
-			flDamage *= gSkillData.monArm;
-			break;
 		case HITGROUP_LEFTLEG:
 		case HITGROUP_RIGHTLEG:
-			flDamage *= gSkillData.monLeg;
 			break;
-		default:
+		case HITGROUP_HEAD:
+			flDamage *= 2.0f;
 			break;
 		}
 

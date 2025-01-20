@@ -437,7 +437,8 @@ void CController :: Spawn()
 	pev->movetype		= MOVETYPE_FLY;
 	pev->flags			|= FL_FLY;
 	m_bloodColor		= BLOOD_COLOR_GREEN;
-	if (!pev->health) pev->health	= gSkillData.controllerHealth;
+	if( !pev->health ) pev->health = g_controllerHealth;
+	pev->max_health = pev->health;
 	pev->view_ofs		= Vector( 0, 0, -2 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_FULL;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -736,9 +737,9 @@ void CController :: RunTask ( Task_t *pTask )
 				else
 					m_vecEstVelocity = m_vecEstVelocity * 0.8;
 
-				vecDir = Intersect( vecSrc, m_hEnemy->BodyTarget( GetAbsOrigin() ), m_vecEstVelocity, gSkillData.controllerSpeedBall );
+				vecDir = Intersect( vecSrc, m_hEnemy->BodyTarget( GetAbsOrigin() ), m_vecEstVelocity, g_controllerSpeedBall );
 				float delta = 0.03490; // +-2 degree
-				vecDir = vecDir + Vector( RANDOM_FLOAT( -delta, delta ), RANDOM_FLOAT( -delta, delta ), RANDOM_FLOAT( -delta, delta ) ) * gSkillData.controllerSpeedBall;
+				vecDir = vecDir + Vector( RANDOM_FLOAT( -delta, delta ), RANDOM_FLOAT( -delta, delta ), RANDOM_FLOAT( -delta, delta ) ) * g_controllerSpeedBall;
 
 				vecSrc = vecSrc + vecDir * (gpGlobals->time - m_flShootTime);
 				CBaseMonster *pBall = (CBaseMonster*)Create( "controller_energy_ball", vecSrc, GetAbsAngles(), edict() );
@@ -1369,7 +1370,7 @@ void CControllerHeadBall :: HuntThink( void  )
 		if (pEntity != NULL && pEntity->pev->takedamage)
 		{
 			ClearMultiDamage( );
-			pEntity->TraceAttack( m_hOwner->pev, gSkillData.controllerDmgZap, GetAbsVelocity(), &tr, DMG_SHOCK );
+			pEntity->TraceAttack( m_hOwner->pev, g_controllerDmgZap, GetAbsVelocity(), &tr, DMG_SHOCK );
 			ApplyMultiDamage( pev, m_hOwner->pev );
 		}
 
@@ -1558,7 +1559,7 @@ void CControllerZapBall::ExplodeTouch( CBaseEntity *pOther )
 		}
 
 		ClearMultiDamage( );
-		pOther->TraceAttack(pevOwner, gSkillData.controllerDmgBall, GetAbsVelocity().Normalize(), &tr, DMG_ENERGYBEAM ); 
+		pOther->TraceAttack(pevOwner, g_controllerDmgBall, GetAbsVelocity().Normalize(), &tr, DMG_ENERGYBEAM );
 		ApplyMultiDamage( pevOwner, pevOwner );
 
 		switch(RANDOM_LONG( 0, 3 ))

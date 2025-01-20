@@ -228,98 +228,6 @@ class CItemSuit : public CItem
 LINK_ENTITY_TO_CLASS(item_suit, CItemSuit);
 
 
-
-class CItemBattery : public CItem
-{
-	void Spawn( void )
-	{ 
-		Precache( );
-		if (pev->model)
-			SET_MODEL(ENT(pev), STRING(pev->model)); //LRC
-		else
-			SET_MODEL(ENT(pev), "models/weapons/w_battery.mdl");
-
-		CItem::Spawn( );
-	}
-	void Precache( void )
-	{
-		if (pev->model)
-			PRECACHE_MODEL((char*)STRING(pev->model)); //LRC
-		else
-			PRECACHE_MODEL ("models/weapons/w_battery.mdl");
-
-		if (pev->noise)
-			PRECACHE_SOUND( (char*)STRING(pev->noise) ); //LRC
-		else
-			PRECACHE_SOUND( "items/gunpickup2.wav" );
-	}
-	BOOL MyTouch( CBasePlayer *pPlayer )
-	{
-		if ( pPlayer->pev->deadflag != DEAD_NO )
-		{
-			return FALSE;
-		}
-
-		if ((pPlayer->pev->armorvalue < MAX_NORMAL_BATTERY) && pPlayer->HasWeapon( WEAPON_SUIT ))
-		{
-			int pct;
-			char szcharge[64];
-
-			pPlayer->pev->armorvalue += gSkillData.batteryCapacity;
-			pPlayer->pev->armorvalue = Q_min(pPlayer->pev->armorvalue, MAX_NORMAL_BATTERY);
-
-			if (pev->noise) EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, STRING(pev->noise), 1, ATTN_NORM ); //LRC
-			else EMIT_SOUND( pPlayer->edict(), CHAN_ITEM, "items/gunpickup2.wav", 1, ATTN_NORM );
-
-			MESSAGE_BEGIN( MSG_ONE, gmsgItemPickup, NULL, pPlayer->pev );
-				WRITE_STRING( STRING(pev->classname) );
-			MESSAGE_END();
-
-			
-			// Suit reports new power level
-			// For some reason this wasn't working in release build -- round it.
-			pct = (int)( (float)(pPlayer->pev->armorvalue * 100.0) * (1.0/MAX_NORMAL_BATTERY) + 0.5);
-			pct = (pct / 5);
-			if (pct > 0)
-				pct--;
-		
-			sprintf( szcharge,"!HEV_%1dP", pct );
-			
-			//EMIT_SOUND_SUIT(ENT(pev), szcharge);
-			pPlayer->SetSuitUpdate(szcharge, FALSE, SUIT_NEXT_IN_30SEC);
-			return TRUE;		
-		}
-		return FALSE;
-	}
-};
-
-//LINK_ENTITY_TO_CLASS(item_battery, CItemBattery); //diffusion - no battery in game
-
-
-class CItemAntidote : public CItem
-{
-	void Spawn( void )
-	{ 
-		Precache( );
-		SET_MODEL(ENT(pev), "models/w_antidote.mdl");
-		CItem::Spawn( );
-	}
-	void Precache( void )
-	{
-		PRECACHE_MODEL ("models/w_antidote.mdl");
-	}
-	BOOL MyTouch( CBasePlayer *pPlayer )
-	{
-		pPlayer->SetSuitUpdate("!HEV_DET4", FALSE, SUIT_NEXT_IN_1MIN);
-		
-		pPlayer->m_rgItems[ITEM_ANTIDOTE] += 1;
-		return TRUE;
-	}
-};
-
-LINK_ENTITY_TO_CLASS(item_antidote, CItemAntidote);
-
-
 class CItemSecurity : public CItem
 {
 	void Spawn( void )
@@ -341,6 +249,7 @@ class CItemSecurity : public CItem
 
 LINK_ENTITY_TO_CLASS(item_security, CItemSecurity);
 
+/*
 class CItemLongJump : public CItem
 {
 	void Spawn( void )
@@ -378,7 +287,7 @@ class CItemLongJump : public CItem
 };
 
 // diffusion - disable
-//LINK_ENTITY_TO_CLASS( item_longjump, CItemLongJump );
+LINK_ENTITY_TO_CLASS( item_longjump, CItemLongJump );*/
 
 #define SF_ONLY_IF_IN_SUIT	BIT( 0 )
 

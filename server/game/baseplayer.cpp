@@ -427,32 +427,21 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
 	if ( pev->takedamage )
 	{
 		m_LastHitGroup = ptr->iHitgroup;
-
+		/* unused, they were all 1.0
 		switch ( ptr->iHitgroup )
 		{
+		default:
 		case HITGROUP_GENERIC:
-			break;
 		case HITGROUP_HEAD:
-			flDamage *= gSkillData.plrHead;
-			break;
 		case HITGROUP_CHEST:
-			flDamage *= gSkillData.plrChest;
-			break;
 		case HITGROUP_STOMACH:
-			flDamage *= gSkillData.plrStomach;
-			break;
 		case HITGROUP_LEFTARM:
 		case HITGROUP_RIGHTARM:
-			flDamage *= gSkillData.plrArm;
-			break;
 		case HITGROUP_LEFTLEG:
 		case HITGROUP_RIGHTLEG:
-			flDamage *= gSkillData.plrLeg;
-			break;
-		default:
 			break;
 		}
-
+		*/
 		SpawnBlood(ptr->vecEndPos, BloodColor(), flDamage);// a little surface blood.
 		TraceBleed( flDamage, vecDir, ptr, bitsDamageType );
 		AddMultiDamage( pevAttacker, this, flDamage, bitsDamageType );

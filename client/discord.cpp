@@ -127,7 +127,7 @@ namespace discord_integration
 				DiscordRichPresence presence{};
 
 				presence.largeImageKey = "gameicon";
-				presence.smallImageKey = "";
+				presence.smallImageKey = "gameicon";
 				presence.largeImageText = "https://moddb.com/mods/diffusion";
 				presence.smallImageText = "";
 

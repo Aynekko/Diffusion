@@ -591,8 +591,8 @@ void CBarney :: Spawn()
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor = BLOOD_COLOR_RED;
-	if (pev->health == 0) //LRC
-		pev->health	= gSkillData.barneyHealth;
+	if( !pev->health ) pev->health = 75;
+	pev->max_health = pev->health;
 	pev->view_ofs		= Vector ( 0, 0, 50 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_WIDE; // NOTE: we need a wide field of view so npc will notice player and say hello
 	m_MonsterState		= MONSTERSTATE_NONE;
