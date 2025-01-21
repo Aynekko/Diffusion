@@ -3283,10 +3283,11 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 				continue;
 		}
 
-		// in some cases surface is invisible but grass is visible
-		bool force = R_AddGrassToChain( psurf, &RI->frustum );
-
 		psurf->info->culltype = CULL_VISIBLE; // set default first
+
+		// in some cases surface is invisible but grass is visible
+		if( R_AddGrassToChain( psurf, &RI->frustum ) )
+			goto skip_cull;
 
 		if( FBitSet( psurf->flags, SURF_WATER ) )
 			goto skip_cull;
@@ -3303,7 +3304,7 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 		// now perform culling
 		psurf->info->culltype = R_CullSurface( psurf ); // ignore frustum for bmodels
 
-		if( !force && psurf->info->culltype >= CULL_FRUSTUM )
+		if( psurf->info->culltype >= CULL_FRUSTUM )
 			continue;
 
 		if( psurf->info->culltype )
