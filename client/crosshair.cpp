@@ -323,6 +323,8 @@ void CHudCrosshairStatic::LoadCrosshairForWeapon( int WeaponID )
 	// the sprite must be listed in hud.txt
 	CrosshairSprite = gHUD.GetSpriteIndex(pszCrosshair);
 	m_CrosshairStatic.spr = gHUD.GetSprite( CrosshairSprite );
+	if( !m_CrosshairStatic.spr )
+		return;
 	m_CrosshairStatic.rc = gHUD.GetSpriteRect( CrosshairSprite );
 	Q_strcpy( m_CrosshairStatic.szSpriteName, pszCrosshair);
 
