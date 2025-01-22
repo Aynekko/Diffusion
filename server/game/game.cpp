@@ -207,8 +207,6 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &bot_max );
 	CVAR_REGISTER( &bot_min );
 	//END BOT
-	
-	SERVER_COMMAND( "exec skill.cfg\n" );
 
 	// Yes in the Xash3D we can register messages here
 	LinkUserMessages();
