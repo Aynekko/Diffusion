@@ -20,6 +20,7 @@ static const int total_cells = 50;
 static float cell_width = 1.0f / ((total_cells + ((total_cells - 1) / 4.0f)) / total_cells_width);
 static float cell_height = full_frame_h / 3.0f;
 static float cell_margin = cell_width * 0.25f;
+static float flash_alpha = 0.0f;
 
 int CHudHealthVisual :: Init(void)
 {
@@ -40,6 +41,7 @@ int CHudHealthVisual :: VidInit(void)
 	cell_height = full_frame_h / 3.0f;
 	cell_margin = cell_width * 0.25f;
 	icon_size = 30.0f * gHUD.fScale;
+	flash_alpha = 0.0f;
 
 	return 1;
 };
@@ -99,43 +101,43 @@ int CHudHealthVisual :: Draw(float flTime)
 
 	if( GotHit )
 	{
-		if( health_val <= 100 )
-			Transparency = 1.0f;
-		else
-			Transparency = 0.65f;
-
+		flash_alpha = 0.6f;
 		GotHit = false;
 	}
-
-	if( Transparency > 0.65f )
-		Transparency -= 0.1f * g_fFrametime;
-
-	if( Transparency < 0.65f )
-		Transparency = 0.65f;
 
 	float cell_start_x = pos_x + icon_size + 10;
 	float cell_start_y = pos_y;
 	int cell;
 
-	float transp = (health_val < 25.f) ? (Transparency + fabs( sin( tr.time * 3 ) ) * 0.25f) : Transparency;
+	// flash health background when hit
+	if( flash_alpha > 0.0f )
+	{
+		flash_alpha -= g_fFrametime;
+		FillRoundedRGBA( cell_start_x - 5, cell_start_y - 5, total_cells_width + 10, cell_height + 10, 10, Vector4D( 1.0f, 0.0f, 0.0f, flash_alpha ) );
+	}
+
+	float transp = (health_val < m_iMaxHealth * 0.25f) ? (0.65f + fabs( sin( tr.time * 3 ) ) * 0.25f) : 0.65f;
+	int num_red_cells = (float)total_cells * ((float)m_iHealth / (float)m_iMaxHealth);
 	for( cell = 0; cell < total_cells; cell++ )
 	{
-		if( cell >= health_val * 0.5f ) // draw grey cells
+		if( cell >= num_red_cells ) // draw grey cells
 			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
 		else
 			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, transp ) );
 		cell_start_x += cell_width + cell_margin;
 	}
 
-	if( health_val > 100 ) // draw same stuff on top (only red cells)
+	if( health_val > m_iMaxHealth ) // draw same stuff on top (only red cells)
 	{
+		float spec_cell_height = cell_height * 0.25f;
 		cell_start_x = pos_x + icon_size + 10;
+		cell_start_y -= spec_cell_height + 5;
 		for( cell = 0; cell < total_cells; cell++ )
 		{
-			if( cell > ( health_val - 100 ) * 0.5f )
+			if( cell > ( health_val - m_iMaxHealth ) * 0.5f )
 				break;
-			
-			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, Transparency ) );
+
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, spec_cell_height, 3, Vector4D( r, g, b, 0.8f ) );
 			cell_start_x += cell_width + cell_margin;
 		}
 	}

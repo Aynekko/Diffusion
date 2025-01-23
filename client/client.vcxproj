@@ -366,6 +366,7 @@
     <ClCompile Include="hud_flashlight.cpp" />
     <ClCompile Include="geiger.cpp" />
     <ClCompile Include="hud_blasticon.cpp" />
+    <ClCompile Include="hud_objectives_and_hints.cpp" />
     <ClCompile Include="hud_pain.cpp" />
     <ClCompile Include="hud.cpp" />
     <ClCompile Include="hud_effects.cpp" />

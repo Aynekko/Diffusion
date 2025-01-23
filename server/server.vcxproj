@@ -376,6 +376,7 @@
     <ClCompile Include="entities\func_effect_water.cpp" />
     <ClCompile Include="entities\func_helicopter.cpp" />
     <ClCompile Include="entities\func_smokevolume.cpp" />
+    <ClCompile Include="entities\hint.cpp" />
     <ClCompile Include="entities\loudness_restriction_relay.cpp" />
     <ClCompile Include="entities\player_customize.cpp" />
     <ClCompile Include="entities\env_dynlight.cpp" />

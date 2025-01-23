@@ -2850,6 +2850,8 @@ void CBasePlayer::PreThink( void )
 	// diffusion - clamped
 	if( pev->health > 200 )
 		pev->health = 200;
+	if( pev->max_health > 200 )
+		pev->max_health = 200;
 
 	if( ShieldOn )
 	{

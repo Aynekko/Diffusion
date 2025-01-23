@@ -444,7 +444,6 @@ public:
   int m_iHealth;
   int m_iMaxHealth;
   bool GotHit; // got a message that we received a damage
-  float Transparency; // store transparency here for this mode
   int MsgFunc_HealthVisual( const char *pszName, int iSize, void *pbuf );
   void DrawOfflineBar( int x, int y );
 };
