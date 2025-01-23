@@ -9,7 +9,7 @@
 // used by scripted_sentence only
 //===========================================================================================
 
-int char_height = 0;
+static int char_height = 0;
 const float fadein_speed = 2.0f;
 const float fadeout_speed = 0.35f;
 

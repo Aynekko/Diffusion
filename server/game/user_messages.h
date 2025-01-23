@@ -65,5 +65,6 @@ extern int gmsgBlastIcons;
 extern int gmsgGaussHUD;
 extern int gmsgShowNote;
 extern int gmsgSubtitle;
+extern int gmsgHint;
 
 void LinkUserMessages( void );

@@ -68,6 +68,7 @@ int gmsgBlastIcons = 0;
 int gmsgGaussHUD = 0;
 int gmsgShowNote = 0;
 int gmsgSubtitle = 0;
+int gmsgHint = 0;
 
 void LinkUserMessages( void )
 {
@@ -138,4 +139,5 @@ void LinkUserMessages( void )
 	gmsgGaussHUD = REG_USER_MSG( "GaussHUD", 2 );
 	gmsgShowNote = REG_USER_MSG( "ShowNote", -1 );
 	gmsgSubtitle = REG_USER_MSG( "Subtitle", -1 );
+	gmsgHint = REG_USER_MSG( "Hint", -1 );
 }

@@ -560,14 +560,6 @@ void ClientCommand( edict_t *pEntity )
 	{
 		pPlayer->SelectLastItem();
 	}
-	else if( FIStrEq( pcmd, "showobjective" ) )
-	{
-		pPlayer->IsShowingObjective = true;
-	}
-	else if( FIStrEq( pcmd, "hideobjective" ) )
-	{
-		pPlayer->IsShowingObjective = false;
-	}
 	else if( FIStrEq( pcmd, "dash" ) )
 	{
 		pPlayer->DashButton = true;

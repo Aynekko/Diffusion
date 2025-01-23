@@ -63,7 +63,6 @@ int CHudScoreboard :: Init( void )
 
 int CHudScoreboard :: VidInit( void )
 {
-	IsShowingObjective = false;
 	VoicePic = LOAD_TEXTURE( "sprites/diffusion/voice_icon", NULL, 0, 0 );
 	boardA = 0.0f;
 	return 1;
@@ -609,20 +608,11 @@ void CHudScoreboard :: DeathMsg( int killer, int victim )
 void CHudScoreboard :: UserCmd_ShowScores( void )
 {
 	m_iShowscoresHeld = TRUE;
-
-	if( !IsShowingObjective )
-	{
-		ClientCmd( "showobjective\n" );
-		IsShowingObjective = true;
-	}
+	gHUD.m_HintObjectives.bShowMissionObjectives = true;
 }
 
 void CHudScoreboard :: UserCmd_HideScores( void )
 {
 	m_iShowscoresHeld = FALSE;
-	if( IsShowingObjective )
-	{
-		ClientCmd( "hideobjective\n" );
-		IsShowingObjective = false;
-	}
+	gHUD.m_HintObjectives.bShowMissionObjectives = false;
 }

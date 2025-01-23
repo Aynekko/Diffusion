@@ -257,8 +257,6 @@ public:
 	int ypos_bottom;
 
 	void GetAllPlayersInfo( void );
-
-	bool IsShowingObjective;
 };
 
 //
@@ -765,6 +763,38 @@ public:
 	int subtitle_height;
 };
 
+class CHudHintObjective : public CHudBase
+{
+public:
+	int Init( void );
+	int VidInit( void );
+	int Draw( float flTime );
+	int MsgFunc_Hint( const char *pszName, int iSize, void *pbuf );
+	void DrawHintPopUp( void );
+
+	bool bShowMissionObjectives;
+
+	// hint
+	float hint_alpha;
+	char pHint[512];
+	int hint_width;
+	int hint_height;
+	float hint_drawstart_time;
+	float hint_ypos;
+	int HintImage;
+	void SetupHint( void );
+
+	// mission objective stuff
+	char pObjective[2][512];
+	void SetupObjectives( void );
+	int obj_width;
+	int obj_height;
+	int obj_primarytext_height;
+	int obj_secondarytext_height;
+	float obj_alpha;
+	float obj_ypos;
+};
+
 class CHudCodeInput : public CHudBase
 {
 public:
@@ -1046,6 +1076,7 @@ public:
 	CHudTriggerTimer m_TriggerTimer;
 	CHudPuzzle m_Puzzle;
 	CHudSubtitle m_Subtitle;
+	CHudHintObjective m_HintObjectives;
 	
 	void Init( void );
 	void VidInit( void );

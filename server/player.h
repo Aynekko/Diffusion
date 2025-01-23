@@ -533,6 +533,8 @@ public:
 
 	string_t Objective; // objective name from titles.txt
 	string_t Objective2; // secondary objective
+	string_t Objective_CL; // objective name from titles.txt
+	string_t Objective2_CL; // secondary objective
 	float LastSwimSound; // last time we played pl_swim sound
 	float LastSwimUpSound; // last time we played a sound of watersplash when we got from underwater
 	bool Submerged; // reached pev->waterlevel 3
@@ -652,8 +654,6 @@ public:
 	int cached_waterlevel; // hack for SetAnimation!!!
 
 	float gtbdPrev; // for CheckTimeBasedDamage()
-
-	bool IsShowingObjective; // not saved
 
 	EHANDLE m_hKiller;
 };

@@ -3187,20 +3187,6 @@ void CBasePlayer::PreThink( void )
 		ClientUseEntOrg = UseEntOrg;
 	}
 
-	// objectives - simply showing a titles.txt message on pressing +score
-	// UNDONE goes every frame, make some delay
-	// UNDONE2 make it better maybe...on client or something
-	if( IsShowingObjective && !(pev->effects & EF_PLAYERUSINGCAMERA) && !(g_pGameRules->IsMultiplayer()) )
-	{	
-		if( !FStringNull( Objective )  )
-			UTIL_ShowMessage( STRING(Objective), this );
-		else
-			UTIL_ShowMessage( "OBJ_NOACTIVE", this );
-
-		if( !FStringNull( Objective2 ) )
-			UTIL_ShowMessage( STRING(Objective2), this );
-	}
-
 	// diffusion - can drop items with force now :)
 	if( m_pHoldableItem != NULL )
 	{
@@ -5271,7 +5257,6 @@ void CBasePlayer::Spawn( void )
 	m_flLastWeaponSwitchTime = 0;
 	EnableHealthBar = true;
 	ConfirmedHit = 0;
-	IsShowingObjective = false;
 
 	CanUseDrone = false; // drone can be used only in special zones defined by game
 	DroneHealth = DRONE_MAX_HEALTH;
@@ -6744,6 +6729,14 @@ void CBasePlayer :: UpdateClientData( void )
 		DrunkLevel_CL = DrunkLevel;
 		CanUseDrone_CL = CanUseDrone;
 		SunLightScale_CL = sunlightscale;
+
+		MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, pev );
+			WRITE_BYTE( 1 );
+			WRITE_STRING( STRING( Objective ) );
+			WRITE_STRING( STRING( Objective2 ) );
+		MESSAGE_END();
+		Objective_CL = Objective;
+		Objective2_CL = Objective2;
 		
 		// update zoom state
 		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, pev );
@@ -6809,6 +6802,17 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_BYTE( (int)m_flFOV );
 		MESSAGE_END();
 		// cache FOV change at end of function, so weapon updates can see that FOV has changed
+	}
+
+	if( Objective != Objective_CL || Objective2 != Objective2_CL )
+	{
+		MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, pev );
+		WRITE_BYTE( 1 );
+		WRITE_STRING( STRING( Objective ) );
+		WRITE_STRING( STRING( Objective2 ) );
+		MESSAGE_END();
+		Objective_CL = Objective;
+		Objective2_CL = Objective2;
 	}
 	
 	if( (CanJump != CanJump_CL) 
