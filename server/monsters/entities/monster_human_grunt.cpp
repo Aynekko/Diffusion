@@ -1240,7 +1240,7 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 			vecToss = gpGlobals->v_forward;
 		}
 		else
-			vecToss = VecCheckToss( pev, GetGunPosition(), vecTarget, 0.5 );
+			vecToss = VecCheckToss( pev, GetGunPosition(), vecTarget, 0.6f );
 
 		if( vecToss != g_vecZero )
 		{
@@ -4540,7 +4540,7 @@ BOOL CHGruntSecurityGeneral::CheckRangeAttack2Impl( float grenadeSpeed, float fl
 			vecToss = gpGlobals->v_forward;
 		}
 		else
-			vecToss = VecCheckToss( pev, GetGunPosition(), vecTarget, 0.5 );
+			vecToss = VecCheckToss( pev, GetGunPosition(), vecTarget, 0.6f );
 
 		if( vecToss != g_vecZero )
 		{

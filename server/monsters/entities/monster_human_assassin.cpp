@@ -986,7 +986,7 @@ BOOL CHAssassin :: CheckRangeAttack2 ( float flDot, float flDist )
 
 	if ( m_flNextGrenadeCheck < gpGlobals->time && !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 512 /* && flDot >= 0.5 */ /* && NoFriendlyFire() */ )
 	{
-		Vector vecToss = VecCheckThrow( pev, GetGunPosition( ), m_hEnemy->Center(), flDist, 0.5 ); // use dist as speed to get there in 1 second
+		Vector vecToss = VecCheckThrow( pev, GetGunPosition( ), m_hEnemy->Center(), flDist, 0.6f ); // use dist as speed to get there in 1 second
 
 		if ( vecToss != g_vecZero )
 		{
@@ -1451,7 +1451,7 @@ BOOL SecAss::CheckRangeAttack2( float flDot, float flDist )
 
 	if( m_flNextGrenadeCheck < gpGlobals->time && !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 512 )
 	{
-		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), m_hEnemy->Center(), flDist, 0.5 ); // use dist as speed to get there in 1 second
+		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), m_hEnemy->Center(), flDist, 0.6f ); // use dist as speed to get there in 1 second
 
 		if( vecToss != g_vecZero )
 		{
@@ -1935,7 +1935,7 @@ BOOL SecAssAlien :: CheckRangeAttack2 ( float flDot, float flDist )
 
 	if( m_flNextGrenadeCheck < gpGlobals->time && !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist >= 300 && flDot >= 0.5 )
 	{
-		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), m_hEnemy->Center(), flDist, 0.5 ); // use dist as speed to get there in 1 second
+		Vector vecToss = VecCheckThrow( pev, GetGunPosition(), m_hEnemy->Center(), flDist, 0.6f ); // use dist as speed to get there in 1 second
 
 		if( vecToss != g_vecZero )
 		{

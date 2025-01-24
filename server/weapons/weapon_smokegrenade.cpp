@@ -140,10 +140,10 @@ void CSmokeGrenade::WeaponIdle( void )
 	{
 		Vector angThrow = m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle;
 
-		if( angThrow.x < 0 )
-			angThrow.x = -10 + angThrow.x * ((90 - 10) / 90.0);
+		if( angThrow.x < 0 ) // throwing upwards
+			angThrow.x = angThrow.x * 0.866f - 15; // ((90 - 12) / 90.0)
 		else
-			angThrow.x = -10 + angThrow.x * ((90 + 10) / 90.0);
+			angThrow.x = angThrow.x * 1.111f - 10; // ((90 + 10) / 90.0)
 
 		float flVelScale = gpGlobals->time - m_flStartThrow + 1.0f; // diffusion - by XaeroX, slightly edited for my needs
 		float flVel = fabs( (90.0f - angThrow.x) * flVelScale * 2 );

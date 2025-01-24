@@ -389,7 +389,8 @@ void CGrenade::BounceTouch( CBaseEntity *pOther )
 		vecVelocity *= 0.8f;
 		SetAbsVelocity( vecVelocity );
 
-		pev->sequence = RANDOM_LONG( 1, 1 );
+		pev->sequence = 1;
+		SetAbsAngles( Vector( 0, RANDOM_LONG( -160, 160 ), 0 ) );
 	}
 	else
 	{
@@ -458,7 +459,6 @@ void CGrenade :: TumbleThink( void )
 		return;
 	}
 
-	StudioFrameAdvance( );
 	SetNextThink( 0.1 );
 
 	if( pev->dmgtime - 1 < gpGlobals->time )
@@ -546,7 +546,7 @@ CGrenade *CGrenade::ShootSmoke( entvars_t *pevOwner, Vector vecStart, Vector vec
 	CGrenade *pGrenade = GetClassPtr( (CGrenade *)NULL );
 	pGrenade->Spawn();
 	// contact grenades arc lower
-	pGrenade->pev->gravity = 0.5;// lower gravity since grenade is aerodynamic and engine doesn't know it.
+	pGrenade->pev->gravity = 0.6;// lower gravity since grenade is aerodynamic and engine doesn't know it.
 	pGrenade->pev->friction = 0.8;
 	UTIL_SetOrigin( pGrenade, vecStart );
 	pGrenade->SetAbsVelocity( vecVelocity );
@@ -564,7 +564,7 @@ CGrenade *CGrenade::ShootSmoke( entvars_t *pevOwner, Vector vecStart, Vector vec
 
 	pGrenade->pev->sequence = RANDOM_LONG( 3, 5 );
 	pGrenade->pev->body = 1;
-
+	pGrenade->pev->framerate = 1.0f;
 	pGrenade->pev->pain_finished = 0; // bounce counter for smoke grenade
 
 	return pGrenade;
@@ -574,13 +574,12 @@ void CGrenade::SmokeGrenadeThink( void )
 {
 	if( pev->flags & FL_ONGROUND || pev->pain_finished > 5 )
 	{
-		pev->framerate = 1.0f;
+		pev->sequence = 1;
+		SetAbsAngles( Vector( 0, RANDOM_LONG( -160, 160 ), 0 ) );
 		SetThink( &CGrenade::SmokeGrenadeExplode );
 		SetNextThink( 1.0 );
 		return;
 	}
-
-	pev->framerate = bound( 0.75f, GetAbsVelocity().Length() / 150.0f, 1.35f );
 
 	// watersplash upon contact with water surface
 	if( pev->waterlevel != 0 )
@@ -620,7 +619,6 @@ void CGrenade::SmokeGrenadeExplode( void )
 		WRITE_BYTE( 50 ); // randomize position offset of each sprite (+/- 50 here)
 	MESSAGE_END();
 
-	pev->sequence = 0;
 	pev->gravity = 0.5f;
 
 	if( pev->waterlevel == 0 )
@@ -663,10 +661,10 @@ CGrenade * CGrenade:: ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector v
 		pGrenade->SetLocalVelocity( g_vecZero );
 	}
 		
-	pGrenade->pev->sequence = RANDOM_LONG( 3, 6 );
+	pGrenade->pev->sequence = RANDOM_LONG( 3, 5 );
 	pGrenade->pev->framerate = 1.0;
 
-	pGrenade->pev->gravity = 0.5;
+	pGrenade->pev->gravity = 0.6;
 	pGrenade->pev->friction = 0.8;
 
 	pGrenade->pev->dmg = 125;
