@@ -55,6 +55,7 @@ extern int gmsgStatusIcon;
 extern int gmsgStatusIconTutor;
 extern int gmsgSetupBones;
 extern int gmsgHealthVisual; // diffusion health visual
+extern int gmsgHealthVisualAlice;
 extern int gmsgStamina; // DiffusionSprint
 extern int gmsgCrosshairStatic;
 extern int gmsgUseIcon;

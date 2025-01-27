@@ -4,6 +4,8 @@
 #include "r_local.h"
 #include "string.h"
 
+static float dronebar_lerp_x = 0;
+
 int CHudDroneBars::Init( void )
 {
 	m_iFlags |= HUD_ACTIVE;
@@ -28,14 +30,13 @@ int CHudDroneBars::VidInit( void )
 	m_hDroneIcon = gHUD.GetSprite( droneicon );
 	m_prc_droneicon = &gHUD.GetSpriteRect( droneicon );
 
+	dronebar_lerp_x = -250;
+
 	return 1;
 };
 
 int CHudDroneBars::Draw( float flTime )
 {
-	if( !CanUseDrone )
-		return 1;
-	
 	if( gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH )
 		return 1;
 
@@ -48,6 +49,22 @@ int CHudDroneBars::Draw( float flTime )
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
 
+	const int default_x = (ScreenWidth / 32) - 30;
+	const int default_y = (ScreenHeight - 500 * gHUD.fScale) - 170; // (alice hud position) - 128(spr height) - margin
+
+	if( !CanUseDrone )
+	{
+		if( dronebar_lerp_x < -250 )
+			return 1;
+		else
+			dronebar_lerp_x = lerp( dronebar_lerp_x, -250, 3.0f * g_fFrametime );
+	}
+	else
+	{
+		if( dronebar_lerp_x < default_x )
+			dronebar_lerp_x = lerp( dronebar_lerp_x, default_x + 10, 5.0f * g_fFrametime );
+	}
+
 	int r, g, b, x, y = 255;
 	int offset = 0;
 	wrect_t temp_rect;
@@ -55,16 +72,14 @@ int CHudDroneBars::Draw( float flTime )
 	// draw the bars' frame
 	UnpackRGB( r, g, b, 0x0046A9FF ); // 70,169,255 for Diffusion
 
-	int default_x = (ScreenWidth / 32) - 30;
-	int default_y = ScreenHeight / 2;
-	x = default_x;
+	x = dronebar_lerp_x;
 	y = default_y;
 
 	SPR_Set( m_hBarFrame, r, g, b );
 	SPR_DrawAdditive( 0, x, y, m_prc_barframe );
 
 	// draw the health bar
-	int bar_height = 128; // ! hardcoded sprite height
+	const int bar_height = 128; // ! hardcoded sprite height
 	// x and y are still same
 	r = 255;
 	g = 0;
@@ -81,7 +96,7 @@ int CHudDroneBars::Draw( float flTime )
 	r = 255;
 	g = 100;
 	b = 0;
-	x = default_x + 24;
+	x = dronebar_lerp_x + 24;
 	SPR_Set( m_hBarAmmo, r, g, b );
 	temp_rect = *m_prc_barammo;
 	offset = bar_height * (1.0f - (DroneAmmo / (float)DRONE_MAX_AMMO ) );
@@ -90,7 +105,7 @@ int CHudDroneBars::Draw( float flTime )
 	SPR_DrawAdditive( 0, x, y + offset, &temp_rect );
 
 	// write distance
-	x = default_x;
+	x = dronebar_lerp_x;
 	y = default_y - 28;
 	if( !DroneDeployed )
 		DrawString( x, y, "OFF", 255, 25, 25 );
@@ -102,7 +117,7 @@ int CHudDroneBars::Draw( float flTime )
 	}
 
 	// draw the drone icon above the bars and text
-	x = default_x;
+	// x yet the same
 	y = default_y - 72;
 	if( !DroneDeployed )
 		SPR_Set( m_hDroneIcon, 100, 100, 100 );

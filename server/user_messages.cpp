@@ -58,6 +58,7 @@ int gmsgStatusIcon = 0;
 int gmsgStatusIconTutor = 0;
 int gmsgSetupBones = 0;
 int gmsgHealthVisual = 0; // diffusion health visual
+int gmsgHealthVisualAlice = 0;
 int gmsgStamina = 0; // DiffusionSprint
 int gmsgCrosshairStatic = 0;
 int gmsgUseIcon = 0;
@@ -83,6 +84,7 @@ void LinkUserMessages( void )
 	gmsgFlashlight = REG_USER_MSG( "Flashlight", 2 );
 	gmsgHealth = REG_USER_MSG( "Health", 1 );
 	gmsgHealthVisual = REG_USER_MSG( "HealthVisual", 3 ); // diffusion health visual
+	gmsgHealthVisualAlice = REG_USER_MSG( "HealthVisualAlice", -1 ); // diffusion health visual
 	gmsgStamina = REG_USER_MSG( "Stamina", 1 ); // DiffusionSprint
 	gmsgDamage = REG_USER_MSG( "Damage", 12 );
 	gmsgBattery = REG_USER_MSG( "Battery", 2 );

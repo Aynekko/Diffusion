@@ -87,7 +87,7 @@ int CHudFlashlight::Draw( float flTime )
 	rc = *m_prc1;
 
 	// draw main case
-	x = (ScreenWidth / 32) - 35;
+	x = 35;
 	if( gHUD.fCenteredPadding > 0.0f )
 		y = ScreenHeight - (72 * gHUD.fScale) - (rc.bottom - rc.top);
 	else

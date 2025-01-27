@@ -445,7 +445,11 @@ public:
   int m_iMaxHealth;
   bool GotHit; // got a message that we received a damage
   int MsgFunc_HealthVisual( const char *pszName, int iSize, void *pbuf );
+  int MsgFunc_HealthVisualAlice( const char *pszName, int iSize, void *pbuf );
   void DrawOfflineBar( int x, int y );
+  bool bAliceDrawHealth;
+  int iAliceHealth; // percent
+  void DrawAliceHealth( void );
 };
 
 class CHudDroneBars: public CHudBase

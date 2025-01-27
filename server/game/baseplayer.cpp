@@ -6750,6 +6750,12 @@ void CBasePlayer :: UpdateClientData( void )
 		MESSAGE_END();
 
 		InitStatusBar();
+
+		// disable Alice hud until it's updated
+		MESSAGE_BEGIN( MSG_ONE, gmsgHealthVisualAlice, NULL, pev );
+			WRITE_BYTE( 0 );
+			WRITE_BYTE( 0 );
+		MESSAGE_END();
 	}
 
 	CBasePlayer* pPlayer = this;

@@ -7,9 +7,11 @@
 #include <stdio.h>
 
 DECLARE_MESSAGE( m_HealthVisual, HealthVisual )
+DECLARE_MESSAGE( m_HealthVisual, HealthVisualAlice )
 
-float OFFLINEFlashAlphaH = 0;
-int health_icon = 0;
+static float OFFLINEFlashAlphaH = 0;
+static int health_icon = 0;
+static int health_alice_img = 0;
 static float icon_size = 30;
 
 // size of an invisible drawing field...
@@ -22,10 +24,13 @@ static float cell_height = full_frame_h / 3.0f;
 static float cell_margin = cell_width * 0.25f;
 static float flash_alpha = 0.0f;
 
+static float alice_lerp_x = 0;
+
 int CHudHealthVisual :: Init(void)
 {
 	m_iFlags |= HUD_ACTIVE;
 	HOOK_MESSAGE( HealthVisual );
+	HOOK_MESSAGE( HealthVisualAlice );
 	gHUD.AddHudElem(this);
 	return 1;
 };
@@ -33,6 +38,8 @@ int CHudHealthVisual :: Init(void)
 int CHudHealthVisual :: VidInit(void)
 {
 	health_icon = LOAD_TEXTURE( "sprites/diffusion/health.dds", NULL, 0, 0 );
+	health_alice_img = LOAD_TEXTURE( "sprites/diffusion/alice_health.dds", NULL, 0, 0 );
+	alice_lerp_x = -500;
 
 	full_frame_h = 64 * gHUD.fScale;
 	full_frame_w = 280 * gHUD.fScale;
@@ -57,6 +64,66 @@ int CHudHealthVisual:: MsgFunc_HealthVisual( const char *pszName,  int iSize, vo
 	return 1;
 }
 
+int CHudHealthVisual::MsgFunc_HealthVisualAlice( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pszName, pbuf, iSize );
+	bAliceDrawHealth = (READ_BYTE() > 0);
+	iAliceHealth = READ_BYTE();
+	END_READ();
+
+	return 1;
+}
+
+void CHudHealthVisual::DrawAliceHealth( void )
+{
+	// pic size is 152x500, scale it down x0.65
+	// big hud scale also scaled, to not affect it that much
+	const float picsizex = 152 * 0.65f * gHUD.fScale * 0.75f;
+	const float picsizey = 500 * 0.65f * gHUD.fScale * 0.75f;
+	const float xpos = 35;
+	const float y = ScreenHeight - 500 * gHUD.fScale;
+
+	if( !bAliceDrawHealth )
+	{
+		if( alice_lerp_x < -500 )
+			return;
+		else
+			alice_lerp_x = lerp( alice_lerp_x, -500, 5.0f * g_fFrametime );
+	}
+	else
+	{
+		if( alice_lerp_x < xpos )
+			alice_lerp_x = lerp( alice_lerp_x, xpos + 10, 5.0f * g_fFrametime );
+	}
+
+	float x = alice_lerp_x;
+
+	GL_Bind( 0, health_alice_img );
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+	GL_Color4f( 0.75f, 0.75f, 0.75f, 1.0f ); // grey
+
+	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+	DrawQuad( x, y, x + picsizex, y + picsizey );
+	gEngfuncs.pTriAPI->End();
+
+	// draw vertical healthbar to the right of the Alice's figure
+	// background bar
+	const float barx = x + picsizex + 15;
+	const float barh = picsizey * 0.75f;
+	const float bary = y + picsizey * 0.25f;
+	const float barw = 15 * gHUD.fScale;
+	FillRoundedRGBA( barx, bary, barw, barh, 5, Vector4D( 0.8f, 0.8f, 0.8f, 0.8f ) );
+
+	// red health
+	if( iAliceHealth <= 0 )
+		return;
+
+	const float redbarh_full = barh * 0.95f;
+	const float redbarh = redbarh_full * (float)(iAliceHealth * 0.01f);
+	const float redbarw = barw * 0.9f;
+	FillRoundedRGBA( barx + (barw - redbarw) * 0.5f, (bary + (barh - redbarh_full) * 0.5f) + (redbarh_full - redbarh), redbarw, redbarh, 5, Vector4D( 1.0f, 0.1f, 0.1f, 0.75f ) );
+}
+
 int CHudHealthVisual :: Draw(float flTime)
 {
 	if( gHUD.m_iHideHUDDisplay & HIDEHUD_HEALTH )
@@ -70,6 +137,8 @@ int CHudHealthVisual :: Draw(float flTime)
 
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
+
+	DrawAliceHealth();
 
 	float pos_x = (ScreenWidth / 32) - 30;
 	pos_x += gHUD.fCenteredPadding;

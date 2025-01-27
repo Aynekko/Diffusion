@@ -955,6 +955,12 @@ void CBaseMonster :: StartTask ( Task_t *pTask )
 		}
 	case TASK_MOVE_TO_TARGET_RANGE:
 		{
+			if( m_hTargetEnt == NULL )
+			{
+				TaskFail();
+				break;
+			}
+
 			if ( (m_hTargetEnt->GetAbsOrigin() - GetLocalOrigin()).Length() < 1 )
 			{
 				TaskComplete();
@@ -971,6 +977,12 @@ void CBaseMonster :: StartTask ( Task_t *pTask )
 	case TASK_WALK_TO_TARGET:
 		{
 			Activity newActivity;
+
+			if( m_hTargetEnt == NULL )
+			{
+				TaskFail();
+				break;
+			}
 
 			if ( (m_hTargetEnt->GetAbsOrigin() - GetLocalOrigin()).Length() < 1 )
 			{

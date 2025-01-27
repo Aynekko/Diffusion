@@ -1131,11 +1131,13 @@ public:
 	void AliceUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	BOOL CineCleanup( void );
 	void AliceSetFollowing( void );
-	float RegenRemander;
+	void AliceSendHUDData( bool enable );
 	float AliceLastHurt;
 	float CoverFailTime;
 	float NewEnemySentenceTime;
 	bool bAliceFollowing;
+	float next_hud_update; // not saved
+	int health_cached; // not saved
 
 	DECLARE_DATADESC();
 };
@@ -1143,6 +1145,7 @@ public:
 LINK_ENTITY_TO_CLASS( monster_alice , CAlice);
 
 BEGIN_DATADESC( CAlice )
+	DEFINE_FUNCTION( AliceUse ),
 	DEFINE_FIELD( AliceLastHurt, FIELD_TIME ),
 	DEFINE_FIELD( CoverFailTime, FIELD_TIME ),
 	DEFINE_FIELD( m_flIdleReloadTime, FIELD_TIME ),
@@ -1182,6 +1185,9 @@ void CAlice::Precache( void )
 	// when a level is loaded, nobody will talk (time is reset to 0)
 	TalkInit();
 	CTalkMonster::Precache();
+
+	if( !next_hud_update ) // need to delay this after save-restore. It sends out too early!
+		next_hud_update = gpGlobals->time + 0.1;
 }
 
 void CAlice :: Spawn( void )
@@ -1224,6 +1230,20 @@ void CAlice :: Spawn( void )
 	SetFlag( F_FIRE_IMMUNE );
 }
 
+void CAlice::AliceSendHUDData( bool enable )
+{
+	if( health_cached == (int)pev->health )
+		return;
+
+	CBaseEntity *pPlayer = UTIL_PlayerByIndex( 1 );
+	MESSAGE_BEGIN( MSG_ONE, gmsgHealthVisualAlice, NULL, pPlayer->pev );
+		WRITE_BYTE( (byte)enable );
+		WRITE_BYTE( (byte)RemapVal( pev->health, 0, pev->max_health, 0, 100 ) );
+	MESSAGE_END();
+	
+	health_cached = (int)pev->health;
+}
+
 void CAlice::AliceSetFollowing( void )
 {
 	// do not change following state during a sequence
@@ -1257,6 +1277,9 @@ void CAlice::AliceSetFollowing( void )
 		if( m_hEnemy != NULL )
 			m_IdealMonsterState = MONSTERSTATE_COMBAT;
 	}
+
+	health_cached = 0;
+	AliceSendHUDData( bAliceFollowing );
 }
 
 BOOL CAlice::CineCleanup( void )
@@ -1355,7 +1378,7 @@ int CAlice :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 	
-	if (pev->health < pev->max_health)
+	if( pev->health < pev->max_health )
 		AliceLastHurt = gpGlobals->time;
 	
 	if (pevAttacker->flags & FL_CLIENT) // player can't hurt Alice!
@@ -1394,18 +1417,18 @@ int CAlice :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float
 
 void CAlice :: RunAI(void) // health regeneration
 {
-	if (pev->health < pev->max_health && IsAlive())
+	if( pev->health < pev->max_health && IsAlive() )
 	{
-		if ( gpGlobals->time > AliceLastHurt + 2 )
+		if( gpGlobals->time > AliceLastHurt + 3 )
 		{
-			RegenRemander += 0.5;
-		
-			if(RegenRemander >= 1)
-			{
-				TakeHealth( RegenRemander, DMG_GENERIC );
-				RegenRemander = 0;
-			}
+			TakeHealth( 10.0f * gpGlobals->frametime, DMG_GENERIC );
 		}
+	}
+
+	if( bAliceFollowing && next_hud_update < gpGlobals->time )
+	{
+		AliceSendHUDData( true );
+		next_hud_update = gpGlobals->time + 0.25;
 	}
 
 	CBaseMonster::RunAI();
