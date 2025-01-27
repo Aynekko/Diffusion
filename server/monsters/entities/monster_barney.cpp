@@ -69,7 +69,7 @@ public:
 	void AlertSound( void );
 	int  Classify ( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
-	
+
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
 	int ObjectCaps( void );
@@ -1128,10 +1128,14 @@ public:
 	void DeathSound(void);
 
 	// Alice only!
+	void AliceUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	BOOL CineCleanup( void );
+	void AliceSetFollowing( void );
 	float RegenRemander;
 	float AliceLastHurt;
 	float CoverFailTime;
 	float NewEnemySentenceTime;
+	bool bAliceFollowing;
 
 	DECLARE_DATADESC();
 };
@@ -1143,7 +1147,7 @@ BEGIN_DATADESC( CAlice )
 	DEFINE_FIELD( CoverFailTime, FIELD_TIME ),
 	DEFINE_FIELD( m_flIdleReloadTime, FIELD_TIME ),
 	DEFINE_FIELD( NewEnemySentenceTime, FIELD_TIME ),
-
+	DEFINE_FIELD( bAliceFollowing, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_iBaseBody, FIELD_INTEGER ), //LRC
 	DEFINE_FIELD( m_fGunDrawn, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_painTime, FIELD_TIME ),
@@ -1154,7 +1158,7 @@ BEGIN_DATADESC( CAlice )
 	DEFINE_FIELD( m_flNextHolsterTime, FIELD_TIME ),
 END_DATADESC()
 
-void CAlice :: Precache()
+void CAlice::Precache( void )
 {
 	if (pev->model)
 		PRECACHE_MODEL((char*)STRING(pev->model)); //LRC
@@ -1180,9 +1184,12 @@ void CAlice :: Precache()
 	CTalkMonster::Precache();
 }
 
-void CAlice :: Spawn()
+void CAlice :: Spawn( void )
 {
-	Precache( );
+	Precache();
+
+	pev->spawnflags |= SF_MONSTER_NOFOLLOW;
+	ObjectCaps(); // refresh after setting this flag
 
 	if (pev->model)
 		SET_MODEL(ENT(pev), STRING(pev->model)); //LRC
@@ -1194,8 +1201,7 @@ void CAlice :: Spawn()
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= DONT_BLEED;
-	if (pev->health == 0) //LRC
-		pev->health	= 500;
+	if( !pev->health ) pev->health = 500;
 	pev->max_health = pev->health;
 	pev->view_ofs		= Vector ( 0, 0, 48 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_WIDE;
@@ -1214,7 +1220,65 @@ void CAlice :: Spawn()
 	CoverFailTime = gpGlobals->time;
 
 	MonsterInit();
-	SetUse( &CTalkMonster::FollowerUse );
+	SetUse( &CAlice::AliceUse );
+	SetFlag( F_FIRE_IMMUNE );
+}
+
+void CAlice::AliceSetFollowing( void )
+{
+	// do not change following state during a sequence
+	// it will be restored later post-sequence
+	if( m_pCine )
+		return;
+	
+	if( bAliceFollowing )
+	{
+		CBaseEntity *pPlayer = UTIL_PlayerByIndex( 1 );
+		if( !pPlayer )
+		{
+			bAliceFollowing = false;
+			return;
+		}
+
+		if( m_hEnemy != NULL )
+			m_IdealMonsterState = MONSTERSTATE_ALERT;
+
+		m_hTargetEnt = pPlayer;
+		ClearConditions( bits_COND_CLIENT_PUSH );
+		ClearSchedule();
+		ALERT( at_aiconsole, "Alice is now following the player.\n" );
+	}
+	else // stop following
+	{
+		if( m_movementGoal == MOVEGOAL_TARGETENT )
+			RouteClear(); // Stop him from walking toward the player
+		m_hTargetEnt = NULL;
+		// ClearSchedule();
+		if( m_hEnemy != NULL )
+			m_IdealMonsterState = MONSTERSTATE_COMBAT;
+	}
+}
+
+BOOL CAlice::CineCleanup( void )
+{
+	CBaseMonster::CineCleanup();
+
+	// start following the player immediately
+	AliceSetFollowing();
+
+	return TRUE;
+}
+
+void CAlice::AliceUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if( useType == USE_ON )
+		bAliceFollowing = true;
+	else if( useType == USE_OFF )
+		bAliceFollowing = false;
+	else // toggle
+		bAliceFollowing = !bAliceFollowing;
+
+	AliceSetFollowing();
 }
 
 BOOL CAlice :: CheckRangeAttack1 ( float flDot, float flDist )
@@ -1370,7 +1434,7 @@ Schedule_t *CAlice :: GetSchedule ( void )
 
 	if ( HasConditions( bits_COND_ENEMY_DEAD ) && FOkToSpeak() )
 	{
-		// Hey, be careful with that
+		// nice kill
 		if (m_iszSpeakAs)
 		{
 			char szBuf[32];
@@ -1434,7 +1498,7 @@ Schedule_t *CAlice :: GetSchedule ( void )
 			// no ammo
 			if ( HasConditions ( bits_COND_NO_AMMO_LOADED ) )
 			{
-				if( RANDOM_LONG(0,1) == 0)
+				if( !IsTalking() && RANDOM_LONG(0,1) == 0)
 					PlaySentence( "ALICE_RELOAD", 4, VOL_NORM, ATTN_NORM );
 				
 				if (pev->health < 350)
@@ -1448,7 +1512,7 @@ Schedule_t *CAlice :: GetSchedule ( void )
 				if (gpGlobals->time > CoverFailTime)
 				{
 					CoverFailTime = gpGlobals->time + 5;
-					if( !(pev->spawnflags & SF_MONSTER_GAG) )
+					if( !(pev->spawnflags & SF_MONSTER_GAG) && !IsTalking() )
 					{
 						if(RANDOM_LONG(0,1)==0)
 							PlaySentence( "ALICE_COVER", 4, VOL_NORM, ATTN_NORM );
@@ -1506,7 +1570,8 @@ Schedule_t *CAlice :: GetSchedule ( void )
 				{
 					if ( m_fGunDrawn && (m_cAmmoLoaded < m_iClipSize) && (m_flIdleReloadTime < gpGlobals->time) )
 					{
-						PlaySentence( "ALICE_RELOAD", 2.5, VOL_NORM, ATTN_IDLE );  // undone
+						if( !IsTalking() )
+							PlaySentence( "ALICE_RELOAD", 2.5, VOL_NORM, ATTN_IDLE );
 						return GetScheduleOfType( SCHED_RELOAD );
 					}
 

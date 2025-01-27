@@ -364,7 +364,7 @@ public:
 	inline BOOL HasAllMemories( int iMemory ) { if ( (m_afMemory & iMemory) == iMemory ) return TRUE; return FALSE; }
 
 	BOOL ExitScriptedSequence( );
-	BOOL CineCleanup( );
+	virtual BOOL CineCleanup( );
 
 	void StartPatrol( CBaseEntity *path );
 
