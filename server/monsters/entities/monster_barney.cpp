@@ -49,6 +49,7 @@ typedef enum
 	//Alice only!
   SCHED_ALICE_WAIT_FACE_ENEMY,
   SCHED_ALICE_TAKECOVER_FAILED,
+  SCHED_ALICE_GETBACKTOPLAYER
 };
  
 typedef enum
@@ -184,7 +185,7 @@ Task_t	tlBaFaceTarget[] =
 {
 	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE },
 	{ TASK_FACE_TARGET,			(float)0		},
-	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE },
+//	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE },
 	{ TASK_SET_SCHEDULE,		(float)SCHED_TARGET_CHASE },
 };
 
@@ -333,6 +334,25 @@ Schedule_t	slAliceWaitInCover[] =
 	},
 };
 
+Task_t	tlAliceGetBackToPlayer[] =
+{
+	{ TASK_MOVE_TO_TARGET_RANGE,(float)128 },	// Move within 128 of target ent (client)
+	{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_TAKE_COVER_FROM_ENEMY },
+	{ TASK_SET_SCHEDULE,		(float)SCHED_TARGET_FACE },
+};
+
+Schedule_t	slAliceGetBackToPlayer[] =
+{
+	{
+		tlAliceGetBackToPlayer,
+		SIZEOFARRAY( tlAliceGetBackToPlayer ),
+		0,
+
+		0,
+		"AliceGetBackToPlayer"
+	},
+};
+
 //=========================================================
 // run to cover.
 // !!!BUGBUG - set a decent fail schedule here.
@@ -371,6 +391,7 @@ DEFINE_CUSTOM_SCHEDULES( CBarney )
 	slBaHideReload, // diffusion
 	slAliceWaitInCover,
 	slAliceTakeCover,
+	slAliceGetBackToPlayer,
 };
 
 
@@ -1126,6 +1147,7 @@ public:
 	void AlertSound(void);
 	void PainSound(void);
 	void DeathSound(void);
+	void Killed( entvars_t *pevAttacker, int iGib );
 
 	// Alice only!
 	void AliceUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
@@ -1228,6 +1250,8 @@ void CAlice :: Spawn( void )
 	MonsterInit();
 	SetUse( &CAlice::AliceUse );
 	SetFlag( F_FIRE_IMMUNE );
+
+	m_flDistTooFar = 4096;
 }
 
 void CAlice::AliceSendHUDData( bool enable )
@@ -1278,7 +1302,7 @@ void CAlice::AliceSetFollowing( void )
 			m_IdealMonsterState = MONSTERSTATE_COMBAT;
 	}
 
-	health_cached = 0;
+	health_cached = pev->health + 1;
 	AliceSendHUDData( bAliceFollowing );
 }
 
@@ -1421,7 +1445,7 @@ void CAlice :: RunAI(void) // health regeneration
 	{
 		if( gpGlobals->time > AliceLastHurt + 3 )
 		{
-			TakeHealth( 10.0f * gpGlobals->frametime, DMG_GENERIC );
+			TakeHealth( 5.0f * gpGlobals->frametime, DMG_GENERIC );
 		}
 	}
 
@@ -1490,6 +1514,8 @@ Schedule_t *CAlice :: GetSchedule ( void )
 	{
 		case MONSTERSTATE_COMBAT:
 		{
+			float dist_to_player = IsFollowing() ? (m_hTargetEnt->GetAbsOrigin() - GetAbsOrigin()).Length() : 0.0f;
+
 			// dead enemy
 			if ( HasConditions( bits_COND_ENEMY_DEAD | bits_COND_ENEMY_LOST ) )
 			{
@@ -1499,11 +1525,20 @@ Schedule_t *CAlice :: GetSchedule ( void )
 				return CBaseMonster :: GetSchedule();
 			}
 
-			if (pev->health < 150)
+			if( IsFollowing() && dist_to_player > 1000 )
 			{
-				if ( (HasConditions(bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE)) ) // low hp - try to hide
+				if( gpGlobals->time > CoverFailTime )
 				{
-					if (gpGlobals->time > CoverFailTime)
+					ALERT( at_aiconsole, "Alice: player is too far, going back to him!\n" );
+					CoverFailTime = gpGlobals->time + 3;
+					return GetScheduleOfType( SCHED_ALICE_GETBACKTOPLAYER );
+				}
+			}
+			else if( pev->health < 150 )
+			{
+				if( (HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE )) ) // low hp - try to hide
+				{
+					if( gpGlobals->time > CoverFailTime )
 					{
 						CoverFailTime = gpGlobals->time + 10;
 						PlaySentence( "ALICE_COVER", 4, VOL_NORM, ATTN_NORM );
@@ -1512,6 +1547,14 @@ Schedule_t *CAlice :: GetSchedule ( void )
 					else
 						return GetScheduleOfType( SCHED_ALICE_TAKECOVER_FAILED );//return CBaseMonster :: GetSchedule();
 				}
+			}
+
+			// when getting back to player, check for enemy visibility and forget about them if no line of sight
+			if( IsFollowing() && dist_to_player < 300 && !HasConditions( bits_COND_SEE_ENEMY ) )
+			{
+				m_hEnemy = NULL;
+				SetState( MONSTERSTATE_ALERT );
+				return CBaseMonster::GetSchedule();
 			}
 				
 			// wait for one schedule to draw gun
@@ -1556,7 +1599,7 @@ Schedule_t *CAlice :: GetSchedule ( void )
 			return GetScheduleOfType( SCHED_SMALL_FLINCH );
 			}
 
-			if (pev->health < 150)
+			if( pev->health < 150 )
 			{
 				if ( (HasConditions(bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE)) ) 
 				{	
@@ -1641,6 +1684,9 @@ Schedule_t* CAlice :: GetScheduleOfType ( int Type )
 
 	case SCHED_TARGET_CHASE:
 		return slBaFollow;
+
+	case SCHED_ALICE_GETBACKTOPLAYER:
+		return slAliceGetBackToPlayer;
 
 //	case SCHED_IDLE_STAND:
 //		return slIdleStand;
@@ -1755,4 +1801,13 @@ void CAlice :: DeathSound ( void )
 int CAlice :: DamageDecal( int bitsDamageType )  // I'm not sure if it's working
 {
 	return -1;
+}
+
+void CAlice::Killed( entvars_t *pevAttacker, int iGib )
+{
+	bAliceFollowing = false;
+	health_cached = pev->health + 1;
+	AliceSendHUDData( false );
+
+	CBarney::Killed( pevAttacker, iGib );
 }
