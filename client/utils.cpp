@@ -83,7 +83,7 @@ void UTIL_ReplaceKeyBindings( const char *inbuf, int inbufsizebytes, char *outbu
 			if( end && (end != inbuf) ) // make sure we handle ## in the string, which should be treated in the output as #
 			{
 				char token[64];
-				strncpy( token, inbuf, end - inbuf );
+				strncpy_s( token, inbuf, end - inbuf );
 				token[end - inbuf] = 0;
 
 				inbuf += end - inbuf;

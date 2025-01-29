@@ -3757,7 +3757,7 @@ void R_DrawWorld( void )
 	R_MarkLeaves();
 	start = Sys_DoubleTime();
 
-	if( CVAR_TO_BOOL( r_recursive_world_node ) ) [[unlikely]]
+	if( CVAR_TO_BOOL( r_recursive_world_node ) )
 		R_RecursiveWorldNode( world->nodes, RI->frustum.GetClipFlags() );
 	else
 		R_WorldMarkVisibleFaces();

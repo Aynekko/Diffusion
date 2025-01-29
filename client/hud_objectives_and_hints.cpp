@@ -28,9 +28,9 @@ int CHudHintObjective::Init( void )
 	pObjective[1][0] = '\0';
 	client_textmessage_t *DefaultObj = TextMessageGet( default_obj_text );
 	if( DefaultObj )
-		_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, DefaultObj->pMessage );
+		_snprintf_s( pObjective[0], sizeof( pObjective[0] ) - 1, DefaultObj->pMessage );
 	else
-		_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, default_obj_text );
+		_snprintf_s( pObjective[0], sizeof( pObjective[0] ) - 1, default_obj_text );
 	return 1;
 }
 
@@ -54,7 +54,7 @@ void CHudHintObjective::SetupHint( void )
 	if( TitlesMsg )
 	{
 		pHint[0] = '\0';
-		_snprintf( pHint, sizeof( pHint ) - 1, TitlesMsg->pMessage );
+		_snprintf_s( pHint, sizeof( pHint ) - 1, TitlesMsg->pMessage );
 	}
 
 	pHint[sizeof( pHint ) - 1] = '\0';
@@ -117,12 +117,12 @@ void CHudHintObjective::SetupObjectives( void )
 		TitlesMsg = TextMessageGet( pObjective[0] );
 		pObjective[0][0] = '\0';
 		if( TitlesMsg )
-			_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, TitlesMsg->pMessage );
+			_snprintf_s( pObjective[0], sizeof( pObjective[0] ) - 1, TitlesMsg->pMessage );
 		else
-			_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, def_obj );
+			_snprintf_s( pObjective[0], sizeof( pObjective[0] ) - 1, def_obj );
 	}
 	else
-		_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, def_obj );
+		_snprintf_s( pObjective[0], sizeof( pObjective[0] ) - 1, def_obj );
 
 	if( pObjective[1][0] != '\0' )
 	{
@@ -130,7 +130,7 @@ void CHudHintObjective::SetupObjectives( void )
 		TitlesMsg = TextMessageGet( pObjective[1] );
 		pObjective[1][0] = '\0';
 		if( TitlesMsg )
-			_snprintf( pObjective[1], sizeof( pObjective[1] ) - 1, TitlesMsg->pMessage );
+			_snprintf_s( pObjective[1], sizeof( pObjective[1] ) - 1, TitlesMsg->pMessage );
 		else
 			pObjective[1][0] = '\0'; // secondary objective can be missing, just null it
 	}
@@ -212,12 +212,12 @@ int CHudHintObjective::MsgFunc_Hint( const char *pszName, int iSize, void *pbuf 
 	switch( get )
 	{
 	case 0:
-		_snprintf( pHint, 64, READ_STRING() );
+		_snprintf_s( pHint, 64, READ_STRING() );
 		SetupHint();
 		break;
 	case 1:
-		_snprintf( pObjective[0], 64, READ_STRING() );
-		_snprintf( pObjective[1], 64, READ_STRING() );
+		_snprintf_s( pObjective[0], 64, READ_STRING() );
+		_snprintf_s( pObjective[1], 64, READ_STRING() );
 		SetupObjectives();
 		break;
 	}
