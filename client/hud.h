@@ -615,7 +615,7 @@ public:
 	float TutorStartTime;
 	bool IsTutorDrawing;
 	bool x_direction; // false - right, true - left
-	void EnableTutorial( char *pszTutorialName );
+	void EnableTutorial( const char *pszTutorialName );
 	int CurrentImage;
 	void MessageDraw( client_textmessage_t *pMessage, int x, int y, bool GetSize = false );
 

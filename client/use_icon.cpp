@@ -53,6 +53,10 @@ int CUseIcon::Draw( float flTime )
 
 	if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE )
 		return 0;
+
+	// currently drawing a tutor
+	if( gHUD.m_StatusIconsTutor.IsTutorDrawing && (gHUD.m_flTime > gHUD.m_StatusIconsTutor.TutorStartTime + 0.5f) && !gHUD.m_StatusIconsTutor.x_direction )
+		return 0;
 	
 	int r, g, b;
 	Vector blue;

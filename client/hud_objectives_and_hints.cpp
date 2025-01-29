@@ -59,6 +59,11 @@ void CHudHintObjective::SetupHint( void )
 
 	pHint[sizeof( pHint ) - 1] = '\0';
 
+	// now replace the keybindings like #attack# etc.
+	char temp[sizeof( pHint )];
+	UTIL_ReplaceKeyBindings( pHint, sizeof( pHint ), temp );
+	_snprintf_s( pHint, sizeof( pHint ), temp );
+
 	// get maximum hint width and height
 	const char *txt = pHint;
 	// start with icon dimensions as minimum hint size

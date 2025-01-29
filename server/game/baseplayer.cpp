@@ -7945,37 +7945,42 @@ void CBasePlayer::CheckTutorMessage( int m_iId )
 	if( HadWeapon[m_iId] )
 		return;
 
-	string_t TempString = MAKE_STRING( "error" ); // default
+	char TempString[32] = "error"; // default
+	char TempPic[128];
+	TempPic[0] = '\0';
 
 	switch( m_iId )
 	{
-		case WEAPON_KNIFE:	TempString = MAKE_STRING("tutor_knife"); break;
-		case WEAPON_BERETTA:		TempString = MAKE_STRING("tutor_pistol"); break;
-		case WEAPON_DEAGLE:		TempString = MAKE_STRING("tutor_deagle"); break;
-		case WEAPON_MRC:		TempString = MAKE_STRING("tutor_mrc"); break;
-		case WEAPON_CYCLER:		TempString = MAKE_STRING("tutor_cycler"); break; // ???
-		case WEAPON_CROSSBOW:	TempString = MAKE_STRING("tutor_crossbow"); break;
-		case WEAPON_SHOTGUN:	TempString = MAKE_STRING("tutor_shotgun"); break;
-		case WEAPON_SHOTGUN_XM:	TempString = MAKE_STRING( "tutor_shotgun_xm" ); break;
-		case WEAPON_RPG:		TempString = MAKE_STRING("tutor_rpg"); break;
-		case WEAPON_GAUSS:		TempString = MAKE_STRING("tutor_gausniper"); break;
-		case WEAPON_EGON:		TempString = MAKE_STRING("tutor_egon"); break; // not used
-		case WEAPON_HORNETGUN:	TempString = MAKE_STRING("tutor_hornet"); break; // not used
-		case WEAPON_HANDGRENADE: TempString = MAKE_STRING("tutor_grenade"); break;
-		case WEAPON_TRIPMINE:	TempString = MAKE_STRING("tutor_tripmine"); break;
-		case WEAPON_SATCHEL:	TempString = MAKE_STRING("tutor_satchel"); break;
-		case WEAPON_SNARK:		TempString = MAKE_STRING("tutor_snark"); break; // not used
-		case WEAPON_AR2:		TempString = MAKE_STRING("tutor_ar2"); break;
-		case WEAPON_DRONE:		TempString = MAKE_STRING("tutor_drone"); break;
-		case WEAPON_SENTRY:		TempString = MAKE_STRING("tutor_sentry"); break;
-		case WEAPON_HKMP5:		TempString = MAKE_STRING("tutor_hkmp5"); break;
-		case WEAPON_FIVESEVEN:	TempString = MAKE_STRING("tutor_fiveseven"); break;
-		case WEAPON_SNIPER:		TempString = MAKE_STRING( "tutor_sniper" ); break;
-		case WEAPON_G36C:		TempString = MAKE_STRING( "tutor_g36c" ); break;
+		case WEAPON_KNIFE:		_snprintf_s( TempString, sizeof( TempString ), "tutor_knife" ); break;
+		case WEAPON_BERETTA:	_snprintf_s( TempString, sizeof( TempString ), "tutor_pistol"); break;
+		case WEAPON_DEAGLE:		_snprintf_s( TempString, sizeof( TempString ), "tutor_deagle"); break;
+		case WEAPON_MRC:		_snprintf_s( TempString, sizeof( TempString ), "tutor_mrc"); break;
+		case WEAPON_CROSSBOW:	_snprintf_s( TempString, sizeof( TempString ), "tutor_crossbow"); break;
+		case WEAPON_SHOTGUN:	_snprintf_s( TempString, sizeof( TempString ), "tutor_shotgun"); break;
+		case WEAPON_SHOTGUN_XM:	_snprintf_s( TempString, sizeof( TempString ), "tutor_shotgun_xm" ); break;
+		case WEAPON_RPG:		_snprintf_s( TempString, sizeof( TempString ), "tutor_rpg"); break;
+		case WEAPON_GAUSS:		_snprintf_s( TempString, sizeof( TempString ), "tutor_gausniper"); break;
+		case WEAPON_EGON:		_snprintf_s( TempString, sizeof( TempString ), "tutor_egon"); break; // not used
+		case WEAPON_HORNETGUN:	_snprintf_s( TempString, sizeof( TempString ), "tutor_hornet"); break; // not used
+		case WEAPON_HANDGRENADE: _snprintf_s( TempString, sizeof( TempString ), "tutor_grenade"); break;
+		case WEAPON_TRIPMINE:	_snprintf_s( TempString, sizeof( TempString ), "tutor_tripmine"); break;
+		case WEAPON_SATCHEL:	_snprintf_s( TempString, sizeof( TempString ), "tutor_satchel"); break;
+		case WEAPON_SNARK:		_snprintf_s( TempString, sizeof( TempString ), "tutor_snark"); break; // not used
+		case WEAPON_AR2:		_snprintf_s( TempString, sizeof( TempString ), "tutor_ar2"); break;
+		case WEAPON_DRONE:		_snprintf_s( TempString, sizeof( TempString ), "tutor_drone"); break;
+		case WEAPON_SENTRY:		_snprintf_s( TempString, sizeof( TempString ), "tutor_sentry"); break;
+		case WEAPON_HKMP5:		_snprintf_s( TempString, sizeof( TempString ), "tutor_hkmp5"); break;
+		case WEAPON_FIVESEVEN:	_snprintf_s( TempString, sizeof( TempString ), "tutor_fiveseven"); break;
+		case WEAPON_SNIPER:		_snprintf_s( TempString, sizeof( TempString ), "tutor_sniper" ); break;
+		case WEAPON_G36C:		_snprintf_s( TempString, sizeof( TempString ), "tutor_g36c" ); break;
 	}
 
+	if( !FStrEq( TempString, "error" ) )
+		_snprintf_s( TempPic, sizeof( TempPic ), "sprites/tutor/%s", TempString );
+
 	MESSAGE_BEGIN( MSG_ONE, gmsgStatusIconTutor, NULL, pev );
-		WRITE_STRING( STRING( TempString ) );
+		WRITE_STRING( TempString );
+		WRITE_STRING( TempPic );
 	MESSAGE_END();
 
 	m_flLastTimeTutorWasShown = gpGlobals->time;

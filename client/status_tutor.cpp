@@ -11,15 +11,14 @@ Example tutorial in titles.txt:
 
 tutor_intro
 {
-%textures/tutorial.dds% <-- it will bug out the text if the image is not found (FIXME), but it will be fine if the line is removed (tutorial has no image)
-%showscores% - view current objective
-%forward% %moveleft% %back% %moveright% - movement
-%sprint% - sprint
-%duck% - duck
-%jump% - jump
-%use% - interact
+#showscores# - view current objective
+#forward# #moveleft# #back# #moveright# - movement
+#sprint# - sprint
+#duck# - duck
+#jump# - jump
+#use# - interact
 
-Press %use% to dismiss.
+Press #use# to dismiss.
 }
 */
 
@@ -45,15 +44,21 @@ int CHudTutorial::VidInit( void )
 int CHudTutorial::MsgFunc_StatusIconTutor( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pszName, pbuf, iSize );
-	char *pszTutorialName = READ_STRING();
+	char pszTutorialName[128];
+	_snprintf_s( pszTutorialName, sizeof( pszTutorialName ), READ_STRING() );
+	const char *img = READ_STRING();
 	END_READ();
+
+	CurrentImage = -1;
+	if( img[0] != '\0'  )
+		CurrentImage = LOAD_TEXTURE( img, NULL, 0, 0 );
 	
 	EnableTutorial( pszTutorialName );
 
 	return 1;
 }
 
-void CHudTutorial::EnableTutorial( char *pszTutorialName )
+void CHudTutorial::EnableTutorial( const char *pszTutorialName )
 {
 	if( !cl_tutor->value )
 		return;
@@ -66,15 +71,14 @@ void CHudTutorial::EnableTutorial( char *pszTutorialName )
 		return;
 	}
 
-	CurrentImage = -1; // not all tutorials need an image
-
+	// copy the message from titles.txt as is
 	tutorial_text[0] = '\0';
-	UTIL_GetImageFromMessage( tutorial->pMessage, sizeof( tutorial_text ), tutorial_text, &CurrentImage );
+	_snprintf_s( tutorial_text, sizeof( tutorial_text ), tutorial->pMessage );
 	
-	// now replace the keybindings like %attack% etc.
+	// now replace the keybindings like #attack# etc.
 	char temp[sizeof( tutorial_text )];
 	UTIL_ReplaceKeyBindings( tutorial_text, sizeof( tutorial_text ), temp );
-	sprintf( tutorial_text, temp );
+	_snprintf_s( tutorial_text, sizeof( tutorial_text ), temp );
 
 	// get tutorial window width and height (this draws text offscreen to get proper values)
 	MessageDraw( tutorial, 0, 0, true );
@@ -98,7 +102,7 @@ int CHudTutorial::Draw( float flTime )
 		return 0;
 
 	// set the coordinates
-	y = ScreenHeight * 0.35f;
+	y = ScreenHeight * 0.25f;
 
 	if( !x_direction ) // tutor is now showing
 	{

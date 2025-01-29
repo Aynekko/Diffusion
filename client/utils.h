@@ -258,6 +258,5 @@ extern cvar_t *in_joystick;
 extern int g_weaponselect;
 
 void UTIL_ReplaceKeyBindings( const char *inbuf, int inbufsizebytes, char *outbuf );
-void UTIL_GetImageFromMessage( const char *inbuf, int inbufsizebytes, char *outbuf, int *texture );
    
 #endif // UTILS_H

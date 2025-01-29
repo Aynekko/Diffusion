@@ -75,12 +75,12 @@ void UTIL_ReplaceKeyBindings( const char *inbuf, int inbufsizebytes, char *outbu
 	while( inbuf != inbufend && *inbuf != 0 )
 	{
 		// check for variables
-		if( *inbuf == '%' )
+		if( *inbuf == '#' )
 		{
 			++inbuf;
 
-			const char *end = strchr( inbuf, '%' );
-			if( end && (end != inbuf) ) // make sure we handle %% in the string, which should be treated in the output as %
+			const char *end = strchr( inbuf, '#' );
+			if( end && (end != inbuf) ) // make sure we handle ## in the string, which should be treated in the output as #
 			{
 				char token[64];
 				strncpy( token, inbuf, end - inbuf );
@@ -120,77 +120,6 @@ void UTIL_ReplaceKeyBindings( const char *inbuf, int inbufsizebytes, char *outbu
 				{
 					strcat( outbuf, "]" );
 					pos += 1;
-				}
-			}
-			else
-			{
-				outbuf[pos] = *inbuf;
-				++pos;
-			}
-		}
-		else
-		{
-			outbuf[pos] = *inbuf;
-			++pos;
-		}
-
-		++inbuf;
-	}
-
-	outbuf[pos] = '\0';
-}
-
-//======================================================================================
-// UTIL_GetImageFromMessage: gets path to image from titles.txt message and loads it
-// example %textures/image.dds%, output is texture and text without the path
-//======================================================================================
-void UTIL_GetImageFromMessage( const char *inbuf, int inbufsizebytes, char *outbuf, int *texture )
-{
-	outbuf[0] = '\0';
-	bool bTexFound = false;
-
-	if( !inbuf || !inbuf[0] )
-		return;
-
-	int pos = 0;
-	const char *inbufend = NULL;
-	if( inbufsizebytes > 0 )
-	{
-		inbufend = inbuf + (inbufsizebytes / 2);
-	}
-
-	while( inbuf != inbufend && *inbuf != 0 )
-	{
-		// check for texture, only once
-		if( !bTexFound && *inbuf == '%' )
-		{
-			++inbuf;
-
-			const char *end = strchr( inbuf, '%' );
-			if( end && (end != inbuf) ) // make sure we handle %% in the string, which should be treated in the output as %
-			{
-				bTexFound = true; // go ahead and set it, don't search again
-				char token[64];
-				strncpy( token, inbuf, end - inbuf );
-				token[end - inbuf] = 0;
-
-				inbuf += end - inbuf + 2; // add 2 symbols to dismiss two %s
-
-				// lookup texture
-				if( FILE_EXISTS( token ) )
-				{
-					*texture = LOAD_TEXTURE( token, NULL, 0, 0 );
-					outbuf[pos] = '\0';
-				}
-				else
-				{
-					outbuf[pos] = '\0';
-					strcat( outbuf, "%" );
-					pos++;
-					strcat( outbuf, token );
-					pos += strlen( token );
-					strcat( outbuf, "%" );
-					pos++;
 				}
 			}
 			else

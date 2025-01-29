@@ -25,6 +25,9 @@ void CHudSpriteTutor::Spawn(void)
 		UTIL_Remove(this);
 		return;
 	}
+
+	if( !pev->model )
+		ALERT( at_warning, "hud_sprite_tutor has empty message!\n" );
 }
 
 void CHudSpriteTutor::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
@@ -33,6 +36,7 @@ void CHudSpriteTutor::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYP
 		pActivator = UTIL_PlayerByIndex(1);
 
 	MESSAGE_BEGIN(MSG_ONE, gmsgStatusIconTutor, NULL, pActivator->pev);
-		WRITE_STRING(STRING(pev->model));
+		WRITE_STRING( STRING( pev->model ) );
+		WRITE_STRING( pev->message ? STRING( pev->message ) : 0 );
 	MESSAGE_END();
 }
