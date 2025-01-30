@@ -31,13 +31,14 @@ struct DeathNoticeItem
 	float	flDisplayTime;
 	float	*KillerColor;
 	float	*VictimColor;
+	float ypos_lerp;
 };
 
 #define MAX_DEATHNOTICES	5
 #define DEATHNOTICE_TOP		32
-#define DEATHNOTICE_RIGHT	15
+#define DEATHNOTICE_RIGHT	40
 #define DEATHNOTICE_ROUNDING 7
-#define DEATHNOTICE_SPACING 30
+#define DEATHNOTICE_SPACING 50
 
 static int DEATHNOTICE_DISPLAY_TIME = 6;
 DeathNoticeItem rgDeathNoticeList[MAX_DEATHNOTICES+1];
@@ -121,7 +122,8 @@ int CHudDeathNotice :: Draw( float flTime )
 		rgDeathNoticeList[i].flDisplayTime = min( rgDeathNoticeList[i].flDisplayTime, gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME );
 
 		// Draw the death notice
-		y = YRES(DEATHNOTICE_TOP) + (DEATHNOTICE_SPACING * i);  //!!!
+		rgDeathNoticeList[i].ypos_lerp = lerp( rgDeathNoticeList[i].ypos_lerp, YRES( DEATHNOTICE_TOP ) + (DEATHNOTICE_SPACING * i), 7.0f * g_fFrametime );
+		y = rgDeathNoticeList[i].ypos_lerp;
 
 		int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
 		x = ScreenWidth - DEATHNOTICE_RIGHT - ConsoleStringLen( rgDeathNoticeList[i].szVictim ) - ( gHUD.GetSpriteRect( id ).right - gHUD.GetSpriteRect( id ).left );

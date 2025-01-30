@@ -31,7 +31,7 @@ extern float *GetClientColor( int clientIndex );
 
 // allow 20 pixels on either side of the text
 #define MAX_LINE_WIDTH	( ScreenWidth - 40 )
-#define LINE_START		10
+#define LINE_START		40
 
 static char g_szLineBuffer[MAX_LINES + 1][MAX_CHARS_PER_LINE];
 static float *g_pflNameColors[MAX_LINES + 1];
@@ -224,10 +224,7 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 	m_iFlags |= HUD_ACTIVE;
 	PlaySound( "misc/talk.wav", 1 ); // diffusionFIXME - a cvar needed
 
-	if( ScreenHeight >= 480 )
-		Y_START = ScreenHeight - 60;
-	else
-		Y_START = ScreenHeight - 45;
+	Y_START = ScreenHeight - 100 * gHUD.fScale;
 
 	Y_START -= (line_height * (MAX_LINES+1));
 }
