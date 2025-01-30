@@ -633,22 +633,19 @@ public:
 	int Draw(float flTime);
 	void _cdecl UserCmd_RefreshAchievementFile( void );
 	void _cdecl UserCmd_ResetAchievementFile( void );
+	void _cdecl UserCmd_ReportAchievementsToConsole( void );
 	float x, y;
 	float AchStartTime;
 	bool IsAchDrawing;
 
 	FILE *achStatsFile;
 	bool bAchievements; // disabled if the goal file wasn't loaded
-	int AchievementStats[TOTAL_ACHIEVEMENTS]; // here we keep pure stats of what the player did and then compare them to goals
-	int AchievementGoal[TOTAL_ACHIEVEMENTS]; // an array with requirements for each achievement
-	bool AchievementComplete[TOTAL_ACHIEVEMENTS]; // true if the Stats >= Goal
-	char AchievementName[TOTAL_ACHIEVEMENTS][100];
+	achievement_data_t ach_data;
 
 	void EnableAchievement(char* pszIconName );
 
 	void LoadAchievementFile( void );
 	void SaveAchievementFile( void );
-	void ReportAchievementsToConsole( void );
 	void CheckAchievement( void );
 	void CreateDefaultAchievementFile( void );
 	float AchievementCheckTime;

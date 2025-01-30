@@ -957,20 +957,15 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 	case TE_ACHIEVEMENT:
 	{
 		int ach_number = READ_BYTE();
-		if( ach_number == 255 )
-		{
-			gHUD.m_StatusIconsAchievement.ReportAchievementsToConsole();
-			break;
-		}
 		Value = READ_LONG();
 		Mode = READ_BYTE();
 		if( gHUD.m_StatusIconsAchievement.bAchievements )
 		{
 			switch( Mode )
 			{
-			case 0: gHUD.m_StatusIconsAchievement.AchievementStats[ach_number] += Value; break;
-			case 1: gHUD.m_StatusIconsAchievement.AchievementStats[ach_number] -= Value; break;
-			case 2: gHUD.m_StatusIconsAchievement.AchievementStats[ach_number] = Value; break;
+			case 0: gHUD.m_StatusIconsAchievement.ach_data.value[ach_number] += Value; break;
+			case 1: gHUD.m_StatusIconsAchievement.ach_data.value[ach_number] -= Value; break;
+			case 2: gHUD.m_StatusIconsAchievement.ach_data.value[ach_number] = Value; break;
 			}
 		//	ConPrintf( "Achievement received: %i, value received: %i\n", ach_number, Value );
 		}
