@@ -77,6 +77,42 @@ const int AchievementGoals[TOTAL_ACHIEVEMENTS]
 	1,		// ACH_CH3_3MINS,			// 31 destroy the computer within 3 minutes
 };
 
+const char * const AchievementNames[TOTAL_ACHIEVEMENTS]
+{
+	"ach_firebullets",		// ACH_BULLETSFIRED = 0,	// 0 fire # bullets
+	"ach_jump",				// ACH_JUMPS,				// 1 jump # times
+	"ach_ammocrates",		// ACH_AMMOCRATES,			// 2 find # ammo crates
+	"ach_disarm",			// ACH_DISARMEDMINES,		// 3 disarm # enemy mines (disarming your own doesn't count)
+	"ach_killenemies",		// ACH_KILLENEMIES,			// 4 kill # enemies
+	"ach_inflictdamage",	// ACH_INFLICTDAMAGE,		// 5 inflict a total of # damage
+	"ach_killenemiessniper",// ACH_KILLENEMIESSNIPER,	// 6 kill # enemies with a stationary sniper rifle (func_tank)
+	"ach_chapter1",			// ACH_CH1,					// 7 complete chapter
+	"ach_chapter2",			// ACH_CH2,					// 8
+	"ach_chapter3",			// ACH_CH3,					// 9
+	"ach_chapter4",			// ACH_CH4,					// 10
+	"ach_chapter5",			// ACH_CH5,					// 11
+	"ach_general30sec",		// ACH_GENERAL30SEC,		// 12 kill security general under 30 sec
+	"ach_hpregenerate",		// ACH_HPREGENERATE,		// 13 regenerate a total of # health
+	"ach_receivedamage",	// ACH_RECEIVEDAMAGE,		// 14 receive a total of # damage
+	"ach_overcook",			// ACH_OVERCOOK,			// 15 overcook the grenade
+	"ach_dronesec",			// ACH_DRONESEC,			// 16 kill # security drones
+	"ach_dronealien",		// ACH_DRONEALIEN,			// 17 kill # alien drones
+	"ach_crossbow",			// ACH_CROSSBOW,			// 18 kill # enemies on a certain distance with a crossbow
+	"ach_tankball",			// ACH_TANKBALL,			// 19 kill the alien military ship with balls
+	"ach_dash",				// ACH_DASH,				// 20 dash # times
+	"ach_notes",			// ACH_NOTES,				// 21 find # notes
+	"ach_secrets",			// ACH_SECRETS,				// 22 find # secrets
+	"ach_killenemiesballs",	// ACH_KILLENEMIESBALLS,	// 23 kill # enemies with balls (weapon_ar2 or func_tankball)
+	"ach_reddweller",		// ACH_REDDWELLER,			// 24 help the red dweller escape (chapter 1)
+	"ach_assembleblastlevel",	// ACH_ASSEMBLEBLASTLEVEL,	// 25 get the first blast level by assembling the module on ch2map2
+	"ach_brokencar",		// ACH_BROKENCAR,			// 26 break the car completely in chapter 1 intro
+	"ach_cardistance",		// ACH_CARDISTANCE,			// 27 travelled distance by car
+	"ach_waterjetdistance",	// ACH_WATERJETDISTANCE,	// 28 travelled distance by water jet
+	"ach_killbots",			// ACH_KILLBOTS,			// 29 kill # bots in multiplayer
+	"ach_dwellerch3",		// ACH_CH3_NOKILLDW,		// 30 don't kill any dwellers in chapter 3
+	"ach_ch3_3mins",		// ACH_CH3_3MINS,			// 31 destroy the computer within 3 minutes
+};
+
 enum Achievement_data_e
 {
 	AchD_GOAL = 0,

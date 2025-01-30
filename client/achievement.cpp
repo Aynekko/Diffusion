@@ -120,7 +120,7 @@ void CHudAchievement::LoadAchievementFile( void )
 
 	if( !aMemFile )
 	{
-		Msg( "^2Achievements:^7 ^3:Warning:^7 Couldn't load achievement file. Creating a default one...\n" );
+		Msg( "^2Achievements:^7 Couldn't load achievement file. Creating a default one...\n" );
 		CreateDefaultAchievementFile();
 
 		// try again.
@@ -216,46 +216,13 @@ void CHudAchievement::UserCmd_ResetAchievementFile( void )
 //====================================================================================
 void CHudAchievement::CreateDefaultAchievementFile(void)
 {
-	// populate achievement names
-	sprintf_s( ach_data.name[ACH_BULLETSFIRED], "ach_firebullets" );
-	sprintf_s( ach_data.name[ACH_JUMPS], "ach_jump" );
-	sprintf_s( ach_data.name[ACH_AMMOCRATES], "ach_ammocrates" );
-	sprintf_s( ach_data.name[ACH_DISARMEDMINES], "ach_disarm" );
-	sprintf_s( ach_data.name[ACH_KILLENEMIES], "ach_killenemies" );
-	sprintf_s( ach_data.name[ACH_INFLICTDAMAGE], "ach_inflictdamage" );
-	sprintf_s( ach_data.name[ACH_KILLENEMIESSNIPER], "ach_killenemiessniper" );
-	sprintf_s( ach_data.name[ACH_CH1], "ach_chapter1" );
-	sprintf_s( ach_data.name[ACH_CH2], "ach_chapter2" );
-	sprintf_s( ach_data.name[ACH_CH3], "ach_chapter3" );
-	sprintf_s( ach_data.name[ACH_CH4], "ach_chapter4" );
-	sprintf_s( ach_data.name[ACH_CH5], "ach_chapter5" );
-	sprintf_s( ach_data.name[ACH_GENERAL30SEC], "ach_general30sec" );
-	sprintf_s( ach_data.name[ACH_HPREGENERATE], "ach_hpregenerate" );
-	sprintf_s( ach_data.name[ACH_RECEIVEDAMAGE], "ach_receivedamage" );
-	sprintf_s( ach_data.name[ACH_OVERCOOK], "ach_overcook" );
-	sprintf_s( ach_data.name[ACH_DRONESEC], "ach_dronesec" );
-	sprintf_s( ach_data.name[ACH_DRONEALIEN], "ach_dronealien" );
-	sprintf_s( ach_data.name[ACH_CROSSBOW], "ach_crossbow" );
-	sprintf_s( ach_data.name[ACH_TANKBALL], "ach_tankball" );
-	sprintf_s( ach_data.name[ACH_DASH], "ach_dash" );
-	sprintf_s( ach_data.name[ACH_NOTES], "ach_notes" );
-	sprintf_s( ach_data.name[ACH_SECRETS], "ach_secrets" );
-	sprintf_s( ach_data.name[ACH_KILLENEMIESBALLS], "ach_killenemiesballs" );
-	sprintf_s( ach_data.name[ACH_REDDWELLER], "ach_reddweller" );
-	sprintf_s( ach_data.name[ACH_ASSEMBLEBLASTLEVEL], "ach_assembleblastlevel" );
-	sprintf_s( ach_data.name[ACH_BROKENCAR], "ach_brokencar" );
-	sprintf_s( ach_data.name[ACH_CARDISTANCE], "ach_cardistance" );
-	sprintf_s( ach_data.name[ACH_WATERJETDISTANCE], "ach_waterjetdistance" );
-	sprintf_s( ach_data.name[ACH_KILLBOTS], "ach_killbots" );
-	sprintf_s( ach_data.name[ACH_CH3_NOKILLDW], "ach_dwellerch3" );
-	sprintf_s( ach_data.name[ACH_CH3_3MINS], "ach_ch3_3mins" );
-
-	// populate achievement default
+	// populate achievement defaults
 	for( int i = 0; i < TOTAL_ACHIEVEMENTS; i++ )
 	{
 		ach_data.goal[i] = AchievementGoals[i];
 		ach_data.completion[i] = false;
 		ach_data.value[i] = 0;
+		sprintf_s( ach_data.name[i], AchievementNames[i] );
 	}
 
 	SaveAchievementFile();
