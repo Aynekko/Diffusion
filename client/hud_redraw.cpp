@@ -189,6 +189,8 @@ int CHud :: Redraw( float flTime, int intermission )
 		m_ScreenEffects.Draw( flTime );
 		m_StatusIconsAchievement.Draw( flTime );
 		m_Message.Draw( flTime );
+		m_Subtitle.Draw( flTime );
+		m_HintObjectives.Draw( flTime );
 	}
 
 	// are we in demo mode? do we need to draw the logo in the top corner?
