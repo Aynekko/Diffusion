@@ -677,7 +677,7 @@ int CL_ButtonBits( int bResetState )
 
 	if( in_forward.state & (BUTTON_DOWN|IMPULSE_DOWN) )
 	{
-		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE )
+		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE && !gHUD.m_Puzzle.solved )
 		{
 			// use movement buttons to move the block
 			gHUD.m_Puzzle.MoveActiveBlock( IN_FORWARD );
@@ -697,7 +697,7 @@ int CL_ButtonBits( int bResetState )
 	
 	if( in_back.state & (BUTTON_DOWN|IMPULSE_DOWN) )
 	{
-		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE )
+		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE && !gHUD.m_Puzzle.solved )
 		{
 			// use movement buttons to move the block
 			gHUD.m_Puzzle.MoveActiveBlock( IN_BACK );
@@ -736,7 +736,7 @@ int CL_ButtonBits( int bResetState )
 	
 	if( in_moveleft.state & (BUTTON_DOWN|IMPULSE_DOWN) )
 	{
-		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE )
+		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE && !gHUD.m_Puzzle.solved )
 		{
 			// use movement buttons to move the block
 			gHUD.m_Puzzle.MoveActiveBlock( IN_MOVELEFT );
@@ -749,7 +749,7 @@ int CL_ButtonBits( int bResetState )
 	
 	if( in_moveright.state & (BUTTON_DOWN|IMPULSE_DOWN) )
 	{
-		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE )
+		if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE && !gHUD.m_Puzzle.solved )
 		{
 			// use movement buttons to move the block
 			gHUD.m_Puzzle.MoveActiveBlock( IN_MOVERIGHT );

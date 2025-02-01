@@ -51,7 +51,7 @@ int CUseIcon::Draw( float flTime )
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
 
-	if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE )
+	if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE && !gHUD.m_Puzzle.solved )
 		return 0;
 
 	// currently drawing a tutor
