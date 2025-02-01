@@ -9,7 +9,7 @@ void CAnimatex::Init( char *Tex )
 	if( Initialized() )
 		return;
 	
-	Q_strcpy( start_tex, Tex );
+	strcpy_s( start_tex, Tex );
 	fCurFrame = 0.0f;
 	xmin = 0;
 	xmax = 100;
@@ -25,7 +25,7 @@ void CAnimatex::Init( char *Tex )
 
 	// load frames
 	char tmp[MAX_PATH];
-	Q_strcpy( tmp, Tex );
+	strcpy_s( tmp, Tex );
 	COM_StripExtension( tmp );
 	char Path[128];
 	int i;

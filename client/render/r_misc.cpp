@@ -289,6 +289,9 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 		if( gl_renderer->value == 0 )
 			return 1;
 
+		if( type == ET_BEAM )
+			return 1; // let the engine draw beams // diffusionFIXME - beams don't work in 3D skybox, obviously
+
 		if( ent->curstate.effects & EF_MERGE_VISIBILITY )
 			r_stats.c_vis_mergers++;
 
@@ -298,15 +301,13 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 			if( !FBitSet(world->features, WORLD_HAS_SCREENS) ) // set it here if it wasn't set (happens with studio screens)
 				SetBits( world->features, WORLD_HAS_SCREENS );
 		}
-
-		if( ent->curstate.effects & EF_SKYCAMERA )
+		else if( ent->curstate.effects & EF_SKYCAMERA )
 		{
 			// found env_sky
 			tr.sky_camera = ent;
 			return 0;
 		}
-
-		if( (ent->curstate.effects & EF_SKIPPVS) && (ent->curstate.renderfx == kRenderFxFullbright) ) // hack to find this entity
+		else if( (ent->curstate.effects & EF_SKIPPVS) && (ent->curstate.renderfx == kRenderFxFullbright) ) // hack to find this entity
 		{
 			// found shader modifier
 			tr.shader_modifier = ent;
@@ -320,10 +321,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				return 0;	// don't draw the player we are following in eye
 		}
 
-		if( type == ET_BEAM )
-			return 1; // let the engine draw beams // diffusionFIXME - beams don't work in 3D skybox, obviously
-
-		float DistanceFade = R_ComputeFadingDistance( ent );	
+		const float DistanceFade = R_ComputeFadingDistance( ent );	
 		if( DistanceFade <= 0.0f )
 			return 0; // distance-culled
 
@@ -400,10 +398,10 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 		{
 			if((gHUD.m_flTimeDelta > 0) && (ent->curstate.fuser1 > 10.0f) && ((int)ent->curstate.fuser1 % 5 == 0) )
 			{
-				float dust_speed = (300 * g_fFrametime) / (1 + ent->curstate.fuser1 * 0.002);
-				float dust_scale = bound( 10, ent->curstate.fuser1 * 0.02, 40 ) + RANDOM_LONG(-3,3);
-				float dust_randomize_pos = bound( 5, ent->curstate.fuser1 * 0.02, 12);
-				int type = ent->curstate.iuser1; // 0 asphalt, 1 sand, 2 dirt, 3 watersplash
+				const float dust_speed = (300 * g_fFrametime) / (1 + ent->curstate.fuser1 * 0.002);
+				const float dust_scale = bound( 10, ent->curstate.fuser1 * 0.02, 40 ) + RANDOM_LONG(-3,3);
+				const float dust_randomize_pos = bound( 5, ent->curstate.fuser1 * 0.02, 12);
+				const int type = ent->curstate.iuser1; // 0 asphalt, 1 sand, 2 dirt, 3 watersplash
 				if( type == 3 )
 					g_pParticles.CreateEffect( 0, "small_splash", ent->curstate.origin, g_vecZero );
 				else
@@ -416,7 +414,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 			if( ent->curstate.fuser1 <= 0.0f )
 				return 0; // something bad happened with the timing (check delta.lst?)
 
-			int ParticleEntIndex = ent->index;
+			const int ParticleEntIndex = ent->index;
 			switch( ent->curstate.iuser1 )
 			{
 			default:
@@ -1200,7 +1198,7 @@ void HUD_EjectShell( const struct mstudioevent_s* event, const struct cl_entity_
 
 	float fR, fU;
 
-	int shell = gEngfuncs.pEventAPI->EV_FindModelIndex( event->options );
+	const int shell = gEngfuncs.pEventAPI->EV_FindModelIndex( event->options );
 
 	if( !shell )
 	{
@@ -1238,7 +1236,7 @@ void GetMuzzleflashSprite( const cl_entity_t *e, int type, int &modelIndex, floa
 {
 	scale = 0.1f;
 
-	int WeaponID = gHUD.m_Ammo.WeaponID;
+	const int WeaponID = gHUD.m_Ammo.WeaponID;
 
 	switch( WeaponID )
 	{

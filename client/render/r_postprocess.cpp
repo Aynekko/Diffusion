@@ -73,7 +73,7 @@ int noise_texture_random = 0;
 void InitAutoExposure(void)
 {
 	// init average luminance
-	int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
+	const int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
 
 	if( tr.avg_luminance_texture )
 	{
@@ -245,8 +245,8 @@ void InitPostTextures( void )
 
 void RenderFSQ( int wide, int tall )
 {
-	float screenWidth = (float)wide;
-	float screenHeight = (float)tall;
+	const float screenWidth = (float)wide;
+	const float screenHeight = (float)tall;
 
 	pglBegin( GL_QUADS );
 		pglTexCoord2f( 0.0f, 1.0f );
@@ -292,14 +292,14 @@ void RenderSunShafts( void )
 		Brightness *= gl_sunshafts_brightness->value;
 	}
 
-	float ScaledWeatherBrightness = 1.0f - gHUD.Weather_Intensity;
+	const float ScaledWeatherBrightness = 1.0f - gHUD.Weather_Intensity;
 	Brightness *= ScaledWeatherBrightness;
 
-	float blur = gl_sunshafts_blur->value;
-	float zFar = Q_max( 256.0f, RI->farClip );
+	const float blur = gl_sunshafts_blur->value;
+	const float zFar = Q_max( 256.0f, RI->farClip );
 	Vector skyColor = tr.sky_ambient * (1.0f / 128.0f) * r_lighting_modulate->value;
-	Vector skyVec = tr.sky_normal.Normalize();
-	Vector sunPos = RI->vieworg + skyVec * 1000.0;
+	const Vector skyVec = tr.sky_normal.Normalize();
+	const Vector sunPos = RI->vieworg + skyVec * 1000.0;
 
 	int TargetSize = TARGET_SIZE512;
 	if( tr.lowmemory )
@@ -459,13 +459,11 @@ void MotionBlur(void)
 	if( gHUD.DrunkLevel > 0 )
 		goto allow_drunk;
 	
-	bool AllowBlur = CVAR_TO_BOOL( r_blur );
-	
-	if( !AllowBlur )
+	if( !CVAR_TO_BOOL( r_blur ) )
 		return;
 
 	float PlayerVelocity = tr.viewparams.simvel.Length();
-	int Threshold = CVAR_GET_FLOAT( "r_blur_threshold" );
+	const int Threshold = CVAR_GET_FLOAT( "r_blur_threshold" );
 
 	// player is in car
 	if( gEngfuncs.GetLocalPlayer()->curstate.vuser1.y > 0.0f )
@@ -507,7 +505,7 @@ void GaussBlur( void )
 {
 	static float skyblur, screenblur, pausedblur, waterblur;
 
-	bool AllowBlur = CVAR_TO_BOOL( r_blur );
+	const bool AllowBlur = CVAR_TO_BOOL( r_blur );
 
 	if( !AllowBlur )
 	{
@@ -640,7 +638,6 @@ void RenderGaussBlur( float blur1, float blur2 )
 
 void HorizontalBlur( void )
 {
-	float YawSpeed;
 	static float Accum = 0.0f;
 
 	if( Accum == 0.0f ) // make sure it's faded out
@@ -661,25 +658,24 @@ void HorizontalBlur( void )
 	}
 
 	float CurYaw = tr.viewparams.viewangles.y;
-	while( CurYaw > 180.0f )
+	if( CurYaw > 180.0f )
 		CurYaw -= 360.0f;
-	while( CurYaw < -180.0f )
+	if( CurYaw < -180.0f )
 		CurYaw += 360.0f;
 
 	float PrevYaw = PrevViewAngles.y;
-	while( PrevYaw > 180.0f )
+	if( PrevYaw > 180.0f )
 		PrevYaw -= 360.0f;
-	while( PrevYaw < -180.0f )
+	if( PrevYaw < -180.0f )
 		PrevYaw += 360.0f;
 
 	// this hopefully disables the circle-strafing blur - copied from source sdk
 //-----------------------------------------------------------------------------------------------------------
 	matrix3x4 mCurrentBasisVectors;
 	AngleMatrix( tr.viewparams.viewangles, mCurrentBasisVectors );
-	Vector vPositionChange = PrevViewOrg - tr.viewparams.vieworg;
-
-	Vector vCurrentSideVec = Vector( mCurrentBasisVectors[0][1], mCurrentBasisVectors[1][1], mCurrentBasisVectors[2][1] );
-	float flSideDotMotion = DotProduct( vCurrentSideVec, vPositionChange );
+	const Vector vPositionChange = PrevViewOrg - tr.viewparams.vieworg;
+	const Vector vCurrentSideVec = Vector( mCurrentBasisVectors[0][1], mCurrentBasisVectors[1][1], mCurrentBasisVectors[2][1] );
+	const float flSideDotMotion = DotProduct( vCurrentSideVec, vPositionChange );
 	float flYawDiffOriginal = PrevYaw - CurYaw;
 	if( ((PrevYaw - CurYaw > 180.0f) || (PrevYaw - CurYaw < -180.0f)) &&
 		((PrevYaw + CurYaw > -180.0f) && (PrevYaw + CurYaw < 180.0f)) )
@@ -694,9 +690,8 @@ void HorizontalBlur( void )
 		flYawDiffAdjusted = bound( 0.0f, flYawDiffAdjusted, flYawDiffOriginal );
 //-----------------------------------------------------------------------------------------------------------
 
-	float Strength = CVAR_GET_FLOAT( "r_blur_strength" );
-
-	YawSpeed = fabs( (PrevYaw - CurYaw) / g_fFrametime );
+	const float Strength = CVAR_GET_FLOAT( "r_blur_strength" );
+	const float YawSpeed = fabs( (PrevYaw - CurYaw) / g_fFrametime );
 
 	if( (YawSpeed > 10) && (fabs( flYawDiffAdjusted ) > 3) )
 		Accum += YawSpeed * 0.01 * Strength * 0.005;// g_fFrametime;   hmm, 0.005 worked better than using frametime. some magic, I guess.
@@ -794,7 +789,7 @@ void Glitch( void )
 
 void Monochrome( void )
 {
-	float MonochromeState = gEngfuncs.GetLocalPlayer()->curstate.vuser1.z;
+	const float MonochromeState = gEngfuncs.GetLocalPlayer()->curstate.vuser1.z;
 
 	static float DmgMonochrome = 0.0f;
 	static float DmgMonochromeTime = 0.0f;
@@ -876,10 +871,10 @@ void SSAO( void )
 	if( !ScreenAO )
 		InitSSAO();
 
-	bool Debug = CVAR_TO_BOOL( gl_ssao_debug );
-	bool UseHBAO = (gl_hbao->value > 0);
+	const bool Debug = CVAR_TO_BOOL( gl_ssao_debug );
+	const bool UseHBAO = (gl_hbao->value > 0);
 
-	float zFar = RI->farClip;
+	const float zFar = RI->farClip;
 
 	// request screen color
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
@@ -890,8 +885,8 @@ void SSAO( void )
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 	// set target viewport
-	int width = glState.width * 0.75;
-	int height = glState.height * 0.75;
+	const int width = glState.width * 0.75;
+	const int height = glState.height * 0.75;
 
 	pglViewport( 0, 0, width, height );
 
@@ -926,9 +921,9 @@ void SSAO( void )
 		hbao_params[2].x = 1.0f * InvFocalLength.x;
 		hbao_params[2].y = 1.0f * InvFocalLength.y;
 		// LinMAD
-		float znear = Z_NEAR, zfar = RI->farClip;
-		hbao_params[3].x = (znear - zfar) / (2.0f * znear * zfar);
-		hbao_params[3].y = (znear + zfar) / (2.0f * znear * zfar);
+		const float znear = Z_NEAR;
+		hbao_params[3].x = (znear - zFar) / (2.0f * znear * zFar);
+		hbao_params[3].y = (znear + zFar) / (2.0f * znear * zFar);
 		// screen resolution
 		hbao_params[4].x = glState.width;
 		hbao_params[4].y = glState.height;
@@ -1058,8 +1053,7 @@ int RenderExposureStorage(void)
 	static int Index = 0;
 	const int sourceIndex = Index % 2;
 	const int destIndex = (Index + 1) % 2;
-
-	int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
+	const int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
 
 	GL_BindShader( glsl.GenExposure );
 	ASSERT( RI->currentshader != NULL );
@@ -1095,7 +1089,7 @@ void ToneMap(void)
 	if( R_FullBright() || r_lightmap->value )
 		return;
 
-	int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
+	const int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
 
 	// render luminance to first mip
 	GL_Bind( GL_TEXTURE0, tr.avg_luminance_texture );
@@ -1145,14 +1139,14 @@ void ToneMap(void)
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
-	int ExposureTexture = RenderExposureStorage();
+	const int ExposureTexture = RenderExposureStorage();
 
 	GL_BindShader( glsl.ToneMap );
 	ASSERT( RI->currentshader != NULL );
 
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
 	GL_Bind( GL_TEXTURE1, ExposureTexture ); // u_HDRExposure
-	float UseTonemap = (gl_tonemap->value > 0) ? 1.0f : 0.0f;
+	const float UseTonemap = (gl_tonemap->value > 0) ? 1.0f : 0.0f;
 	pglUniform1fARB( RI->currentshader->u_GenericCondition, UseTonemap );
 
 	RenderFSQ( glState.width, glState.height );
@@ -1188,8 +1182,8 @@ void DownScale( void )
 
 	GL_Setup2D();
 
-	float w = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 );
-	float h = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 );
+	const float w = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 );
+	const float h = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 );
 
 	// capture screen
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
@@ -1230,18 +1224,17 @@ void LensFlare( void )
 
 	Vector sunangles, sundir, suntarget;
 	Vector forward, right, up, screen;
-	Vector v_angles, v_origin;
 
 	// Sun position
 	VectorAngles( -tr.sky_normal, sunangles );
 
-	v_angles = tr.viewparams.viewangles;
-	v_origin = tr.viewparams.vieworg;
+	const Vector v_angles = tr.viewparams.viewangles;
+	const Vector v_origin = tr.viewparams.vieworg;
 	AngleVectors( v_angles, forward, NULL, NULL );
 	AngleVectors( sunangles, sundir, NULL, NULL );
 	suntarget = v_origin + sundir * 135000; // maps can be this big :)
 
-	float DotP = DotProduct( forward, sundir );
+	const float DotP = DotProduct( forward, sundir );
 	if( DotP < 0.0f )
 		gHUD.LensFlareAlpha = 0.0f;
 
@@ -1323,7 +1316,7 @@ void WaterDrops( void )
 	if( gEngfuncs.GetLocalPlayer()->curstate.vuser1.y > 0.0f )
 		gHUD.ScreenDrips_Visible = false;
 
-	bool Override = (gHUD.ScreenDrips_OverrideTime > tr.time);
+	const bool Override = (gHUD.ScreenDrips_OverrideTime > tr.time);
 
 	// do not allow water drips if we look too much down
 	if( !Override && tr.viewparams.viewangles.x > 30 )
@@ -1384,7 +1377,7 @@ void DroneScreenShader( void )
 	if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_PLAYERUSINGCAMERA )
 		return;
 
-	float out_amount = 1.5f - (gHUD.m_DroneBars.DroneHealth / (float)DRONE_MAX_HEALTH);
+	const float out_amount = 1.5f - (gHUD.m_DroneBars.DroneHealth / (float)DRONE_MAX_HEALTH);
 
 	// capture screen
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
@@ -1416,14 +1409,14 @@ void HeatDistortionShader( void )
 			return;
 	}
 
-	float angle = fabs( tr.viewparams.viewangles.x );
+	const float angle = fabs( tr.viewparams.viewangles.x );
 
 	// do not allow this effect if we look too much up or down
 	if( angle > 45 )
 		return;
 
 	// otherwise scale it
-	float scale = 1.0f - (angle / 45.0f);
+	const float scale = 1.0f - (angle / 45.0f);
 	
 	// capture screen
 	GL_Bind( GL_TEXTURE0, tr.screen_color );

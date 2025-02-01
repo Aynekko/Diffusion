@@ -1480,18 +1480,20 @@ float R_ComputeFadingDistance( cl_entity_t *e )
 	if( IsBuildingCubemaps() )
 		return tr.fadeblend[e->index];
 
+	const int EntFadingDistance = e->curstate.iuser4;
+
 	// fade distance is not set in the entity
-	if( e->curstate.iuser4 <= 0 )
+	if( EntFadingDistance <= 0 )
 		return tr.fadeblend[e->index];
 
 	// calculate correct origin (helps for brush ents)
-	Vector CenterOffset = (e->curstate.mins + e->curstate.maxs) / 2.f;
-	Vector EntOrigin = e->curstate.origin + CenterOffset;
+	const Vector CenterOffset = (e->curstate.mins + e->curstate.maxs) / 2.f;
+	const Vector EntOrigin = e->curstate.origin + CenterOffset;
 
 	// calculate new, increased fade distance if we are zoomed
 	// for FOV above 70 it is assumed that distance remains unchanged
-	float FOVfactor = bound( 30, RI->fov_x, 70 ) / 70;
-	int FadeDistance = e->curstate.iuser4 * (1 / FOVfactor);
+	const float FOVfactor = bound( 30, RI->fov_x, 70 ) / 70;
+	const int FadeDistance = EntFadingDistance / FOVfactor;
 
 	// FIXME: entities in monitor/portal view are not counted
 	// they could be culled serverside already, because I only count the distance from the player (host) and entity directly
@@ -1507,17 +1509,17 @@ float R_ComputeFadingDistance( cl_entity_t *e )
 		)
 		{ ViewOrigin = tr.pDrone->curstate.origin; }
 
-	int iDist = (int)(ViewOrigin - EntOrigin).Length();
+	const int iDist = (int)(ViewOrigin - EntOrigin).Length();
 
 	// player within range, no need to fade
 	if( iDist <= FadeDistance )
 		return tr.fadeblend[e->index];
-
-	// if the distance from model origin and the player exceeds desired fade distance, start fading
-	float remapped = RemapVal( iDist, FadeDistance, FadeDistance + 255, 0.0f, 1.0f );
-	
-	if( iDist > FadeDistance )
+	else
+	{
+		// if the distance from model origin and the player exceeds desired fade distance, start fading
+		float remapped = RemapVal( iDist, FadeDistance, FadeDistance + 255, 0.0f, 1.0f );
 		tr.fadeblend[e->index] = 1.0f - remapped;
+	}
 
 	// keep the custom render mode intact, only switch to Fade if Normal or Solid (those can't fade)
 	if( tr.fadeblend[e->index] < 1.0f )
@@ -1526,11 +1528,11 @@ float R_ComputeFadingDistance( cl_entity_t *e )
 			e->curstate.rendermode = kRenderFade; // this is a 100% clone of Texture, the only difference is light brightness (Texture has much less - see BMODEL_KRENDERTRANSTEXTURE)
 	}
 
-	tr.fadeblend[e->index] = bound( 0, tr.fadeblend[e->index], 1.0f );
+	tr.fadeblend[e->index] = bound( 0.0f, tr.fadeblend[e->index], 1.0f );
 
-	if( tr.fadeblend[e->index] <= 0 )
+	if( tr.fadeblend[e->index] == 0.0f )
 		r_stats.num_faded_ents++; // to see this, sv_fade_props must be disabled
-	else if( tr.fadeblend[e->index] > 0 && tr.fadeblend[e->index] < 1 )
+	else if( tr.fadeblend[e->index] > 0.0f && tr.fadeblend[e->index] < 1.0f )
 		r_stats.num_fading_ents++;
 
 	return tr.fadeblend[e->index];

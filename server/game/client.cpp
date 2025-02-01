@@ -1800,14 +1800,14 @@ void SetupVisibility( edict_t *pViewEntity, edict_t *pClient, unsigned char **pv
 // IsBackCulled: if the entity is behind our back, we don't send it to client.
 // Experimental!!! Function is copy-pasted from monster's FInViewCone.
 //===========================================================================
-bool IsBackCulled( CBasePlayer* pPlayer, CBaseEntity* e)
+static bool IsBackCulled( CBasePlayer* pPlayer, CBaseEntity* e)
 {
-	if( !pPlayer || !e )
-		return false;
-	
 	// how sv_fade_props work: 0 - disable all culling, 1 - enable front culling
 	// any value above 1 enables backculling and equals minimum distance where entity will be culled
 	if( sv_fade_props.value <= 1 )
+		return false;
+	
+	if( !pPlayer || !e )
 		return false;
 
 	// important entities must have this set, if we don't want them to be back-culled
@@ -1875,23 +1875,24 @@ bool IsBackCulled( CBasePlayer* pPlayer, CBaseEntity* e)
 //===========================================================================
 // IsDistanceCulled: if the entity is far enough, we don't send it to client.
 //===========================================================================
-bool IsDistanceCulled( CBasePlayer *pPlayer, CBaseEntity *e )
+static bool IsDistanceCulled( CBasePlayer *pPlayer, CBaseEntity *e )
 {	
+	if( sv_fade_props.value <= 0 )
+		return false;
+	
 	if( !pPlayer || !e )
 		return false;
 
-	if( sv_fade_props.value <= 0 )
-		return false;
+	const bool Force = (sv_force_fadedistance.value > 0); // only applied to entities which already have fadedistance set
+	const int EntFadingDistance = e->pev->iuser4;
 
-	bool Force = (sv_force_fadedistance.value > 0); // only applied to entities which already have fadedistance set
-
-	if( e->pev->iuser4 <= 0 ) // fade distance isn't set
+	if( EntFadingDistance <= 0 ) // fade distance isn't set
 		return false;
-	else if( e->pev->iuser4 > 0 && e->pev->iuser4 < 10 ) // don't bother calculating
+	else if( EntFadingDistance > 0 && EntFadingDistance < 10 ) // don't bother calculating
 		return true;
 
-	Vector CenterOffset = (e->pev->mins + e->pev->maxs) / 2.f;
-	Vector EntOrigin = e->GetAbsOrigin() + CenterOffset;
+	const Vector CenterOffset = (e->pev->mins + e->pev->maxs) / 2.f;
+	const Vector EntOrigin = e->GetAbsOrigin() + CenterOffset;
 	Vector HostOrigin = pPlayer->CameraOrigin;
 
 	// if player has a drone active, we need to check this distance too - otherwise the entities won't be seen on the tablet screen
@@ -1909,12 +1910,12 @@ bool IsDistanceCulled( CBasePlayer *pPlayer, CBaseEntity *e )
 	// !!!: same stuff is going on in R_ComputeFadingDistance on client
 	float FOV = pPlayer->m_flFOV;
 	if (FOV <= 0) FOV = 90;
-	float FOVfactor = bound(30, FOV, 70) / 70;
+	const float FOVfactor = bound(30, FOV, 70) / 70;
 	int FadeDistance;
 	if( Force )
-		FadeDistance = sv_force_fadedistance.value * (1 / FOVfactor);
+		FadeDistance = sv_force_fadedistance.value / FOVfactor;
 	else
-		FadeDistance = e->pev->iuser4 * (1 / FOVfactor);
+		FadeDistance = EntFadingDistance / FOVfactor;
 
 	if( (int)(HostOrigin - EntOrigin).Length() > FadeDistance + 255 )
 		return true;
@@ -1969,19 +1970,6 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 			return 0;
 	}
 
-	// diffusion - apply a flag to laser spot, will be using local origin on client
-	if( FClassnameIs(pEntity,"laser_spot"))
-	{
-		if( pEntity->pev->effects & EF_MYLASERSPOT )
-			pEntity->pev->effects &= ~EF_MYLASERSPOT;
-
-		if( pEntity->pev->owner == pPlayer->edict() )
-		{
-			if( !(pEntity->pev->effects & EF_MYLASERSPOT) )
-				pEntity->pev->effects |= EF_MYLASERSPOT;
-		}
-	}
-
 	bool DisableCullingForCubemap = false;
 	if( sv_cubemap_culling.value > 0 )
 	{
@@ -2006,6 +1994,19 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 				}
 				else
 					return 0;
+			}
+		}
+
+		// diffusion - apply a flag to laser spot, will be using local origin on client
+		if( FClassnameIs( pEntity, "laser_spot" ) )
+		{
+			if( pEntity->pev->effects & EF_MYLASERSPOT )
+				pEntity->pev->effects &= ~EF_MYLASERSPOT;
+
+			if( pEntity->pev->owner == pPlayer->edict() )
+			{
+				if( !(pEntity->pev->effects & EF_MYLASERSPOT) )
+					pEntity->pev->effects |= EF_MYLASERSPOT;
 			}
 		}
 	}
@@ -2040,7 +2041,6 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 	}
 
 	memset( state, 0, sizeof( *state ) );
-
 
 	// Assign index so we can track this entity from frame to frame and
 	// delta from it.
@@ -2104,11 +2104,13 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 	state->framerate  = ent->v.framerate;
 	state->body       = ent->v.body;
 
-	for (i = 0; i < 4; i++)
-		state->controller[i] = ent->v.controller[i];
+	state->controller[0] = ent->v.controller[0];
+	state->controller[1] = ent->v.controller[1];
+	state->controller[2] = ent->v.controller[2];
+	state->controller[3] = ent->v.controller[3];
 
-	for (i = 0; i < 2; i++)
-		state->blending[i]   = ent->v.blending[i];
+	state->blending[0]   = ent->v.blending[0];
+	state->blending[1] = ent->v.blending[1];
 
 	state->rendermode = ent->v.rendermode;
 	state->renderamt = ent->v.renderamt;
