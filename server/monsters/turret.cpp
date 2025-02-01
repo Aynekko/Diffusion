@@ -36,7 +36,7 @@
 extern Vector VecBModelOrigin( entvars_t* pevBModel );
 
 #define TURRET_SHOTS	2
-#define TURRET_RANGE	(100 * 12)
+#define TURRET_RANGE	1200
 #define TURRET_SPREAD	Vector( 0, 0, 0 )
 #define TURRET_TURNRATE	30		//angles per 0.1 second
 #define TURRET_MAXWAIT	15		// seconds turret will stay active w/o a target
@@ -309,7 +309,7 @@ void CBaseTurret::Spawn()
 	SetBoneController( 0, 0 );
 	SetBoneController( 1, 0 );
 	m_flFieldOfView = VIEW_FIELD_FULL;
-	// m_flSightRange = TURRET_RANGE;
+	if( !m_flDistLook ) m_flDistLook = TURRET_RANGE;
 	SetFlag( F_METAL_MONSTER );
 }
 
@@ -537,7 +537,7 @@ void CBaseTurret::EyeOff( )
 
 CBaseEntity *CBaseTurret::AcquireTarget(void)
 {
-	Look( TURRET_RANGE );
+	Look( m_flDistLook );
 	CBaseEntity *pEnemy = BestVisibleEnemy();
 	if( !pEnemy )
 	{
@@ -674,7 +674,7 @@ void CBaseTurret::ActiveThink(void)
 	float flDistToEnemy = vecDirToEnemy.Length();
 
 	// Current enmey is not visible.
-	if( !fEnemyVisible || ( flDistToEnemy > TURRET_RANGE ))
+	if( !fEnemyVisible || ( flDistToEnemy > m_flDistLook ))
 	{
 		if( !m_flLastSight )
 			m_flLastSight = gpGlobals->time + 0.5;
@@ -784,7 +784,7 @@ void CBaseTurret::ActiveThink(void)
 
 void CTurret::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
 {
-	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_9MM, 1, 0, VARS(pev->owner) );
+	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, m_flDistLook, BULLET_MONSTER_9MM, 1, 0, VARS(pev->owner) );
 	EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "turret/tu_fire1.wav", 1, 0.6, 0, RANDOM_LONG( 95, 105 ) );
 	pev->effects |= EF_MUZZLEFLASH;
 }
@@ -792,7 +792,7 @@ void CTurret::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
 
 void CMiniTurret::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
 {
-	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_9MM, 1, 0, VARS( pev->owner ) );
+	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, m_flDistLook, BULLET_MONSTER_9MM, 1, 0, VARS( pev->owner ) );
 
 	switch(RANDOM_LONG(0,2))
 	{
@@ -1455,7 +1455,7 @@ void CSentry::Spawn()
 
 void CSentry::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
 {
-	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, TURRET_RANGE, BULLET_MONSTER_MP5, 1, 0, VARS( pev->owner ) );
+	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, m_flDistLook, BULLET_MONSTER_MP5, 1, 0, VARS( pev->owner ) );
 	CSoundEnt::InsertSound ( bits_SOUND_COMBAT, GetAbsOrigin(), 768, 0.3, ENTINDEX(edict()) );
 
 //	ALERT(at_console, "SentryAmmoClip %3d\n", SentryAmmoClip);
