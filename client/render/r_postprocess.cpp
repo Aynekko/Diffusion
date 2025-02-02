@@ -195,6 +195,10 @@ void InitPostTextures( void )
 	if( !tr.screen_color )
 		tr.screen_color = CREATE_TEXTURE( "*screencolor", glState.width, glState.height, NULL, TF_COLORBUFFER );
 
+	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); // this is useful for rendering scale below 1.0
+	GL_Bind( GL_TEXTURE0, 0 );
+
 	if( tr.target_rgb[0] )
 	{
 		FREE_TEXTURE( tr.target_rgb[0] );
@@ -1191,16 +1195,8 @@ void DownScale( void )
 
 	pglViewport( 0, 0, w, h );
 
-	GL_BindShader( glsl.DownScale );
-	ASSERT( RI->currentshader != NULL );
-
-	// do filtering and sharpening
-	pglUniform1fARB( RI->currentshader->u_GenericCondition, 0.1f );
-	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / w, 1.0f / h );
-
 	RenderFSQ( glState.width, glState.height );
 
-	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
 }
 
