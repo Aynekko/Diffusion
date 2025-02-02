@@ -757,7 +757,7 @@ public:
 	virtual int Illumination( ) { return GETENTITYILLUM( ENT( pev ) ); };
 
 	virtual int FVisible ( CBaseEntity *pEntity );
-	virtual int FVisible ( const Vector &vecOrigin );
+	virtual int FVisible( const Vector &vecOrigin, CBaseEntity *pEntity = NULL );
 
 	virtual BOOL ShouldCollide( CBaseEntity *pOther );
 

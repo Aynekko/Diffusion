@@ -542,7 +542,7 @@ CBaseEntity *CBaseTurret::AcquireTarget(void)
 	if( !pEnemy )
 	{
 		// special case for player's turret and deathmatch mode
-		if( FClassnameIs( this, "_playersentry" ) && g_pGameRules->IsMultiplayer() )
+		if( g_pGameRules->IsMultiplayer() && FClassnameIs( this, "_playersentry" ) )
 		{
 			int iDist = 0;
 			int iNearest = 8192;

@@ -1328,48 +1328,42 @@ BOOL CBaseMonster :: FInViewCone ( Vector *pOrigin )
 // returns 0 or 1 as before, but can also return 2, if the entity is visible through a solid wall (func_wall with special properties)
 // CheckSeeThrough is time-based so monster would do some other things rather then always running out of cover
 //=========================================================
-int CBaseEntity :: FVisible ( CBaseEntity *pEntity )
+int CBaseEntity::FVisible( const Vector &vecOrigin, CBaseEntity *pEntity )
 {
-	TraceResult tr, tr2;
-	Vector vecLookerOrigin;
-	Vector vecTargetOrigin;
+	if( pEntity )
+	{
+		if( FBitSet( pEntity->pev->flags, FL_NOTARGET ) )
+			return 0;
 
-	if( !pEntity ) // diffusion
-		return 0;
+		// don't look through water
+		if( (pev->waterlevel != 3 && pEntity->pev->waterlevel == 3) || (pev->waterlevel == 3 && pEntity->pev->waterlevel == 0) )
+			return 0;
+	}
 	
-	if (FBitSet( pEntity->pev->flags, FL_NOTARGET ))
-		return 0;
+	TraceResult tr;
 
-	// don't look through water
-	if(( pev->waterlevel != 3 && pEntity->pev->waterlevel == 3 ) || ( pev->waterlevel == 3 && pEntity->pev->waterlevel == 0 ))
-		return 0;
-
-	vecLookerOrigin = EyePosition(); // look through the caller's 'eyes'
-	vecTargetOrigin = pEntity->EyePosition();
-
-	UTIL_TraceLine(vecLookerOrigin, vecTargetOrigin, ignore_monsters, ignore_glass, ENT(pev)/*pentIgnore*/, &tr);
+	UTIL_TraceLine( EyePosition(), vecOrigin, ignore_monsters, ignore_glass, ENT( pev )/*pentIgnore*/, &tr );
 
 	// diffusion - able to see through transparent wall if such properties are set.
 	CBaseEntity *pHitEnt = CBaseEntity::Instance( tr.pHit );
 
 	if( pHitEnt->HasFlag( F_MONSTER_CAN_SEE_THROUGH ) ) // UNDONE func_wall only
 	{
-		
 		// we need to do another trace. the monster can see through this transparent wall, but what's behind it?
-		UTIL_TraceLine( tr.vecEndPos, vecTargetOrigin, ignore_monsters, ignore_glass, ENT( pHitEnt->pev )/*pentIgnore*/, &tr2 );
+		UTIL_TraceLine( tr.vecEndPos, vecOrigin, ignore_monsters, ignore_glass, ENT( pHitEnt->pev )/*pentIgnore*/, &tr );
 
-		if( FClassnameIs( pEntity, "monster_target" ) && tr2.fInOpen )
-			return 2; // monster_target can't be tracelined as good
+	//	if( pEntity && FClassnameIs( pEntity, "monster_target" ) && tr.fInOpen )
+	//		return 2; // monster_target can't be tracelined as good
 
-		if( tr2.flFraction != 1.0 )
+		if( tr.flFraction != 1.0 )
 			return 0; // Line of sight is not established
 		else
 			return 2; // line of sight is valid.
 	}
 	else
 	{
-		if( FClassnameIs( pEntity, "monster_target" ) && tr.fInOpen )
-			return 1;
+	//	if( pEntity && FClassnameIs( pEntity, "monster_target" ) && tr.fInOpen )
+	//		return 1;
 
 		if( tr.flFraction != 1.0 )
 			return 0; // Line of sight is not established
@@ -1378,23 +1372,16 @@ int CBaseEntity :: FVisible ( CBaseEntity *pEntity )
 	}
 }
 
-//=========================================================
-// FVisible - returns true if a line can be traced from
-// the caller's eyes to the target vector
-//=========================================================
-int CBaseEntity :: FVisible ( const Vector &vecOrigin )
+int CBaseEntity :: FVisible ( CBaseEntity *pEntity )
 {
-	TraceResult tr;
-	Vector		vecLookerOrigin;
-	
-	vecLookerOrigin = EyePosition();//look through the caller's 'eyes'
+	TraceResult tr, tr2;
+	Vector vecLookerOrigin;
+	Vector vecTargetOrigin;
 
-	UTIL_TraceLine(vecLookerOrigin, vecOrigin, ignore_monsters, ignore_glass, ENT(pev)/*pentIgnore*/, &tr);
-	
-	if (tr.flFraction != 1.0)
-		return 0; // Line of sight is not established
-	else
-		return 1;// line of sight is valid.
+	if( !pEntity ) // diffusion
+		return 0;
+
+	return FVisible( pEntity->EyePosition(), pEntity );
 }
 
 /*
