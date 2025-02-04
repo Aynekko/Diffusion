@@ -543,7 +543,10 @@ void CCar::Spawn( void )
 	PrevOrigin = GetAbsOrigin(); // for achievement purposes, to measure distance
 
 	if( HasSpawnFlags(SF_CAR_DRIFTMODE) ) // experimental and unfinished...
+	{
 		DriftMode = true;
+		DriftAngles = GetAbsAngles();
+	}
 
 	SafeSpawnPos = g_vecZero;
 	SafeCarPos = g_vecZero;
@@ -954,9 +957,9 @@ void CCar::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Col
 
 	// make chassis vectors
 	UTIL_MakeVectors( pChassis->GetAbsAngles() );
-	Vector ChassisForw = gpGlobals->v_forward;
-	Vector ChassisUp = gpGlobals->v_up;
-	Vector ChassisRight = gpGlobals->v_right;
+	const Vector ChassisForw = gpGlobals->v_forward;
+	const Vector ChassisUp = gpGlobals->v_up;
+	const Vector ChassisRight = gpGlobals->v_right;
 
 	// bring back the car vectors
 	UTIL_MakeVectors( GetAbsAngles() );
@@ -1286,9 +1289,8 @@ void CCar::Drive( void )
 
 	// reset all velocity from previous frame
 	pev->velocity = g_vecZero;
-	bool IsDrifting = false;
 
-	float AbsCarSpeed = fabs( CarSpeed );
+	const float AbsCarSpeed = fabs( CarSpeed );
 
 	// CAR STUCK???
 	if( StuckTime > gpGlobals->time )
@@ -1308,30 +1310,35 @@ void CCar::Drive( void )
 
 	// will need those later!
 	UTIL_MakeVectors( pChassis->GetAbsAngles() );
-	Vector ChassisForw = gpGlobals->v_forward;
-	Vector ChassisUp = gpGlobals->v_up;
-	Vector ChassisRight = gpGlobals->v_right;
+	const Vector ChassisForw = gpGlobals->v_forward;
+	const Vector ChassisUp = gpGlobals->v_up;
+	const Vector ChassisRight = gpGlobals->v_right;
 	Vector DriftForw = g_vecZero;
 
 	if( DriftMode )
 	{
-		float ChassisAbsAngY = pChassis->pev->angles.y;
-		float anglediff = AngleDiff( ChassisAbsAngY, DriftAngles.y );
+		const float ChassisAbsAngY = pChassis->pev->angles.y;
+		const float anglediff = AngleDiff( ChassisAbsAngY, DriftAngles.y );
 
-		float drift_recovery_speed = (MaxCarSpeed * 3) / (1 + AbsCarSpeed); // stability
-		drift_recovery_speed = bound( 10.0f, drift_recovery_speed, 500.0f );
-		if( bForward() )
-			drift_recovery_speed *= 0.25f;
+		// should depend on a surface/tires used etc.
+		float drift_recovery_speed = 5000.0f / (1.0f + AbsCarSpeed); // stability
+		UTIL_MakeVectors( DriftAngles );
+		DriftForw = gpGlobals->v_forward;
+		float dot = DotProduct( DriftForw, ChassisForw );
+		DriftAmount = bound( 0.05, dot, 1 );
+		DriftAmount *= DriftAmount * DriftAmount;
+		drift_recovery_speed = bound( 30.0f, drift_recovery_speed, 5000.0f );
+		drift_recovery_speed /= DriftAmount;
+		if( !bLeft() && !bRight() )
+			drift_recovery_speed *= 2.0f; // should depend on a surface/tires used etc.
+		if( !bForward() )
+			drift_recovery_speed *= 2.0f;
 		if( AbsCarSpeed <= 0.1f )
 			DriftAngles.y = ChassisAbsAngY;
 		else
 			DriftAngles.y = UTIL_ApproachAngle( ChassisAbsAngY, DriftAngles.y, drift_recovery_speed * gpGlobals->frametime );
 
-		UTIL_MakeVectors( DriftAngles );
-		DriftForw = gpGlobals->v_forward;
-		float dot = DotProduct( DriftForw, ChassisForw );
-		DriftAmount = 1 / bound( 0.05, dot, 1 ); // 1 to 20
-	//	ALERT( at_console, "recovery %f, amt %f, dot %f\n", drift_recovery_speed, DriftAmount, dot );
+		ALERT( at_console, "recovery %f, amt %f, dot %f\n", drift_recovery_speed, DriftAmount, dot );
 	}
 	else
 		DriftAmount = 1.0f;
@@ -1340,7 +1347,7 @@ void CCar::Drive( void )
 	UTIL_MakeVectors( GetAbsAngles() );
 
 	// TEMP !!! (or not.)
-	Vector PlayerPos = GetAbsOrigin() + gpGlobals->v_up * 40;
+	const Vector PlayerPos = GetAbsOrigin() + gpGlobals->v_up * 40;
 //	if( pDriverMdl )
 //		PlayerPos = pDriverMdl->GetAbsOrigin();
 	hDriver->SetAbsOrigin( PlayerPos );
@@ -1369,8 +1376,8 @@ void CCar::Drive( void )
 	int RRW_InAir;
 	int RLW_InAir;
 	Wheels( &FRW_InAir, &FLW_InAir, &RRW_InAir, &RLW_InAir );
-	int FrontWheelsInAir = FRW_InAir + FLW_InAir; // can't turn if 2
-	int RearWheelsInAir = RRW_InAir + RLW_InAir; // can't accelerate if 2 // TODO: 4x4? Front drive?
+	const int FrontWheelsInAir = FRW_InAir + FLW_InAir; // can't turn if 2
+	const int RearWheelsInAir = RRW_InAir + RLW_InAir; // can't accelerate if 2 // TODO: 4x4? Front drive?
 
 	//----------------------------
 	// turn
@@ -1421,6 +1428,7 @@ void CCar::Drive( void )
 	if( max_turn_val > 1.0f )
 		max_turn_val = 1.0f;
 	Turning = bound( -max_turn_val, Turning, max_turn_val );
+	const float AbsTurning = fabs( Turning );
 
 	int CameraMovingBound = 0;
 	if( SecondaryCamera )
@@ -1429,18 +1437,24 @@ void CCar::Drive( void )
 	CameraMoving = bound( -CameraMovingBound, CameraMoving, CameraMovingBound );
 
 	float CarTurnRate = (empirical * 0.1) + (0.005f * HeatingMult);
-	if( 0 )//DriftMode && AbsCarSpeed > 10 )
-	{
-		CarTurnRate *= DriftAmount;
-		if( bForward() )
-			CarTurnRate *= 0.75f * DriftAmount;
-	}
+//	if( 0 )//DriftMode && AbsCarSpeed > 10 )
+//	{
+//		CarTurnRate *= DriftAmount;
+//		if( bForward() )
+//			CarTurnRate *= 0.75f * DriftAmount;
+//	}
 	CarTurnRate = bound( 0, CarTurnRate, 1 );
 	
 	// handbrake pressed
 	if( bUp() )
 	{
-		CarTurnRate *= bound(1.0f, AbsCarSpeed * 0.002, 1.5f) + fabs(Turning);
+		if( DriftMode )
+		{
+			const float HandbrakeTurnRateMult = bound( 1.0f, AbsCarSpeed * 0.002, 1.5f ) + AbsTurning;
+			DriftAngles.y -= (10 * MaxTurn) * (Turning * CarTurnRate * HandbrakeTurnRateMult) * gpGlobals->frametime;
+		}
+		else
+			CarTurnRate *= bound( 1.0f, AbsCarSpeed * 0.002, 1.5f ) + AbsTurning;
 	}
 
 	Vector CarAng = GetLocalAngles();
@@ -1459,7 +1473,7 @@ void CCar::Drive( void )
 	// get one rear wheel which only rotates, the second will repeat
 	Vector RearWheelAng = pWheel3->GetLocalAngles();
 
-	float ApproachSpeed = bound( 200, AbsCarSpeed, 400 );
+	const float ApproachSpeed = bound( 200, AbsCarSpeed, 400 );
 	if( Forward == 0 )
 	{
 		if( bLeft() )
@@ -1490,7 +1504,7 @@ void CCar::Drive( void )
 	else if( !(bUp()) )
 	{
 		FrontWheelAng.x += Forward * AbsCarSpeed * (M_PI * 0.5) * gpGlobals->frametime;
-		RearWheelAng.x += Forward * AbsCarSpeed * (M_PI * 0.5) * gpGlobals->frametime * (1 + HeatingMult);
+		RearWheelAng.x += Forward * AbsCarSpeed * (M_PI * 0.5) * gpGlobals->frametime * (1 + HeatingMult) * (1.0f / (bForward() ? DriftAmount : 1.0f));
 	}
 
 	if( FrontWheelAng.x > 359.9f || FrontWheelAng.x < -359.9f )
@@ -1532,7 +1546,7 @@ void CCar::Drive( void )
 	surf_CurrentMult = (surf_Mult1 + surf_Mult2 + surf_Mult3 + surf_Mult4) * 0.25f;
 
 	// add turnwheel wobbling :)
-	float NewTurnWheelShake = RANDOM_FLOAT( -ChassisShake, ChassisShake ) * AbsCarSpeed * 0.01f;
+	const float NewTurnWheelShake = RANDOM_FLOAT( -ChassisShake, ChassisShake ) * AbsCarSpeed * 0.01f;
 	AddTurnWheelShake = UTIL_Approach( NewTurnWheelShake, AddTurnWheelShake, 50 * gpGlobals->frametime );
 
 	//----------------------------
@@ -1708,7 +1722,7 @@ void CCar::Drive( void )
 	}
 
 	// add "sound shake" on some surfaces
-	float SndShake = ChassisShake * SuspHardness * AbsCarSpeed * 0.0001f;
+	const float SndShake = ChassisShake * SuspHardness * AbsCarSpeed * 0.0001f;
 	EngPitch += RANDOM_FLOAT( -SndShake, SndShake );
 	EngPitch = bound( 80, EngPitch, 250 );
 	if( BrokenCar )
@@ -1753,7 +1767,7 @@ void CCar::Drive( void )
 	//----------------------------
 	// chassis inclination
 	//----------------------------
-	int SuspDiff = fabs( RearWheelRadius - FrontWheelRadius );
+	const int SuspDiff = fabs( RearWheelRadius - FrontWheelRadius );
 	float SuspDiff2 = 1.0f;
 
 	// RECHECK THIS IN GAME!!! Set bigger front or rear wheels
@@ -1769,7 +1783,7 @@ void CCar::Drive( void )
 	// something similar must be done for LateralChange...
 	CrossChange *= 115.0f / (float)(FrontSuspDist + RearSuspDist);
 	
-	float LateralChange = ((pWheel1->GetAbsOrigin().z + pWheel3->GetAbsOrigin().z - SuspDiff) * 0.5) - ((pWheel2->GetAbsOrigin().z + pWheel4->GetAbsOrigin().z - SuspDiff) * 0.5);
+	const float LateralChange = ((pWheel1->GetAbsOrigin().z + pWheel3->GetAbsOrigin().z - SuspDiff) * 0.5) - ((pWheel2->GetAbsOrigin().z + pWheel4->GetAbsOrigin().z - SuspDiff) * 0.5);
 
 	// add shaking from going on dirt/snow/grass...
 	float AddChassisShake = 0.0f;
@@ -1812,7 +1826,7 @@ void CCar::Drive( void )
 		ChassisAng.x = UTIL_Approach( NewChassisAngX, ChassisAng.x, SuspHardness * fabs( NewChassisAngX - ChassisAng.x) * gpGlobals->frametime);
 
 	// Z - lateral rotation
-	float NewChassisAngZ = -LateralChange * SuspDiff2 + CarSpeed * Turning * (DriftAmount * MaxLean * 0.001) + AddChassisShake;
+	float NewChassisAngZ = -LateralChange * SuspDiff2 + CarSpeed * Turning * (MaxLean * 0.001) + AddChassisShake;
 	if( EnteringShake > 0.0f )
 	{
 		NewChassisAngZ += EnteringShake * sin( gpGlobals->time * 5.0f );
@@ -1836,7 +1850,7 @@ void CCar::Drive( void )
 //	ChassisOrg.z = UTIL_Approach( MiddlePoint, ChassisOrg.z, SuspHardness * fabs( MiddlePoint - ChassisOrg.z ) * gpGlobals->frametime );
 //	pChassis->SetAbsOrigin( ChassisOrg );
 	Vector ChassisOrg = pChassis->GetAbsOrigin();
-	Vector NewChassisOrg = (pWheel1->GetAbsOrigin() + pWheel2->GetAbsOrigin() + pWheel3->GetAbsOrigin() + pWheel4->GetAbsOrigin()) * 0.25;
+	const Vector NewChassisOrg = (pWheel1->GetAbsOrigin() + pWheel2->GetAbsOrigin() + pWheel3->GetAbsOrigin() + pWheel4->GetAbsOrigin()) * 0.25;
 	ChassisOrg.x = UTIL_Approach( NewChassisOrg.x, ChassisOrg.x, SuspHardness * fabs( NewChassisOrg.x - ChassisOrg.x ) * gpGlobals->frametime );
 	ChassisOrg.y = UTIL_Approach( NewChassisOrg.y, ChassisOrg.y, SuspHardness * fabs( NewChassisOrg.y - ChassisOrg.y ) * gpGlobals->frametime );
 	ChassisOrg.z = UTIL_Approach( NewChassisOrg.z, ChassisOrg.z, SuspHardness * fabs( NewChassisOrg.z - ChassisOrg.z ) * gpGlobals->frametime );
@@ -1854,10 +1868,10 @@ void CCar::Drive( void )
 	case 3: WaterVelocityMult = 0.25; break;
 	}
 
-	float ActualMaxCarSpeed = MaxCarSpeed * WaterVelocityMult * surf_CurrentMult;
-	float ActualMaxCarSpeedBackwards = MaxCarSpeedBackwards * WaterVelocityMult * surf_CurrentMult;
-	float ActualAccelRate = (AccelRate + (200 * HeatingMult) + (TurboAccum * 100)) / (1 + (AbsCarSpeed / MaxCarSpeed));
-	float ActualBackAccelRate = (BackAccelRate + (200 * HeatingMult)) / (1 + (AbsCarSpeed / MaxCarSpeed));
+	const float ActualMaxCarSpeed = MaxCarSpeed * WaterVelocityMult * surf_CurrentMult * DriftAmount;
+	const float ActualMaxCarSpeedBackwards = MaxCarSpeedBackwards * WaterVelocityMult * surf_CurrentMult * DriftAmount;
+	const float ActualAccelRate = (DriftAmount * (AccelRate + (200 * HeatingMult) + (TurboAccum * 100))) / (1 + (AbsCarSpeed / MaxCarSpeed));
+	const float ActualBackAccelRate = (BackAccelRate + (200 * HeatingMult)) / (1 + (AbsCarSpeed / MaxCarSpeed));
 
 	if( HasSpawnFlags( SF_CAR_TURBO ) )
 	{
@@ -1931,14 +1945,14 @@ void CCar::Drive( void )
 	{
 		if( bUp() || HeatingTires ) // handbrake
 		{
-			CarSpeed = UTIL_Approach( 0, CarSpeed, BrakeRate * 1.35 * gpGlobals->frametime );
+			CarSpeed = UTIL_Approach( 0, CarSpeed, BrakeRate * 1.25f * gpGlobals->frametime );
 		}
 		else if( bForward() )
 		{
 			if( CarSpeed > 0 && CarSpeed > ActualMaxCarSpeed && ActualMaxCarSpeed != MaxCarSpeed )
 				CarSpeed -= 300 * gpGlobals->frametime;
 			else if( !IsShifting )
-				CarSpeed += ActualAccelRate * (1 - fabs( Turning ) * 0.5) * WaterVelocityMult * surf_CurrentMult * gpGlobals->frametime;
+				CarSpeed += ActualAccelRate * (1.0f - AbsTurning * 0.5f) * WaterVelocityMult * surf_CurrentMult * gpGlobals->frametime;
 
 			if( CarSpeed < 0 )
 				DoBrakeSqueak = true;
@@ -1955,7 +1969,7 @@ void CCar::Drive( void )
 				if( CarSpeed < 0 && CarSpeed < -ActualMaxCarSpeedBackwards && ActualMaxCarSpeedBackwards != MaxCarSpeedBackwards )
 					CarSpeed += 300 * gpGlobals->frametime;
 				else
-					CarSpeed -= ActualBackAccelRate * (1 - fabs( Turning ) * 0.5) * WaterVelocityMult * surf_CurrentMult * gpGlobals->frametime;
+					CarSpeed -= ActualBackAccelRate * (1.0f - AbsTurning * 0.5f) * WaterVelocityMult * surf_CurrentMult * gpGlobals->frametime;
 			}
 		}
 	}
@@ -1993,14 +2007,16 @@ void CCar::Drive( void )
 	}
 
 	if( DriftMode )
-		CarSpeed = bound( (-MaxCarSpeedBackwards + (MaxCarSpeedBackwards * fabs( Turning ) * 0.5) ), CarSpeed, (MaxCarSpeed - (MaxCarSpeed * fabs( Turning ) * 0.75)) );
+	{
+		CarSpeed = bound( (-ActualMaxCarSpeedBackwards + (ActualMaxCarSpeedBackwards * AbsTurning * 0.5f)), CarSpeed, (ActualMaxCarSpeed - (ActualMaxCarSpeed * AbsTurning * 0.75f)) );
+	}
 	else
 		// also slow down the car if turning too much
-		CarSpeed = bound( -MaxCarSpeedBackwards + (MaxCarSpeedBackwards * fabs(Turning) * 0.25) + RANDOM_LONG(-1,1), CarSpeed, MaxCarSpeed - (MaxCarSpeed * fabs( Turning ) * 0.75) + RANDOM_LONG( -1, 1 ) );
+		CarSpeed = bound( -ActualMaxCarSpeedBackwards + (ActualMaxCarSpeedBackwards * AbsTurning * 0.25f) + RANDOM_LONG(-1,1), CarSpeed, ActualMaxCarSpeed - (ActualMaxCarSpeed * AbsTurning * 0.75f) + RANDOM_LONG( -1, 1 ) );
 
 	// -------- apply main movement  --------
-	float AngleDiff = pWheel1->GetLocalAngles().y - pChassis->GetLocalAngles().y;
-	float Percentage = Forward * (AngleDiff / (90 - MaxTurn));
+	const float AngleDiff = pWheel1->GetLocalAngles().y - pChassis->GetLocalAngles().y;
+	const float Percentage = Forward * (AngleDiff / (90 - MaxTurn));
 	if( !Collision.IsNull() )
 	{
 		pev->velocity = Collision;
@@ -2174,11 +2190,11 @@ void CCar::Drive( void )
 	}
 
 	// measure speed
-	float kph = (Distance * 0.001f) / (gpGlobals->frametime / 3600.0f);
+	const float kph = (Distance * 0.001f) / (gpGlobals->frametime / 3600.0f);
 
 	// unstick the car if this happens...
 	// stupid hack just to keep things playable because it can truly stick in a brush and it looks terrible
-	float ExpectedDist = (pev->velocity * gpGlobals->frametime).Length() * 0.01905f; // predicted velocity next frame in meters
+	const float ExpectedDist = (pev->velocity * gpGlobals->frametime).Length() * 0.01905f; // predicted velocity next frame in meters
 	// we didn't make even a half of expected distance, likely stuck
 	if( (AbsCarSpeed > 100.0f) && (ExpectedDist > 0.01f) && (Distance < ExpectedDist * 0.5f) && (gpGlobals->time > StuckTime + 1) && Collision.IsNull() )
 	{
@@ -2327,7 +2343,7 @@ void CCar::Wheels( int *FRW_InAir, int *FLW_InAir, int *RRW_InAir, int *RLW_InAi
 
 	// front right wheel
 	// ChassisUp * 40: need to make tracing start high to work properly on slopes !!!
-	float SlopeAdjust = 40.0f;
+	const float SlopeAdjust = 40.0f;
 	UTIL_TraceLine( pWheel1Org + ChassisUp * SlopeAdjust, pWheel1Org - ChassisUp * FrontWheelRadius * 2, ignore_monsters, dont_ignore_glass, pWheel1->edict(), &tr );
 	pWheel1NewOrg = tr.vecEndPos + ChassisUp * FrontWheelRadius;
 
@@ -2381,7 +2397,7 @@ void CCar::Camera(void)
 	if( !(hDriver->pev->flags & FL_CLIENT) )
 		return;
 
-	float AbsCarSpeed = fabs( CarSpeed );
+	const float AbsCarSpeed = fabs( CarSpeed );
 
 	if( !NewCameraAngle )
 		NewCameraAngle = pChassis->pev->angles.y;
@@ -2401,8 +2417,8 @@ void CCar::Camera(void)
 			NewCameraAngle = pChassis->pev->angles.y;
 	}
 
-	float anglediff = AngleDiff( NewCameraAngle, CameraAngles.y );
-	float approach_speed = bound( 1.0f, AbsCarSpeed * 0.005f, 3.0f );
+	const float anglediff = AngleDiff( NewCameraAngle, CameraAngles.y );
+	const float approach_speed = bound( 1.0f, AbsCarSpeed * 0.005f, 3.0f );
 
 	Vector vForward, vRight;
 	g_engfuncs.pfnAngleVectors( CameraAngles, vForward, vRight, NULL );
@@ -2410,7 +2426,7 @@ void CCar::Camera(void)
 	if( CarSpeed < -10 ) // going backwards
 		vRight = -vRight;
 
-	float max_camera_lean = bound( 0.f, CarSpeed * 0.025f, 10.f );
+	const float max_camera_lean = bound( 0.f, CarSpeed * 0.025f, 10.f );
 
 	if( CarSpeed > 0.01f && (bBack() || bUp()) ) // braking
 	{	
@@ -2499,7 +2515,7 @@ void CCar::Idle( void )
 	// now make the car's vectors
 	UTIL_MakeVectors( GetAbsAngles() );
 
-	float AbsCarSpeed = fabs( CarSpeed );
+	const float AbsCarSpeed = fabs( CarSpeed );
 
 	//----------------------------
 	// wheels' origin (aka "suspension"...)
@@ -2523,7 +2539,7 @@ void CCar::Idle( void )
 	
 	// Forward turning controls if going backwards
 	int Forward = 1;
-	Vector CarAng = GetLocalAngles();
+	const Vector CarAng = GetLocalAngles();
 
 	//----------------------------
 	// chassis inclination
@@ -2770,7 +2786,7 @@ bool CCar::ExitCar( CBaseEntity *pPlayer )
 	TraceResult TrExit;
 	TraceResult VisCheck;
 	UTIL_MakeVectors( pChassis->GetAbsAngles() );
-	Vector CarCenter = GetAbsOrigin() + gpGlobals->v_up * 46; // (human hull height / 2) + 10
+	const Vector CarCenter = GetAbsOrigin() + gpGlobals->v_up * 46; // (human hull height / 2) + 10
 	Vector vecSrc, vecEnd;
 
 	// check left side of the car first
@@ -2837,7 +2853,7 @@ Vector CCar::SafeSpawnPosition(void)
 	LastSafeSpawnCollectTime = gpGlobals->time;
 
 	UTIL_MakeVectors( pChassis->GetAbsAngles() );
-	Vector CarCenter = GetAbsOrigin() + gpGlobals->v_up * 46; // (human hull height / 2) + 10
+	const Vector CarCenter = GetAbsOrigin() + gpGlobals->v_up * 46; // (human hull height / 2) + 10
 	Vector vecSrc, vecEnd;
 	TraceResult TrExit, VisCheck;
 
@@ -2921,8 +2937,8 @@ void CCar::CarExplode( void )
 			UTIL_Remove( pWheel4->m_hChild );
 	}
 	
-	Vector vecOrigin = GetAbsOrigin();
-	Vector vecSpot = vecOrigin + (pev->mins + pev->maxs) * 0.5;
+	const Vector vecOrigin = GetAbsOrigin();
+	const Vector vecSpot = vecOrigin + (pev->mins + pev->maxs) * 0.5;
 
 	// fireball
 	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );

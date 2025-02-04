@@ -14,6 +14,7 @@
 #define SPEED_ARROW_STEP 2
 #define SPEED_ARROW_FRAMES 121
 #define SPEEDOMETER_Y_OFFSET 5
+#define SPEEDOMETER_SIZE 300
 #define SAVE_SQUARE_SIZE 100
 
 int VoiceIcon = 0;
@@ -131,11 +132,13 @@ void CScreenEffects::DrawGameSaved(void)
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, alpha );
 
+	const float saveiconsize = SAVE_SQUARE_SIZE * gHUD.fScale;
+	const float saveiconhalfsize = saveiconsize * 0.5f;
 	pglPushMatrix();
-	pglTranslatef( (ScreenWidth * 0.5f) - (SAVE_SQUARE_SIZE / 2), ScreenHeight - 75 - SAVE_SQUARE_SIZE, 0 );
+	pglTranslatef( ScreenWidth * 0.5f, ScreenHeight - (75 * gHUD.fScale) - saveiconsize, 0 );
 	pglRotatef( curRotation, 0, 0, 1 );
 	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-	DrawQuad( -SAVE_SQUARE_SIZE / 2, -SAVE_SQUARE_SIZE / 2, SAVE_SQUARE_SIZE / 2, SAVE_SQUARE_SIZE / 2 );
+	DrawQuad( -saveiconhalfsize, -saveiconhalfsize, saveiconhalfsize, saveiconhalfsize );
 	gEngfuncs.pTriAPI->End();
 	pglPopMatrix();
 }
@@ -163,11 +166,11 @@ void CScreenEffects::DrawSpeedometer(void)
 	GL_SelectTexture( 0 );
 	GL_Bind( 0, Speedometer );
 	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-	DrawQuad( ScreenWidth - 320, ScreenHeight - 320, ScreenWidth - 20, ScreenHeight - 20 );
+	DrawQuad( ScreenWidth - gHUD.fScale * (SPEEDOMETER_SIZE + 20), ScreenHeight - gHUD.fScale * (SPEEDOMETER_SIZE + 20), ScreenWidth - gHUD.fScale * 20, ScreenHeight - gHUD.fScale * 20 );
 	gEngfuncs.pTriAPI->End();
 
 	// kilometers
-	float Distance = (gEngfuncs.GetLocalPlayer()->prevstate.origin - gEngfuncs.GetLocalPlayer()->curstate.origin).Length() * 0.01905f * 0.001f;
+	const float Distance = (gEngfuncs.GetLocalPlayer()->prevstate.origin - gEngfuncs.GetLocalPlayer()->curstate.origin).Length() * 0.01905f * 0.001f;
 	float timedelta = g_fFrametime;
 	if( GET_MAX_CLIENTS() > 1 )
 		timedelta = gEngfuncs.GetLocalPlayer()->curstate.msg_time - gEngfuncs.GetLocalPlayer()->prevstate.msg_time;
@@ -181,17 +184,18 @@ void CScreenEffects::DrawSpeedometer(void)
 		SpeedArrowRotation = 240;
 	GL_Bind( 0, SpeedometerArrow );
 	pglPushMatrix();
-	pglTranslatef( ScreenWidth - 320 + 150, ScreenHeight - 320 + 150, 0 );
+	pglTranslatef( ScreenWidth - gHUD.fScale * (SPEEDOMETER_SIZE + 20) + gHUD.fScale * 150, ScreenHeight - gHUD.fScale * (SPEEDOMETER_SIZE + 20) + gHUD.fScale * 150, 0 );
 	pglRotatef( SpeedArrowRotation, 0, 0, 1 );
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-	DrawQuad( -128, -128, 128, 128 );
+	const float arrow_half_size = 128 * gHUD.fScale;
+	DrawQuad( -arrow_half_size, -arrow_half_size, arrow_half_size, arrow_half_size );
 	gEngfuncs.pTriAPI->End();
 	pglPopMatrix();
 
 	// draw gears
 	// 9 frames in total (EMPTY-1-2-3-4-5-6-7-R)
-	SpeedometerGears.SetPos( ScreenWidth - 320, ScreenHeight - 320 - SPEEDOMETER_Y_OFFSET, ScreenWidth - 20, ScreenHeight - 20 - SPEEDOMETER_Y_OFFSET );
+	SpeedometerGears.SetPos( ScreenWidth - gHUD.fScale * (SPEEDOMETER_SIZE + 20), ScreenHeight - gHUD.fScale * (SPEEDOMETER_SIZE + 20 + SPEEDOMETER_Y_OFFSET), ScreenWidth - gHUD.fScale * 20, ScreenHeight - gHUD.fScale * (20 + SPEEDOMETER_Y_OFFSET) );
 	SpeedometerGears.SetRenderMode( kRenderTransAdd );
 	SpeedometerGears.DrawFrame( Gear );
 }
@@ -208,8 +212,7 @@ void CScreenEffects::DrawCinematicBorder( void )
 
 	if( g_iUser1 )
 		BorderTransparency = 125;
-
-	if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_PLAYERUSINGCAMERA )
+	else if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_PLAYERUSINGCAMERA )
 		BorderTransparency = 200;
 
 	if( BorderTransparency > 0 )
@@ -246,9 +249,7 @@ void CScreenEffects::DrawVignette( void )
 		gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, VignetteAlpha );
 		gEngfuncs.pTriAPI->CullFace( TRI_NONE );
 
-		GL_SelectTexture( 0 );
-
-		GL_Bind( 0, Vignette );
+		GL_Bind( GL_TEXTURE0, Vignette );
 
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 		DrawQuad( 0, 0, ScreenWidth, ScreenHeight );
@@ -284,9 +285,7 @@ void CScreenEffects::DrawShieldVignette(void)
 		gEngfuncs.pTriAPI->Color4f( 70 / 255.0f, 169 / 255.0f, 1.0f, ShieldAlpha );
 		gEngfuncs.pTriAPI->CullFace( TRI_NONE );
 
-		GL_SelectTexture( 0 );
-
-		GL_Bind( 0, VignetteShield );
+		GL_Bind( GL_TEXTURE0, VignetteShield );
 
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 		DrawQuad( 0, 0, ScreenWidth, ScreenHeight );
@@ -306,8 +305,8 @@ void CScreenEffects::DrawVoiceIcon( void )
 		return;
 
 	const int icon_size = 50;
-	int x_pos = ScreenWidth - icon_size - 20;
-	int y_pos = ScreenHeight - (ScreenHeight * 0.25f);
+	const int x_pos = ScreenWidth - icon_size - 20;
+	const int y_pos = ScreenHeight - (ScreenHeight * 0.25f);
 
 	GL_Bind( 0, VoiceIcon );
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
