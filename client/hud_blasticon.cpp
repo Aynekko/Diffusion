@@ -58,12 +58,12 @@ int CHudBlastIcons::Draw( float flTime )
 		return 0;
 
 	float x = gHUD.fCenteredPadding; // starting offset
-	float padding = 10 * gHUD.fScale;
+	const float padding = 10 * gHUD.fScale;
 	int r1 = 0, g1 = 0, b1 = 0;
 	int r2 = 0, g2 = 0, b2 = 0;
 	int r3 = 0, g3 = 0, b3 = 0;
-	float icon_size = 48 * gHUD.fScale;
-	float y = ScreenHeight - (72 * gHUD.fScale);
+	const float icon_size = 48 * gHUD.fScale;
+	const float y = ScreenHeight - (72 * gHUD.fScale);
 
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 	GL_Bind( 0, img_blasticon );

@@ -45,9 +45,9 @@ int CHudCrosshairStatic::VidInit( void )
 	DamageDealt = 0;
 
 	// gauss-specific
-	int Gframe = gHUD.GetSpriteIndex( "hud_gausniper_frame" );
-	int Gcharge = gHUD.GetSpriteIndex( "hud_gausniper_charge" );
-	int Gammo = gHUD.GetSpriteIndex( "hud_gausniper_ammo" );
+	const int Gframe = gHUD.GetSpriteIndex( "hud_gausniper_frame" );
+	const int Gcharge = gHUD.GetSpriteIndex( "hud_gausniper_charge" );
+	const int Gammo = gHUD.GetSpriteIndex( "hud_gausniper_ammo" );
 	m_hGFrame = gHUD.GetSprite( Gframe );
 	m_hGCharge = gHUD.GetSprite( Gcharge );
 	m_hGAmmo = gHUD.GetSprite( Gammo );
@@ -64,11 +64,9 @@ void CHudCrosshairStatic::Reset( void )
 
 int CHudCrosshairStatic::MsgFunc_CrosshairStatic( const char *pszName, int iSize, void *pbuf )
 {
-	int ShouldEnable;
-
 	BEGIN_READ( pszName, pbuf, iSize );
 
-	ShouldEnable = READ_BYTE();
+	const int ShouldEnable = READ_BYTE();
 
 	if( ShouldEnable > 0 )
 	{
@@ -181,8 +179,8 @@ int CHudCrosshairStatic::Draw( float flTime )
 	
 	if( gHUD.IsZoomed ) // draw sniper scope
 	{
-		float YawSpeed = (PrevViewAngles - tr.viewparams.viewangles).Length() / g_fFrametime;
-		float Velocity = gEngfuncs.GetLocalPlayer()->curstate.velocity.Length();
+		const float YawSpeed = (PrevViewAngles - tr.viewparams.viewangles).Length() / g_fFrametime;
+		const float Velocity = gEngfuncs.GetLocalPlayer()->curstate.velocity.Length();
 		if( gHUD.IsZooming )
 		//	ZoomBlur += 5 * g_fFrametime;
 			ZoomBlur = 0.1f;
@@ -346,7 +344,7 @@ void CHudCrosshairStatic::LoadCrosshairForWeapon( int WeaponID )
 void CHudCrosshairStatic::DrawGaussZoomedHUD(void)
 {
 	// change weapon skin while charging
-	int skin = bound( 0, 9 - GaussCharge, 9 );
+	const int skin = bound( 0, 9 - GaussCharge, 9 );
 	GET_VIEWMODEL()->curstate.skin = skin;
 
 	static int iPlaySound = 0;
@@ -389,7 +387,7 @@ void CHudCrosshairStatic::DrawGaussZoomedHUD(void)
 	y = ScreenHeight - 80;
 	
 	wrect_t rc = *m_prc_Gcharge;
-	int offs = 200 - GaussCharge * 20; // GaussCharge is locked at 9 max
+	const int offs = 200 - GaussCharge * 20; // GaussCharge is locked at 9 max
 	rc.right -= offs;
 	rc.left += offs;
 	SPR_Set( m_hGCharge, r, g, b );

@@ -53,8 +53,8 @@ int CHudAchievement::Draw( float flTime )
 	if( gHUD.m_flTime > AchStartTime + SHOW_ACHIEVEMENT_TIME )
 		y_direction = true;
 
-	int xmax = RENDER_GET_PARM( PARM_TEX_WIDTH, CurrentImage );
-	int ymax = RENDER_GET_PARM( PARM_TEX_HEIGHT, CurrentImage );
+	const int xmax = RENDER_GET_PARM( PARM_TEX_WIDTH, CurrentImage );
+	const int ymax = RENDER_GET_PARM( PARM_TEX_HEIGHT, CurrentImage );
 
 	// screen center
 	x = (ScreenWidth - xmax) / 2;
@@ -160,15 +160,12 @@ void CHudAchievement::UserCmd_ReportAchievementsToConsole(void)
 	if( !bAchievements )
 		return;
 	
-	char Completed[7];
+	const char *cYes = "^2YES^7";
+	const char *cNo = "^1NO^7";
 	Msg( "^2Achievements:^7 currently in memory:\n" );
 	for( int i = 0; i < TOTAL_ACHIEVEMENTS; i++ )
 	{
-		if( ach_data.completion[i] )
-			sprintf_s( Completed, "^2YES^7" );
-		else
-			sprintf_s( Completed, "^1NO^7" );
-		Msg( "%i Achievement \"%s\", current %i, goal %i, Completed? %s\n", i, ach_data.name[i], ach_data.value[i], ach_data.goal[i], Completed );
+		Msg( "%i Achievement \"%s\", current %i, goal %i, Completed? %s\n", i, ach_data.name[i], ach_data.value[i], ach_data.goal[i], ach_data.completion[i] ? cYes : cNo );
 	}
 	Msg( "^2Achievements:^7 end of report.\n" );
 }

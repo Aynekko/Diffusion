@@ -26,8 +26,8 @@ int CHealthbars::Init( void )
 
 int CHealthbars::VidInit( void )
 {
-	int bar_emptyh = gHUD.GetSpriteIndex( "health_empty" );
-	int bar_fullh = gHUD.GetSpriteIndex( "health_full" );
+	const int bar_emptyh = gHUD.GetSpriteIndex( "health_empty" );
+	const int bar_fullh = gHUD.GetSpriteIndex( "health_full" );
 	m_hBarEmpty = gHUD.GetSprite( bar_emptyh );
 	m_hBarFull = gHUD.GetSprite( bar_fullh );
 	m_prc_emp = &gHUD.GetSpriteRect( bar_emptyh );
@@ -83,8 +83,8 @@ void CHealthbars::DrawCentralBar( void )
 
 	// 600 width, 30 height
 
-	int tex_background = LOAD_TEXTURE( "sprites/healthbar5.dds", NULL, 0, 0 );
-	int tex_bar = LOAD_TEXTURE( "sprites/healthbar6.dds", NULL, 0, 0 );
+	const int tex_background = LOAD_TEXTURE( "sprites/healthbar5.dds", NULL, 0, 0 );
+	const int tex_bar = LOAD_TEXTURE( "sprites/healthbar6.dds", NULL, 0, 0 );
 
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 
@@ -106,11 +106,11 @@ void CHealthbars::DrawCentralBar( void )
 
 	static float hp = 0;
 	hp = lerp( hp, health_center, g_fFrametime * 5 );
-	float newwidth = 300 * (hp / 100.0f) * 2; // no idea how but it works
-	float xmin = x_start - 300;
-	float ymin = y_start - 15;
-	float xmax = x_start - 300 + newwidth;
-	float ymax = y_start + 15;
+	const float newwidth = 300 * (hp / 100.0f) * 2; // no idea how but it works
+	const float xmin = x_start - 300;
+	const float ymin = y_start - 15;
+	const float xmax = x_start - 300 + newwidth;
+	const float ymax = y_start + 15;
 	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 	// top left
 	gEngfuncs.pTriAPI->TexCoord2f( 0, 0 ); gEngfuncs.pTriAPI->Vertex3f( xmin, ymin, 0 );
@@ -186,15 +186,15 @@ int CHealthbars::Draw( float flTime )
 	}
 
 	R_WorldToScreen( org, screen );
-	int x = XPROJECT( screen[0] );
-	int y = YPROJECT( screen[1] );
+	const int x = XPROJECT( screen[0] );
+	const int y = YPROJECT( screen[1] );
 
 	// total distance
 	float dist_mult = DistanceToEnt / (DISAPPEAR_START_DIST + 255);
 	dist_mult = bound( 0.1, dist_mult, 1 );
 	// also scale by fov, taking 80 fov as default
 
-	float fov_mult = current_fov / 80.0f;
+	const float fov_mult = current_fov / 80.0f;
 	dist_mult *= fov_mult;
 
 	float width = (BAR_SCALE * 10 * (barsize+1)) / dist_mult;
@@ -236,7 +236,7 @@ int CHealthbars::Draw( float flTime )
 	GL_SelectTexture( 0 );
 	GL_Bind( 0, hptex2 );
 
-	float hp1 = bound( 0, health, 100 );
+	const float hp1 = bound( 0, health, 100 );
 	float newwidth = width * ( hp1 / 100.0f) * 2; // no idea how but it works
 	float xmin = x - width;
 	float ymin = y - height;
@@ -256,7 +256,7 @@ int CHealthbars::Draw( float flTime )
 	// draw same red bar on top
 	if( health > 100 )
 	{
-		float hp2 = bound( 0, health - 100, 100 );
+		const float hp2 = bound( 0, health - 100, 100 );
 		newwidth = width * (hp2 / 100.0f) * 2;
 		xmin = x - width;
 		ymin = y - height;
