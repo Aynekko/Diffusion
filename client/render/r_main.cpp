@@ -515,12 +515,6 @@ void R_CheckChanges( void )
 		settings_changed = true;
 	}
 
-	if( FBitSet( r_recursive_world_node->flags, FCVAR_CHANGED ))
-	{
-		ClearBits( r_recursive_world_node->flags, FCVAR_CHANGED );
-		settings_changed = true;
-	}
-
 	if (FBitSet(thirdperson->flags, FCVAR_CHANGED))
 	{
 		ClearBits(thirdperson->flags, FCVAR_CHANGED);

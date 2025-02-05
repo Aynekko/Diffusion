@@ -110,7 +110,6 @@ cvar_t *r_recursion_depth;
 cvar_t *r_lighting_modulate;
 cvar_t *r_lighting_extended;
 cvar_t *r_lightstyle_lerping;
-cvar_t *r_recursive_world_node;
 cvar_t *r_cached_box_culling;
 cvar_t *r_polyoffset;
 cvar_t *r_grass;
@@ -370,7 +369,6 @@ void V_Init( void )
 	gl_shadows = CVAR_REGISTER( "gl_shadows", "1", FCVAR_CLIENTDLL | FCVAR_ARCHIVE );
 	r_allow_3dsky = CVAR_REGISTER( "gl_allow_3dsky", "1", FCVAR_CHEAT );
 	r_recursion_depth = CVAR_REGISTER( "gl_recursion_depth", "1", FCVAR_ARCHIVE );
-	r_recursive_world_node = CVAR_REGISTER( "gl_recursive_world_node", "0", FCVAR_ARCHIVE );
 	r_drawmodels = CVAR_REGISTER( "r_drawmodels", "1", FCVAR_CHEAT );
 	r_cached_box_culling = CVAR_REGISTER( "r_cached_box_culling", "1", FCVAR_ARCHIVE );
 

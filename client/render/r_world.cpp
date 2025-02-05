@@ -29,6 +29,8 @@ GNU General Public License for more details.
 static gl_world_t	worlddata;
 gl_world_t *world = &worlddata;
 
+#define RECURSIVE_WORLD_NODE 0
+
 /*
 ==================
 Mod_SampleSizeForFace
@@ -560,10 +562,10 @@ static void Mod_LoadWorldMaterials( void )
 //=====================================================================
 static int R_SolidSurfaceCompare( const gl_bmodelface_t &a, const gl_bmodelface_t &b )
 {
-	msurface_t *surf1 = (msurface_t *)a.surface;
-	msurface_t *surf2 = (msurface_t *)b.surface;
-	mextrasurf_t *esrf1 = surf1->info;
-	mextrasurf_t *esrf2 = surf2->info;
+	const msurface_t *surf1 = (msurface_t *)a.surface;
+	const msurface_t *surf2 = (msurface_t *)b.surface;
+	const mextrasurf_t *esrf1 = surf1->info;
+	const mextrasurf_t *esrf2 = surf2->info;
 
 	// sort priority
 	// 1. shaders
@@ -907,16 +909,13 @@ sort faces to reduce shader switches
 */
 static int Mod_SurfaceCompareInGame( const unsigned short **a, const unsigned short **b )
 {
-	msurface_t *surf1, *surf2;
-	mextrasurf_t *esrf1, *esrf2;
+	msurface_t *surf1 = &worldmodel->surfaces[*(unsigned short*)a];
+	msurface_t *surf2 = &worldmodel->surfaces[*(unsigned short*)b];
+	const texture_t *tx1 = R_TextureAnimation( surf1 );
+	const texture_t *tx2 = R_TextureAnimation( surf2 );
 
-	surf1 = &worldmodel->surfaces[*(unsigned short*)a];
-	surf2 = &worldmodel->surfaces[*(unsigned short*)b];
-	texture_t *tx1 = R_TextureAnimation( surf1 );
-	texture_t *tx2 = R_TextureAnimation( surf2 );
-
-	esrf1 = surf1->info;
-	esrf2 = surf2->info;
+	const mextrasurf_t *esrf1 = surf1->info;
+	const mextrasurf_t *esrf2 = surf2->info;
 
 	if( esrf1->shaderNum[0] > esrf2->shaderNum[0] )
 		return 1;
@@ -1197,17 +1196,15 @@ trying to smooth the normals
 */
 static void Mod_SmoothVertexNormals( void )
 {
-	float smooth_threshold;
 	int i, j, k, l;
 	Vector faceNormal;
 	msurface_t *s0, *s1;
 	bvert_t *v0, *v1;
-	double start;
 
 	if( world->normals ) return;
 
-	smooth_threshold = cos( DEG2RAD( 50.0f ) );
-	start = Sys_DoubleTime();
+	const float smooth_threshold = cos( DEG2RAD( 50.0f ) );
+	const double start = Sys_DoubleTime();
 
 	for( i = 0, s0 = worldmodel->surfaces; i < worldmodel->numsurfaces; i++, s0++ )
 	{
@@ -1325,8 +1322,8 @@ return layer name per face
 */
 bool Mod_CheckLayerNameForSurf( msurface_t *surf, const char *checkName )
 {
-	mtexinfo_t *tx = surf->texinfo;
-	mfaceinfo_t *land = tx->faceinfo;
+	const mtexinfo_t *tx = surf->texinfo;
+	const mfaceinfo_t *land = tx->faceinfo;
 	terrain_t *terra;
 	layerMap_t *lm;
 
@@ -1563,7 +1560,7 @@ static int Mod_SubdivideSurface( msurface_t *fa, bool firstpass )
 {
 	mextrasurf_t *es = fa->info;
 
-	float Surfsize = (es->mins - es->maxs).Length();
+	const float Surfsize = (es->mins - es->maxs).Length();
 	int SubdivideSize = 64;
 	if( Surfsize > 16000.0f )
 		SubdivideSize = 1024;
@@ -1864,7 +1861,7 @@ static void Mod_LoadWorld( model_t *mod, const byte *buf )
 	Mod_SetupWorldLeafs();
 	Mod_SetupWorldNodes();
 
-	int visclusters = mod->submodels[0].visleafs;
+	const int visclusters = mod->submodels[0].visleafs;
 	tr.pvssize = (visclusters + 7) >> 3;
 
 	// all the old lightmaps are freed
@@ -1923,39 +1920,33 @@ static void Mod_LoadWorld( model_t *mod, const byte *buf )
 
 		if( FBitSet( surf->flags, SURF_DRAWSKY ) )
 			SetBits( world->features, WORLD_HAS_SKYBOX );
-
-		if( !Q_strncmp( tex->name, "movie", 5 ) )
+		else if( !Q_strncmp( tex->name, "fff", 3 ) ) // diffusion
 		{
-			SetBits( world->features, WORLD_HAS_MOVIES );
-			SetBits( surf->flags, SURF_MOVIE );
+			SetBits( surf->flags, SURF_FULLBRIGHT );
 		}
-
-		if( tr.materials[tex->gl_texturenum].PlanarReflectScale > 0.01f || !Q_strncmp( tex->name, "reflect", 7 ) || !Q_strncmp( tex->name, "!reflect", 8 ) )
-		{
-			SetBits( world->features, WORLD_HAS_MIRRORS );
-			SetBits( surf->flags, SURF_REFLECT );
-		}
-
-		if( !Q_strncmp( tex->name, "portal", 6 ) )
-		{
-			SetBits( world->features, WORLD_HAS_PORTALS );
-			SetBits( surf->flags, SURF_PORTAL );
-		}
-
-		if( !Q_strncmp( tex->name, "monitor", 7 ) )
+		else if( !Q_strncmp( tex->name, "monitor", 7 ) )
 		{
 			SetBits( world->features, WORLD_HAS_SCREENS );
 			SetBits( surf->flags, SURF_SCREEN );
 		}
-
-		if( !Q_strncmp( tex->name, "chrome", 6 ) )
+		else if( !Q_strncmp( tex->name, "movie", 5 ) )
+		{
+			SetBits( world->features, WORLD_HAS_MOVIES );
+			SetBits( surf->flags, SURF_MOVIE );
+		}
+		else if( tr.materials[tex->gl_texturenum].PlanarReflectScale > 0.01f || !Q_strncmp( tex->name, "reflect", 7 ) || !Q_strncmp( tex->name, "!reflect", 8 ) )
+		{
+			SetBits( world->features, WORLD_HAS_MIRRORS );
+			SetBits( surf->flags, SURF_REFLECT );
+		}
+		else if( !Q_strncmp( tex->name, "portal", 6 ) )
+		{
+			SetBits( world->features, WORLD_HAS_PORTALS );
+			SetBits( surf->flags, SURF_PORTAL );
+		}
+		else if( !Q_strncmp( tex->name, "chrome", 6 ) )
 		{
 			SetBits( surf->flags, SURF_CHROME );
-		}
-
-		if( !Q_strncmp( tex->name, "fff", 3 ) ) // diffusion
-		{
-			SetBits( surf->flags, SURF_FULLBRIGHT );
 		}
 	}
 
@@ -2196,10 +2187,10 @@ bool R_AddSurfaceToDrawList( msurface_t *surf, bool lightpass )
 
 void R_SetRenderColor( cl_entity_t *e )
 {
-	float r = e->curstate.rendercolor.r / 255.0f;
-	float g = e->curstate.rendercolor.g / 255.0f;
-	float b = e->curstate.rendercolor.b / 255.0f;
-	float a = tr.blend;//e->curstate.renderamt / 255.0f;
+	const float r = e->curstate.rendercolor.r / 255.0f;
+	const float g = e->curstate.rendercolor.g / 255.0f;
+	const float b = e->curstate.rendercolor.b / 255.0f;
+	const float a = tr.blend;//e->curstate.renderamt / 255.0f;
 
 	switch( e->curstate.rendermode )
 	{
@@ -2235,7 +2226,6 @@ void R_BuildFaceListForLight( plight_t *pl )
 		R_GrassPrepareLight();
 
 	tr.num_light_surfaces = 0;
-	tr.modelorg = pl->origin;
 	gl_bmodelface_t *entry;
 	msurface_t *psurf;
 	mextrasurf_t *es;
@@ -2290,7 +2280,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 	qboolean flush_buffer = false;
 	cl_entity_t *e = RI->currententity;
 	gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
-	GLfloat	gl_lightViewProjMatrix[16];
+	
 	int	startv, endv;
 
 	float cached_dynlightscale = -1.0f;
@@ -2306,8 +2296,9 @@ void R_DrawLightForSurfList( plight_t *pl )
 	float y2 = (float)RI->viewport[3] - pl->h - pl->y;
 	pglScissor( pl->x, y2, pl->w, pl->h );
 
-	Vector lightdir = pl->frustum.GetPlane( FRUSTUM_FAR )->normal;
+	GLfloat	gl_lightViewProjMatrix[16];
 	pl->lightviewProjMatrix.CopyToArray( gl_lightViewProjMatrix );
+	const Vector lightdir = pl->frustum.GetPlane( FRUSTUM_FAR )->normal;
 
 	gl_bmodelface_t *entry;
 	mextrasurf_t *es;
@@ -2344,16 +2335,14 @@ void R_DrawLightForSurfList( plight_t *pl )
 		// begin draw the sorted list
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 		{
-			Vector lightdir = pl->frustum.GetPlane( FRUSTUM_FAR )->normal;
-
 			GL_BindShader( &glsl_programs[entry->hProgram] );
 
 			ASSERT( RI->currentshader != NULL );
 
 			// write constants
 			pglUniformMatrix4fvARB( RI->currentshader->u_LightViewProjectionMatrix, 1, GL_FALSE, &gl_lightViewProjMatrix[0] );
-			float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture[0] );
-			float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
+			const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture[0] );
+			const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
 
 			// set the current waveheight
 			if( FBitSet( s->flags, SURF_WATER ) )
@@ -2403,8 +2392,8 @@ void R_DrawLightForSurfList( plight_t *pl )
 
 		if( cached_texture != es->gl_texturenum )
 		{
-			mtexinfo_t *tx = s->texinfo;
-			mfaceinfo_t *land = tx->faceinfo;
+			const mtexinfo_t *tx = s->texinfo;
+			const mfaceinfo_t *land = tx->faceinfo;
 			
 			if( r_lightmap->value )
 			{
@@ -2475,7 +2464,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 			else
 			{
-				float newdynlightscale = FBitSet( s->flags, SURF_MOVIE ) ? pl->brightness : (pl->brightness * tr.materials[es->gl_texturenum].DynlightScale);
+				const float newdynlightscale = FBitSet( s->flags, SURF_MOVIE ) ? pl->brightness : (pl->brightness * tr.materials[es->gl_texturenum].DynlightScale);
 				if( newdynlightscale != cached_dynlightscale )
 				{
 					pglUniform1fARB( RI->currentshader->u_DynLightBrightness, newdynlightscale );
@@ -2780,7 +2769,7 @@ void R_DrawBrushList( void )
 	int startv, endv;
 	mcubemap_t *cached_cubemap = NULL;
 
-	bool bUseRefractedWater = (!tr.lowmemory && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction));
+	const bool bUseRefractedWater = (!tr.lowmemory && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction));
 
 	RI->currentmodel = e->model;
 	R_LoadIdentity();
@@ -2903,8 +2892,8 @@ void R_DrawBrushList( void )
 
 		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != es->gl_texturenum) )
 		{
-			mtexinfo_t *tx = s->texinfo;
-			mfaceinfo_t *land = tx->faceinfo;
+			const mtexinfo_t *tx = s->texinfo;
+			const mfaceinfo_t *land = tx->faceinfo;
 
 			if( FBitSet( s->flags, SURF_REFLECT | SURF_PORTAL | SURF_SCREEN ) && es->subtexture[glState.stack_position] )
 			{
@@ -3085,9 +3074,7 @@ void R_DrawBrushList( void )
 
 		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale[0] > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
 		{
-			int cubemap_tex_unit = GL_TEXTURE6;
-			if( FBitSet( s->flags, SURF_WATER ) )
-				cubemap_tex_unit = GL_TEXTURE2;
+			const int cubemap_tex_unit = FBitSet( s->flags, SURF_WATER ) ? GL_TEXTURE2 : GL_TEXTURE6;
 
 			if( es->cubemap )
 			{
@@ -3462,7 +3449,7 @@ void R_MarkLeaves( void )
 	R_UpdateEngineVisibility();
 	RI->visframecount++;
 
-	int stack = glState.stack_position;
+	const int stack = glState.stack_position;
 
 	for( int i = 0; i < world->numleafs - 1; i++ )
 	{
@@ -3485,13 +3472,14 @@ void R_MarkLeaves( void )
 R_RecursiveWorldNode
 ================
 */
+#if RECURSIVE_WORLD_NODE
 void R_RecursiveWorldNode( mworldnode_t *node, unsigned int clipflags )
 {
-	int		stack = glState.stack_position;
+	const int stack = glState.stack_position;
 	msurface_t *surf, **mark;
 	mworldleaf_t *pleaf;
-	int		c, side;
-	float		dot;
+	int	c, side;
+	float dot;
 loc0:
 	if( node->contents == CONTENTS_SOLID )
 		return; // hit a solid leaf
@@ -3596,6 +3584,7 @@ loc0:
 	node = node->children[!side];
 	goto loc0;
 }
+#endif
 
 void R_WorldMarkVisibleFaces( void )
 {
@@ -3603,7 +3592,7 @@ void R_WorldMarkVisibleFaces( void )
 	mextrasurf_t *esrf;
 	mworldleaf_t *leaf;
 	int i, j;
-	bool bBuildingCubemaps = IsBuildingCubemaps();
+	const bool bBuildingCubemaps = IsBuildingCubemaps();
 
 	if( RP_NORMALPASS() )
 		tr.bSkySurfFound = false;
@@ -3632,7 +3621,7 @@ void R_WorldMarkVisibleFaces( void )
 
 			for( j = 0, mark = leaf->firstmarksurface; j < leaf->nummarksurfaces; j++, mark++ )
 			{
-				int facenum = *mark - worldmodel->surfaces;
+				const int facenum = *mark - worldmodel->surfaces;
 				bool force = false, backplane;
 				float dist;
 
@@ -3686,49 +3675,6 @@ void R_WorldMarkVisibleFaces( void )
 			}
 		}
 	}
-#if 0
-	// create drawlist for faces, do additional culling for world faces
-	for( i = 0; i < world->numsortedfaces; i++ )
-	{
-		j = world->sortedfaces[i];
-
-		if( j >= worldmodel->nummodelsurfaces )
-			continue;	// not a world face
-
-		if( CHECKVISBIT( RI->visfaces, j ) )
-		{
-			surf = worldmodel->surfaces + j;
-			esrf = surf->info;
-
-			RI->currententity = GET_ENTITY( 0 );
-			RI->currentmodel = RI->currententity->model;
-
-			// in some cases surface is invisible but grass is visible
-			bool force = R_AddGrassToChain( surf, &RI->frustum );
-
-			if( !force && R_CullSurface( surf ) )
-			{
-				CLEARVISBIT( RI->visfaces, j ); // not visible
-				continue;
-			}
-
-			if( FBitSet( surf->flags, SURF_DRAWSKY ) )
-			{
-				if( FBitSet( RI->params, RP_SHADOWPASS ) )
-					continue;
-
-				if( tr.fIgnoreSkybox )
-					continue;
-
-				R_AddSkyBoxSurface( surf );
-			}
-			else
-			{
-				R_AddSurfaceToDrawList( surf, false );
-			}
-		}
-	}
-#endif
 }
 
 /*
@@ -3757,10 +3703,11 @@ void R_DrawWorld( void )
 	R_MarkLeaves();
 	start = Sys_DoubleTime();
 
-	if( CVAR_TO_BOOL( r_recursive_world_node ) )
-		R_RecursiveWorldNode( world->nodes, RI->frustum.GetClipFlags() );
-	else
-		R_WorldMarkVisibleFaces();
+#if RECURSIVE_WORLD_NODE
+	R_RecursiveWorldNode( world->nodes, RI->frustum.GetClipFlags() );
+#else
+	R_WorldMarkVisibleFaces();
+#endif
 
 	end = Sys_DoubleTime();
 
@@ -3793,10 +3740,11 @@ void R_DrawWorldShadowPass( void )
 	R_GrassPrepareFrame();
 	R_LoadIdentity();
 
-	if( CVAR_TO_BOOL( r_recursive_world_node ) )
-		R_RecursiveWorldNode( world->nodes, RI->frustum.GetClipFlags() );
-	else
-		R_WorldMarkVisibleFaces();
+#if RECURSIVE_WORLD_NODE
+	R_RecursiveWorldNode( world->nodes, RI->frustum.GetClipFlags() );
+#else
+	R_WorldMarkVisibleFaces();
+#endif
 
 	R_DrawShadowBrushList();
 }
