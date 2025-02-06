@@ -191,11 +191,11 @@ typedef struct
 // 14 bytes here
 typedef struct
 {
-	struct vbomesh_s	*mesh;
-	unsigned short	hProgram;		// handle to glsl program
-	cl_entity_t	*parent;		// pointer to parent entity
-	model_t		*model;
-	bool		additive;		// additive mesh
+	struct vbomesh_s *mesh;
+	unsigned short hProgram;		// handle to glsl program
+	cl_entity_t *parent;		// pointer to parent entity
+	model_t *model;
+	bool additive;		// additive mesh
 } gl_studiomesh_t;
 
 class CBaseBoneSetup : public CStudioBoneSetup

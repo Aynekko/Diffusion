@@ -535,7 +535,7 @@ void CStudioModelRenderer::ClearInstanceData( bool create )
 	UpdateInstanceMaterials();
 
 	// copy attachments names
-	mstudioattachment_t *pattachment = (mstudioattachment_t *)((byte *)m_pStudioHeader + m_pStudioHeader->attachmentindex);
+	const mstudioattachment_t *pattachment = (mstudioattachment_t *)((byte *)m_pStudioHeader + m_pStudioHeader->attachmentindex);
 	StudioAttachment_t *att = m_pModelInstance->attachment;
 
 	// setup attachment names
@@ -608,10 +608,10 @@ bool CStudioModelRenderer::CheckBoneCache( float f )
 		return false; // needs to be updated every frame
 
 	BoneCache_t *cache = &m_pModelInstance->bonecache;
-	cl_entity_t *e = m_pCurrentEntity;
+	const cl_entity_t *e = m_pCurrentEntity;
 
-	bool pos_valid = (cache->transform == m_pModelInstance->m_protationmatrix) ? true : false;
-	bool param_valid = !memcmp( cache->poseparam, m_pModelInstance->m_poseparameter, sizeof( float ) * MAXSTUDIOPOSEPARAM );
+	const bool pos_valid = (cache->transform == m_pModelInstance->m_protationmatrix) ? true : false;
+	const bool param_valid = !memcmp( cache->poseparam, m_pModelInstance->m_poseparameter, sizeof( float ) * MAXSTUDIOPOSEPARAM );
 
 	// make sure that all cached values are unchanged
 	if( cache->frame == f && cache->sequence == e->curstate.sequence && pos_valid && !memcmp( cache->blending, e->curstate.blending, 2 )
@@ -682,9 +682,9 @@ void CStudioModelRenderer::LoadLocalMatrix( int bone, mstudioboneinfo_t *boneinf
 
 void CStudioModelRenderer::ComputeSkinMatrix( svert_t *vertex, const matrix3x4 worldtransform[], matrix3x4 &result )
 {
-	float	flWeight0, flWeight1, flWeight2, flWeight3;
+	float flWeight0, flWeight1, flWeight2, flWeight3;
 	int	numbones = 0;
-	float	flTotal;
+	float flTotal;
 
 	for( int i = 0; i < MAXSTUDIOBONEWEIGHTS; i++ )
 	{
@@ -776,9 +776,9 @@ void CStudioModelRenderer::ComputeSkinMatrix( svert_t *vertex, const matrix3x4 w
 
 void CStudioModelRenderer::ComputeSkinMatrix( mstudioboneweight_t *boneweights, const matrix3x4 worldtransform[], matrix3x4 &result )
 {
-	float	flWeight0, flWeight1, flWeight2, flWeight3;
+	float flWeight0, flWeight1, flWeight2, flWeight3;
 	int	numbones = 0;
-	float	flTotal;
+	float flTotal;
 
 	for( int i = 0; i < MAXSTUDIOBONEWEIGHTS; i++ )
 	{
@@ -1151,8 +1151,8 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 	std::vector<Vector> localverts;
 	localverts.resize( pSubModel->numverts );
 
-	float s = 1.0f / (float)ptexture->width;
-	float t = 1.0f / (float)ptexture->height;
+	const float s = 1.0f / (float)ptexture->width;
+	const float t = 1.0f / (float)ptexture->height;
 
 	pOut->skinref = pMesh->skinref;
 
@@ -1507,7 +1507,7 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 
 mvbocache_t *CStudioModelRenderer::CreateMeshCache( dmodellight_t *dml )
 {
-	float start_time = Sys_DoubleTime();
+	const float start_time = Sys_DoubleTime();
 	bool unique_model = (dml == NULL);	// just for more readable code
 	TmpModel_t	submodel[MAXSTUDIOMODELS];	// list of unique models
 	static matrix3x4	bones[MAXSTUDIOBONES];
@@ -1918,8 +1918,8 @@ void CStudioModelRenderer::LoadStudioMaterials( void )
 
 		if( !tr.lowmemory && IMAGE_EXISTS( diffuse ) && !FBitSet( ptexture->flags, STUDIO_NF_COLORMAP ) )
 		{
-			int	texture_ext = LOAD_TEXTURE( diffuse, NULL, 0, 0 );
-			int	encodeType = RENDER_GET_PARM( PARM_TEX_ENCODE, texture_ext );
+			const int texture_ext = LOAD_TEXTURE( diffuse, NULL, 0, 0 );
+			const int encodeType = RENDER_GET_PARM( PARM_TEX_ENCODE, texture_ext );
 
 			// NOTE: default renderer can't unpack encoded textures
 			// so keep lowres copies for this case
@@ -1964,7 +1964,7 @@ void CStudioModelRenderer::LoadStudioMaterials( void )
 		LoadMaterialSettingsForTexture( pmaterial->gl_diffuse_id );
 
 		// cache the animation into material to reload if needed, because they are purged on map unload, but studio models can stay
-		int anim_id = tr.materials[pmaterial->gl_diffuse_id].animation_id;
+		const int anim_id = tr.materials[pmaterial->gl_diffuse_id].animation_id;
 		if( anim_id >= 0 )
 		{
 			pmaterial->anim_framerate = tr.animation[anim_id].framerate;
@@ -2006,7 +2006,7 @@ void CStudioModelRenderer::TryReloadingAnimation( mstudiomaterial_t *mat )
 	}
 
 	// check again
-	int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
+	const int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
 	if( !tr.animation[anim_id].Initialized() )
 	{
 		// animation failed to load, probably missing texture
@@ -2429,10 +2429,10 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 	if( m_pCurrentEntity->curstate.effects & EF_ROTATING )
 		FuncRotatingClient( m_pCurrentEntity );
 
-	float lodDist = (origin - RI->vieworg).Length() * tr.lodScale;
-	float radius = Q_max( m_pModelInstance->radius, 1.0f ); // to avoid division by zero
+	const float lodDist = (origin - RI->vieworg).Length() * tr.lodScale;
+	const float radius = Q_max( m_pModelInstance->radius, 1.0f ); // to avoid division by zero
 	int lodnum = (int)(lodDist / radius);
-	int numLods = m_pModelInstance->numlods;
+	const int numLods = m_pModelInstance->numlods;
 
 	if( CVAR_TO_BOOL( m_pCvarLodScale ) )
 		lodnum /= (int)fabs( m_pCvarLodScale->value );
@@ -2709,7 +2709,7 @@ float CStudioModelRenderer::StudioEstimateInterpolant( void )
 
 float CStudioModelRenderer::StudioEstimateInterpolant( void )
 {
-	cl_entity_t *e = RI->currententity;
+	const cl_entity_t *e = RI->currententity;
 	double interval = g_fFrametime;	// monster think interval
 	float dadt = 1.0f;
 
@@ -3508,9 +3508,9 @@ NOTE: m_pSubModel must be set
 */
 void CStudioModelRenderer::StudioBuildNormalTable( void )
 {
-	cl_entity_t *e = m_pCurrentEntity;
+	const cl_entity_t *e = m_pCurrentEntity;
 	mstudiomesh_t *pmesh;
-	int		i, j;
+	int i, j;
 
 	ASSERT( m_pSubModel != NULL );
 
@@ -3559,10 +3559,10 @@ m_verts must be computed
 */
 void CStudioModelRenderer::StudioGenerateNormals( void )
 {
-	Vector		e0, e1, norm;
-	int		v0, v1, v2;
+	Vector e0, e1, norm;
+	int v0, v1, v2;
 	mstudiomesh_t *pmesh;
-	int		i, j;
+	int i, j;
 
 	ASSERT( m_pSubModel != NULL );
 
@@ -3654,7 +3654,7 @@ StudioSetupChrome
 */
 void CStudioModelRenderer::StudioSetupChrome( float *pchrome, int bone, const Vector &normal )
 {
-	float	n;
+	float n;
 
 	if( m_chromeAge[bone] != m_chromeCount )
 	{
@@ -3876,7 +3876,7 @@ void CStudioModelRenderer::StudioLighting( float *lv, int bone, int flags, const
 		return;
 	}
 
-	float	illum = light->ambientlight;
+	float illum = light->ambientlight;
 
 	if( FBitSet( flags, STUDIO_NF_FLATSHADE ) )
 	{
@@ -3914,7 +3914,7 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 	// setup advanced vertexlighting for env_static entities
 	if( (ent->curstate.iuser3 > 0) && world->vertex_lighting != NULL )
 	{
-		int	cacheID = ent->curstate.iuser3 - 1;
+		const int cacheID = ent->curstate.iuser3 - 1;
 		dvlightlump_t *vl = world->vertex_lighting;
 
 		if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) )
@@ -3979,7 +3979,7 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 		lighting.plightvec = tmp;
 
 		// setup classic Half-Life lighting
-		float dynamic = r_dynamic->value;
+		const float dynamic = r_dynamic->value;
 		r_dynamic->value = 0.0f; // ignore dlights
 		IEngineStudio.StudioDynamicLight( ent, &lighting );
 		r_dynamic->value = dynamic;
@@ -4153,7 +4153,7 @@ StudioDrawPoints
 */
 void CStudioModelRenderer::StudioDrawPoints( void )
 {
-	float	shellscale = 0.0f;
+	float shellscale = 0.0f;
 	int	i, j, k;
 
 	ASSERT( m_pStudioHeader != NULL );
@@ -4286,7 +4286,7 @@ StudioDrawHulls
 */
 void CStudioModelRenderer::StudioDrawHulls( void )
 {
-	float	alpha, lv;
+	float alpha, lv;
 	int	i, j;
 
 	if( r_drawentities->value == 4 )
@@ -4305,7 +4305,7 @@ void CStudioModelRenderer::StudioDrawHulls( void )
 	for( i = 0; i < m_pStudioHeader->numhitboxes; i++ )
 	{
 		mstudiobbox_t *pbbox = (mstudiobbox_t *)((byte *)m_pStudioHeader + m_pStudioHeader->hitboxindex);
-		vec3_t		tmp, p[8];
+		vec3_t tmp, p[8];
 
 		for( j = 0; j < 8; j++ )
 		{
@@ -4393,7 +4393,7 @@ StudioDrawBones
 void CStudioModelRenderer::StudioDrawBones( void )
 {
 	mstudiobone_t *pbones = (mstudiobone_t *)((byte *)m_pStudioHeader + m_pStudioHeader->boneindex);
-	Vector		point;
+	Vector point;
 
 	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
 	GL_Texture2D( GL_FALSE );
@@ -4525,7 +4525,7 @@ void CStudioModelRenderer::StudioRenderModel( void )
 	m_pCurrentEntity->curstate.renderamt = 255;
 #endif
 
-	int draw_ents = (int)r_drawentities->value;
+	const int draw_ents = (int)r_drawentities->value;
 
 	switch( draw_ents )
 	{
@@ -4774,7 +4774,7 @@ StudioFormatAttachment
 */
 void CStudioModelRenderer::StudioFormatAttachment( Vector &point )
 {
-	float worldx = tan( (float)RI->fov_x * M_PI / 360.0 );
+	const float worldx = tan( (float)RI->fov_x * M_PI / 360.0 );
 	float viewx = tan( m_flViewmodelFov * M_PI / 360.0 );
 
 	// BUGBUG: workaround
@@ -4783,10 +4783,10 @@ void CStudioModelRenderer::StudioFormatAttachment( Vector &point )
 	// aspect ratio cancels out, so only need one factor
 	// the difference between the screen coordinates of the 2 systems is the ratio
 	// of the coefficients of the projection matrices (tan (fov/2) is that coefficient)
-	float factor = worldx / viewx;
+	const float factor = worldx / viewx;
 
 	// get the coordinates in the viewer's space.
-	Vector tmp = point - RI->vieworg;
+	const Vector tmp = point - RI->vieworg;
 	Vector vTransformed;
 
 	vTransformed.x = DotProduct( RI->vright, tmp );
@@ -4860,8 +4860,8 @@ Select the program for mesh (diffuse\bump\debug)
 */
 word CStudioModelRenderer::ChooseStudioProgram( studiohdr_t *phdr, mstudiomaterial_t *mat, bool lightpass )
 {
-	bool vertex_lighting = FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) ? true : false;
-	bool bone_weighting = (m_pRenderModel->poseToBone != NULL) ? true : false;
+	const bool vertex_lighting = FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) ? true : false;
+	const bool bone_weighting = (m_pRenderModel->poseToBone != NULL) ? true : false;
 	bool fullbright = false;
 
 	// diffusion - shader must be reset when model changes appearance
@@ -4942,6 +4942,7 @@ void CStudioModelRenderer::AddMeshToDrawList( studiohdr_t *phdr, const vbomesh_t
 			return;
 		}
 	}
+
 	gl_studiomesh_t *entry = NULL;
 	word hProgram = 0;
 
@@ -5021,8 +5022,8 @@ void CStudioModelRenderer::AddStudioToLightList( plight_t *pl )
 	RI->currentmodel = m_pRenderModel = m_pModelInstance->m_pModel;
 	m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata( m_pRenderModel );
 
-	Vector modelpos = m_pModelInstance->m_protationmatrix.GetOrigin();
-	float dist = (pl->origin - modelpos).Length();
+	const Vector modelpos = m_pModelInstance->m_protationmatrix.GetOrigin();
+	const float dist = (pl->origin - modelpos).Length();
 	if( !dist )
 		return;
 
@@ -5078,12 +5079,12 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 	m_pModelInstance = &m_ModelInstances[RI->currententity->modelhandle];
 
 	tr.modelorg = m_pModelInstance->m_plightmatrix.VectorITransform( RI->vieworg );
-	Vector right = m_pModelInstance->m_plightmatrix.VectorIRotate( RI->vright );
-	Vector lightorg = m_pModelInstance->m_plightmatrix.VectorITransform( pl->origin );
-	Vector lightdir = m_pModelInstance->m_plightmatrix.VectorIRotate( pl->frustum.GetPlane( FRUSTUM_FAR )->normal );
+	const Vector right = m_pModelInstance->m_plightmatrix.VectorIRotate( RI->vright );
+	const Vector lightorg = m_pModelInstance->m_plightmatrix.VectorITransform( pl->origin );
+	const Vector lightdir = m_pModelInstance->m_plightmatrix.VectorIRotate( pl->frustum.GetPlane( FRUSTUM_FAR )->normal );
 
-	matrix4x4 lightView = pl->modelviewMatrix.ConcatTransforms( m_pModelInstance->m_protationmatrix );
-	matrix4x4 projectionView = pl->projectionMatrix.Concat( lightView );
+	const matrix4x4 lightView = pl->modelviewMatrix.ConcatTransforms( m_pModelInstance->m_protationmatrix );
+	const matrix4x4 projectionView = pl->projectionMatrix.Concat( lightView );
 	projectionView.CopyToArray( gl_lightViewProjMatrix );
 
 	Vector4D light_params[7];
@@ -5091,23 +5092,24 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 	// sorting list to reduce shader switches
 	for( int i = 0; i < m_nNumLightMeshes; i++ )
 	{
-		gl_studiomesh_t *entry = &m_LightMeshes[i];
+		const gl_studiomesh_t *entry = &m_LightMeshes[i];
 		RI->currentmodel = m_pRenderModel = entry->model;
 		m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata( m_pRenderModel );
-		int m_skinnum = bound( 0, m_pCurrentEntity->curstate.skin, m_pStudioHeader->numskinfamilies - 1 );
-		vbomesh_t *pMesh = entry->mesh;
-		Vector ang = m_pCurrentEntity->angles;
+		const int m_skinnum = bound( 0, m_pCurrentEntity->curstate.skin, m_pStudioHeader->numskinfamilies - 1 );
+		const vbomesh_t *pMesh = entry->mesh;
+		const Vector ang = m_pCurrentEntity->angles;
 
 		short *pskinref = (short *)((byte *)m_pStudioHeader + m_pStudioHeader->skinindex);
 		pskinref += (m_skinnum * m_pStudioHeader->numskinref);
 
-		mstudiomaterial_t *mat = &m_pRenderModel->materials[pskinref[pMesh->skinref]];
+		const mstudiomaterial_t *mat = &m_pRenderModel->materials[pskinref[pMesh->skinref]];
+		const int iTexnum = mat->gl_diffuse_id;
 		int num_bones;
 
 		// begin to draw the sorted list
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 		{
-			bool reset_cache = (RI->currentshader != &glsl_programs[entry->hProgram]);
+			const bool reset_cache = (RI->currentshader != &glsl_programs[entry->hProgram]);
 			
 			GL_BindShader( &glsl_programs[entry->hProgram] );
 
@@ -5115,8 +5117,8 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 
 			// write constants
 			pglUniformMatrix4fvARB( RI->currentshader->u_LightViewProjectionMatrix, 1, GL_FALSE, &gl_lightViewProjMatrix[0] );
-			float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture[0] );
-			float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
+			const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture[0] );
+			const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
 
 			// depth scale and bias and shadowmap resolution
 		//	R_SetRenderColor( m_pCurrentEntity );
@@ -5155,10 +5157,10 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			meshparams[2] = Vector( scale, m_pCurrentEntity->curstate.fuser2, 0.0f ); // fuser2 is the dirt on the car body/wheels
 			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
 
-			if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
+			if( tr.materials[iTexnum].FoliageSwayHeight != 0 )
 			{
 				pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, (float)tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
+				pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, (float)tr.materials[iTexnum].FoliageSwayHeight );
 			}
 
 			// reset cache
@@ -5204,81 +5206,81 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 		if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
 			cached_texture = -1;
 
-		float newdynlightscale = pl->brightness * tr.materials[mat->gl_diffuse_id].DynlightScale;
+		const float newdynlightscale = pl->brightness * tr.materials[iTexnum].DynlightScale;
 		if( newdynlightscale != cached_dynlightscale )
 		{
 			pglUniform1fARB( RI->currentshader->u_DynLightBrightness, newdynlightscale );
 			cached_dynlightscale = newdynlightscale;
 		}
 
-		if( cached_texture == -1 || cached_texture != mat->gl_diffuse_id )
+		if( cached_texture == -1 || cached_texture != iTexnum )
 		{		
 			if( r_lightmap->value && !r_fullbright->value )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 			else if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
 				IEngineStudio.StudioSetupSkin( m_pStudioHeader, pskinref[pMesh->skinref] );
-			else if( tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id > 0 )
-				GL_Bind( GL_TEXTURE0, tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id );
-			else if( mat->gl_diffuse_id != tr.defaultTexture && tr.materials[mat->gl_diffuse_id].animation_id >= 0 )
+			else if( tr.materials[iTexnum].gl_fallbacktex_id > 0 )
+				GL_Bind( GL_TEXTURE0, tr.materials[iTexnum].gl_fallbacktex_id );
+			else if( iTexnum != tr.defaultTexture && tr.materials[iTexnum].animation_id >= 0 )
 			{
-				int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
+				int anim_id = tr.materials[iTexnum].animation_id;
 				GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
 			}
-			else if( tr.materials[mat->gl_diffuse_id].drone_view )
+			else if( tr.materials[iTexnum].drone_view )
 				GL_Bind( GL_TEXTURE0, tr.DroneViewTex );
-			else if( (m_pCurrentEntity->curstate.iuser3 == -670) && tr.materials[mat->gl_diffuse_id].monitor && tr.studio_screen_tex[m_pCurrentEntity->index] )
+			else if( (m_pCurrentEntity->curstate.iuser3 == -670) && tr.materials[iTexnum].monitor && tr.studio_screen_tex[m_pCurrentEntity->index] )
 				GL_Bind( GL_TEXTURE0, tr.studio_screen_tex[m_pCurrentEntity->index] );
 			else
-				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
+				GL_Bind( GL_TEXTURE0, iTexnum );
 
-			if( tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 && cached_normalmap != tr.materials[mat->gl_diffuse_id].gl_normalmap_id ) // u_NormalMap
+			if( tr.materials[iTexnum].gl_normalmap_id > 0 && cached_normalmap != tr.materials[iTexnum].gl_normalmap_id ) // u_NormalMap
 			{
-				GL_Bind( GL_TEXTURE3, tr.materials[mat->gl_diffuse_id].gl_normalmap_id );
-				cached_normalmap = tr.materials[mat->gl_diffuse_id].gl_normalmap_id;
+				GL_Bind( GL_TEXTURE3, tr.materials[iTexnum].gl_normalmap_id );
+				cached_normalmap = tr.materials[iTexnum].gl_normalmap_id;
 			}
 
 			// diffusion - interior mapping
-			if( tr.materials[mat->gl_diffuse_id].gl_interiormap_id > 0 )
+			if( tr.materials[iTexnum].gl_interiormap_id > 0 )
 			{
-				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[mat->gl_diffuse_id].InteriorGrid.x, tr.materials[mat->gl_diffuse_id].InteriorGrid.y, (float)tr.materials[mat->gl_diffuse_id].InteriorLightState );
-				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_interiormap_id ); // u_InteriorMap
+				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[iTexnum].InteriorGrid.x, tr.materials[iTexnum].InteriorGrid.y, (float)tr.materials[iTexnum].InteriorLightState );
+				GL_Bind( GL_TEXTURE4, tr.materials[iTexnum].gl_interiormap_id ); // u_InteriorMap
 			}
-			else if( tr.materials[mat->gl_diffuse_id].gl_blendtex_id > 0 )
+			else if( tr.materials[iTexnum].gl_blendtex_id > 0 )
 			{
-				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_blendtex_id ); // u_BlendTexture
+				GL_Bind( GL_TEXTURE4, tr.materials[iTexnum].gl_blendtex_id ); // u_BlendTexture
 			}
 
-			if( gl_specular->value > 0 && tr.materials[mat->gl_diffuse_id].GlossScale > 0.0f )
+			if( gl_specular->value > 0 && tr.materials[iTexnum].GlossScale > 0.0f )
 			{
-				if( tr.materials[mat->gl_diffuse_id].GlossSmoothness != cached_glosssmoothness )
+				if( tr.materials[iTexnum].GlossSmoothness != cached_glosssmoothness )
 				{
-					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
-					cached_glosssmoothness = tr.materials[mat->gl_diffuse_id].GlossSmoothness;
+					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[iTexnum].GlossSmoothness );
+					cached_glosssmoothness = tr.materials[iTexnum].GlossSmoothness;
 				}
 
-				if( tr.materials[mat->gl_diffuse_id].GlossScale != cached_glossscale )
+				if( tr.materials[iTexnum].GlossScale != cached_glossscale )
 				{
-					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
-					cached_glossscale = tr.materials[mat->gl_diffuse_id].GlossScale;
-				}
-			}
-
-			if( gl_emboss->value > 0 && tr.materials[mat->gl_diffuse_id].EmbossScale > 0.0f )
-			{
-				if( tr.materials[mat->gl_diffuse_id].EmbossScale != cached_embossscale )
-				{
-					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
-					cached_embossscale = tr.materials[mat->gl_diffuse_id].EmbossScale;
+					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[iTexnum].GlossScale );
+					cached_glossscale = tr.materials[iTexnum].GlossScale;
 				}
 			}
 
-			cached_texture = mat->gl_diffuse_id;
+			if( gl_emboss->value > 0 && tr.materials[iTexnum].EmbossScale > 0.0f )
+			{
+				if( tr.materials[iTexnum].EmbossScale != cached_embossscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[iTexnum].EmbossScale );
+					cached_embossscale = tr.materials[iTexnum].EmbossScale;
+				}
+			}
+
+			cached_texture = iTexnum;
 		}
 
 		// diffusion - apply custom color to a specific texture
 		if( !r_lightmap->value )
 		{
-			if( tr.materials[mat->gl_diffuse_id].ApplyColor || tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
+			if( tr.materials[iTexnum].ApplyColor || tr.materials[iTexnum].gl_colormask_id > 0 )
 			{
 				// hack
 				if( RI->currententity->curstate.rendermode == kRenderTransAdd )
@@ -5292,8 +5294,8 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 					pglUniform4fARB( RI->currentshader->u_RenderColor, RI->currententity->curstate.rendercolor.r / 255.0f, RI->currententity->curstate.rendercolor.g / 255.0f, RI->currententity->curstate.rendercolor.b / 255.0f, tr.blend );
 
 				// color mask
-				if( tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
-					GL_Bind( GL_TEXTURE5, tr.materials[mat->gl_diffuse_id].gl_colormask_id ); // u_ColorMask
+				if( tr.materials[iTexnum].gl_colormask_id > 0 )
+					GL_Bind( GL_TEXTURE5, tr.materials[iTexnum].gl_colormask_id ); // u_ColorMask
 			}
 			else
 				R_SetRenderColor( m_pCurrentEntity );
@@ -5388,7 +5390,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	// sorting list to reduce shader switches
 	for( i = 0; i < m_nNumDrawMeshes; i++ )
 	{
-		gl_studiomesh_t *entry = &m_DrawMeshes[i];
+		const gl_studiomesh_t *entry = &m_DrawMeshes[i];
 		RI->currentmodel = m_pRenderModel = entry->model;
 		m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata( m_pRenderModel );
 		int m_skinnum = bound( 0, m_pCurrentEntity->curstate.skin, m_pStudioHeader->numskinfamilies - 1 );
@@ -5397,14 +5399,15 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 		short *pskinref = (short *)((byte *)m_pStudioHeader + m_pStudioHeader->skinindex);
 		pskinref += (m_skinnum * m_pStudioHeader->numskinref);
 
-		mstudiomaterial_t *mat = &m_pRenderModel->materials[pskinref[pMesh->skinref]];
+		const mstudiomaterial_t *mat = &m_pRenderModel->materials[pskinref[pMesh->skinref]];
+		const int iTexnum = mat->gl_diffuse_id;
 
 		ASSERT( m_pCurrentEntity->modelhandle != INVALID_HANDLE );
 
 		// begin draw the sorted list
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 		{
-			bool reset_cache = (RI->currentshader != &glsl_programs[entry->hProgram]);
+			const bool reset_cache = (RI->currentshader != &glsl_programs[entry->hProgram]);
 			GL_BindShader( &glsl_programs[entry->hProgram] );
 
 			ASSERT( RI->currentshader != NULL );
@@ -5511,77 +5514,77 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 		if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
 			cached_texture = -1;
 
-		if( cached_texture == -1 || cached_texture != mat->gl_diffuse_id )
+		if( cached_texture == -1 || cached_texture != iTexnum )
 		{
 			if( r_lightmap->value && !r_fullbright->value )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 			else if( FBitSet( mat->flags, STUDIO_NF_COLORMAP ) )
 				IEngineStudio.StudioSetupSkin( m_pStudioHeader, pskinref[pMesh->skinref] );
-			else if( (m_pCurrentEntity->curstate.iuser3 == -670) && tr.materials[mat->gl_diffuse_id].monitor && tr.studio_screen_tex[m_pCurrentEntity->index] )
+			else if( (m_pCurrentEntity->curstate.iuser3 == -670) && tr.materials[iTexnum].monitor && tr.studio_screen_tex[m_pCurrentEntity->index] )
 				GL_Bind( GL_TEXTURE0, tr.studio_screen_tex[m_pCurrentEntity->index] );
-			else if( tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id > 0 )
-				GL_Bind( GL_TEXTURE0, tr.materials[mat->gl_diffuse_id].gl_fallbacktex_id );
-			else if( mat->gl_diffuse_id != tr.defaultTexture && tr.materials[mat->gl_diffuse_id].animation_id >= 0 )
+			else if( tr.materials[iTexnum].gl_fallbacktex_id > 0 )
+				GL_Bind( GL_TEXTURE0, tr.materials[iTexnum].gl_fallbacktex_id );
+			else if( iTexnum != tr.defaultTexture && tr.materials[iTexnum].animation_id >= 0 )
 			{
-				int anim_id = tr.materials[mat->gl_diffuse_id].animation_id;
+				int anim_id = tr.materials[iTexnum].animation_id;
 				GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
 			}
-			else if( tr.materials[mat->gl_diffuse_id].drone_view )
+			else if( tr.materials[iTexnum].drone_view )
 				GL_Bind( GL_TEXTURE0, tr.DroneViewTex );
 			else 
-				GL_Bind( GL_TEXTURE0, mat->gl_diffuse_id );
+				GL_Bind( GL_TEXTURE0, iTexnum );
 
-			if( tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 && cached_normalmap != tr.materials[mat->gl_diffuse_id].gl_normalmap_id )
+			if( tr.materials[iTexnum].gl_normalmap_id > 0 && cached_normalmap != tr.materials[iTexnum].gl_normalmap_id )
 			{
-				GL_Bind( GL_TEXTURE1, tr.materials[mat->gl_diffuse_id].gl_normalmap_id ); // u_NormalMap
-				cached_normalmap = tr.materials[mat->gl_diffuse_id].gl_normalmap_id;
+				GL_Bind( GL_TEXTURE1, tr.materials[iTexnum].gl_normalmap_id ); // u_NormalMap
+				cached_normalmap = tr.materials[iTexnum].gl_normalmap_id;
 			}
 
 			// diffusion - interior mapping
-			if( tr.materials[mat->gl_diffuse_id].gl_interiormap_id > 0 )
+			if( tr.materials[iTexnum].gl_interiormap_id > 0 )
 			{
-				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[mat->gl_diffuse_id].InteriorGrid.x, tr.materials[mat->gl_diffuse_id].InteriorGrid.y, (float)tr.materials[mat->gl_diffuse_id].InteriorLightState );
-				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_interiormap_id ); // u_InteriorMap
+				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[iTexnum].InteriorGrid.x, tr.materials[iTexnum].InteriorGrid.y, (float)tr.materials[iTexnum].InteriorLightState );
+				GL_Bind( GL_TEXTURE4, tr.materials[iTexnum].gl_interiormap_id ); // u_InteriorMap
 			}
-			else if( tr.materials[mat->gl_diffuse_id].gl_blendtex_id > 0 )
+			else if( tr.materials[iTexnum].gl_blendtex_id > 0 )
 			{
-				GL_Bind( GL_TEXTURE4, tr.materials[mat->gl_diffuse_id].gl_blendtex_id ); // u_BlendTexture
+				GL_Bind( GL_TEXTURE4, tr.materials[iTexnum].gl_blendtex_id ); // u_BlendTexture
 			}
 
-			if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
-				pglUniform1iARB( RI->currentshader->u_FoliageSwayHeight, tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
+			if( tr.materials[iTexnum].FoliageSwayHeight != 0 )
+				pglUniform1iARB( RI->currentshader->u_FoliageSwayHeight, tr.materials[iTexnum].FoliageSwayHeight );
 
-			if( gl_specular->value > 0 && tr.materials[mat->gl_diffuse_id].GlossScale > 0.0f )
+			if( gl_specular->value > 0 && tr.materials[iTexnum].GlossScale > 0.0f )
 			{
-				if( tr.materials[mat->gl_diffuse_id].GlossSmoothness != cached_glosssmoothness )
+				if( tr.materials[iTexnum].GlossSmoothness != cached_glosssmoothness )
 				{
-					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[mat->gl_diffuse_id].GlossSmoothness );
-					cached_glosssmoothness = tr.materials[mat->gl_diffuse_id].GlossSmoothness;
+					pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[iTexnum].GlossSmoothness );
+					cached_glosssmoothness = tr.materials[iTexnum].GlossSmoothness;
 				}
 
-				if( tr.materials[mat->gl_diffuse_id].GlossScale != cached_glossscale )
+				if( tr.materials[iTexnum].GlossScale != cached_glossscale )
 				{
-					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[mat->gl_diffuse_id].GlossScale );
-					cached_glossscale = tr.materials[mat->gl_diffuse_id].GlossScale;
-				}
-			}
-
-			if( gl_emboss->value > 0 && tr.materials[mat->gl_diffuse_id].EmbossScale > 0.0f )
-			{
-				if( tr.materials[mat->gl_diffuse_id].EmbossScale != cached_embossscale )
-				{
-					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[mat->gl_diffuse_id].EmbossScale );
-					cached_embossscale = tr.materials[mat->gl_diffuse_id].EmbossScale;
+					pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[iTexnum].GlossScale );
+					cached_glossscale = tr.materials[iTexnum].GlossScale;
 				}
 			}
 
-			cached_texture = mat->gl_diffuse_id;
+			if( gl_emboss->value > 0 && tr.materials[iTexnum].EmbossScale > 0.0f )
+			{
+				if( tr.materials[iTexnum].EmbossScale != cached_embossscale )
+				{
+					pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[iTexnum].EmbossScale );
+					cached_embossscale = tr.materials[iTexnum].EmbossScale;
+				}
+			}
+
+			cached_texture = iTexnum;
 		}
 
 		// diffusion - apply custom color to a specific texture
 		if( !r_lightmap->value )
 		{
-			if( tr.materials[mat->gl_diffuse_id].ApplyColor || tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
+			if( tr.materials[iTexnum].ApplyColor || tr.materials[iTexnum].gl_colormask_id > 0 )
 			{
 				// hack
 				if( RI->currententity->curstate.rendermode == kRenderTransAdd )
@@ -5595,8 +5598,8 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 					pglUniform4fARB( RI->currentshader->u_RenderColor, RI->currententity->curstate.rendercolor.r / 255.0f, RI->currententity->curstate.rendercolor.g / 255.0f, RI->currententity->curstate.rendercolor.b / 255.0f, tr.blend );
 
 				// color mask
-				if( tr.materials[mat->gl_diffuse_id].gl_colormask_id > 0 )
-					GL_Bind( GL_TEXTURE5, tr.materials[mat->gl_diffuse_id].gl_colormask_id ); // u_ColorMask
+				if( tr.materials[iTexnum].gl_colormask_id > 0 )
+					GL_Bind( GL_TEXTURE5, tr.materials[iTexnum].gl_colormask_id ); // u_ColorMask
 			}
 			else
 				R_SetRenderColor( m_pCurrentEntity );
@@ -5605,7 +5608,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			R_SetRenderColor( m_pCurrentEntity );
 
 		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready
-			&& (tr.materials[mat->gl_diffuse_id].ReflectScale[0] > 0.01f)
+			&& (tr.materials[iTexnum].ReflectScale[0] > 0.01f)
 			&& !IsBuildingCubemaps() ) // diffusioncubemaps
 		{
 			if( m_pModelInstance->cubemap )
@@ -5634,16 +5637,16 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				cached_cubemap = NULL;
 			}
 
-			if( tr.materials[mat->gl_diffuse_id].ReflectScale != cached_reflectscale )
+			if( tr.materials[iTexnum].ReflectScale != cached_reflectscale )
 			{
-				pglUniform2fARB( RI->currentshader->u_ReflectScale, tr.materials[mat->gl_diffuse_id].ReflectScale[0], cached_cubemap != NULL ? bound( 0, tr.materials[mat->gl_diffuse_id].ReflectScale[1], cached_cubemap->numMips) : 0.0f );
-				cached_reflectscale = tr.materials[mat->gl_diffuse_id].ReflectScale;
+				pglUniform2fARB( RI->currentshader->u_ReflectScale, tr.materials[iTexnum].ReflectScale[0], cached_cubemap != NULL ? bound( 0, tr.materials[iTexnum].ReflectScale[1], cached_cubemap->numMips) : 0.0f );
+				cached_reflectscale = tr.materials[iTexnum].ReflectScale;
 			}
 
-			if( tr.materials[mat->gl_diffuse_id].Fresnel != cached_fresnel )
+			if( tr.materials[iTexnum].Fresnel != cached_fresnel )
 			{
-				pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[mat->gl_diffuse_id].Fresnel );
-				cached_fresnel = tr.materials[mat->gl_diffuse_id].Fresnel;
+				pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[iTexnum].Fresnel );
+				cached_fresnel = tr.materials[iTexnum].Fresnel;
 			}
 		}
 
@@ -5695,7 +5698,7 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 	// sorting list to reduce shader switches
 	for( i = 0; i < m_nNumDrawMeshes; i++ )
 	{
-		gl_studiomesh_t *entry = &m_DrawMeshes[i];
+		const gl_studiomesh_t *entry = &m_DrawMeshes[i];
 		RI->currentmodel = m_pRenderModel = entry->model;
 		m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata( m_pRenderModel );
 		int m_skinnum = bound( 0, m_pCurrentEntity->curstate.skin, m_pStudioHeader->numskinfamilies - 1 );
@@ -5705,7 +5708,7 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 		short *pskinref = (short *)((byte *)m_pStudioHeader + m_pStudioHeader->skinindex);
 		pskinref += (m_skinnum * m_pStudioHeader->numskinref);
 
-		mstudiomaterial_t *mat = &m_pRenderModel->materials[pskinref[pMesh->skinref]];
+		const mstudiomaterial_t *mat = &m_pRenderModel->materials[pskinref[pMesh->skinref]];
 
 		ASSERT( m_pCurrentEntity->modelhandle != INVALID_HANDLE );
 
@@ -5741,9 +5744,10 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 			cached_model = m_pRenderModel;
 		}
 
-		int cur_texture = tr.whiteTexture;
 		if( FBitSet( mat->flags, STUDIO_NF_MASKED ) )
 			cur_texture = mat->gl_diffuse_id;
+		else
+			cur_texture = tr.whiteTexture;
 
 		if( cached_texture != cur_texture )
 		{
@@ -5884,10 +5888,10 @@ void CStudioModelRenderer::DrawViewModel( void )
 	m_flViewmodelFov = m_pCvarViewmodelFov->value - flFOVOffset;
 
 	// calc local FOV
-	float x = (float)ScreenWidth / tan( m_flViewmodelFov / 360 * M_PI );
+	const float x = (float)ScreenWidth / tan( m_flViewmodelFov / 360 * M_PI );
 
-	float fov_x = m_flViewmodelFov;
-	float fov_y = atan( (float)ScreenHeight / x ) * 360 / M_PI;
+	const float fov_x = m_flViewmodelFov;
+	const float fov_y = atan( (float)ScreenHeight / x ) * 360 / M_PI;
 
 	if( fov_x != RI->fov_x )
 	{

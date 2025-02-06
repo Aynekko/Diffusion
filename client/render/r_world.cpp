@@ -2086,7 +2086,7 @@ static unsigned int tempElems[MAX_MAP_ELEMS];
 static unsigned int numTempElems;
 
 // accumulate the indices
-static void R_DrawSurface( mextrasurf_t *esurf )
+static void R_DrawSurface( const mextrasurf_t *esurf )
 {
 	for( int vert = 0; vert < esurf->numverts - 2; vert++ )
 	{
@@ -2098,7 +2098,7 @@ static void R_DrawSurface( mextrasurf_t *esurf )
 }
 
 // accumulate the indices
-static void R_DrawIndexedSurface( mextrasurf_t *esurf )
+static void R_DrawIndexedSurface( const mextrasurf_t *esurf )
 {
 	for( int elem = 0; elem < esurf->numindexes; elem++ )
 	{
@@ -2226,17 +2226,16 @@ void R_BuildFaceListForLight( plight_t *pl )
 		R_GrassPrepareLight();
 
 	tr.num_light_surfaces = 0;
-	gl_bmodelface_t *entry;
-	msurface_t *psurf;
-	mextrasurf_t *es;
-	gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
+
+	const gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
 	tr.modelorg = glm->transform.VectorITransform( pl->origin );
+	mextrasurf_t *es;
 
 	// only visible polys passed through the light list
 	for( int i = 0; i < tr.num_draw_surfaces; i++ )
 	{
-		entry = &tr.draw_surfaces[i];
-		psurf = entry->surface;
+		const gl_bmodelface_t *entry = &tr.draw_surfaces[i];
+		const msurface_t *psurf = entry->surface;
 		es = entry->surface->info;
 		
 		if( es->subtexture[glState.stack_position] && !(es->surf->flags & SURF_WATER) && !(es->surf->flags & SURF_SCREEN) )
@@ -2277,9 +2276,9 @@ setup light projection for each
 void R_DrawLightForSurfList( plight_t *pl )
 {
 	int cached_texture = -1;
-	qboolean flush_buffer = false;
+	bool flush_buffer = false;
 	cl_entity_t *e = RI->currententity;
-	gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
+	const gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
 	
 	int	startv, endv;
 
@@ -2300,22 +2299,20 @@ void R_DrawLightForSurfList( plight_t *pl )
 	pl->lightviewProjMatrix.CopyToArray( gl_lightViewProjMatrix );
 	const Vector lightdir = pl->frustum.GetPlane( FRUSTUM_FAR )->normal;
 
-	gl_bmodelface_t *entry;
-	mextrasurf_t *es;
-	msurface_t *s;
 	Vector4D light_params[6];
 	float waveHeight = 0.0f;
 
 	for( int i = 0; i < tr.num_light_surfaces; i++ )
 	{
-		entry = &tr.light_surfaces[i];
-		es = entry->surface->info;
-		s = entry->surface;
+		const gl_bmodelface_t *entry = &tr.light_surfaces[i];
+		const mextrasurf_t *es = entry->surface->info;
+		const msurface_t *s = entry->surface;
+		const int iTexnum = es->gl_texturenum;
 
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 			flush_buffer = true;
 
-		if( cached_texture != es->gl_texturenum )
+		if( cached_texture != iTexnum )
 			flush_buffer = true;
 
 		if( flush_buffer )
@@ -2390,7 +2387,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			cached_embossscale = -1.0f;
 		}
 
-		if( cached_texture != es->gl_texturenum )
+		if( cached_texture != iTexnum )
 		{
 			const mtexinfo_t *tx = s->texinfo;
 			const mfaceinfo_t *land = tx->faceinfo;
@@ -2413,28 +2410,28 @@ void R_DrawLightForSurfList( plight_t *pl )
 				if( land && land->terrain && land->terrain->layermap.gl_diffuse_id > 0 )
 					GL_Bind( GL_TEXTURE0, land->terrain->layermap.gl_diffuse_id );
 				else 
-					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
+					GL_Bind( GL_TEXTURE0, iTexnum );
 				GL_LoadIdentityTexMatrix();
 			}
 			else if( FBitSet( s->flags, SURF_SCREEN ) && es->subtexture[glState.stack_position] )
 			{
-				int handle = es->subtexture[glState.stack_position];
+				const int handle = es->subtexture[glState.stack_position];
 				GL_Bind( GL_TEXTURE0, tr.subviewTextures[handle - 1].texturenum );
 				GL_LoadTexMatrix( tr.subviewTextures[handle - 1].matrix );
 			}
 			else
 			{
 				if( FBitSet( s->flags, SURF_LANDSCAPE ) )
-					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
-				else if( tr.materials[es->gl_texturenum].gl_fallbacktex_id > 0 )
-					GL_Bind( GL_TEXTURE0, tr.materials[es->gl_texturenum].gl_fallbacktex_id );
-				else if( es->gl_texturenum != tr.defaultTexture && tr.materials[es->gl_texturenum].animation_id >= 0 )
+					GL_Bind( GL_TEXTURE0, iTexnum );
+				else if( tr.materials[iTexnum].gl_fallbacktex_id > 0 )
+					GL_Bind( GL_TEXTURE0, tr.materials[iTexnum].gl_fallbacktex_id );
+				else if( iTexnum != tr.defaultTexture && tr.materials[iTexnum].animation_id >= 0 )
 				{
-					int anim_id = tr.materials[es->gl_texturenum].animation_id;
+					const int anim_id = tr.materials[iTexnum].animation_id;
 					GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
 				}
 				else
-					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
+					GL_Bind( GL_TEXTURE0, iTexnum );
 				GL_LoadIdentityTexMatrix();
 			}
 
@@ -2464,39 +2461,39 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 			else
 			{
-				const float newdynlightscale = FBitSet( s->flags, SURF_MOVIE ) ? pl->brightness : (pl->brightness * tr.materials[es->gl_texturenum].DynlightScale);
+				const float newdynlightscale = FBitSet( s->flags, SURF_MOVIE ) ? pl->brightness : (pl->brightness * tr.materials[iTexnum].DynlightScale);
 				if( newdynlightscale != cached_dynlightscale )
 				{
 					pglUniform1fARB( RI->currentshader->u_DynLightBrightness, newdynlightscale );
 					cached_dynlightscale = newdynlightscale;
 				}
 
-				if( gl_specular->value > 0 && tr.materials[es->gl_texturenum].GlossScale > 0.0f )
+				if( gl_specular->value > 0 && tr.materials[iTexnum].GlossScale > 0.0f )
 				{
-					if( tr.materials[es->gl_texturenum].GlossSmoothness != cached_glosssmoothness )
+					if( tr.materials[iTexnum].GlossSmoothness != cached_glosssmoothness )
 					{
-						pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[es->gl_texturenum].GlossSmoothness );
-						cached_glosssmoothness = tr.materials[es->gl_texturenum].GlossSmoothness;
+						pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[iTexnum].GlossSmoothness );
+						cached_glosssmoothness = tr.materials[iTexnum].GlossSmoothness;
 					}
 
-					if( tr.materials[es->gl_texturenum].GlossScale != cached_glossscale )
+					if( tr.materials[iTexnum].GlossScale != cached_glossscale )
 					{
-						pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[es->gl_texturenum].GlossScale );
-						cached_glossscale = tr.materials[es->gl_texturenum].GlossScale;
+						pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[iTexnum].GlossScale );
+						cached_glossscale = tr.materials[iTexnum].GlossScale;
 					}
 				}
 
-				if( gl_emboss->value > 0 && tr.materials[es->gl_texturenum].EmbossScale > 0.0f )
+				if( gl_emboss->value > 0 && tr.materials[iTexnum].EmbossScale > 0.0f )
 				{
-					if( tr.materials[es->gl_texturenum].EmbossScale != cached_embossscale )
+					if( tr.materials[iTexnum].EmbossScale != cached_embossscale )
 					{
-						pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[es->gl_texturenum].EmbossScale );
-						cached_embossscale = tr.materials[es->gl_texturenum].EmbossScale;
+						pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[iTexnum].EmbossScale );
+						cached_embossscale = tr.materials[iTexnum].EmbossScale;
 					}
 				}
 
-				if( tr.materials[es->gl_texturenum].gl_normalmap_id > 0 )
-					GL_Bind( GL_TEXTURE6, tr.materials[es->gl_texturenum].gl_normalmap_id );
+				if( tr.materials[iTexnum].gl_normalmap_id > 0 )
+					GL_Bind( GL_TEXTURE6, tr.materials[iTexnum].gl_normalmap_id );
 			}
 
 			if( !tr.lowmemory && FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
@@ -2511,15 +2508,15 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 
 			// diffusion - interior mapping
-			if( tr.materials[es->gl_texturenum].gl_interiormap_id > 0 )
+			if( tr.materials[iTexnum].gl_interiormap_id > 0 )
 			{
 			//	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[es->gl_texturenum].InteriorGrid.x, tr.materials[es->gl_texturenum].InteriorGrid.y, (float)tr.materials[es->gl_texturenum].InteriorLightState );
-				GL_Bind( GL_TEXTURE7, tr.materials[es->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
+				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[iTexnum].InteriorGrid.x, tr.materials[iTexnum].InteriorGrid.y, (float)tr.materials[iTexnum].InteriorLightState );
+				GL_Bind( GL_TEXTURE7, tr.materials[iTexnum].gl_interiormap_id ); // u_InteriorMap
 			}
 
 			// diffusion - apply custom color to a specific texture
-			if( tr.materials[es->gl_texturenum].ApplyColor && (e->index > 0) )
+			if( tr.materials[iTexnum].ApplyColor && (e->index > 0) )
 			{
 				pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
 			}
@@ -2531,7 +2528,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			else
 				GL_Cull( GL_FRONT );
 
-			cached_texture = es->gl_texturenum;
+			cached_texture = iTexnum;
 		}
 
 		if( es->firstvertex < startv )
@@ -2627,7 +2624,7 @@ R_DrawShadowBrushList
 void R_DrawShadowBrushList( void )
 {
 	int cached_texture = -1;
-	qboolean flush_buffer = false;
+	bool flush_buffer = false;
 	plight_t *pl = RI->currentlight;
 	cl_entity_t *e = RI->currententity;
 	int startv, endv;
@@ -2643,23 +2640,22 @@ void R_DrawShadowBrushList( void )
 	pglBindVertexArray( world->vertex_array_object );
 	GL_TextureTarget( GL_NONE );
 
-	gl_bmodelface_t *entry;
-	mextrasurf_t *es;
-	msurface_t *s;
 	int curtex;
 
 	for( int i = 0; i < tr.num_draw_surfaces; i++ )
 	{
-		entry = &tr.draw_surfaces[i];
-		es = entry->surface->info;
-		s = entry->surface;
+		const gl_bmodelface_t *entry = &tr.draw_surfaces[i];
 
 		if( !entry->hProgram )
 			continue;
 
-		curtex = tr.whiteTexture;
+		const mextrasurf_t *es = entry->surface->info;
+		const msurface_t *s = entry->surface;
+
 		if( FBitSet( s->flags, SURF_TRANSPARENT ) )
 			curtex = es->gl_texturenum;
+		else
+			curtex = tr.whiteTexture;
 
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 			flush_buffer = true;
@@ -2688,7 +2684,7 @@ void R_DrawShadowBrushList( void )
 
 			ASSERT( RI->currentshader != NULL );
 
-			gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
+			const gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
 
 			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 			pglUniform2fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1] );
@@ -2791,18 +2787,18 @@ void R_DrawBrushList( void )
 	float waveHeight = 0.0f;
 
 	int i;
-	gl_bmodelface_t *entry;
-	mextrasurf_t *es;
-	msurface_t *s;
-	texture_t *tex;
 
 	for( i = 0; i < tr.num_draw_surfaces; i++ )
 	{
-		entry = &tr.draw_surfaces[i];
-		es = entry->surface->info;
-		s = entry->surface;
-		tex = s->texinfo->texture;
-		if( !entry->hProgram ) continue;
+		const gl_bmodelface_t *entry = &tr.draw_surfaces[i];
+
+		if( !entry->hProgram )
+			continue;
+
+		const mextrasurf_t *es = entry->surface->info;
+		const msurface_t *s = entry->surface;
+		const texture_t *tex = s->texinfo->texture;
+		const int iTexnum = es->gl_texturenum;
 
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 			flush_buffer = true;
@@ -2813,13 +2809,13 @@ void R_DrawBrushList( void )
 		if( cached_mirror != es->subtexture[glState.stack_position] )
 			flush_buffer = true;
 
-		if( cached_texture != es->gl_texturenum )
+		if( cached_texture != iTexnum )
 			flush_buffer = true;
 
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
 			flush_buffer = true;
 
-		if( tr.materials[es->gl_texturenum].ReflectScale[0] > 0.01f )
+		if( tr.materials[iTexnum].ReflectScale[0] > 0.01f )
 		{
 			if( cached_cubemap != es->cubemap )
 				flush_buffer = true;
@@ -2890,7 +2886,7 @@ void R_DrawBrushList( void )
 			cached_reflectscale = { -1.0f, 0.0f };
 		}
 
-		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != es->gl_texturenum) )
+		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != iTexnum) )
 		{
 			const mtexinfo_t *tx = s->texinfo;
 			const mfaceinfo_t *land = tx->faceinfo;
@@ -2902,7 +2898,7 @@ void R_DrawBrushList( void )
 				GL_LoadTexMatrix( tr.subviewTextures[handle - 1].matrix );
 
 				if( FBitSet( s->flags, SURF_REFLECT ) )
-					pglUniform1fARB( RI->currentshader->u_PlanarReflectScale, tr.materials[es->gl_texturenum].PlanarReflectScale );
+					pglUniform1fARB( RI->currentshader->u_PlanarReflectScale, tr.materials[iTexnum].PlanarReflectScale );
 			}
 			else if( r_lightmap->value )
 			{
@@ -2914,16 +2910,16 @@ void R_DrawBrushList( void )
 				if( FBitSet( s->flags, SURF_MOVIE ) && e->curstate.body )
 					GL_Bind( GL_TEXTURE0, tr.cinTextures[es->cintexturenum - 1] );
 				else if( FBitSet( s->flags, SURF_LANDSCAPE ) )
-					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
-				else if( tr.materials[es->gl_texturenum].gl_fallbacktex_id > 0 )
-					GL_Bind( GL_TEXTURE0, tr.materials[es->gl_texturenum].gl_fallbacktex_id );
-				else if( es->gl_texturenum != tr.defaultTexture && tr.materials[es->gl_texturenum].animation_id >= 0 )
+					GL_Bind( GL_TEXTURE0, iTexnum );
+				else if( tr.materials[iTexnum].gl_fallbacktex_id > 0 )
+					GL_Bind( GL_TEXTURE0, tr.materials[iTexnum].gl_fallbacktex_id );
+				else if( iTexnum != tr.defaultTexture && tr.materials[iTexnum].animation_id >= 0 )
 				{
-					int anim_id = tr.materials[es->gl_texturenum].animation_id;
+					int anim_id = tr.materials[iTexnum].animation_id;
 					GL_Bind( GL_TEXTURE0, tr.animation[anim_id].GetAnimationCurFrame() );
 				}
 				else
-					GL_Bind( GL_TEXTURE0, es->gl_texturenum );
+					GL_Bind( GL_TEXTURE0, iTexnum );
 
 				GL_LoadIdentityTexMatrix();
 			}
@@ -2946,38 +2942,38 @@ void R_DrawBrushList( void )
 			}
 			else
 			{
-				if( gl_specular->value > 0 && tr.materials[es->gl_texturenum].GlossScale > 0.0f )
+				if( gl_specular->value > 0 && tr.materials[iTexnum].GlossScale > 0.0f )
 				{
-					if( tr.materials[es->gl_texturenum].GlossSmoothness != cached_glosssmoothness )
+					if( tr.materials[iTexnum].GlossSmoothness != cached_glosssmoothness )
 					{
-						pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[es->gl_texturenum].GlossSmoothness );
-						cached_glosssmoothness = tr.materials[es->gl_texturenum].GlossSmoothness;
+						pglUniform1fARB( RI->currentshader->u_GlossSmoothness, tr.materials[iTexnum].GlossSmoothness );
+						cached_glosssmoothness = tr.materials[iTexnum].GlossSmoothness;
 					}
 
-					if( tr.materials[es->gl_texturenum].GlossScale != cached_glossscale )
+					if( tr.materials[iTexnum].GlossScale != cached_glossscale )
 					{
-						pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[es->gl_texturenum].GlossScale );
-						cached_glossscale = tr.materials[es->gl_texturenum].GlossScale;
+						pglUniform1fARB( RI->currentshader->u_GlossScale, tr.materials[iTexnum].GlossScale );
+						cached_glossscale = tr.materials[iTexnum].GlossScale;
 					}
 				}
 
-				if( gl_emboss->value > 0 && tr.materials[es->gl_texturenum].EmbossScale > 0.0f )
+				if( gl_emboss->value > 0 && tr.materials[iTexnum].EmbossScale > 0.0f )
 				{
-					if( tr.materials[es->gl_texturenum].EmbossScale != cached_embossscale )
+					if( tr.materials[iTexnum].EmbossScale != cached_embossscale )
 					{
-						pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[es->gl_texturenum].EmbossScale );
-						cached_embossscale = tr.materials[es->gl_texturenum].EmbossScale;
+						pglUniform1fARB( RI->currentshader->u_EmbossScale, tr.materials[iTexnum].EmbossScale );
+						cached_embossscale = tr.materials[iTexnum].EmbossScale;
 					}
 				}
 
-				if( tr.materials[es->gl_texturenum].gl_normalmap_id > 0 )
-					GL_Bind( GL_TEXTURE4, tr.materials[es->gl_texturenum].gl_normalmap_id );
+				if( tr.materials[iTexnum].gl_normalmap_id > 0 )
+					GL_Bind( GL_TEXTURE4, tr.materials[iTexnum].gl_normalmap_id );
 			}
 
-			if( tr.materials[es->gl_texturenum].Fresnel != cached_fresnel )
+			if( tr.materials[iTexnum].Fresnel != cached_fresnel )
 			{
-				pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[es->gl_texturenum].Fresnel );
-				cached_fresnel = tr.materials[es->gl_texturenum].Fresnel;
+				pglUniform1fARB( RI->currentshader->u_Fresnel, tr.materials[iTexnum].Fresnel );
+				cached_fresnel = tr.materials[iTexnum].Fresnel;
 			}
 
 			// diffusion - refracted water!!!
@@ -2999,11 +2995,11 @@ void R_DrawBrushList( void )
 			}
 
 			// diffusion - interior mapping
-			if( tr.materials[es->gl_texturenum].gl_interiormap_id > 0 )
+			if( tr.materials[iTexnum].gl_interiormap_id > 0 )
 			{
 			//	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[es->gl_texturenum].InteriorGrid.x, tr.materials[es->gl_texturenum].InteriorGrid.y, (float)tr.materials[es->gl_texturenum].InteriorLightState );
-				GL_Bind( GL_TEXTURE5, tr.materials[es->gl_texturenum].gl_interiormap_id ); // u_InteriorMap
+				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[iTexnum].InteriorGrid.x, tr.materials[iTexnum].InteriorGrid.y, (float)tr.materials[iTexnum].InteriorLightState );
+				GL_Bind( GL_TEXTURE5, tr.materials[iTexnum].gl_interiormap_id ); // u_InteriorMap
 			}
 			else if( FBitSet( s->flags, SURF_WATER ) && (gl_water_planar->value > 0) )
 			{
@@ -3011,7 +3007,7 @@ void R_DrawBrushList( void )
 			}
 
 			// diffusion - apply custom color to a specific texture
-			if( tr.materials[es->gl_texturenum].ApplyColor && (e->index > 0) )
+			if( tr.materials[iTexnum].ApplyColor && (e->index > 0) )
 			{
 				// hack
 				if( e->curstate.rendermode == kRenderTransAdd )
@@ -3028,7 +3024,7 @@ void R_DrawBrushList( void )
 				R_SetRenderColor( RI->currententity );
 
 			cached_mirror = es->subtexture[glState.stack_position];
-			cached_texture = es->gl_texturenum;
+			cached_texture = iTexnum;
 			cached_texofs[0] = -1.0f;
 			cached_texofs[1] = -1.0f;
 		}
@@ -3072,7 +3068,7 @@ void R_DrawBrushList( void )
 			cached_texofs[1] = es->texofs[1];
 		}
 
-		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[es->gl_texturenum].ReflectScale[0] > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
+		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (tr.materials[iTexnum].ReflectScale[0] > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
 		{
 			const int cubemap_tex_unit = FBitSet( s->flags, SURF_WATER ) ? GL_TEXTURE2 : GL_TEXTURE6;
 
@@ -3102,10 +3098,10 @@ void R_DrawBrushList( void )
 				cached_cubemap = NULL;
 			}
 
-			if( tr.materials[es->gl_texturenum].ReflectScale != cached_reflectscale )
+			if( tr.materials[iTexnum].ReflectScale != cached_reflectscale )
 			{
-				pglUniform2fARB( RI->currentshader->u_ReflectScale, tr.materials[es->gl_texturenum].ReflectScale[0], cached_cubemap != NULL ? bound( 0, tr.materials[es->gl_texturenum].ReflectScale[1], cached_cubemap->numMips ) : 0.0f );
-				cached_reflectscale = tr.materials[es->gl_texturenum].ReflectScale;
+				pglUniform2fARB( RI->currentshader->u_ReflectScale, tr.materials[iTexnum].ReflectScale[0], cached_cubemap != NULL ? bound( 0, tr.materials[iTexnum].ReflectScale[1], cached_cubemap->numMips ) : 0.0f );
+				cached_reflectscale = tr.materials[iTexnum].ReflectScale;
 			}
 		}
 
