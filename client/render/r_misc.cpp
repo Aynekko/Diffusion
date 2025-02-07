@@ -522,17 +522,17 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				if( ent->curstate.fuser3 <= 0.0f )
 					return 0; // something bad happened with the timing (check delta.lst?)
 				
-				int ParticleEntIndex = ent->index;
+				const int ParticleEntIndex = ent->index;
 				if( tr.time < tr.ParticleTime[ParticleEntIndex] )
 					return 0;
 				
-				bool IsSmoke = ((ent->curstate.iuser1 == 0) || (ent->curstate.iuser1 == 2));
-				bool IsDustMotes = ((ent->curstate.iuser1 == 1) || (ent->curstate.iuser1 == 3));
-				bool IsWaterfall = (ent->curstate.iuser1 == 4);
+				const bool IsSmoke = ((ent->curstate.iuser1 == 0) || (ent->curstate.iuser1 == 2));
+				const bool IsDustMotes = ((ent->curstate.iuser1 == 1) || (ent->curstate.iuser1 == 3));
+				const bool IsWaterfall = (ent->curstate.iuser1 == 4);
 
-				Vector SmV_Org = ent->curstate.origin + (ent->curstate.mins + ent->curstate.maxs) * 0.5f;
+				const Vector SmV_Org = ent->curstate.origin + (ent->curstate.mins + ent->curstate.maxs) * 0.5f;
 				// size
-				Vector SmV_Size = ent->curstate.maxs - ent->curstate.mins;
+				const Vector SmV_Size = ent->curstate.maxs - ent->curstate.mins;
 
 				float Density = ent->curstate.fuser2;
 				if( Density <= 0.0f )
@@ -552,8 +552,8 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				Vector vecSpot;
 				int i, j;
 				float SmV_Alpha = ent->curstate.renderamt / 255.0f;
-				int SmV_Distance = ent->curstate.iuser2;
-				float SmV_Scale = ent->curstate.fuser1;
+				const int SmV_Distance = ent->curstate.iuser2;
+				const float SmV_Scale = ent->curstate.fuser1;
 				Vector Color = Vector( ent->curstate.rendercolor.r, ent->curstate.rendercolor.g, ent->curstate.rendercolor.b ) / 255.0f;
 
 				if( SmV_Alpha <= 0.0f )
@@ -600,16 +600,16 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				if( ent->curstate.fuser2 <= 0.0f )
 					return 0; // something bad happened with the timing (check delta.lst?)
 
-				int ParticleEntIndex = ent->index;
+				const int ParticleEntIndex = ent->index;
 				if( tr.time < tr.ParticleTime[ParticleEntIndex] )
 					return 0;
 
-				int B_Distance = ent->curstate.iuser4;
-				int Count = (int)ent->curstate.fuser1 + 1;
-				int Density = Count * 3 + 6;
-				float maxHeight = ent->curstate.maxs.z - ent->curstate.mins.z;
-				int width = ent->curstate.maxs.x - ent->curstate.mins.x;
-				int depth = ent->curstate.maxs.y - ent->curstate.mins.y;
+				const int B_Distance = ent->curstate.iuser4;
+				const int Count = (int)ent->curstate.fuser1 + 1;
+				const int Density = Count * 3 + 6;
+				const float maxHeight = ent->curstate.maxs.z - ent->curstate.mins.z;
+				const int width = ent->curstate.maxs.x - ent->curstate.mins.x;
+				const int depth = ent->curstate.maxs.y - ent->curstate.mins.y;
 
 				Vector B_Org;
 				for( int i = 0; i < Count; i++ )
@@ -617,7 +617,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 					B_Org.x = ent->curstate.mins.x + RANDOM_LONG( 0, width - 1 );
 					B_Org.y = ent->curstate.mins.y + RANDOM_LONG( 0, depth - 1 );
 					B_Org.z = ent->curstate.mins.z;
-					float vertical_speed = RANDOM_LONG( 80, 140 );
+					const float vertical_speed = RANDOM_LONG( 80, 140 );
 
 					g_pParticles.Bubble( ParticleEntIndex, B_Org, vertical_speed, B_Distance, tr.time + (maxHeight / vertical_speed) - 0.1f, ent->curstate.fuser3 );
 				}
@@ -1069,7 +1069,7 @@ void HUD_ProcessPlayerState( struct entity_state_s* dst, const struct entity_sta
 	memcpy( &dst->blending[0], &src->blending[0], 2 * sizeof( byte ) );
 
 	// Save off some data so other areas of the Client DLL can get to it
-	cl_entity_t* player = GET_LOCAL_PLAYER(); // Get the local player's index
+	const cl_entity_t *player = GET_LOCAL_PLAYER(); // Get the local player's index
 
 	if( dst->number == player->index )
 	{
@@ -1173,7 +1173,7 @@ void HUD_CreateEntities( void )
 //======================
 void HUD_DrawBeam( void )
 {
-	cl_entity_t* view = GET_VIEWMODEL();
+	const cl_entity_t *view = GET_VIEWMODEL();
 	int m_iBeam = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/plasma.spr" );
 
 	gEngfuncs.pEfxAPI->R_BeamEnts( view->index | 0x1000, view->index | 0x2000, m_iBeam, 1.05f, 0.8f, 0.5f, 0.5f, 0.6f, 0, 10, 2, 10, 0 );
@@ -1472,11 +1472,11 @@ parse heightmap pixels and remap it
 to real layer count
 ========================
 */
-bool LoadHeightMap( indexMap_t* im, int numLayers )
+static bool LoadHeightMap( indexMap_t *im, int numLayers )
 {
-	unsigned int* src;
-	int		i, tex;
-	int		depth = 1;
+	unsigned int *src;
+	int i, tex;
+	int depth = 1;
 
 	if( numLayers <= 0 )
 		return false;
@@ -1494,8 +1494,8 @@ bool LoadHeightMap( indexMap_t* im, int numLayers )
 
 	im->gl_diffuse_id = LOAD_TEXTURE( im->diffuse, NULL, 0, 0 );
 
-	int width = RENDER_GET_PARM( PARM_TEX_SRC_WIDTH, tex );
-	int height = RENDER_GET_PARM( PARM_TEX_SRC_HEIGHT, tex );
+	const int width = RENDER_GET_PARM( PARM_TEX_SRC_WIDTH, tex );
+	const int height = RENDER_GET_PARM( PARM_TEX_SRC_HEIGHT, tex );
 
 	im->pixels = (byte*)Mem_Alloc( width * height );
 	im->numLayers = bound( 1, numLayers, 255 );
@@ -1516,10 +1516,10 @@ bool LoadHeightMap( indexMap_t* im, int numLayers )
 	for( i = 0; i < (im->width * im->height); i++ )
 		im->pixels[i] = ((src[i] & 0xFF) * (im->numLayers - 1)) / im->maxHeight;
 
-	size_t lay_size = im->width * im->height * 4;
-	size_t img_size = lay_size * depth;
-	byte* layers = (byte*)Mem_Alloc( img_size );
-	byte* pixels = (byte*)src;
+	const size_t lay_size = im->width * im->height * 4;
+	const size_t img_size = lay_size * depth;
+	byte *layers = (byte *)Mem_Alloc( img_size );
+	byte *pixels = (byte *)src;
 
 	for( int x = 0; x < im->width; x++ )
 	{
@@ -1586,7 +1586,7 @@ bool LoadHeightMap( indexMap_t* im, int numLayers )
 	// release source texture
 	FREE_TEXTURE( tex );
 
-	tex = CREATE_TEXTURE_ARRAY( im->name, im->width, im->height, depth, layers, TF_CLAMP | TF_HAS_ALPHA );
+	tex = CREATE_TEXTURE_ARRAY( im->name, im->width, im->height, depth, layers, TF_CLAMP );
 	Mem_Free( layers );
 
 	im->gl_heightmap_id = tex;
@@ -1602,13 +1602,13 @@ loading all the landscape layers
 into texture arrays
 ========================
 */
-bool LoadTerrainLayers( layerMap_t* lm, int numLayers )
+static bool LoadTerrainLayers( layerMap_t* lm, int numLayers )
 {
-	char* texnames[MAX_LANDSCAPE_LAYERS];
-	char* normalmaps[MAX_LANDSCAPE_LAYERS];
-	char* ptr, buffer[1024];
-	char* ptr_n, buffer_n[1024];
-	size_t nameLen = 64;
+	char *texnames[MAX_LANDSCAPE_LAYERS];
+	char *normalmaps[MAX_LANDSCAPE_LAYERS];
+	char *ptr, buffer[1024];
+	char *ptr_n, buffer_n[1024];
+	const size_t nameLen = 64;
 	int	i;
 
 	memset( buffer, 0, sizeof( buffer ) ); // list must be null terminated
@@ -1710,7 +1710,7 @@ void R_LoadLandscapes( const char* filename )
 
 	Q_snprintf( filepath, sizeof( filepath ), "maps/%s_land.txt", filename );
 
-	char* afile = (char*)gEngfuncs.COM_LoadFile( filepath, 5, NULL );
+	char *afile = (char *)gEngfuncs.COM_LoadFile( filepath, 5, NULL );
 	if( !afile ) return;
 
 	ALERT( at_aiconsole, "loading %s\n", filepath );
@@ -1758,7 +1758,7 @@ void R_LoadLandscapes( const char* filename )
 			break;
 		}
 
-		terrain_t* terra = &world->terrains[current];
+		terrain_t *terra = &world->terrains[current];
 
 		// read the landscape name
 		Q_strncpy( terra->name, token, sizeof( terra->name ) );
@@ -1878,7 +1878,7 @@ R_FindTerrain
 find the terrain description
 ========================
 */
-terrain_t* R_FindTerrain( const char* texname )
+terrain_t *R_FindTerrain( const char *texname )
 {
 	for( int i = 0; i < world->num_terrains; i++ )
 	{
@@ -1897,11 +1897,11 @@ Parses an edict out of the given string, returning the new position
 ed should be a properly initialized empty edict.
 ====================
 */
-void ED_ParseEdict( char** pfile )
+static void ED_ParseEdict( char **pfile )
 {
 	int	vertex_light_cache = -1;
-	char	modelname[64];
-	char	token[2048];
+	char modelname[64];
+	char token[2048];
 
 	// go through all the dictionary pairs
 	while( 1 )
@@ -1951,11 +1951,11 @@ GL_InitVertexLightCache
 create VBO cache for vertex-lit studio models
 ==================
 */
-void GL_InitVertexLightCache( void )
+static void GL_InitVertexLightCache( void )
 {
-	char* entities = worldmodel->entities;
-	static char	worldname[64];
-	char		token[2048];
+	char *entities = worldmodel->entities;
+	static char worldname[64];
+	char token[2048];
 
 	if( !Q_stricmp( world->name, worldname ) && !world->ignore_restart_check )
 		return; // just a restart
@@ -1985,7 +1985,7 @@ Called always when map is changed or restarted
 void R_NewMap( void )
 {
 	int	i, j;
-	model_t* m;
+	model_t *m;
 
 	if( g_pParticleSystems )
 		g_pParticleSystems->ClearSystems();
@@ -2057,6 +2057,9 @@ void R_NewMap( void )
 	tr.oldtime = GET_CLIENT_OLDTIME();
 
 	// setup special flags
+	#ifdef _OPENMP
+	#pragma omp parallel for
+	#endif
 	for( int i = 0; i < worldmodel->numsurfaces; i++ )
 	{
 		msurface_t *surf = &worldmodel->surfaces[i];
@@ -2143,11 +2146,10 @@ void R_VidInit( void )
 
 void R_Sprite_Smoke( TEMPENTITY *pTemp, float scale, int mode )
 {
-	int	iColor;
-
 	if( !pTemp ) return;
 
-	iColor = RANDOM_LONG( 20, 35 );
+	int iColor = RANDOM_LONG( 20, 35 );
+
 	if( mode == 1 )
 		pTemp->entity.curstate.rendermode = kRenderTransAdd;
 	else
@@ -2199,7 +2201,7 @@ Vector R_MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 	if( !(POINT_CONTENTS( vecEnd ) == CONTENTS_WATER && POINT_CONTENTS( vecSrc ) != CONTENTS_WATER) )
 		return g_vecZero;
 
-	float len = (vecEnd - vecSrc).Length();
+	const float len = (vecEnd - vecSrc).Length();
 
 	// divide by 2
 	Vector vecTemp = Vector( (vecEnd.x + vecSrc.x) * 0.5f, (vecEnd.y + vecSrc.y) * 0.5f, (vecEnd.z + vecSrc.z) * 0.5f );
@@ -2305,7 +2307,7 @@ void R_Explosion( Vector pos, int model, float scale, float framerate, int flags
 			R_SetupLightProjection( dl, pos, g_vecZero, dl->radius, 90.0f );
 			R_SetupLightAttenuationTexture( dl );
 
-			int SprGlow = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/glow01.spr" );
+			const int SprGlow = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/glow01.spr" );
 			TEMPENTITY *pTemp = gEngfuncs.pEfxAPI->R_TempSprite( pos, Vector( 0, 0, 0 ), RANDOM_FLOAT( 5, 8 ), SprGlow, kRenderGlow, kRenderFxNoDissipation, 0.5, 0.1, FTENT_FADEOUT );
 			if( pTemp )
 			{
@@ -2318,10 +2320,10 @@ void R_Explosion( Vector pos, int model, float scale, float framerate, int flags
 
 	if( flags != TE_EXPLFLAG_NOSOUND )
 	{
-		int sndnum = RANDOM_LONG( 0, 2 );
+		const int sndnum = RANDOM_LONG( 0, 2 );
 
 		gEngfuncs.pEventAPI->EV_PlaySound( 0, pos, CHAN_STATIC, cl_explode_sounds[sndnum], VOL_NORM, 0.5, 0, PITCH_NORM );
-		int Length = (pos - tr.viewparams.vieworg).Length();
+		const int Length = (pos - tr.viewparams.vieworg).Length();
 		if( Length > 1000 )
 		{
 			float vol = (Length * 0.001) - 0.8; // should be 0.2 and above because starting from 1000
@@ -2342,9 +2344,9 @@ void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoV
 	char *sndname[5] = { NULL, NULL, NULL, NULL, NULL };
 	char *sndname_d[5] = { NULL, NULL, NULL, NULL, NULL };
 	int num = -1;
-	cl_entity_t *player = gEngfuncs.GetLocalPlayer();
+	const cl_entity_t *player = gEngfuncs.GetLocalPlayer();
 	int Channel = CHAN_WEAPON;
-	bool localanim = (LocalWeaponAnims() && UTIL_IsLocal( entindex ) && entindex == player->index && !CL_IsThirdPerson());
+	const bool localanim = (LocalWeaponAnims() && UTIL_IsLocal( entindex ) && entindex == player->index && !CL_IsThirdPerson());
 	float attenuation = 0.6f;
 	int pitch = RANDOM_LONG( 98, 103 );
 
