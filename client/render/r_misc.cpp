@@ -1586,7 +1586,7 @@ static bool LoadHeightMap( indexMap_t *im, int numLayers )
 	// release source texture
 	FREE_TEXTURE( tex );
 
-	tex = CREATE_TEXTURE_ARRAY( im->name, im->width, im->height, depth, layers, TF_CLAMP );
+	tex = CREATE_TEXTURE_ARRAY( im->name, im->width, im->height, depth, layers, TF_CLAMP | TF_HAS_ALPHA );
 	Mem_Free( layers );
 
 	im->gl_heightmap_id = tex;
