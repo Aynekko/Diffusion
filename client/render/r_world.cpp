@@ -3447,7 +3447,8 @@ void R_MarkLeaves( void )
 
 	const int stack = glState.stack_position;
 
-	for( int i = 0; i < world->numleafs - 1; i++ )
+	// skip leaf 0 (outside leaf)
+	for( int i = 1; i < world->numleafs - 1; i++ )
 	{
 		if( CHECKVISBIT( RI->visbytes, i ) )
 		{
@@ -3695,7 +3696,7 @@ void R_DrawWorld( void )
 	R_LoadIdentity();
 
 	R_ClearSkyBox();
-	
+
 	R_MarkLeaves();
 	start = Sys_DoubleTime();
 
