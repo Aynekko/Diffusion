@@ -74,16 +74,17 @@ void CFuncConveyor::UpdateSpeed(float speed)
 	// make sure the sign is correct - positive for forward rotation,
 	// negative for reverse rotation.
 	speed = fabs(speed);
-	if (pev->impulse) speed *= -1;
+	if (pev->impulse) speed = -speed;
 
 	// encode it as an integer with 4 fractional bits
-	int speedCode = (int)(fabs(speed) * 16.0f);
+//	int speedCode = (int)(fabs(speed) * 16.0f);
 
 	// HACKHACK -- This is ugly, but encode the speed in the rendercolor
 	// to avoid adding more data to the network stream
-	pev->rendercolor.x = (speed < 0) ? 1 : 0;
-	pev->rendercolor.y = (speedCode >> 8);
-	pev->rendercolor.z = (speedCode & 0xFF);
+//	pev->rendercolor.x = (speed < 0) ? 1 : 0;
+//	pev->rendercolor.y = (speedCode >> 8);
+//	pev->rendercolor.z = (speedCode & 0xFF);
+	pev->fuser1 = speed; // diffusion - use this instead!
 
 	// set conveyor state
 	m_iState = (speed != 0) ? STATE_ON : STATE_OFF;

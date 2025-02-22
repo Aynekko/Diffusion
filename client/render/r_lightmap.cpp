@@ -514,12 +514,13 @@ void R_UpdateSurfaceParams( msurface_t *surf )
 		float	sOffset, sy;
 		float	tOffset, cy;
 
-		if( !FBitSet( e->curstate.effects, EF_CONVEYOR ))
+		if( !FBitSet( e->curstate.effects, EF_CONVEYOR )) // func_conveyor
 		{
-			flConveyorSpeed = (e->curstate.rendercolor.g<<8|e->curstate.rendercolor.b) / 16.0f;
-			if( e->curstate.rendercolor.r ) flConveyorSpeed = -flConveyorSpeed;
+		//	flConveyorSpeed = (e->curstate.rendercolor.g<<8|e->curstate.rendercolor.b) / 16.0f;
+		//	if( e->curstate.rendercolor.r ) flConveyorSpeed = -flConveyorSpeed;
+			flConveyorSpeed = e->curstate.fuser1;
 		}
-		else flConveyorPos = e->curstate.fuser1;
+		else flConveyorPos = e->curstate.fuser1; // func_transporter
 		flWidth = (float)RENDER_GET_PARM( PARM_TEX_SRC_WIDTH, surf->texinfo->texture->gl_texturenum );
 
 		if( flWidth != 0.0f )
