@@ -148,7 +148,7 @@ R_CullNodeTopView
 cull node by user rectangle (simple scissor)
 ================
 */
-bool R_CullNodeTopView( const mworldnode_t *node )
+bool R_CullNodeTopView( const struct mworldnode_s *node )
 {
 	Vector2D	delta, size;
 	Vector	center, half;

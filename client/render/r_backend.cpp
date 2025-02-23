@@ -23,12 +23,12 @@ int R_GetSpriteTexture( const model_t *m_pSpriteModel, int frame )
 	return R_GetSpriteFrame( m_pSpriteModel, frame )->gl_texturenum;
 }
 
-void GL_DepthRange( GLfloat depthmin, GLfloat depthmax )
+void GL_DepthRange( const GLfloat depthmin, const GLfloat depthmax )
 {
 	pglDepthRange( depthmin, depthmax );
 }
 
-void GL_Texture2D( GLint enable )
+void GL_Texture2D( const GLint enable )
 {
 	if( enable )
 		pglEnable( GL_TEXTURE_2D );
@@ -36,7 +36,7 @@ void GL_Texture2D( GLint enable )
 		pglDisable( GL_TEXTURE_2D );
 }
 
-void GL_DepthTest( GLint enable )
+void GL_DepthTest( const GLint enable )
 {
 	if( enable ) 
 		pglEnable( GL_DEPTH_TEST );
@@ -44,7 +44,7 @@ void GL_DepthTest( GLint enable )
 		pglDisable( GL_DEPTH_TEST );
 }
 
-void GL_Color4f( GLfloat r, GLfloat g, GLfloat b, GLfloat a )
+void GL_Color4f( const GLfloat r, const GLfloat g, const GLfloat b, const GLfloat a )
 {
 	pglColor4f( r, g, b, a );
 }
@@ -54,7 +54,7 @@ void GL_Color4f( GLfloat r, GLfloat g, GLfloat b, GLfloat a )
 GL_DepthMask
 ==============
 */
-void GL_DepthMask( GLint enable )
+void GL_DepthMask( const GLint enable )
 {
 	pglDepthMask( enable );
 }
@@ -64,7 +64,7 @@ void GL_DepthMask( GLint enable )
 GL_AlphaTest
 ==============
 */
-void GL_AlphaTest( GLint enable )
+void GL_AlphaTest( const GLint enable )
 {
 	if( enable )
 		pglEnable( GL_ALPHA_TEST );
@@ -76,7 +76,7 @@ void GL_AlphaTest( GLint enable )
 #endif
 }
 
-void GL_AlphaFunc( GLenum func, GLclampf ref )
+void GL_AlphaFunc( const GLenum func, const GLclampf ref )
 {
 	pglAlphaFunc( func, ref );
 }
@@ -86,7 +86,7 @@ void GL_AlphaFunc( GLenum func, GLclampf ref )
 GL_Blend
 ==============
 */
-void GL_Blend( GLint enable )
+void GL_Blend( const GLint enable )
 {
 	if( enable )
 		pglEnable( GL_BLEND );
@@ -94,7 +94,7 @@ void GL_Blend( GLint enable )
 		pglDisable( GL_BLEND );
 }
 
-void GL_BlendFunc( GLenum sfactor, GLenum dfactor )
+void GL_BlendFunc( const GLenum sfactor, const GLenum dfactor )
 {
 	pglBlendFunc( sfactor, dfactor );
 }
@@ -104,7 +104,7 @@ void GL_BlendFunc( GLenum sfactor, GLenum dfactor )
 GL_Cull
 =================
 */
-void GL_Cull( GLenum cull )
+void GL_Cull( const GLenum cull )
 {
 	// to avoid useless OpenGL API calls
 	if( glState.faceCull == cull )
@@ -127,7 +127,7 @@ void GL_Cull( GLenum cull )
 GL_FrontFace
 =================
 */
-void GL_FrontFace( GLenum front )
+void GL_FrontFace( const GLenum front )
 {
 	pglFrontFace( front ? GL_CW : GL_CCW );
 	glState.frontFace = front;
@@ -312,7 +312,7 @@ void R_EndDrawProjectionGLSL( void )
 	GL_Blend( GL_FALSE );
 }
 
-int R_AllocFrameBuffer( int viewport[4] )
+int R_AllocFrameBuffer( const int viewport[4] )
 {
 	int i = tr.num_framebuffers;
 
@@ -349,7 +349,7 @@ int R_AllocFrameBuffer( int viewport[4] )
 	return i;
 }
 
-void R_FreeFrameBuffer( int buffer )
+void R_FreeFrameBuffer( const int buffer )
 {
 	if( buffer < 0 || buffer >= MAX_FRAMEBUFFERS )
 	{
@@ -364,7 +364,7 @@ void R_FreeFrameBuffer( int buffer )
 	memset( fbo, 0, sizeof( *fbo ));
 }
 
-void GL_BindFrameBuffer( int buffer, int texture )
+void GL_BindFrameBuffer( const int buffer, const int texture )
 {
 	gl_fbo_t *fbo = NULL;
 
@@ -399,7 +399,7 @@ void GL_BindFrameBuffer( int buffer, int texture )
 GL_BindFBO
 ==============
 */
-void GL_BindFBO( GLint buffer )
+void GL_BindFBO( const GLint buffer )
 {
 	if( !GL_Support( R_FRAMEBUFFER_OBJECT ))
 		return;
@@ -418,7 +418,7 @@ void GL_BindFBO( GLint buffer )
 	glState.frameBuffer = buffer;
 }
 
-void GL_AlphaToCoverage( bool enable )
+void GL_AlphaToCoverage( const bool enable )
 {
 	// TODO store state locally to avoid GL-calls to get current state
 	if( pglIsEnabled( GL_SAMPLE_ALPHA_TO_COVERAGE_ARB ) == enable )
@@ -456,7 +456,7 @@ static void createRoundedCorners( Vector2D *arr, int num )
 		arr[i].y = sinf( a );
 	}
 }
-void FillRoundedRGBA( float x, float y, float width, float height, float radius, Vector4D rgba )
+void FillRoundedRGBA( const float x, const float y, const float width, const float height, float radius, Vector4D rgba )
 {
 	if( glwRoundedCorners[0].x + glwRoundedCorners[0].y == 0 )
 		createRoundedCorners( glwRoundedCorners, GLW_SMALL_ROUNDED_CORNER_SLICES );

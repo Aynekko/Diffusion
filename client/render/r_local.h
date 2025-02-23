@@ -710,31 +710,31 @@ void R_RenderVolumetricLights( void );
 //
 void GL_LoadMatrix( const matrix4x4 source );
 void GL_LoadTexMatrix( const matrix4x4 source );
-void GL_FrontFace( GLenum front );
-void GL_Cull( GLenum cull );
+void GL_FrontFace( const GLenum front );
+void GL_Cull( const GLenum cull );
 bool R_BeginDrawProjectionGLSL( plight_t *pl, float lightscale = 1.0f );
 void R_EndDrawProjectionGLSL( void );
 int R_GetSpriteTexture( const model_t *m_pSpriteModel, int frame );
-int R_AllocFrameBuffer( int viewport[4] );
-void GL_BindFrameBuffer( int buffer, int texture );
-void R_FreeFrameBuffer( int buffer );
-void GL_DepthMask( GLint enable );
-void GL_AlphaTest( GLint enable );
-void GL_AlphaFunc( GLenum func, GLclampf ref );
-void GL_Blend( GLint enable );
-void GL_BlendFunc( GLenum sfactor, GLenum dfactor );
-void GL_BindFBO( GLint buffer );
+int R_AllocFrameBuffer( const int viewport[4] );
+void GL_BindFrameBuffer( const int buffer, const int texture );
+void R_FreeFrameBuffer( const int buffer );
+void GL_DepthMask( const GLint enable );
+void GL_AlphaTest( const GLint enable );
+void GL_AlphaFunc( const GLenum func, GLclampf ref );
+void GL_Blend( const GLint enable );
+void GL_BlendFunc( const GLenum sfactor, const GLenum dfactor );
+void GL_BindFBO( const GLint buffer );
 void GL_Setup2D( void );
 void GL_Setup3D( void );
 void GL_CleanupDrawState( void );
 void GL_CleanupAllTextureUnits( void );
-void GL_AlphaToCoverage( bool enable );
+void GL_AlphaToCoverage( const bool enable );
 bool GL_UsingAlphaToCoverage( void );
-void GL_DepthRange( GLfloat depthmin, GLfloat depthmax );
-void GL_DepthTest( GLint enable );
-void GL_Texture2D( GLint enable );
-void GL_Color4f( GLfloat r, GLfloat g, GLfloat b, GLfloat a );
-void FillRoundedRGBA( float posx, float posy, float w, float h, float r, Vector4D rgba );
+void GL_DepthRange( const GLfloat depthmin, const GLfloat depthmax );
+void GL_DepthTest( const GLint enable );
+void GL_Texture2D( const GLint enable );
+void GL_Color4f( const GLfloat r, const GLfloat g, const GLfloat b, const GLfloat a );
+void FillRoundedRGBA( const float posx, const float posy, const float w, const float h, float r, Vector4D rgba );
 
 //
 // r_cull.cpp
