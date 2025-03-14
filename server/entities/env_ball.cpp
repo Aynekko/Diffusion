@@ -2,6 +2,8 @@
 #include "util.h"
 #include "cbase.h"
 #include "triggers.h"
+#include "game/gamerules.h"
+#include "monsters.h"
 
 //==========================================================================
 //diffusion - energy ball, prop_combine_ball replica
@@ -288,7 +290,6 @@ public:
 	void Explode(void);
 	virtual BOOL IsProjectile( void ) { return TRUE; }
 
-	Vector m_vecIdeal;
 	int Bounced; // how many times did it bounce?
 	int SpriteExplosion;
 	float m_maxFrame;
@@ -339,8 +340,6 @@ void CEnvBallEntity::Spawn(void)
 		UTIL_SetSize(pev, g_vecZero, g_vecZero);
 
 	SetTouch(&CEnvBallEntity::BounceTouch);
-
-	m_vecIdeal = Vector(0, 0, 0);
 
 	if( pev->owner )
 		m_hOwner = Instance(pev->owner);
@@ -463,14 +462,14 @@ void CEnvBallEntity::BounceTouch(CBaseEntity* pOther)
 			// with this code you can push the ball with your body, but it can be buggy...
 			// UPD: FIXME I feel some lines can be unnecessary. It works, but must be looked into
 			Vector m_vecIdeal = pOther->GetAbsVelocity();
-			m_vecIdeal = m_vecIdeal + (m_vecIdeal - GetAbsOrigin()).Normalize() * 100;
+			m_vecIdeal += (m_vecIdeal - GetAbsOrigin()).Normalize() * 100;
 			SetAbsVelocity(m_vecIdeal);
 			Vector vecDir = m_vecIdeal.Normalize();
 			TraceResult tr = UTIL_GetGlobalTrace();
 			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
 			vecDir = 2.0 * tr.vecPlaneNormal * n + vecDir;
-			m_vecIdeal = vecDir * m_vecIdeal.Length();
-			m_vecIdeal.z += 2; // so it won't stick to surface...
+		//	m_vecIdeal = vecDir * m_vecIdeal.Length();
+		//	m_vecIdeal.z += 2; // so it won't stick to surface...
 
 			if (pev->fuser2 > 0)
 			{
@@ -707,8 +706,6 @@ void CEnvBallEntitySoldier::Spawn(void)
 	SetThink(&CEnvBallEntitySoldier::AnimateThink);
 	SetTouch(&CEnvBallEntitySoldier::BounceTouch);
 
-	m_vecIdeal = Vector(0, 0, 0);
-
 	if (pev->owner)
 	{
 		m_hOwner = Instance(pev->owner);
@@ -889,6 +886,12 @@ public:
 	void AnimateThink(void);
 	virtual BOOL IsProjectile( void ) { return TRUE; }
 
+	// player's energy ball has an ability to correct its course toward enemies (like hl2)
+	bool bJustBounced; // not saved
+	void CorrectCourseTowardEnemy( void );
+	bool bStruckEntity; // not saved
+	bool IsAttractiveTarget( CBaseEntity *pEntity );
+
 	DECLARE_DATADESC();
 };
 
@@ -906,7 +909,7 @@ void CEnvBallEntityPlayer::AnimateThink(void)
 	if (m_hOwner == NULL)
 		pev->owner = NULL;
 
-	SetNextThink(0);
+	SetNextThink( 0 );
 
 	if ((pev->fuser1 > 0) && (gpGlobals->time - pev->dmgtime > pev->fuser1))
 	{
@@ -930,6 +933,12 @@ void CEnvBallEntityPlayer::AnimateThink(void)
 	float frames = pev->framerate * gpGlobals->frametime;
 	if( m_maxFrame > 0 )
 		pev->frame = fmod( pev->frame + frames, m_maxFrame );
+
+	if( bJustBounced )
+	{
+		CorrectCourseTowardEnemy();
+		bJustBounced = false;
+	}
 }
 
 void CEnvBallEntityPlayer::Spawn(void)
@@ -956,8 +965,6 @@ void CEnvBallEntityPlayer::Spawn(void)
 
 	SetThink(&CEnvBallEntityPlayer::AnimateThink);
 	SetTouch(&CEnvBallEntityPlayer::BounceTouch);
-
-	m_vecIdeal = Vector(0, 0, 0);
 
 	m_hOwner = Instance(pev->owner);
 	pev->dmgtime = gpGlobals->time; // keep track of when ball spawned
@@ -1025,22 +1032,23 @@ void CEnvBallEntityPlayer::BounceTouch(CBaseEntity* pOther)
 	if( pev->owner )
 		pevOwner = VARS( pev->owner );
 
-	if (pOther->IsMonster())
+	if( pOther->IsMonster() )
 	{
-		if (FClassnameIs(pOther, "monster_alien_ship") || FClassnameIs(pOther, "monster_gargantua"))
+		if( FClassnameIs( pOther, "monster_alien_ship" ) || FClassnameIs( pOther, "monster_gargantua" ) )
 		{
 			Explode();
 			return;
 		}
 		else
 		{
-			pOther->TakeDamage(pev, pevOwner, pev->fuser2, DMG_SHOCK);
+			pOther->TakeDamage( pev, pevOwner, pev->fuser2, DMG_SHOCK );
 			Bounced += 2;
 
 			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/bounce_hit.wav", 1, 0.4, 0, RANDOM_LONG( 90, 110 ) );
+			bStruckEntity = true;
 		}
 	}
-	else if ((pOther->Classify() == CLASS_PLAYER_ALLY))
+	else if( (pOther->Classify() == CLASS_PLAYER_ALLY) )
 	{
 		// do nothing
 	}
@@ -1049,8 +1057,9 @@ void CEnvBallEntityPlayer::BounceTouch(CBaseEntity* pOther)
 		pOther->TakeDamage( pev, pevOwner, pev->fuser2, DMG_SHOCK );
 		Bounced += 2;
 		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/bounce_hit.wav", 1, 0.4, 0, RANDOM_LONG( 90, 110 ) );
+		bStruckEntity = true;
 	}
-	else if (pOther->IsPlayer()) // multiplayer stuff
+	else if( pOther->IsPlayer() ) // multiplayer stuff
 	{
 		if( pevOwner )
 		{
@@ -1058,12 +1067,133 @@ void CEnvBallEntityPlayer::BounceTouch(CBaseEntity* pOther)
 			{
 				pOther->TakeDamage(pev, pevOwner, pev->fuser2, DMG_SHOCK);
 				EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/bounce_hit.wav", 1, 0.4, 0, RANDOM_LONG( 90, 110 ) );
+				bStruckEntity = true;
 				return;
 			}
 		}
 	}
 
-	UTIL_ScreenShake(pev->origin, 5.0, 150.0, 0.5, 500, true);
+	UTIL_ScreenShake( pev->origin, 5.0, 150.0, 0.5, 500, true );
+
+	bJustBounced = true;
+}
+
+//=====================================================================================================
+// IsAttractiveTarget: tells whether this energy ball should consider deflecting towards this entity.
+//=====================================================================================================
+bool CEnvBallEntityPlayer::IsAttractiveTarget( CBaseEntity *pEntity )
+{
+	if( !pEntity->IsAlive() )
+		return false;
+
+	if( pEntity->pev->flags & EF_NODRAW )
+		return false;
+	
+	if( !g_pGameRules->IsMultiplayer() ) // singleplayer
+	{
+		if( m_hOwner != NULL )
+		{
+			// Things we check if this ball has an owner that's not an NPC.
+			if( m_hOwner->IsPlayer() )
+			{
+				CBaseMonster *pPlayer = m_hOwner->MyMonsterPointer();
+				if( pPlayer->IRelationship( pEntity ) < R_DL )
+				{
+					// Not attracted to other players or allies.
+					return false;
+				}
+			}
+		}
+
+		if( !pEntity->IsMonster() )
+			return false;
+	}
+	else
+	{
+		if( !pEntity->IsPlayer() )
+			return false;
+
+		if( pEntity == m_hOwner )
+			return false;
+
+		// No tracking teammates in teammode!
+		if( g_pGameRules->IsTeamplay() )
+		{
+			if( g_pGameRules->PlayerRelationship( m_hOwner, pEntity ) == GR_TEAMMATE )
+				return false;
+		}
+	}
+
+	// We must be able to hit them
+	TraceResult	tr;
+	UTIL_TraceLine( GetAbsOrigin(), pEntity->BodyTarget( GetAbsOrigin() ), dont_ignore_monsters, dont_ignore_glass, ENT(pev), &tr );
+
+	if( tr.flFraction < 1.0f && tr.pHit != pEntity->edict() )
+		return false;
+
+	return true;
+}
+
+//===============================================================================
+// CorrectCourseTowardEnemy: corrects ball's course to guide it into the enemy
+//===============================================================================
+void CEnvBallEntityPlayer::CorrectCourseTowardEnemy( void )
+{
+	const Vector vel_norm = GetAbsVelocity().Normalize();
+	CBaseEntity *pBestTarget = NULL;
+	const Vector vecStartPoint = GetAbsOrigin();
+	float flBestDist = 99999.f;
+
+	CBaseEntity *pList[1024];
+
+	Vector vecDelta;
+	float distance, flDot;
+	const float flMaxDot = 0.966f;
+
+	int nCount = UTIL_EntitiesInBox( pList, 1024, GetAbsOrigin() - Vector( 512, 512, 512 ), GetAbsOrigin() + Vector( 512, 512, 512 ), FL_MONSTER | FL_CLIENT | FL_FAKECLIENT );
+
+	for( int i = 0; i < nCount; i++ )
+	{
+		if( !IsAttractiveTarget( pList[i] ) )
+			continue;
+
+		Vector WorldSpaceCenter = (pList[i]->pev->mins + pList[i]->pev->maxs) * 0.5f + pList[i]->GetAbsOrigin();
+		vecDelta = WorldSpaceCenter - vecStartPoint;
+		distance = vecDelta.Length();
+		flDot = DotProduct( vecDelta.Normalize(), vel_norm );
+
+		if( bStruckEntity ) // If we've already hit something, get accurate
+		{
+			if( distance < flBestDist )
+			{
+				// Check our direction
+				if( flDot > 0.0f )
+				{
+					pBestTarget = pList[i];
+					flBestDist = distance;
+				}
+			}
+		}
+		else
+		{
+			if( flDot > flMaxDot )
+			{
+				if( distance < flBestDist )
+				{
+					pBestTarget = pList[i];
+					flBestDist = distance;
+				}
+			}
+		}
+	}
+
+	if( pBestTarget )
+	{
+		Vector WorldSpaceCenter = (pBestTarget->pev->mins + pBestTarget->pev->maxs) * 0.5f + pBestTarget->GetAbsOrigin();
+		Vector vecDelta = (WorldSpaceCenter - vecStartPoint).Normalize();
+		vecDelta *= GetAbsVelocity().Length();
+		SetAbsVelocity( vecDelta );
+	}
 }
 
 void CEnvBallEntityPlayer::Explode(void)
