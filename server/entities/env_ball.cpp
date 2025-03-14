@@ -1150,7 +1150,7 @@ void CEnvBallEntityPlayer::CorrectCourseTowardEnemy( void )
 	float distance, flDot;
 	const float flMaxDot = 0.966f;
 
-	int nCount = UTIL_EntitiesInBox( pList, 1024, GetAbsOrigin() - Vector( 512, 512, 512 ), GetAbsOrigin() + Vector( 512, 512, 512 ), FL_MONSTER | FL_CLIENT | FL_FAKECLIENT );
+	const int nCount = UTIL_EntitiesInBox( pList, 1024, GetAbsOrigin() - Vector( 1024, 1024, 1024 ), GetAbsOrigin() + Vector( 1024, 1024, 1024 ), FL_MONSTER | FL_CLIENT | FL_FAKECLIENT );
 
 	for( int i = 0; i < nCount; i++ )
 	{
