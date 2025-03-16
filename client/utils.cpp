@@ -431,21 +431,18 @@ bool Mod_BoxVisible( const Vector mins, const Vector maxs, const byte *visbits )
 	{
 		if( CHECKVISBIT( visbits, leafList[i] ) )
 		{
-			if( use_cache )
-				RI->bBoxVisible[RI->currententity->index] = 1;
+			RI->bBoxVisible[RI->currententity->index] = 1;
 			return true;
 		}
 	}
 
 	if( Mod_HeadnodeVisible( headnode, visbits ) )
 	{
-		if( use_cache )
-			RI->bBoxVisible[RI->currententity->index] = 1;
+		RI->bBoxVisible[RI->currententity->index] = 1;
 		return true;
 	}
 
-	if( use_cache )
-		RI->bBoxVisible[RI->currententity->index] = 0;
+	RI->bBoxVisible[RI->currententity->index] = 0;
 
 	return false;
 }
