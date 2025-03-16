@@ -859,6 +859,7 @@ void CHudAmmo::UserCmd_NextWeapon( void )
 				if( wsp && (gWR.HasAmmo( wsp ) || gHUD.CanSelectEmptyWeapon))
 				{
 					gpActiveSel = wsp;
+					PlaySound( "common/wpn_moveselect.wav", 1 );
 					return;
 				}
 			}
@@ -907,6 +908,7 @@ void CHudAmmo::UserCmd_PrevWeapon( void )
 				if( wsp && (gWR.HasAmmo( wsp ) || gHUD.CanSelectEmptyWeapon))
 				{
 					gpActiveSel = wsp;
+					PlaySound( "common/wpn_moveselect.wav", 1 );
 					return;
 				}
 			}
