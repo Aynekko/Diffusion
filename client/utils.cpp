@@ -412,13 +412,12 @@ bool Mod_BoxVisible( const Vector mins, const Vector maxs, const byte *visbits )
 		RI->currentlight == NULL &&
 		RI->currententity != NULL &&
 		(RI->currententity->index > 0) &&
-		RP_NORMALPASS() &&
-		(RI->currententity->curstate.origin == RI->currententity->prevstate.origin)
+		RP_NORMALPASS()
 		);
 
 	if( use_cache )
 	{
-		if( RI->bBoxVisible[RI->currententity->index] != -1 )
+		if( RI->bBoxVisible[RI->currententity->index] != -1 && (RI->currententity->curstate.origin == RI->currententity->prevstate.origin) )
 			return RI->bBoxVisible[RI->currententity->index] > 0 ? true : false;
 	}
 
@@ -431,18 +430,21 @@ bool Mod_BoxVisible( const Vector mins, const Vector maxs, const byte *visbits )
 	{
 		if( CHECKVISBIT( visbits, leafList[i] ) )
 		{
-			RI->bBoxVisible[RI->currententity->index] = 1;
+			if( use_cache )
+				RI->bBoxVisible[RI->currententity->index] = 1;
 			return true;
 		}
 	}
 
 	if( Mod_HeadnodeVisible( headnode, visbits ) )
 	{
-		RI->bBoxVisible[RI->currententity->index] = 1;
+		if( use_cache )
+			RI->bBoxVisible[RI->currententity->index] = 1;
 		return true;
 	}
 
-	RI->bBoxVisible[RI->currententity->index] = 0;
+	if( use_cache )
+		RI->bBoxVisible[RI->currententity->index] = 0;
 
 	return false;
 }
