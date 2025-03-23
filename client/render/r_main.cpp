@@ -1677,10 +1677,7 @@ void R_DrawTranslucentEntities(void)
 		// tell engine about current entity
 		SET_CURRENT_ENTITY( RI->currententity );
 
-		// handle studiomodels with custom rendermodes on texture
-		if( RI->currententity->curstate.rendermode != kRenderNormal )
-			tr.blend = CL_FxBlend( RI->currententity ) / 255.0f;
-		else tr.blend = 1.0f; // draw as solid but sorted by distance
+		tr.blend = CL_FxBlend( RI->currententity ) / 255.0f;
 
 		if( RI->currententity->index < MAX_FADING_ENTS )
 		{
@@ -1708,9 +1705,7 @@ void R_DrawTranslucentEntities(void)
 
 		SET_CURRENT_ENTITY( RI->currententity );
 
-		if( RI->currententity->curstate.rendermode != kRenderNormal )
-			tr.blend = CL_FxBlend( RI->currententity ) / 255.0f;
-		else tr.blend = 1.0f;
+		tr.blend = CL_FxBlend( RI->currententity ) / 255.0f;
 
 		if( RI->currententity->index < MAX_FADING_ENTS )
 		{
@@ -1752,9 +1747,7 @@ void R_DrawTranslucentEntities(void)
 
 		SET_CURRENT_ENTITY( RI->currententity );
 
-		if( RI->currententity->curstate.rendermode != kRenderNormal )
-			tr.blend = CL_FxBlend( RI->currententity ) / 255.0f;
-		else tr.blend = 1.0f;
+		tr.blend = CL_FxBlend( RI->currententity ) / 255.0f;
 
 		if( RI->currententity->index < MAX_FADING_ENTS )
 		{

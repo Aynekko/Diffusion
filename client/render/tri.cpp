@@ -43,12 +43,11 @@ void HUD_DrawNormalTriangles( void )
 	
 	for( int i = 0; i < tr.num_solid_entities; i++ )
 	{
-		RI->currententity = tr.solid_entities[i];
-		RI->currentmodel = RI->currententity->model;
-
-		if( RI->currententity->curstate.iuser3 != -669 )
+		if( tr.solid_entities[i]->curstate.iuser3 != -669 )
 			continue;
 
+		RI->currententity = tr.solid_entities[i];
+		RI->currentmodel = RI->currententity->model;
 		SET_CURRENT_ENTITY( RI->currententity );
 
 		Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
@@ -91,11 +90,10 @@ void HUD_DrawTransparentTriangles( void )
 
 	for( int i = 0; i < tr.num_trans_entities; i++ )
 	{
-		RI->currententity = tr.trans_entities[i];
-		RI->currentmodel = RI->currententity->model;
-
-		if( RI->currententity->curstate.iuser3 == -669 )
+		if( tr.trans_entities[i]->curstate.iuser3 == -669 )
 		{
+			RI->currententity = tr.trans_entities[i];
+			RI->currentmodel = RI->currententity->model;
 			SET_CURRENT_ENTITY( RI->currententity );
 
 			Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
@@ -111,8 +109,10 @@ void HUD_DrawTransparentTriangles( void )
 
 			R_SetupCable( RI->currententity );
 		}
-		else if( RI->currententity->curstate.iuser3 == -664 )
+		else if( tr.trans_entities[i]->curstate.iuser3 == -664 )
 		{
+			RI->currententity = tr.trans_entities[i];
+			RI->currentmodel = RI->currententity->model;
 			SET_CURRENT_ENTITY( RI->currententity );
 
 			// FIXME culling is not performed if this entity was parented (moving)
