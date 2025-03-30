@@ -25,6 +25,8 @@
 #define RGB_RED			0x00FF3232 // 255, 50, 50
 #define RGB_GREY		0x00777777 // 119, 119, 119
 
+#define OBJECTIVE_TIMER 5.0f
+
 #include "wrect.h"
 #ifdef _WIN32
 #include <windows.h>
@@ -773,6 +775,7 @@ public:
 	void DrawHintPopUp( void );
 
 	bool bShowMissionObjectives;
+	bool bShowMissionObjectivesTimed;
 
 	// hint
 	float hint_alpha;
@@ -793,6 +796,7 @@ public:
 	int obj_secondarytext_height;
 	float obj_alpha;
 	float obj_ypos;
+	float fForcedTimer;
 };
 
 class CHudCodeInput : public CHudBase

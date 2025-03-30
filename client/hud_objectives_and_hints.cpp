@@ -43,6 +43,8 @@ int CHudHintObjective::VidInit( void )
 	HintImage = LOAD_TEXTURE( "sprites/diffusion/hint.dds", NULL, 0, 0 );
 	hint_drawstart_time = 0.0f;
 	obj_alpha = 0.0f;
+	fForcedTimer = 0.0f;
+	obj_ypos = -100;
 	
 	return 1;
 }
@@ -319,19 +321,21 @@ int CHudHintObjective::Draw( float flTime )
 
 	if( tr.time == tr.oldtime )
 		return 1;
+
+	bShowMissionObjectivesTimed = (tr.time < fForcedTimer);
 	
-	if( !bShowMissionObjectives && obj_alpha <= 0.0f )
+	if( !bShowMissionObjectives && !bShowMissionObjectivesTimed && obj_alpha <= 0.0f )
 		return 1;
 
 	// draw objectives panel
-	if( bShowMissionObjectives && obj_alpha < 1.0f )
+	if( (bShowMissionObjectives || bShowMissionObjectivesTimed) && obj_alpha < 1.0f )
 	{
 		// bring the panels' visibility if TAB is pressed
 		obj_alpha = lerp( obj_alpha, 1.1f, g_fFrametime * 10.0f );
 		if( obj_alpha > 1.0f )
 			obj_alpha = 1.0f;
 	}
-	else if( !bShowMissionObjectives && obj_alpha > 0.0f )
+	else if( !bShowMissionObjectives && !bShowMissionObjectivesTimed && obj_alpha > 0.0f )
 	{
 		// no TAB pressed - fade out
 		if( obj_alpha > 0.0f )
@@ -351,7 +355,7 @@ int CHudHintObjective::Draw( float flTime )
 
 	// final position we are lerping to
 	float ypos;
-	if( bShowMissionObjectives )
+	if( bShowMissionObjectives || bShowMissionObjectivesTimed )
 		ypos = 100;
 	else
 		ypos = -frame_height;
@@ -415,6 +419,18 @@ int CHudHintObjective::Draw( float flTime )
 			}
 			tmp_text++;
 		}
+	}
+
+	// draw timed bar to force show the objective text
+	if( bShowMissionObjectivesTimed )
+	{
+		// it's always 5 seconds
+		const float taketh = (fForcedTimer - tr.time) / OBJECTIVE_TIMER;
+		// scale the total width by this value
+		const float timedbar_width = frame_width * taketh;
+		// how much should I move the x coord?
+		const float timedbar_xpos = xpos + ((frame_width - timedbar_width) * 0.5f);
+		FillRoundedRGBA( timedbar_xpos, obj_ypos + frame_height + 7, timedbar_width, 6.0f, 6.0f, Vector4D( 0.1f, 0.1f, 0.1f, obj_alpha * 0.5f ) );
 	}
 
 	return 1;

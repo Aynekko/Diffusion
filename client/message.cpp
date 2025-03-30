@@ -497,6 +497,12 @@ int CHudMessage::MsgFunc_HudText( const char *pszName, int iSize, void *pbuf )
 		END_READ();
 		return 1;
 	}
+	else if( !_stricmp( pString, "OBJ_UPDATED" ) )
+	{
+		gHUD.m_HintObjectives.fForcedTimer = tr.time + OBJECTIVE_TIMER;
+		END_READ();
+		return 1;
+	}
 
 	MessageAdd( pString, gHUD.m_flTime );
 
