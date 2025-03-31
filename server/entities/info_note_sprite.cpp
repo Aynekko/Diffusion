@@ -54,7 +54,8 @@ void CNoteSprite::Spawn(void)
 	SET_MODEL( edict(), NOTE_ICON );
 	UTIL_SetSize( pev, Vector( -1, -1, -1 ), Vector( 1, 1, 1 ) );
 	pev->rendermode = kRenderTransAdd;
-	pev->renderamt = 255;
+	pev->renderamt = 200;
+	pev->renderfx = kRenderFxPulseSlowWide;
 	pev->scale = 0.05;
 	if( !(pev->iuser4) )
 		SetFadeDistance( 800 );
@@ -84,5 +85,9 @@ void CNoteSprite::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 		pPlayer->SendAchievementStatToClient( ACH_NOTES, 1, 0 );
 		SUB_UseTargets( pActivator, USE_TOGGLE, 0 ); // fire target only once.
 		AchievementCounted = true;
+
+		// mark as read :)
+		pev->renderamt = 25;
+		pev->renderfx = 0;
 	}
 }
