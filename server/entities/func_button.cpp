@@ -846,6 +846,13 @@ void CBaseButton:: ButtonTouch( CBaseEntity *pOther )
 		PlayLockSounds( pev, &m_ls, TRUE, TRUE );
 		if( pev->message )
 			UTIL_ShowMessage( STRING(pev->message), pOther );
+		if( pev->netname ) // hint message
+		{
+			MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, pOther->edict() );
+			WRITE_BYTE( 0 );
+			WRITE_STRING( STRING( pev->netname ) );
+			MESSAGE_END();
+		}
 		return;
 	}
 
@@ -873,8 +880,18 @@ void CBaseButton :: ButtonActivate( void )
 		PlayLockSounds( pev, &m_ls, TRUE, TRUE );
 
 		CBaseEntity *pPlayer = CBaseEntity::Instance( INDEXENT( 1 ) );
-		if( pPlayer && pev->message )
-			UTIL_ShowMessage( STRING(pev->message), pPlayer );
+		if( pPlayer )
+		{
+			if( pev->message )
+				UTIL_ShowMessage( STRING( pev->message ), pPlayer );
+			if( pev->netname ) // hint message
+			{
+				MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, pPlayer->edict() );
+				WRITE_BYTE( 0 );
+				WRITE_STRING( STRING( pev->netname ) );
+				MESSAGE_END();
+			}
+		}
 		return;
 	}
 	else

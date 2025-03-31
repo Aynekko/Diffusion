@@ -117,6 +117,9 @@ void CPlayerCounterAdd::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_T
 	//	for( int i = 0; i < 5; i++ )
 	//		ALERT(at_aiconsole, "Slot has %3d\n", pPlayer->CountSlot[i]);
 
+	if( pev->target )
+		UTIL_FireTargets( pev->target, pActivator, this, USE_TOGGLE, 0 );
+
 	if( HasSpawnFlags(SF_PLRCNT_REMOVE) )
 		UTIL_Remove(this);
 }
@@ -307,11 +310,19 @@ void CPlayerCounterTrigger::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 
 void CPlayerCounterTrigger::Deny(CBaseEntity* pActivator)
 {
-	if (m_iszDenySound)
+	if( m_iszDenySound )
 		EMIT_SOUND(edict(), CHAN_STATIC, STRING(m_iszDenySound), 1, ATTN_NORM);
 
-	if (pev->message)
+	if( pev->message )
 		UTIL_ShowMessage(STRING(pev->message), pActivator);
+
+	if( pev->netname && pActivator->IsPlayer() ) // hint message
+	{
+		MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, pActivator->edict() );
+		WRITE_BYTE( 0 );
+		WRITE_STRING( STRING( pev->netname ) );
+		MESSAGE_END();
+	}
 
 	if( !FStringNull( AltTarget ) )
 		UTIL_FireTargets( AltTarget, pActivator, this, USE_TOGGLE, 0 );
