@@ -396,7 +396,7 @@ Schedule_t	slGruntCombatFace[] =
 Task_t	tlGruntSignalSuppress[] =
 {
 	{ TASK_STOP_MOVING,					0						},
-	{ TASK_FACE_IDEAL,					(float)0				},
+	{ TASK_FACE_ENEMY,					(float)0				},
 	{ TASK_PLAY_SEQUENCE_FACE_ENEMY,	(float)ACT_SIGNAL2		},
 	{ TASK_FACE_ENEMY,					(float)0				},
 	{ TASK_GRUNT_CHECK_FIRE,			(float)0				},
