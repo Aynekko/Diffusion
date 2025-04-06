@@ -460,6 +460,8 @@ void R_BuildLightList( void )
 		if( pl->die < tr.time || !pl->radius || pl->culled )
 			continue;
 
+		RI->currentlight = pl;
+
 		if( !UTIL_IsLocal( pl->entindex ) ) // do not perform culling for this player's flashlight - it's always visible
 		{
 			if( R_CullBox( pl->absmin, pl->absmax ) )
@@ -472,6 +474,8 @@ void R_BuildLightList( void )
 		tr.cur_dynlights[tr.num_dynlights] = pl;
 		tr.num_dynlights++;
 	}
+
+	RI->currentlight = NULL;
 }
 
 /*
