@@ -373,7 +373,6 @@ void R_RenderCables( void )
 //============================================================================================
 // diffusion - sprite-based volumetric light
 //============================================================================================
-
 void R_SetupVolumetricLight( cl_entity_t *e )
 {
 	if( !tr.volumetric_light_texture )
@@ -384,23 +383,34 @@ void R_SetupVolumetricLight( cl_entity_t *e )
 	Vector ang_forward, ang_right, ang_up;
 	gEngfuncs.pfnAngleVectors( v_angles, ang_forward, ang_right, ang_up );
 
-	float light_length = e->curstate.vuser1.x;
-	float light_width = e->curstate.vuser1.y;
-	int num_sprites = e->curstate.vuser1.z;
+	const float light_length = e->curstate.vuser1.x;
+	const float light_width = e->curstate.vuser1.y;
+	const int num_sprites = bound( 1, e->curstate.vuser1.z, MAX_LIGHT_SPRITES );
 
 	// this way we can shape our cone how we want
-	float start_cone_scale = e->curstate.vuser2.x; // distance between sprites at start point
-	float end_cone_scale = e->curstate.vuser2.y; // distance between sprites at ending point
+	const float start_cone_scale = e->curstate.vuser2.x; // distance between sprites at start point
+	const float end_cone_scale = e->curstate.vuser2.y; // distance between sprites at ending point
 
 	Vector vmidpoint; // average midpoint of the cone
 	vmidpoint = e->curstate.origin + ang_forward * light_length * 0.5f;
 	float flFade = 1.0f;
-	float flDist = (RI->vieworg - vmidpoint).Length();
-	float dist_check = light_length; // full length
+	const float flDist = (RI->vieworg - vmidpoint).Length();
+	const float dist_check = light_length; // full length
 
-	bool spawn_particles = (e->curstate.vuser2.z == 1.0f) && (tr.time >= tr.ParticleTime[e->index]);
+	// fade out the transparency if the player is looking right at the beam
+	float fader = 1.0f;
+	float DotP = 1.0f;
+	if( flDist <= dist_check )
+	{
+		DotP = fabs( DotProduct( RI->vforward, ang_right ) );
+		fader = RemapVal( flDist, 0, dist_check, 0, 1 );
+	}
+	flFade = DotP + fader;
+	flFade = bound( 0, flFade, 1 );
+	const float transparency = flFade * (float)CL_FxBlend( e ) * tr.fadeblend[e->index];
 
-	num_sprites = bound( 1, num_sprites, MAX_LIGHT_SPRITES );
+	const bool spawn_particles = (e->curstate.vuser2.z == 1.0f) && (tr.time >= tr.ParticleTime[e->index]);
+	const Vector ParticleColor = spawn_particles ? (Vector( e->curstate.rendercolor.r, e->curstate.rendercolor.g, e->curstate.rendercolor.b ) / 255.0f) : g_vecZero;
 
 	for( int i = 0; i < num_sprites; i++ )
 	{
@@ -414,27 +424,14 @@ void R_SetupVolumetricLight( cl_entity_t *e )
 		if( spawn_particles ) // 3 - fullbright dustmotes
 		{
 			float ParticleDist = RANDOM_FLOAT( light_length * 0.1f, light_length * 0.75f );
-			Vector Color = Vector( e->curstate.rendercolor.r, e->curstate.rendercolor.g, e->curstate.rendercolor.b ) / 255.0f;
 			// remapval on ParticleDist is controlling alpha: closer to light emission means brighter particle
-			g_pParticles.SmokeVolume( e->index, 3, vposition1 + forward * ParticleDist, g_vecZero, g_vecZero, Color, 0.0f, 1.0f - RemapVal( ParticleDist, light_length * 0.1f, light_length * 0.75f, 0.0f, 1.0f ), 1000 );
+			g_pParticles.SmokeVolume( e->index, 3, vposition1 + forward * ParticleDist, g_vecZero, g_vecZero, ParticleColor, 0.0f, 1.0f - RemapVal( ParticleDist, light_length * 0.1f, light_length * 0.75f, 0.0f, 1.0f ), 1000 );
 		}
 
 		forward.z = 0;
-
 		vTangent = vposition1 - vposition2;
 		vDir = vposition1 - RI->vieworg;
 		vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
-
-		float fader = 1.0f;
-		float DotP = 1.0f;
-		if( flDist <= dist_check )
-		{
-			DotP = fabs( DotProduct( RI->vforward, ang_right ) );
-			fader = RemapVal( flDist, 0, dist_check, 0, 1 );
-		}
-		flFade = DotP + fader;
-		flFade = bound( 0, flFade, 1 );
-		float transparency = flFade * (float)CL_FxBlend( e ) * tr.fadeblend[e->index];
 
 		VectorMA( vposition1, light_width, vRight, vVertex );
 		VolumetricColorArray[volumetric_numverts][0] = e->curstate.rendercolor.r;
