@@ -117,6 +117,14 @@ int CPseudoGUI::Draw( float flTime )
 	// draw darken frame
 	FillRoundedRGBA( rFrame.x, rFrame.y, rFrame.w, rFrame.h, 20, Vector4D( rFrame.r, rFrame.g, rFrame.b, rFrame.a ) );
 
+	const float text_start_x = rFrame.x + rFrame.w * 0.1f;
+	const float text_start_y = rFrame.y + rFrame.h * 0.1f;
+	const int text_frame_width = rFrame.w - ((text_start_x - rFrame.x - 15) * 2.0f);
+
+	// draw black background for text
+	gEngfuncs.pfnFillRGBABlend( text_start_x - 15, text_start_y - 15, text_frame_width, FRAME_HEIGHT - BUTTON_HEIGHT * 3, 0, 0, 0, 100 );
+	gEngfuncs.pfnFillRGBABlend( text_start_x - 10, text_start_y - 10, text_frame_width - 10, FRAME_HEIGHT - 10 - BUTTON_HEIGHT * 3, 0, 0, 0, 100 );
+
 	// draw text
 	// is it MOTD?
 	if( m_szMOTD[0] != '\0' )
@@ -124,10 +132,10 @@ int CPseudoGUI::Draw( float flTime )
 		client_textmessage_t MOTD;
 		MOTD.pMessage = m_szMOTD;
 		MOTD.r1 = MOTD.g1 = MOTD.b1 = 255;
-		MessageDraw( &MOTD, rFrame.x + rFrame.w * 0.1, rFrame.y + rFrame.h * 0.1 );
+		MessageDraw( &MOTD, text_start_x, text_start_y );
 	}
 	else // it's a note
-		MessageDraw( TextMessageGet( Note ), rFrame.x + rFrame.w * 0.1, rFrame.y + rFrame.h * 0.1 );
+		MessageDraw( TextMessageGet( Note ), text_start_x, text_start_y );
 
 	// draw "Close" button
 	rClose.r = rClose.g = rClose.b = 25.f / 255.f;
@@ -277,15 +285,16 @@ void CPseudoGUI::MessageDraw( client_textmessage_t *pMessage, int x, int y )
 
 	if( enable_scrollbar && lines_below > 0 )
 	{
-		int sbar_x = (ScreenWidth / 2) - (FRAME_WIDTH / 2) + (FRAME_WIDTH - 40);
-		int sbar_w = 20;
-		int sbar_h = (text_end_pos - text_start_pos);
+		const int sbar_x = (ScreenWidth / 2) - (FRAME_WIDTH / 2) + (FRAME_WIDTH - 40);
+		const int sbar_w = 20;
+		const int sbar_h = (text_end_pos - text_start_pos);
 		FillRoundedRGBA( sbar_x, y, sbar_w, sbar_h, 2, Vector4D( 25.0f / 255.0f, 25.0f / 255.0f, 25.0f / 255.0f, 0.8f ) );
 
 		// scrollbar handle
-		int handle_x = sbar_x;
-		int handle_y = y + ((sbar_h / m_parms.lines) * scrolled_lines);
-		int handle_h = sbar_h - ((sbar_h / m_parms.lines) * lines_below);
+		const int handle_x = sbar_x;
+		const int handle_y = y + ((sbar_h / m_parms.lines) * scrolled_lines);
+		const int handle_h = sbar_h - ((sbar_h / m_parms.lines) * lines_below);
+
 		FillRoundedRGBA( handle_x, handle_y, sbar_w, handle_h, 2, Vector4D( 125.0f / 255.0f, 125.0f / 255.0f, 125.0f / 255.0f, 0.8f ) );
 	}
 }
