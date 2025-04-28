@@ -12,6 +12,7 @@
 
 #define SF_BARREL_CANHOLD		BIT(0)
 #define SF_BARREL_RESPAWNABLE	BIT(1)
+#define SF_BARREL_DONTDROP		BIT(2)
 
 #define EXTENDED_FADEDISTANCE 2000 // add fadedistance if the barrel was picked up by player. He can move it around
 
@@ -119,7 +120,7 @@ void CExplosiveBarrel::Spawn(void)
 	pev->max_health = pev->health;
 #if 1
 	pev->solid = SOLID_BBOX;
-	pev->movetype = MOVETYPE_PUSHSTEP;
+	pev->movetype = HasSpawnFlags( SF_BARREL_CANHOLD ) ? MOVETYPE_PUSHSTEP : MOVETYPE_NONE;
 #else
 	if( WorldPhysic->Initialized() )
 	{
@@ -141,7 +142,8 @@ void CExplosiveBarrel::Spawn(void)
 
 	pev->iuser3 = -661; // custom flag for dimlight
 
-	UTIL_DropToFloor( this );
+	if( !HasSpawnFlags( SF_BARREL_DONTDROP ) )
+		UTIL_DropToFloor( this );
 }
 
 void CExplosiveBarrel::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
