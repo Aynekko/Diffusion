@@ -17,6 +17,7 @@
 #include <mathlib.h>
 #include "ammohistory.h"
 #include "cdll_exp.h"
+#include "r_quakeparticle.h"
 
 // thirdperson camera
 void CAM_Think( void ) {}
@@ -61,6 +62,7 @@ float		v_cameraRelaxAngle = 5.0f;
 float		v_cameraFocusAngle = 35.0f;
 qboolean	v_resetCamera = 1;
 float gun_roll_angle = 0;
+int water_droplets_counter = 0;
 
 #define	HL2_BOB_CYCLE_MIN	1.0f
 #define	HL2_BOB_CYCLE_MAX	0.45f
@@ -224,7 +226,7 @@ void V_ChangeView( void )
 //=======================================================================
 // PlayWallSlideSound: play a sound of friction between player and walls
 //=======================================================================
-void PlayWallSlideSound( struct ref_params_s *pparams )
+void PlayWallSlideSound( ref_params_t *pparams )
 {
 	bool SoundDisabled = false;
 
@@ -275,7 +277,7 @@ void PlayWallSlideSound( struct ref_params_s *pparams )
 //=======================================================================
 // PlayFlingWhooshSound: just like Portal! :)
 //=======================================================================
-void PlayFlingWhooshSound( struct ref_params_s *pparams )
+void PlayFlingWhooshSound( ref_params_t *pparams )
 {
 	int min_fling_speed = 400;
 	static float woosh_vol = 0.0f;
@@ -298,6 +300,34 @@ void PlayFlingWhooshSound( struct ref_params_s *pparams )
 	woosh_vol = CL_UTIL_Approach( fWooshVolume, woosh_vol, g_fFrametime );
 
 	gEngfuncs.pEventAPI->EV_PlaySound( gEngfuncs.GetLocalPlayer()->index, NULL, CHAN_STATIC, "player/fling_whoosh.wav", woosh_vol, 0, SND_CHANGE_VOL | SND_CHANGE_PITCH, PITCH_NORM );
+}
+
+//=======================================================================
+// MakeWaterDroplets: make waterdrops when player emerges from the water
+//=======================================================================
+void MakeWaterDroplets( ref_params_t *pparams )
+{
+	static float droplet_timer = 0;
+	if( pparams->waterlevel == 3 )
+	{
+		water_droplets_counter = 16;
+		droplet_timer = tr.time;
+	}
+	else if( water_droplets_counter > 0 )
+	{
+		// drop a drip
+		if( tr.time > droplet_timer )
+		{
+			Vector pos = gEngfuncs.GetLocalPlayer()->curstate.origin + pparams->forward * 32.0f;
+			pos.x += RANDOM_FLOAT( -16.0f, 16.0f );
+			pos.y += RANDOM_FLOAT( -16.0f, 16.0f );
+			pos.z += RANDOM_FLOAT( 16.0f, 32.0f );
+			g_pParticles.WaterDrop( 0, pos );
+
+			droplet_timer = tr.time + (3.0f / water_droplets_counter);
+			water_droplets_counter--;
+		}
+	}
 }
 
 //==========================
@@ -432,6 +462,7 @@ void V_VidInit( void )
 	PrevViewAngles = g_vecZero;
 	PrevViewOrg = g_vecZero;
 	gun_roll_angle = 0;
+	water_droplets_counter = 0;
 }
 
 float V_CalcBob( struct ref_params_s *pparams )
@@ -2138,6 +2169,7 @@ void V_CalcRefdef( struct ref_params_s *pparams )
 
 	PlayWallSlideSound( pparams );
 	PlayFlingWhooshSound( pparams );
+	MakeWaterDroplets( pparams );
 
 	// roll camera when in car
 	static float car_roll_ang = 0.0f;
