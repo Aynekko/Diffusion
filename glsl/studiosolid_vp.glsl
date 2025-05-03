@@ -54,9 +54,15 @@ uniform vec4		u_StudioParams[3];
 #define u_RealTime		u_StudioParams[0].w
 #define u_ViewRight		u_StudioParams[1].xyz
 
-varying vec3		var_LightDiffuse;
+#if defined( STUDIO_VERTEX_LIGHTING )
+	varying vec3		var_LightDiffuse[4];
+	varying vec3		var_LightVec[4];
+#else
+	varying vec3		var_LightDiffuse;
+	varying vec3		var_LightVec;
+#endif
+
 varying vec2		var_TexDiffuse;
-varying vec3		var_LightVec;
 varying vec3		var_ViewVec;
 varying vec3		var_Normal;
 varying float		var_Distance;
@@ -129,44 +135,84 @@ void main( void )
 #if defined( STUDIO_FULLBRIGHT )
 	var_LightDiffuse = vec3( 1.0 );	// just get fullbright
 #elif defined( STUDIO_VERTEX_LIGHTING )
-	vec3 lightmap = vec3( 0.0 );
-	vec3 deluxmap = vec3( 0.0 );
+	// apply lightstyles
 	float gammaIndex;
 
-	if( u_LightStyles.x != 0.0 )
-    {
-        lightmap += UnpackVector( attr_LightColor.x ) * u_LightStyles.x;
-        deluxmap += UnpackNormal( -attr_LightVecs.x ) * u_LightStyles.x;
-    }
+	if( u_LightStyles[0] != 0.0 )
+	{
+		var_LightDiffuse[0] = UnpackVector( attr_LightColor[0] );
+			
+		gammaIndex = ( var_LightDiffuse[0].r * 255.0 );
+		var_LightDiffuse[0].r = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+		gammaIndex = ( var_LightDiffuse[0].g * 255.0 );
+		var_LightDiffuse[0].g = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+		gammaIndex = ( var_LightDiffuse[0].b * 255.0 );
+		var_LightDiffuse[0].b = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+			
+		var_LightDiffuse[0] *= u_LightStyles[0] * LIGHTMAP_SHIFT;
 
-    if( u_LightStyles.y != 0.0 )
-    {
-        lightmap += UnpackVector( attr_LightColor.y ) * u_LightStyles.y;
-        deluxmap += UnpackNormal( -attr_LightVecs.y ) * u_LightStyles.y;
-    }
+		var_LightVec[0] = -UnpackNormal( -attr_LightVecs[0] );
+		#if defined( STUDIO_BUMP ) || defined( STUDIO_INTERIOR )	
+			var_LightVec[0] = var_LightVec[0] * tbn;
+		#endif			
+	}
 
-    if( u_LightStyles.z != 0.0 )
-    {
-        lightmap += UnpackVector( attr_LightColor.z ) * u_LightStyles.z;
-        deluxmap += UnpackNormal( -attr_LightVecs.z ) * u_LightStyles.z;
-    }
+	if( u_LightStyles[1] != 0.0 )
+	{
+		var_LightDiffuse[1] = UnpackVector( attr_LightColor[1] );
+			
+		gammaIndex = ( var_LightDiffuse[1].r * 255.0 );
+		var_LightDiffuse[1].r = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+		gammaIndex = ( var_LightDiffuse[1].g * 255.0 );
+		var_LightDiffuse[1].g = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+		gammaIndex = ( var_LightDiffuse[1].b * 255.0 );
+		var_LightDiffuse[1].b = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+			
+		var_LightDiffuse[1] *= u_LightStyles[1] * LIGHTMAP_SHIFT;
 
-    if( u_LightStyles.w != 0.0 )
-    {
-        lightmap += UnpackVector( attr_LightColor.w ) * u_LightStyles.w;
-        deluxmap += UnpackNormal( -attr_LightVecs.w ) * u_LightStyles.w;
-    }
+		var_LightVec[1] = -UnpackNormal( -attr_LightVecs[1] );
+		#if defined( STUDIO_BUMP ) || defined( STUDIO_INTERIOR )	
+			var_LightVec[1] = var_LightVec[1] * tbn;
+		#endif			
+	}
 
-	var_LightDiffuse = min(( lightmap * LIGHTMAP_SHIFT ), 1.0 );
-    srcL = ( deluxmap * LIGHTMAP_SHIFT ); // get lightvector
+	if( u_LightStyles[2] != 0.0 )
+	{
+		var_LightDiffuse[2] = UnpackVector( attr_LightColor[2] );
+			
+		gammaIndex = ( var_LightDiffuse[2].r * 255.0 );
+		var_LightDiffuse[2].r = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+		gammaIndex = ( var_LightDiffuse[2].g * 255.0 );
+		var_LightDiffuse[2].g = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+		gammaIndex = ( var_LightDiffuse[2].b * 255.0 );
+		var_LightDiffuse[2].b = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+			
+		var_LightDiffuse[2] *= u_LightStyles[2] * LIGHTMAP_SHIFT;
 
-	// apply screen gamma
-	gammaIndex = ( var_LightDiffuse.r * 255.0 );
-	var_LightDiffuse.r = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
-	gammaIndex = ( var_LightDiffuse.g * 255.0 );
-	var_LightDiffuse.g = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
-	gammaIndex = ( var_LightDiffuse.b * 255.0 );
-	var_LightDiffuse.b = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+		var_LightVec[2] = -UnpackNormal( -attr_LightVecs[2] );
+		#if defined( STUDIO_BUMP ) || defined( STUDIO_INTERIOR )	
+			var_LightVec[2] = var_LightVec[2] * tbn;
+		#endif			
+	}
+
+	if( u_LightStyles[3] != 0.0 )
+	{
+		var_LightDiffuse[3] = UnpackVector( attr_LightColor[3] );
+			
+		gammaIndex = ( var_LightDiffuse[3].r * 255.0 );
+		var_LightDiffuse[3].r = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+		gammaIndex = ( var_LightDiffuse[3].g * 255.0 );
+		var_LightDiffuse[3].g = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+		gammaIndex = ( var_LightDiffuse[3].b * 255.0 );
+		var_LightDiffuse[3].b = u_GammaTable[int( gammaIndex/4.0 )][int( mod( gammaIndex, 4.0 ))];
+			
+		var_LightDiffuse[3] *= u_LightStyles[3] * LIGHTMAP_SHIFT;
+
+		var_LightVec[3] = -UnpackNormal( -attr_LightVecs[3] );
+		#if defined( STUDIO_BUMP ) || defined( STUDIO_INTERIOR )	
+			var_LightVec[3] = var_LightVec[3] * tbn;
+		#endif			
+	}
 #else
 	float AmbientLight = u_LightAmbient;
 
@@ -202,12 +248,16 @@ void main( void )
 
 #if defined( STUDIO_BUMP ) || defined( STUDIO_INTERIOR )
 	// transform into tangent space
-	var_LightVec = -srcL * tbn * MeshScale;
+	#ifndef STUDIO_VERTEX_LIGHTING
+		var_LightVec = -srcL * tbn * MeshScale;
+	#endif
 	var_ViewVec = srcV * tbn * MeshScale;
 	var_Normal = srcN * tbn;
 #else
 	// leave in worldspace
-	var_LightVec = -srcL * MeshScale;
+	#ifndef STUDIO_VERTEX_LIGHTING	
+		var_LightVec = -srcL * MeshScale;
+	#endif		
 	var_ViewVec = srcV * MeshScale;
 	var_Normal = srcN;
 #endif

@@ -56,9 +56,17 @@ uniform sampler2D	u_BlendTexture;
 #endif
 
 // shared variables
-varying vec3		var_LightDiffuse;
+#if defined( STUDIO_VERTEX_LIGHTING )
+	varying vec3		var_LightDiffuse[4];
+	varying vec3		var_LightVec[4];
+	uniform vec4		u_StudioLighting[2];	
+	#define u_LightStyles	u_StudioLighting[0]	
+#else
+	varying vec3		var_LightDiffuse;
+	varying vec3		var_LightVec;
+#endif
+
 varying vec2		var_TexDiffuse;
-varying vec3		var_LightVec;
 varying vec3		var_ViewVec;
 varying vec3		var_Normal;
 varying float		var_Distance;
@@ -74,11 +82,6 @@ uniform float		u_Fresnel;
 
 void main( void )
 {		
-	vec3 L = normalize( var_LightVec );		
-	vec3 V = normalize( var_ViewVec );
-	vec3 N;
-	vec3 light_diffuse;
-
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
 
 #if defined( ALPHA_RESCALING )
@@ -92,36 +95,14 @@ void main( void )
 	#endif
 #endif
 
-	// compute the normal term
-#if defined( STUDIO_BUMP )
-	#if defined( STUDIO_INTERIOR )
-		N = normalmap2D( u_NormalMap, fract(var_TexDiffuse * vec2(u_InteriorParams.x,u_InteriorParams.y)));
-	#else
-		N = normalmap2D( u_NormalMap, var_TexDiffuse );
-	#endif
-	float NdotB = ComputeStaticBump( L, N );
-    light_diffuse = var_LightDiffuse * NdotB;
-#else
-	N = normalize( var_Normal );
-	light_diffuse = var_LightDiffuse;
-#endif
-	
-	// two side materials support
-	if( bool( gl_FrontFacing )) N = -N;
-
 	// compute the diffuse, emboss and specular term
-	
 #if defined( STUDIO_TEXTURE_BLEND )
 	vec4 blend_texture = texture2D( u_BlendTexture, var_TexDiffuse );
 	// blend them together
 	diffuse.rgb = mix( diffuse.rgb, blend_texture.rgb, u_BlendAmount );
 #endif
 
-	vec3 glossmap = vec3(1.0);
-	#if defined( STUDIO_SPECULAR )
-		glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
-	#endif
-        // apply emboss filter
+	// apply emboss filter
 	#if defined( STUDIO_EMBOSS )
 		vec3 emboss = EmbossFilter( u_ColorMap, var_TexDiffuse, u_EmbossScale );
 		diffuse.rgb *= emboss;
@@ -135,7 +116,127 @@ void main( void )
 	diffuse.rgb *= u_RenderColor.rgb; // kRenderTransColor
 #endif
 
+	// compute the normal term
+	vec3 N;	
+#if defined( STUDIO_BUMP )
+	#if defined( STUDIO_INTERIOR )
+		N = normalmap2D( u_NormalMap, fract(var_TexDiffuse * vec2(u_InteriorParams.x,u_InteriorParams.y)));
+	#else
+		N = normalmap2D( u_NormalMap, var_TexDiffuse );
+	#endif
+#else
+	N = normalize( var_Normal );
+#endif
+
+	// two side materials support
+	N = gl_FrontFacing ? -N : N;
+	
+	vec3 V = normalize( var_ViewVec );
+	vec3 light_diffuse;		
+	
+#if defined( STUDIO_VERTEX_LIGHTING )
+	vec3 light_diffuse_sum = vec3(0.0);
+	vec3 gloss_sum = vec3(0.0);
+	#if defined( STUDIO_SPECULAR )
+		vec3 glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
+	#endif
+
+	// apply lightstyles
+	if( u_LightStyles[0] > 0.0 )
+	{
+		vec3 L = normalize( var_LightVec[0] );		
+			
+		#if defined( STUDIO_BUMP )
+			float NdotB = ComputeStaticBump( L, N );
+			light_diffuse = var_LightDiffuse[0] * NdotB;
+		#else	
+			light_diffuse = var_LightDiffuse[0];
+		#endif			
+			
+		#if defined( STUDIO_SPECULAR )
+			float NdotLGloss = saturate( dot( N, L ));				
+			vec3 gloss = ComputeSpecular( N, V, L, glossmap, u_GlossSmoothness, u_GlossScale ) * NdotLGloss;				
+			gloss_sum += gloss * light_diffuse;			
+			light_diffuse *= saturate( 1.0 - GetLuminance( gloss ));
+		#endif
+			
+		light_diffuse_sum += light_diffuse;
+	}
+
+	if( u_LightStyles[1] > 0.0 )
+	{
+		vec3 L = normalize( var_LightVec[1] );		
+			
+		#if defined( STUDIO_BUMP )
+			float NdotB = ComputeStaticBump( L, N );
+			light_diffuse = var_LightDiffuse[1] * NdotB;
+		#else	
+			light_diffuse = var_LightDiffuse[1];
+		#endif			
+			
+		#if defined( STUDIO_SPECULAR )
+			float NdotLGloss = saturate( dot( N, L ));				
+			vec3 gloss = ComputeSpecular( N, V, L, glossmap, u_GlossSmoothness, u_GlossScale ) * NdotLGloss;				
+			gloss_sum += gloss * light_diffuse;			
+			light_diffuse *= saturate( 1.0 - GetLuminance( gloss ));
+		#endif
+			
+		light_diffuse_sum += light_diffuse;
+	}
+
+	if( u_LightStyles[2] > 0.0 )
+	{
+		vec3 L = normalize( var_LightVec[2] );		
+			
+		#if defined( STUDIO_BUMP )
+			float NdotB = ComputeStaticBump( L, N );
+			light_diffuse = var_LightDiffuse[2] * NdotB;
+		#else	
+			light_diffuse = var_LightDiffuse[2];
+		#endif			
+			
+		#if defined( STUDIO_SPECULAR )
+			float NdotLGloss = saturate( dot( N, L ));				
+			vec3 gloss = ComputeSpecular( N, V, L, glossmap, u_GlossSmoothness, u_GlossScale ) * NdotLGloss;				
+			gloss_sum += gloss * light_diffuse;			
+			light_diffuse *= saturate( 1.0 - GetLuminance( gloss ));
+		#endif
+			
+		light_diffuse_sum += light_diffuse;
+	}
+
+	if( u_LightStyles[3] > 0.0 )
+	{
+		vec3 L = normalize( var_LightVec[3] );		
+			
+		#if defined( STUDIO_BUMP )
+			float NdotB = ComputeStaticBump( L, N );
+			light_diffuse = var_LightDiffuse[3] * NdotB;
+		#else	
+			light_diffuse = var_LightDiffuse[3];
+		#endif			
+			
+		#if defined( STUDIO_SPECULAR )
+			float NdotLGloss = saturate( dot( N, L ));				
+			vec3 gloss = ComputeSpecular( N, V, L, glossmap, u_GlossSmoothness, u_GlossScale ) * NdotLGloss;				
+			gloss_sum += gloss * light_diffuse;			
+			light_diffuse *= saturate( 1.0 - GetLuminance( gloss ));
+		#endif
+			
+		light_diffuse_sum += light_diffuse;
+	}
+
+	diffuse.rgb *= light_diffuse_sum; // apply lighting		
+#else
+	vec3 L = normalize( var_LightVec );	
+	#if defined( STUDIO_BUMP )			
+		float NdotB = ComputeStaticBump( L, N );
+		light_diffuse = var_LightDiffuse * NdotB;
+	#else	
+		light_diffuse = var_LightDiffuse;
+	#endif
 	diffuse.rgb *= light_diffuse; // apply lighting
+#endif
 
 #if defined( STUDIO_INTERIOR )
 	if( diffuse.a < 0.98 )
@@ -144,13 +245,21 @@ void main( void )
 
 	// apply specular lighting
 #if defined( STUDIO_SPECULAR )
-	float NdotLGloss = saturate( dot( N, L ));
-	vec3 gloss = ComputeSpecular( N, V, L, glossmap, u_GlossSmoothness, u_GlossScale ) * NdotLGloss;
-	diffuse.rgb *= saturate( 1.0 - GetLuminance( gloss ));
-	#if defined( STUDIO_EMBOSS )
-		gloss *= emboss;
-	#endif
-	diffuse.rgb += gloss * light_diffuse;
+	#if defined( STUDIO_VERTEX_LIGHTING )
+		#if defined( STUDIO_EMBOSS )
+			gloss_sum *= emboss;
+		#endif	
+		diffuse.rgb += gloss_sum;
+	#else
+		float NdotLGloss = saturate( dot( N, L ));
+		vec3 glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
+		vec3 gloss = ComputeSpecular( N, V, L, glossmap, u_GlossSmoothness, u_GlossScale ) * NdotLGloss;
+		diffuse.rgb *= saturate( 1.0 - GetLuminance( gloss ));
+		#if defined( STUDIO_EMBOSS )
+			gloss *= emboss;
+		#endif
+		diffuse.rgb += gloss * light_diffuse;
+	#endif	
 #endif
 
 	// apply cubemap reflection
@@ -165,7 +274,7 @@ void main( void )
 	vec3 R = reflect( -VW, NW );
 	float fresnel = GetFresnel( VW, NW, u_Fresnel, u_ReflectScale.x );
 	vec3 cubemap_reflection = CubemapReflectionProbe( MeshOrigin, R, u_ReflectScale.y ) * u_ReflectScale.x;
-	diffuse.rgb += cubemap_reflection * fresnel * var_LightDiffuse;
+	diffuse.rgb += cubemap_reflection * fresnel * light_diffuse;
 #endif
 
 	// apply global fog
