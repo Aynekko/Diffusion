@@ -56,7 +56,7 @@ uniform sampler2D	u_BlendTexture;
 #endif
 
 // shared variables
-#if defined( STUDIO_VERTEX_LIGHTING )
+#if defined( STUDIO_VERTEX_LIGHTING ) && !defined( STUDIO_FULLBRIGHT )
 	varying vec3		var_LightDiffuse[4];
 	varying vec3		var_LightVec[4];
 	uniform vec4		u_StudioLighting[2];	
@@ -133,8 +133,8 @@ void main( void )
 	
 	vec3 V = normalize( var_ViewVec );
 	vec3 light_diffuse;		
-	
-#if defined( STUDIO_VERTEX_LIGHTING )
+
+#if defined( STUDIO_VERTEX_LIGHTING ) && !defined( STUDIO_FULLBRIGHT )
 	vec3 light_diffuse_sum = vec3(0.0);
 	vec3 gloss_sum = vec3(0.0);
 	#if defined( STUDIO_SPECULAR )
@@ -244,7 +244,7 @@ void main( void )
 #endif
 
 	// apply specular lighting
-#if defined( STUDIO_SPECULAR )
+#if defined( STUDIO_SPECULAR ) && !defined( STUDIO_FULLBRIGHT )
 	#if defined( STUDIO_VERTEX_LIGHTING )
 		#if defined( STUDIO_EMBOSS )
 			gloss_sum *= emboss;

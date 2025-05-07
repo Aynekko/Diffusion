@@ -54,7 +54,7 @@ uniform vec4		u_StudioParams[3];
 #define u_RealTime		u_StudioParams[0].w
 #define u_ViewRight		u_StudioParams[1].xyz
 
-#if defined( STUDIO_VERTEX_LIGHTING )
+#if defined( STUDIO_VERTEX_LIGHTING ) && !defined( STUDIO_FULLBRIGHT )
 	varying vec3		var_LightDiffuse[4];
 	varying vec3		var_LightVec[4];
 #else
