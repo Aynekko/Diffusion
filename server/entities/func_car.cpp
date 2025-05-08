@@ -24,6 +24,7 @@
 #define SF_CAR_CANTBEDIRTY		BIT(6) // don't accumulate dirt or wetness
 #define SF_CAR_TURNREARWHEELS	BIT(7) // rear wheels will turn too
 #define SF_CAR_SQUEAKYBRAKES	BIT(8) // brakes make squeaky sound
+#define SF_CAR_EXHAUSTPOPS		BIT(9) // do exhaust pops when player releases acceleration pedal
 
 // iuser1 is used for car spawn angle
 // fuser2 is used for both body and wheels' models to control the amount of dirt on the car
@@ -39,6 +40,8 @@ BEGIN_DATADESC( CCar )
 	DEFINE_KEYFIELD( camera2, FIELD_STRING, "camera2" ),
 	DEFINE_KEYFIELD( tank_tower, FIELD_STRING, "tank_tower" ),
 	DEFINE_KEYFIELD( door_handle, FIELD_STRING, "door_handle" ),
+	DEFINE_KEYFIELD( exhaust1, FIELD_STRING, "exhaust1" ),
+	DEFINE_KEYFIELD( exhaust2, FIELD_STRING, "exhaust2" ),
 	DEFINE_FIELD( Camera2LocalOrigin, FIELD_VECTOR ),
 	DEFINE_FIELD( Camera2LocalAngles, FIELD_VECTOR ),
 	DEFINE_FIELD( CameraAngles, FIELD_VECTOR ),
@@ -88,6 +91,8 @@ BEGIN_DATADESC( CCar )
 	DEFINE_FIELD( pChassisMdl, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pTankTower, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pDoorHandle, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pExhaust1, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pExhaust2, FIELD_CLASSPTR ),
 	DEFINE_KEYFIELD( m_iszEngineSnd, FIELD_STRING, "enginesnd" ),
 	DEFINE_KEYFIELD( m_iszIdleSnd, FIELD_STRING, "idlesnd" ),
 	DEFINE_FIELD( AllowCamera, FIELD_BOOLEAN ),
@@ -103,6 +108,7 @@ BEGIN_DATADESC( CCar )
 	DEFINE_FIELD( DriftMode, FIELD_BOOLEAN ),
 	DEFINE_FIELD( DriftAmount, FIELD_FLOAT ),
 	DEFINE_KEYFIELD( ShiftingTime, FIELD_FLOAT, "shiftingtime" ),
+	DEFINE_FIELD( num_exhausts, FIELD_INTEGER ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( func_car, CCar );
@@ -184,6 +190,13 @@ const char *CCar::pTireSounds[] =
 	"func_car/tires/water.wav",
 	"func_car/tires/brake_dirt.wav",
 	"func_car/tires/brake_asphalt.wav",
+};
+
+const char *CCar::pExhaustPopSounds[] =
+{
+	"func_car/pop01.wav",
+	"func_car/pop02.wav",
+	"func_car/pop03.wav",
 };
 
 int CCar::ObjectCaps( void )
@@ -409,6 +422,16 @@ void CCar::KeyValue( KeyValueData *pkvd )
 		door_handle = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "exhaust1" ) )
+	{
+		exhaust1 = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "exhaust2" ) )
+	{
+		exhaust2 = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "shiftingtime" ) )
 	{
 		ShiftingTime = Q_atof( pkvd->szValue );
@@ -435,6 +458,11 @@ void CCar::Precache( void )
 	PRECACHE_SOUND( "func_car/eng_stop.wav" );
 	PRECACHE_SOUND( "func_car/eng_stop_elec.wav" );
 	PRECACHE_SOUND( "func_car/landing.wav" );
+	if( HasSpawnFlags( SF_CAR_EXHAUSTPOPS ) )
+	{
+		for( int i = 0; i < SIZEOFARRAY( pExhaustPopSounds ); i++ )
+			PRECACHE_SOUND( (char *)pExhaustPopSounds[i] );
+	}
 	PRECACHE_SOUND( "func_car/gear1.wav" );
 	PRECACHE_SOUND( "func_car/gear2.wav" );
 	PRECACHE_SOUND( "func_car/gear3.wav" );
@@ -446,7 +474,7 @@ void CCar::Precache( void )
 		PRECACHE_SOUND( "func_car/brakes.wav" );
 
 	for( int i = 0; i < SIZEOFARRAY( pTireSounds ); i++ )
-		PRECACHE_SOUND( (char *)pTireSounds[i] );;
+		PRECACHE_SOUND( (char *)pTireSounds[i] );
 
 	PRECACHE_SOUND( "drone/drone_hit1.wav" );
 	PRECACHE_SOUND( "drone/drone_hit2.wav" );
@@ -607,6 +635,18 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 		if( pTankTower )
 			pTankTower->SetAbsAngles( GetAbsAngles() );
 
+		if( pExhaust1 )
+		{
+			pExhaust1->pev->iuser3 = 0;
+			pExhaust1->pev->fuser2 = 0.0f; // alpha multiplier
+		}
+		if( pExhaust2 )
+		{
+			pExhaust2->pev->iuser3 = 0;
+			pExhaust2->pev->fuser2 = 0.0f; // alpha multiplier
+		}
+		num_pops = 0.0f;
+
 		if( pPlayer == hDriver )
 		{
 			if( m_iszEngineSnd ) // stop engine sounds
@@ -735,6 +775,18 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			NewCameraAngle = CameraAngles.y;
 			AccelAddX = BrakeAddX = 0;
 			EnteringShake = 2.0f;
+			if( pExhaust1 )
+			{
+				pExhaust1->pev->iuser3 = -665;
+				pExhaust1->pev->fuser1 = 0.1f;
+			}
+			if( pExhaust2 )
+			{
+				pExhaust2->pev->iuser3 = -665;
+				pExhaust2->pev->fuser1 = 0.1f;
+			}
+			num_pops = 0.0f;
+			poptime = 0.0f;
 
 			SetNextThink( 0 );
 		}
@@ -787,6 +839,8 @@ void CCar::Setup( void )
 	pCamera2 = UTIL_FindEntityByTargetname( NULL, STRING( camera2 ) );
 	pTankTower = UTIL_FindEntityByTargetname( NULL, STRING( tank_tower ) );
 	pDoorHandle = UTIL_FindEntityByTargetname( NULL, STRING( door_handle ) );
+	pExhaust1 = UTIL_FindEntityByTargetname( NULL, STRING( exhaust1 ) );
+	pExhaust2 = UTIL_FindEntityByTargetname( NULL, STRING( exhaust2 ) );
 
 	if( !pWheel1 || !pWheel2 || !pWheel3 || !pWheel4 )
 	{
@@ -923,6 +977,36 @@ void CCar::Setup( void )
 			pDoorHandle->SetParent( this );
 
 		pDoorHandle->pev->owner = edict();
+	}
+
+	num_exhausts = 0;
+	num_pops = 0.0f;
+	if( pExhaust1 )
+	{
+		SET_MODEL( pExhaust1->edict(), "sprites/muzzleflash2.spr" );
+		pExhaust1->pev->rendermode = kRenderTransAdd;
+		pExhaust1->pev->scale = 0.1f;
+		pExhaust1->pev->framerate = 10;
+		pExhaust1->pev->iuser1 = 5; // parallel oriented sprite
+		if( pChassisMdl )
+			pExhaust1->SetParent( pChassisMdl );
+		else
+			pExhaust1->SetParent( this );
+		num_exhausts++;
+
+		if( pExhaust2 )
+		{
+			SET_MODEL( pExhaust2->edict(), "sprites/muzzleflash2.spr" );
+			pExhaust2->pev->rendermode = kRenderTransAdd;
+			pExhaust2->pev->scale = 0.1f;
+			pExhaust2->pev->framerate = 10;
+			pExhaust2->pev->iuser1 = 5; // parallel oriented sprite
+			if( pChassisMdl )
+				pExhaust2->SetParent( pChassisMdl );
+			else
+				pExhaust2->SetParent( this );
+			num_exhausts++;
+		}
 	}
 
 	if( pev->iuser1 ) // rotate car
@@ -1752,7 +1836,7 @@ void CCar::Drive( void )
 		else
 			STOP_SOUND( edict(), CHAN_VOICE, "func_car/gear_whine.wav" );
 	}
-
+	
 	//----------------------------
 	// collision
 	//----------------------------
@@ -2309,6 +2393,107 @@ void CCar::Drive( void )
 		MESSAGE_END();
 
 		LastTrailTime = gpGlobals->time;
+	}
+
+	//----------------------------
+	// exhaust fx
+	//----------------------------
+	// this is not supposed to be on electic cars but if the creator wants that...be my guest!
+	if( num_exhausts > 0 )
+	{
+		// write the smoke velocity and exhaust rate - the client will deal with it using "iuser3" tag
+		UTIL_MakeVectors( GetAbsAngles() );
+		float smoke_vel = -35.0f;
+		if( Forward == -1 )
+			smoke_vel = 35.0f;
+		const Vector v_smoke_vel = pev->velocity + gpGlobals->v_forward * smoke_vel;
+		if( pExhaust1 )
+		{
+			pExhaust1->pev->vuser1 = v_smoke_vel;
+			if( bForward() || bBack() )
+				pExhaust1->pev->fuser1 -= gpGlobals->frametime * AccelRate * 0.01f;
+			else
+				pExhaust1->pev->fuser1 += gpGlobals->frametime * 0.35f;
+			pExhaust1->pev->fuser1 = bound( 0.025f, pExhaust1->pev->fuser1, 0.1f );
+			pExhaust1->pev->renderamt = 255;
+		}
+
+		if( pExhaust2 )
+		{
+			pExhaust2->pev->vuser1 = v_smoke_vel;
+			if( bForward() || bBack() )
+				pExhaust2->pev->fuser1 -= gpGlobals->frametime * 0.5f;
+			else
+				pExhaust2->pev->fuser1 += gpGlobals->frametime * 0.5f;
+			pExhaust2->pev->fuser1 = bound( 0.025f, pExhaust2->pev->fuser1, 0.1f );
+		}
+
+		// accumulate the pops
+		if( HasSpawnFlags( SF_CAR_EXHAUSTPOPS ) )
+		{
+			if( !IsShifting &&
+					(
+					HeatingTires 
+					|| (bForward() && CarSpeed > 0) 
+					|| (bBack() && CarSpeed < 0) 
+					|| (AbsCarSpeed == 0.0f && bUp() && (bForward() || bBack())) 
+					)
+				)
+			{
+				if( num_pops < 7.0f )
+					num_pops += gpGlobals->frametime * AccelRate * 0.01f;
+				poptime = gpGlobals->time + 0.1f;
+			}
+		}
+
+		// do pop-pop-pop!
+		bool candopop = true;
+		if( IsShifting )
+		{
+			// yes
+		}
+		else if( bForward() && CarSpeed > 0 )
+			candopop = false;
+		else if( bBack() && CarSpeed < 0 )
+			candopop = false;
+
+		if( num_pops > 0.0f && candopop )
+		{
+			if( gpGlobals->time > poptime )
+			{
+				if( num_exhausts == 2 ) // alternate
+					currentExhaust = (currentExhaust == pExhaust1) ? pExhaust2 : pExhaust1;
+				else
+					currentExhaust = pExhaust1;
+				currentExhaust->pev->fuser2 = 1.0f;
+				if( currentExhaust->pev->fuser2 == 1.0f )
+				{
+					EMIT_SOUND_DYN( currentExhaust->edict(), CHAN_BODY, pExhaustPopSounds[RANDOM_LONG( 0, SIZEOFARRAY( pExhaustPopSounds ) - 1 )], 1.0, ATTN_NORM, 0, RANDOM_LONG( 80, 120 ) );
+					Vector x = currentExhaust->GetAbsAngles();
+					x[ROLL] = RANDOM_LONG( 0, 359 );
+					currentExhaust->SetAbsAngles( x );
+				}
+				poptime = gpGlobals->time + (RANDOM_FLOAT( 0.1f, 0.5f ) / num_pops);
+				num_pops -= 1.0f;
+			}
+		}
+
+		// immediately start fading the sprites out because the sound plays at exactly 1.0f
+		if( pExhaust1 )
+		{
+			if( pExhaust1->pev->fuser2 > 0.0f )
+				pExhaust1->pev->fuser2 = UTIL_Approach( 0.0f, pExhaust1->pev->fuser2, gpGlobals->frametime * 7.0f );
+
+			pExhaust1->pev->renderamt = 255 * pExhaust1->pev->fuser2;
+		}
+
+		if( pExhaust2 )
+		{
+			if( pExhaust2->pev->fuser2 > 0.0f )
+				pExhaust2->pev->fuser2 = UTIL_Approach( 0.0f, pExhaust2->pev->fuser2, gpGlobals->frametime * 7.0f );
+
+			pExhaust2->pev->renderamt = 255 * pExhaust2->pev->fuser2;
+		}
 	}
 	
 	SetNextThink( 0 );

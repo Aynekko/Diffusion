@@ -42,6 +42,8 @@ public:
 	string_t camera2;
 	string_t tank_tower;
 	string_t door_handle;
+	string_t exhaust1;
+	string_t exhaust2;
 
 	Vector pWheel1Org;
 	Vector pWheel2Org;
@@ -60,6 +62,8 @@ public:
 	CBaseAnimating *pChassisMdl;
 	CBaseEntity *pTankTower;
 	CBaseEntity *pDoorHandle;
+	CBaseEntity *pExhaust1;
+	CBaseEntity *pExhaust2;
 
 	int m_iszEngineSnd;
 	static const char *pTireSounds[];
@@ -156,6 +160,12 @@ public:
 	float ShiftStartTime;
 
 	float AddTurnWheelShake;
+
+	static const char *pExhaustPopSounds[];
+	int num_exhausts;
+	float num_pops; // not saved
+	float poptime; // not saved
+	CBaseEntity *currentExhaust; // not saved
 
 	float BrakeSqueak; // volume of the squeaky sound (0-1), not saved
 

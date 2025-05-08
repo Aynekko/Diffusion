@@ -39,6 +39,7 @@ used iuser3 "flags":
 -662 player's drone
 -663 env_bubbles
 -664 env_volumetric_light
+-665 car exhaust
 -666 item_flare
 -667 monster on fire
 -668 dust particles from car wheel
@@ -406,6 +407,20 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 					g_pParticles.CreateEffect( 0, "small_splash", ent->curstate.origin, g_vecZero );
 				else
 					g_pParticles.Smoke( ent->index, type, ent->curstate.origin - Vector(0,0,ent->curstate.iuser2 * 0.25), g_vecZero, 1, dust_speed, dust_scale, dust_randomize_pos, 0, Vector(1,1,1), 1000 );
+			}
+		}
+
+		if( ent->curstate.iuser3 == -665 ) // car exhaust
+		{
+			const int ParticleEntIndex = ent->index;
+			if( tr.time > tr.ParticleTime[ParticleEntIndex] )
+			{
+				const float exh_alpha = 0.5f - (ent->curstate.vuser1.Length() * 0.001f);
+				if( exh_alpha > 0.0f )
+				{
+					g_pParticles.Smoke( ParticleEntIndex, 0, ent->curstate.origin, ent->curstate.vuser1, 1, 0.25f, 5.0f, 0.0f, 0.0f, Vector( 0.75f, 0.75f, 0.75f ), 800, exh_alpha );
+					tr.ParticleTime[ParticleEntIndex] = tr.time + ent->curstate.fuser1;
+				}
 			}
 		}
 
