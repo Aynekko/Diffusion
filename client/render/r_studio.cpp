@@ -4761,6 +4761,10 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 		}
 		
 		StudioRenderModel();
+
+		// restore LOD back to default after rendering the model through a specific pass
+		if( m_pModelInstance->numlods > 0 )
+			m_pCurrentEntity->curstate.body = 0;
 	}
 
 	return 1;
