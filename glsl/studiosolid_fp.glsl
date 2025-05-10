@@ -226,7 +226,8 @@ void main( void )
 		light_diffuse_sum += light_diffuse;
 	}
 
-	diffuse.rgb *= light_diffuse_sum; // apply lighting		
+	light_diffuse = light_diffuse_sum;
+	diffuse.rgb *= light_diffuse; // apply lighting		
 #else
 	vec3 L = normalize( var_LightVec );	
 	#if defined( STUDIO_BUMP )			
