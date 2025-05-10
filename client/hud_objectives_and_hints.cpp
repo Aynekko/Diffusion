@@ -430,8 +430,9 @@ int CHudHintObjective::Draw( float flTime )
 		const float timedbar_width = frame_width * taketh;
 		// how much should I move the x coord?
 		const float timedbar_xpos = xpos + ((frame_width - timedbar_width) * 0.5f);
-		FillRoundedRGBA( timedbar_xpos, obj_ypos + frame_height + 7, timedbar_width, 6.0f, 6.0f, Vector4D( 0.1f, 0.1f, 0.1f, obj_alpha * 0.75f ) );
-		FillRoundedRGBA( timedbar_xpos + 2, obj_ypos + frame_height + 9, timedbar_width - 4, 2.0f, 6.0f, Vector4D( 0.275f, 0.666f, 1.0f, obj_alpha * 0.75f ) );
+		FillRoundedRGBA( timedbar_xpos, obj_ypos + frame_height + 7, timedbar_width, 8.0f, 6.0f, Vector4D( 0.1f, 0.1f, 0.1f, obj_alpha * 0.75f ) );
+		if( timedbar_width > 4 )
+			FillRoundedRGBA( timedbar_xpos + 2, obj_ypos + frame_height + 9, timedbar_width - 4, 4.0f, 6.0f, Vector4D( 0.275f, 0.666f, 1.0f, obj_alpha * 0.75f ) );
 	}
 
 	return 1;
