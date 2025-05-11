@@ -30,7 +30,7 @@ int CHud::UpdateClientData(client_data_t *cdata, float time)
 		gHUD.CarAddFovMult = CL_UTIL_Approach( 1.0f, gHUD.CarAddFovMult, g_fFrametime ); // this jerks fov when switching gears
 	if( gHUD.InCar )
 	{
-		AddFov = CL_UTIL_Approach( gHUD.CarSpeed * 0.25f * gHUD.CarAddFovMult, AddFov, (10 / gHUD.CarAddFovMult) * g_fFrametime ); // just for smoothing
+		AddFov = lerp( AddFov, gHUD.CarSpeed * 0.25f * gHUD.CarAddFovMult, 3.0f * g_fFrametime ); // just for smoothing
 		AddFov = bound( 0, AddFov, 30 );
 		cdata->fov = (m_flFOV * 0.75f) + AddFov;
 	}

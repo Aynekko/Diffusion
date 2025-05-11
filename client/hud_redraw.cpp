@@ -50,24 +50,36 @@ static void SuitIsOffline(void)
 	}
 }
 
+const char *DrumSamples[]
+{
+	"drums/kick.wav",
+	"drums/snare.wav",
+	"drums/tomlow.wav",
+	"drums/tommed.wav",
+	"drums/tomhigh.wav",
+	"drums/ride.wav",
+	"drums/hihat.wav",
+	"drums/crash.wav",
+};
+
 void CHud::DrumsInput( int Slot )
 {
-	char sample[128];
+	const char *sample = NULL;
 
 	switch( Slot )
 	{
-	case 4: Q_snprintf( sample, sizeof( sample ), "drums/kick.wav" ); break;
-	case 3: Q_snprintf( sample, sizeof( sample ), "drums/snare.wav" ); break;
-	case 2: Q_snprintf( sample, sizeof( sample ), "drums/tomlow.wav" ); break;
-	case 1: Q_snprintf( sample, sizeof( sample ), "drums/tommed.wav" ); break;
-	case 0: Q_snprintf( sample, sizeof( sample ), "drums/tomhigh.wav" ); break;
+	case 4: sample = DrumSamples[0]; break;
+	case 3: sample = DrumSamples[1]; break;
+	case 2: sample = DrumSamples[2]; break;
+	case 1: sample = DrumSamples[3]; break;
+	case 0: sample = DrumSamples[4]; break;
 	// cymbals
-	case 5: Q_snprintf( sample, sizeof( sample ), "drums/ride.wav" ); break;
-	case 6: Q_snprintf( sample, sizeof( sample ), "drums/hihat.wav" ); break;
-	case 7: Q_snprintf( sample, sizeof( sample ), "drums/crash.wav" ); break;
+	case 5: sample = DrumSamples[5]; break;
+	case 6: sample = DrumSamples[6]; break;
+	case 7: sample = DrumSamples[7]; break;
 	}
 
-	if( sample[0] != NULL )
+	if( sample != NULL )
 		gEngfuncs.pEventAPI->EV_PlaySound( gEngfuncs.GetLocalPlayer()->index, gEngfuncs.GetLocalPlayer()->origin, CHAN_STATIC, sample, 1.0, 1.0, 0, 100 );
 }
 
