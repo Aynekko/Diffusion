@@ -497,7 +497,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 	if( Error )
 		ConPrintf( "^1Error:^7 txt file for texture \"%s\" is incorrect.\n", tr.materials[texnum].name );
 
-	gEngfuncs.COM_FreeFile( afile );
+	gEngfuncs.COM_FreeFile( pfile );
 }
 
 /*
