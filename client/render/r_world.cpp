@@ -2307,7 +2307,10 @@ void R_DrawLightForSurfList( plight_t *pl )
 		const gl_bmodelface_t *entry = &tr.light_surfaces[i];
 		const mextrasurf_t *es = entry->surface->info;
 		const msurface_t *s = entry->surface;
-		const int iTexnum = es->gl_texturenum;
+		const texture_t *tex = s->texinfo->texture;
+		int iTexnum = es->gl_texturenum;
+		if( tex->anim_total > 0 )
+			iTexnum = tex->gl_texturenum;
 
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 			flush_buffer = true;
@@ -2798,7 +2801,9 @@ void R_DrawBrushList( void )
 		const mextrasurf_t *es = entry->surface->info;
 		const msurface_t *s = entry->surface;
 		const texture_t *tex = s->texinfo->texture;
-		const int iTexnum = es->gl_texturenum;
+		int iTexnum = es->gl_texturenum;
+		if( tex->anim_total > 0 )
+			iTexnum = tex->gl_texturenum;
 
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 			flush_buffer = true;
