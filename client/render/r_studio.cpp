@@ -3989,16 +3989,13 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 		// so I want to make them brighter, in the floor case only, but how to determine if we took the lighting from the floor?
 		// plightvec[2] < -0.8 - this is how. This is probably bad, but works... This, or I rip everything from the engine and rewrite (no, thanks)
 		#if 1
+		const float magicgamma = vid_gamma->value * 0.65f + vid_brightness->value * 0.35f;
+		lighting.ambientlight *= magicgamma; // this is strangely fitting. maybe the gamma doesn't work?...
+		lighting.shadelight *= magicgamma;
 		if( lighting.plightvec[2] < -0.8 )
 		{
-			lighting.ambientlight *= vid_gamma->value * 0.65f + vid_brightness->value * 0.35f; // this is strangely fitting. maybe the gamma doesn't work?...
 			lighting.ambientlight *= 2.0f; // MAGIC
-			if( lighting.ambientlight > 128 )
-				lighting.ambientlight = 128;
-			lighting.shadelight *= vid_gamma->value * 0.65f + vid_brightness->value * 0.35f;
 			lighting.shadelight *= 2.0f; // MAGIC
-			if( lighting.shadelight > 192 )
-				lighting.shadelight = 192;
 		}
 		else
 		{
@@ -4008,6 +4005,11 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 				lighting.shadelight *= tr.sunlightscale;
 			}
 		}
+
+		if( lighting.ambientlight > 128 )
+			lighting.ambientlight = 128;
+		if( lighting.shadelight > 192 )
+			lighting.shadelight = 192;
 		#endif
 
 		// diffusion - smooth light change for everything else (moving models like viewmodel, players etc)
