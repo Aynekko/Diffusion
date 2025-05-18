@@ -639,11 +639,13 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 		{
 			pExhaust1->pev->iuser3 = 0;
 			pExhaust1->pev->fuser2 = 0.0f; // alpha multiplier
+			pExhaust1->pev->renderamt = 0;
 		}
 		if( pExhaust2 )
 		{
 			pExhaust2->pev->iuser3 = 0;
 			pExhaust2->pev->fuser2 = 0.0f; // alpha multiplier
+			pExhaust2->pev->renderamt = 0;
 		}
 		num_pops = 0.0f;
 
@@ -779,11 +781,13 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			{
 				pExhaust1->pev->iuser3 = -665;
 				pExhaust1->pev->fuser1 = 0.1f;
+				pExhaust1->pev->renderamt = 0;
 			}
 			if( pExhaust2 )
 			{
 				pExhaust2->pev->iuser3 = -665;
 				pExhaust2->pev->fuser1 = 0.1f;
+				pExhaust2->pev->renderamt = 0;
 			}
 			num_pops = 0.0f;
 			poptime = 0.0f;
@@ -2943,6 +2947,10 @@ void CCar::ClearEffects( void )
 		UTIL_Remove( pCarHurt, true );
 	if( pDriverMdl )
 		UTIL_Remove( pDriverMdl, true );
+	if( pExhaust1 )
+		UTIL_Remove( pExhaust1 );
+	if( pExhaust2 )
+		UTIL_Remove( pExhaust2 );
 
 	pWheel1 = NULL;
 	pWheel2 = NULL;
@@ -2955,6 +2963,8 @@ void CCar::ClearEffects( void )
 	pFreeCam = NULL;
 	pCarHurt = NULL;
 	pDriverMdl = NULL;
+	pExhaust1 = NULL;
+	pExhaust2 = NULL;
 }
 
 void CCar::OnRemove(void)
