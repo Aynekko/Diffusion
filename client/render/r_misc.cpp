@@ -397,7 +397,8 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 
 		if( ent->curstate.iuser3 == -668 ) // dust particles from car wheel
 		{
-			if((gHUD.m_flTimeDelta > 0) && (ent->curstate.fuser1 > 10.0f) && ((int)ent->curstate.fuser1 % 5 == 0) )
+			const int ParticleEntIndex = ent->index;
+			if( (ent->curstate.fuser1 > 10.0f) && (tr.time > tr.ParticleTime[ParticleEntIndex]) )
 			{
 				const float dust_speed = (300 * g_fFrametime) / (1 + ent->curstate.fuser1 * 0.002);
 				const float dust_scale = bound( 10, ent->curstate.fuser1 * 0.02, 40 ) + RANDOM_LONG(-3,3);
@@ -407,6 +408,8 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 					g_pParticles.CreateEffect( 0, "small_splash", ent->curstate.origin, g_vecZero );
 				else
 					g_pParticles.Smoke( ent->index, type, ent->curstate.origin - Vector(0,0,ent->curstate.iuser2 * 0.25), g_vecZero, 1, dust_speed, dust_scale, dust_randomize_pos, 0, Vector(1,1,1), 1000 );
+
+				tr.ParticleTime[ParticleEntIndex] = tr.time + (1.0f / (1.0f + ent->curstate.fuser1 * 0.1f));
 			}
 		}
 
