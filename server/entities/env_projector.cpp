@@ -15,11 +15,20 @@ public:
 	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
 	virtual STATE GetState(void) { return FBitSet(pev->effects, EF_NODRAW) ? STATE_OFF : STATE_ON; };
 	virtual int ObjectCaps(void) { return BaseClass::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	void ProjectorThink( void );
+	float thinktime;
 	void CineThink(void);
 	void SpriteThink(void);
-	void PVSThink(void);
 	void UpdatePVSPoint(void);
 	float Frames(void) { return pev->frags; }
+
+	// diffusion - think functions for smooth turning
+	void TurnOn( void );
+	void TurnOff( void );
+	bool LightOn;
+	float TurnOnTime;
+	float TurnOffTime;
+	float Brightness; // actual brightness is fuser1. This value is only needed to remember the initial brightness.
 
 	DECLARE_DATADESC();
 };
@@ -27,9 +36,14 @@ public:
 LINK_ENTITY_TO_CLASS(env_projector, CEnvProjector);
 
 BEGIN_DATADESC(CEnvProjector)
+	DEFINE_FUNCTION( ProjectorThink ),
 	DEFINE_FUNCTION(CineThink),
 	DEFINE_FUNCTION(SpriteThink),
-	DEFINE_FUNCTION(PVSThink),
+	DEFINE_KEYFIELD( TurnOnTime, FIELD_FLOAT, "turnontime" ),
+	DEFINE_KEYFIELD( TurnOffTime, FIELD_FLOAT, "turnofftime" ),
+	DEFINE_FIELD( Brightness, FIELD_FLOAT ),
+	DEFINE_FIELD( LightOn, FIELD_BOOLEAN ),
+	DEFINE_FIELD( thinktime, FIELD_TIME ),
 END_DATADESC()
 
 void CEnvProjector::KeyValue(KeyValueData* pkvd)
@@ -58,7 +72,17 @@ void CEnvProjector::KeyValue(KeyValueData* pkvd)
 	}
 	else if( FStrEq( pkvd->szKeyName, "brightness" ) )
 	{
-		pev->fuser1 = Q_atof( pkvd->szValue );
+		Brightness = Q_atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "turnontime" ) )
+	{
+		TurnOnTime = Q_atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "turnofftime" ) )
+	{
+		TurnOffTime = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else BaseClass::KeyValue(pkvd);
@@ -87,6 +111,11 @@ void CEnvProjector::Spawn(void)
 	// diffusion - these two needed for correct fading on client
 	pev->rendermode = kRenderTransTexture;
 	pev->renderamt = 255;
+
+	LightOn = false;
+
+	if( !Brightness )
+		Brightness = 1.0f;
 
 	pev->movetype = MOVETYPE_NOCLIP;
 	SetFlag(F_NOBACKCULL);
@@ -179,40 +208,107 @@ void CEnvProjector::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE 
 	if( useType == USE_ON )
 	{
 		// turn projector on
-		if( pev->effects & EF_NODRAW )
-			pev->effects &= ~EF_NODRAW;
+		LightOn = true;
 	}
 	else if( useType == USE_OFF )
 	{
 		// turn projector off
-		if( !(pev->effects & EF_NODRAW) )
-			pev->effects |= EF_NODRAW;
+		LightOn = false;
 	}
 	else // toggle
 	{
-		if( pev->effects & EF_NODRAW )
-			pev->effects &= ~EF_NODRAW;
-		else
-			pev->effects |= EF_NODRAW;
+		LightOn = !LightOn;
 	}
 
-	if( pev->effects & EF_NODRAW )
+	pev->dmgtime = gpGlobals->time;
+
+	SetThink( &CEnvProjector::ProjectorThink );
+	SetNextThink(0);
+}
+
+void CEnvProjector::ProjectorThink( void )
+{	
+	if( LightOn )
+		TurnOn();
+	else
+		TurnOff();
+
+	if( pev->fuser1 == 0.0f )
 	{
 		DontThink();
 		return;
 	}
-	else
+
+	if( gpGlobals->time > thinktime )
 	{
-		pev->dmgtime = gpGlobals->time + 0.1f;
+		// run proper method
+		if( FBitSet( pev->iuser1, CF_MOVIE ) )
+		{
+			SetThink( &CEnvProjector::CineThink );
+			thinktime = gpGlobals->time + CIN_FRAMETIME;
+		}
+		else if( FBitSet( pev->iuser1, CF_SPRITE ) && Frames() > 1 )
+		{
+			SetThink( &CEnvProjector::SpriteThink );
+			// keep think at 0.1 so interpolation will working properly
+			thinktime = gpGlobals->time + 0.1f;
+		}
+		else
+		{
+			UpdatePVSPoint();
+			thinktime = gpGlobals->time + 0.1f;
+		}
+	}
 
-		// run properly method
-		if (FBitSet(pev->iuser1, CF_MOVIE))
-			SetThink(&CEnvProjector::CineThink);
-		else if (FBitSet(pev->iuser1, CF_SPRITE) && Frames() > 1)
-			SetThink(&CEnvProjector::SpriteThink);
-		else SetThink(&CEnvProjector::PVSThink);
+	SetNextThink( 0 );
+}
 
-		SetNextThink(0.1f);
+void CEnvProjector::TurnOn( void )
+{
+	if( pev->effects & EF_NODRAW )
+		pev->effects &= ~EF_NODRAW;
+
+	if( pev->fuser1 == Brightness )
+		return;
+
+	if( !TurnOnTime )
+	{
+		pev->fuser1 = Brightness;
+		return;
+	}
+
+	if( pev->fuser1 < Brightness )
+	{
+		pev->fuser1 += Brightness / (TurnOnTime / gpGlobals->frametime);
+		if( pev->fuser1 >= Brightness )
+		{
+			pev->fuser1 = Brightness;
+			return;
+		}
+	}
+}
+
+void CEnvProjector::TurnOff( void )
+{
+	if( pev->fuser1 == 0.0f )
+		return;
+
+	if( !TurnOffTime )
+	{
+		pev->fuser1 = 0;
+		pev->effects |= EF_NODRAW;
+		return;
+	}
+
+	if( pev->fuser1 > 0 )
+	{
+		pev->fuser1 -= Brightness / (TurnOffTime / gpGlobals->frametime);
+		if( pev->fuser1 < 0.01f )
+		{
+			pev->effects |= EF_NODRAW;
+			pev->fuser1 = 0;
+			return;
+		}
 	}
 }
 
@@ -222,7 +318,6 @@ void CEnvProjector::CineThink(void)
 
 	// update as 30 frames per second
 	pev->fuser2 += CIN_FRAMETIME;
-	SetNextThink(CIN_FRAMETIME);
 }
 
 void CEnvProjector::SpriteThink(void)
@@ -234,15 +329,6 @@ void CEnvProjector::SpriteThink(void)
 	pev->dmgtime = gpGlobals->time;
 
 	UpdatePVSPoint();
-
-	// keep think at 0.1 so interpolation will working properly
-	SetNextThink(0.1f);
-}
-
-void CEnvProjector::PVSThink(void)
-{
-	UpdatePVSPoint();
-	SetNextThink(0.1f);
 }
 
 void CEnvProjector::UpdatePVSPoint(void)
