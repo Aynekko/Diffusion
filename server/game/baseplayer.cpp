@@ -623,15 +623,15 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 			default:
 			case 1:
 				shield_dmg_absorbed = flDamage * 0.35f;
-				shield_energy_spent *= flDamage * 0.5f;
+				shield_energy_spent = flDamage * 0.5f;
 				break;
 			case 2:
 				shield_dmg_absorbed = flDamage * 0.5f;
-				shield_energy_spent *= flDamage * 0.4f;
+				shield_energy_spent = flDamage * 0.4f;
 				break;
 			case 3:
 				shield_dmg_absorbed = flDamage * 0.65f;
-				shield_energy_spent *= flDamage * 0.35f;
+				shield_energy_spent = flDamage * 0.35f;
 				break;
 		}
 
