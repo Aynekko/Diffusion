@@ -616,10 +616,29 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 		if( bitsDamageType & DMG_FALL )
 			goto skip_shield;
 
-		if( m_flStaminaValue > flDamage * 0.5 )
+		float shield_dmg_absorbed;
+		float shield_energy_spent;
+		switch( ShieldAvailableLVL )
 		{
-			m_flStaminaValue -= flDamage * 0.5;
-			flDamage *= 0.5;
+			default:
+			case 1:
+				shield_dmg_absorbed = flDamage * 0.35f;
+				shield_energy_spent *= flDamage * 0.5f;
+				break;
+			case 2:
+				shield_dmg_absorbed = flDamage * 0.5f;
+				shield_energy_spent *= flDamage * 0.4f;
+				break;
+			case 3:
+				shield_dmg_absorbed = flDamage * 0.65f;
+				shield_energy_spent *= flDamage * 0.35f;
+				break;
+		}
+
+		if( m_flStaminaValue > shield_energy_spent )
+		{
+			m_flStaminaValue -= shield_energy_spent;
+			flDamage -= shield_dmg_absorbed;
 		}
 		else // we took more damage than we have stamina available
 		{
@@ -2855,16 +2874,20 @@ void CBasePlayer::PreThink( void )
 
 	if( ShieldOn )
 	{
-		if( m_flStaminaValue > 0 ) // UNDONE - ShieldLVLs
+		if( ShieldAvailableLVL == 0 )
 		{
-			if( g_pGameRules->IsMultiplayer() )
-				m_flStaminaValue -= gpGlobals->frametime;
-			else
-				m_flStaminaValue -= 10 * gpGlobals->frametime;
-		}
-
-		if( m_flStaminaValue <= 0 )
 			ShieldOn = false;
+		}
+		else
+		{
+			if( m_flStaminaValue > 0 )
+			{
+				m_flStaminaValue -= (10.0f / (float)ShieldAvailableLVL) * gpGlobals->frametime;
+			}
+
+			if( m_flStaminaValue <= 0 )
+				ShieldOn = false;
+		}
 	}
 
 	UTIL_MakeVectors( pev->v_angle );             // is this still used?

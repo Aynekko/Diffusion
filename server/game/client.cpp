@@ -546,7 +546,7 @@ void ClientCommand( edict_t *pEntity )
 //	for( int i = 0; pcmd[i] != 0; i++ )
 //		pcmd[i] = tolower( pcmd[i] );
 
-	bool Cheats = (g_flWeaponCheat != 0.0);
+	const bool Cheats = (g_flWeaponCheat != 0.0);
 	
 	if( FIStrEq( pcmd, "use" ) )
 	{
@@ -578,6 +578,13 @@ void ClientCommand( edict_t *pEntity )
 				pPlayer->ShieldOn = !pPlayer->ShieldOn;
 				pPlayer->NextShieldChangeTime = gpGlobals->time + 0.5;
 			}
+		}
+	}
+	else if( FIStrEq( pcmd, "shieldlevel" ) )
+	{
+		if( Cheats && CMD_ARGC() > 1 )
+		{
+			pPlayer->ShieldAvailableLVL = bound( 0, Q_atoi( CMD_ARGV( 1 ) ), 3 );
 		}
 	}
 	else if( FIStrEq( pcmd, "selectdrone" ) ) // shortcut to select the drone
