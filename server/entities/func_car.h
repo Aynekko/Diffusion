@@ -42,6 +42,7 @@ public:
 	string_t camera2;
 	string_t tank_tower;
 	string_t door_handle;
+	string_t door_handle2;
 	string_t exhaust1;
 	string_t exhaust2;
 
@@ -61,7 +62,8 @@ public:
 	CBaseAnimating *pDriverMdl;
 	CBaseAnimating *pChassisMdl;
 	CBaseEntity *pTankTower;
-	CBaseEntity *pDoorHandle;
+	CBaseEntity *pDoorHandle1;
+	CBaseEntity *pDoorHandle2;
 	CBaseEntity *pExhaust1;
 	CBaseEntity *pExhaust2;
 

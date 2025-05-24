@@ -46,7 +46,7 @@ BEGIN_DATADESC( CHelicopter )
 	DEFINE_FIELD( pDriverMdl, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pChassisMdl, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pTankTower, FIELD_CLASSPTR ), // I honestly still don't get it - why do I have to put this here again if it's already defined in the saverestore table in the base class, where this variable is taken from?
-	DEFINE_FIELD( pDoorHandle, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pDoorHandle1, FIELD_CLASSPTR ),
 	DEFINE_KEYFIELD( m_iszEngineSnd, FIELD_STRING, "enginesnd" ),
 	DEFINE_KEYFIELD( m_iszIdleSnd, FIELD_STRING, "idlesnd" ),
 	DEFINE_FIELD( AllowCamera, FIELD_BOOLEAN ),
@@ -66,7 +66,7 @@ int CHelicopter::ObjectCaps( void )
 	if( HasSpawnFlags( SF_HELI_ONLYTRIGGER ) )
 		return 0;
 
-	if( pDoorHandle )
+	if( pDoorHandle1 )
 		return 0;
 
 	return FCAP_IMPULSE_USE;
@@ -342,7 +342,8 @@ void CHelicopter::Setup( void )
 	pBlade = UTIL_FindEntityByTargetname( NULL, STRING( blade ) );
 	pBlade2 = UTIL_FindEntityByTargetname( NULL, STRING( blade2 ) );
 	pTankTower = UTIL_FindEntityByTargetname( NULL, STRING( tank_tower ) );
-	pDoorHandle = UTIL_FindEntityByTargetname( NULL, STRING( door_handle ) );
+	pDoorHandle1 = UTIL_FindEntityByTargetname( NULL, STRING( door_handle ) );
+	pDoorHandle2 = UTIL_FindEntityByTargetname( NULL, STRING( door_handle2 ) );
 
 	if( pChassisMdl )
 	{
@@ -453,16 +454,26 @@ void CHelicopter::Setup( void )
 			FreeCameraDistance = CameraDistance;
 	}
 
-	if( pDoorHandle )
+	if( pDoorHandle1 )
 	{
 		// reset USE flag, car can be USE-pressed through handle only
 		ObjectCaps();
 		if( pChassisMdl )
-			pDoorHandle->SetParent( pChassisMdl );
+			pDoorHandle1->SetParent( pChassisMdl );
 		else
-			pDoorHandle->SetParent( this );
+			pDoorHandle1->SetParent( this );
 
-		pDoorHandle->pev->owner = edict();
+		pDoorHandle1->pev->owner = edict();
+
+		if( pDoorHandle2 )
+		{
+			if( pChassisMdl )
+				pDoorHandle2->SetParent( pChassisMdl );
+			else
+				pDoorHandle2->SetParent( this );
+
+			pDoorHandle2->pev->owner = edict();
+		}
 	}
 
 	if( pTankTower )

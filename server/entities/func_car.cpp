@@ -40,6 +40,7 @@ BEGIN_DATADESC( CCar )
 	DEFINE_KEYFIELD( camera2, FIELD_STRING, "camera2" ),
 	DEFINE_KEYFIELD( tank_tower, FIELD_STRING, "tank_tower" ),
 	DEFINE_KEYFIELD( door_handle, FIELD_STRING, "door_handle" ),
+	DEFINE_KEYFIELD( door_handle2, FIELD_STRING, "door_handle2" ),
 	DEFINE_KEYFIELD( exhaust1, FIELD_STRING, "exhaust1" ),
 	DEFINE_KEYFIELD( exhaust2, FIELD_STRING, "exhaust2" ),
 	DEFINE_FIELD( Camera2LocalOrigin, FIELD_VECTOR ),
@@ -90,7 +91,8 @@ BEGIN_DATADESC( CCar )
 	DEFINE_FIELD( pDriverMdl, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pChassisMdl, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pTankTower, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pDoorHandle, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pDoorHandle1, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pDoorHandle2, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pExhaust1, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pExhaust2, FIELD_CLASSPTR ),
 	DEFINE_KEYFIELD( m_iszEngineSnd, FIELD_STRING, "enginesnd" ),
@@ -204,7 +206,7 @@ int CCar::ObjectCaps( void )
 	if( HasSpawnFlags( SF_CAR_ONLYTRIGGER ) )
 		return 0;
 
-	if( pDoorHandle )
+	if( pDoorHandle1 )
 		return 0;
 
 	return FCAP_IMPULSE_USE;
@@ -420,6 +422,11 @@ void CCar::KeyValue( KeyValueData *pkvd )
 	else if( FStrEq( pkvd->szKeyName, "door_handle" ) )
 	{
 		door_handle = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "door_handle2" ) )
+	{
+		door_handle2 = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "exhaust1" ) )
@@ -842,7 +849,8 @@ void CCar::Setup( void )
 	pCamera1 = CBaseEntity::Create( "info_target", GetAbsOrigin(), GetAbsAngles(), edict() );
 	pCamera2 = UTIL_FindEntityByTargetname( NULL, STRING( camera2 ) );
 	pTankTower = UTIL_FindEntityByTargetname( NULL, STRING( tank_tower ) );
-	pDoorHandle = UTIL_FindEntityByTargetname( NULL, STRING( door_handle ) );
+	pDoorHandle1 = UTIL_FindEntityByTargetname( NULL, STRING( door_handle ) );
+	pDoorHandle2 = UTIL_FindEntityByTargetname( NULL, STRING( door_handle2 ) );
 	pExhaust1 = UTIL_FindEntityByTargetname( NULL, STRING( exhaust1 ) );
 	pExhaust2 = UTIL_FindEntityByTargetname( NULL, STRING( exhaust2 ) );
 
@@ -971,16 +979,26 @@ void CCar::Setup( void )
 			FreeCameraDistance = CameraDistance;
 	}
 
-	if( pDoorHandle )
+	if( pDoorHandle1 )
 	{
 		// reset USE flag, car can be USE-pressed through handle only
 		ObjectCaps();
 		if( pChassisMdl )
-			pDoorHandle->SetParent( pChassisMdl );
+			pDoorHandle1->SetParent( pChassisMdl );
 		else
-			pDoorHandle->SetParent( this );
+			pDoorHandle1->SetParent( this );
 
-		pDoorHandle->pev->owner = edict();
+		pDoorHandle1->pev->owner = edict();
+
+		if( pDoorHandle2 )
+		{
+			if( pChassisMdl )
+				pDoorHandle2->SetParent( pChassisMdl );
+			else
+				pDoorHandle2->SetParent( this );
+
+			pDoorHandle2->pev->owner = edict();
+		}
 	}
 
 	num_exhausts = 0;
@@ -2951,6 +2969,10 @@ void CCar::ClearEffects( void )
 		UTIL_Remove( pExhaust1 );
 	if( pExhaust2 )
 		UTIL_Remove( pExhaust2 );
+	if( pDoorHandle1 )
+		UTIL_Remove( pDoorHandle1 );
+	if( pDoorHandle2 )
+		UTIL_Remove( pDoorHandle2 );
 
 	pWheel1 = NULL;
 	pWheel2 = NULL;
@@ -2965,6 +2987,8 @@ void CCar::ClearEffects( void )
 	pDriverMdl = NULL;
 	pExhaust1 = NULL;
 	pExhaust2 = NULL;
+	pDoorHandle1 = NULL;
+	pDoorHandle2 = NULL;
 }
 
 void CCar::OnRemove(void)
