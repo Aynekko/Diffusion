@@ -3191,7 +3191,15 @@ void CGraph :: ComputeStaticRoutingTables( void )
 								}
 								else
 								{
-									ALERT( at_aiconsole, "Nodes need sorting (%d,%d)!\n", iLastNode, iFrom);
+									ALERT( at_aiconsole, "Nodes need sorting (%d [%.f %.f %.f], %d [%.f %.f %.f])!\n",
+										iLastNode,
+										m_pNodes[iLastNode].m_vecOrigin.x,
+										m_pNodes[iLastNode].m_vecOrigin.y,
+										m_pNodes[iLastNode].m_vecOrigin.z,
+										iFrom,
+										m_pNodes[iFrom].m_vecOrigin.x,
+										m_pNodes[iFrom].m_vecOrigin.y,
+										m_pNodes[iFrom].m_vecOrigin.z );
 								}
 								cRepeats = 0;
 
@@ -3280,7 +3288,15 @@ void CGraph :: ComputeStaticRoutingTables( void )
 						}
 						else
 						{
-							ALERT( at_aiconsole, "Nodes need sorting (%d,%d)!\n", iLastNode, iFrom);
+							ALERT( at_aiconsole, "Nodes need sorting (%d [%.f %.f %.f], %d [%.f %.f %.f])!\n",
+								iLastNode, 
+								m_pNodes[iLastNode].m_vecOrigin.x,
+								m_pNodes[iLastNode].m_vecOrigin.y,
+								m_pNodes[iLastNode].m_vecOrigin.z,
+								iFrom,
+								m_pNodes[iFrom].m_vecOrigin.x,
+								m_pNodes[iFrom].m_vecOrigin.y,
+								m_pNodes[iFrom].m_vecOrigin.z );
 						}
 					}
 
