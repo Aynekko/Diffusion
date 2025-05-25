@@ -186,6 +186,10 @@ void main( void )
 	light *= 2 * u_DynLightBrightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 #endif
 
+	// remove this if HDR is implemented
+	// this is a hack to remove overbright on brighter textures
+	light *= 1.0 - (0.25 * length( diffuse.rgb ));
+
 	if( u_FogParams.w > 0.0 )
 	{
 		float dist = length( var_ViewVec );

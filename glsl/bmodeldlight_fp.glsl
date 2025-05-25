@@ -286,6 +286,10 @@ void main( void )
 	#endif
 #endif
 
+	// remove this if HDR is implemented
+	// this is a hack to remove overbright on brighter textures
+	Brightness *= 1.0 - (0.25 * length( diffuse.rgb ));
+
 #if defined( BMODEL_LIGHT_PROJECTION )
 	light = u_LightDiffuse.rgb * DLIGHT_SCALE;	// light color
 
