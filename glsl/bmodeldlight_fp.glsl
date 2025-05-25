@@ -147,6 +147,7 @@ void main( void )
 	diffuse = TerrainApplyDiffuse( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3 );
 #else
 	diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+	diffuse.rgb *= diffuse.a;
 #endif
 
 #if !defined( BMODEL_INTERIOR )
@@ -281,7 +282,7 @@ void main( void )
 	#if defined( BMODEL_WATER_REFRACTION ) 
 		RenderModeModifier = 1.0 - exp( -WaterAbsorbFactor * 0.5 );
 	#else 
-		RenderModeModifier = 0.2;     
+//		RenderModeModifier = 0.2;
 	#endif
 #endif
 

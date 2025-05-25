@@ -1777,15 +1777,6 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 
 	texture_t *tx = s->texinfo->texture;
 
-	if( FBitSet( s->flags, SURF_LANDSCAPE ) )
-	{
-		if( landscape && landscape->terrain && landscape->terrain->layermap.gl_diffuse_id != 0 )
-		{
-			GL_AddShaderDirective( options, va( "TERRAIN_NUM_LAYERS %i", landscape->terrain->numLayers ));
-			GL_AddShaderDirective( options, "BMODEL_MULTI_LAYERS" );
-		}
-	}
-
 	if( !IsLandscape )
 	{
 		if( gl_emboss->value > 0 )
@@ -1811,6 +1802,12 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 	}
 	else // landscape
 	{
+		if( landscape && landscape->terrain && landscape->terrain->layermap.gl_diffuse_id != 0 )
+		{
+			GL_AddShaderDirective( options, va( "TERRAIN_NUM_LAYERS %i", landscape->terrain->numLayers ) );
+			GL_AddShaderDirective( options, "BMODEL_MULTI_LAYERS" );
+		}
+
 		if( gl_emboss->value > 0 )
 		{
 			if( landscape && landscape->terrain && landscape->terrain->layermap.has_emboss )
