@@ -176,33 +176,36 @@ void R_SetupCable( cl_entity_t *e )
 	Vector vmidpoint;
 	
 	float TargetSway = e->curstate.fuser3;
-	int NumberOfCables = (int)e->curstate.vuser2.y;
+	const int NumberOfCables = (int)e->curstate.vuser2.y;
 	
 	// origin of the cable can move when parented. if so, add shaking
-	float Speed = (e->curstate.origin - e->prevstate.origin).Length() / g_fFrametime;
+	const float Speed = (e->curstate.origin - e->prevstate.origin).Length() / g_fFrametime;
 	TargetSway *= 1.0f + (Speed * 0.05f);
 
 	// approach faster when shaking starts, but slower when coming to a halt
-	float ApproachSpeed = (e->curstate.fuser3 > tr.cableSwayIntensity[e->index]) ? g_fFrametime * (0.1f + 0.5f * fabs( tr.cableSwayIntensity[e->index] - e->curstate.fuser3 )) : (g_fFrametime * 0.1f);
+	const float ApproachSpeed = (e->curstate.fuser3 > tr.cableSwayIntensity[e->index]) ? g_fFrametime * (0.1f + 0.5f * fabs( tr.cableSwayIntensity[e->index] - e->curstate.fuser3 )) : (g_fFrametime * 0.1f);
 	tr.cableSwayIntensity[e->index] = CL_UTIL_Approach( TargetSway, tr.cableSwayIntensity[e->index], ApproachSpeed );
-	if( (tr.time != tr.oldtime) && !(RI->params & RP_SHADOWPASS) ) // don't animate when paused or in shadowpass
+	if( (tr.time != tr.oldtime) && e->visframe != tr.realframecount ) // animate only once per frame
+	{
 		tr.cableSwayPhase[e->index] += g_fFrametime * tr.cableSwayIntensity[e->index];
+		e->visframe = tr.realframecount;
+	}
 
 	float falldepth = e->curstate.fuser1;
 	if( falldepth <= 0.0f )
 		falldepth = 0.001f;
 
-	float fwidth = e->curstate.fuser2;
+	const float fwidth = e->curstate.fuser2;
 
 	Vector vpoints[50];
-	int isegments = bound( 3, e->curstate.iuser2, 49 );
+	const int isegments = bound( 3, e->curstate.iuser2, 49 );
 
-	int inumpoints = isegments + 1;
-	float RenderAmt = (float)CL_FxBlend(e) * tr.fadeblend[e->index];
+	const int inumpoints = isegments + 1;
+	const float RenderAmt = (float)CL_FxBlend(e) * tr.fadeblend[e->index];
 	vposition1 = e->curstate.origin; // start cable
 	vposition2 = e->curstate.vuser1; // end cable
 
-	bool bMakeWaterDrops = (e->curstate.vuser2.x > 0.01f); // rate: 0 - 255
+	const bool bMakeWaterDrops = (e->curstate.vuser2.x > 0.01f); // rate: 0 - 255
 	// choose a cable for waterdrop
 	int WaterdropCable = 0;
 	if( bMakeWaterDrops && NumberOfCables > 1 )
