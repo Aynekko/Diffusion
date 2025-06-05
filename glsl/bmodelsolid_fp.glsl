@@ -110,7 +110,7 @@ void main( void )
 	// get diffuse and read alpha
 #if defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR ) || defined( BMODEL_PORTAL )
 	#if defined( BMODEL_WATER_PLANAR )
-		diffuse = texture2D( u_WaterTex, var_TexDiffuse );
+		diffuse = texture2D( u_WaterTex, var_TexDiffuse * 0.25 );
 	#elif defined( BMODEL_PORTAL )
 		diffuse = texture2DProj( u_ColorMap, var_TexMirror );
 	#else
@@ -123,7 +123,11 @@ void main( void )
 	TerrainReadMask( var_TexGlobal, mask0, mask1, mask2, mask3 );
 	diffuse = TerrainApplyDiffuse( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3 );
 #else
-	diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+	#if defined( BMODEL_WATER )
+		diffuse = texture2D( u_ColorMap, var_TexDiffuse * 0.25 );
+	#else
+		diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+	#endif
 #endif
 
 #if defined( ALPHA_RESCALING )
@@ -145,7 +149,7 @@ void main( void )
 	// compute the normal term
 #if defined( BMODEL_WATER ) 
         #if defined( BMODEL_WATER_REFRACTION )
-			vec3 WaterNormal = normalmap2D( u_NormalMap, var_TexDiffuse * 2.5 );
+			vec3 WaterNormal = normalmap2D( u_NormalMap, var_TexDiffuse );
 			N = normalize( WaterNormal );
     	#endif 
 #elif defined( BMODEL_MULTI_LAYERS )

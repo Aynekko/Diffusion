@@ -103,7 +103,7 @@ void main( void )
 	vec3 emboss = vec3( 1.0 );
 	float shadow = 1.0;
 
-        // compute the masks for terrain
+	// compute the masks for terrain
 #if defined( BMODEL_MULTI_LAYERS )
 	vec4 mask0, mask1, mask2, mask3;
 	TerrainReadMask( var_TexGlobal, mask0, mask1, mask2, mask3 );
@@ -146,7 +146,11 @@ void main( void )
 #if defined( BMODEL_MULTI_LAYERS )
 	diffuse = TerrainApplyDiffuse( u_ColorMap, var_TexDiffuse, mask0, mask1, mask2, mask3 );
 #else
-	diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+	#if defined( BMODEL_WATER )
+		diffuse = texture2D( u_ColorMap, var_TexDiffuse * 0.25 );
+	#else
+		diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+	#endif
 	diffuse.rgb *= diffuse.a;
 #endif
 
@@ -162,7 +166,7 @@ void main( void )
         // compute the normal term
 #if defined( BMODEL_WATER ) && defined( BMODEL_WATER_REFRACTION )
 	// rotate water normal to worldpsace
-	vec3 WaterNormal = normalmap2D( u_NormalMap, var_TexDiffuse * 2.5 );
+	vec3 WaterNormal = normalmap2D( u_NormalMap, var_TexDiffuse );
 	N = WaterNormal;
 #elif defined( BMODEL_MULTI_LAYERS )
 	#if defined( BMODEL_BUMP )
