@@ -781,8 +781,11 @@ void CBaseButton :: ButtonUse( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 	{
 		if( !m_fStayPushed && FBitSet( pev->spawnflags, SF_BUTTON_TOGGLE ))
 		{
-			if ( pev->spawnflags & SF_BUTTON_SAMEDIR )
+			if( HasSpawnFlags(SF_BUTTON_SAMEDIR) )
+			{
+				EMIT_SOUND( edict(), CHAN_VOICE, STRING( pev->noise ), 1, ATTN_NORM );
 				ButtonContinue();
+			}
 			else
 			{
 				EMIT_SOUND( edict(), CHAN_VOICE, STRING( pev->noise ), 1, ATTN_NORM );
@@ -792,8 +795,9 @@ void CBaseButton :: ButtonUse( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 	}
 	else
 	{
-		if ( pev->spawnflags & SF_BUTTON_SAMEDIR )
+		if( HasSpawnFlags( SF_BUTTON_SAMEDIR ) )
 		{
+			EMIT_SOUND( edict(), CHAN_VOICE, STRING( pev->noise ), 1, ATTN_NORM );
 			ButtonContinue();
 		}
 		else
