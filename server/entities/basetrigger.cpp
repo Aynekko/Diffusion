@@ -51,7 +51,7 @@ void CBaseTrigger::InitTrigger()
 
 BOOL CBaseTrigger::CanTouch(CBaseEntity* pOther)
 {
-	if( sv_ignore_triggers.value > 0 )
+	if( sv_ignore_triggers.value > 0 && pOther && pOther->IsPlayer() )
 		return FALSE;
 	
 	if (FStringNull(pev->netname))
@@ -131,9 +131,6 @@ void CBaseTrigger::ToggleUse(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_
 void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 {
 	if( !CanTouch( pOther ) )
-		return;
-
-	if( sv_ignore_triggers.value > 0 )
 		return;
 
 	if (!pOther->pev->takedamage)

@@ -373,7 +373,7 @@ void CFuncMultiManager::UseTouch( CBaseEntity *pOther )
 	if( !pOther )
 		return;
 
-	if( sv_ignore_triggers.value > 0 )
+	if( sv_ignore_triggers.value > 0 && pOther->IsPlayer() )
 		return;
 
 	if( IsLockedByMaster() )
