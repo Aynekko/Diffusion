@@ -2522,7 +2522,10 @@ void R_DrawLightForSurfList( plight_t *pl )
 			// diffusion - apply custom color to a specific texture
 			if( MT.ApplyColor && (e->index > 0) )
 			{
-				pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
+				if( e->curstate.rendercolor.r == 0 && e->curstate.rendercolor.g == 0 && e->curstate.rendercolor.b == 0 )
+					pglUniform4fARB( RI->currentshader->u_RenderColor, 1.0f, 1.0f, 1.0f, tr.blend );
+				else
+					pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
 			}
 			else
 				R_SetRenderColor( RI->currententity );
@@ -3025,7 +3028,12 @@ void R_DrawBrushList( void )
 						pglUniform4fARB( RI->currentshader->u_RenderColor, tr.blend * (float)e->curstate.rendercolor.r / 255.0f, tr.blend * (float)e->curstate.rendercolor.g / 255.0f, tr.blend * (float)e->curstate.rendercolor.b / 255.0f, 1.0f );
 				}
 				else
-					pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
+				{
+					if( e->curstate.rendercolor.r == 0 && e->curstate.rendercolor.g == 0 && e->curstate.rendercolor.b == 0 )
+						pglUniform4fARB( RI->currentshader->u_RenderColor, 1.0f, 1.0f, 1.0f, tr.blend );
+					else
+						pglUniform4fARB( RI->currentshader->u_RenderColor, e->curstate.rendercolor.r / 255.0f, e->curstate.rendercolor.g / 255.0f, e->curstate.rendercolor.b / 255.0f, tr.blend );
+				}
 			}
 			else
 				R_SetRenderColor( RI->currententity );
