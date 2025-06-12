@@ -1911,7 +1911,7 @@ static void Mod_LoadWorld( model_t *mod, const byte *buf )
 
 	// mark surfaces for world features
 	#ifdef _OPENMP
-	#pragma omp parallel for
+//	#pragma omp parallel for // extremely rarely, but it can miss, disable
 	#endif
 	for( i = 0; i < worldmodel->numsurfaces; i++ )
 	{

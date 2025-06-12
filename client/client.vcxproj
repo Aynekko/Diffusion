@@ -188,7 +188,8 @@
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
-      <OpenMPSupport>true</OpenMPSupport>
+      <OpenMPSupport>
+      </OpenMPSupport>
     </ClCompile>
     <PostBuildEvent>
       <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\x64\Release\client\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client_amd64.dll"</Command>
