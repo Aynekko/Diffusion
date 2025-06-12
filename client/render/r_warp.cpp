@@ -393,7 +393,7 @@ void R_CheckSkyPortal( cl_entity_t *skyPortal )
 		return;
 	}
 
-	if( FBitSet( RI->params, RP_OVERVIEW ))
+	if( (RI->params & RP_IGNORE_3DSKY) || (RI->params & RP_OVERVIEW) )
 		return;
 
 	// don't allow recursive 3dsky

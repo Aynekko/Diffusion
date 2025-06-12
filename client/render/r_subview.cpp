@@ -616,6 +616,9 @@ void R_DrawSubviewPasses( void )
 		surf->info->subtexture[glState.stack_position-1] = 0;
 		RI->reject_face = surf;
 
+		if( surf->info->parent->curstate.iuser3 == -671 )
+			RI->params |= RP_IGNORE_3DSKY;
+
 		R_RenderScene();
 
 		RI->reject_face = NULL;

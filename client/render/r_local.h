@@ -64,6 +64,7 @@ GNU General Public License for more details.
 #define RP_NOGRASS		BIT( 12 )	// don't draw grass
 #define RP_THIRDPERSON	BIT( 13 )	// camera is thirdperson
 #define RP_SKYBOXRENDERED BIT(14)	// diffusion - mark that 2d sky is rendered
+#define RP_IGNORE_3DSKY BIT(15)		// sometimes 3D sky should not be rendered through portals or mirrors
 
 #define RP_NONVIEWERREF	(RP_MIRRORVIEW|RP_PORTALVIEW|RP_ENVVIEW|RP_SCREENVIEW|RP_SKYPORTALVIEW|RP_SHADOWPASS)
 #define RP_LOCALCLIENT( e )	(gEngfuncs.GetLocalPlayer() && ((e)->index == gEngfuncs.GetLocalPlayer()->index && e->player ))

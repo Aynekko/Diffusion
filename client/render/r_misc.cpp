@@ -45,6 +45,7 @@ used iuser3 "flags":
 -668 dust particles from car wheel
 -669 cable
 -670 turned on monitor
+-671 do not render 3D sky - only used in brush entities (func_portal or mirrors)
 */
 
 #define DEFAULT_SMOOTHNESS	0.35f
