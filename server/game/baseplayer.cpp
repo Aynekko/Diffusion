@@ -1720,10 +1720,17 @@ void CBasePlayer::WaterMove()
 				}
 
 				// take damage
-				if( fabs(NotInWaterVelocity.z) >= PLAYER_MAX_SAFE_FALL_SPEED * 1.5 )
+				const float vertical_absvelocity = fabs( NotInWaterVelocity.z );
+				if( vertical_absvelocity >= PLAYER_MAX_SAFE_FALL_SPEED )
 				{
-					float flFallDamage = (NotInWaterVelocity.Length() - PLAYER_MAX_SAFE_FALL_SPEED) * DAMAGE_FOR_FALL_SPEED * 0.2;
-					TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), flFallDamage, DMG_FALL );
+					// do screenshake
+					UTIL_ScreenShakeLocal( this, GetAbsOrigin(), 10.0, 150.0, 1.0, 400, true );
+
+					if( vertical_absvelocity >= PLAYER_MAX_SAFE_FALL_SPEED * 1.5 )
+					{
+						float flFallDamage = (NotInWaterVelocity.Length() - PLAYER_MAX_SAFE_FALL_SPEED) * DAMAGE_FOR_FALL_SPEED * 0.2;
+						TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), flFallDamage, DMG_FALL );
+					}
 				}
 
 				// "shoot" into water to figure out splash particle location
