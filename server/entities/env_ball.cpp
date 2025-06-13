@@ -236,7 +236,7 @@ void CEnvBall::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 	if( HasSpawnFlags(ENVBALL_TAIL) )
 	{
 		// create trail
-		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY );
+		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_BEAMFOLLOW );
 			WRITE_SHORT( pBall->entindex() );	// entity
 			WRITE_SHORT(m_iTrail );	// model
