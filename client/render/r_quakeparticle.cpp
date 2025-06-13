@@ -240,9 +240,8 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 		{
 			if( curAlpha >= curParticle->m_flAlpha )
 			{
-				curParticle->m_vecOrigin.x = curParticle->m_vecOrigin.x + curParticle->m_vecVelocity.x * time + curParticle->m_vecAccel.x * time2;
-				curParticle->m_vecOrigin.y = curParticle->m_vecOrigin.y + curParticle->m_vecVelocity.y * time + curParticle->m_vecAccel.y * time2;
-				curParticle->m_vecOrigin.z = curParticle->m_vecOrigin.z + curParticle->m_vecVelocity.z * time + curParticle->m_vecAccel.z * time2 * gravity;
+				curParticle->m_vecVelocity = (org - curParticle->m_vecOrigin) / time;
+				curParticle->m_vecOrigin = org;
 				curParticle->m_flRadius = curParticle->m_flRadius + curParticle->m_flRadiusVelocity * time;
 				curParticle->m_flLength = curParticle->m_flLength + curParticle->m_flLengthVelocity * time;
 				curParticle->m_flRotation = curParticle->m_flRotation + curParticle->m_flRotationVelocity * time;
@@ -733,9 +732,8 @@ bool CQuakePart::Evaluate( float gravity )
 	{
 		if( curAlpha >= m_flAlpha )
 		{
-			m_vecOrigin.x = m_vecOrigin.x + m_vecVelocity.x * time + m_vecAccel.x * time2;
-			m_vecOrigin.y = m_vecOrigin.y + m_vecVelocity.y * time + m_vecAccel.y * time2;
-			m_vecOrigin.z = m_vecOrigin.z + m_vecVelocity.z * time + m_vecAccel.z * time2 * gravity;
+			m_vecVelocity = (org - m_vecOrigin) / time;
+			m_vecOrigin = org;
 			m_flRadius = m_flRadius + m_flRadiusVelocity * time;
 			m_flLength = m_flLength + m_flLengthVelocity * time;
 			m_flRotation = m_flRotation + m_flRotationVelocity * time;
