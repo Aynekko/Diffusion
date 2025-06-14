@@ -36,7 +36,6 @@ public:
 	string_t Target3;
 	string_t Target4;
 	string_t Target5;
-	hudtextparms_t m_TextParams;
 
 	float NextUseTime;
 
@@ -118,28 +117,23 @@ void CAmmoPrinter::Spawn( void )
 
 void CAmmoPrinter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	// text parameters - same as ammo crate
-	m_TextParams.channel = 16;
-	m_TextParams.x = 0.7;
-	m_TextParams.y = 0.7;
-	m_TextParams.effect = 2;
-	m_TextParams.r1 = 0;
-	m_TextParams.g1 = 170;
-	m_TextParams.b1 = 255;
-	m_TextParams.a1 = 200;
-	m_TextParams.r2 = 255;
-	m_TextParams.g2 = 255;
-	m_TextParams.b2 = 255;
-	m_TextParams.a2 = 200;
-	m_TextParams.fadeinTime = 0.03;
-	m_TextParams.fadeoutTime = 0.5;
-	m_TextParams.holdTime = 5;
-	m_TextParams.fxTime = 0;
-	
+	if( !pActivator || !pActivator->IsPlayer() )
+		pActivator = CBaseEntity::Instance( INDEXENT( 1 ) );
+
+	CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
+
+	if( !pPlayer )
+		return;
+
 	if( pev->iuser2 >= pev->iuser1 )
 	{
 		ALERT( at_aiconsole, "AmmoPrinter: number of prints exceeded!\n" );
-		UTIL_HudMessage( pActivator, m_TextParams, "Number of prints exceeded!" );
+
+		MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, pPlayer->edict() );
+		WRITE_BYTE( 0 );
+		WRITE_STRING( "AMMOPRINTER_EXCEEDED" );
+		MESSAGE_END();
+
 		if( SndDeny )
 			EMIT_SOUND( edict(), CHAN_STATIC, (char *)STRING( SndDeny ), 1, ATTN_NORM );
 		return;
@@ -150,24 +144,25 @@ void CAmmoPrinter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 
 	if( gpGlobals->time < NextUseTime )
 	{
-		UTIL_HudMessage( pActivator, m_TextParams, "Not ready!" );
+		MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, pPlayer->edict() );
+		WRITE_BYTE( 0 );
+		WRITE_STRING( "AMMOPRINTER_NOTREADY" );
+		MESSAGE_END();
+
 		if( SndDeny )
 			EMIT_SOUND( edict(), CHAN_STATIC, (char *)STRING( SndDeny ), 1, ATTN_NORM );
 		return;
 	}
-	
-	if( !pActivator || !pActivator->IsPlayer() )
-		pActivator = CBaseEntity::Instance( INDEXENT( 1 ) );
-
-	CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
-
-	if( !pPlayer )
-		return;
 
 	if( !pPlayer->m_pActiveItem )
 	{
 		ALERT( at_aiconsole, "AmmoPrinter: no active item!\n" );
-		UTIL_HudMessage( pActivator, m_TextParams, "No active weapon selected!" );
+
+		MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, pPlayer->edict() );
+		WRITE_BYTE( 0 );
+		WRITE_STRING( "AMMOPRINTER_NOACTIVEWPN" );
+		MESSAGE_END();
+
 		if( SndDeny )
 			EMIT_SOUND( edict(), CHAN_STATIC, (char *)STRING( SndDeny ), 1, ATTN_NORM );
 		return;
@@ -176,7 +171,12 @@ void CAmmoPrinter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	if( InvalidWeapon(pPlayer->m_pActiveItem) )
 	{
 		ALERT( at_aiconsole, "AmmoPrinter: invalid weapon!\n" );
-		UTIL_HudMessage( pActivator, m_TextParams, "Not supported!" );
+		
+		MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, pPlayer->edict() );
+		WRITE_BYTE( 0 );
+		WRITE_STRING( "AMMOPRINTER_WPNINVALID" );
+		MESSAGE_END();
+
 		if( SndDeny )
 			EMIT_SOUND( edict(), CHAN_STATIC, (char *)STRING( SndDeny ), 1, ATTN_NORM );
 		return;
@@ -194,7 +194,12 @@ void CAmmoPrinter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	if( Ammo1 == -1 && Ammo2 == -1 )
 	{
 		ALERT( at_aiconsole, "AmmoPrinter: player can't have this ammo (full?)!\n" );
-		UTIL_HudMessage( pActivator, m_TextParams, "Ammo is already full for this weapon!" );
+		
+		MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, pPlayer->edict() );
+		WRITE_BYTE( 0 );
+		WRITE_STRING( "AMMOPRINTER_AMMOFULL" );
+		MESSAGE_END();
+
 		if( SndDeny )
 			EMIT_SOUND( edict(), CHAN_STATIC, (char *)STRING( SndDeny ), 1, ATTN_NORM );
 		return;
