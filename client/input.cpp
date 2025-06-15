@@ -743,6 +743,12 @@ int CL_ButtonBits( int bResetState )
 			in_moveleft.state &= ~IMPULSE_DOWN;
 			in_moveleft.state &= ~BUTTON_DOWN;
 		}
+		else if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+		{
+			gHUD.m_PseudoGUI.scrolled_lines -= 5; // scroll up
+			in_moveleft.state &= ~IMPULSE_DOWN;
+			in_moveleft.state &= ~BUTTON_DOWN;
+		}
 		else
 			bits |= IN_MOVELEFT;
 	}
@@ -753,6 +759,12 @@ int CL_ButtonBits( int bResetState )
 		{
 			// use movement buttons to move the block
 			gHUD.m_Puzzle.MoveActiveBlock( IN_MOVERIGHT );
+			in_moveright.state &= ~IMPULSE_DOWN;
+			in_moveright.state &= ~BUTTON_DOWN;
+		}
+		else if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+		{
+			gHUD.m_PseudoGUI.scrolled_lines += 5; // scroll down
 			in_moveright.state &= ~IMPULSE_DOWN;
 			in_moveright.state &= ~BUTTON_DOWN;
 		}
