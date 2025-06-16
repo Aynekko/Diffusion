@@ -1166,10 +1166,8 @@ void CScriptedSentence :: FindThink( void )
 				EMIT_SOUND_DYN( pEntity->edict(), CHAN_VOICE, pszSentence, m_flVolume, m_flAttenuation, 0, PITCH_NORM );
 			else SENTENCEG_PlayRndSz( pEntity->edict(), pszSentence, m_flVolume, m_flAttenuation, 0, PITCH_NORM );
 
-			if( !FStringNull(name) )
-				UTIL_ShowMessageAll( STRING(name) );
-			if( !FStringNull(msg) )
-				UTIL_ShowMessageAll( STRING(msg) );
+			if( !FStringNull( name ) && !FStringNull( msg ) )
+				UTIL_SendSubtitle( STRING( name ), STRING( msg ) );
 
 			if ( pev->spawnflags & SF_SENTENCE_ONCE )
 				UTIL_Remove( this );
