@@ -1002,34 +1002,35 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 
 	AngleVectors( angles, forward, right, up );
 
-	if( pparams->frametime != 0.0f )	// not in paused
+	Vector vDifference;
+
+	vDifference = forward - gHUD.m_vecLastFacing;
+
+	float flSpeed = 3.0f;
+
+	// If we start to lag too far behind, we'll increase the "catch up" speed.
+	// Solves the problem with fast cl_yawspeed, m_yaw or joysticks rotating quickly.
+	// The old code would slam lastfacing with origin causing the viewmodel to pop to a new position
+	float flDiff = vDifference.Length();
+
+	if( (flDiff > cl_weaponlag->value) && (cl_weaponlag->value > 0.0f) )
 	{
-		Vector vDifference;
+		float flScale = flDiff / cl_weaponlag->value;
+		flSpeed *= flScale;
+	}
 
-		vDifference = forward - gHUD.m_vecLastFacing;
+	// FIXME:  Needs to be predictable?
+	if( tr.time != tr.oldtime )
+		gHUD.m_vecLastFacing += vDifference * (flSpeed * g_fFrametime);
+	// Make sure it doesn't grow out of control!!!
+	gHUD.m_vecLastFacing = gHUD.m_vecLastFacing.Normalize();
+	origin = origin + (vDifference * -1.0f) * flSpeed * 0.25;  // diffusion *0.25
 
-		float flSpeed = 3.0f;
-
-		// If we start to lag too far behind, we'll increase the "catch up" speed.
-		// Solves the problem with fast cl_yawspeed, m_yaw or joysticks rotating quickly.
-		// The old code would slam lastfacing with origin causing the viewmodel to pop to a new position
-		float flDiff = vDifference.Length();
-
-		if( (flDiff > cl_weaponlag->value) && (cl_weaponlag->value > 0.0f) )
-		{
-			float flScale = flDiff / cl_weaponlag->value;
-			flSpeed *= flScale;
-		}
-
-		// FIXME:  Needs to be predictable?
-		gHUD.m_vecLastFacing += vDifference * (flSpeed * pparams->frametime);
-		// Make sure it doesn't grow out of control!!!
-		gHUD.m_vecLastFacing = gHUD.m_vecLastFacing.Normalize();
-		origin = origin + (vDifference * -1.0f) * flSpeed * 0.25;  // diffusion *0.25
-
-		// add subtle rolls
-		// ----------------------------------------------------
-		if( PrevViewAngles != g_vecZero && fabs(vOriginalAngles.x) < 45 )
+	// add subtle rolls
+	// ----------------------------------------------------
+	if( tr.time != tr.oldtime )
+	{
+		if( PrevViewAngles != g_vecZero && fabs( vOriginalAngles.x ) < 45 )
 		{
 			Vector2D vDifference2D = { vDifference.x, vDifference.y };
 			float flDiff2D = vDifference2D.Length();
@@ -1050,19 +1051,19 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 		}
 		else
 			gun_roll_angle = CL_UTIL_Approach( 0.0f, gun_roll_angle, pparams->frametime * 3.0f );
-
-		if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN )
-		{
-			angles.z -= gun_roll_angle * 5.0f;
-			angles.y -= gun_roll_angle * 2.0f;
-		}
-		else
-		{
-			angles.z += gun_roll_angle * 5.0f;
-			angles.y -= gun_roll_angle * 2.0f;
-		}
-		// ----------------------------------------------------
 	}
+
+	if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN )
+	{
+		angles.z -= gun_roll_angle * 5.0f;
+		angles.y -= gun_roll_angle * 2.0f;
+	}
+	else
+	{
+		angles.z += gun_roll_angle * 5.0f;
+		angles.y -= gun_roll_angle * 2.0f;
+	}
+	// ----------------------------------------------------
 
 	AngleVectors( original_angles, forward, right, up );
 
@@ -2009,22 +2010,26 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	//	LowerGunAmount = bound(0, LowerGunAmount, 1);
 	//	view->origin[2] -= LowerGunAmount;
 		// another solution:
-	if( CL_IsCrouching() )
+	if( tr.time != tr.oldtime )
 	{
-		GunPosZCurrent = lerp( GunPosZCurrent, 0, 2.0f * g_fFrametime );
-		GunPosXYCurrent = lerp( GunPosXYCurrent, 1, 1.5f * g_fFrametime );
+		if( CL_IsCrouching() )
+		{
+			GunPosZCurrent = lerp( GunPosZCurrent, 0, 2.0f * g_fFrametime );
+			GunPosXYCurrent = lerp( GunPosXYCurrent, 1, 1.5f * g_fFrametime );
+		}
+		else if( gHUD.m_iKeyBits & (IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT) )
+		{
+			if( pparams->simvel.Length2D() > 0 && (GunPosZCurrent < 1) )
+				GunPosZCurrent += pparams->simvel.Length2D() * 0.02f * g_fFrametime;
+			GunPosXYCurrent = lerp( GunPosXYCurrent, 0, 1.5f * g_fFrametime );
+		}
+		else
+		{
+			GunPosZCurrent = lerp( GunPosZCurrent, 0, 2.0f * g_fFrametime );
+			GunPosXYCurrent = lerp( GunPosXYCurrent, 0, 1.5f * g_fFrametime );
+		}
 	}
-	else if( gHUD.m_iKeyBits & (IN_FORWARD | IN_BACK | IN_MOVELEFT | IN_MOVERIGHT) )
-	{
-		if( pparams->simvel.Length2D() > 0 && (GunPosZCurrent < 1) )
-			GunPosZCurrent += pparams->simvel.Length2D() * 0.02f * g_fFrametime;
-		GunPosXYCurrent = lerp( GunPosXYCurrent, 0, 1.5f * g_fFrametime );
-	}
-	else
-	{
-		GunPosZCurrent = lerp( GunPosZCurrent, 0, 2.0f * g_fFrametime );
-		GunPosXYCurrent = lerp( GunPosXYCurrent, 0, 1.5f * g_fFrametime );
-	}
+
 	if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN )
 		view->origin.z += GunPosZCurrent;
 	else
