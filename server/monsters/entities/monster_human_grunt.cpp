@@ -4381,7 +4381,7 @@ void CHGruntSecurityGeneral::Spawn()
 		AddWeapon( HGRUNT_GRENADELAUNCHER );
 	}
 
-	m_cClipSize = GRUNT_CLIP_SIZE;
+	m_cClipSize = GRUNT_CLIP_SIZE * 2;
 
 	m_cAmmoLoaded = m_cClipSize;
 
@@ -4412,8 +4412,8 @@ void CHGruntSecurityGeneral::Precache()
 	else
 		PRECACHE_MODEL("models/npc/hgrunt_securityg.mdl");
 
-	PRECACHE_SOUND("hgrunt/gr_mgun1.wav");
-	PRECACHE_SOUND("hgrunt/gr_mgun2.wav");
+	PRECACHE_SOUND( "hgrunt/general_mgun.wav" );
+	PRECACHE_SOUND( "hgrunt/general_mgun_d.wav" );
 
 	PRECACHE_SOUND("hgrunt/hg_die1.wav");
 	PRECACHE_SOUND("hgrunt/hg_die2.wav");
@@ -4883,7 +4883,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 		if (HasWeapon(HGRUNT_9MMAR))
 		{
 			Shoot();
-			PlayClientSound( this, 252, 0, (m_cAmmoLoaded <= 15 ? m_cAmmoLoaded : 0), org );
+			PlayClientSound( this, 245, 0, (m_cAmmoLoaded <= 15 ? m_cAmmoLoaded : 0), org );
 		}
 		else
 		{

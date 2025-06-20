@@ -2506,6 +2506,11 @@ void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoV
 		sndname[0] = "weapons/rocketfire1.wav";
 		num = 0;
 	break;
+	case 245: // monster_security_general 9mmAR
+		sndname[0] = "hgrunt/general_mgun.wav";
+		sndname_d[0] = "hgrunt/general_mgun_d.wav";
+		num = 0;
+		break;
 	case 246: // ammo_crystalpack
 		sndname[0] = "weapons/ammo_crystalpack.wav";
 		Channel = CHAN_STATIC;
