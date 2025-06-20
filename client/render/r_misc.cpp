@@ -2506,6 +2506,11 @@ void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoV
 		sndname[0] = "weapons/rocketfire1.wav";
 		num = 0;
 	break;
+	case 246: // ammo_crystalpack
+		sndname[0] = "weapons/ammo_crystalpack.wav";
+		Channel = CHAN_STATIC;
+		num = 0;
+		break;
 	case 247: // helicopter minigun
 		// reuse sniper sounds with higher pitch
 		sndname[0] = "weapons/sniper_wpn_fire.wav";

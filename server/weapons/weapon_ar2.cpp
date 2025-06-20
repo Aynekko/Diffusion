@@ -355,3 +355,46 @@ class CAR2Ball : public CBasePlayerAmmo
 };
 
 LINK_ENTITY_TO_CLASS( ammo_ar2ball, CAR2Ball );
+
+//================================================================================
+// processed crystal mix (ammo pack that contains ammo for AR2 and Alien sniper)
+//================================================================================
+class CAmmoCrystalPack : public CBasePlayerAmmo
+{
+	DECLARE_CLASS( CAmmoCrystalPack, CBasePlayerAmmo );
+
+	void Spawn( void )
+	{
+		Precache();
+		SET_MODEL( ENT( pev ), "models/weapons/w_crystalpack.mdl" );
+		CBasePlayerAmmo::Spawn();
+	}
+	void Precache( void )
+	{
+		PRECACHE_MODEL( "models/weapons/w_crystalpack.mdl" );
+		PRECACHE_SOUND( "weapons/ammo_crystalpack.wav" );
+	}
+	BOOL AddAmmo( CBaseEntity *pOther )
+	{
+		bool bResult = false;
+
+		// give ar2 balls
+		if( pOther->GiveAmmo( AMMO_M203BOX_GIVE, "ar2balls", M203_GRENADE_MAX_CARRY ) != -1 )
+			bResult = true;
+
+		// give ar2 ammo
+		if( (pOther->GiveAmmo( (int)(AR2_MAX_CARRY * 0.5f), "ar2ammo", AR2_MAX_CARRY ) != -1) )
+			bResult = true;
+
+		// give alien sniper ammo
+		if( pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY ) != -1 )
+			bResult = true;
+
+		if( bResult )
+			PlayPickupSound( pOther, 246 );
+
+		return bResult;
+	}
+};
+
+LINK_ENTITY_TO_CLASS( ammo_crystalpack, CAmmoCrystalPack );
