@@ -11,6 +11,7 @@ class CTriggerSave : public CBaseTrigger
 public:
 	void Spawn(void);
 	void SaveTouch(CBaseEntity* pOther);
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
 	DECLARE_DATADESC();
 };
@@ -48,4 +49,16 @@ void CTriggerSave::SaveTouch(CBaseEntity* pOther)
 	UTIL_Remove(this);
 	SERVER_COMMAND("autosave\n");
 	UTIL_ShowMessage( "GAMESAVED", pOther ); // diffusion - show save icon
+}
+
+void CTriggerSave::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if( !pActivator || !pActivator->IsPlayer() )
+		pActivator = UTIL_PlayerByIndex( 1 );
+
+	if( !UTIL_IsMasterTriggered( m_sMaster, pActivator ) )
+		return;
+
+	SERVER_COMMAND( "autosave\n" );
+	UTIL_ShowMessage( "GAMESAVED", pActivator ); // diffusion - show save icon
 }
