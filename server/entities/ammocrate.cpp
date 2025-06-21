@@ -461,12 +461,12 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 			case WEAPON_SHOTGUN:
 				Ratio[WEAPON_SHOTGUN] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "buckshot" ) ) / BUCKSHOT_MAX_CARRY;
 				break;
-			case WEAPON_GAUSS:
-				Ratio[WEAPON_GAUSS] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "uranium" ) ) / URANIUM_MAX_CARRY;
-				break;
-			case WEAPON_AR2:
-				Ratio[WEAPON_AR2] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "ar2ammo" ) ) / AR2_MAX_CARRY;
-				break;
+		//	case WEAPON_GAUSS:
+		//		Ratio[WEAPON_GAUSS] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "uranium" ) ) / URANIUM_MAX_CARRY;
+		//		break;
+		//	case WEAPON_AR2:
+		//		Ratio[WEAPON_AR2] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "ar2ammo" ) ) / AR2_MAX_CARRY;
+		//		break;
 			case WEAPON_HKMP5:
 				Ratio[WEAPON_HKMP5] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "hkmp5ammo" ) ) / _9MM_MAX_CARRY;
 				break;
@@ -476,15 +476,15 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 			case WEAPON_SNIPER:
 				Ratio[WEAPON_SNIPER] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "sniperammo" ) ) / SNIPER_MAX_CARRY;
 				break;
-			case WEAPON_SHOTGUN_XM:
-				Ratio[WEAPON_SHOTGUN_XM] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "buckshot" ) ) / BUCKSHOT_MAX_CARRY;
-				break;
+		//	case WEAPON_SHOTGUN_XM:
+		//		Ratio[WEAPON_SHOTGUN_XM] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "buckshot" ) ) / BUCKSHOT_MAX_CARRY;
+		//		break;
 			case WEAPON_G36C:
 				Ratio[WEAPON_G36C] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "g36cammo" ) ) / _9MM_MAX_CARRY;
 				break;
-			case WEAPON_RPG:
-				Ratio[WEAPON_RPG] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "rockets" ) ) / ROCKET_MAX_CARRY;
-				break;
+		//	case WEAPON_RPG:
+		//		Ratio[WEAPON_RPG] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "rockets" ) ) / ROCKET_MAX_CARRY;
+		//		break;
 			}
 		}
 	}
