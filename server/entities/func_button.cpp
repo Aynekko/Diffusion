@@ -1004,8 +1004,13 @@ void CBaseButton::ButtonReturn( void )
 
 void CBaseButton::ButtonContinue( void )
 {
-	if( IsLockedByMaster( ))
+	if( IsLockedByMaster() )
+	{
+		PlayLockSounds( pev, &m_ls, TRUE, TRUE );
 		return;
+	}
+
+	PlayLockSounds( pev, &m_ls, FALSE, TRUE );
 	
 	AngularMove( (GetLocalAngles() + pev->movedir * m_flMoveDistance), pev->speed );
 
