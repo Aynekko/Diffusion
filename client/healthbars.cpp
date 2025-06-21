@@ -85,11 +85,14 @@ void CHealthbars::DrawCentralBar( void )
 
 	const int tex_background = LOAD_TEXTURE( "sprites/healthbar5.dds", NULL, 0, 0 );
 	const int tex_bar = LOAD_TEXTURE( "sprites/healthbar6.dds", NULL, 0, 0 );
+	float alpha = 1.0f;
+	if( gHUD.m_HintObjectives.bShowMissionObjectives || gHUD.m_HintObjectives.bShowMissionObjectivesTimed )
+		alpha = 0.1f; // dim the health to make objective more readable
 
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 
 	// draw the background texture
-	gEngfuncs.pTriAPI->Color4f( 0.275f, 0.663f, 1.0f, 1.0f ); // 70 169 255
+	gEngfuncs.pTriAPI->Color4f( 0.275f, 0.663f, 1.0f, alpha ); // 70 169 255
 	GL_SelectTexture( 0 );
 	GL_Bind( 0, tex_background );
 	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
@@ -99,7 +102,7 @@ void CHealthbars::DrawCentralBar( void )
 	gEngfuncs.pTriAPI->End();
 
 	// draw the red health bar on top
-	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f ); // red is baked into texture for now
+	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, alpha ); // red is baked into texture for now
 	gEngfuncs.pTriAPI->CullFace( TRI_NONE );
 	GL_SelectTexture( 0 );
 	GL_Bind( 0, tex_bar );
@@ -135,7 +138,9 @@ void CHealthbars::DrawCentralBar( void )
 		buf++;
 	}
 
-	DrawString( (int)((ScreenWidth - width) * 0.5f), (ScreenHeight * 0.125f) - 15 - (gHUD.m_scrinfo.iCharHeight * 1.25f), MonsterName, 255, 255, 255 );
+	int r = 255, g = 255, b = 255;
+	ScaleColors( r, g, b, alpha * 255 );
+	DrawString( (int)((ScreenWidth - width) * 0.5f), (ScreenHeight * 0.125f) - 15 - (gHUD.m_scrinfo.iCharHeight * 1.25f), MonsterName, r, g, b );
 }
 
 int CHealthbars::Draw( float flTime )
