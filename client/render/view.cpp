@@ -166,7 +166,8 @@ cvar_t *r_flashlightlockposition;
 cvar_t *cl_crosshair;
 cvar_t *cl_useicon;
 cvar_t *cl_oldammohud;
-
+cvar_t *room_type;
+cvar_t *room_type_auto;
 cvar_t *r_blur;
 cvar_t *r_blur_threshold;
 cvar_t *r_blur_strength; // only horizontal blur
@@ -342,7 +343,7 @@ void V_Init( void )
 	r_speeds = CVAR_GET_POINTER( "r_speeds" );
 	gl_test = CVAR_GET_POINTER( "gl_test" );
 	gl_anisotropy = CVAR_GET_POINTER( "gl_anisotropy" );
-
+	room_type = CVAR_GET_POINTER( "room_type" );
 	r_novis = CVAR_GET_POINTER( "r_novis" );
 	r_nocull = CVAR_GET_POINTER( "r_nocull" );
 	r_nosort = CVAR_GET_POINTER( "gl_nosort" );
@@ -415,6 +416,7 @@ void V_Init( void )
 	r_flashlightlockposition = CVAR_REGISTER( "r_flashlightlockposition", "0", FCVAR_CHEAT );
 	gl_heateffect_force = CVAR_REGISTER( "gl_heateffect_force", "0", FCVAR_CHEAT );
 	gl_renderscale = CVAR_REGISTER( "gl_renderscale", "1.0", FCVAR_ARCHIVE );
+	room_type_auto = CVAR_REGISTER( "room_type_auto", "0", FCVAR_ARCHIVE );
 
 	// cubemaps
 	gEngfuncs.pfnAddCommand( "buildcubemaps", CL_BuildCubemaps_f );
@@ -526,6 +528,252 @@ float V_CalcNewBob( struct ref_params_s *pparams )  // diffusion hl2 bob
 
 	//NOTENOTE: We don't use this return value in our case (need to restructure the calculation function setup!)
 	return 0.0f;
+}
+
+//=================================================================================================
+// DSP_Automatic: an experiment to set room_type automatically based on room size
+//=================================================================================================
+void DSP_Automatic( void )
+{
+	static int current_room_type = 0;
+	
+	if( room_type_auto->value <= 0 )
+	{
+		// make sure to reset to default when turned off
+		if( current_room_type > 0 )
+		{
+			room_type->value = 0;
+			current_room_type = 0;
+		}
+		return;
+	}
+
+	const bool bDebug = (room_type_auto->value > 1);
+
+	// one trace per frame
+	Vector PlayerOrg = tr.viewparams.vieworg;
+	pmtrace_t LeftTrace, RightTrace, FrontTrace, BackTrace, UpTrace, DownTrace;
+	static int current_trace = 0;
+	static int RoomW = 0;
+	static int RoomL = 0;
+	static int RoomH = 0;
+	static bool Outdoors = false;
+	static bool bRoomReady = false;
+	static int LeftContents = 0;
+	static int RightContents = 0;
+	static int FrontContents = 0;
+	static int BackContents = 0;
+	static int UpContents = 0;
+	static int DownContents = 0;
+
+	// new map or DSP reset, check from the beginning
+	if( current_trace == 0 )
+	{
+		current_trace = 0;
+		RoomW = 0;
+		RoomL = 0;
+		RoomH = 0;
+		Outdoors = false;
+		LeftContents = 0;
+		RightContents = 0;
+		FrontContents = 0;
+		BackContents = 0;
+		UpContents = 0;
+		DownContents = 0;
+		bRoomReady = false;
+	}
+
+	// check all horizontal directions and upwards
+	Vector LeftTraceOrigin = PlayerOrg;		LeftTraceOrigin.x -= 10000;
+	Vector RightTraceOrigin = PlayerOrg;	RightTraceOrigin.x += 10000;
+	Vector FrontTraceOrigin = PlayerOrg;	FrontTraceOrigin.y -= 10000;
+	Vector BackTraceOrigin = PlayerOrg;		BackTraceOrigin.y += 10000;
+	Vector UpTraceOrigin = PlayerOrg;		UpTraceOrigin.z += 10000;
+	Vector DownTraceOrigin = PlayerOrg;		DownTraceOrigin.z -= 10000;
+
+	gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+	switch( current_trace )
+	{
+	case 0:
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, UpTraceOrigin, PM_WORLD_ONLY, -1, &UpTrace );
+		if( POINT_CONTENTS( UpTrace.endpos ) == CONTENTS_SKY )
+			Outdoors = true;
+		RoomH += (UpTrace.endpos - PlayerOrg).Length();
+		if( bDebug )
+		{
+			gEngfuncs.pEfxAPI->R_ParticleLine( (float *)PlayerOrg, (float *)UpTrace.endpos, 70, 169, 255, 0 );
+			CL_UTIL_Sparks( UpTrace.endpos );
+		}
+		current_trace++;
+		break;
+
+	case 1:
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, DownTraceOrigin, PM_WORLD_ONLY, -1, &DownTrace );
+		//	DownContents = POINT_CONTENTS( DownTrace.endpos );
+		RoomH += (DownTrace.endpos - PlayerOrg).Length();
+		if( bDebug )
+		{
+			gEngfuncs.pEfxAPI->R_ParticleLine( (float *)PlayerOrg, (float *)DownTrace.endpos, 70, 169, 255, 0 );
+			CL_UTIL_Sparks( DownTrace.endpos );
+		}
+		current_trace++;
+		break;
+
+	case 2:
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, LeftTraceOrigin, PM_WORLD_ONLY, -1, &LeftTrace );
+		//	LeftContents = POINT_CONTENTS( LeftTrace.endpos );
+		RoomW += (LeftTrace.endpos - PlayerOrg).Length();
+		if( bDebug )
+		{
+			gEngfuncs.pEfxAPI->R_ParticleLine( (float *)PlayerOrg, (float *)LeftTrace.endpos, 70, 169, 255, 0 );
+			CL_UTIL_Sparks( LeftTrace.endpos );
+		}
+		current_trace++;
+		break;
+
+	case 3:
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, RightTraceOrigin, PM_WORLD_ONLY, -1, &RightTrace );
+		//	RightContents = POINT_CONTENTS( RightTrace.endpos );
+		RoomW += (RightTrace.endpos - PlayerOrg).Length();
+		if( bDebug )
+		{
+			gEngfuncs.pEfxAPI->R_ParticleLine( (float *)PlayerOrg, (float *)RightTrace.endpos, 70, 169, 255, 0 );
+			CL_UTIL_Sparks( RightTrace.endpos );
+		}
+		current_trace++;
+		break;
+
+	case 4:
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, FrontTraceOrigin, PM_WORLD_ONLY, -1, &FrontTrace );
+		//	FrontContents = POINT_CONTENTS( FrontTrace.endpos );
+		RoomL += (FrontTrace.endpos - PlayerOrg).Length();
+		if( bDebug )
+		{
+			gEngfuncs.pEfxAPI->R_ParticleLine( (float *)PlayerOrg, (float *)FrontTrace.endpos, 70, 169, 255, 0 );
+			CL_UTIL_Sparks( FrontTrace.endpos );
+		}
+		current_trace++;
+		break;
+
+	case 5:
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, BackTraceOrigin, PM_WORLD_ONLY, -1, &BackTrace );
+		//	BackContents = POINT_CONTENTS( BackTrace.endpos );
+		RoomL += (BackTrace.endpos - PlayerOrg).Length();
+		if( bDebug )
+		{
+			gEngfuncs.pEfxAPI->R_ParticleLine( (float *)PlayerOrg, (float *)BackTrace.endpos, 70, 169, 255, 0 );
+			CL_UTIL_Sparks( BackTrace.endpos );
+		}
+		current_trace = 0; // reset trace sequence
+		bRoomReady = true; // room is now ready to change to new DSP
+		break;
+	}
+
+	if( bRoomReady )
+	{
+		// select desired room type
+		int new_room_type = 0;
+		if( Outdoors )
+		{
+			if( RoomW < 50 || RoomL < 50 )
+				new_room_type = 17; // Concrete Small
+			else if( RoomW < 500 || RoomL < 500 )
+				new_room_type = 18; // Concrete Medium
+			else
+				new_room_type = 22; // Big 3
+		}
+		else // check for room sizes
+		{
+			if( RoomH < 50 ) // vent
+			{
+				if( RoomW < 50 || RoomL < 50 )
+					new_room_type = 2; // Metal Small
+				else if( RoomW < 250 || RoomL < 250 )
+					new_room_type = 18; // Concrete Medium
+				else if( RoomW < 500 || RoomL < 500 )
+					new_room_type = 19; // Concrete Large
+			}
+			else if( RoomH < 160 ) // room
+			{
+				if( RoomW > 1000 || RoomL > 1000 )
+					new_room_type = 10; // Chamber Large
+				else if( RoomW > 600 || RoomL > 600 )
+					new_room_type = 9; // Chamber Medium
+				else
+					new_room_type = 8; // Chamber Small
+			}
+			else if( RoomH < 500 ) // tunnel
+			{
+				if( RoomW > 1400 || RoomL > 1400 )
+					new_room_type = 7; // Tunnel Large
+				else if( RoomW > 1000 || RoomL > 1000 )
+					new_room_type = 6; // Tunnel Medium
+				else
+					new_room_type = 5; // Tunnel Small
+			}
+			else if( RoomH < 1200 ) // cavern
+			{
+				if( RoomW > 2000 || RoomL > 2000 )
+					new_room_type = 25; // Cavern Large
+				else if( RoomW > 1000 || RoomL > 1000 )
+					new_room_type = 24; // Cavern Medium
+				else
+					new_room_type = 23; // Cavern Small
+			}
+			else // just a huge space
+			{
+				if( RoomW > 4000 || RoomL > 4000 )
+					new_room_type = 22; // Big 3
+				else if( RoomW > 2200 || RoomL > 2200 )
+					new_room_type = 21; // Big 2
+				else
+					new_room_type = 20; // Big 1
+			}
+		}
+
+		if( current_room_type != new_room_type )
+		{
+			room_type->value = new_room_type;
+			current_room_type = new_room_type;
+		}
+
+		if( bDebug )
+		{
+			const char *RoomTypes[29] =
+			{
+				"Normal (off)",		// (0) - The default, echo-less sound style.
+				"Generic",			// (1) - A slightly more closed in sound than default.
+				"Metal Small",		// (2) - Quite similar to Generic, with slightly more ring.
+				"Metal Medium",		// (3) - As above, but with slightly longer echo.
+				"Metal Large",		// (4) - As above, but with longer echo.
+				"Tunnel Small",		// (5) - A drawn out, tinny sound.
+				"Tunnel Medium",	// (6) - As above, by with more drawn out echo.
+				"Tunnel Large",		// (7) - As above, but with a very drawn out echo.
+				"Chamber Small",	// (8) - Similar to Generic, but with more echo.
+				"Chamber Medium",	// (9) - As above, but with slightly longer echo.
+				"Chamber Large",	// (10) - As above, but with a long echo.
+				"Bright Small",		// (11) - Very similar to Generic.
+				"Bright Medium",	// (12) - As above, but more open-sounding.
+				"Bright Large",		// (13) - As above, but more open-sounding.
+				"Water 1",			// (14) - A claustrophobic, muffled sound.
+				"Water 2",			// (15) - As above, but with an echo.
+				"Water 3",			// (16) - As above, but with a longer, ringing echo.
+				"Concrete Large",	// (17) - Similar to Generic, but with a short echo.
+				"Concrete Medium",	// (18) - As above, but with a longer echo.
+				"Concrete Large",	// (19) - As above, but with a longer echo.
+				"Big 1",			// (20) - An open sound with a spaced out, ringing echo.
+				"Big 2",			// (21) - As above, but with a longer-lingering echo.
+				"Big 3",			// (22) - As above, but with a much longer-lingering echo.
+				"Cavern Small",		// (23) - A closed in sound with a fast-ringing echo.
+				"Cavern Medium",	// (24) - As above, but with a longer-lingering echo.
+				"Cavern Large",		// (25) - As above, but with a much longer-lingering echo.
+				"Weirdo 1",			// (26) - Similar to Generic, but with a sharper sound.
+				"Weirdo 2",			// (27) - As above, but with a high, ringing echo.
+				"Weirdo 3",			// (28) - As above, but with a strange, high-pitched echo.
+			};
+			gEngfuncs.Con_NPrintf( 6, "ROOM (%s[%i]) W%i L%i H%i Sky? %s\n", RoomTypes[current_room_type], current_room_type, RoomW, RoomL, RoomH, Outdoors ? "Yes" : "No" );
+		}
+	}
 }
 
 extern cvar_t *cl_forwardspeed;
@@ -2143,6 +2391,7 @@ void V_CalcRefdef( struct ref_params_s *pparams )
 
 	PlayWallSlideSound( pparams );
 	PlayFlingWhooshSound( pparams );
+	DSP_Automatic();
 
 	// roll camera when in car
 	static float car_roll_ang = 0.0f;

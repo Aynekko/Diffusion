@@ -110,7 +110,8 @@ extern cvar_t *r_flashlightlockposition;
 extern cvar_t *cl_crosshair;
 extern cvar_t *cl_useicon;
 extern cvar_t *cl_oldammohud;
-
+extern cvar_t *room_type;
+extern cvar_t *room_type_auto;
 extern cvar_t *ui_is_active; // internal cvar
 extern cvar_t *ui_videooptions_active;
 extern cvar_t *cl_background;
