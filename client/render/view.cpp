@@ -1272,7 +1272,7 @@ void V_CalcViewModelLag( ref_params_t *pparams, Vector &origin, Vector &angles, 
 		gHUD.m_vecLastFacing += vDifference * (flSpeed * g_fFrametime);
 	// Make sure it doesn't grow out of control!!!
 	gHUD.m_vecLastFacing = gHUD.m_vecLastFacing.Normalize();
-	origin = origin + (vDifference * -1.0f) * flSpeed * 0.25;  // diffusion *0.25
+	origin += (vDifference * -1.0f) * flSpeed * 0.25;
 
 	// add subtle rolls
 	// ----------------------------------------------------
@@ -2206,15 +2206,6 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 
 	// Let the viewmodel shake at about 10% of the amplitude
 	ApplyShake( view->origin, view->angles, 0.9f );
-	/*
-		view->origin += pparams->forward * bob * 0.4f;
-		view->origin.z += bob;
-
-		view->angles[PITCH] -= bob * 0.3f;
-		view->angles[YAW] -= bob * 0.5f;
-		view->angles[ROLL] -= bob * 1.0f;
-		view->origin.z -= 1;
-	*/
 
 	//---------diffusion hl2 bob start
 	Vector forward, right;
@@ -2226,9 +2217,7 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	// Apply bob, but scaled down to 40%
 	if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN )
 	{
-		view->origin[0] = view->origin[0] - g_verticalBob * 0.1f * forward[0];
-		view->origin[1] = view->origin[1] - g_verticalBob * 0.1f * forward[1];
-		view->origin[2] = view->origin[2] - g_verticalBob * 0.1f * forward[2];
+		view->origin -= g_verticalBob * 0.1f * forward;
 		// Z bob a bit more
 		view->origin[2] -= g_verticalBob * 0.1f;
 		// bob the angles
@@ -2286,11 +2275,11 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	view->origin -= forward * GunPosXYCurrent + right * GunPosXYCurrent * 1.25f;
 
 	// and move the gun in the direction opposite to movement
-	float VelX = -pparams->simvel[0] * 0.004;
-	VelX = bound( 0, VelX, 1 );
+	float VelX = -pparams->simvel.x * 0.004f;
+	VelX = bound( -1, VelX, 1 );
 	view->origin.x += VelX;
-	float VelY = -pparams->simvel[1] * 0.004;
-	VelY = bound( 0, VelY, 1 );
+	float VelY = -pparams->simvel.y * 0.004f;
+	VelY = bound( -1, VelY, 1 );
 	view->origin.y += VelY;
 
 	// move weapon back if there's an obstacle
