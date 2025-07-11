@@ -1383,6 +1383,10 @@ END_DATADESC()
 
 int CSentry::ObjectCaps( void )
 { 
+	// only player turret is holdable (TODO: make a flag?)
+	if( !FClassnameIs( pev, "_playersentry" ) )
+		return BaseClass::ObjectCaps();
+	
 	int flags = 0;
 
 	if( pev->deadflag == DEAD_DEAD )
