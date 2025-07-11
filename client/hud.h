@@ -613,10 +613,10 @@ public:
 		MAX_ICONSPRITES = 4,
 	};
 
-	float x, y;
 	float TutorStartTime;
 	bool IsTutorDrawing;
-	bool x_direction; // false - right, true - left
+	float alpha;
+	bool alpha_direction; // false - alpha+, true - alpha-
 	void EnableTutorial( const char *pszTutorialName );
 	int CurrentImage;
 	void MessageDraw( client_textmessage_t *pMessage, int x, int y, bool GetSize = false );

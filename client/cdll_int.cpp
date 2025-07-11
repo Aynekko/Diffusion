@@ -329,9 +329,9 @@ int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 	if( bUseButton )
 	{
 		// currently drawing a tutor
-		if( gHUD.m_StatusIconsTutor.IsTutorDrawing && (gHUD.m_flTime > gHUD.m_StatusIconsTutor.TutorStartTime + 1) && !gHUD.m_StatusIconsTutor.x_direction )
+		if( gHUD.m_StatusIconsTutor.IsTutorDrawing && (gHUD.m_flTime > gHUD.m_StatusIconsTutor.TutorStartTime + 1) && !gHUD.m_StatusIconsTutor.alpha_direction )
 		{
-			gHUD.m_StatusIconsTutor.x_direction = true; // let's hide the tutor
+			gHUD.m_StatusIconsTutor.alpha_direction = true; // let's hide the tutor
 			return 0;
 		}
 

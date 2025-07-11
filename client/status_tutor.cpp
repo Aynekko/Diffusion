@@ -36,7 +36,7 @@ int CHudTutorial::VidInit( void )
 {
 	IsTutorDrawing = false;
 	TutorStartTime = 0;
-	x_direction = false;
+	alpha_direction = false;
 	CurrentImage = 0;
 	return 1;
 }
@@ -85,8 +85,8 @@ void CHudTutorial::EnableTutorial( const char *pszTutorialName )
 
 	TutorStartTime = gHUD.m_flTime;
 	IsTutorDrawing = true;
-	x_direction = false;
-	x = -600; // HACKHACK starting position
+	alpha_direction = false;
+	alpha = 0.f;
 
 	PlaySound( "misc/tutor.wav", 1.0 );
 
@@ -102,19 +102,22 @@ int CHudTutorial::Draw( float flTime )
 		return 0;
 
 	// set the coordinates
-	y = ScreenHeight * 0.25f;
+	const float x = 30;
+	const float y = ScreenHeight * 0.25f;
 
-	if( !x_direction ) // tutor is now showing
+	if( !alpha_direction ) // tutor is now showing
 	{
-		x = lerp( x, 30, 3 * g_fFrametime );
+		alpha = lerp( alpha, 1.2f, 0.5f * g_fFrametime );
+		if( alpha > 1.0f ) alpha = 1.0f;
 	}
 	else // tutor is hiding
 	{
-		x -= 200 * g_fFrametime;
+		alpha -= 2 * g_fFrametime;
 
 		// fully hidden, finish up
-		if( x < -600 )
+		if( alpha <= 0 )
 		{
+			alpha = 0;
 			IsTutorDrawing = false;
 			m_iFlags &= ~HUD_ACTIVE;
 			TutorStartTime = 0;
@@ -150,13 +153,13 @@ int CHudTutorial::Draw( float flTime )
 	}
 
 	// draw tutorial frame/background
-	FillRoundedRGBA( x, y, Twidth + (border * 2.0f), Theight + image_h + (border * 2.0f), 10.0f, Vector4D( 0.5f, 0.5f, 0.5f, 0.8f ) );
+	FillRoundedRGBA( x, y, Twidth + (border * 2.0f), Theight + image_h + (border * 2.0f), 10.0f, Vector4D( 0.5f, 0.5f, 0.5f, alpha * 0.8f ) );
 
 	// draw the image if present
 	if( CurrentImage != -1 )
 	{
 		GL_Bind( 0, CurrentImage );
-		GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+		GL_Color4f( 1.0f, 1.0f, 1.0f, alpha );
 		GL_Blend( GL_FALSE );
 		pglBegin( GL_QUADS );
 		DrawQuad( x + border, y + border, x + image_w, y + image_h );
@@ -240,8 +243,9 @@ void CHudTutorial::MessageDraw( client_textmessage_t *pMessage, int x, int y, bo
 			m_parms.text = (unsigned char)pLineStart[j];
 			int next = m_parms.x;
 
+			const int txt_a = alpha * 255;
 			if( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
-				next += TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, 255, 255, 255 );
+				next += TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, txt_a, txt_a, txt_a );
 			m_parms.x = next;
 		}
 
