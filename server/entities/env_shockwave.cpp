@@ -117,7 +117,7 @@ void CEnvShockwave::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 		vecPos.z += m_iHeight;
 
 	// blast circle
-	MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecPos );
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY, vecPos );
 		WRITE_BYTE( m_iType );
 		WRITE_COORD( vecPos.x );// coord coord coord (center position)
 		WRITE_COORD( vecPos.y );

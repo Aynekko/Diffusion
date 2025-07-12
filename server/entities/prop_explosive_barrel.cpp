@@ -244,7 +244,7 @@ void CExplosiveBarrel::Ignite(void)
 	EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "ambience/fire_burning.wav", 0.5, 1.5, SND_CHANGE_PITCH, 100);
 
 	Vector vecOrg = GetAbsOrigin();
-	MESSAGE_BEGIN(MSG_PVS, gmsgTempEnt, vecOrg);
+	MESSAGE_BEGIN(MSG_BROADCAST, gmsgTempEnt, vecOrg);
 	WRITE_BYTE(TE_FIRE);
 		WRITE_COORD(vecOrg.x + RANDOM_LONG(-10, 10));
 		WRITE_COORD(vecOrg.y + RANDOM_LONG(-10, 10));

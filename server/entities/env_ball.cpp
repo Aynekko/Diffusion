@@ -164,7 +164,7 @@ void CEnvBall::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 
 	if ( !HasSpawnFlags(ENVBALL_NOLIGHTEFFECTS) )
 	{
-		MESSAGE_BEGIN(MSG_PVS, gmsgTempEnt, pev->origin);
+		MESSAGE_BEGIN(MSG_BROADCAST, gmsgTempEnt, pev->origin);
 			WRITE_BYTE(TE_DLIGHT);
 			WRITE_COORD(pev->origin.x);	// X
 			WRITE_COORD(pev->origin.y);	// Y
@@ -434,7 +434,7 @@ void CEnvBallEntity::BounceTouch(CBaseEntity* pOther)
 
 		Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3; // pull out the templight a bit from the touched surface
 
-		MESSAGE_BEGIN(MSG_PVS, gmsgTempEnt, vecOrg);
+		MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
 			WRITE_BYTE(TE_DLIGHT);
 			WRITE_COORD(vecOrg.x);	// X
 			WRITE_COORD(vecOrg.y);	// Y
@@ -545,7 +545,7 @@ void CEnvBallEntity::Explode(void)
 		TraceResult tr = UTIL_GetGlobalTrace();
 		Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3;
 
-		MESSAGE_BEGIN(MSG_PVS, gmsgTempEnt, vecOrg);
+		MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
 		WRITE_BYTE(TE_DLIGHT);
 			WRITE_COORD(vecOrg.x);	// X
 			WRITE_COORD(vecOrg.y);	// Y
@@ -562,7 +562,7 @@ void CEnvBallEntity::Explode(void)
 	}
 
 	// blast effect
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY, pev->origin);
 		WRITE_BYTE(TE_BEAMCYLINDER);
 		WRITE_COORD(pev->origin.x);
 		WRITE_COORD(pev->origin.y);
@@ -717,7 +717,7 @@ void CEnvBallEntitySoldier::Spawn(void)
 	Bounced = 0; // haven't bounced yet
 
 	// light
-	MESSAGE_BEGIN(MSG_PVS, gmsgTempEnt, pev->origin);
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, pev->origin);
 		WRITE_BYTE(TE_DLIGHT);
 			WRITE_COORD(pev->origin.x);	// X
 			WRITE_COORD(pev->origin.y);	// Y
@@ -777,7 +777,7 @@ void CEnvBallEntitySoldier::BounceTouch(CBaseEntity* pOther)
 	TraceResult tr = UTIL_GetGlobalTrace();
 	Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3;
 
-	MESSAGE_BEGIN(MSG_PVS, gmsgTempEnt, vecOrg);
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
 	WRITE_BYTE(TE_DLIGHT);
 		WRITE_COORD(vecOrg.x);	// X
 		WRITE_COORD(vecOrg.y);	// Y
@@ -814,7 +814,7 @@ void CEnvBallEntitySoldier::Explode(void)
 	TraceResult tr = UTIL_GetGlobalTrace();
 	Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3;
 
-	MESSAGE_BEGIN(MSG_PVS, gmsgTempEnt, vecOrg);
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
 		WRITE_BYTE(TE_DLIGHT);
 		WRITE_COORD(vecOrg.x);	// X
 		WRITE_COORD(vecOrg.y);	// Y
@@ -830,7 +830,7 @@ void CEnvBallEntitySoldier::Explode(void)
 	MESSAGE_END();
 
 	// blast effect
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY, pev->origin);
 		WRITE_BYTE(TE_BEAMCYLINDER);
 		WRITE_COORD(pev->origin.x);
 		WRITE_COORD(pev->origin.y);
@@ -1012,7 +1012,7 @@ void CEnvBallEntityPlayer::BounceTouch(CBaseEntity* pOther)
 	TraceResult tr = UTIL_GetGlobalTrace();
 	Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3;
 
-	MESSAGE_BEGIN(MSG_PVS, gmsgTempEnt, vecOrg);
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
 		WRITE_BYTE(TE_DLIGHT);
 		WRITE_COORD(vecOrg.x);	// X
 		WRITE_COORD(vecOrg.y);	// Y
@@ -1202,7 +1202,7 @@ void CEnvBallEntityPlayer::Explode(void)
 	TraceResult tr = UTIL_GetGlobalTrace();
 	Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3;
 
-	MESSAGE_BEGIN(MSG_PVS, gmsgTempEnt, vecOrg);
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
 		WRITE_BYTE(TE_DLIGHT);
 		WRITE_COORD(vecOrg.x);	// X
 		WRITE_COORD(vecOrg.y);	// Y
@@ -1218,7 +1218,7 @@ void CEnvBallEntityPlayer::Explode(void)
 	MESSAGE_END();
 
 	// blast effect
-	MESSAGE_BEGIN(MSG_PVS, SVC_TEMPENTITY, pev->origin);
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY, pev->origin);
 		WRITE_BYTE(TE_BEAMCYLINDER);
 		WRITE_COORD(pev->origin.x);
 		WRITE_COORD(pev->origin.y);

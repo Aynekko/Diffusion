@@ -174,7 +174,7 @@ void CFlare::Ignite(void)
 	{
 		UTIL_Sparks(vecOrg);
 
-		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecOrg );
+		MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg );
 			WRITE_BYTE( TE_SMOKE );
 			WRITE_COORD( vecOrg.x );
 			WRITE_COORD( vecOrg.y );
