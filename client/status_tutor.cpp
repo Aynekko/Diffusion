@@ -160,7 +160,7 @@ int CHudTutorial::Draw( float flTime )
 	{
 		GL_Bind( 0, CurrentImage );
 		GL_Color4f( 1.0f, 1.0f, 1.0f, alpha );
-		GL_Blend( GL_FALSE );
+		GL_Blend( GL_TRUE );
 		pglBegin( GL_QUADS );
 		DrawQuad( x + border, y + border, x + image_w, y + image_h );
 		pglEnd();
