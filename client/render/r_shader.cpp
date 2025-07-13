@@ -2040,6 +2040,11 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 	{
 		GL_AddShaderDirective( options, "STUDIO_FULLBRIGHT" );
 	}
+	else if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) )
+	{
+		GL_AddShaderDirective( options, "STUDIO_FULLBRIGHT" );
+		GL_AddShaderDirective( options, "STUDIO_ADDITIVE" );
+	}
 	else
 	{
 		if( FBitSet( mat->flags, STUDIO_NF_FLATSHADE ))

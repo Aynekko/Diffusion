@@ -84,6 +84,12 @@ void main( void )
 {		
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
 
+#if defined( STUDIO_ADDITIVE )
+	// ignore black pixels of the texture
+	if( length( diffuse.rgb ) == 0.0 )
+		discard;
+#endif
+
 #if defined( ALPHA_RESCALING )
 	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
 #endif
@@ -278,6 +284,7 @@ void main( void )
 	diffuse.rgb += cubemap_reflection * fresnel * light_diffuse;
 #endif
 
+#if !defined( STUDIO_ADDITIVE )
 	// apply global fog
 	if( u_FogParams.w > 0.0 )
 	{
@@ -286,6 +293,7 @@ void main( void )
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );
 		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}
+#endif
 
 	// compute final color
 	gl_FragColor = vec4( diffuse.rgb, diffuse.a * u_RenderColor.a );
