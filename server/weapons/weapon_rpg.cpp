@@ -172,7 +172,7 @@ void CRpgRocket :: Spawn( void )
 
 	SetFlag(F_NOBACKCULL);
 
-	SetNextThink( 0.4 );
+	SetNextThink( 0.2 );
 
 	pev->dmg = 135;
 	
@@ -285,7 +285,7 @@ void CRpgRocket :: CreateTrail( void )
 		WRITE_SHORT(entindex());	// entity
 		WRITE_SHORT(m_iTrail );	// model
 		WRITE_BYTE( 40 ); // life
-		WRITE_BYTE( 5 );  // width
+		WRITE_BYTE( 3 );  // width
 		WRITE_BYTE( 224 );   // r, g, b
 		WRITE_BYTE( 224 );   // r, g, b
 		WRITE_BYTE( 255 );   // r, g, b
@@ -1075,6 +1075,8 @@ void CRpg::Precache( void )
 
 	PRECACHE_SOUND("weapons/rocketfire1.wav");
 	PRECACHE_SOUND("weapons/glauncher.wav"); // alternative fire sound
+	PRECACHE_SOUND( "weapons/rpg_draw.wav" );
+	PRECACHE_SOUND( "weapons/rpg_reload.wav" );
 }
 
 int CRpg::GetItemInfo(ItemInfo *p)
@@ -1178,7 +1180,7 @@ void CRpg::PrimaryAttack()
 
 			m_flNextPrimaryAttack = gpGlobals->time + 1.5;
 			m_flTimeWeaponIdle = gpGlobals->time + 1.5;
-			m_pPlayer->pev->punchangle.x -= 5;
+			m_pPlayer->pev->punchangle.x -= 12;
 		}
 	}
 	else

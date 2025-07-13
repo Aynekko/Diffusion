@@ -1281,6 +1281,7 @@ void GetMuzzleflashSprite( const cl_entity_t *e, int type, int &modelIndex, floa
 	case WEAPON_SHOTGUN:
 	case WEAPON_SHOTGUN_XM:
 	case WEAPON_SNIPER:
+	case WEAPON_RPG:
 		modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/muzzleflash2.spr" );
 		scale = 0.2f;
 	break;
