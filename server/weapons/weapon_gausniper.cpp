@@ -179,7 +179,7 @@ BOOL CGauss::Deploy( void )
 
 	UpdateHUD();
 
-	m_flNextPrimaryAttack = gpGlobals->time + DEFAULT_DEPLOY_TIME;
+	m_flNextPrimaryAttack = gpGlobals->time + 1.0f;
 
 	return DefaultDeploy( "models/weapons/v_gausniper.mdl", "models/weapons/p_gausniper.mdl", GAUSS_DRAW, "gauss" );
 }
