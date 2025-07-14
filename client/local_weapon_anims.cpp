@@ -414,6 +414,7 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 		if( Attack1 && localanim_AllowRpgShoot )
 		{
 			WeaponAnim( RPG_FIRE, 0 );
+			R_MakeWeaponShake( WEAPON_RPG, 0, true );
 			gEngfuncs.pEventAPI->EV_PlaySound( player->index, player->origin, CHAN_WEAPON, "weapons/rocketfire1.wav", VOL_NORM, 0.6, 0, RANDOM_LONG( 98, 103 ) );
 			localanim_AllowRpgShoot = false; // do not allow any more animations, until we catch reload or deploy
 		}

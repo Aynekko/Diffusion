@@ -172,7 +172,7 @@ void CRpgRocket :: Spawn( void )
 
 	SetFlag(F_NOBACKCULL);
 
-	SetNextThink( 0.2 );
+	SetNextThink( 0.25 );
 
 	pev->dmg = 135;
 	
@@ -1172,6 +1172,7 @@ void CRpg::PrimaryAttack()
 		//	EMIT_SOUND( m_pPlayer->edict(), CHAN_WEAPON, "weapons/rocketfire1.wav", 0.9, ATTN_NORM );
 		//	EMIT_SOUND( m_pPlayer->edict(), CHAN_ITEM, "weapons/glauncher.wav", 0.7, ATTN_NORM );
 			PlayClientSound( m_pPlayer, WEAPON_RPG );
+			MakeWeaponShake( m_pPlayer, WEAPON_RPG, 0 );
 
 			if( m_pPlayer->LoudWeaponsRestricted )
 				m_pPlayer->FireLoudWeaponRestrictionEntity();

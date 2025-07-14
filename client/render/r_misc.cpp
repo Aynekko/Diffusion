@@ -2676,6 +2676,11 @@ void R_MakeWeaponShake( int Weapon, int Mode, bool Override )
 		gHUD.shake.frequency = 100;
 		gHUD.shake.duration = 0.7;
 		break;
+	case WEAPON_RPG:
+		gHUD.shake.amplitude = 7;
+		gHUD.shake.frequency = 100;
+		gHUD.shake.duration = 0.5;
+		break;
 	default:
 		return;
 	}
