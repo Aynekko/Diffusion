@@ -2707,11 +2707,12 @@ float CStudioModelRenderer::StudioEstimateInterpolant( void )
 	return dadt;
 }*/
 
-float CStudioModelRenderer::StudioEstimateInterpolant( void )
+float CStudioModelRenderer::StudioEstimateInterpolant( float *dadt_blend )
 {
 	const cl_entity_t *e = RI->currententity;
 	double interval = g_fFrametime;	// monster think interval
 	float dadt = 1.0f;
+	*dadt_blend = 1.0f;
 
 	if( e->player )
 	{
@@ -2724,11 +2725,13 @@ float CStudioModelRenderer::StudioEstimateInterpolant( void )
 		}
 	}
 
-
 	if( !m_fShootDecal && (e->curstate.animtime >= e->latched.prevanimtime + 0.01f) )
 	{
 		dadt = (tr.time - e->curstate.animtime) / interval;
 		dadt = bound( 0.0f, dadt, 1.0f );
+
+		*dadt_blend = (tr.time - e->curstate.animtime) / 0.1;
+		*dadt_blend = bound( 0.0f, *dadt_blend, 1.0f );
 	}
 
 	return dadt;
@@ -3284,7 +3287,8 @@ void CStudioModelRenderer::StudioSetupBones( void )
 	pseqdesc = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + e->curstate.sequence;
 	float f = StudioEstimateFrame( pseqdesc );
 
-	float dadt = StudioEstimateInterpolant();
+	float dadt_blend;
+	float dadt = StudioEstimateInterpolant( &dadt_blend );
 
 	StudioInterpolatePoseParams( e, dadt );
 
@@ -3299,7 +3303,7 @@ void CStudioModelRenderer::StudioSetupBones( void )
 	}
 
 	cycle = f / m_boneSetup.LocalMaxFrame( e->curstate.sequence );
-	StudioInterpolateBlends( e, dadt );
+	StudioInterpolateBlends( e, dadt_blend );
 
 	m_boneSetup.InitPose( pos, q );
 	m_boneSetup.UpdateRealTime( tr.time );

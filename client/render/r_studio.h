@@ -271,7 +271,7 @@ private:
 	virtual void StudioMergeBones ( matrix3x4 bones[], matrix3x4 cached_bones[], model_t *pModel, model_t *pParentModel );
 
 	// Determine interpolation fraction
-	virtual float StudioEstimateInterpolant( void );
+	virtual float StudioEstimateInterpolant( float *dadt_blend );
 
 	// Determine current gaitframe for rendering
 	virtual float StudioEstimateGaitFrame ( mstudioseqdesc_t *pseqdesc );
