@@ -1182,6 +1182,11 @@ void CRpg::PrimaryAttack()
 			m_flNextPrimaryAttack = gpGlobals->time + 1.5;
 			m_flTimeWeaponIdle = gpGlobals->time + 1.5;
 			m_pPlayer->pev->punchangle.x -= 12;
+
+			// push player back
+			Vector vPlayerVel = m_pPlayer->GetAbsVelocity();
+			vPlayerVel -= gpGlobals->v_forward * 150;
+			m_pPlayer->SetAbsVelocity( vPlayerVel );
 		}
 	}
 	else
@@ -1225,15 +1230,16 @@ void CRpg::Reload( void )
 	//
 	// Set the next attack time into the future so that WeaponIdle will get called more often
 	// than reload, allowing the RPG LTD to be updated
-	
-	m_flNextPrimaryAttack = gpGlobals->time + RPG_RELOAD_TIME;
 
 	if ( m_cActiveRockets > 0 && m_bSpotActive )
 	{
 		// no reloading when there are active missiles tracking the designator.
 		// ward off future autoreload attempts by setting next attack time into the future for a bit. 
+		m_flNextPrimaryAttack = gpGlobals->time + 0.25f;
 		return;
 	}
+
+	m_flNextPrimaryAttack = gpGlobals->time + RPG_RELOAD_TIME;
 
 	if( m_pSpot && m_bSpotActive )
 	{
