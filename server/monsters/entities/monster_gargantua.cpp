@@ -105,6 +105,7 @@ public:
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	void ClearEffects(void);
+	int IgnoreConditions( void );
 
 	// somewhere around his guns, otherwise he will shoot walls
 	// BUGBUG setting pev->view_ofs in Spawn does NOT work!
@@ -373,6 +374,8 @@ void CGargantua :: Spawn()
 	m_flDistTooFar = 1000;
 
 	ShootAttachment = false;
+
+	Remember( bits_MEMORY_FLINCHED ); // !!! don't flinch
 }
 
 
@@ -920,6 +923,16 @@ CBaseEntity* CGargantua::GargantuaCheckTraceHullAttack(float flDist, int iDamage
 	return NULL;
 }
 
+int CGargantua::IgnoreConditions( void )
+{
+	int ic = 0;
+
+	// ignore damage or new enemies when shooting at someone
+	if( m_pSchedule && (FStrEq( m_pSchedule->pName, "Range Attack1" ) || FStrEq( m_pSchedule->pName, "Range Attack2" )) )
+		ic |= (bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE | bits_COND_NEW_ENEMY);
+	
+	return CBaseMonster::IgnoreConditions() | ic;
+}
 
 Schedule_t *CGargantua::GetScheduleOfType( int Type )
 {

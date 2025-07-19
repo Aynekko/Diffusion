@@ -2269,6 +2269,7 @@ void CDrone :: Spawn()
 
 	snd_pitch = 100;
 	AlertSoundTime = 0;
+	Remember( bits_MEMORY_FLINCHED ); // !!! don't flinch
 }
 
 //=========================================================
@@ -3281,6 +3282,7 @@ void CDroneAlien :: Spawn()
 
 	snd_pitch = 100;
 	AlertSoundTime = 0;
+	Remember( bits_MEMORY_FLINCHED ); // !!! don't flinch
 }
 
 //=========================================================
@@ -3909,6 +3911,7 @@ void CAlienShip :: Spawn()
 	m_flDistLook = 6000;
 	m_afCapability &= ~bits_CAP_CANSEEFLASHLIGHT;
 	HealthBarType = 2;
+	Remember( bits_MEMORY_FLINCHED ); // !!! don't flinch
 }
 
 //=========================================================

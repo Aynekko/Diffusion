@@ -256,16 +256,12 @@ void CBaseMonster :: MaintainSchedule ( void )
 		}
 
 		if ( m_iTaskStatus == TASKSTATUS_NEW )
-		{	
+		{
 			Task_t *pTask = GetTask();
 			ASSERT( pTask != NULL );
 			TaskBegin();
 			StartTask( pTask );
 		}
-
-		// UNDONE: Twice?!!!
-		if ( m_Activity != m_IdealActivity )
-			SetActivity ( m_IdealActivity );
 		
 		if ( !TaskIsComplete() && m_iTaskStatus != TASKSTATUS_NEW )
 			break;
