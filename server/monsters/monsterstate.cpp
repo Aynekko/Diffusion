@@ -65,6 +65,9 @@ void CBaseMonster :: RunAI ( void )
 {
 	// to test model's eye height
 //	UTIL_ParticleEffect ( EyePosition(), g_vecZero, 255, 10 );
+
+	// filter conditions.
+	ClearConditions( IgnoreConditions() );
 	
 	if( gpGlobals->time > NextUpdateTime )
 	{
@@ -104,9 +107,6 @@ void CBaseMonster :: RunAI ( void )
 					else if( HasConditions( bits_COND_LOW_HEALTH ) && (pev->health > (pev->max_health * 0.25f)) )
 						ClearConditions( bits_COND_LOW_HEALTH ); // regenerated? clear condition
 				}
-
-				// now filter conditions.
-				ClearConditions( IgnoreConditions() );
 
 				GetEnemy();
 			}
