@@ -121,6 +121,8 @@ BEGIN_DATADESC( CBaseMonster )
 	DEFINE_KEYFIELD( m_iTriggerCondition2, FIELD_INTEGER, "TriggerCondition2" ),
 	DEFINE_KEYFIELD( m_iTriggerCondition3, FIELD_INTEGER, "TriggerCondition3" ),
 	DEFINE_KEYFIELD( m_iszTriggerTarget, FIELD_STRING, "TriggerTarget" ),
+	DEFINE_KEYFIELD( m_iszTriggerTarget2, FIELD_STRING, "TriggerTarget2" ),
+	DEFINE_KEYFIELD( m_iszTriggerTarget3, FIELD_STRING, "TriggerTarget3" ),
 	DEFINE_FIELD( m_HackedGunPos, FIELD_VECTOR ),
 	DEFINE_FIELD( m_scriptState, FIELD_INTEGER ),
 	DEFINE_FIELD( m_pCine, FIELD_CLASSPTR ),
@@ -3360,6 +3362,16 @@ void CBaseMonster :: KeyValue( KeyValueData *pkvd )
 		m_iszTriggerTarget = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerTarget2" ) )
+	{
+		m_iszTriggerTarget2 = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "TriggerTarget3" ) )
+	{
+		m_iszTriggerTarget3 = ALLOC_STRING( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else if (FStrEq(pkvd->szKeyName, "TriggerCondition") )
 	{
 		m_iTriggerCondition = Q_atoi( pkvd->szValue );
@@ -3441,28 +3453,28 @@ void CBaseMonster :: KeyValue( KeyValueData *pkvd )
 //=========================================================
 BOOL CBaseMonster :: FCheckAITrigger ( void )
 {
-	BOOL fFireTarget;
-
 	if ( (m_iTriggerCondition == AITRIGGER_NONE) && (m_iTriggerCondition2 == AITRIGGER_NONE) && (m_iTriggerCondition3 == AITRIGGER_NONE))
 	{
 		// no conditions, so this trigger is never fired.
 		return FALSE; 
 	}
 
-	fFireTarget = FALSE;
+	bool bFireTarget = false;
+	bool bFireTarget2 = false;
+	bool bFireTarget3 = false;
 
 	switch ( m_iTriggerCondition )
 	{
 	case AITRIGGER_SEEPLAYER_ANGRY_AT_PLAYER:
 		if ( m_hEnemy != NULL && m_hEnemy->IsPlayer() && HasConditions ( bits_COND_SEE_ENEMY ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget = true;
 		}
 		break;
 	case AITRIGGER_SEEPLAYER_UNCONDITIONAL:
 		if ( HasConditions ( bits_COND_SEE_CLIENT ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget = true;
 		}
 		break;
 	case AITRIGGER_SEEPLAYER_NOT_IN_COMBAT:
@@ -3471,25 +3483,25 @@ BOOL CBaseMonster :: FCheckAITrigger ( void )
 			 m_MonsterState != MONSTERSTATE_PRONE	&& 
 			 m_MonsterState != MONSTERSTATE_SCRIPT)
 		{
-			fFireTarget = TRUE;
+			bFireTarget = true;
 		}
 		break;
 	case AITRIGGER_TAKEDAMAGE:
 		if ( m_afConditions & ( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget = true;
 		}
 		break;
 	case AITRIGGER_DEATH:
 		if ( pev->deadflag != DEAD_NO )
 		{
-			fFireTarget = TRUE;
+			bFireTarget = true;
 		}
 		break;
 	case AITRIGGER_HALFHEALTH:
 		if ( IsAlive() && pev->health <= ( pev->max_health / 2 ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget = true;
 		}
 		break;
 /*
@@ -3504,19 +3516,19 @@ BOOL CBaseMonster :: FCheckAITrigger ( void )
 	case AITRIGGER_HEARWORLD:
 		if ( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_WORLD )
 		{
-			fFireTarget = TRUE;
+			bFireTarget = true;
 		}
 		break;
 	case AITRIGGER_HEARPLAYER:
 		if ( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_PLAYER )
 		{
-			fFireTarget = TRUE;
+			bFireTarget = true;
 		}
 		break;
 	case AITRIGGER_HEARCOMBAT:
 		if ( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_COMBAT )
 		{
-			fFireTarget = TRUE;
+			bFireTarget = true;
 		}
 		break;
 	}
@@ -3528,13 +3540,13 @@ BOOL CBaseMonster :: FCheckAITrigger ( void )
 	case AITRIGGER_SEEPLAYER_ANGRY_AT_PLAYER:
 		if ( m_hEnemy != NULL && m_hEnemy->IsPlayer() && HasConditions ( bits_COND_SEE_ENEMY ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget2 = true;
 		}
 		break;
 	case AITRIGGER_SEEPLAYER_UNCONDITIONAL:
 		if ( HasConditions ( bits_COND_SEE_CLIENT ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget2 = true;
 		}
 		break;
 	case AITRIGGER_SEEPLAYER_NOT_IN_COMBAT:
@@ -3543,52 +3555,43 @@ BOOL CBaseMonster :: FCheckAITrigger ( void )
 			 m_MonsterState != MONSTERSTATE_PRONE	&& 
 			 m_MonsterState != MONSTERSTATE_SCRIPT)
 		{
-			fFireTarget = TRUE;
+			bFireTarget2 = true;
 		}
 		break;
 	case AITRIGGER_TAKEDAMAGE:
 		if ( m_afConditions & ( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget2 = true;
 		}
 		break;
 	case AITRIGGER_DEATH:
 		if ( pev->deadflag != DEAD_NO )
 		{
-			fFireTarget = TRUE;
+			bFireTarget2 = true;
 		}
 		break;
 	case AITRIGGER_HALFHEALTH:
 		if ( IsAlive() && pev->health <= ( pev->max_health / 2 ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget2 = true;
 		}
 		break;
-/*
-
-  // !!!UNDONE - no persistant game state that allows us to track these two. 
-
-	case AITRIGGER_SQUADMEMBERDIE:
-		break;
-	case AITRIGGER_SQUADLEADERDIE:
-		break;
-*/
 	case AITRIGGER_HEARWORLD:
 		if ( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_WORLD )
 		{
-			fFireTarget = TRUE;
+			bFireTarget2 = true;
 		}
 		break;
 	case AITRIGGER_HEARPLAYER:
 		if ( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_PLAYER )
 		{
-			fFireTarget = TRUE;
+			bFireTarget2 = true;
 		}
 		break;
 	case AITRIGGER_HEARCOMBAT:
 		if ( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_COMBAT )
 		{
-			fFireTarget = TRUE;
+			bFireTarget2 = true;
 		}
 		break;
 	}
@@ -3598,13 +3601,13 @@ BOOL CBaseMonster :: FCheckAITrigger ( void )
 	case AITRIGGER_SEEPLAYER_ANGRY_AT_PLAYER:
 		if ( m_hEnemy != NULL && m_hEnemy->IsPlayer() && HasConditions ( bits_COND_SEE_ENEMY ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget3 = true;
 		}
 		break;
 	case AITRIGGER_SEEPLAYER_UNCONDITIONAL:
 		if ( HasConditions ( bits_COND_SEE_CLIENT ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget3 = true;
 		}
 		break;
 	case AITRIGGER_SEEPLAYER_NOT_IN_COMBAT:
@@ -3613,57 +3616,48 @@ BOOL CBaseMonster :: FCheckAITrigger ( void )
 			 m_MonsterState != MONSTERSTATE_PRONE	&& 
 			 m_MonsterState != MONSTERSTATE_SCRIPT)
 		{
-			fFireTarget = TRUE;
+			bFireTarget3 = true;
 		}
 		break;
 	case AITRIGGER_TAKEDAMAGE:
 		if ( m_afConditions & ( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget3 = true;
 		}
 		break;
 	case AITRIGGER_DEATH:
 		if ( pev->deadflag != DEAD_NO )
 		{
-			fFireTarget = TRUE;
+			bFireTarget3 = true;
 		}
 		break;
 	case AITRIGGER_HALFHEALTH:
 		if ( IsAlive() && pev->health <= ( pev->max_health / 2 ) )
 		{
-			fFireTarget = TRUE;
+			bFireTarget3 = true;
 		}
 		break;
-/*
-
-  // !!!UNDONE - no persistant game state that allows us to track these two. 
-
-	case AITRIGGER_SQUADMEMBERDIE:
-		break;
-	case AITRIGGER_SQUADLEADERDIE:
-		break;
-*/
 	case AITRIGGER_HEARWORLD:
 		if ( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_WORLD )
 		{
-			fFireTarget = TRUE;
+			bFireTarget3 = true;
 		}
 		break;
 	case AITRIGGER_HEARPLAYER:
 		if ( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_PLAYER )
 		{
-			fFireTarget = TRUE;
+			bFireTarget3 = true;
 		}
 		break;
 	case AITRIGGER_HEARCOMBAT:
 		if ( m_afConditions & bits_COND_HEAR_SOUND && m_afSoundTypes & bits_SOUND_COMBAT )
 		{
-			fFireTarget = TRUE;
+			bFireTarget3 = true;
 		}
 		break;
 	}
 
-	if ( fFireTarget )
+	if ( bFireTarget )
 	{
 		// fire the target, then set the trigger conditions to NONE so we don't fire again
 		// diffusion - clear other conditions too
@@ -3671,10 +3665,30 @@ BOOL CBaseMonster :: FCheckAITrigger ( void )
 		ALERT ( at_aiconsole, "AI Trigger Fire Target\n" );
 		UTIL_FireTargets( STRING( m_iszTriggerTarget ), this, this, USE_TOGGLE, 0 );
 		m_iTriggerCondition = AITRIGGER_NONE;
-		m_iTriggerCondition2 = AITRIGGER_NONE;
-		m_iTriggerCondition3 = AITRIGGER_NONE;
-		return TRUE;
 	}
+
+	if( bFireTarget2 )
+	{
+		// fire the target, then set the trigger conditions to NONE so we don't fire again
+		// diffusion - clear other conditions too
+		// UNDONE - separate targets for each condition, maybe?
+		ALERT( at_aiconsole, "AI Trigger Fire Target 2\n" );
+		UTIL_FireTargets( STRING( m_iszTriggerTarget2 ), this, this, USE_TOGGLE, 0 );
+		m_iTriggerCondition2 = AITRIGGER_NONE;
+	}
+
+	if( bFireTarget3 )
+	{
+		// fire the target, then set the trigger conditions to NONE so we don't fire again
+		// diffusion - clear other conditions too
+		// UNDONE - separate targets for each condition, maybe?
+		ALERT( at_aiconsole, "AI Trigger Fire Target 3\n" );
+		UTIL_FireTargets( STRING( m_iszTriggerTarget3 ), this, this, USE_TOGGLE, 0 );
+		m_iTriggerCondition3 = AITRIGGER_NONE;
+	}
+
+	if( bFireTarget || bFireTarget2 || bFireTarget3 )
+		return TRUE;
 
 	return FALSE;
 }

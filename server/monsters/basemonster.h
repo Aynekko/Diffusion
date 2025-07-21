@@ -108,7 +108,9 @@ public:
 	int		m_iTriggerCondition;// for scripted AI, this is the condition that will cause the activation of the monster's TriggerTarget
 	int		m_iTriggerCondition2;
 	int		m_iTriggerCondition3;
-	string_t		m_iszTriggerTarget;// name of target that should be fired. 
+	string_t m_iszTriggerTarget; // name of target that should be fired.
+	string_t m_iszTriggerTarget2;
+	string_t m_iszTriggerTarget3;
 
 	Vector		m_HackedGunPos;	// HACK until we can query end of gun
 

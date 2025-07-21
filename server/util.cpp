@@ -939,7 +939,10 @@ CBaseEntity *UTIL_FindEntityByMonsterTarget( CBaseEntity *pStartEntity, const ch
 		if( !pMonster )
 			continue;
 
-		if( !Q_strcmp( szName, STRING( pMonster->m_iszTriggerTarget )) )
+		if( !Q_strcmp( szName, STRING( pMonster->m_iszTriggerTarget )) 
+			|| !Q_strcmp( szName, STRING( pMonster->m_iszTriggerTarget2 ) ) 
+			|| !Q_strcmp( szName, STRING( pMonster->m_iszTriggerTarget3 ) ) 
+			)
 			return pMonster;
 	}
 

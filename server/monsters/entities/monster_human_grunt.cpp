@@ -2816,6 +2816,8 @@ void CHGruntRepel::Use ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE
 	pGrunt->m_iTriggerCondition2 = m_iTriggerCondition2;
 	pGrunt->m_iTriggerCondition3 = m_iTriggerCondition3;
 	pGrunt->m_iszTriggerTarget = m_iszTriggerTarget;
+	pGrunt->m_iszTriggerTarget2 = m_iszTriggerTarget2;
+	pGrunt->m_iszTriggerTarget3 = m_iszTriggerTarget3;
 
 	CBeam *pBeam = CBeam::BeamCreate( "sprites/rope.spr", 10 );
 	pBeam->PointEntInit( GetAbsOrigin() + Vector( 0, 0, 112 ), pGrunt->entindex() );
