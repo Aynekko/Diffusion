@@ -74,6 +74,7 @@ typedef struct material_s
 	float PlanarReflectScale;
 	int FoliageSwayHeight;
 	bool ApplyColor;
+	bool fullbright;
 	unsigned short gl_colormask_id;
 	unsigned short gl_blendtex_id; // can mix diffuse and this using fuser2 (0-1)
 	float Fresnel;

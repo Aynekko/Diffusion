@@ -81,6 +81,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 	tr.materials[texnum].animation_id = -1;
 	tr.materials[texnum].drone_view = false;
 	tr.materials[texnum].monitor = false;
+	tr.materials[texnum].fullbright = false;
 
 	tr.materials[texnum].gl_normalmap_id = 0;
 	tr.materials[texnum].gl_interiormap_id = 0;
@@ -220,6 +221,20 @@ void LoadMaterialSettingsForTexture( int texnum )
 				flValue = Q_atoi( token );
 				if( flValue > 0 )
 					tr.materials[texnum].TwoSided = true;
+			}
+			else
+			{
+				Error = true;
+				break;
+			}
+		}
+		else if( !Q_stricmp( token, "Fullbright" ) )
+		{
+			// parse value for this setting
+			afile = COM_ParseLine( afile, token );
+			if( afile && token[0] > 0 )
+			{
+				tr.materials[texnum].fullbright = (Q_atoi( token ) > 0);
 			}
 			else
 			{
@@ -464,6 +479,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 			if( afile && token[0] > 0 )
 			{
 				tr.materials[texnum].monitor = true;
+				tr.materials[texnum].fullbright = true;
 			}
 			else
 			{

@@ -1586,6 +1586,9 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	if( /*FBitSet( s->flags, SURF_WATER ) || */translucent )
 		fullBright = true;
 
+	if( tr.materials[tx->gl_texturenum].fullbright )
+		fullBright = true;
+
 	if( RI->currententity ) // diffusion
 	{
 		if( (RI->currententity->curstate.renderfx == kRenderFxFullbright) || (RI->currententity->curstate.renderfx == kRenderFxFullbrightNoShadows) )
@@ -2011,7 +2014,7 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 	bool texAlphaToCoverage = FBitSet( mat->flags, STUDIO_NF_ALPHATOCOVERAGE ) ? true : false;
 	bool usingAlphaBlend = texTransparent && FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) && !texAlphaToCoverage;
 
-	if( tr.materials[mat->gl_diffuse_id].monitor )
+	if( tr.materials[mat->gl_diffuse_id].fullbright ) // .monitor automatically sets this too
 		fullbright = true;
 
 	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransTexture )
@@ -2040,9 +2043,9 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 	{
 		GL_AddShaderDirective( options, "STUDIO_FULLBRIGHT" );
 	}
-	else if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) )
+
+	if( FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) )
 	{
-		GL_AddShaderDirective( options, "STUDIO_FULLBRIGHT" );
 		GL_AddShaderDirective( options, "STUDIO_ADDITIVE" );
 	}
 	else
