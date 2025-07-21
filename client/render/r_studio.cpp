@@ -5084,7 +5084,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 	// sorting list to reduce shader switches
 	if( !CVAR_TO_BOOL( r_nosort ) )
 		// QSortStudioMeshes( m_LightMeshes, 0, m_nNumLightMeshes - 1 );
-		std::sort( m_LightMeshes, m_LightMeshes + m_nNumLightMeshes - 1, SortSolidMeshes );
+		std::sort( m_LightMeshes, m_LightMeshes + m_nNumLightMeshes, SortSolidMeshes );
 
 	m_pModelInstance = &m_ModelInstances[RI->currententity->modelhandle];
 
@@ -5392,11 +5392,11 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	if( !CVAR_TO_BOOL( r_nosort ) )
 	{
 	//	QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
-		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes - 1, SortSolidMeshes );
+		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes, SortSolidMeshes );
 		// then push additive meshes to be the last to draw
-		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes - 1, SortSolidMeshesByAdditive );
+		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes, SortSolidMeshesByAdditive );
 	}
-
+	
 	// sorting list to reduce shader switches
 	for( i = 0; i < m_nNumDrawMeshes; i++ )
 	{
@@ -5703,7 +5703,7 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 	// sorting list to reduce shader switches
 	if( !CVAR_TO_BOOL( r_nosort ) ) 
 //		QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
-		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes - 1, SortSolidMeshes );
+		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes, SortSolidMeshes );
 
 	// sorting list to reduce shader switches
 	for( i = 0; i < m_nNumDrawMeshes; i++ )
