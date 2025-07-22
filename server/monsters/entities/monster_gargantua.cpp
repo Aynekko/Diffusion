@@ -454,7 +454,7 @@ void CGargantua :: RunAI( void )
 	{
 		// turn to face the desired enemy at all times
 		Vector ang = GetAbsAngles();
-		Vector vectoenemy = m_hEnemy->GetAbsOrigin() - GetAbsOrigin();
+		Vector vectoenemy = m_vecEnemyLKP - GetAbsOrigin();
 		float yaw = VecToYaw( vectoenemy ) - ang.y;
 
 		if( yaw > 180 ) yaw -= 360;
@@ -600,6 +600,17 @@ void CGargantua::RocketAttack(void)
 	UTIL_MakeVectors( GetAbsAngles() );
 	Vector vecStart = vecGunPos + gpGlobals->v_forward * 35;
 	Vector vecAim = ShootAtEnemy( vecStart );
+
+	bool shoot_under_feet = false;
+	if( m_hEnemy != NULL && (m_hEnemy->pev->flags & FL_ONGROUND) )
+		shoot_under_feet = true;
+
+	if( m_vecEnemyLKP.z > vecStart.z )
+		shoot_under_feet = false;
+
+	if( shoot_under_feet )
+		vecAim.z *= 1.5f;
+
 	vecGunAngles = UTIL_VecToAngles( vecAim );
 
 	CBaseMonster *pRocket = (CBaseMonster*)Create( "robo_rocket2", vecStart, vecGunAngles, edict() );
@@ -608,7 +619,6 @@ void CGargantua::RocketAttack(void)
 	{
 	//	if( m_hEnemy != NULL ) // disable auto-following, it's too hard!
 	//		pRocket->m_hEnemy = m_hEnemy;
-		pRocket->SetAbsVelocity( vecAim * 100 );
 	}
 
 	Vector angles;
