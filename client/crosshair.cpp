@@ -144,34 +144,37 @@ int CHudCrosshairStatic::Draw( float flTime )
 			break;
 		}
 
-		ScaleColors( r, g, b, HMTransparency );
-		SPR_Set( m_HM.spr, r, g, b );
-		SPR_DrawAdditive( 0, x, y, &m_HM.rc );
-		if( HMTransparency <= 0 )
-			EnableHitMarker = false;
-
-		// also draw the amount of damage
-		if( DamageDealt > 0 && cl_showdamage->value > 0 )
+		if( HMTransparency > 0.0f )
 		{
-			static int width = 0;
-			if( DamageDealt != TempDamageDealt )
+			ScaleColors( r, g, b, HMTransparency );
+			SPR_Set( m_HM.spr, r, g, b );
+			SPR_DrawAdditive( 0, x, y, &m_HM.rc );
+
+			// also draw the amount of damage
+			if( DamageDealt > 0 && cl_showdamage->value > 0 )
 			{
-				_snprintf_s( dmg, sizeof( dmg ), "%d", DamageDealt );
-				// calculate width to align center...
-				const char *buf;
-				width = 0;
-				buf = dmg;
-				while( *buf )
+				int width = 0;
+				if( DamageDealt != TempDamageDealt )
 				{
-					width += gHUD.m_scrinfo.charWidths[*buf];
-					buf++;
+					_snprintf_s( dmg, sizeof( dmg ), "%d", DamageDealt );
+					// calculate width to align center...
+					const char *buf;
+					width = 0;
+					buf = dmg;
+					while( *buf )
+					{
+						width += gHUD.m_scrinfo.charWidths[*buf];
+						buf++;
+					}
+
+					TempDamageDealt = DamageDealt; // cache to avoid doing text trickery every frame
 				}
 
-				TempDamageDealt = DamageDealt; // cache to avoid doing text trickery every frame
+				DrawString( (int)((ScreenWidth - width) * 0.5f), y - 10, dmg, r, g, b );
 			}
-
-			DrawString( (int)((ScreenWidth - width) * 0.5f), y - 10, dmg, r, g, b );
 		}
+		else
+			EnableHitMarker = false;
 	}
 	
 	if(( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WPNS | HIDEHUD_ALL | HIDEHUD_HEALTH | HIDEHUD_WPNS_HOLDABLEITEM | HIDEHUD_WPNS_CUSTOM)))
