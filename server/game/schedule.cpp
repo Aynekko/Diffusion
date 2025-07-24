@@ -262,6 +262,10 @@ void CBaseMonster :: MaintainSchedule ( void )
 			TaskBegin();
 			StartTask( pTask );
 		}
+
+		// UNDONE: Twice?!!!
+		if( m_Activity != m_IdealActivity )
+			SetActivity( m_IdealActivity );
 		
 		if ( !TaskIsComplete() && m_iTaskStatus != TASKSTATUS_NEW )
 			break;
