@@ -121,6 +121,7 @@ void CStudioModelRenderer::Init( void )
 	m_pCvarCompatible = CVAR_REGISTER( "r_studio_compatible", "1", FCVAR_ARCHIVE );
 	m_pCvarLodScale = CVAR_REGISTER( "cl_lod_scale", "5.0", FCVAR_ARCHIVE );
 	m_pCvarLodBias = CVAR_REGISTER( "cl_lod_bias", "0", FCVAR_ARCHIVE );
+	m_pCvarLod = CVAR_REGISTER( "cl_lod_enable", "0", FCVAR_ARCHIVE );
 
 	m_pChromeSprite = IEngineStudio.GetChromeSprite();
 	m_chromeCount = 0;
@@ -2429,21 +2430,24 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 	if( m_pCurrentEntity->curstate.effects & EF_ROTATING )
 		FuncRotatingClient( m_pCurrentEntity );
 
-	const float lodDist = (origin - RI->vieworg).Length() * tr.lodScale;
-	const float radius = Q_max( m_pModelInstance->radius, 1.0f ); // to avoid division by zero
-	int lodnum = (int)(lodDist / radius);
-	const int numLods = m_pModelInstance->numlods;
-
-	if( CVAR_TO_BOOL( m_pCvarLodScale ) )
-		lodnum /= (int)fabs( m_pCvarLodScale->value );
-	if( CVAR_TO_BOOL( m_pCvarLodBias ) )
-		lodnum += (int)fabs( m_pCvarLodBias->value );
-
-	// apply lodnum to model
-	if( numLods > 0 )
+	if( CVAR_TO_BOOL( m_pCvarLod ) )
 	{
-		// set derived LOD
-		m_pCurrentEntity->curstate.body = Q_min( lodnum, numLods - 1 );
+		const float lodDist = (origin - RI->vieworg).Length() * tr.lodScale;
+		const float radius = Q_max( m_pModelInstance->radius, 1.0f ); // to avoid division by zero
+		int lodnum = (int)(lodDist / radius);
+		const int numLods = m_pModelInstance->numlods;
+
+		if( CVAR_TO_BOOL( m_pCvarLodScale ) )
+			lodnum /= (int)fabs( m_pCvarLodScale->value );
+		if( CVAR_TO_BOOL( m_pCvarLodBias ) )
+			lodnum += (int)fabs( m_pCvarLodBias->value );
+
+		// apply lodnum to model
+		if( numLods > 0 )
+		{
+			// set derived LOD
+			m_pCurrentEntity->curstate.body = Q_min( lodnum, numLods - 1 );
+		}
 	}
 
 	if( m_pPlayerInfo )

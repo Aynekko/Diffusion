@@ -605,6 +605,7 @@ private:
 	cvar_t			*m_pCvarViewmodelFov;
 	cvar_t			*m_pCvarGlowShellFreq;
 	cvar_t			*m_pCvarCompatible;
+	cvar_t			*m_pCvarLod;
 	cvar_t			*m_pCvarLodScale;
 	cvar_t			*m_pCvarLodBias;
 
