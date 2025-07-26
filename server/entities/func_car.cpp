@@ -3777,20 +3777,23 @@ void CFuncCarSelfdrive::DriveThink( void )
 
 		if( FStringNull( pRouteTarget->pev->netname ) )
 		{
-			m_iState = STATE_OFF;
+			// don't turn off the car - only using trigger
+			// (if you need to turn it off on last path, just specify it in the target field of the path)
+		//	m_iState = STATE_OFF;
 			pev->button = 0;
-			pCar->DeactivateSelfdrive();
+		//	pCar->DeactivateSelfdrive();
 			SetThink( NULL );
 			DontThink();
+			return;
 		}
 		else
 		{
 			pRouteTarget = UTIL_FindEntityByTargetname( NULL, STRING( pRouteTarget->pev->netname ) );
 			if( !pRouteTarget )
 			{
-				m_iState = STATE_OFF;
+			//	m_iState = STATE_OFF;
 				pev->button = 0;
-				pCar->DeactivateSelfdrive();
+			//	pCar->DeactivateSelfdrive();
 				SetThink( NULL );
 				DontThink();
 				return;
