@@ -526,7 +526,7 @@ void CCar::Spawn( void )
 		FrontWheelRadius = 16;
 	if( !RearWheelRadius )
 		RearWheelRadius = 16;
-	if( !SuspHardness )
+	if( !SuspHardness || SuspHardness < 1.0f )
 		SuspHardness = 10.0f;
 	if( !FrontBumperLength )
 		FrontBumperLength = 45;
@@ -588,6 +588,132 @@ void CCar::Spawn( void )
 
 	SetThink( &CCar::Setup );
 	SetNextThink( RANDOM_FLOAT( 0.1f, 0.2f ) );
+}
+
+void CCar::ActivateSelfdrive( void )
+{
+	if( StartSilent )
+		StartSilent = false;
+
+	if( pCarHurt )
+		pCarHurt->pev->frags = 1;
+
+	if( HasSpawnFlags( SF_CAR_ELECTRIC ) )
+	{
+		EMIT_SOUND( edict(), CHAN_STATIC, "func_car/eng_start_elec.wav", VOL_NORM, ATTN_NORM );
+		MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, hDriver->pev );
+		WRITE_BYTE( TE_CARPARAMS );
+		WRITE_BYTE( 0 );
+		MESSAGE_END();
+	}
+	else
+		EMIT_SOUND( edict(), CHAN_STATIC, "func_car/eng_start.wav", VOL_NORM, ATTN_NORM );
+
+	if( m_iszIdleSnd )
+		STOP_SOUND( edict(), CHAN_WEAPON, STRING( m_iszIdleSnd ) );
+
+	time = gpGlobals->time;
+	DriverMdlSequence = -1;
+	CameraBrakeOffsetX = 0;
+	TurboAccum = 0;
+	if( HasSpawnFlags( SF_CAR_ELECTRIC ) )
+		IsShifting = false;
+	else
+		IsShifting = true;
+	Gear = 1;
+	LastGear = -1;
+	ShiftStartTime = gpGlobals->time - ShiftingTime;
+	CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
+	NewCameraAngle = CameraAngles.y;
+	AccelAddX = BrakeAddX = 0;
+	if( pExhaust1 )
+	{
+		pExhaust1->pev->iuser3 = -665;
+		pExhaust1->pev->fuser1 = 0.1f;
+		pExhaust1->pev->renderamt = 0;
+	}
+	if( pExhaust2 )
+	{
+		pExhaust2->pev->iuser3 = -665;
+		pExhaust2->pev->fuser1 = 0.1f;
+		pExhaust2->pev->renderamt = 0;
+	}
+	num_pops = 0.0f;
+	poptime = 0.0f;
+
+	TurningOverride = true;
+
+	SetThink( &CCar::Drive );
+	SetNextThink( 0 );
+}
+
+void CCar::DeactivateSelfdrive( void )
+{
+	if( pTankTower )
+		pTankTower->SetAbsAngles( GetAbsAngles() );
+
+	if( pExhaust1 )
+	{
+		pExhaust1->pev->iuser3 = 0;
+		pExhaust1->pev->fuser2 = 0.0f; // alpha multiplier
+		pExhaust1->pev->renderamt = 0;
+	}
+	if( pExhaust2 )
+	{
+		pExhaust2->pev->iuser3 = 0;
+		pExhaust2->pev->fuser2 = 0.0f; // alpha multiplier
+		pExhaust2->pev->renderamt = 0;
+	}
+	num_pops = 0.0f;
+
+	if( m_iszEngineSnd ) // stop engine sounds
+	{
+		STOP_SOUND( edict(), CHAN_WEAPON, STRING( m_iszEngineSnd ) );
+		if( HasSpawnFlags( SF_CAR_ELECTRIC ) )
+			EMIT_SOUND( edict(), CHAN_STATIC, "func_car/eng_stop_elec.wav", VOL_NORM, ATTN_NORM );
+		else
+			EMIT_SOUND( edict(), CHAN_STATIC, "func_car/eng_stop.wav", VOL_NORM, ATTN_NORM );
+		if( HasSpawnFlags( SF_CAR_GEARWHINE ) )
+			STOP_SOUND( edict(), CHAN_VOICE, "func_car/gear_whine.wav" );
+	}
+
+	if( pCarHurt )
+		pCarHurt->pev->frags = 0;
+
+	pev->owner = NULL;
+	time = gpGlobals->time;
+	hDriver = NULL;
+	CameraBrakeOffsetX = 0;
+	TurboAccum = 0;
+
+	// clear tires' sound
+//	EMIT_SOUND( edict(), CHAN_ITEM, "common/null.wav", 1, 3.0 );
+	EMIT_SOUND( pWheel1->edict(), CHAN_ITEM, "common/null.wav", 0, 3.0 );
+	EMIT_SOUND( pWheel2->edict(), CHAN_ITEM, "common/null.wav", 0, 3.0 );
+	EMIT_SOUND( pWheel3->edict(), CHAN_ITEM, "common/null.wav", 0, 3.0 );
+	EMIT_SOUND( pWheel4->edict(), CHAN_ITEM, "common/null.wav", 0, 3.0 );
+	// clear brake squeak
+	if( HasSpawnFlags( SF_CAR_SQUEAKYBRAKES ) )
+		EMIT_SOUND( pWheel3->edict(), CHAN_BODY, "common/null.wav", 0, 3.0 );
+	// clear particles (speed is stored here)
+	pWheel1->pev->fuser1 = 0;
+	pWheel2->pev->fuser1 = 0;
+	pWheel3->pev->fuser1 = 0;
+	pWheel4->pev->fuser1 = 0;
+	// clear sound desync
+	pWheel1->pev->fuser3 = 0;
+	pWheel2->pev->fuser3 = 0;
+	pWheel3->pev->fuser3 = 0;
+	pWheel4->pev->fuser3 = 0;
+
+	IsShifting = false;
+	ShiftStartTime = 0;
+	LastGear = -1;
+
+	TurningOverride = false;
+
+	SetThink( &CCar::Idle );
+	SetNextThink( 0 );
 }
 
 void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -1505,28 +1631,31 @@ void CCar::Drive( void )
 	if( SecondaryCamera )
 		CameraSwayRate = MaxCamera2Sway;
 
-	if( bRight() )
+	if( !TurningOverride )
 	{
-		Turning -= TurnRate * gpGlobals->frametime;
-		if( CameraSwayRate > 0 )
-			CameraMoving -= (CameraMoving > 0 ? 2 : 1) * CameraSwayRate * gpGlobals->frametime;
-	}
-	else if( bLeft() )
-	{
-		Turning += TurnRate * gpGlobals->frametime;
-		if( CameraSwayRate > 0 )
-			CameraMoving += (CameraMoving < 0 ? 2 : 1) * CameraSwayRate * gpGlobals->frametime;
-	}
+		if( bRight() )
+		{
+			Turning -= TurnRate * gpGlobals->frametime;
+			if( CameraSwayRate > 0 )
+				CameraMoving -= (CameraMoving > 0 ? 2 : 1) * CameraSwayRate * gpGlobals->frametime;
+		}
+		else if( bLeft() )
+		{
+			Turning += TurnRate * gpGlobals->frametime;
+			if( CameraSwayRate > 0 )
+				CameraMoving += (CameraMoving < 0 ? 2 : 1) * CameraSwayRate * gpGlobals->frametime;
+		}
 
-	// no turning buttons pressed, go to zero slowly
-	if( (!bLeft() && !bRight()) )
-	{
-		Turning = UTIL_Approach( 0, Turning, fabs( TurnRate * 0.75 ) * gpGlobals->frametime );
-		if( CameraSwayRate > 0 )
-			CameraMoving = UTIL_Approach( 0, CameraMoving, CameraSwayRate * 0.5 * gpGlobals->frametime );
+		// no turning buttons pressed, go to zero slowly
+		if( (!bLeft() && !bRight()) )
+		{
+			Turning = UTIL_Approach( 0, Turning, fabs( TurnRate * 0.75 ) * gpGlobals->frametime );
+			if( CameraSwayRate > 0 )
+				CameraMoving = UTIL_Approach( 0, CameraMoving, CameraSwayRate * 0.5 * gpGlobals->frametime );
 
-		if( fabs( Turning ) <= 0.001f )
-			Turning = 0;
+			if( fabs( Turning ) <= 0.001f )
+				Turning = 0;
+		}
 	}
 
 	const float empirical = AbsCarSpeed * 0.00625f;
@@ -1758,7 +1887,7 @@ void CCar::Drive( void )
 		}
 
 		if( Upshifting && bForward() ) // shake body only when upshifting and gas pressed
-			AccelAddX -= 1;
+			AccelAddX_ShiftAdd = 1.25f;
 	}
 	
 	if( AbsCarSpeed < 15.0f && bBack() && bForward() ) // heating up the tires
@@ -1914,22 +2043,24 @@ void CCar::Drive( void )
 		BrakeAddX = UTIL_Approach( 0, BrakeAddX, 5 * gpGlobals->frametime );
 
 	BrakeAddX = bound( -MaxLean * 0.2, BrakeAddX, MaxLean * 0.2 );
-	
+
 	// lean car when accelerating
 	if( HeatingTires )
-		AccelAddX = UTIL_Approach( 0, AccelAddX, 2 * gpGlobals->frametime );
-	else if( CarSpeed > 0 && CarSpeed < 250 && (bForward()) && (CarSpeed < (MaxCarSpeed * 0.5)) && !IsShifting )
-		AccelAddX -= AccelRate * 0.01 * gpGlobals->frametime * (1 + HeatingMult);
+		AccelAddX = UTIL_Approach( 0, AccelAddX, 3 * gpGlobals->frametime );
+	else if( CarSpeed > 0 && bForward() && !IsShifting )
+		//	AccelAddX -= AccelRate * 0.02 * gpGlobals->frametime * (1 + HeatingMult);
+		AccelAddX = UTIL_Approach( NewAccelAddX * (10.0f / SuspHardness), AccelAddX, 10 * gpGlobals->frametime );
 	else if( CarSpeed < 0 && CarSpeed > -150 && !(bForward()) && (bBack()) )
 		AccelAddX += BackAccelRate * 0.01 * gpGlobals->frametime * (1 + HeatingMult);
 	else
-		AccelAddX = UTIL_Approach( 0, AccelAddX, 2 * gpGlobals->frametime );
+		AccelAddX = UTIL_Approach( 0, AccelAddX, 3 * gpGlobals->frametime );
 
 	AccelAddX = bound( -MaxLean * 0.2, AccelAddX, MaxLean * 0.2 );
 	
-	float NewChassisAngX = -CrossChange * 0.5 * SuspDiff2 + BrakeAddX + AccelAddX + AddChassisShake;
+	float NewChassisAngX = -CrossChange * 0.5 * SuspDiff2 + BrakeAddX + AccelAddX + AddChassisShake - AccelAddX_ShiftAdd;
+	AccelAddX_ShiftAdd = UTIL_Approach( 0.0f, AccelAddX_ShiftAdd, 10 * gpGlobals->frametime );
 	if( FrontWheelsInAir + RearWheelsInAir < 4 )
-		ChassisAng.x = UTIL_Approach( NewChassisAngX, ChassisAng.x, SuspHardness * fabs( NewChassisAngX - ChassisAng.x) * gpGlobals->frametime);
+		ChassisAng.x = lerp( ChassisAng.x, NewChassisAngX, SuspHardness * gpGlobals->frametime );
 
 	// Z - lateral rotation
 	float NewChassisAngZ = -LateralChange * SuspDiff2 + CarSpeed * Turning * (MaxLean * 0.001) + AddChassisShake;
@@ -1938,8 +2069,9 @@ void CCar::Drive( void )
 		NewChassisAngZ += EnteringShake * sin( gpGlobals->time * 5.0f );
 		EnteringShake = UTIL_Approach( 0.0f, EnteringShake, 3.0f * gpGlobals->frametime );
 	}
+
 	if( FrontWheelsInAir + RearWheelsInAir < 4 )
-		ChassisAng.z = UTIL_Approach( NewChassisAngZ, ChassisAng.z, SuspHardness * fabs( NewChassisAngZ - ChassisAng.z ) * gpGlobals->frametime );
+		ChassisAng.z = lerp( ChassisAng.z, NewChassisAngZ, SuspHardness * gpGlobals->frametime );
 
 	if( FrontWheelsInAir + RearWheelsInAir == 4 )
 	{
@@ -2374,6 +2506,16 @@ void CCar::Drive( void )
 	}
 
 	SafeSpawnPosition();
+
+	if( !LastCarSpeed )
+		LastCarSpeed = CarSpeed;
+	float spd_diff = CarSpeed - LastCarSpeed;
+	// make sure we are accelerating
+	if( spd_diff > 0 && (CarSpeed < ActualMaxCarSpeed * 0.8f) )
+		NewAccelAddX = (-spd_diff / gpGlobals->frametime) * 0.01f;
+	else
+		NewAccelAddX = UTIL_Approach( 0.0f, NewAccelAddX, gpGlobals->frametime );
+	LastCarSpeed = CarSpeed;
 
 	//-----------------------------------------------------
 	// !!! hDriver can become NULL after this, by taking damage and dying, game will crash.
@@ -3319,4 +3461,370 @@ void CCarDoorHandle::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 		return;
 
 	pCar->Use( pActivator, pCaller, useType, value );
+}
+
+
+//===============================================================================
+// trigger_car_selfdrive
+//===============================================================================
+#define SELFDRIVE_DEBUG 0
+class CFuncCarSelfdrive : public CBaseDelay
+{
+	DECLARE_CLASS( CFuncCarSelfdrive, CBaseDelay );
+public:
+	void Precache( void );
+	void Spawn( void );
+	void DriveThink( void );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+
+	void FindCar( void );
+
+	CCar *pCar;
+	CBaseEntity *pRouteTarget;
+	CBaseEntity *pRouteNextTarget;
+	int speed_limit;
+
+	// cache for saverestore
+	bool b_set_car_params;
+	float car_speed;
+
+#if SELFDRIVE_DEBUG
+	int m_iBeam;
+#endif
+	DECLARE_DATADESC();
+};
+
+LINK_ENTITY_TO_CLASS( trigger_car_selfdrive, CFuncCarSelfdrive );
+
+BEGIN_DATADESC( CFuncCarSelfdrive )
+	DEFINE_FIELD( pCar, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pRouteTarget, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pRouteNextTarget, FIELD_CLASSPTR ),
+	DEFINE_FIELD( car_speed, FIELD_FLOAT ),
+	DEFINE_FIELD( speed_limit, FIELD_INTEGER ),
+	DEFINE_FUNCTION( FindCar ),
+	DEFINE_FUNCTION( DriveThink ),
+END_DATADESC()
+
+void CFuncCarSelfdrive::Precache( void )
+{
+#if SELFDRIVE_DEBUG
+	m_iBeam = PRECACHE_MODEL( "sprites/smoke.spr" );
+#endif
+
+	b_set_car_params = true;
+}
+
+void CFuncCarSelfdrive::Spawn( void )
+{
+#if SELFDRIVE_DEBUG
+	Precache();
+#endif
+	m_iState = STATE_OFF;
+	pRouteTarget = NULL;
+	speed_limit = 0;
+	if( pev->frags > 0 )
+		speed_limit = pev->frags * 15; // km/h to units
+
+	if( FStringNull( pev->netname ) )
+	{
+		ALERT( at_error, "trigger_car_selfdrive \"%s\" doesn't have route target. Removed.\n", STRING( pev->targetname ) );
+		UTIL_Remove( this );
+		return;
+	}
+
+	SetThink( &CFuncCarSelfdrive::FindCar );
+	SetNextThink( 1 );
+}
+
+void CFuncCarSelfdrive::FindCar( void )
+{
+	pCar = (CCar *)UTIL_FindEntityByTargetname( NULL, STRING( pev->target ) );
+
+	if( !pCar )
+	{
+		ALERT( at_error, "trigger_car_selfdrive \"%s\" can't find specified vehicle! Removed.\n", STRING( pev->targetname ) );
+		UTIL_Remove( this );
+		return;
+	}
+
+	if( !FClassnameIs( pCar, "func_car" ) )
+	{
+		ALERT( at_error, "trigger_car_selfdrive \"%s\": target entity is not a func_car. Removed.\n", STRING( pev->targetname ) );
+		UTIL_Remove( this );
+		return;
+	}
+
+	if( HasSpawnFlags( BIT( 0 ) ) )
+	{
+		SetThink( &CBaseEntity::SUB_CallUseToggle );
+		SetNextThink( 1.0 ); // let the car spawn properly
+	}
+}
+
+void CFuncCarSelfdrive::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if( pCar == NULL )
+		return;
+
+	if( IsLockedByMaster() )
+		return;
+
+	if( m_iState == STATE_OFF )
+	{
+		pRouteTarget = UTIL_FindEntityByTargetname( NULL, STRING( pev->netname ) );
+		if( !pRouteTarget )
+		{
+			ALERT( at_error, "trigger_car_selfdrive \"%s\" can't find route target \"%s\".\n", STRING( pev->targetname ), STRING( pev->netname ) );
+			return;
+		}
+
+		// find the target afterwards, to be used later
+		pRouteNextTarget = NULL;
+		if( !FStringNull( pRouteTarget->pev->netname ) )
+			pRouteNextTarget = UTIL_FindEntityByTargetname( NULL, STRING( pRouteTarget->pev->netname ) );
+
+		if( pCar->hDriver != NULL )
+		{
+			ALERT( at_warning, "trigger_car_selfdrive \"%s\" can't possess the car for it is occupied!\n", STRING( pev->targetname ) );
+			return;
+		}
+		// possess the car
+		m_iState = STATE_ON;
+		pCar->ActivateSelfdrive();
+		pCar->hDriver = this;
+
+		speed_limit = 0;
+		if( pev->frags > 0 )
+			speed_limit = pev->frags * 15; // km/h to units
+
+		SetThink( &CFuncCarSelfdrive::DriveThink );
+		SetNextThink( 0 );
+	}
+	else
+	{
+		m_iState = STATE_OFF;
+		pev->button = 0;
+		if( pCar )
+		{
+			pCar->hDriver = NULL;
+			pCar->DeactivateSelfdrive();
+		}
+		SetThink( NULL );
+		DontThink();
+	}
+}
+
+void CFuncCarSelfdrive::DriveThink( void )
+{
+	pev->button = 0;
+
+	if( !pCar )
+	{
+		m_iState = STATE_OFF;
+		SetThink( NULL );
+		DontThink();
+		return;
+	}
+
+	if( b_set_car_params )
+	{
+		pCar->CarSpeed = car_speed;
+		b_set_car_params = false;
+	}
+
+	// assume always going forward
+	float speed = fabs( pCar->CarSpeed );
+	
+	car_speed = speed;
+
+	if( speed_limit > 0 )
+	{
+		if( pCar->CarSpeed > speed_limit )
+			pCar->CarSpeed = speed_limit;
+	}
+
+	// find first target (in 2D space)
+	Vector vCarOrg = pCar->GetAbsOrigin();
+	vCarOrg.z = 0;
+	Vector vTargetOrg = pRouteTarget->GetAbsOrigin();
+	vTargetOrg.z = 0;
+
+	const float cur_dist_to_t = (vTargetOrg - vCarOrg).Length2D();
+
+	// turning
+	Vector vec_to_target = vTargetOrg - vCarOrg;
+	Vector ang_to_target = UTIL_VecToAngles( vec_to_target );
+	UTIL_MakeVectors( ang_to_target );
+	const Vector forward_desired = gpGlobals->v_forward;
+	Vector ang_car = pCar->GetAbsAngles();
+	ang_car.z = 0;
+	UTIL_MakeVectors( ang_car );
+	const Vector forward_current = gpGlobals->v_forward;
+	const Vector right_current = gpGlobals->v_right;
+
+#if SELFDRIVE_DEBUG
+	// diffusion - for testing all this shit...
+	Vector dbg_org = pCar->GetAbsOrigin();
+	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, dbg_org );
+	WRITE_BYTE( TE_BEAMPOINTS );
+	WRITE_COORD( dbg_org.x );
+	WRITE_COORD( dbg_org.y );
+	WRITE_COORD( dbg_org.z );
+	WRITE_COORD( (dbg_org + forward_desired * 250).x );
+	WRITE_COORD( (dbg_org + forward_desired * 250).y );
+	WRITE_COORD( (dbg_org + forward_desired * 250).z );
+	WRITE_SHORT( m_iBeam );
+	WRITE_BYTE( 0 ); // startframe
+	WRITE_BYTE( 0 ); // framerate
+	WRITE_BYTE( 1 ); // life
+
+	WRITE_BYTE( 10 );  // width
+
+	WRITE_BYTE( 0 );   // noise
+
+	WRITE_BYTE( 0 );   // r
+	WRITE_BYTE( 0 );   // g
+	WRITE_BYTE( 255 );   // b
+
+	WRITE_BYTE( 255 );	// brightness
+
+	WRITE_BYTE( 0 );		// speed
+	MESSAGE_END();
+
+	MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, dbg_org );
+	WRITE_BYTE( TE_BEAMPOINTS );
+	WRITE_COORD( dbg_org.x );
+	WRITE_COORD( dbg_org.y );
+	WRITE_COORD( dbg_org.z );
+	WRITE_COORD( (dbg_org + forward_current * 250).x );
+	WRITE_COORD( (dbg_org + forward_current * 250).y );
+	WRITE_COORD( (dbg_org + forward_current * 250).z );
+	WRITE_SHORT( m_iBeam );
+	WRITE_BYTE( 0 ); // startframe
+	WRITE_BYTE( 0 ); // framerate
+	WRITE_BYTE( 1 ); // life
+
+	WRITE_BYTE( 10 );  // width
+
+	WRITE_BYTE( 0 );   // noise
+
+	WRITE_BYTE( 0 );   // r
+	WRITE_BYTE( 255 );   // g
+	WRITE_BYTE( 0 );   // b
+
+	WRITE_BYTE( 255 );	// brightness
+
+	WRITE_BYTE( 0 );		// speed
+	MESSAGE_END();
+#endif
+
+	float fTurnDir = 1.0f;
+	const float dot_right = DotProduct( right_current, forward_desired );
+	if( dot_right > 0.0f )
+		fTurnDir = -1.0f;
+
+	fTurnDir *= fabs( dot_right ) * 10.0f; // turn strength
+
+	const float dot_forward = DotProduct( forward_current, forward_desired );
+	const float abs_dot_forward = fabs( dot_forward );
+	pCar->Turning = fTurnDir * (1.0f - dot_forward);
+
+	if( cur_dist_to_t > speed ) // target is far enough, hit the gas
+		pev->button |= IN_FORWARD;
+	else
+	{
+		// get vector to next target ahead of schedule
+		if( pRouteNextTarget )
+		{
+			Vector vNextTargetOrg = pRouteNextTarget->GetAbsOrigin();
+			vNextTargetOrg.z = 0;
+			Vector vec_to_next_target = vNextTargetOrg - vCarOrg;
+			Vector ang_to_next_target = UTIL_VecToAngles( vec_to_next_target );
+			UTIL_MakeVectors( ang_to_next_target );
+			const Vector forward_to_next = gpGlobals->v_forward;
+			const float dot_to_next = DotProduct( forward_current, forward_to_next );
+			const float abs_dot_to_next = fabs( dot_to_next );
+
+			if( abs_dot_to_next < 0.8f )
+			{
+				// bad angle, drop gas
+				pev->button &= ~IN_FORWARD;
+
+				// very bad, hit brakes
+				if( abs_dot_to_next < 0.666f )
+					pev->button |= IN_BACK;
+				else
+					pev->button &= ~IN_BACK;
+			}
+		}
+		else // no next target, stop
+		{
+			pev->button &= ~IN_FORWARD;
+			pev->button |= IN_BACK;
+		}
+	}
+
+	if( cur_dist_to_t < 250 ) // find next target
+	{
+		if( FStringNull( pRouteTarget->pev->target ) )
+			UTIL_FireTargets( pRouteTarget->pev->target, this, this, USE_TOGGLE, 0 );
+
+		if( pRouteTarget->pev->frags > 0 )
+			speed_limit = pRouteTarget->pev->frags * 15; // km/h to units
+		else
+			speed_limit = 0;
+
+		if( FStringNull( pRouteTarget->pev->netname ) )
+		{
+			m_iState = STATE_OFF;
+			pev->button = 0;
+			pCar->DeactivateSelfdrive();
+			SetThink( NULL );
+			DontThink();
+		}
+		else
+		{
+			pRouteTarget = UTIL_FindEntityByTargetname( NULL, STRING( pRouteTarget->pev->netname ) );
+			if( !pRouteTarget )
+			{
+				m_iState = STATE_OFF;
+				pev->button = 0;
+				pCar->DeactivateSelfdrive();
+				SetThink( NULL );
+				DontThink();
+				return;
+			}
+			else
+			{
+				// find the target afterwards, to be used later
+				pRouteNextTarget = NULL;
+				if( !FStringNull( pRouteTarget->pev->netname ) )
+					pRouteNextTarget = UTIL_FindEntityByTargetname( NULL, STRING( pRouteTarget->pev->netname ) );
+			}
+		}
+	}
+
+	SetNextThink( 0 );
+}
+
+//===============================================================================
+// info_selfdrive_target - used for path
+// target: activate target on pass
+// netname: next path
+// frags: set car max speed
+//===============================================================================
+class CInfoSelfdriveTarget : public CPointEntity
+{
+	DECLARE_CLASS( CInfoSelfdriveTarget, CPointEntity );
+public:
+	void Spawn( void );
+};
+
+LINK_ENTITY_TO_CLASS( info_selfdrive_target, CInfoSelfdriveTarget );
+
+void CInfoSelfdriveTarget::Spawn( void )
+{
+	pev->solid = SOLID_NOT;
+	SetBits( m_iFlags, MF_POINTENTITY );
 }

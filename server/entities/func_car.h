@@ -12,6 +12,8 @@ public:
 	void Setup( void );
 	void Drive( void );
 	void Idle( void );
+	void ActivateSelfdrive( void );
+	void DeactivateSelfdrive( void );
 	void GetCollision( const float AbsCarSpeed, const int Forward, Vector *Collision, float *ColDotProduct, Vector *ColPoint );
 	void Wheels( int *FRW_InAir, int *FLW_InAir, int *RRW_InAir, int *RLW_InAir );
 	void Camera( void );
@@ -75,6 +77,7 @@ public:
 
 	float CarSpeed;
 	float Turning;
+	bool TurningOverride;
 	float CameraMoving;
 	int FrontWheelRadius;
 	int RearWheelRadius;
@@ -127,6 +130,10 @@ public:
 	float LastTrailTime; // last time I sent a message with trail sprite (not saved)
 	float StuckTime; // do not abuse stuck fix (not saved)
 	float DamageMult; // if hurt, player will receive flDamage x DamageMult when in this car (can make armored cars this way...)
+
+	float LastCarSpeed;
+	float NewAccelAddX;
+	float AccelAddX_ShiftAdd;
 
 	int MaxGears;
 	int GearStep; // maxspeed / 5
