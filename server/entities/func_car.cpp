@@ -1531,6 +1531,8 @@ void CCar::Drive( void )
 	// reset all velocity from previous frame
 	pev->velocity = g_vecZero;
 
+	pev->friction = 0.0f; // always set this, otherwise issues on different framerates
+
 	const float AbsCarSpeed = fabs( CarSpeed );
 
 	// CAR STUCK???
@@ -1717,7 +1719,7 @@ void CCar::Drive( void )
 	// get one rear wheel which only rotates, the second will repeat
 	Vector RearWheelAng = pWheel3->GetLocalAngles();
 
-	const float ApproachSpeed = bound( 200, AbsCarSpeed, 400 );
+	const float ApproachSpeed = bound( TurningOverride ? 0 : 200, AbsCarSpeed, 400 );
 	if( Forward == 0 )
 	{
 		if( bLeft() )
@@ -2199,7 +2201,10 @@ void CCar::Drive( void )
 			if( CarSpeed > 0 && CarSpeed > ActualMaxCarSpeed && ActualMaxCarSpeed != MaxCarSpeed )
 				CarSpeed -= 300 * gpGlobals->frametime;
 			else if( !IsShifting )
-				CarSpeed += ActualAccelRate * (1.0f - AbsTurning * 0.5f) * WaterVelocityMult * surf_CurrentMult * gpGlobals->frametime;
+			{
+				float tx = TurningOverride ? 1.0f : (1.0f - AbsTurning * 0.5f);
+				CarSpeed += ActualAccelRate * tx * WaterVelocityMult * surf_CurrentMult * gpGlobals->frametime;
+			}
 
 			if( CarSpeed < 0 )
 				DoBrakeSqueak = true;
@@ -2875,6 +2880,8 @@ void CCar::Camera(void)
 //===============================================================================
 void CCar::Idle( void )
 {
+	pev->friction = 0.0f; // always set this, otherwise issues on different framerates
+
 	// will need those later!
 	UTIL_MakeVectors( pChassis->GetAbsAngles() );
 	Vector ChassisForw = gpGlobals->v_forward;
