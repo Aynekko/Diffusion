@@ -1756,17 +1756,17 @@ void CBasePlayer::WaterMove()
 	}
 
 	// make a small splash sound when we go from underwater and our head shows up
-	if( (Submerged == false) && (pev->waterlevel > 2) )
+	if( !Submerged && (pev->waterlevel > 2) )
 	{
 		LastSwimUpSound = gpGlobals->time;
 		Submerged = true;
 	}
 
-	if( (LastSwimUpSound != -1) && (pev->waterlevel < 3) )
+	if( LastSwimUpSound > 0 && pev->waterlevel < 3 )
 	{
 		// in order for sound to play, the player must be at least for 1 full second underwater
 		// no abuse!
-		if( gpGlobals->time > LastSwimUpSound + 1 )
+		if( gpGlobals->time > LastSwimUpSound + 1.0f )
 		{
 			switch( RANDOM_LONG( 0, 2 ) )
 			{
@@ -1776,7 +1776,7 @@ void CBasePlayer::WaterMove()
 			}
 		}
 
-		LastSwimUpSound = -1;
+		LastSwimUpSound = -1.0f;
 		Submerged = false;
 		pev->vuser1.x = 15;
 	}
@@ -5285,7 +5285,7 @@ void CBasePlayer::Spawn( void )
 		ShieldAvailableLVL = 1;
 	}
 	BlastChargesReady = 0;
-	LastSwimUpSound = -1;
+	LastSwimUpSound = -1.0f;
 	m_flLastWeaponSwitchTime = 0;
 	EnableHealthBar = true;
 	ConfirmedHit = 0;
