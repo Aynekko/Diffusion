@@ -1124,7 +1124,10 @@ void UTIL_ScreenShakeAll( const Vector &center, float amplitude, float frequency
 // diffusion - only the caller can see it
 void UTIL_ScreenShakeLocal(CBaseEntity *pEntity, const Vector& center, float amplitude, float frequency, float duration, float radius, bool bAllowInAir )
 {
-	float		localAmplitude;
+	if( !pEntity || !pEntity->IsPlayer() )
+		return;
+	
+	float localAmplitude;
 	ScreenShake	shake;
 
 	shake.duration = FixedUnsigned16(duration, 1 << 12);		// 4.12 fixed

@@ -550,6 +550,8 @@ void CCar::Spawn( void )
 		MaxGears = 7;
 	if( !ShiftingTime )
 		ShiftingTime = 0.2f;
+	if( !pev->frame ) // friction
+		pev->frame = 1.0f;
 
 	ShiftStartTime = 0;
 	IsShifting = false;
@@ -598,19 +600,22 @@ void CCar::ActivateSelfdrive( void )
 	if( pCarHurt )
 		pCarHurt->pev->frags = 1;
 
-	if( HasSpawnFlags( SF_CAR_ELECTRIC ) )
+	if( hDriver == NULL ) // the car could be already on by previous script
 	{
-		EMIT_SOUND( edict(), CHAN_STATIC, "func_car/eng_start_elec.wav", VOL_NORM, ATTN_NORM );
-		MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, hDriver->pev );
-		WRITE_BYTE( TE_CARPARAMS );
-		WRITE_BYTE( 0 );
-		MESSAGE_END();
-	}
-	else
-		EMIT_SOUND( edict(), CHAN_STATIC, "func_car/eng_start.wav", VOL_NORM, ATTN_NORM );
+		if( HasSpawnFlags( SF_CAR_ELECTRIC ) )
+		{
+			EMIT_SOUND( edict(), CHAN_STATIC, "func_car/eng_start_elec.wav", VOL_NORM, ATTN_NORM );
+			MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, hDriver->pev );
+			WRITE_BYTE( TE_CARPARAMS );
+			WRITE_BYTE( 0 );
+			MESSAGE_END();
+		}
+		else
+			EMIT_SOUND( edict(), CHAN_STATIC, "func_car/eng_start.wav", VOL_NORM, ATTN_NORM );
 
-	if( m_iszIdleSnd )
-		STOP_SOUND( edict(), CHAN_WEAPON, STRING( m_iszIdleSnd ) );
+		if( m_iszIdleSnd )
+			STOP_SOUND( edict(), CHAN_WEAPON, STRING( m_iszIdleSnd ) );
+	}
 
 	time = gpGlobals->time;
 	DriverMdlSequence = -1;
@@ -1002,21 +1007,25 @@ void CCar::Setup( void )
 	{
 		pWheel1->SetParent( pChassis );
 		pWheel1->pev->iuser2 = FrontWheelRadius;
+		pWheel1->pev->owner = edict();
 	}
 	if( pWheel2 )
 	{
 		pWheel2->SetParent( pChassis );
 		pWheel2->pev->iuser2 = FrontWheelRadius;
+		pWheel2->pev->owner = edict();
 	}
 	if( pWheel3 )
 	{
 		pWheel3->SetParent( pChassis );
 		pWheel3->pev->iuser2 = RearWheelRadius;
+		pWheel3->pev->owner = edict();
 	}
 	if( pWheel4 )
 	{
 		pWheel4->SetParent( pChassis );
 		pWheel4->pev->iuser2 = RearWheelRadius;
+		pWheel4->pev->owner = edict();
 	}
 
 	if( pCamera1 )
@@ -1730,7 +1739,6 @@ void CCar::Drive( void )
 	//----------------------------
 	// wheels' rotation (visual effect)
 	//----------------------------
-	// ??? should I include wheel radius here somehow?
 	if( HeatingTires )
 	{
 		HeatingMult = UTIL_Approach( 7.0f, HeatingMult, 2.5f * gpGlobals->frametime );
@@ -1738,8 +1746,9 @@ void CCar::Drive( void )
 	}
 	else if( !(bUp()) )
 	{
-		FrontWheelAng.x += Forward * AbsCarSpeed * (M_PI * 0.5) * gpGlobals->frametime;
-		RearWheelAng.x += Forward * AbsCarSpeed * (M_PI * 0.5) * gpGlobals->frametime * (1 + HeatingMult) * (1.0f / (bForward() ? DriftAmount : 1.0f));
+		// I have no idea how and why this works. It just does.
+		FrontWheelAng.x += Forward * AbsCarSpeed * (M_PI * 0.5) * gpGlobals->frametime / (FrontWheelRadius * 0.05f);
+		RearWheelAng.x += Forward * AbsCarSpeed * (M_PI * 0.5) * gpGlobals->frametime * (1 + HeatingMult) * (1.0f / (bForward() ? DriftAmount : 1.0f)) / (RearWheelRadius * 0.05f);
 	}
 
 	if( FrontWheelAng.x > 359.9f || FrontWheelAng.x < -359.9f )
@@ -2160,7 +2169,7 @@ void CCar::Drive( void )
 	{
 		// no accelerate/brake buttons pressed or all wheels in air
 		// car slows down (aka friction...)
-		float SlowDownRamp = 150.0f;
+		float SlowDownRamp = 150.0f * pev->frame;
 		int RampDir = 1; // 1 up, -1 down
 
 		if( fabs( ChassisAng.x ) > 10 ) // start to go down by itself, if on a slope
@@ -2249,8 +2258,20 @@ void CCar::Drive( void )
 		CarSpeed = bound( (-ActualMaxCarSpeedBackwards + (ActualMaxCarSpeedBackwards * AbsTurning * 0.5f)), CarSpeed, (ActualMaxCarSpeed - (ActualMaxCarSpeed * AbsTurning * 0.75f)) );
 	}
 	else
+	{
+		/* // nah
 		// also slow down the car if turning too much
-		CarSpeed = bound( -ActualMaxCarSpeedBackwards + (ActualMaxCarSpeedBackwards * AbsTurning * 0.25f) + RANDOM_LONG(-1,1), CarSpeed, ActualMaxCarSpeed - (ActualMaxCarSpeed * AbsTurning * 0.75f) + RANDOM_LONG( -1, 1 ) );
+		float turn_slowdown_back = AbsTurning * 0.25f;
+		float turn_slowdown_forw = AbsTurning * 0.75f;
+		if( TurningOverride )
+		{
+			turn_slowdown_back = 0.0f;
+			turn_slowdown_forw = 0.0f;
+		}
+		CarSpeed = bound( -ActualMaxCarSpeedBackwards + (ActualMaxCarSpeedBackwards * turn_slowdown_back), CarSpeed, ActualMaxCarSpeed - (ActualMaxCarSpeed * turn_slowdown_forw) );
+		*/
+		CarSpeed = bound( -ActualMaxCarSpeedBackwards, CarSpeed, ActualMaxCarSpeed );
+	}
 
 	// -------- apply main movement  --------
 	const float AngleDiff = pWheel1->GetLocalAngles().y - pChassis->GetLocalAngles().y;
@@ -2908,12 +2929,12 @@ void CCar::Idle( void )
 
 	// X - transversal rotation
 	float NewChassisAngX = -CrossChange * 0.5 * SuspDiff2;
-	ChassisAng.x = UTIL_Approach( NewChassisAngX, ChassisAng.x, SuspHardness * fabs( NewChassisAngX - ChassisAng.x ) * gpGlobals->frametime );
+	ChassisAng.x = lerp( ChassisAng.x, NewChassisAngX, SuspHardness * gpGlobals->frametime );
 	ChassisAng.x = bound( -30, ChassisAng.x, 30 );
 
 	// Z - lateral rotation
 	float NewChassisAngZ = -LateralChange * SuspDiff2 + CarSpeed * Turning * (MaxLean * 0.001);
-	ChassisAng.z = UTIL_Approach( NewChassisAngZ, ChassisAng.z, SuspHardness * fabs( NewChassisAngZ - ChassisAng.z ) * gpGlobals->frametime );
+	ChassisAng.z = lerp( ChassisAng.z, NewChassisAngZ, SuspHardness * gpGlobals->frametime );
 	ChassisAng.z = bound( -30, ChassisAng.z, 30 );
 
 	if( FrontWheelsInAir + RearWheelsInAir == 4 )
@@ -3136,7 +3157,7 @@ void CCar::ClearEffects( void )
 void CCar::OnRemove(void)
 {
 	// if car is somehow deleted during drive, we need to remove the driver to prevent game crash
-	if( hDriver != NULL )
+	if( hDriver != NULL && hDriver->IsPlayer() )
 		Use( hDriver, hDriver, USE_OFF, 0 );
 }
 
@@ -3486,6 +3507,7 @@ public:
 
 	// cache for saverestore
 	bool b_set_car_params;
+	bool b_set_initial_speed;
 	float car_speed;
 
 #if SELFDRIVE_DEBUG
@@ -3534,7 +3556,7 @@ void CFuncCarSelfdrive::Spawn( void )
 	}
 
 	SetThink( &CFuncCarSelfdrive::FindCar );
-	SetNextThink( 1 );
+	SetNextThink( 0.1f );
 }
 
 void CFuncCarSelfdrive::FindCar( void )
@@ -3584,9 +3606,9 @@ void CFuncCarSelfdrive::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 		if( !FStringNull( pRouteTarget->pev->netname ) )
 			pRouteNextTarget = UTIL_FindEntityByTargetname( NULL, STRING( pRouteTarget->pev->netname ) );
 
-		if( pCar->hDriver != NULL )
+		if( pCar->hDriver != NULL && pCar->hDriver->IsPlayer() )
 		{
-			ALERT( at_warning, "trigger_car_selfdrive \"%s\" can't possess the car for it is occupied!\n", STRING( pev->targetname ) );
+			ALERT( at_warning, "trigger_car_selfdrive \"%s\" can't possess the car for it is occupied by player!\n", STRING( pev->targetname ) );
 			return;
 		}
 		// possess the car
@@ -3598,6 +3620,9 @@ void CFuncCarSelfdrive::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 		if( pev->frags > 0 )
 			speed_limit = pev->frags * 15; // km/h to units
 
+		if( pev->fuser1 > 0.0f )
+			b_set_initial_speed = true;
+
 		SetThink( &CFuncCarSelfdrive::DriveThink );
 		SetNextThink( 0 );
 	}
@@ -3607,7 +3632,6 @@ void CFuncCarSelfdrive::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 		pev->button = 0;
 		if( pCar )
 		{
-			pCar->hDriver = NULL;
 			pCar->DeactivateSelfdrive();
 		}
 		SetThink( NULL );
@@ -3633,16 +3657,16 @@ void CFuncCarSelfdrive::DriveThink( void )
 		b_set_car_params = false;
 	}
 
+	if( b_set_initial_speed )
+	{
+		pCar->CarSpeed = pev->fuser1 * 15.0f; // initial car speed
+		b_set_initial_speed = false;
+	}
+
 	// assume always going forward
 	float speed = fabs( pCar->CarSpeed );
 	
 	car_speed = speed;
-
-	if( speed_limit > 0 )
-	{
-		if( pCar->CarSpeed > speed_limit )
-			pCar->CarSpeed = speed_limit;
-	}
 
 	// find first target (in 2D space)
 	Vector vCarOrg = pCar->GetAbsOrigin();
@@ -3724,15 +3748,25 @@ void CFuncCarSelfdrive::DriveThink( void )
 	if( dot_right > 0.0f )
 		fTurnDir = -1.0f;
 
-	fTurnDir *= fabs( dot_right ) * 10.0f; // turn strength
+	fTurnDir *= fabs( dot_right ) * 100.0f; // turn strength
 
 	const float dot_forward = DotProduct( forward_current, forward_desired );
 	const float abs_dot_forward = fabs( dot_forward );
 	pCar->Turning = fTurnDir * (1.0f - dot_forward);
 
-	if( cur_dist_to_t > speed ) // target is far enough, hit the gas
-		pev->button |= IN_FORWARD;
-	else
+	// hit the gas unless told otherwise
+	pev->button |= IN_FORWARD;
+
+	if( speed_limit > 0 )
+	{
+		if( pCar->CarSpeed > speed_limit )
+		{
+			pev->button &= ~IN_FORWARD;
+			pev->button |= IN_BACK;
+		}
+	}
+
+	if( cur_dist_to_t < speed )
 	{
 		// get vector to next target ahead of schedule
 		if( pRouteNextTarget )
@@ -3765,9 +3799,13 @@ void CFuncCarSelfdrive::DriveThink( void )
 		}
 	}
 
-	if( cur_dist_to_t < 250 ) // find next target
+	int precision = 250;
+	if( pRouteTarget->pev->sequence > 0 )
+		precision = pRouteTarget->pev->sequence;
+
+	if( cur_dist_to_t < precision ) // find next target
 	{
-		if( FStringNull( pRouteTarget->pev->target ) )
+		if( !FStringNull( pRouteTarget->pev->target ) )
 			UTIL_FireTargets( pRouteTarget->pev->target, this, this, USE_TOGGLE, 0 );
 
 		if( pRouteTarget->pev->frags > 0 )
@@ -3779,9 +3817,7 @@ void CFuncCarSelfdrive::DriveThink( void )
 		{
 			// don't turn off the car - only using trigger
 			// (if you need to turn it off on last path, just specify it in the target field of the path)
-		//	m_iState = STATE_OFF;
 			pev->button = 0;
-		//	pCar->DeactivateSelfdrive();
 			SetThink( NULL );
 			DontThink();
 			return;
@@ -3791,9 +3827,7 @@ void CFuncCarSelfdrive::DriveThink( void )
 			pRouteTarget = UTIL_FindEntityByTargetname( NULL, STRING( pRouteTarget->pev->netname ) );
 			if( !pRouteTarget )
 			{
-			//	m_iState = STATE_OFF;
 				pev->button = 0;
-			//	pCar->DeactivateSelfdrive();
 				SetThink( NULL );
 				DontThink();
 				return;
