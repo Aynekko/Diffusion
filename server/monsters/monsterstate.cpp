@@ -157,7 +157,7 @@ void CBaseMonster::CheckFire(void)
 	// do stuff while burning, disable when the time runs out
 	if( IsOnFire )
 	{
-		if( (gpGlobals->time > m_flCaughtFireTime + 7) || (pev->waterlevel > 0) )
+		if( (gpGlobals->time > m_flCaughtFireTime + 10.0f) || (pev->waterlevel > 0) )
 		{
 			pev->effects &= ~EF_DIMLIGHT;
 			IsOnFire = false;
@@ -178,7 +178,7 @@ void CBaseMonster::CheckFire(void)
 				WRITE_BYTE( RANDOM_LONG(10,20) ); // framerate
 			MESSAGE_END();
 
-			TakeDamage(VARS(eoNullEntity),VARS(eoNullEntity),0.5,DMG_BURN);
+			TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), 1.0f, DMG_BURN );
 		}
 	}
 }

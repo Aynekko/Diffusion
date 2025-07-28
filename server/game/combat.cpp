@@ -591,7 +591,7 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 		pev->iuser3 = 0;
 		// probably died because of fire. make him black
 		pev->rendermode = kRenderTransColor;
-		pev->rendercolor = Vector( 20, 20, 20 );
+		pev->rendercolor = Vector( 10, 10, 10 ); // crispy critter
 		pev->renderamt = 255;
 	}
 
