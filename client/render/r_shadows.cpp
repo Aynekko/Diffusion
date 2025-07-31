@@ -206,7 +206,14 @@ int R_AllocateShadowFramebuffer( plight_t *pl, int side = 0 )
 		pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, texture ), 0 );
 	}
 
-	ValidateFBO();
+	bool result = ValidateFBO();
+	if( pl->pointlight && !result )
+	{
+		// 512 mb or less old nvidia card fails with gl_out_of_memory
+		tr.omni_shadows_notsupport = true;
+		tr.glsl_sequence_omni[1]++;
+		Msg( "error\n" );
+	}
 
 	return texture;
 }
@@ -508,7 +515,7 @@ void R_RenderShadowScene( plight_t *pl )
 
 	if( !worldmodel )
 	{
-		ALERT( at_error, "R_RenderShadowView: NULL worldmodel\n" );
+		ALERT( at_error, "R_RenderShadowScene: NULL worldmodel\n" );
 		return;
 	}
 
@@ -539,7 +546,19 @@ void R_RenderShadowScene( plight_t *pl )
 
 void R_RenderShadowCubeSide( plight_t *pl, int side )
 {
+	if( tr.omni_shadows_notsupport )
+		return;
+	
 	RI->params = RP_SHADOWPASS;
+
+	// set the worldmodel
+	worldmodel = GET_ENTITY( 0 )->model;
+
+	if( !worldmodel )
+	{
+		ALERT( at_error, "R_RenderShadowCubeSide: NULL worldmodel\n" );
+		return;
+	}
 
 	RI->viewport[2] = RI->viewport[3] = ShadowViewport;
 
