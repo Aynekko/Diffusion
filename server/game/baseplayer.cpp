@@ -595,8 +595,8 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 		// 20% of this damages the HP, 80% goes to deplete the stamina
 		flDamage = OriginalDamage * 0.2f;
 		m_flStaminaValue -= OriginalDamage * 0.8f;
-		if( m_flStaminaValue < 0 )
-			m_flStaminaValue = 0;
+		if( m_flStaminaValue < 0.0f )
+			m_flStaminaValue = 0.0f;
 		m_flStaminaWait = gpGlobals->time + 3;
 		// add glitch effect for the emp grenade
 		if( FClassnameIs( pevInflictor, "grenade_emp" ) )
@@ -3088,7 +3088,7 @@ void CBasePlayer::PreThink( void )
 	if ( !g_pGameRules->IsMultiplayer() && (m_flStaminaValue > 20) && !pCar ) //DiffusionSprint
 	{
 		if ( m_afButtonPressed & IN_JUMP && (pev->flags & FL_ONGROUND ) && !DroneControl )
-			m_flStaminaValue -= 20;
+			m_flStaminaValue -= 20.0f;
 		else if ( m_afButtonReleased & IN_JUMP )
 			return;
 	}
@@ -3707,7 +3707,8 @@ void CBasePlayer::ManageElectroBlast( void )
 
 		BlastChargesReady--;
 
-		m_flStaminaValue = 1;
+		m_flStaminaValue = 1.0f;
+		m_flStaminaWait = gpGlobals->time + 3.0f;
 
 		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
 			WRITE_BYTE( TE_DLIGHT );

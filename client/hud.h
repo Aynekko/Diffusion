@@ -734,6 +734,7 @@ private:
 	int BlastChargesReady;
 	bool CanElectroBlast;
 	float AlphaFade1, AlphaFade2, AlphaFade3;
+	float circlea1, circlea2, circlea3;
 };
 
 class CHudTriggerTimer : public CHudBase
