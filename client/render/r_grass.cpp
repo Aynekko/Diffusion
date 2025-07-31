@@ -580,11 +580,11 @@ void R_DrawLightForGrassMesh( plight_t *pl, grass_t *grass, int tex, word &hLast
 
 		// write constants
 		pglUniformMatrix4fvARB( RI->currentshader->u_LightViewProjectionMatrix, 1, GL_FALSE, &gl_lightViewProjMatrix[0] );
-		float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture[0] );
-		float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
+		float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
+		float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
 
 		GL_Bind( GL_TEXTURE1, pl->projectionTexture );
-		GL_Bind( GL_TEXTURE2, pl->shadowTexture[0] );
+		GL_Bind( GL_TEXTURE2, pl->shadowTexture );
 
 		Vector4D grasslight_params[7];
 		// light dir
@@ -1688,8 +1688,8 @@ void R_DrawGrassLight( plight_t *pl )
 
 	// write constants
 	pglUniformMatrix4fvARB( RI->currentshader->u_LightViewProjectionMatrix, 1, GL_FALSE, &gl_lightViewProjMatrix[0] );
-	float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture[0] );
-	float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
+	float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
+	float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
 
 	// depth scale and bias and shadowmap resolution
 	pglUniform4fARB( RI->currentshader->u_LightDir, lightdir.x, lightdir.y, lightdir.z, pl->fov );
@@ -1701,7 +1701,7 @@ void R_DrawGrassLight( plight_t *pl )
 	pglUniform1fARB( RI->currentshader->u_DynLightBrightness, pl->brightness );
 
 	GL_Bind( GL_TEXTURE1, pl->projectionTexture );
-	GL_Bind( GL_TEXTURE2, pl->shadowTexture[0] );
+	GL_Bind( GL_TEXTURE2, pl->shadowTexture );
 
 	R_DrawGrass( true );
 

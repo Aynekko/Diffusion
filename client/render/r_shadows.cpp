@@ -522,7 +522,7 @@ void R_RenderShadowScene( plight_t *pl )
 	RI->viewport[2] = RI->viewport[3] = ShadowViewport;
 
 	if( FBOsupported )
-		pl->shadowTexture[0] = R_AllocateShadowFramebuffer( pl );
+		pl->shadowTexture = R_AllocateShadowFramebuffer( pl );
 
 	r_stats.num_passes++;
 	R_ShadowPassSetupFrame( pl );
@@ -541,7 +541,7 @@ void R_RenderShadowScene( plight_t *pl )
 	if( FBOsupported )
 		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, glState.frameBuffer == -1 ? 0 : glState.frameBuffer );
 	else
-		pl->shadowTexture[0] = R_AllocateShadowTexture();
+		pl->shadowTexture = R_AllocateShadowTexture();
 }
 
 void R_RenderShadowCubeSide( plight_t *pl, int side )
@@ -563,7 +563,7 @@ void R_RenderShadowCubeSide( plight_t *pl, int side )
 	RI->viewport[2] = RI->viewport[3] = ShadowViewport;
 
 	if( FBOsupported )
-		pl->shadowTexture[0] = R_AllocateShadowFramebuffer( pl, side );
+		pl->shadowTexture = R_AllocateShadowFramebuffer( pl, side );
 
 	R_ShadowPassSetupFrame( pl, side );
 
@@ -585,7 +585,7 @@ void R_RenderShadowCubeSide( plight_t *pl, int side )
 	if( FBOsupported )
 		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, glState.frameBuffer == -1 ? 0 : glState.frameBuffer );
 	else
-		pl->shadowTexture[0] = R_AllocateShadowCubemap( side );
+		pl->shadowTexture = R_AllocateShadowCubemap( side );
 }
 
 void R_RenderShadowmaps(void)

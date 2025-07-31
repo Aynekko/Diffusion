@@ -2358,8 +2358,8 @@ void R_DrawLightForSurfList( plight_t *pl )
 
 			// write constants
 			pglUniformMatrix4fvARB( RI->currentshader->u_LightViewProjectionMatrix, 1, GL_FALSE, &gl_lightViewProjMatrix[0] );
-			const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture[0] );
-			const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
+			const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
+			const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
 
 			// set the current waveheight
 			if( FBitSet( s->flags, SURF_WATER ) )
@@ -2395,7 +2395,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 		//	R_SetRenderColor( RI->currententity );
 
 			GL_Bind( GL_TEXTURE2, pl->projectionTexture );
-			GL_Bind( GL_TEXTURE3, pl->shadowTexture[0] );
+			GL_Bind( GL_TEXTURE3, pl->shadowTexture );
 
 			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
 

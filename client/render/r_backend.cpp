@@ -268,8 +268,8 @@ bool R_BeginDrawProjectionGLSL( plight_t *pl, float lightscale )
 
 	// write constants
 	pglUniformMatrix4fvARB( RI->currentshader->u_LightViewProjectionMatrix, 1, GL_FALSE, &gl_lightViewProjMatrix[0] );
-	float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture[0] );
-	float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture[0] );
+	float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
+	float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
 
 	Vector4D light_params[6];
 	// light dir + fov
@@ -288,7 +288,7 @@ bool R_BeginDrawProjectionGLSL( plight_t *pl, float lightscale )
 	pglUniform4fvARB( RI->currentshader->u_LightParams, 6, &light_params[0][0] );
 
 	GL_Bind( GL_TEXTURE1, pl->projectionTexture );
-	GL_Bind( GL_TEXTURE2, pl->shadowTexture[0] );
+	GL_Bind( GL_TEXTURE2, pl->shadowTexture );
 
 	return true;
 }

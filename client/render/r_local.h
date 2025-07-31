@@ -195,7 +195,7 @@ typedef struct plight_s
 	struct model_s	*pSprite;		// animated sprite
 	int		cinTexturenum;	// not gltexturenum!
 	int		lastframe;	// cinematic lastframe
-	int		shadowTexture[MAX_SHADOWS];	// shadowmap for this light
+	int		shadowTexture;	// shadowmap for this light
 
 	// scissor data
 	float		x, y, w, h;
