@@ -161,7 +161,7 @@ int CHudTutorial::Draw( float flTime )
 	}
 
 	// draw tutorial frame/background
-	FillRoundedRGBA( x, y, Twidth + (border * 2.0f), Theight + image_h + (border * 3.0f), 10.0f, Vector4D( 0.5f, 0.5f, 0.5f, alpha * 0.8f ) );
+	FillRoundedRGBA( x, y, Twidth + (border * 2.0f), Theight + image_h + (border * (CurrentImage != -1 ? 3.0f : 2.0f)), 10.0f, Vector4D( 0.5f, 0.5f, 0.5f, alpha * 0.8f ) );
 
 	// draw the image if present
 	if( CurrentImage != -1 )
@@ -175,7 +175,7 @@ int CHudTutorial::Draw( float flTime )
 	}
 
 	// draw the tutorial text
-	MessageDraw( tutorial, x + border, y + border + border + image_h );
+	MessageDraw( tutorial, x + border, y + border + (CurrentImage != -1 ? border : 0) + image_h );
 	
 	return 1;
 }
