@@ -3628,7 +3628,8 @@ void CBasePlayer::ManageElectroBlast( void )
 	if( BlastAbilityLVL == -1 ) // first time upgrading?
 	{
 		MESSAGE_BEGIN( MSG_ONE, gmsgStatusIconTutor, NULL, pev );
-			WRITE_STRING( STRING( MAKE_STRING( "tutor_electroblast" ) ) );
+			WRITE_STRING( "tutor_electroblast" );
+			WRITE_STRING( "textures/!tutor/tutor_electroblast.dds" );
 		MESSAGE_END();
 		LastBlastTime = gpGlobals->time - 27;
 		BlastChargesReady = 0;
@@ -3708,7 +3709,7 @@ void CBasePlayer::ManageElectroBlast( void )
 		BlastChargesReady--;
 
 		m_flStaminaValue = 1.0f;
-		m_flStaminaWait = gpGlobals->time + 3.0f;
+		m_flStaminaWait = gpGlobals->time + 5.0f;
 
 		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
 			WRITE_BYTE( TE_DLIGHT );

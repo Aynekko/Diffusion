@@ -143,17 +143,25 @@ int CHudTutorial::Draw( float flTime )
 			image_h = 128;
 		}
 
+		// bound and scale the dimensions to prevent stretching
 		if( image_w > 512 )
+		{
+			image_h *= 512.0f / image_w;
 			image_w = 512;
+
+		}
 		if( image_h > 512 )
+		{
+			image_w *= 512.0f / image_h;
 			image_h = 512;
+		}
 
 		if( Twidth < image_w )
-			Twidth = image_w - border; // bruh moment...
+			Twidth += image_w - Twidth;
 	}
 
 	// draw tutorial frame/background
-	FillRoundedRGBA( x, y, Twidth + (border * 2.0f), Theight + image_h + (border * 2.0f), 10.0f, Vector4D( 0.5f, 0.5f, 0.5f, alpha * 0.8f ) );
+	FillRoundedRGBA( x, y, Twidth + (border * 2.0f), Theight + image_h + (border * 3.0f), 10.0f, Vector4D( 0.5f, 0.5f, 0.5f, alpha * 0.8f ) );
 
 	// draw the image if present
 	if( CurrentImage != -1 )
@@ -162,12 +170,12 @@ int CHudTutorial::Draw( float flTime )
 		GL_Color4f( 1.0f, 1.0f, 1.0f, alpha );
 		GL_Blend( GL_TRUE );
 		pglBegin( GL_QUADS );
-		DrawQuad( x + border, y + border, x + image_w, y + image_h );
+		DrawQuad( x + border, y + border, x + border + image_w, y + border + image_h );
 		pglEnd();
 	}
 
 	// draw the tutorial text
-	MessageDraw( tutorial, x + border, y + border + image_h );
+	MessageDraw( tutorial, x + border, y + border + border + image_h );
 	
 	return 1;
 }
