@@ -565,38 +565,6 @@ extern plight_t		cl_plights[MAX_PLIGHTS];
 
 =======================================================================
 */
-/*
-enum
-{
-	R_OPENGL_110 = 0,		// base
-	R_WGL_PROCADDRESS,
-	R_ARB_VERTEX_BUFFER_OBJECT_EXT,
-	R_ARB_VERTEX_ARRAY_OBJECT_EXT,
-	R_TEXTURE_ARRAY_EXT,	// shaders only
-	R_EXT_GPU_SHADER4,		// shaders only
-	R_DRAW_BUFFERS_EXT,
-	R_ARB_MULTITEXTURE,
-	R_TEXTURECUBEMAP_EXT,
-	R_SHADER_GLSL100_EXT,
-	R_DRAW_RANGEELEMENTS_EXT,
-	R_TEXTURE_3D_EXT,
-	R_SHADER_OBJECTS_EXT,
-	R_VERTEX_SHADER_EXT,	// glsl vertex program
-	R_FRAGMENT_SHADER_EXT,	// glsl fragment program	
-	R_ARB_TEXTURE_NPOT_EXT,
-	R_TEXTURE_2D_RECT_EXT,
-	R_DEPTH_TEXTURE,
-	R_SHADOW_EXT,
-	R_FRAMEBUFFER_OBJECT,
-	R_SEPARATE_BLENDFUNC_EXT,
-	R_OCCLUSION_QUERIES_EXT,
-	R_SEAMLESS_CUBEMAP,
-	R_BINARY_SHADER_EXT,
-	R_PARANOIA_EXT,		// custom OpenGL32.dll with hacked function glDepthRange
-	R_DEBUG_OUTPUT,
-	R_A2C_DITHER_CONTROL,
-	R_EXTCOUNT,		// must be last
-};*/
 enum
 {
 	R_OPENGL_110 = 0,		// base
@@ -625,10 +593,8 @@ enum
 	R_SEAMLESS_CUBEMAP,
 	R_BINARY_SHADER_EXT,
 	R_PARANOIA_EXT,		// custom OpenGL32.dll with hacked function glDepthRange
-	R_DEBUG_OUTPUT,
 	R_KHR_DEBUG,
 	R_ARB_PIXEL_BUFFER_OBJECT,
-	R_A2C_DITHER_CONTROL,
 	R_EXTCOUNT,		// must be last
 };
 
@@ -729,8 +695,6 @@ void GL_Setup2D( void );
 void GL_Setup3D( void );
 void GL_CleanupDrawState( void );
 void GL_CleanupAllTextureUnits( void );
-void GL_AlphaToCoverage( const bool enable );
-bool GL_UsingAlphaToCoverage( void );
 void GL_DepthRange( const GLfloat depthmin, const GLfloat depthmax );
 void GL_DepthTest( const GLint enable );
 void GL_Texture2D( const GLint enable );

@@ -418,27 +418,6 @@ void GL_BindFBO( const GLint buffer )
 	glState.frameBuffer = buffer;
 }
 
-void GL_AlphaToCoverage( const bool enable )
-{
-	// TODO store state locally to avoid GL-calls to get current state
-	if( pglIsEnabled( GL_SAMPLE_ALPHA_TO_COVERAGE_ARB ) == enable )
-		return;
-
-	if( enable && 1 )// CVAR_TO_BOOL( gl_alpha2coverage ) )
-	{
-		pglEnable( GL_SAMPLE_ALPHA_TO_COVERAGE_ARB );
-	}
-	else 
-	{
-		pglDisable( GL_SAMPLE_ALPHA_TO_COVERAGE_ARB );
-	}
-}
-
-bool GL_UsingAlphaToCoverage( void )
-{
-	return (CVAR_GET_FLOAT( "gl_msaa" ) > 0.0f);
-}
-
 //=============================================================================================================
 // FillRoundedRGBA
 // credits: https://stackoverflow.com/questions/5369507/opengl-es-1-0-2d-rounded-rectangle by user6458202

@@ -1612,16 +1612,6 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 			GL_AddShaderDirective( options, "BMODEL_HAS_LUMA" );
 	}
 
-	/*
-	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransAlpha )
-	{
-		// case when using textures with prefix '{'
-		if( GL_UsingAlphaToCoverage() && GL_Support( R_A2C_DITHER_CONTROL ) )
-		{
-			// enable macro only when we're disabled dithering for A2C
-			GL_AddShaderDirective( options, "ALPHA_TO_COVERAGE" );
-		}
-	}*/
 	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransAlpha && !IsLandscape )
 		GL_AddShaderDirective( options, "ALPHA_RESCALING" );
 
@@ -2008,11 +1998,7 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 	Q_strncpy( glname, "StudioSolid", sizeof( glname ));
 	memset( options, 0, sizeof( options ));
 
-	bool flagAdditive = FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) ? true : false;
-	bool flagMasked = FBitSet( mat->flags, STUDIO_NF_MASKED ) ? true : false;
-	bool texTransparent = flagAdditive || flagMasked;
-	bool texAlphaToCoverage = FBitSet( mat->flags, STUDIO_NF_ALPHATOCOVERAGE ) ? true : false;
-	bool usingAlphaBlend = texTransparent && FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) && !texAlphaToCoverage;
+	const bool bMasked = FBitSet( mat->flags, STUDIO_NF_MASKED ) ? true : false;
 
 	if( tr.materials[mat->gl_diffuse_id].fullbright ) // .monitor automatically sets this too
 		fullbright = true;
@@ -2072,26 +2058,8 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 		GL_EncodeNormal( options, tr.materials[mat->gl_diffuse_id].gl_normalmap_id );
 	}
 
-	if( flagMasked )
+	if( bMasked )
 		GL_AddShaderDirective( options, "ALPHA_RESCALING" );
-
-	/*
-	// mixed mode: solid & transparent controlled by alpha-channel
-	if( RI->currententity && texTransparent && RI->currententity->curstate.rendermode != kRenderGlow )
-	{
-		if( usingAlphaBlend ) 
-		{
-			GL_AddShaderDirective( options, "ALPHA_BLENDING" );
-		}
-		else if( texAlphaToCoverage && GL_UsingAlphaToCoverage() )
-		{
-			if( GL_Support( R_A2C_DITHER_CONTROL ) )
-			{
-				// enable macro only when we're disabled dithering for A2C
-				GL_AddShaderDirective( options, "ALPHA_TO_COVERAGE" );
-			}
-		}
-	}*/
 
 	// diffusioncubemaps		
 	if( CVAR_TO_BOOL( gl_cubemaps ) && (tr.materials[mat->gl_diffuse_id].ReflectScale[0] > 0.01f) )
@@ -2143,12 +2111,6 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 
 	char glname[64];
 	char options[MAX_OPTIONS_LENGTH];
-
-	bool flagAdditive = FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) ? true : false;
-	bool flagMasked = FBitSet( mat->flags, STUDIO_NF_MASKED ) ? true : false;
-	bool texTransparent = flagAdditive || flagMasked;
-	bool texAlphaToCoverage = true;// FBitSet( mat->flags, STUDIO_NF_ALPHATOCOVERAGE );
-	bool usingAlphaBlend = texTransparent && FBitSet( mat->flags, STUDIO_NF_HAS_ALPHA ) && !texAlphaToCoverage;
 
 	Q_strncpy( glname, "StudioDlight", sizeof( glname ));
 	memset( options, 0, sizeof( options ));

@@ -70,12 +70,6 @@ typedef char GLchar;
 #define GL_BLEND				0x0BE2
 #define GL_ALPHA_TEST			0x0BC0
 
-// GL_NV_alpha_to_coverage_dither_control
-#define GL_ALPHA_TO_COVERAGE_DITHER_DEFAULT_NV	0x934D
-#define GL_ALPHA_TO_COVERAGE_DITHER_ENABLE_NV	0x934E
-#define GL_ALPHA_TO_COVERAGE_DITHER_DISABLE_NV	0x934F
-#define GL_ALPHA_TO_COVERAGE_DITHER_MODE_NV		0x92BF
-
 // shading model
 #define GL_FLAT				0x1D00
 #define GL_SMOOTH				0x1D01
@@ -1269,8 +1263,6 @@ EXTERN void ( APIENTRY *pglDebugMessageControlARB)( GLenum source, GLenum type, 
 EXTERN void ( APIENTRY *pglDebugMessageInsertARB)( GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const char* buf );
 EXTERN void ( APIENTRY *pglDebugMessageCallbackARB)( pglDebugProcARB callback, void* userParam );
 EXTERN GLuint ( APIENTRY *pglGetDebugMessageLogARB)( GLuint count, GLsizei bufsize, GLenum* sources, GLenum* types, GLuint* ids, GLuint* severities, GLsizei* lengths, char* messageLog );
-
-EXTERN void (APIENTRY *pglAlphaToCoverageDitherControlNV)(GLenum mode);
 
 EXTERN GLhandleARB( APIENTRY *pglCreateShader )(GLenum shaderType);
 EXTERN void (APIENTRY *pglAttachShader)(GLuint program, GLuint shader);
