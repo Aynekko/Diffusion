@@ -71,9 +71,11 @@ void CHudHealth::Reset( void )
 	m_bitsDamage = 0;
 
 	for( int i = 0; i < NUM_DMG_TYPES; i++ )
-	{
 		m_dmg[i].fExpire = 0;
-	}
+
+	// diffusion - reset "offline", saverestore issues again...
+	gHUD.NextDrawingOfflineHUDTime = 0;
+	gHUD.IsDrawingOfflineHUD = false;
 }
 
 int CHudHealth::VidInit( void )
@@ -86,9 +88,6 @@ int CHudHealth::VidInit( void )
 	giDmgHeight = gHUD.GetSpriteRect( m_HUD_dmg_bio ).right - gHUD.GetSpriteRect( m_HUD_dmg_bio ).left;
 	giDmgWidth = gHUD.GetSpriteRect( m_HUD_dmg_bio ).bottom - gHUD.GetSpriteRect( m_HUD_dmg_bio ).top;
 
-	// diffusion - reset "offline", saverestore issues again...
-	gHUD.NextDrawingOfflineHUDTime = 0;
-	gHUD.IsDrawingOfflineHUD = false;
 	return 1;
 }
 
