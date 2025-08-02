@@ -2355,8 +2355,8 @@ void CCar::Drive( void )
 	else
 	{
 		float mult = fabs( ChassisAng.x );
-		if( mult < 1 ) mult = 1; // -____-
-		DownForce = -AbsCarSpeed * (0.02 * mult);
+		if( mult < 1.0f ) mult = 1.0f; // -____-
+		DownForce = -AbsCarSpeed * (0.05f * mult);
 	}
 
 	pev->velocity.z = DownForce;
