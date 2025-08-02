@@ -1253,10 +1253,9 @@ void R_CheckFog( void )
 				tr.fogColor[0] = ((tr.movevars->fog_settings & 0xFF000000) >> 24) / 255.0f;
 				tr.fogColor[1] = ((tr.movevars->fog_settings & 0xFF0000) >> 16) / 255.0f;
 				tr.fogColor[2] = ((tr.movevars->fog_settings & 0xFF00) >> 8) / 255.0f;
-				if( FBitSet( RI->params, RP_SKYPORTALVIEW ) )
-					tr.fogDensity = (tr.movevars->fog_settings & 0xFF) * 0.00005f;
-				else
-					tr.fogDensity = (tr.movevars->fog_settings & 0xFF) * 0.000005f;
+				tr.fogDensity = (tr.movevars->fog_settings & 0xFF) * 0.000005f;
+				if( FBitSet( RI->params, RP_SKYPORTALVIEW ) && tr.sky_camera )
+					tr.fogDensity *= tr.sky_camera->curstate.scale;
 			}
 			tr.fogEnabled = true;
 		}
