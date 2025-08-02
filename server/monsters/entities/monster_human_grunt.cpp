@@ -72,6 +72,7 @@ enum
 };
 
 int g_fGruntQuestion;				// true if an idle grunt asked a question. Cleared when someone answers.
+bool g_bGruntAlert;
 
 extern DLL_GLOBAL int		g_iSkillLevel;
 
@@ -1473,6 +1474,9 @@ void CHGrunt :: IdleSound( void )
 			g_fGruntQuestion = 0;
 		}
 		JustSpoke();
+
+		// clear alert message here also
+		g_bGruntAlert = false;
 	}
 }
 
@@ -2406,7 +2410,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 				{
 					MySquadLeader()->m_fEnemyEluded = FALSE;
 
-					if (FOkToSpeak() && (m_hEnemy != NULL) )
+					if( !g_bGruntAlert && (m_hEnemy != NULL) )
 					{
 						if( m_hEnemy->IsPlayer() ) // player
 						{
@@ -2424,6 +2428,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 							SENTENCEG_PlayRndSz( ENT(pev), "HG_MONST", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
 
 						JustSpoke();
+						g_bGruntAlert = true;
 					}
 				}
 
@@ -5015,7 +5020,7 @@ Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 		// new enemy
 		if( HasConditions( bits_COND_NEW_ENEMY ) )
 		{
-			if( FOkToSpeak() && (m_hEnemy != NULL) )// && RANDOM_LONG(0,1))
+			if( !g_bGruntAlert && (m_hEnemy != NULL) )// && RANDOM_LONG(0,1))
 			{
 				if( m_hEnemy->IsPlayer() )
 				{
@@ -5033,6 +5038,7 @@ Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 					SENTENCEG_PlayRndSz( ENT( pev ), "HG_MONST", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
 
 				JustSpoke();
+				g_bGruntAlert = true;
 			}
 
 			if( (OccupySlot( bits_SLOTS_HGRUNT_GRENADE )) && !DroneSpawned ) // HasConditions ( bits_COND_CAN_RANGE_ATTACK2 )
