@@ -36,6 +36,7 @@ BEGIN_DATADESC( CBoat )
 	DEFINE_KEYFIELD( DamageMult, FIELD_FLOAT, "damagemult" ),
 	DEFINE_KEYFIELD( CameraHeight, FIELD_INTEGER, "camheight" ),
 	DEFINE_KEYFIELD( CameraDistance, FIELD_INTEGER, "camdistance" ),
+	DEFINE_KEYFIELD( FreeCameraDistance, FIELD_INTEGER, "freecamdistance" ),
 	DEFINE_FIELD( hDriver, FIELD_EHANDLE ),
 	DEFINE_FUNCTION( Setup ),
 	DEFINE_FUNCTION( Drive ),
@@ -358,23 +359,24 @@ void CBoat::Setup( void )
 	else
 		ALERT( at_warning, "func_boat \"%s\" doesn't have body model entity specified, collision won't work properly.\n", GetTargetname() );
 
+	if( CameraDistance <= 0 )
+	{
+		if( pChassisMdl )
+		{
+			// get camera distance according to model bounds
+			Vector mins = g_vecZero;
+			Vector maxs = g_vecZero;
+			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+			CameraDistance = (int)((mins - maxs).Length() * pChassisMdl->pev->scale);
+		}
+		else
+			CameraDistance = 230;
+	}
+
 	if( pCamera1 )
 	{
 		pCamera1->SetNullModel();
 		pCamera1->pev->effects |= EF_SKIPPVS;
-		if( !CameraDistance )
-		{
-			if( pChassisMdl )
-			{
-				// get camera distance according to model bounds
-				Vector mins = g_vecZero;
-				Vector maxs = g_vecZero;
-				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-				CameraDistance = (int)((mins - maxs).Length() * pChassisMdl->pev->scale);
-			}
-			else
-				CameraDistance = 230;
-		}
 		if( !CameraHeight )
 		{
 			if( pChassisMdl )
@@ -419,18 +421,20 @@ void CBoat::Setup( void )
 	{
 		pFreeCam->SetNullModel();
 		pFreeCam->SetParent( this );
-		pFreeCam->pev->iuser1 = 0;
-		if( pChassisMdl )
+		if( FreeCameraDistance <= 0 )
 		{
-			// get camera distance according to model bounds
-			Vector mins = g_vecZero;
-			Vector maxs = g_vecZero;
-			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-			pFreeCam->pev->iuser1 = (int)((mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale);
+			if( pChassisMdl )
+			{
+				// get camera distance according to model bounds
+				Vector mins = g_vecZero;
+				Vector maxs = g_vecZero;
+				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+				FreeCameraDistance = (int)((mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale);
+			}
+			else
+				FreeCameraDistance = CameraDistance;
 		}
 		pFreeCam->pev->effects |= EF_SKIPPVS;
-		if( !FreeCameraDistance )
-			FreeCameraDistance = CameraDistance;
 	}
 
 	if( pev->iuser1 ) // rotate boat

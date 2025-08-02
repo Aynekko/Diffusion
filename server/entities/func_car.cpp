@@ -1028,23 +1028,24 @@ void CCar::Setup( void )
 		pWheel4->pev->owner = edict();
 	}
 
+	if( CameraDistance <= 0 )
+	{
+		if( pChassisMdl )
+		{
+			// get camera distance according to model bounds
+			Vector mins = g_vecZero;
+			Vector maxs = g_vecZero;
+			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+			CameraDistance = (int)((mins - maxs).Length() * pChassisMdl->pev->scale);
+		}
+		else
+			CameraDistance = 230;
+	}
+
 	if( pCamera1 )
 	{
 		pCamera1->SetNullModel();
 		pCamera1->pev->effects |= EF_SKIPPVS;
-		if( !CameraDistance )
-		{
-			if( pChassisMdl )
-			{
-				// get camera distance according to model bounds
-				Vector mins = g_vecZero;
-				Vector maxs = g_vecZero;
-				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-				CameraDistance = (int)((mins - maxs).Length() * pChassisMdl->pev->scale);
-			}
-			else
-				CameraDistance = 230;
-		}
 		if( !CameraHeight )
 		{
 			if( pChassisMdl )
@@ -1100,18 +1101,20 @@ void CCar::Setup( void )
 	{
 		pFreeCam->SetNullModel();
 		pFreeCam->SetParent( this );
-		pFreeCam->pev->iuser1 = 0;
-		if( pChassisMdl )
+		if( FreeCameraDistance <= 0 )
 		{
-			// get camera distance according to model bounds
-			Vector mins = g_vecZero;
-			Vector maxs = g_vecZero;
-			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-			pFreeCam->pev->iuser1 = (int)( (mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale );
+			if( pChassisMdl )
+			{
+				// get camera distance according to model bounds
+				Vector mins = g_vecZero;
+				Vector maxs = g_vecZero;
+				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+				FreeCameraDistance = (int)((mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale);
+			}
+			else
+				FreeCameraDistance = CameraDistance;
 		}
 		pFreeCam->pev->effects |= EF_SKIPPVS;
-		if( !FreeCameraDistance )
-			FreeCameraDistance = CameraDistance;
 	}
 
 	if( pDoorHandle1 )

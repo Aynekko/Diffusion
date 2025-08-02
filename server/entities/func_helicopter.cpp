@@ -56,6 +56,7 @@ BEGIN_DATADESC( CHelicopter )
 	DEFINE_FIELD( BladeSpeed, FIELD_FLOAT ),
 	DEFINE_KEYFIELD( CameraHeight, FIELD_INTEGER, "camheight" ),
 	DEFINE_KEYFIELD( CameraDistance, FIELD_INTEGER, "camdistance" ),
+	DEFINE_KEYFIELD( FreeCameraDistance, FIELD_INTEGER, "freecamdistance" ),
 	DEFINE_FIELD( IsHeli, FIELD_BOOLEAN ),
 END_DATADESC()
 
@@ -356,23 +357,24 @@ void CHelicopter::Setup( void )
 	else
 		ALERT( at_warning, "func_helicopter \"%s\" doesn't have body model entity specified, collision won't work properly.\n", GetTargetname() );
 
+	if( CameraDistance <= 0 )
+	{
+		if( pChassisMdl )
+		{
+			// get camera distance according to model bounds
+			Vector mins = g_vecZero;
+			Vector maxs = g_vecZero;
+			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+			CameraDistance = (int)((mins - maxs).Length() * pChassisMdl->pev->scale);
+		}
+		else
+			CameraDistance = 250;
+	}
+
 	if( pCamera1 )
 	{
 		pCamera1->SetNullModel();
 		pCamera1->pev->effects |= EF_SKIPPVS;
-		if( !CameraDistance )
-		{
-			if( pChassisMdl )
-			{
-				// get camera distance according to model bounds
-				Vector mins = g_vecZero;
-				Vector maxs = g_vecZero;
-				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-				CameraDistance = (int)((mins - maxs).Length() * pChassisMdl->pev->scale);
-			}
-			else
-				CameraDistance = 230;
-		}
 		if( !CameraHeight )
 		{
 			if( pChassisMdl )
@@ -439,19 +441,20 @@ void CHelicopter::Setup( void )
 	{
 		pFreeCam->SetNullModel();
 		pFreeCam->SetParent( this );
-		if( pChassisMdl )
+		if( FreeCameraDistance <= 0 )
 		{
-			// get camera distance according to model bounds
-			Vector mins = g_vecZero;
-			Vector maxs = g_vecZero;
-			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-			pFreeCam->pev->iuser1 = (int)((mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale);
+			if( pChassisMdl )
+			{
+				// get camera distance according to model bounds
+				Vector mins = g_vecZero;
+				Vector maxs = g_vecZero;
+				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+				FreeCameraDistance = (int)((mins - maxs).Length() * pChassisMdl->pev->scale);
+			}
+			else
+				FreeCameraDistance = CameraDistance;
 		}
-		else
-			pFreeCam->pev->iuser1 = 100; // distance from heli, because it's bigger
 		pFreeCam->pev->effects |= EF_SKIPPVS;
-		if( !FreeCameraDistance )
-			FreeCameraDistance = CameraDistance;
 	}
 
 	if( pDoorHandle1 )
