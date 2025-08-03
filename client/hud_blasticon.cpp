@@ -72,6 +72,9 @@ int CHudBlastIcons::Draw( float flTime )
 	if( tr.time == tr.oldtime ) // paused
 		return 1;
 
+	if( gHUD.IsDrawingOfflineHUD || CL_IsDead() || gHUD.HUDSuitOffline )
+		return 1;
+
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
 
