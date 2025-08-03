@@ -2071,7 +2071,8 @@ void CCar::Drive( void )
 
 	AccelAddX = bound( -MaxLean * 0.2, AccelAddX, MaxLean * 0.2 );
 	
-	float NewChassisAngX = -CrossChange * 0.5 * SuspDiff2 + BrakeAddX + AccelAddX + AddChassisShake - AccelAddX_ShiftAdd;
+	const float NewChassisAngX = -CrossChange * 0.5 * SuspDiff2 + BrakeAddX + AccelAddX + AddChassisShake - AccelAddX_ShiftAdd;
+	const float OldChassisAngX = ChassisAng.x;
 	AccelAddX_ShiftAdd = UTIL_Approach( 0.0f, AccelAddX_ShiftAdd, 10 * gpGlobals->frametime );
 	if( FrontWheelsInAir + RearWheelsInAir < 4 )
 		ChassisAng.x = lerp( ChassisAng.x, NewChassisAngX, SuspHardness * gpGlobals->frametime );
@@ -2137,6 +2138,12 @@ void CCar::Drive( void )
 
 	bool DoBrakeSqueak = false;
 
+	int RampDir = 1; // 1 up, -1 down
+	if( Forward == 1 && ChassisAng.x > 10.0f )
+		RampDir = -1;
+	else if( Forward == -1 && ChassisAng.x < -10.0f ) // going backwards, nose up
+		RampDir = -1;
+
 	if( !Collision.IsNull() )
 	{
 		// can't accelerate if we are colliding
@@ -2175,15 +2182,9 @@ void CCar::Drive( void )
 		// no accelerate/brake buttons pressed or all wheels in air
 		// car slows down (aka friction...)
 		float SlowDownRamp = 150.0f * pev->frame;
-		int RampDir = 1; // 1 up, -1 down
 
 		if( fabs( ChassisAng.x ) > 10 ) // start to go down by itself, if on a slope
 			SlowDownRamp = 100 + 5 * fabs( ChassisAng.x ); // must put weight there I guess
-
-		if( Forward == 1 && ChassisAng.x > 10.0f )
-			RampDir = -1;
-		else if( Forward == -1 && ChassisAng.x < -10.0f ) // going backwards, nose up
-			RampDir = -1;
 
 		if( CarSpeed >= 20.0f )
 			CarSpeed -= RampDir * SlowDownRamp * WaterVelocityMult * (1/surf_CurrentMult) * gpGlobals->frametime;
@@ -2205,7 +2206,7 @@ void CCar::Drive( void )
 				CarSpeed -= 300 * gpGlobals->frametime;
 			else if( !IsShifting )
 			{
-				float tx = TurningOverride ? 1.0f : (1.0f - AbsTurning * 0.5f);
+				float tx = TurningOverride ? 1.0f : (1.0f - AbsTurning * 0.75f);
 				CarSpeed += ActualAccelRate * tx * WaterVelocityMult * surf_CurrentMult * gpGlobals->frametime;
 			}
 
@@ -2254,10 +2255,10 @@ void CCar::Drive( void )
 	}
 
 	// chassis has changed angles too fast (more than 5 deg this frame). slow down
-	if( fabs( NewChassisAngX - ChassisAng.x ) > 5.0f )
-	{
-		CarSpeed = UTIL_Approach( 0, CarSpeed, 150 * gpGlobals->frametime * Forward * fabs( NewChassisAngX - ChassisAng.x ) );
-	//	ALERT( at_console, "slow %f\n", fabs( NewChassisAngX - ChassisAng.x ) );
+	if( fabs( NewChassisAngX - OldChassisAngX ) > 5.0f && (FrontWheelsInAir + RearWheelsInAir == 0) )
+	{	
+		CarSpeed = UTIL_Approach( 0.0f, CarSpeed, 150 * gpGlobals->frametime * RampDir * fabs( NewChassisAngX - OldChassisAngX ) );
+	//	ALERT( at_console, "slow %.1f\n", fabs( NewChassisAngX - OldChassisAngX ) );
 	//	CarSpeed -= 50 * gpGlobals->frametime * Forward * fabs( NewChassisAngX - ChassisAng.x );
 	}
 
@@ -2267,18 +2268,16 @@ void CCar::Drive( void )
 	}
 	else
 	{
-		/* // nah
 		// also slow down the car if turning too much
-		float turn_slowdown_back = AbsTurning * 0.25f;
-		float turn_slowdown_forw = AbsTurning * 0.75f;
-		if( TurningOverride )
+		float turn_slowdown_back = 1.0f;
+		float turn_slowdown_forw = 1.0f;
+		if( !TurningOverride )
 		{
-			turn_slowdown_back = 0.0f;
-			turn_slowdown_forw = 0.0f;
+			turn_slowdown_back /= 1.0f + (AbsTurning * 0.25f);
+			turn_slowdown_forw /= 1.0f + (AbsTurning * 0.5f);
 		}
-		CarSpeed = bound( -ActualMaxCarSpeedBackwards + (ActualMaxCarSpeedBackwards * turn_slowdown_back), CarSpeed, ActualMaxCarSpeed - (ActualMaxCarSpeed * turn_slowdown_forw) );
-		*/
-		CarSpeed = bound( -ActualMaxCarSpeedBackwards, CarSpeed, ActualMaxCarSpeed );
+		// main speed bound
+		CarSpeed = bound( -ActualMaxCarSpeedBackwards * turn_slowdown_back, CarSpeed, ActualMaxCarSpeed * turn_slowdown_forw );
 	}
 
 	// -------- apply main movement  --------
@@ -2359,7 +2358,7 @@ void CCar::Drive( void )
 	{
 		float mult = fabs( ChassisAng.x );
 		if( mult < 1.0f ) mult = 1.0f; // -____-
-		DownForce = -AbsCarSpeed * (0.05f * mult);
+		DownForce = -AbsCarSpeed * (0.035f * mult);
 	}
 
 	pev->velocity.z = DownForce;

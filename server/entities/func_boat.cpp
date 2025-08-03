@@ -111,6 +111,7 @@ void CBoat::Precache( void )
 
 	PRECACHE_SOUND( "func_car/tires/water.wav" );
 	PRECACHE_SOUND( "func_car/metal_drag.wav" );
+	PRECACHE_SOUND( "func_car/boat_push.wav" );
 
 	PRECACHE_SOUND( "drone/drone_hit1.wav" );
 	PRECACHE_SOUND( "drone/drone_hit2.wav" );
@@ -216,6 +217,7 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 		UTIL_MakeVectors( pPlayer->pev->v_angle );
 		PushVelocity = gpGlobals->v_forward * 200;
 		PushVelocity.z = 35;
+		EMIT_SOUND( edict(), CHAN_STATIC, "func_car/boat_push.wav", VOL_NORM, ATTN_NORM );
 		return;
 	}
 
