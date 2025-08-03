@@ -655,7 +655,18 @@ void CCar::ActivateSelfdrive( void )
 void CCar::DeactivateSelfdrive( void )
 {
 	if( pTankTower )
-		pTankTower->SetAbsAngles( GetAbsAngles() );
+	{
+		Vector TowerAngles = pChassis->GetAbsAngles();
+
+		if( pChassisMdl )
+		{
+			TowerAngles = pChassisMdl->GetLocalAngles();
+			TowerAngles.y += 180.0f; // ???
+			pTankTower->SetLocalAngles( TowerAngles );
+		}
+		else
+			pTankTower->SetAbsAngles( TowerAngles );
+	}
 
 	if( pExhaust1 )
 	{
@@ -771,7 +782,18 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 		pPlayer->pev->fixangle = TRUE;
 		CamUnlocked = false;
 		if( pTankTower )
-			pTankTower->SetAbsAngles( GetAbsAngles() );
+		{
+			Vector TowerAngles = pChassis->GetAbsAngles();
+
+			if( pChassisMdl )
+			{
+				TowerAngles = pChassisMdl->GetLocalAngles();
+				TowerAngles.y += 180.0f; // ???
+				pTankTower->SetLocalAngles( TowerAngles );
+			}
+			else
+				pTankTower->SetAbsAngles( TowerAngles );
+		}
 
 		if( pExhaust1 )
 		{
@@ -2498,26 +2520,30 @@ void CCar::Drive( void )
 		{
 			// turret moves almost freely because we use it as a camera
 			TowerAngles = hDriver->pev->v_angle;
-			TowerAngles.x *= 0.4f; // let's not get carried away...
+			TowerAngles.x *= 0.35f; // let's not get carried away...
 		}
 		else
-			TowerAngles.y = pev->angles.y;
-		pTankTower->SetAbsAngles( TowerAngles );
+		{
+			TowerAngles.y += 180.0f; // ???
+		}
+
+		pTankTower->SetLocalAngles( TowerAngles );
 
 		if( (hDriver->pev->button & IN_ATTACK) && (gpGlobals->time > LastShootTime + 1) )
 		{
 			// use forward vector of the tower
-			UTIL_MakeVectors( TowerAngles );
+			Vector TowerAbsAngles = pTankTower->GetAbsAngles();
+			UTIL_MakeVectors( TowerAbsAngles );
 			Vector RocketOrg = pTankTower->GetAbsOrigin() + gpGlobals->v_forward * 50;
-			Vector RocketAng = TowerAngles;
+			Vector RocketAng = TowerAbsAngles;
 
 			if( !CamUnlocked )
-				RocketAng = TowerAngles; // just forward
+				RocketAng = TowerAbsAngles; // just forward
 			
 			if( !CamUnlocked )
 				RocketAng.x = RocketAng.z = 0;
 
-			RocketAng.x -= 5; // aim higher
+			RocketAng.x -= 5.0f; // aim higher
 			CBaseEntity *pRocket = CBaseEntity::Create( "apc_projectile", RocketOrg, RocketAng, hDriver->edict() );
 
 			if( pRocket )
