@@ -904,11 +904,14 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 
 		int WaterTrail = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/effects/watertrail.spr" );
 
-		pTemp = gEngfuncs.pEfxAPI->R_TempSprite( pos, Vector( 0, 0, 0 ), Scale, WaterTrail, kRenderTransAdd, 0, (Framerate / 255), 0.1, FTENT_FADEOUT );
+		pTemp = gEngfuncs.pEfxAPI->R_TempSprite( pos, Vector( 0, 0, 0 ), Scale, WaterTrail, kRenderTransAdd, 0, (Framerate / 255.0f), 0.1, FTENT_FADEIN | FTENT_FADEOUT );
 
 		if( pTemp )
 		{
-			pTemp->fadeSpeed = 1.0;
+			pTemp->entity.baseline.fuser1 = 0.0f; // for FTENT_FADEIN - starting renderamt
+			pTemp->entity.baseline.fuser2 = tr.time; // for FTENT_FADEIN - spawn time (always tr.time)
+			pTemp->entity.baseline.fuser3 = 2.5f; // for FTENT_FADEIN - fade in speed (more - faster)
+			pTemp->fadeSpeed = 1.0f;
 			pTemp->entity.curstate.rendercolor.r = 255;
 			pTemp->entity.curstate.rendercolor.g = 255;
 			pTemp->entity.curstate.rendercolor.b = 255;

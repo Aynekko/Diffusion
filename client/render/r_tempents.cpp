@@ -211,7 +211,11 @@ void HUD_TempEntUpdate(
 	{
 		int active = 1;
 
-		life = pTemp->die - client_time;
+		if( pTemp->flags & FTENT_FADEIN )
+			life = 1;
+		else
+			life = pTemp->die - client_time;
+
 		pnext = pTemp->next;
 
 		if( life < 0 )
@@ -227,6 +231,23 @@ void HUD_TempEntUpdate(
 
 			}
 			else active = 0;
+		}
+		else
+		{
+			if( pTemp->flags & FTENT_FADEIN )
+			{
+				// fuser1: starts from 0 and accumulates renderamt in float
+				// fuser2: holds the timestamp when entity was spawned
+				// fuser3: fade in speed (fadeSpeed is the fade out speed)
+				pTemp->entity.baseline.fuser1 += 255.0f * pTemp->entity.baseline.fuser3 * g_fFrametime;
+				pTemp->entity.curstate.renderamt = pTemp->entity.baseline.fuser1;
+				if( pTemp->entity.curstate.renderamt >= pTemp->entity.baseline.renderamt )
+				{
+					pTemp->entity.curstate.renderamt = pTemp->entity.baseline.renderamt;
+					pTemp->flags &= ~FTENT_FADEIN;
+					pTemp->die += client_time - pTemp->entity.baseline.fuser2;
+				}
+			}
 		}
 
 		if( !active ) // Kill it

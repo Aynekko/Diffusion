@@ -217,7 +217,7 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 		UTIL_MakeVectors( pPlayer->pev->v_angle );
 		PushVelocity = gpGlobals->v_forward * 200;
 		PushVelocity.z = 35;
-		EMIT_SOUND( edict(), CHAN_STATIC, "func_car/boat_push.wav", VOL_NORM, ATTN_NORM );
+		EMIT_SOUND_DYN( edict(), CHAN_STATIC, "func_car/boat_push.wav", VOL_NORM, ATTN_NORM, 0, RANDOM_LONG( 90, 105 ) );
 		return;
 	}
 

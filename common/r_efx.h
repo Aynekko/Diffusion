@@ -84,6 +84,7 @@ color24 gTracerColors[] =
 #define FTENT_CLIENTCUSTOM	BIT(19) // Must specify callback.  Callback function is responsible for killing tempent and updating fields ( unless other flags specify how to do things )
 #define FTENT_SCALE			BIT(20) // An experiment
 #define FTENT_COLLIDE_STUDIOIGNORE BIT(21) // diffusion - ignore studio models during collision trace
+#define FTENT_FADEIN BIT(22) // diffusion - add
 
 typedef struct tempent_s	TEMPENTITY;
 typedef struct tempent_s
