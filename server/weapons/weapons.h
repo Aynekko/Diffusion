@@ -70,7 +70,7 @@ public:
 	float LastBounceSoundTime; // diffusion - don't play sound too often
 
 	bool SendWaterSplash;
-	Vector OrgAboveWater; // last not-in-water valid position
+	bool DoWaterCheck; // not saved
 
 	bool IsEMPGrenade;
 };

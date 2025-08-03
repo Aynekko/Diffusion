@@ -121,13 +121,19 @@ void CSatchelCharge::SatchelSlide( CBaseEntity *pOther )
 
 void CSatchelCharge :: SatchelThink( void )
 {
-	// There is no model animation so commented this out to prevent net traffic
-	//StudioFrameAdvance( );
-
 	if (!IsInWorld())
 	{
 		UTIL_Remove( this );
 		return;
+	}
+
+	if( !DoWaterCheck )
+	{
+		// spawned underwater, no need to splash
+		if( pev->waterlevel > 0 )
+			SendWaterSplash = true;
+
+		DoWaterCheck = true;
 	}
 
 	if (pev->waterlevel == 3)

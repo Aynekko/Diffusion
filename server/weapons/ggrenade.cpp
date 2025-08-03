@@ -318,6 +318,15 @@ void CGrenade::DangerSoundThink( void )
 		sndentindex = ENTINDEX( pev->owner );
 	CSoundEnt::InsertSound( bits_SOUND_DANGER, GetAbsOrigin() + GetAbsVelocity() * 0.5, GetAbsVelocity().Length( ), 0.2, sndentindex );
 
+	if( !DoWaterCheck )
+	{
+		// spawned underwater, no need to splash
+		if( pev->waterlevel > 0 )
+			SendWaterSplash = true;
+
+		DoWaterCheck = true;
+	}
+
 	if( pev->waterlevel != 0 )
 	{
 		Vector vecVelocity = GetAbsVelocity();
@@ -472,6 +481,15 @@ void CGrenade :: TumbleThink( void )
 	if( pev->dmgtime <= gpGlobals->time )
 		SetThink(&CGrenade::Detonate );
 
+	if( !DoWaterCheck )
+	{
+		// spawned underwater, no need to splash
+		if( pev->waterlevel > 0 )
+			SendWaterSplash = true;
+
+		DoWaterCheck = true;
+	}
+
 	if( pev->waterlevel != 0 )
 	{
 		Vector vecVelocity = GetAbsVelocity();
@@ -525,7 +543,7 @@ CGrenade *CGrenade::ShootContact( entvars_t *pevOwner, Vector vecStart, Vector v
 	pGrenade->SetLocalAngles( UTIL_VecToAngles( pGrenade->GetLocalVelocity( )));
 	pGrenade->pev->owner = ENT(pevOwner);
 	
-	// make monsters afaid of it while in the air
+	// make monsters afraid of it while in the air
 	pGrenade->SetThink(&CGrenade::DangerSoundThink );
 	pGrenade->SetNextThink( 0 );
 	
@@ -579,6 +597,15 @@ void CGrenade::SmokeGrenadeThink( void )
 		SetThink( &CGrenade::SmokeGrenadeExplode );
 		SetNextThink( 1.0 );
 		return;
+	}
+
+	if( !DoWaterCheck )
+	{
+		// spawned underwater, no need to splash
+		if( pev->waterlevel > 0 )
+			SendWaterSplash = true;
+
+		DoWaterCheck = true;
 	}
 
 	// watersplash upon contact with water surface

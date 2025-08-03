@@ -43,6 +43,9 @@ class CCrossbowBolt : public CBaseEntity
 	void OnTeleport( void );
 	void PlayTouchSound( CBaseEntity *pOther );
 	int m_iTrail;
+	bool SendWaterSplash;
+	bool DoWaterCheck; // not saved
+	float fThinkTime;
 
 	DECLARE_DATADESC();
 public:
@@ -56,6 +59,7 @@ BEGIN_DATADESC( CCrossbowBolt )
 	DEFINE_FUNCTION( ExplodeThink ),
 	DEFINE_FUNCTION( BoltTouch ),
 	DEFINE_FUNCTION( PlayTouchSound ),
+	DEFINE_FIELD( SendWaterSplash, FIELD_BOOLEAN ),
 END_DATADESC()
 
 CCrossbowBolt *CCrossbowBolt::BoltCreate( void )
@@ -83,10 +87,12 @@ void CCrossbowBolt::Spawn( void )
 	RelinkEntity( TRUE );
 
 	SetFadeDistance(1500);
+	fThinkTime = 0.0f;
+	SendWaterSplash = false;
 
 	SetTouch( &CCrossbowBolt::BoltTouch );
 	SetThink(&CCrossbowBolt::BubbleThink );
-	SetNextThink(0);
+	SetNextThink( 0 );
 }
 
 void CCrossbowBolt::Precache( )
@@ -273,9 +279,45 @@ void CCrossbowBolt :: OnTeleport( void )
 
 void CCrossbowBolt::BubbleThink( void )
 {
-	SetNextThink(0.1);
+	SetNextThink( 0 );
+
+	if( !DoWaterCheck )
+	{
+		// spawned underwater, no need to splash
+		if( pev->waterlevel > 0 )
+			SendWaterSplash = true;
+
+		DoWaterCheck = true;
+	}
+
+	if( pev->waterlevel != 0 )
+	{
+		if( !SendWaterSplash )
+		{
+			SendWaterSplash = true;
+			Vector org = GetAbsOrigin();
+			MakeWaterSplash( org + Vector( 0, 0, 512 ), org - Vector( 0, 0, 4 ), 1 );
+		}
+	}
+	else
+	{
+		if( SendWaterSplash )
+			SendWaterSplash = false;
+	}
+
+	if( gpGlobals->time < fThinkTime )
+		return;
+
+	fThinkTime = gpGlobals->time + 0.1f;
 
 	SetAbsAngles( UTIL_VecToAngles( GetAbsVelocity() ) );
+
+	if( pev->waterlevel != 0 )
+	{
+		Vector vecVelocity = GetAbsVelocity();
+		vecVelocity *= 0.5f;
+		SetAbsVelocity( vecVelocity );
+	}
 
 	if( pev->waterlevel == 0 )
 		return;
