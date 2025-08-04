@@ -46,6 +46,7 @@ BEGIN_DATADESC( CHelicopter )
 	DEFINE_FIELD( pDriverMdl, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pChassisMdl, FIELD_CLASSPTR ),
 	DEFINE_FIELD( pTankTower, FIELD_CLASSPTR ), // I honestly still don't get it - why do I have to put this here again if it's already defined in the saverestore table in the base class, where this variable is taken from?
+	DEFINE_KEYFIELD( TankTowerRotationOffset, FIELD_INTEGER, "tank_tower_rotation" ),
 	DEFINE_FIELD( pDoorHandle1, FIELD_CLASSPTR ),
 	DEFINE_KEYFIELD( m_iszEngineSnd, FIELD_STRING, "enginesnd" ),
 	DEFINE_KEYFIELD( m_iszIdleSnd, FIELD_STRING, "idlesnd" ),
@@ -147,6 +148,8 @@ void CHelicopter::Spawn( void )
 		BrakeRate = 800;
 	if( !TurningRate )
 		TurningRate = 500;
+	if( !TankTowerRotationOffset )
+		TankTowerRotationOffset = 0;
 	
 	MaxTurn = 50;
 

@@ -39,6 +39,7 @@ BEGIN_DATADESC( CCar )
 	DEFINE_KEYFIELD( carhurt, FIELD_STRING, "carhurt" ),
 	DEFINE_KEYFIELD( camera2, FIELD_STRING, "camera2" ),
 	DEFINE_KEYFIELD( tank_tower, FIELD_STRING, "tank_tower" ),
+	DEFINE_KEYFIELD( TankTowerRotationOffset, FIELD_INTEGER, "tank_tower_rotation" ),
 	DEFINE_KEYFIELD( door_handle, FIELD_STRING, "door_handle" ),
 	DEFINE_KEYFIELD( door_handle2, FIELD_STRING, "door_handle2" ),
 	DEFINE_KEYFIELD( exhaust1, FIELD_STRING, "exhaust1" ),
@@ -444,6 +445,11 @@ void CCar::KeyValue( KeyValueData *pkvd )
 		ShiftingTime = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "tank_tower_rotation" ) )
+	{
+		TankTowerRotationOffset = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		BaseClass::KeyValue( pkvd );
 }
@@ -552,6 +558,8 @@ void CCar::Spawn( void )
 		ShiftingTime = 0.2f;
 	if( !pev->frame ) // friction
 		pev->frame = 1.0f;
+	if( !TankTowerRotationOffset )
+		TankTowerRotationOffset = 0;
 
 	ShiftStartTime = 0;
 	IsShifting = false;
@@ -661,7 +669,7 @@ void CCar::DeactivateSelfdrive( void )
 		if( pChassisMdl )
 		{
 			TowerAngles = pChassisMdl->GetLocalAngles();
-			TowerAngles.y += 180.0f; // ???
+			TowerAngles.y += TankTowerRotationOffset;
 			pTankTower->SetLocalAngles( TowerAngles );
 		}
 		else
@@ -788,7 +796,7 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			if( pChassisMdl )
 			{
 				TowerAngles = pChassisMdl->GetLocalAngles();
-				TowerAngles.y += 180.0f; // ???
+				TowerAngles.y += TankTowerRotationOffset;
 				pTankTower->SetLocalAngles( TowerAngles );
 			}
 			else
@@ -1196,6 +1204,20 @@ void CCar::Setup( void )
 		Vector ang = GetAbsAngles();
 		ang.y += pev->iuser1;
 		SetAbsAngles( ang );
+	}
+
+	if( pTankTower )
+	{
+		Vector TowerAngles = pChassis->GetAbsAngles();
+
+		if( pChassisMdl )
+		{
+			TowerAngles = pChassisMdl->GetLocalAngles();
+			TowerAngles.y += TankTowerRotationOffset;
+			pTankTower->SetLocalAngles( TowerAngles );
+		}
+		else
+			pTankTower->SetAbsAngles( TowerAngles );
 	}
 
 	pev->flags &= ~FL_ONGROUND; // !!! this resets position so the vehicle won't hang in air...
@@ -2524,7 +2546,7 @@ void CCar::Drive( void )
 		}
 		else
 		{
-			TowerAngles.y += 180.0f; // ???
+			TowerAngles.y += TankTowerRotationOffset;
 		}
 
 		pTankTower->SetLocalAngles( TowerAngles );
