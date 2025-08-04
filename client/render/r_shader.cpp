@@ -303,16 +303,20 @@ static void GL_LinkProgram( glsl_program_t *shader )
 	else shader->status |= SHADER_PROGRAM_LINKED;
 }
 
-static void GL_ValidateProgram( glsl_program_t *shader )
+static bool GL_ValidateProgram( glsl_program_t *shader )
 {
-	GLint	validated = 0;
+	GLint validated = 0;
 
-	if( !shader ) return;
+	if( !shader ) return false;
 
 	pglValidateProgramARB( shader->handle );
 
 	pglGetObjectParameterivARB( shader->handle, GL_OBJECT_VALIDATE_STATUS_ARB, &validated );
-	if( !validated ) ALERT( at_error, "%s\n%s shader failed to validate\n", GL_PrintInfoLog( shader->handle ), shader->name );
+
+	if( !validated )
+		ALERT( at_error, "%s\n%s shader failed to validate\n", GL_PrintInfoLog( shader->handle ), shader->name );
+
+	return validated;
 }
 
 int GL_UniformTypeToDwordCount( GLuint type, bool align = false )
@@ -1543,9 +1547,14 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	bool fullBright = false;
 	bool mirror = false;
 	bool portal = false;
-	bool using_cubemaps = false;
 	bool IsLandscape = FBitSet( s->flags, SURF_LANDSCAPE );
 	bool movie = FBitSet( s->flags, SURF_MOVIE );
+
+	bool use_cubemaps = false;
+	bool use_emboss = false;
+	bool use_interior = false;
+	bool use_specular = false;
+	bool use_bump = false;
 
 	ASSERT( worldmodel != NULL );
 
@@ -1607,9 +1616,6 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 		// process lightstyles
 		for( int i = 0; i < MAXLIGHTMAPS && s->styles[i] != LS_NONE; i++ )
 			GL_AddShaderDirective( options, va( "BMODEL_APPLY_STYLE%i", i ));
-
-		if( tx->fb_texturenum != 0 )
-			GL_AddShaderDirective( options, "BMODEL_HAS_LUMA" );
 	}
 
 	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransAlpha && !IsLandscape )
@@ -1634,13 +1640,19 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 		if( gl_emboss->value > 0 )
 		{
 			if( tr.materials[tx->gl_texturenum].EmbossScale > 0.0f )
+			{
 				GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+				use_emboss = true;
+			}
 		}
 
 		if( gl_specular->value > 0 )
 		{
 			if( tr.materials[tx->gl_texturenum].GlossScale > 0.0f )
+			{
 				GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
+				use_specular = true;
+			}
 		}
 
 		if( gl_bump->value > 0 )
@@ -1649,6 +1661,7 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 			{
 				GL_AddShaderDirective( options, "BMODEL_BUMP" );
 				GL_EncodeNormal( options, tr.materials[tx->gl_texturenum].gl_normalmap_id );
+				use_bump = true;
 			}
 		}
 	}
@@ -1657,13 +1670,19 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 		if( gl_emboss->value > 0 )
 		{
 			if( landscape && landscape->terrain && landscape->terrain->layermap.has_emboss )
+			{
 				GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+				use_emboss = true;
+			}
 		}
 
 		if( gl_specular->value > 0 )
 		{
 			if( landscape && landscape->terrain && landscape->terrain->layermap.has_specular )
+			{
 				GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
+				use_specular = true;
+			}
 		}
 
 		if( gl_bump->value > 0 )
@@ -1672,6 +1691,7 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 			{
 				GL_AddShaderDirective( options, "BMODEL_BUMP" );
 				GL_EncodeNormal( options, landscape->terrain->layermap.gl_normalmap_id );
+				use_bump = true;
 			}
 		}
 	}
@@ -1680,11 +1700,14 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	if( CVAR_TO_BOOL( gl_cubemaps ) && (tr.materials[tx->gl_texturenum].ReflectScale[0] > 0.01f) )
 	{
 		GL_AddShaderDirective( options, "REFLECTION_CUBEMAP" );
-		using_cubemaps = true;
+		use_cubemaps = true;
 	}
 
 	if( tr.materials[tx->gl_texturenum].gl_interiormap_id > 0 )
+	{
 		GL_AddShaderDirective( options, "BMODEL_INTERIOR" );
+		use_interior = true;
+	}
 
 #if 0
 	// can't properly draw for beams particles through glass. g-cont
@@ -1720,8 +1743,16 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 
 	word shaderNum = (shader - glsl_programs);
 
-	if( using_cubemaps )
-		SetBits( shader->status, SHADER_USE_CUBEMAPS );
+	if( use_bump )
+		shader->status |= SHADER_USE_BUMP;
+	if( use_emboss )
+		shader->status |= SHADER_USE_EMBOSS;
+	if( use_interior )
+		shader->status |= SHADER_USE_INTERIOR;
+	if( use_specular )
+		shader->status |= SHADER_USE_SPECULAR;
+	if( use_cubemaps )
+		shader->status |= SHADER_USE_CUBEMAPS;
 
 	es->glsl_sequence[mirror] = tr.glsl_valid_sequence;
 	ClearBits( s->flags, SURF_NODRAW );
@@ -1747,6 +1778,11 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 	bool portalSurface = false;
 	mfaceinfo_t *landscape = NULL;
 	bool IsLandscape = FBitSet( s->flags, SURF_LANDSCAPE );
+
+	bool use_emboss = false;
+	bool use_interior = false;
+	bool use_specular = false;
+	bool use_bump = false;
 	
 	Q_strncpy( glname, "BmodelDlight", sizeof( glname ));
 
@@ -1775,13 +1811,19 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 		if( gl_emboss->value > 0 )
 		{
 			if( tr.materials[tx->gl_texturenum].EmbossScale > 0.0f )
+			{
 				GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+				use_emboss = true;
+			}
 		}
 
 		if( gl_specular->value > 0 )
 		{
 			if( tr.materials[tx->gl_texturenum].GlossScale > 0.0f )
+			{
 				GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
+				use_specular = true;
+			}
 		}
 
 		if( gl_bump->value > 0 )
@@ -1790,6 +1832,7 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 			{
 				GL_AddShaderDirective( options, "BMODEL_BUMP" );
 				GL_EncodeNormal( options, tr.materials[tx->gl_texturenum].gl_normalmap_id );
+				use_bump = true;
 			}
 		}
 	}
@@ -1804,13 +1847,19 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 		if( gl_emboss->value > 0 )
 		{
 			if( landscape && landscape->terrain && landscape->terrain->layermap.has_emboss )
+			{
 				GL_AddShaderDirective( options, "BMODEL_EMBOSS" );
+				use_emboss = true;
+			}
 		}
 
 		if( gl_specular->value > 0 )
 		{
 			if( landscape && landscape->terrain && landscape->terrain->layermap.has_specular )
+			{
 				GL_AddShaderDirective( options, "BMODEL_SPECULAR" );
+				use_specular = true;
+			}
 		}
 
 		if( gl_bump->value > 0 )
@@ -1819,6 +1868,7 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 			{
 				GL_AddShaderDirective( options, "BMODEL_BUMP" );
 				GL_EncodeNormal( options, landscape->terrain->layermap.gl_normalmap_id );
+				use_bump = true;
 			}
 		}
 	}
@@ -1846,7 +1896,10 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 	}
 
 	if( tr.materials[tx->gl_texturenum].gl_interiormap_id > 0 )
+	{
 		GL_AddShaderDirective( options, "BMODEL_INTERIOR" );
+		use_interior = true;
+	}
 
 	if( shadows )
 		GL_AddShaderDirective( options, "BMODEL_HAS_SHADOWS" );
@@ -1873,6 +1926,15 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 		es->projLightShaderNum[shadows] = shaderNum;
 		es->glsl_sequence_proj[shadows] = tr.glsl_valid_sequence;
 	}
+
+	if( use_bump )
+		shader->status |= SHADER_USE_BUMP;
+	if( use_emboss )
+		shader->status |= SHADER_USE_EMBOSS;
+	if( use_interior )
+		shader->status |= SHADER_USE_INTERIOR;
+	if( use_specular )
+		shader->status |= SHADER_USE_SPECULAR;
 
 	return shaderNum;
 }
@@ -1990,7 +2052,11 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 {
 	char glname[64];
 	char options[MAX_OPTIONS_LENGTH];
-	bool using_cubemaps = false;
+	bool use_cubemaps = false;
+	bool use_emboss = false;
+	bool use_interior = false;
+	bool use_specular = false;
+	bool use_bump = false;
 
 	if( mat->shaderNum && mat->glsl_sequence == tr.glsl_valid_sequence )
 		return mat->shaderNum; // valid
@@ -2043,19 +2109,26 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 	if( gl_emboss->value > 0 )
 	{
 		if( tr.materials[mat->gl_diffuse_id].EmbossScale > 0.0f )
+		{
 			GL_AddShaderDirective( options, "STUDIO_EMBOSS" );
+			use_emboss = true;
+		}
 	}
 
 	if( gl_specular->value > 0 )
 	{
 		if( tr.materials[mat->gl_diffuse_id].GlossScale > 0.0f )
+		{
 			GL_AddShaderDirective( options, "STUDIO_SPECULAR" );
+			use_specular = true;
+		}
 	}
 
 	if( CVAR_TO_BOOL( gl_bump ) && tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 )
 	{
 		GL_AddShaderDirective( options, "STUDIO_BUMP" );
 		GL_EncodeNormal( options, tr.materials[mat->gl_diffuse_id].gl_normalmap_id );
+		use_bump = true;
 	}
 
 	if( bMasked )
@@ -2065,11 +2138,14 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 	if( CVAR_TO_BOOL( gl_cubemaps ) && (tr.materials[mat->gl_diffuse_id].ReflectScale[0] > 0.01f) )
 	{
 		GL_AddShaderDirective( options, "REFLECTION_CUBEMAP" );
-		using_cubemaps = true;
+		use_cubemaps = true;
 	}
 
 	if( tr.materials[mat->gl_diffuse_id].gl_interiormap_id > 0 )
+	{
 		GL_AddShaderDirective( options, "STUDIO_INTERIOR" );
+		use_interior = true;
+	}
 	else if( tr.materials[mat->gl_diffuse_id].gl_blendtex_id > 0 )
 		GL_AddShaderDirective( options, "STUDIO_TEXTURE_BLEND" );
 
@@ -2088,13 +2164,21 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 
 	word shaderNum = (shader - glsl_programs);
 
-	if( using_cubemaps )
-		SetBits( shader->status, SHADER_USE_CUBEMAPS );
-
 	// done
 	mat->glsl_sequence = tr.glsl_valid_sequence;
 	ClearBits( mat->flags, STUDIO_NF_NODRAW );
 	mat->shaderNum = shaderNum;
+
+	if( use_bump )
+		shader->status |= SHADER_USE_BUMP;
+	if( use_emboss )
+		shader->status |= SHADER_USE_EMBOSS;
+	if( use_interior )
+		shader->status |= SHADER_USE_INTERIOR;
+	if( use_specular )
+		shader->status |= SHADER_USE_SPECULAR;
+	if( use_cubemaps )
+		shader->status |= SHADER_USE_CUBEMAPS;
 
 	return shaderNum;
 }
@@ -2111,6 +2195,11 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 
 	char glname[64];
 	char options[MAX_OPTIONS_LENGTH];
+
+	bool use_emboss = false;
+	bool use_interior = false;
+	bool use_specular = false;
+	bool use_bump = false;
 
 	Q_strncpy( glname, "StudioDlight", sizeof( glname ));
 	memset( options, 0, sizeof( options ));
@@ -2147,23 +2236,33 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 	if( gl_emboss->value > 0 )
 	{
 		if( tr.materials[mat->gl_diffuse_id].EmbossScale > 0.0f )
+		{
 			GL_AddShaderDirective( options, "STUDIO_EMBOSS" );
+			use_emboss = true;
+		}
 	}
 
 	if( gl_specular->value > 0 )
 	{
 		if( tr.materials[mat->gl_diffuse_id].GlossScale > 0.0f )
+		{
 			GL_AddShaderDirective( options, "STUDIO_SPECULAR" );
+			use_specular = true;
+		}
 	}
 
 	if( CVAR_TO_BOOL( gl_bump ) && tr.materials[mat->gl_diffuse_id].gl_normalmap_id > 0 )
 	{
 		GL_AddShaderDirective( options, "STUDIO_BUMP" );
 		GL_EncodeNormal( options, tr.materials[mat->gl_diffuse_id].gl_normalmap_id );
+		use_bump = true;
 	}
 
 	if( tr.materials[mat->gl_diffuse_id].gl_interiormap_id > 0 )
+	{
 		GL_AddShaderDirective( options, "STUDIO_INTERIOR" );
+		use_interior = true;
+	}
 	else if( tr.materials[mat->gl_diffuse_id].gl_blendtex_id > 0 )
 		GL_AddShaderDirective( options, "STUDIO_TEXTURE_BLEND" );
 
@@ -2201,6 +2300,15 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 		mat->projLightShaderNum[shadows] = shaderNum;
 		mat->glsl_sequence_proj[shadows] = tr.glsl_valid_sequence;
 	}
+
+	if( use_bump )
+		shader->status |= SHADER_USE_BUMP;
+	if( use_emboss )
+		shader->status |= SHADER_USE_EMBOSS;
+	if( use_interior )
+		shader->status |= SHADER_USE_INTERIOR;
+	if( use_specular )
+		shader->status |= SHADER_USE_SPECULAR;
 
 	return shaderNum;
 }

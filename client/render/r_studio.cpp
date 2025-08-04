@@ -5247,14 +5247,14 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			else
 				GL_Bind( GL_TEXTURE0, iTexnum );
 
-			if( tr.materials[iTexnum].gl_normalmap_id > 0 && cached_normalmap != tr.materials[iTexnum].gl_normalmap_id ) // u_NormalMap
+			if( RI->currentshader->status & SHADER_USE_BUMP && cached_normalmap != tr.materials[iTexnum].gl_normalmap_id ) // u_NormalMap
 			{
 				GL_Bind( GL_TEXTURE3, tr.materials[iTexnum].gl_normalmap_id );
 				cached_normalmap = tr.materials[iTexnum].gl_normalmap_id;
 			}
 
 			// diffusion - interior mapping
-			if( tr.materials[iTexnum].gl_interiormap_id > 0 )
+			if( RI->currentshader->status & SHADER_USE_INTERIOR )
 			{
 				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[iTexnum].InteriorGrid.x, tr.materials[iTexnum].InteriorGrid.y, (float)tr.materials[iTexnum].InteriorLightState );
 				GL_Bind( GL_TEXTURE4, tr.materials[iTexnum].gl_interiormap_id ); // u_InteriorMap
@@ -5264,7 +5264,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 				GL_Bind( GL_TEXTURE4, tr.materials[iTexnum].gl_blendtex_id ); // u_BlendTexture
 			}
 
-			if( gl_specular->value > 0 && tr.materials[iTexnum].GlossScale > 0.0f )
+			if( RI->currentshader->status & SHADER_USE_SPECULAR )
 			{
 				if( tr.materials[iTexnum].GlossSmoothness != cached_glosssmoothness )
 				{
@@ -5279,7 +5279,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 				}
 			}
 
-			if( gl_emboss->value > 0 && tr.materials[iTexnum].EmbossScale > 0.0f )
+			if( RI->currentshader->status & SHADER_USE_EMBOSS )
 			{
 				if( tr.materials[iTexnum].EmbossScale != cached_embossscale )
 				{
@@ -5548,14 +5548,14 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			else 
 				GL_Bind( GL_TEXTURE0, iTexnum );
 
-			if( tr.materials[iTexnum].gl_normalmap_id > 0 && cached_normalmap != tr.materials[iTexnum].gl_normalmap_id )
+			if( RI->currentshader->status & SHADER_USE_BUMP && cached_normalmap != tr.materials[iTexnum].gl_normalmap_id )
 			{
 				GL_Bind( GL_TEXTURE1, tr.materials[iTexnum].gl_normalmap_id ); // u_NormalMap
 				cached_normalmap = tr.materials[iTexnum].gl_normalmap_id;
 			}
 
 			// diffusion - interior mapping
-			if( tr.materials[iTexnum].gl_interiormap_id > 0 )
+			if( RI->currentshader->status & SHADER_USE_INTERIOR )
 			{
 				pglUniform3fARB( RI->currentshader->u_InteriorParams, tr.materials[iTexnum].InteriorGrid.x, tr.materials[iTexnum].InteriorGrid.y, (float)tr.materials[iTexnum].InteriorLightState );
 				GL_Bind( GL_TEXTURE4, tr.materials[iTexnum].gl_interiormap_id ); // u_InteriorMap
@@ -5568,7 +5568,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			if( tr.materials[iTexnum].FoliageSwayHeight != 0 )
 				pglUniform1iARB( RI->currentshader->u_FoliageSwayHeight, tr.materials[iTexnum].FoliageSwayHeight );
 
-			if( gl_specular->value > 0 && tr.materials[iTexnum].GlossScale > 0.0f )
+			if( RI->currentshader->status & SHADER_USE_SPECULAR )
 			{
 				if( tr.materials[iTexnum].GlossSmoothness != cached_glosssmoothness )
 				{
@@ -5583,7 +5583,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 				}
 			}
 
-			if( gl_emboss->value > 0 && tr.materials[iTexnum].EmbossScale > 0.0f )
+			if( RI->currentshader->status & SHADER_USE_EMBOSS )
 			{
 				if( tr.materials[iTexnum].EmbossScale != cached_embossscale )
 				{
@@ -5620,10 +5620,8 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 		}
 		else
 			R_SetRenderColor( m_pCurrentEntity );
-
-		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready
-			&& (tr.materials[iTexnum].ReflectScale[0] > 0.01f)
-			&& !IsBuildingCubemaps() ) // diffusioncubemaps
+		
+		if( RI->currentshader->status & SHADER_USE_CUBEMAPS )
 		{
 			if( m_pModelInstance->cubemap )
 			{

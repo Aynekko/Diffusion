@@ -32,8 +32,7 @@ Vector( -90.0f, 180.0f, -90.0f ),	// GL_TEXTURE_CUBE_MAP_POSITIVE_Z_ARB
 Vector( 90.0f,   0.0f,  90.0f ),	// GL_TEXTURE_CUBE_MAP_NEGATIVE_Z_ARB
 };
 
-GLuint framebuffer[MAX_SHADOWS]; // projector
-GLuint framebufferCM[MAX_SHADOWS]; // pointlight
+GLuint sh_framebuffer;
 int ShadowQualityLevel = 0;
 int ShadowViewport = 512;
 bool FBOsupported = false;
@@ -126,8 +125,8 @@ int R_AllocateShadowFramebuffer( plight_t *pl, int side = 0 )
 
 	if( pl->pointlight )
 	{
-		if( !framebufferCM[0] )
-			pglGenFramebuffers( MAX_SHADOWS, framebufferCM );
+		if( !sh_framebuffer )
+			pglGenFramebuffers( 1, &sh_framebuffer );
 		
 		if( side != 0 )
 		{
@@ -171,15 +170,17 @@ int R_AllocateShadowFramebuffer( plight_t *pl, int side = 0 )
 			}
 		}
 
-		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, framebufferCM[i] );
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, sh_framebuffer );
+		pglDrawBuffer( GL_NONE );
+		pglReadBuffer( GL_NONE );
 		pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB + side, RENDER_GET_PARM( PARM_TEX_TEXNUM, texture ), 0 );
 	}
 	else
 	{
 		i = tr.num_shadows_used;
 
-		if( !framebuffer[0] )
-			pglGenFramebuffers( MAX_SHADOWS, framebuffer );
+		if( !sh_framebuffer )
+			pglGenFramebuffers( 1, &sh_framebuffer );
 
 		if( i >= MAX_SHADOWS )
 		{
@@ -200,7 +201,7 @@ int R_AllocateShadowFramebuffer( plight_t *pl, int side = 0 )
 			texture = tr.shadowTextures[i];
 		}
 
-		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, framebuffer[i] );
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, sh_framebuffer );
 		pglDrawBuffer( GL_NONE );
 		pglReadBuffer( GL_NONE );
 		pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, texture ), 0 );

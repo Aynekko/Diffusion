@@ -2460,7 +2460,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 				if( land && land->terrain )
 				{
 					GL_Bind( GL_TEXTURE5, land->terrain->indexmap.gl_heightmap_id );
-					if( land->terrain->layermap.gl_normalmap_id > 0 )
+					if( RI->currentshader->status & SHADER_USE_BUMP )
 						GL_Bind( GL_TEXTURE6, land->terrain->layermap.gl_normalmap_id );
 					
 					float ScaledDynLightBrightness[MAX_LANDSCAPE_LAYERS];
@@ -2470,12 +2470,12 @@ void R_DrawLightForSurfList( plight_t *pl )
 						ScaledDynLightBrightness[sc] *= pl->brightness;
 
 					pglUniform1fvARB( RI->currentshader->u_DynLightBrightness, land->terrain->numLayers, &ScaledDynLightBrightness[0] );
-					if( gl_specular->value > 0 && land->terrain->layermap.has_specular )
+					if( RI->currentshader->status & SHADER_USE_SPECULAR )
 					{
 						pglUniform1fvARB( RI->currentshader->u_GlossSmoothness, land->terrain->numLayers, &land->terrain->layermap.GlossSmoothness[0] );
 						pglUniform1fvARB( RI->currentshader->u_GlossScale, land->terrain->numLayers, &land->terrain->layermap.GlossScale[0] );
 					}
-					if( gl_emboss->value > 0 && land->terrain->layermap.has_emboss )
+					if( RI->currentshader->status & SHADER_USE_EMBOSS )
 						pglUniform1fvARB( RI->currentshader->u_EmbossScale, land->terrain->numLayers, &land->terrain->layermap.EmbossScale[0] );
 				}
 			}
@@ -2488,7 +2488,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 					cached_dynlightscale = newdynlightscale;
 				}
 
-				if( gl_specular->value > 0 && MT.GlossScale > 0.0f )
+				if( RI->currentshader->status & SHADER_USE_SPECULAR )
 				{
 					if( MT.GlossSmoothness != cached_glosssmoothness )
 					{
@@ -2503,7 +2503,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 					}
 				}
 
-				if( gl_emboss->value > 0 && MT.EmbossScale > 0.0f )
+				if( RI->currentshader->status & SHADER_USE_EMBOSS )
 				{
 					if( MT.EmbossScale != cached_embossscale )
 					{
@@ -2512,7 +2512,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 					}
 				}
 
-				if( MT.gl_normalmap_id > 0 )
+				if( RI->currentshader->status & SHADER_USE_BUMP )
 					GL_Bind( GL_TEXTURE6, MT.gl_normalmap_id );
 			}
 
@@ -2528,7 +2528,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 
 			// diffusion - interior mapping
-			if( MT.gl_interiormap_id > 0 )
+			if( RI->currentshader->status & SHADER_USE_INTERIOR )
 			{
 			//	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
 				pglUniform3fARB( RI->currentshader->u_InteriorParams, MT.InteriorGrid.x, MT.InteriorGrid.y, (float)MT.InteriorLightState );
@@ -2949,26 +2949,30 @@ void R_DrawBrushList( void )
 
 				GL_LoadIdentityTexMatrix();
 			}
-
+			
 			if( FBitSet( s->flags, SURF_LANDSCAPE ) )
 			{
 				if( land && land->terrain )
 				{
-					if( gl_specular->value > 0 && land->terrain->layermap.has_specular )
+					if( RI->currentshader->status & SHADER_USE_SPECULAR )
 					{
 						pglUniform1fvARB( RI->currentshader->u_GlossSmoothness, land->terrain->numLayers, &land->terrain->layermap.GlossSmoothness[0] );
 						pglUniform1fvARB( RI->currentshader->u_GlossScale, land->terrain->numLayers, &land->terrain->layermap.GlossScale[0] );
 					}
-					if( gl_emboss->value > 0 && land->terrain->layermap.has_emboss )
+
+					if( RI->currentshader->status & SHADER_USE_EMBOSS )
 						pglUniform1fvARB( RI->currentshader->u_EmbossScale, land->terrain->numLayers, &land->terrain->layermap.EmbossScale[0] );
+
 					GL_Bind( GL_TEXTURE5, land->terrain->indexmap.gl_heightmap_id );
-					if( land->terrain->layermap.gl_normalmap_id > 0 )
+
+					if( RI->currentshader->status & SHADER_USE_BUMP )
 						GL_Bind( GL_TEXTURE4, land->terrain->layermap.gl_normalmap_id );
 				}
 			}
 			else
 			{
-				if( gl_specular->value > 0 && MT.GlossScale > 0.0f )
+
+				if( RI->currentshader->status & SHADER_USE_SPECULAR )
 				{
 					if( MT.GlossSmoothness != cached_glosssmoothness )
 					{
@@ -2983,7 +2987,7 @@ void R_DrawBrushList( void )
 					}
 				}
 
-				if( gl_emboss->value > 0 && MT.EmbossScale > 0.0f )
+				if( RI->currentshader->status & SHADER_USE_EMBOSS )
 				{
 					if( MT.EmbossScale != cached_embossscale )
 					{
@@ -2992,7 +2996,7 @@ void R_DrawBrushList( void )
 					}
 				}
 
-				if( MT.gl_normalmap_id > 0 )
+				if( RI->currentshader->status & SHADER_USE_BUMP )
 					GL_Bind( GL_TEXTURE4, MT.gl_normalmap_id );
 			}
 
@@ -3021,7 +3025,7 @@ void R_DrawBrushList( void )
 			}
 
 			// diffusion - interior mapping
-			if( MT.gl_interiormap_id > 0 )
+			if( RI->currentshader->status & SHADER_USE_INTERIOR )
 			{
 			//	pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
 				pglUniform3fARB( RI->currentshader->u_InteriorParams, MT.InteriorGrid.x, MT.InteriorGrid.y, (float)MT.InteriorLightState );
@@ -3099,7 +3103,7 @@ void R_DrawBrushList( void )
 			cached_texofs[1] = es->texofs[1];
 		}
 
-		if( CVAR_TO_BOOL( gl_cubemaps ) && world->cubemaps_ready && (MT.ReflectScale[0] > 0.01f) && !IsBuildingCubemaps() ) // diffusioncubemaps
+		if( RI->currentshader->status & SHADER_USE_CUBEMAPS ) // diffusioncubemaps
 		{
 			const int cubemap_tex_unit = FBitSet( s->flags, SURF_WATER ) ? GL_TEXTURE2 : GL_TEXTURE6;
 

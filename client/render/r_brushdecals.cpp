@@ -184,7 +184,7 @@ bool DrawSingleDecal( decal_t* decal, bool project )
 		else decal_verts[i].position = v;
 	}
 
-	pglBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(decal_verts[0]) * numVerts, decal_verts, GL_STATIC_DRAW_ARB);
+	pglBufferDataARB(GL_ARRAY_BUFFER_ARB, sizeof(decal_verts[0]) * numVerts, decal_verts, GL_DYNAMIC_DRAW_ARB );
 	pglDrawArrays(GL_POLYGON, 0, numVerts);
 
 	r_stats.c_decals++;

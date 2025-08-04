@@ -26,6 +26,10 @@ GNU General Public License for more details.
 #define SHADER_UBERSHADER			BIT( 3 )
 #define SHADER_USE_SCREENCOPY		BIT( 4 )
 #define SHADER_USE_CUBEMAPS			BIT( 5 )
+#define SHADER_USE_SPECULAR			BIT( 6 )
+#define SHADER_USE_BUMP				BIT( 7 )
+#define SHADER_USE_INTERIOR			BIT( 8 )
+#define SHADER_USE_EMBOSS			BIT( 9 )
 
 #define SHADER_STATUS_OK		( SHADER_PROGRAM_LINKED|SHADER_VERTEX_COMPILED|SHADER_FRAGMENT_COMPILED )
 #define CheckShader( shader )		( shader && shader->status == SHADER_STATUS_OK )
