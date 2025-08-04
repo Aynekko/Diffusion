@@ -556,15 +556,18 @@ R_AnimateLight
 */
 void R_AnimateLight( void )
 {
-	int		k, flight, clight;
-	float		l, lerpfrac, backlerp;
-	float		scale;
-	const lightstyle_t	*ls;
+	int k, flight, clight;
+	float l, lerpfrac, backlerp;
+	float scale;
+	const lightstyle_t *ls;
 
 	if( !worldmodel )
 		return;
 	
 	scale = r_lighting_modulate->value;
+
+	const float fSunScale = tr.sunlightscale; // LS_SUN - direct sunlight
+	const float fSkyScale = 0.5f + tr.sunlightscale * 0.5f; // LS_SKY - diffuse light from sky - just half
 
 	// light animations
 	// 'm' is normal light, 'a' is no light, 'z' is double bright
@@ -588,10 +591,18 @@ void R_AnimateLight( void )
 		{
 			tr.lightstylevalue[i] = 256 * scale;
 			tr.lightstyles[i] = 256.0f * scale;
-			if( tr.sunlightscale > 0.0f && i == LS_SKY )
+			if( tr.sunlightscale > 0.0f )
 			{
-				tr.lightstylevalue[i] *= tr.sunlightscale;
-				tr.lightstyles[i] *= tr.sunlightscale;
+				if( i == LS_SUN )
+				{
+					tr.lightstylevalue[i] *= fSunScale;
+					tr.lightstyles[i] *= fSunScale;
+				}
+				else if( i == LS_SKY && tr.sunlightscale < 1.0f ) // just half
+				{
+					tr.lightstylevalue[i] *= fSkyScale;
+					tr.lightstyles[i] *= fSkyScale;
+				}
 			}
 			continue;
 		}
@@ -600,10 +611,18 @@ void R_AnimateLight( void )
 			// single length style so don't bother interpolating
 			tr.lightstylevalue[i] = ls->map[0] * 22 * scale;
 			tr.lightstyles[i] = ls->map[0] * 22.0f * scale;
-			if( tr.sunlightscale > 0.0f && i == LS_SKY )
+			if( tr.sunlightscale > 0.0f )
 			{
-				tr.lightstylevalue[i] *= tr.sunlightscale;
-				tr.lightstyles[i] *= tr.sunlightscale;
+				if( i == LS_SUN )
+				{
+					tr.lightstylevalue[i] *= fSunScale;
+					tr.lightstyles[i] *= fSunScale;
+				}
+				else if( i == LS_SKY && tr.sunlightscale < 1.0f ) // just half
+				{
+					tr.lightstylevalue[i] *= fSkyScale;
+					tr.lightstyles[i] *= fSkyScale;
+				}
 			}
 			continue;
 		}
@@ -611,10 +630,18 @@ void R_AnimateLight( void )
 		{
 			tr.lightstylevalue[i] = ls->map[flight%ls->length] * 22 * scale;
 			tr.lightstyles[i] = ls->map[flight%ls->length] * 22.0f * scale;
-			if( tr.sunlightscale > 0.0f && i == LS_SKY )
+			if( tr.sunlightscale > 0.0f )
 			{
-				tr.lightstylevalue[i] *= tr.sunlightscale;
-				tr.lightstyles[i] *= tr.sunlightscale;
+				if( i == LS_SUN )
+				{
+					tr.lightstylevalue[i] *= fSunScale;
+					tr.lightstyles[i] *= fSunScale;
+				}
+				else if( i == LS_SKY && tr.sunlightscale < 1.0f ) // just half
+				{
+					tr.lightstylevalue[i] *= fSkyScale;
+					tr.lightstyles[i] *= fSkyScale;
+				}
 			}
 			continue;
 		}

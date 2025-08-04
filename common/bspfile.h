@@ -74,7 +74,8 @@ BRUSH MODELS
 #define LS_NORMAL			0x00
 #define LS_UNUSED			0xFE
 #define LS_NONE			0xFF
-#define LS_SKY			0x14
+#define LS_SUN			0x14
+#define LS_SKY			0x15 // pxrad: -skystyle 21
 
 #define MAX_MAP_MODELS		2048		// can be increased up to 2048 if needed
 #define MAX_MAP_BRUSHES		32768		// unsigned short limit
