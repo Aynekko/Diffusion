@@ -906,8 +906,13 @@ R_DrawWeather
 */
 void R_DrawWeather( void )
 {	
+	if( Rain.dripsPerSecond <= 0 )
+		return;
+
 	if( FBitSet( RI->params, RP_SKYPORTALVIEW ) || FBitSet( RI->params, RP_SHADOWPASS ) || IsBuildingCubemaps() )
 		return;
+
+	RI->currententity = NULL;
 
 	GL_CleanupDrawState();
 	GL_AlphaTest( GL_FALSE );
@@ -923,21 +928,18 @@ void R_DrawWeather( void )
 	if( gHUD.ScreenDrips_OverrideTime < tr.time )
 		gHUD.ScreenDrips_DripIntensity = bound( 0.0f, gHUD.Weather_Intensity, 0.5f ); // for water drops shader
 
-	if( Rain.dripsPerSecond > 0 )
+	// diffusion - trace up from the player to check if he is under a roof
+	// make sure he is not above it
+	if( gEngfuncs.GetLocalPlayer()->curstate.origin.z < Rain.globalHeight )
 	{
-		// diffusion - trace up from the player to check if he is under a roof
-		// make sure he is not above it
-		if( gEngfuncs.GetLocalPlayer()->curstate.origin.z < Rain.globalHeight )
-		{
-			pmtrace_t trace;
-			Vector PlayerOrg = gEngfuncs.GetLocalPlayer()->curstate.origin;
-			Vector RainOrg = PlayerOrg;
-			RainOrg.z = Rain.globalHeight;
-			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-			gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, RainOrg, PM_TRACELINE_PHYSENTSONLY, gEngfuncs.GetLocalPlayer()->index, &trace );
-			if( trace.fraction == 1.0f ) // in the open // P.S. maybe check a sky texture instead? or both methods? anyway this works well for now
-				gHUD.ScreenDrips_Visible = true;
-		}
+		pmtrace_t trace;
+		Vector PlayerOrg = gEngfuncs.GetLocalPlayer()->curstate.origin;
+		Vector RainOrg = PlayerOrg;
+		RainOrg.z = Rain.globalHeight;
+		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, RainOrg, PM_TRACELINE_PHYSENTSONLY, gEngfuncs.GetLocalPlayer()->index, &trace );
+		if( trace.fraction == 1.0f ) // in the open // P.S. maybe check a sky texture instead? or both methods? anyway this works well for now
+			gHUD.ScreenDrips_Visible = true;
 	}
 
 	DrawRain();
