@@ -1819,6 +1819,8 @@ void R_RenderScene( void )
 
 	R_CheckFog();
 
+	R_MarkLeaves();
+
 	R_DrawWorld();
 
 	R_DrawEntitiesOnList();

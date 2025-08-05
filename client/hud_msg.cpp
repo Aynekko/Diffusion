@@ -1062,7 +1062,7 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 }
 
 //=======================================================================================
-// diffusion - do watersplash (author: ONeiLL)
+// diffusion - do watersplash
 //=======================================================================================
 int CHud::MsgFunc_WaterSplash( const char *pszName, int iSize, void *pbuf )
 {
@@ -1122,35 +1122,6 @@ int CHud::MsgFunc_WaterSplash( const char *pszName, int iSize, void *pbuf )
 	case 1: gEngfuncs.pEventAPI->EV_PlaySound( 0, pos, CHAN_STATIC, "items/water_splash/water_splash2.wav", 0.7, 0.8, 0, RANDOM_LONG( 95, 110 ) ); break;
 	case 2: gEngfuncs.pEventAPI->EV_PlaySound( 0, pos, CHAN_STATIC, "items/water_splash/water_splash3.wav", 0.7, 0.8, 0, RANDOM_LONG( 95, 110 ) ); break;
 	}
-
-	/* ONeiLL
-	int iWaterSplash;
-	TEMPENTITY *pTemp;
-	iWaterSplash = gEngfuncs.pEventAPI->EV_FindModelIndex(  "sprites/effects/waterring2.spr" ); // horizontal splash
-	pTemp = gEngfuncs.pEfxAPI->R_TempSprite( Vector(x,y,z), Vector( 0, 0, 0 ), RANDOM_FLOAT( 1, 1.5 ), iWaterSplash, kRenderTransAdd, 0, 1.0, 2, FTENT_SPRANIMATE );
-
-	if( pTemp )
-	{
-		pTemp->fadeSpeed = 60.0;
-		pTemp->entity.curstate.framerate = RANDOM_FLOAT( 45, 65 );
-		pTemp->entity.curstate.renderamt = 150;
-		pTemp->entity.curstate.rendercolor.r = 255;
-		pTemp->entity.curstate.rendercolor.g = 255;
-		pTemp->entity.curstate.rendercolor.b = 255;
-		pTemp->entity.angles = Vector( 90, 0, 0 );
-	}
-
-	iWaterSplash = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/effects/wsplash3.spr" ); // drops
-	pTemp = gEngfuncs.pEfxAPI->R_TempSprite( Vector( x, y, z ), Vector( 0, 0, 0 ), RANDOM_FLOAT( 0.5, 1.0 ), iWaterSplash, kRenderTransAdd, 0, 1.0, 1, FTENT_SPRANIMATE );
-	if( pTemp )
-	{
-		pTemp->fadeSpeed = 60.0;
-		pTemp->entity.curstate.framerate = RANDOM_FLOAT( 40,55 );
-		pTemp->entity.curstate.renderamt = 150;
-		pTemp->entity.curstate.rendercolor.r = 255;
-		pTemp->entity.curstate.rendercolor.g = 255;
-		pTemp->entity.curstate.rendercolor.b = 255;
-	}*/
 	
 	return 1;
 }

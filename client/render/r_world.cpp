@@ -2318,6 +2318,11 @@ void R_DrawLightForSurfList( plight_t *pl )
 	Vector4D light_params[6];
 	float waveHeight = 0.0f;
 
+	GL_Bind( GL_TEXTURE2, pl->projectionTexture );
+	GL_Bind( GL_TEXTURE3, pl->shadowTexture );
+	const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
+	const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
+
 	for( int i = 0; i < tr.num_light_surfaces; i++ )
 	{
 		const gl_bmodelface_t *entry = &tr.light_surfaces[i];
@@ -2358,8 +2363,6 @@ void R_DrawLightForSurfList( plight_t *pl )
 
 			// write constants
 			pglUniformMatrix4fvARB( RI->currentshader->u_LightViewProjectionMatrix, 1, GL_FALSE, &gl_lightViewProjMatrix[0] );
-			const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
-			const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
 
 			// set the current waveheight
 			if( FBitSet( s->flags, SURF_WATER ) )
@@ -2393,9 +2396,6 @@ void R_DrawLightForSurfList( plight_t *pl )
 			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 			pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)glState.width, 1.0f / (float)glState.height );
 		//	R_SetRenderColor( RI->currententity );
-
-			GL_Bind( GL_TEXTURE2, pl->projectionTexture );
-			GL_Bind( GL_TEXTURE3, pl->shadowTexture );
 
 			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
 
@@ -2636,6 +2636,7 @@ void R_RenderDynLightList( void )
 	GL_Blend( GL_FALSE );
 	GL_DepthMask( GL_TRUE );
 	pglBindVertexArray( GL_FALSE );
+	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 }
 
 /*
@@ -2661,7 +2662,6 @@ void R_DrawShadowBrushList( void )
 	numTempElems = 0;
 	endv = 0;
 	pglBindVertexArray( world->vertex_array_object );
-	GL_TextureTarget( GL_NONE );
 
 	int curtex;
 
@@ -2711,9 +2711,6 @@ void R_DrawShadowBrushList( void )
 
 			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 			pglUniform2fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1] );
-
-			// reset cache
-			cached_texture = -1;
 		}
 
 		// begin draw the sorted list
@@ -2757,14 +2754,18 @@ void R_DrawShadowBrushList( void )
 
 	GL_SelectTexture( glConfig.max_texture_units - 1 ); // force to cleanup all the units
 	GL_CleanUpTextureUnits( 0 );
-	pglBindVertexArray( GL_FALSE );
 	GL_BindShader( GL_FALSE );
+	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 	tr.num_draw_surfaces = 0;
 
 	if( R_GrassUseBufferObject() )
 		R_RenderShadowGrassOnList();
 	else
 		R_DrawGrass();
+
+	pglBindVertexArray( 0 );
+	GL_BindShader( GL_FALSE );
+	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 
 	GL_Cull( GL_FRONT );
 }
@@ -3162,7 +3163,6 @@ void R_DrawBrushList( void )
 
 	GL_SelectTexture( glConfig.max_texture_units - 1 ); // force to cleanup all the units
 	GL_CleanUpTextureUnits( 0 );
-	pglBindVertexArray( GL_FALSE );
 	GL_BindShader( NULL );
 	GL_Cull( GL_FRONT );
 
@@ -3175,7 +3175,8 @@ void R_DrawBrushList( void )
 	// draw dynamic lighting for world and bmodels
 	R_RenderDynLightList();
 
-	pglBindVertexArray( GL_FALSE );
+	pglBindVertexArray( 0 );
+	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 	GL_BindShader( NULL );
 	DrawWireFrame();
 
@@ -3732,7 +3733,6 @@ void R_DrawWorld( void )
 
 	R_ClearSkyBox();
 
-	R_MarkLeaves();
 	start = Sys_DoubleTime();
 
 #if RECURSIVE_WORLD_NODE

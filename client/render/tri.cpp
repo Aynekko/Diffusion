@@ -350,7 +350,7 @@ void R_RenderCables( void )
 		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 	}
 
-	pglBindVertexArray( NULL );
+	pglBindVertexArray( 0 );
 	pglEnableClientState( GL_VERTEX_ARRAY );
 	pglVertexPointer( 3, GL_FLOAT, sizeof( Vector ), CableVertexesArray );
 	pglEnableClientState( GL_COLOR_ARRAY );
@@ -525,7 +525,7 @@ void R_RenderVolumetricLights( void )
 	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 	GL_DepthMask( GL_FALSE );
 
-	pglBindVertexArray( NULL );
+	pglBindVertexArray( 0 );
 	pglEnableClientState( GL_VERTEX_ARRAY );
 	pglVertexPointer( 3, GL_FLOAT, sizeof( Vector ), VolumetricVertexesArray );
 	pglEnableClientState( GL_COLOR_ARRAY );

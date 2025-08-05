@@ -5103,6 +5103,11 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 
 	Vector4D light_params[7];
 
+	GL_Bind( GL_TEXTURE1, pl->projectionTexture );
+	GL_Bind( GL_TEXTURE2, pl->shadowTexture );
+	const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
+	const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
+
 	// sorting list to reduce shader switches
 	for( int i = 0; i < m_nNumLightMeshes; i++ )
 	{
@@ -5131,8 +5136,6 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 
 			// write constants
 			pglUniformMatrix4fvARB( RI->currentshader->u_LightViewProjectionMatrix, 1, GL_FALSE, &gl_lightViewProjMatrix[0] );
-			const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
-			const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
 
 			// depth scale and bias and shadowmap resolution
 		//	R_SetRenderColor( m_pCurrentEntity );
@@ -5159,9 +5162,6 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			num_bones = Q_min( m_pStudioHeader->numbones, glConfig.max_skinning_bones );
 			pglUniform4fvARB( RI->currentshader->u_BoneQuaternion, num_bones, &m_pModelInstance->m_studioquat[0][0] );
 			pglUniform3fvARB( RI->currentshader->u_BonePosition, num_bones, &m_pModelInstance->m_studiopos[0][0] );
-
-			GL_Bind( GL_TEXTURE1, pl->projectionTexture );
-			GL_Bind( GL_TEXTURE2, pl->shadowTexture );
 
 			float scale = m_pCurrentEntity->curstate.scale;
 			if( scale <= 0.0f ) scale = 1.0f;

@@ -235,7 +235,7 @@ void R_CreateSurfaceVBO( grass_t *out )
 	pglBufferDataARB( GL_ELEMENT_ARRAY_BUFFER_ARB, m_iNumIndex * sizeof( unsigned short ), &m_indexarray[0], GL_STATIC_DRAW_ARB );
 
 	// don't forget to unbind them
-	pglBindVertexArray( GL_FALSE );
+	pglBindVertexArray( 0 );
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 	pglBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
 
@@ -352,7 +352,7 @@ void R_ConstructGrassVBO( msurface_t *surf )
 	if( es->grass || !(surf->flags & SURF_HASGRASS) )
 		return;
 
-	pglBindVertexArray( GL_FALSE );
+	pglBindVertexArray( 0 );
 
 	size_t grasshdr_size = sizeof( grasshdr_t ) + sizeof( grass_t ) * ( es->grasscount - 1 );
 	grasshdr_t *hdr = es->grass = (grasshdr_t *)IEngineStudio.Mem_Calloc( 1, grasshdr_size );
@@ -546,7 +546,8 @@ void R_RenderGrassOnList( void )
 			R_DrawGrassMesh( g, i, hLastShader, hCachedMatrix, hLastTexture, hLastBumpMap );
 	}
 
-	pglBindVertexArray( world->vertex_array_object ); // restore old binding
+	pglBindVertexArray( 0 );
+	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 
 	GL_CleanupAllTextureUnits();
 
@@ -580,11 +581,8 @@ void R_DrawLightForGrassMesh( plight_t *pl, grass_t *grass, int tex, word &hLast
 
 		// write constants
 		pglUniformMatrix4fvARB( RI->currentshader->u_LightViewProjectionMatrix, 1, GL_FALSE, &gl_lightViewProjMatrix[0] );
-		float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
-		float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
-
-		GL_Bind( GL_TEXTURE1, pl->projectionTexture );
-		GL_Bind( GL_TEXTURE2, pl->shadowTexture );
+		const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
+		const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
 
 		Vector4D grasslight_params[7];
 		// light dir
@@ -616,7 +614,10 @@ void R_DrawLightForGrassMesh( plight_t *pl, grass_t *grass, int tex, word &hLast
 		pglUniform1fARB( RI->currentshader->u_GenericCondition, 1.0f );
 	}
 	else
+	{
 		pglUniform1fARB( RI->currentshader->u_GenericCondition, 0.0f );
+		GL_Bind( GL_TEXTURE3, tr.blackTexture ); // stub
+	}
 
 	if( grass->hCachedMatrix != hCachedMatrix )
 	{
@@ -645,6 +646,9 @@ void R_DrawLightForGrass( plight_t *pl )
 	if( !CVAR_TO_BOOL( r_grass ) || !tr.num_light_grass ) return; // don't waste time
 	
 	GL_Cull( GL_NONE );
+
+	GL_Bind( GL_TEXTURE1, pl->projectionTexture );
+	GL_Bind( GL_TEXTURE2, pl->shadowTexture );
 
 	for( int i = 0; i < GRASS_TEXTURES; i++ )
 	{
@@ -1679,7 +1683,7 @@ void R_DrawGrassLight( plight_t *pl )
 	if( !tr.num_light_grass || !shaderNum || tr.nodlights )
 		return;
 
-	pglBindVertexArray( GL_FALSE );
+	pglBindVertexArray( 0 );
 	GL_BindShader( &glsl_programs[shaderNum] );			
 	ASSERT( RI->currentshader != NULL );
 
@@ -1706,7 +1710,6 @@ void R_DrawGrassLight( plight_t *pl )
 	R_DrawGrass( true );
 
 	pglBindVertexArray( world->vertex_array_object );
-//	pglBindVertexArray( GL_FALSE );
 	GL_SelectTexture( glConfig.max_texture_units - 1 ); // force to cleanup all the units
 	GL_CleanUpTextureUnits( 0 );
 }

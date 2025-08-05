@@ -905,7 +905,14 @@ R_DrawWeather
 =================================
 */
 void R_DrawWeather( void )
-{	
+{
+	// a neat global to determine the intensity of a storm if needed
+	gHUD.Weather_Intensity = bound( 0.0f, Rain.dripsPerSecond / 2500.0f, 1.0f );  // this number can be tuned
+
+	gHUD.ScreenDrips_Visible = false;
+	if( gHUD.ScreenDrips_OverrideTime < tr.time )
+		gHUD.ScreenDrips_DripIntensity = bound( 0.0f, gHUD.Weather_Intensity, 0.5f ); // for water drops shader
+
 	if( Rain.dripsPerSecond <= 0 )
 		return;
 
@@ -920,13 +927,6 @@ void R_DrawWeather( void )
 	
 	ProcessRain();
 	ProcessFXObjects();
-
-	// a neat global to determine the intensity of a storm if needed
-	gHUD.Weather_Intensity = bound( 0.0f, Rain.dripsPerSecond / 2500.0f, 1.0f );  // this number can be tuned
-
-	gHUD.ScreenDrips_Visible = false;
-	if( gHUD.ScreenDrips_OverrideTime < tr.time )
-		gHUD.ScreenDrips_DripIntensity = bound( 0.0f, gHUD.Weather_Intensity, 0.5f ); // for water drops shader
 
 	// diffusion - trace up from the player to check if he is under a roof
 	// make sure he is not above it

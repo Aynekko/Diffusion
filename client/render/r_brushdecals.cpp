@@ -42,11 +42,11 @@ word cached_shader = -1;
 
 static void R_CreateDecalsVAO()
 {
-	const int decalSize = sizeof(struct decalarray_s);
-	pglGenVertexArrays(1, &decal_vao);
-	pglGenBuffersARB(1, &decal_vbo);
-	pglBindVertexArray(decal_vao);
-	pglBindBufferARB(GL_ARRAY_BUFFER_ARB, decal_vbo);
+	const int decalSize = sizeof( struct decalarray_s );
+	pglGenVertexArrays( 1, &decal_vao );
+	pglGenBuffersARB( 1, &decal_vbo );
+	pglBindVertexArray( decal_vao );
+	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, decal_vbo );
 
 	pglVertexAttribPointerARB(ATTR_INDEX_TEXCOORD0, 4, GL_FLOAT, GL_FALSE, decalSize, (void*)offsetof(decalarray_s, texcoord0));
 	pglEnableVertexAttribArrayARB(ATTR_INDEX_TEXCOORD0);
@@ -58,7 +58,9 @@ static void R_CreateDecalsVAO()
 	pglEnableVertexAttribArrayARB(ATTR_INDEX_LIGHT_STYLES);
 	pglVertexAttribPointerARB(ATTR_INDEX_POSITION, 3, GL_FLOAT, GL_FALSE, decalSize, (void*)offsetof(decalarray_s, position));
 	pglEnableVertexAttribArrayARB(ATTR_INDEX_POSITION);
-	pglBindVertexArray(0);
+
+	pglBindVertexArray( 0 );
+	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 }
 
 /*
@@ -275,7 +277,7 @@ void DrawDecalsBatch(void)
 	for( i = 0; i < num_render_decals; i++ )
 		DrawSingleDecal( decal_list[i], false );
 
-	pglBindVertexArray( NULL );
+	pglBindVertexArray( 0 );
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 
 	/*
