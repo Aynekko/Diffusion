@@ -127,6 +127,7 @@ void C_AR2::PrimaryAttack()
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
+		CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
 		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/crystal_empty.wav", 1.0, ATTN_NORM );
 		m_flNextPrimaryAttack = gpGlobals->time + 0.2;
 		return;
@@ -218,8 +219,9 @@ void C_AR2::SecondaryAttack( void )
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
+		CLIENT_COMMAND( m_pPlayer->edict(), "-attack2\n" );
 		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/crystal_empty.wav", 1.0, ATTN_NORM );
-		m_flNextPrimaryAttack = gpGlobals->time + 0.15;
+		m_flNextSecondaryAttack = gpGlobals->time + 0.15;
 		return;
 	}
 

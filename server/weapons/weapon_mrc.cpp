@@ -132,6 +132,7 @@ void CMRC::PrimaryAttack()
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
+		CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
 		PlayEmptySound( );
 		m_flNextPrimaryAttack = gpGlobals->time + 0.15;
 		return;
@@ -223,8 +224,9 @@ void CMRC::SecondaryAttack( void )
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
+		CLIENT_COMMAND( m_pPlayer->edict(), "-attack2\n" );
 		PlayEmptySound( );
-		m_flNextPrimaryAttack = gpGlobals->time + 0.15;
+		m_flNextSecondaryAttack = gpGlobals->time + 0.15;
 		return;
 	}
 

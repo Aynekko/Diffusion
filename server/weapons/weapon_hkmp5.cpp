@@ -117,6 +117,7 @@ void CWeaponHKMP5::PrimaryAttack()
 	// don't fire underwater
 	if (m_pPlayer->pev->waterlevel == 3)
 	{
+		CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" );
 		PlayEmptySound( );
 		m_flNextPrimaryAttack = gpGlobals->time + 0.15;
 		return;
