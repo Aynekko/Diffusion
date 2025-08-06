@@ -156,7 +156,7 @@ void CTriggerRandomizer::KeyValue(KeyValueData* pkvd)
 	}
 	else if (FStrEq(pkvd->szKeyName, "deviation"))
 	{
-		Deviation = Q_atoi(pkvd->szValue);
+		Deviation = Q_atof(pkvd->szValue);
 		pkvd->fHandled = TRUE;
 	}
 	else
