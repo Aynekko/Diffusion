@@ -147,6 +147,12 @@ void R_SetupLightProjection( plight_t *pl, const Vector &origin, const Vector &a
 {
 	if( pl->brightness == 0 )
 		pl->brightness = 1; // diffusion - set default
+
+	// set default shadow textures
+	if( pl->pointlight )
+		pl->shadowTexture = tr.depthCubemap;
+	else
+		pl->shadowTexture = tr.depthTexture;
 	
 	if( pl->origin != origin || pl->angles != angles || pl->fov != fov || pl->radius != radius )
 	{

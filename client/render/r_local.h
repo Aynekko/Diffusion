@@ -350,6 +350,7 @@ typedef struct
 	int		num_cin_used;	// used movie textures per full frame
 	int		whiteCubeTexture;	// stub
 	int		blackCubeTexture; // cubemap box stub
+	int		depthCubemap;
 
 	int		screen_depth;
 	int		screen_color;

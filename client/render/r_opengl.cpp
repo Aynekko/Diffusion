@@ -865,6 +865,7 @@ static void R_InitStubCubemaps( void )
 	tr.whiteCubeTexture = CREATE_TEXTURE( "*whiteCube", size, size, dataCM, TF_NOMIPMAP|TF_CUBEMAP|TF_CLAMP );
 	memset( dataCM, 0x00, sizeof( dataCM ) );
 	tr.blackCubeTexture = CREATE_TEXTURE( "*blackCube", size, size, dataCM, TF_NOMIPMAP|TF_CUBEMAP|TF_CLAMP );
+	tr.depthCubemap = CREATE_TEXTURE( "depthCube", 8, 8, NULL, TF_SHADOW_CUBEMAP );
 }
 
 static void GL_InitTextures( void )
