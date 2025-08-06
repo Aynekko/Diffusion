@@ -207,14 +207,7 @@ int R_AllocateShadowFramebuffer( plight_t *pl, int side = 0 )
 		pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, texture ), 0 );
 	}
 
-	bool result = ValidateFBO();
-	if( pl->pointlight && !result )
-	{
-		// 512 mb or less old nvidia card fails with gl_out_of_memory
-		tr.omni_shadows_notsupport = true;
-		tr.glsl_sequence_omni[1]++;
-		Msg( "error\n" );
-	}
+	ValidateFBO();
 
 	return texture;
 }

@@ -2842,7 +2842,7 @@ void R_DrawBrushList( void )
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
 			flush_buffer = true;
 
-		if( MT.ReflectScale[0] > 0.01f )
+		if( RI->currentshader && RI->currentshader->status & SHADER_USE_CUBEMAPS )
 		{
 			if( cached_cubemap != es->cubemap )
 				flush_buffer = true;

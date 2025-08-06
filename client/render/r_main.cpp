@@ -2210,10 +2210,6 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 
 	memset( tr.visbytes, 0, tr.pvssize );
 
-	// diffusioncubemaps
-	if( GL_Support( R_SEAMLESS_CUBEMAP ) )
-		pglEnable( GL_TEXTURE_CUBE_MAP_SEAMLESS );
-
 	GL_LoadAndRebuildCubemaps( RI->params );  // diffusioncubemaps
 
 	tr.fCustomRendering = true;

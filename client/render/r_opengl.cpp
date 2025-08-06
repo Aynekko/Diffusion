@@ -661,7 +661,7 @@ static void GL_InitExtensions( void )
 	// hardware cubemaps
 	GL_CheckExtension( "GL_ARB_texture_cube_map", NULL, "gl_texture_cubemap", R_TEXTURECUBEMAP_EXT, true );
 
-	GL_CheckExtension( "GL_ARB_seamless_cube_map", NULL, "gl_seamless_cubemap", R_SEAMLESS_CUBEMAP );
+//	GL_CheckExtension( "GL_ARB_seamless_cube_map", NULL, "gl_seamless_cubemap", R_SEAMLESS_CUBEMAP ); // remove for now, unless we really need it
 
 	if( GL_Support( R_TEXTURECUBEMAP_EXT ))
 		pglGetIntegerv( GL_MAX_CUBE_MAP_TEXTURE_SIZE_ARB, &glConfig.max_cubemap_size );
