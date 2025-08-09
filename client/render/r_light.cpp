@@ -573,7 +573,7 @@ void R_AnimateLight( void )
 	scale = r_lighting_modulate->value;
 
 	const float fSunScale = tr.sunlightscale; // LS_SUN - direct sunlight
-	const float fSkyScale = 0.5f + tr.sunlightscale * 0.5f; // LS_SKY - diffuse light from sky - just half
+	const float fSkyScale = 0.5f * (1.0f + tr.sunlightscale); // LS_SKY - diffuse light from sky - just half
 
 	// light animations
 	// 'm' is normal light, 'a' is no light, 'z' is double bright
@@ -604,7 +604,7 @@ void R_AnimateLight( void )
 					tr.lightstylevalue[i] *= fSunScale;
 					tr.lightstyles[i] *= fSunScale;
 				}
-				else if( i == LS_SKY && tr.sunlightscale < 1.0f ) // just half
+				else if( i == LS_SKY && tr.sunlightscale != 1.0f )
 				{
 					tr.lightstylevalue[i] *= fSkyScale;
 					tr.lightstyles[i] *= fSkyScale;
@@ -624,7 +624,7 @@ void R_AnimateLight( void )
 					tr.lightstylevalue[i] *= fSunScale;
 					tr.lightstyles[i] *= fSunScale;
 				}
-				else if( i == LS_SKY && tr.sunlightscale < 1.0f ) // just half
+				else if( i == LS_SKY && tr.sunlightscale != 1.0f )
 				{
 					tr.lightstylevalue[i] *= fSkyScale;
 					tr.lightstyles[i] *= fSkyScale;
@@ -643,7 +643,7 @@ void R_AnimateLight( void )
 					tr.lightstylevalue[i] *= fSunScale;
 					tr.lightstyles[i] *= fSunScale;
 				}
-				else if( i == LS_SKY && tr.sunlightscale < 1.0f ) // just half
+				else if( i == LS_SKY && tr.sunlightscale != 1.0f )
 				{
 					tr.lightstylevalue[i] *= fSkyScale;
 					tr.lightstyles[i] *= fSkyScale;
