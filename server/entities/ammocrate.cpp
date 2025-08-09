@@ -37,6 +37,8 @@ public:
 //	char WpnText[128];
 	void GiveItems( CBasePlayer *pPlayer );
 	void GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float CurrentRatio );
+	void DbgPrint( int Had, const char *AmmoType, int Max, int Given );
+	int CalcGive( int MaxAmmo, float Ratio );
 
 	// multiplayer only
 	CSprite* AmmoIcon;
@@ -534,6 +536,19 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 	PlayPickupSound( pPlayer );
 }
 
+void CAmmoCrate::DbgPrint( int Had, const char *AmmoType, int Max, int Given )
+{
+	ALERT( at_aiconsole, "GiveDynamicAmmo: player had %i of \"%s\" out of %i, given %i.\n", Had - Given, AmmoType, Max, Given );
+}
+
+int CAmmoCrate::CalcGive( int MaxAmmo, float Ratio )
+{
+	int out = (MaxAmmo - (MaxAmmo * Ratio)) * 0.25f;
+	if( out < 1 ) out = 1;
+
+	return out;
+}
+
 void CAmmoCrate::GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float CurrentRatio )
 {
 	if( WeaponID == 0 || CurrentRatio == 1.0f || CurrentRatio < 0.0f )
@@ -542,46 +557,74 @@ void CAmmoCrate::GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float Curr
 	if( !pPlayer )
 		return;
 
+	int iGive = 0;
+
 	switch( WeaponID )
 	{
 	case WEAPON_BERETTA:
-		pPlayer->GiveAmmo( (int)((_9MM_MAX_CARRY - (_9MM_MAX_CARRY * CurrentRatio)) * 0.5), "9mm", _9MM_MAX_CARRY );
+		iGive = CalcGive( _9MM_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "9mm", _9MM_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "9mm" ) ), "9mm", _9MM_MAX_CARRY, iGive );
 		break;
 	case WEAPON_DEAGLE:
-		pPlayer->GiveAmmo( (int)((DEAGLE_MAX_CARRY - (DEAGLE_MAX_CARRY * CurrentRatio)) * 0.5), "357", DEAGLE_MAX_CARRY );
+		iGive = CalcGive( DEAGLE_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "357", DEAGLE_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "357" ) ), "357", DEAGLE_MAX_CARRY, iGive );
 		break;
 	case WEAPON_MRC:
-		pPlayer->GiveAmmo( (int)((_9MM_MAX_CARRY - (_9MM_MAX_CARRY * CurrentRatio)) * 0.5), "mrcbullets", _9MM_MAX_CARRY );
+		iGive = CalcGive( _9MM_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "mrcbullets", _9MM_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "mrcbullets" ) ), "mrcbullets", _9MM_MAX_CARRY, iGive );
 		break;
 	case WEAPON_CROSSBOW:
-		pPlayer->GiveAmmo( (int)((BOLT_MAX_CARRY - (BOLT_MAX_CARRY * CurrentRatio)) * 0.5), "bolts", BOLT_MAX_CARRY );
+		iGive = CalcGive( BOLT_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "bolts", BOLT_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "bolts" ) ), "bolts", BOLT_MAX_CARRY, iGive );
 		break;
 	case WEAPON_SHOTGUN:
-		pPlayer->GiveAmmo( (int)((BUCKSHOT_MAX_CARRY - (BUCKSHOT_MAX_CARRY * CurrentRatio)) * 0.5), "buckshot", BUCKSHOT_MAX_CARRY );
+		iGive = CalcGive( BUCKSHOT_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "buckshot", BUCKSHOT_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "buckshot" ) ), "buckshot", BUCKSHOT_MAX_CARRY, iGive );
 		break;
 	case WEAPON_GAUSS:
-		pPlayer->GiveAmmo( (int)((URANIUM_MAX_CARRY - (URANIUM_MAX_CARRY * CurrentRatio)) * 0.5), "uranium", URANIUM_MAX_CARRY );
+		iGive = CalcGive( URANIUM_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "uranium", URANIUM_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "uranium" ) ), "uranium", URANIUM_MAX_CARRY, iGive );
 		break;
 	case WEAPON_AR2:
-		pPlayer->GiveAmmo( (int)((AR2_MAX_CARRY - (AR2_MAX_CARRY * CurrentRatio)) * 0.5), "ar2ammo", AR2_MAX_CARRY );
+		iGive = CalcGive( AR2_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "ar2ammo", AR2_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "ar2ammo" ) ), "ar2ammo", AR2_MAX_CARRY, iGive );
 		break;
 	case WEAPON_HKMP5:
-		pPlayer->GiveAmmo( (int)((_9MM_MAX_CARRY - (_9MM_MAX_CARRY * CurrentRatio)) * 0.5), "hkmp5ammo", _9MM_MAX_CARRY );
+		iGive = CalcGive( _9MM_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "hkmp5ammo", _9MM_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "hkmp5ammo" ) ), "hkmp5ammo", _9MM_MAX_CARRY, iGive );
 		break;
 	case WEAPON_FIVESEVEN:
+		iGive = CalcGive( _57_MAX_CARRY, CurrentRatio );
 		pPlayer->GiveAmmo( (int)((_57_MAX_CARRY - (_57_MAX_CARRY * CurrentRatio)) * 0.5), "ammo57", _57_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "ammo57" ) ), "ammo57", _57_MAX_CARRY, iGive );
 		break;
 	case WEAPON_SNIPER:
-		pPlayer->GiveAmmo( (int)((SNIPER_MAX_CARRY - (SNIPER_MAX_CARRY * CurrentRatio)) * 0.5), "sniperammo", SNIPER_MAX_CARRY );
+		iGive = CalcGive( SNIPER_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "sniperammo", SNIPER_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "sniperammo" ) ), "sniperammo", SNIPER_MAX_CARRY, iGive );
 		break;
 	case WEAPON_SHOTGUN_XM:
-		pPlayer->GiveAmmo( (int)((BUCKSHOT_MAX_CARRY - (BUCKSHOT_MAX_CARRY * CurrentRatio)) * 0.5), "buckshot", BUCKSHOT_MAX_CARRY );
+		iGive = CalcGive( BUCKSHOT_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "buckshot", BUCKSHOT_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "buckshot" ) ), "buckshot", BUCKSHOT_MAX_CARRY, iGive );
 		break;
 	case WEAPON_G36C:
-		pPlayer->GiveAmmo( (int)((_9MM_MAX_CARRY - (_9MM_MAX_CARRY * CurrentRatio)) * 0.5), "g36cammo", _9MM_MAX_CARRY );
+		iGive = CalcGive( _9MM_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "g36cammo", _9MM_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "g36cammo" ) ), "g36cammo", _9MM_MAX_CARRY, iGive );
 		break;
 	case WEAPON_RPG:
-		pPlayer->GiveAmmo( (int)((ROCKET_MAX_CARRY - (ROCKET_MAX_CARRY * CurrentRatio)) * 0.5), "rockets", ROCKET_MAX_CARRY );
+		iGive = CalcGive( ROCKET_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, "rockets", ROCKET_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "rockets" ) ), "rockets", ROCKET_MAX_CARRY, iGive );
 		break;
 	}
 }
