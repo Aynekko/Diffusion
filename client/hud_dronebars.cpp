@@ -61,7 +61,7 @@ int CHudDroneBars::Draw( float flTime )
 	}
 	else
 	{
-		if( dronebar_lerp_x < default_x )
+		if( dronebar_lerp_x != default_x )
 			dronebar_lerp_x = lerp( dronebar_lerp_x, default_x + 10, 5.0f * g_fFrametime );
 	}
 

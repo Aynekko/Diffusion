@@ -67,5 +67,5 @@ void main( void )
     
     vec4 output_color = color - (vig * vignette_intensity);
 
-	gl_FragColor = vec4( mix( original.rgb, output_color.rgb, 1.0 ), 1.0 );
+	gl_FragColor = vec4( mix( original.rgb, output_color.rgb, 1.0 ), 1.0 ) * 1.25;
 }
