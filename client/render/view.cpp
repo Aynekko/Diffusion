@@ -184,6 +184,7 @@ cvar_t	v_ipitch_level = { "v_ipitch_level", "0.3", 0, 0.3f };
 
 cvar_t *ui_is_active;
 cvar_t *ui_videooptions_active;
+cvar_t *ui_forcenoblur;
 cvar_t *cl_background;
 
 int g_iPlayerClass;
@@ -426,6 +427,7 @@ void V_Init( void )
 
 	ui_is_active = CVAR_REGISTER( "ui_is_active", "0", FCVAR_UNLOGGED );
 	ui_videooptions_active = CVAR_REGISTER( "ui_videooptions_active", "0", FCVAR_UNLOGGED );
+	ui_forcenoblur = CVAR_REGISTER( "ui_forcenoblur", "0", FCVAR_UNLOGGED );
 	cl_background = CVAR_GET_POINTER( "cl_background" );
 }
 

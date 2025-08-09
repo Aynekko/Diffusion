@@ -2242,6 +2242,9 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 
 	HUD_PrintStats();
 
+	// restore global blur after saving the game
+	ui_forcenoblur->value = 0;
+
 	return 1;
 }
 

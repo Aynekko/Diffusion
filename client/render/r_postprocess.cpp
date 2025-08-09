@@ -518,6 +518,11 @@ void GaussBlur( void )
 		skyblur = 0;
 	}
 
+	// this is asked by UI when saving the game, to get unblurred save preview image
+	// it will always reset to 0 at the end of every frame
+	if( CVAR_TO_BOOL( ui_forcenoblur ) )
+		return;
+
 	// blur when paused (menu is shown)
 	if( RP_NORMALPASS() && !cl_background->value )
 	{
