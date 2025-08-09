@@ -5152,7 +5152,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			// view right
 			light_params[5] = Vector4D( right.x, right.y, right.z, 0.0f );
 			// fog params
-			if( m_pCurrentEntity->curstate.rendermode == kRenderTransAdd || m_pCurrentEntity->curstate.renderfx == kRenderFxFullbright || m_pCurrentEntity->curstate.renderfx == kRenderFxFullbrightNoShadows )
+			if( m_pCurrentEntity->curstate.rendermode == kRenderTransAdd )
 				light_params[6] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f ); // disable fog
 			else
 				light_params[6] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
@@ -5432,7 +5432,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			// view right
 			studio_params[1] = Vector4D( right.x, right.y, right.z, 0.0f );
 			// fog params
-			if( m_pCurrentEntity->curstate.rendermode == kRenderTransAdd || m_pCurrentEntity->curstate.renderfx == kRenderFxFullbright || m_pCurrentEntity->curstate.renderfx == kRenderFxFullbrightNoShadows )
+			if( m_pCurrentEntity->curstate.rendermode == kRenderTransAdd )
 				studio_params[2] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f ); // disable fog
 			else
 				studio_params[2] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
