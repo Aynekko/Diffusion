@@ -102,7 +102,9 @@ int CHudTutorial::Draw( float flTime )
 		return 0;
 
 	// set the coordinates
-	const float x = 30;
+	// offset to the right if the drone bars are visible
+	const float drone_x_offset = (gHUD.m_DroneBars.CanUseDrone ? 80.0f : 0.0f);
+	const float x = 30 + drone_x_offset;
 	const float y = ScreenHeight * 0.25f;
 
 	if( !alpha_direction ) // tutor is now showing

@@ -622,7 +622,7 @@ public:
 	void MessageDraw( client_textmessage_t *pMessage, int x, int y, bool GetSize = false );
 
 	client_textmessage_t *tutorial;
-	char tutorial_text[1536];
+	char tutorial_text[2048];
 	int Twidth;
 	int Theight;
 };
