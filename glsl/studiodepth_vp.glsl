@@ -25,6 +25,8 @@ attribute vec4		attr_BoneWeights;
 uniform float u_MeshScale;
 uniform vec4		u_BoneQuaternion[MAXSTUDIOBONES];
 uniform vec3		u_BonePosition[MAXSTUDIOBONES];
+uniform float		u_RealTime;
+uniform float		u_FoliageSwayHeight;
 
 varying vec2		var_TexCoord;	// for alpha-testing
 varying vec3		var_VertexColor;
@@ -32,6 +34,14 @@ varying vec3		var_ViewVec;
 
 void main( void )
 {
+	vec4 position = vec4( attr_Position, 1.0 );
+
+	if( u_FoliageSwayHeight != 0.0 && position.z > u_FoliageSwayHeight )
+	{
+		position.x += position.z * 0.025 * sin( position.z + u_RealTime * 0.25 );
+		position.y += position.z * 0.025 * cos( position.z + u_RealTime * 0.25 );
+	}
+
 #if defined( STUDIO_BONEWEIGHTING )
 	int boneIndex0 = int( attr_BoneIndexes[0] );
 	int boneIndex1 = int( attr_BoneIndexes[1] );
@@ -55,7 +65,7 @@ void main( void )
 	// compute hardware skinning without boneweighting
 	mat4 boneMatrix = Mat4FromOriginQuat( u_BoneQuaternion[boneIndex0], u_BonePosition[boneIndex0] );
 #endif
-	vec4 worldpos = boneMatrix * vec4( attr_Position, 1.0 );
+	vec4 worldpos = boneMatrix * position;
 
 	// transform vertex position into homogenous clip-space
 	gl_Position = gl_ModelViewProjectionMatrix * worldpos;

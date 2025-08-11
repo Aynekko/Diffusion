@@ -1016,6 +1016,8 @@ static void GL_InitStudioDepthFillUniforms( glsl_program_t *shader )
 	ASSERT( shader != NULL );
 
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
+	shader->u_RealTime = pglGetUniformLocationARB( shader->handle, "u_RealTime" );
+	shader->u_FoliageSwayHeight = pglGetUniformLocationARB( shader->handle, "u_FoliageSwayHeight" );
 
 	shader->u_BoneQuaternion = pglGetUniformLocationARB( shader->handle, "u_BoneQuaternion" );
 	shader->u_BonePosition = pglGetUniformLocationARB( shader->handle, "u_BonePosition" );

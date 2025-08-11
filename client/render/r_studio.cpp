@@ -5704,7 +5704,6 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 
 	// sorting list to reduce shader switches
 	if( !CVAR_TO_BOOL( r_nosort ) ) 
-//		QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
 		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes, SortSolidMeshes );
 
 	// sorting list to reduce shader switches
@@ -5731,10 +5730,17 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 
 			ASSERT( RI->currentshader != NULL );
 
+			pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
+
 			// reset cache
 			cached_model = NULL;
 			cached_texture = -1;
 		}
+
+		if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
+			pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, (float)tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
+		else
+			pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, 0.0f ); // stub value
 
 		if( cached_model != m_pRenderModel )
 		{
