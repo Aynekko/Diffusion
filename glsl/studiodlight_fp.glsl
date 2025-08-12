@@ -92,6 +92,15 @@ varying mat3	        var_MatrixTBN;
 
 void main( void )
 {
+	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+
+#if !defined( STUDIO_INTERIOR )
+	if( diffuse.a == 0.0 ) discard;
+	#if !defined( STUDIO_DEFAULTALPHATEST )
+		if( diffuse.a < 0.5 ) discard;
+	#endif
+#endif
+
 	float dist = length( var_LightVec );
 	float atten = 1.0 - saturate( pow( dist * u_LightOrigin.w, u_LightDiffuse.a ));
 	if( atten <= 0.0 ) discard; // fast reject
@@ -131,7 +140,7 @@ void main( void )
 	vec3 V = normalize( var_ViewVec );
 	vec3 N;
 
-        // compute the normal term
+	// compute the normal term
 #if defined( STUDIO_BUMP )
 	N = normalmap2D( u_NormalMap, var_TexDiffuse );
 #else
@@ -141,20 +150,10 @@ void main( void )
 	// two side materials support
 	if( bool( gl_FrontFacing )) N = -N;
 
-	// compute the diffuse, emboss and specular term
-	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
-
 #if defined( STUDIO_TEXTURE_BLEND )
 	vec4 blend_texture = texture2D( u_BlendTexture, var_TexDiffuse );
 	// blend them together
 	diffuse.rgb = mix( diffuse.rgb, blend_texture.rgb, u_BlendAmount );
-#endif
-
-#if !defined( STUDIO_INTERIOR )
-	#if !defined( STUDIO_DEFAULTALPHATEST )
-		if( diffuse.a < 0.5f )
-			discard;
-	#endif
 #endif
 
 #if defined( STUDIO_HAS_COLORMASK )

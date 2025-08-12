@@ -135,8 +135,9 @@ void main( void )
 #endif
 
 #if !defined( BMODEL_INTERIOR )
+	if( diffuse.a == 0.0 ) discard;
 	#if !defined( BMODEL_DEFAULTALPHATEST )
-	if( diffuse.a < 0.5 ) discard;
+		if( diffuse.a < 0.5 ) discard;
 	#endif
 #endif
 

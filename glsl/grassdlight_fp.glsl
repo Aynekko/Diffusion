@@ -56,6 +56,11 @@ varying vec4		var_ShadowCoord;
 
 void main( void )
 {
+	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
+
+	if( diffuse.a < 0.5 ) discard;
+
 	float dist = length( var_LightVec );
 	float atten = 1.0 - saturate( pow( dist * u_LightOrigin.w, u_LightDiffuse.a ));
 	if( atten <= 0.0 ) discard; // fast reject
@@ -78,14 +83,6 @@ void main( void )
 #elif defined( GRASS_LIGHT_OMNIDIRECTIONAL )
 	L = normalize( var_LightVec );
 #endif
-
-	// compute the diffuse term
-	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
-
-	diffuse.a = AlphaRescaling( u_ColorMap, var_TexDiffuse, diffuse.a );
-
-	if( diffuse.a < 0.5 )
-		discard;
 
 	vec3 light = vec3( 1.0 );
 	vec3 N;

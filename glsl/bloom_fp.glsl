@@ -15,6 +15,8 @@ GNU General Public License for more details.
 
 #include "texfetch.h"
 
+#define BLOOM_STRENGTH 0.75
+
 uniform sampler2D	u_ScreenMap;
 uniform vec2		u_ScreenSizeInv;    // actually screensize
 
@@ -39,5 +41,5 @@ void main()
 	tex += texture2DLod( u_ScreenMap, var_TexCoord, 3.0 );	
 	tex *= 0.25;
 	
-	gl_FragColor = tex;
+	gl_FragColor = tex * BLOOM_STRENGTH;
 }

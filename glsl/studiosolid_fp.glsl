@@ -95,9 +95,9 @@ void main( void )
 #endif
 
 #if !defined( STUDIO_INTERIOR )
+	if( diffuse.a == 0.0 ) discard;
 	#if !defined( STUDIO_DEFAULTALPHATEST )
-		if( diffuse.a < 0.5f )
-			discard;
+		if( diffuse.a < 0.5 ) discard;
 	#endif
 #endif
 
