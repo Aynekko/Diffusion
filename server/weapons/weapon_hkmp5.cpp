@@ -190,7 +190,7 @@ void CWeaponHKMP5::PrimaryAttack()
 	if( m_iClip <= 10 )
 		LowAmmoMsg( m_pPlayer );
 
-	m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 1, 0 );
+	m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 1, ACHVAL_ADD );
 
 	m_pPlayer->pev->punchangle.x += Cone * RANDOM_LONG(15,25);
 	m_pPlayer->pev->punchangle.y += -Cone * RANDOM_LONG(-15,25);

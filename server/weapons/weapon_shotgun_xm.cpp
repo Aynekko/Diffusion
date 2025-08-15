@@ -194,7 +194,6 @@ void CShotgunXM::PrimaryAttack()
 
 		UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 
-	//	EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/xm_fire.wav", 1, ATTN_NORM, 0, 95 + RANDOM_LONG( 0, 10 ) );
 		PlayClientSound( m_pPlayer, WEAPON_SHOTGUN_XM );
 
 		Vector vecSrc = m_pPlayer->GetGunPosition();
@@ -207,8 +206,7 @@ void CShotgunXM::PrimaryAttack()
 		if( m_pPlayer->LoudWeaponsRestricted )
 			m_pPlayer->FireLoudWeaponRestrictionEntity();
 
-	//	m_pPlayer->AchievementStats[ACH_BULLETSFIRED]++;
-		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 6, 0 );
+		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 6, ACHVAL_ADD );
 
 		m_pPlayer->pev->punchangle.x -= 7;
 

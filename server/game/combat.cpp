@@ -880,7 +880,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			if ( pPlayer )
 			{
 				if( pevInflictor->owner != edict() && pevAttacker != pev ) // do not count the damage inflicted to yourself
-					pPlayer->SendAchievementStatToClient( ACH_INFLICTDAMAGE, (int)flDamage, 0 ); //pPlayer->AchievementStats[ACH_INFLICTDAMAGE] += flDamage;
+					pPlayer->SendAchievementStatToClient( ACH_INFLICTDAMAGE, (int)flDamage, ACHVAL_ADD );
 			}
 		}
 	}
@@ -972,16 +972,16 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 					if( pPlayer->m_pTank != NULL )
 					{
 						if( FClassnameIs( pevInflictor, "shootball" ) )
-							pPlayer->SendAchievementStatToClient( ACH_KILLENEMIESBALLS, 1, 0 );
+							pPlayer->SendAchievementStatToClient( ACH_KILLENEMIESBALLS, 1, ACHVAL_ADD );
 					}
 
-					pPlayer->SendAchievementStatToClient( ACH_KILLENEMIES, 1, 0 );
+					pPlayer->SendAchievementStatToClient( ACH_KILLENEMIES, 1, ACHVAL_ADD );
 
 					if( FClassnameIs(pev, "monster_security_drone") )
-						pPlayer->SendAchievementStatToClient( ACH_DRONESEC, 1, 0 ); //pPlayer->AchievementStats[ACH_DRONESEC]++;
+						pPlayer->SendAchievementStatToClient( ACH_DRONESEC, 1, ACHVAL_ADD );
 
 					if( FClassnameIs(pev, "monster_alien_drone") )
-						pPlayer->SendAchievementStatToClient( ACH_DRONEALIEN, 1, 0 ); //pPlayer->AchievementStats[ACH_DRONEALIEN]++;
+						pPlayer->SendAchievementStatToClient( ACH_DRONEALIEN, 1, ACHVAL_ADD );
 
 					if( FClassnameIs( pevInflictor, "crossbow_bolt") )
 					{
@@ -991,13 +991,13 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 						// ALERT( at_aiconsole, "CrossbowMeters %f m\n", CrossbowMeters );
 						if( CrossbowMeters > 50 )
 						{
-							pPlayer->SendAchievementStatToClient( ACH_CROSSBOW, 1, 0 );
+							pPlayer->SendAchievementStatToClient( ACH_CROSSBOW, 1, ACHVAL_ADD );
 						}
 					}
 
 					if( FClassnameIs( pevInflictor, "playerball" ) )
 					{
-						pPlayer->SendAchievementStatToClient( ACH_KILLENEMIESBALLS, 1, 0 );
+						pPlayer->SendAchievementStatToClient( ACH_KILLENEMIESBALLS, 1, ACHVAL_ADD );
 					}
 				}
 			}
@@ -1006,12 +1006,12 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			if( (pev->flags & FL_CLIENT) || (pev->flags & FL_FAKECLIENT) )
 			{
 				if( HasFlag( F_BOT ) )
-					pPlayer->SendAchievementStatToClient( ACH_KILLBOTS, 1, 0 );
+					pPlayer->SendAchievementStatToClient( ACH_KILLBOTS, 1, ACHVAL_ADD );
 			}
 
 			// achievement for both
 			if( pPlayer->m_pActiveItem && pPlayer->m_pActiveItem->m_iId == WEAPON_SNIPER )
-				pPlayer->SendAchievementStatToClient( ACH_KILLENEMIESSNIPER, 1, 0 );
+				pPlayer->SendAchievementStatToClient( ACH_KILLENEMIESSNIPER, 1, ACHVAL_ADD );
 		}
 
 		if ( bitsDamageType & DMG_ALWAYSGIB )

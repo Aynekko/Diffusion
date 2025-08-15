@@ -199,8 +199,7 @@ void CHandGrenade::HandgrenadeThink(void) // it's so stupid that it's almost gen
 		CLIENT_COMMAND(m_pPlayer->edict(), "-attack\n");
 		WarningSound = false;
 		// achievement
-	//	m_pPlayer->AchievementStats[ACH_OVERCOOK]++;
-		m_pPlayer->SendAchievementStatToClient( ACH_OVERCOOK, 1, 2 );
+		m_pPlayer->SendAchievementStatToClient( ACH_OVERCOOK, 1, ACHVAL_EQUAL );
 		SetThink( NULL );
 	}
 	else

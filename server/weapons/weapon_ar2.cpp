@@ -211,7 +211,7 @@ void C_AR2::PrimaryAttack()
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 
-	m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 1, 0 );
+	m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 1, ACHVAL_ADD );
 }
 
 void C_AR2::SecondaryAttack( void )

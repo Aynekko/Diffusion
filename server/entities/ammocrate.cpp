@@ -399,7 +399,7 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 
 	int i;
 
-	pPlayer->SendAchievementStatToClient( ACH_AMMOCRATES, 1, 0 );
+	pPlayer->SendAchievementStatToClient( ACH_AMMOCRATES, 1, ACHVAL_ADD );
 
 	// give items written in the entity
 	for( i = 0; i < MAX_EQUIP; i++ )

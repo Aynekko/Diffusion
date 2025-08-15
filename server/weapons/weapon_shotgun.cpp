@@ -234,8 +234,7 @@ void CShotgun::PrimaryAttack()
 
 		m_pPlayer->FireBullets( 6, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0 );
 
-	//	m_pPlayer->AchievementStats[ACH_BULLETSFIRED]++;
-		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 6, 0 );
+		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 6, ACHVAL_ADD );
 
 		m_pPlayer->pev->punchangle.x -= 4;
 
@@ -330,7 +329,6 @@ void CShotgun::SecondaryAttack( void )
 
 		UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 
-	//	EMIT_SOUND_DYN( m_pPlayer->edict(), CHAN_WEAPON, "weapons/dbarrel1.wav", RANDOM_FLOAT(0.98, 1.0), ATTN_NORM, 0, 85 + RANDOM_LONG(0,0x1f));
 		PlayClientSound( m_pPlayer, WEAPON_SHOTGUN, 1 );
 	
 		Vector vecSrc = m_pPlayer->GetGunPosition( );
@@ -338,8 +336,7 @@ void CShotgun::SecondaryAttack( void )
 	
 		m_pPlayer->FireBullets( 12, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0 );
 
-	//	m_pPlayer->AchievementStats[ACH_BULLETSFIRED]++;
-		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 12, 0 );
+		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 12, ACHVAL_ADD );
 
 		m_pPlayer->pev->punchangle.y -= 3.5;
 

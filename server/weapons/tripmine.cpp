@@ -199,8 +199,7 @@ void CTripmineGrenade::DisarmThink(void)
 		while ( ((pPlayer = (CBasePlayer*)UTIL_FindEntityByClassname( pPlayer, "player" )) != NULL) && (!FNullEnt(pPlayer->edict())) )
 		{
 			pPlayer->EnableControl( TRUE );
-		//	pPlayer->AchievementStats[ACH_DISARMEDMINES]++;
-			pPlayer->SendAchievementStatToClient( ACH_DISARMEDMINES, 1, 0 );
+			pPlayer->SendAchievementStatToClient( ACH_DISARMEDMINES, 1, ACHVAL_ADD );
 		}
 		pev->dmg *= 0.5; // do half damage when disarmed
 	}

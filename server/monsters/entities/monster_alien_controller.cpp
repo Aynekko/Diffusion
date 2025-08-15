@@ -25,6 +25,7 @@
 #include	"game/schedule.h"
 #include	"weapons/weapons.h"
 #include	"squadmonster.h"
+#include	"game/gamerules.h"
 
 // CDrone
 #include	"entities/soundent.h"
@@ -3035,11 +3036,23 @@ int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 		SetTurnActivity();
 	}
 
-	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+	int ret = CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+
+	// let's hope it's dead... now get achievement
+	if( !g_pGameRules->IsMultiplayer() && pev->deadflag == DEAD_DEAD && !HasFlag( F_PLAYER_DRONE ) )
+	{
+		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( 1 );
+		// a player's drone killed us, and the player was in 1st-person mode
+		if( FClassnameIs( pevInflictor, "_playerdrone" ) && pPlayer->DroneControl )
+			pPlayer->SendAchievementStatToClient( ACH_5DRONES, 1, ACHVAL_ADD );
+	}
+
+	return ret;
 }
 
 void CDrone::Killed( entvars_t *pevAttacker, int iGib )
 {
+	ALERT( at_console, "DRONE_KILLED\n" );
 	pev->takedamage = DAMAGE_NO;
 	pev->deadflag = DEAD_DEAD;
 	FCheckAITrigger();
