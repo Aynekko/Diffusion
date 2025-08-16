@@ -3052,7 +3052,6 @@ int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 
 void CDrone::Killed( entvars_t *pevAttacker, int iGib )
 {
-	ALERT( at_console, "DRONE_KILLED\n" );
 	pev->takedamage = DAMAGE_NO;
 	pev->deadflag = DEAD_DEAD;
 	FCheckAITrigger();

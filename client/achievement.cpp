@@ -13,6 +13,13 @@
 
 #define SHOW_ACHIEVEMENT_TIME 7
 
+const float total_width = 666.f;
+const float total_height = 200.f;
+const float border = 20.f;
+const float pic_frame_size = total_height - border - border;
+const float border2 = 10.f;
+const float pic_size = pic_frame_size - border2 - border2;
+
 DECLARE_COMMAND( m_StatusIconsAchievement, RefreshAchievementFile );
 DECLARE_COMMAND( m_StatusIconsAchievement, ResetAchievementFile );
 DECLARE_COMMAND( m_StatusIconsAchievement, ReportAchievementsToConsole );
@@ -47,27 +54,19 @@ int CHudAchievement::Draw( float flTime )
 	if( !IsAchDrawing )
 		return 0;
 
-	if( !CurrentImage )
-		return 0;
-
 	if( gHUD.m_flTime > AchStartTime + SHOW_ACHIEVEMENT_TIME )
 		y_direction = true;
 
-	const int xmax = RENDER_GET_PARM( PARM_TEX_WIDTH, CurrentImage );
-	const int ymax = RENDER_GET_PARM( PARM_TEX_HEIGHT, CurrentImage );
-
 	// screen center
-	x = (ScreenWidth - xmax) / 2;
+	x = (ScreenWidth - total_width) * 0.5f;
 
 	if( !y_direction ) // achievement sprite is now showing
 	{
-		if( y > ScreenHeight - 250 ) y -= 700 * g_fFrametime;
-
-		if( y < ScreenHeight - 250 ) y = ScreenHeight - 250;
+		y = lerp( y, ScreenHeight - 250, 7.0f * g_fFrametime );
 	}
 	else // hiding
 	{
-		y += 50 * g_fFrametime;
+		y += 75.0f * g_fFrametime;
 
 		// fully hidden, finish up
 		if( y > ScreenHeight )
@@ -78,11 +77,31 @@ int CHudAchievement::Draw( float flTime )
 		}
 	}
 
+	// draw main frame
+	FillRoundedRGBA( x, y, total_width, total_height, 20, Vector4D( 0.05f, 0.05f, 0.05f, 0.8f ) );
+
+	// draw square frame RGB 70 169 255
+	FillRoundedRGBA( x + border, y + border, pic_frame_size, pic_frame_size, 10, Vector4D( 0.275f, 0.663f, 1.0f, 0.8f ) );
+
+	// draw the picture in the frame
 	GL_Bind( 0, CurrentImage );
-	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+	GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-	DrawQuad( x, y, x + xmax, y + ymax );
+	DrawQuad( x + border + border2, y + border + border2, x + border + border2 + pic_size, y + border + border2 + pic_size );
 	gEngfuncs.pTriAPI->End();
+
+	// draw achievement title and text from titles.txt
+	int r, g, b;
+	if( pTitle )
+	{
+		UnpackRGB( r, g, b, gHUD.m_iHUDColor );
+		DrawString( x + border + pic_frame_size + border, y + border, pTitle->pMessage, r, g, b );
+	}
+	if( pText )
+	{
+		UnpackRGB( r, g, b, 0x00FFFFFF );
+		DrawString( x + border + pic_frame_size + border, y + border + gHUD.m_scrinfo.iCharHeight + border, pText->pMessage, r, g, b );
+	}
 
 	return 1;
 }
@@ -96,8 +115,13 @@ void CHudAchievement::EnableAchievement( char *pszIconName )
 	if( !CurrentImage )
 	{
 		ConPrintf( "^1Error:^7 Achievement image \"%s\" couldn't be loaded!\n", pszIconName );
-		return;
+		CurrentImage = tr.defaultTexture;
 	}
+
+	pTitle = TextMessageGet( pszIconName ); // titles.txt
+	char txt[128];
+	sprintf_s( txt, "%s_text", pszIconName );
+	pText = TextMessageGet( txt ); // titles.txt
 
 	y = ScreenHeight + 200; // starting position below the bottom of the screen
 	IsAchDrawing = true;

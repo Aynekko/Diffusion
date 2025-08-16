@@ -652,6 +652,8 @@ public:
 	void CreateDefaultAchievementFile( void );
 	float AchievementCheckTime;
 	int CurrentImage;
+	client_textmessage_t *pTitle;
+	client_textmessage_t *pText;
 };
 
 class CHudCrosshairStatic: public CHudBase
