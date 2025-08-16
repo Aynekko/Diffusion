@@ -21,6 +21,7 @@
 // thirdperson camera
 void CAM_Think( void ) {}
 
+Vector weapon_move_angles = g_vecZero;
 
 void CL_CameraOffset( float *ofs )
 {
@@ -436,6 +437,7 @@ void V_VidInit( void )
 	PrevViewAngles = g_vecZero;
 	PrevViewOrg = g_vecZero;
 	gun_roll_angle = 0;
+	weapon_move_angles = g_vecZero;
 }
 
 float V_CalcBob( struct ref_params_s *pparams )
@@ -2166,7 +2168,6 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	if( cl_viewmodel_extras->value > 0.0f )
 	{
 		Vector weapon_attachment_angles = R_StudioAttachmentAngles( view, 0, AF_LOCAL_SPACE );
-		static Vector weapon_move_angles = Vector( 0, 0, 0 );
 		float wpn_mult = 0.1f * cl_viewmodel_extras->value;
 		weapon_move_angles.x = lerp( weapon_move_angles.x, weapon_attachment_angles.x * wpn_mult, 5 * g_fFrametime );
 		weapon_move_angles.y = lerp( weapon_move_angles.y, weapon_attachment_angles.y * wpn_mult, 5 * g_fFrametime );
