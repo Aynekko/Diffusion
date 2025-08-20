@@ -13,12 +13,12 @@
 
 #define SHOW_ACHIEVEMENT_TIME 7
 
-const float total_width = 666.f;
-const float total_height = 200.f;
-const float border = 20.f;
-const float pic_frame_size = total_height - border - border;
-const float border2 = 10.f;
-const float pic_size = pic_frame_size - border2 - border2;
+const float fTOTAL_WIDTH = 666.f;
+const float fTOTAL_HEIGHT = 200.f;
+const float fBORDER = 20.f;
+const float fPIC_FRAME_SIZE = fTOTAL_HEIGHT - fBORDER - fBORDER;
+const float fBORDER2 = 10.f;
+const float fPIC_SIZE = fPIC_FRAME_SIZE - fBORDER2 - fBORDER2;
 
 DECLARE_COMMAND( m_StatusIconsAchievement, RefreshAchievementFile );
 DECLARE_COMMAND( m_StatusIconsAchievement, ResetAchievementFile );
@@ -57,8 +57,27 @@ int CHudAchievement::Draw( float flTime )
 	if( gHUD.m_flTime > AchStartTime + SHOW_ACHIEVEMENT_TIME )
 		y_direction = true;
 
+	int added_total_width = 0;
+	if( pText )
+	{
+		// get text width
+		// it can be long, so I need to make the frame bigger if needed
+		const char *tmp = pText->pMessage;
+		int tmpwidth = 0;
+		while( *tmp && *tmp != '\n' )
+		{
+			unsigned char c = *tmp;
+			tmpwidth += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+			tmp++;
+		}
+
+		int final_width = fBORDER + fPIC_FRAME_SIZE + fBORDER + tmpwidth;
+		if( final_width > fTOTAL_WIDTH )
+			added_total_width = final_width - fTOTAL_WIDTH + fBORDER;
+	}
+
 	// screen center
-	x = (ScreenWidth - total_width) * 0.5f;
+	x = (ScreenWidth - (fTOTAL_WIDTH + added_total_width)) * 0.5f;
 
 	if( !y_direction ) // achievement sprite is now showing
 	{
@@ -78,16 +97,16 @@ int CHudAchievement::Draw( float flTime )
 	}
 
 	// draw main frame
-	FillRoundedRGBA( x, y, total_width, total_height, 20, Vector4D( 0.05f, 0.05f, 0.05f, 0.8f ) );
+	FillRoundedRGBA( x, y, fTOTAL_WIDTH + added_total_width, fTOTAL_HEIGHT, 20, Vector4D( 0.05f, 0.05f, 0.05f, 0.8f ) );
 
 	// draw square frame RGB 70 169 255
-	FillRoundedRGBA( x + border, y + border, pic_frame_size, pic_frame_size, 10, Vector4D( 0.275f, 0.663f, 1.0f, 0.8f ) );
+	FillRoundedRGBA( x + fBORDER, y + fBORDER, fPIC_FRAME_SIZE, fPIC_FRAME_SIZE, 10, Vector4D( 0.275f, 0.663f, 1.0f, 0.8f ) );
 
 	// draw the picture in the frame
 	GL_Bind( 0, CurrentImage );
 	GL_Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
 	gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-	DrawQuad( x + border + border2, y + border + border2, x + border + border2 + pic_size, y + border + border2 + pic_size );
+	DrawQuad( x + fBORDER + fBORDER2, y + fBORDER + fBORDER2, x + fBORDER + fBORDER2 + fPIC_SIZE, y + fBORDER + fBORDER2 + fPIC_SIZE );
 	gEngfuncs.pTriAPI->End();
 
 	// draw achievement title and text from titles.txt
@@ -95,12 +114,12 @@ int CHudAchievement::Draw( float flTime )
 	if( pTitle )
 	{
 		UnpackRGB( r, g, b, gHUD.m_iHUDColor );
-		DrawString( x + border + pic_frame_size + border, y + border, pTitle->pMessage, r, g, b );
+		DrawString( x + fBORDER + fPIC_FRAME_SIZE + fBORDER, y + fBORDER, pTitle->pMessage, r, g, b );
 	}
 	if( pText )
 	{
 		UnpackRGB( r, g, b, 0x00FFFFFF );
-		DrawString( x + border + pic_frame_size + border, y + border + gHUD.m_scrinfo.iCharHeight + border, pText->pMessage, r, g, b );
+		DrawString( x + fBORDER + fPIC_FRAME_SIZE + fBORDER, y + fBORDER + gHUD.m_scrinfo.iCharHeight + fBORDER, pText->pMessage, r, g, b );
 	}
 
 	return 1;
@@ -109,7 +128,7 @@ int CHudAchievement::Draw( float flTime )
 void CHudAchievement::EnableAchievement( char *pszIconName )
 {
 	char Path[128];
-	sprintf_s( Path, "sprites/ach/%s", pszIconName );
+	sprintf_s( Path, "textures/!ach/%s", pszIconName );
 	CurrentImage = LOAD_TEXTURE( Path, NULL, 0, 0 );
 
 	if( !CurrentImage )
@@ -165,13 +184,16 @@ void CHudAchievement::LoadAchievementFile( void )
 	Msg( "^2Achievements:^7 loaded %s.\n", szFilename );
 }
 
-void CHudAchievement::SaveAchievementFile(void)
+void CHudAchievement::SaveAchievementFile( bool backup )
 {
 	if( !bAchievements )
 		return;
 
 	char szFilename[MAX_PATH];
-	_snprintf_s( szFilename, sizeof( szFilename ), "data/achievements.bin" );
+	if( !backup )
+		_snprintf_s( szFilename, sizeof( szFilename ), "data/achievements.bin" );
+	else
+		_snprintf_s( szFilename, sizeof( szFilename ), "data/achievements_backup.bin" );
 
 	if( !gRenderfuncs.pfnSaveFile( szFilename, &ach_data, sizeof( ach_data ) ) )
 		Msg( "^2Achievements:^7 ^1Error:^7 SaveAchievementFile: couldn't save %s\n", szFilename );
@@ -228,6 +250,7 @@ void CHudAchievement::UserCmd_RefreshAchievementFile(void)
 void CHudAchievement::UserCmd_ResetAchievementFile( void )
 {
 	Msg( "^2Achievements:^7 resetting to default values.\n" );
+	SaveAchievementFile( true ); // create backup file with current values
 	CreateDefaultAchievementFile();
 	LoadAchievementFile();
 }

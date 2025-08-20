@@ -647,7 +647,7 @@ public:
 	void EnableAchievement(char* pszIconName );
 
 	void LoadAchievementFile( void );
-	void SaveAchievementFile( void );
+	void SaveAchievementFile( bool backup = false );
 	void CheckAchievement( void );
 	void CreateDefaultAchievementFile( void );
 	float AchievementCheckTime;

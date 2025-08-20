@@ -2641,7 +2641,7 @@ void CDrone :: RunTask ( Task_t *pTask )
 					{
 						if( m_iCounter > 0 )
 						{
-							FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 1.5f ); // 1.5 fixed damage
+							FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, DMG_WPN_DRONE_MONST );
 
 							m_iCounter--; // player's drone keeps track of bullets
 

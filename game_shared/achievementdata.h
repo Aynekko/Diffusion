@@ -36,9 +36,10 @@ enum Achievements_e
 	ACH_CH3_NOKILLDW,		// 28 don't kill any dwellers in chapter 3
 	ACH_CH3_3MINS,			// 29 destroy the computer within 3 minutes
 	ACH_5DRONES,			// 30 kill 5 enemy drones while piloting a drone from 1st person
+	ACH_DRUNK,				// 31 kill 5 enemies while drunk
 };
 
-#define TOTAL_ACHIEVEMENTS 31
+#define TOTAL_ACHIEVEMENTS 32
 
 const int AchievementGoals[TOTAL_ACHIEVEMENTS]
 {
@@ -48,7 +49,7 @@ const int AchievementGoals[TOTAL_ACHIEVEMENTS]
 	5,		// ACH_DISARMEDMINES,		// 3 disarm # enemy mines (disarming your own doesn't count)
 	100,	// ACH_KILLENEMIES,			// 4 kill # enemies
 	10000,	// ACH_INFLICTDAMAGE,		// 5 inflict a total of # damage
-	5,		// ACH_KILLENEMIESSNIPER,	// 6 kill # enemies with a stationary sniper rifle (func_tank)
+	25,		// ACH_KILLENEMIESSNIPER,	// 6 kill # enemies with weapon_sniper
 	1,		// ACH_CH1,					// 7 complete chapter
 	1,		// ACH_CH2,					// 8
 	1,		// ACH_CH3,					// 9
@@ -62,8 +63,8 @@ const int AchievementGoals[TOTAL_ACHIEVEMENTS]
 	20,		// ACH_DRONEALIEN,			// 17 kill # alien drones
 	10,		// ACH_CROSSBOW,			// 18 kill # enemies on a certain distance with a crossbow
 	100,	// ACH_DASH,				// 19 dash # times
-	50,		// ACH_NOTES,				// 20 find all notes
-	10,		// ACH_KILLENEMIESBALLS,	// 21 kill # enemies with balls (weapon_ar2 or func_tankball)
+	50,		// ACH_NOTES,				// 20 find 50 notes
+	20,		// ACH_KILLENEMIESBALLS,	// 21 kill # enemies with balls (weapon_ar2 or func_tankball)
 	1,		// ACH_REDDWELLER,			// 22 help the red dweller escape (chapter 1)
 	1,		// ACH_ASSEMBLEBLASTLEVEL,	// 23 get the first blast level by assembling the module on ch2map2
 	1,		// ACH_BROKENCAR,			// 24 break the car completely in chapter 1 intro
@@ -73,6 +74,7 @@ const int AchievementGoals[TOTAL_ACHIEVEMENTS]
 	1,		// ACH_CH3_NOKILLDW,		// 28 don't kill any dwellers in chapter 3
 	1,		// ACH_CH3_3MINS,			// 29 destroy the computer within 3 minutes
 	5,		// ACH_5DRONES,				// 30 kill 5 enemy drones while piloting a drone from 1st person
+	5,		// ACH_DRUNK,				// 31 kill 5 enemies while drunk
 };
 
 const char * const AchievementNames[TOTAL_ACHIEVEMENTS]
@@ -108,6 +110,7 @@ const char * const AchievementNames[TOTAL_ACHIEVEMENTS]
 	"ach_dwellerch3",		// ACH_CH3_NOKILLDW,		// 28 don't kill any dwellers in chapter 3
 	"ach_ch3_3mins",		// ACH_CH3_3MINS,			// 29 destroy the computer within 3 minutes
 	"ach_5drones",			// ACH_5DRONES,				// 30 kill 5 enemy drones while piloting a drone from 1st person
+	"ach_drunk",			// ACH_DRUNK,				// 31 kill 5 enemies while drunk
 };
 
 enum Achievement_data_e

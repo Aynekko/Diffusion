@@ -314,7 +314,7 @@ int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 		return 0;
 	}
 
-	if( (gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) && (keynum == K_ENTER || keynum == K_MOUSE1 || bUseButton || !Q_strcmp(pszCurrentBinding, "+attack") || bEscButton) )
+	if( (gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) && (keynum == K_ENTER || keynum == K_MOUSE1 || bUseButton || !Q_strcmp(pszCurrentBinding, "+attack")) )
 	{
 		gHUD.m_PseudoGUI.CloseWindow( keynum == K_MOUSE1 || !Q_strcmp( pszCurrentBinding, "+attack" ) );
 		return 0;

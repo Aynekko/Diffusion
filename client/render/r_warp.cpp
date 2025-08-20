@@ -455,11 +455,23 @@ void R_DrawSkyBox( void )
 		GL_BindShader( glsl.skyboxEnv );
 
 		ColorNormalize( sky_color, sky_color );
+
+		float fogdensity = 0.0f;
+		if( RI->params & RP_SKYPORTALVIEW )
+		{
+			// custom fog for 3D sky
+			if( tr.sky_camera->curstate.controller[0] + tr.sky_camera->curstate.controller[1] + tr.sky_camera->curstate.controller[2] + tr.sky_camera->curstate.controller[3] > 0.1f )
+				fogdensity = tr.fogDensity * 0.05f; // empirical
+			else
+				fogdensity = (tr.fogDensity * 0.5f) / tr.sky_camera->curstate.scale;
+		}
+		else
+			fogdensity = tr.fogDensity * 0.5f;
 		
 		pglUniform3fARB( RI->currentshader->u_LightDir, sky_vec.x, sky_vec.y, sky_vec.z );
 		pglUniform3fARB( RI->currentshader->u_LightDiffuse, sky_color.x, sky_color.y, sky_color.z );
 		pglUniform3fARB( RI->currentshader->u_ViewOrigin, RI->vieworg.x, RI->vieworg.y, RI->vieworg.z );
-		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], (RI->params & RP_SKYPORTALVIEW) ? tr.fogDensity * 0.0125f : tr.fogDensity * 0.125f );
+		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], fogdensity );
 		pglUniform1fARB( RI->currentshader->u_GenericCondition, (float)sundisk );
 	}
 

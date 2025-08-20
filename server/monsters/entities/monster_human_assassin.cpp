@@ -1249,6 +1249,23 @@ Schedule_t *CHAssassin :: GetSchedule ( void )
 						return GetScheduleOfType( SCHED_CHASE_ENEMY );
 				}
 
+				// chase more often on harder difficulty
+				if( g_iSkillLevel == SKILL_EASY )
+				{
+					if( RANDOM_LONG( 0, 7 ) == 3 )
+						return GetScheduleOfType( SCHED_CHASE_ENEMY );
+				}
+				else if( g_iSkillLevel == SKILL_MEDIUM )
+				{
+					if( RANDOM_LONG( 0, 4 ) == 3 )
+						return GetScheduleOfType( SCHED_CHASE_ENEMY );
+				}
+				else
+				{
+					if( RANDOM_LONG( 0, 2 ) == 2 )
+						return GetScheduleOfType( SCHED_CHASE_ENEMY );
+				}
+
 				// ALERT( at_console, "stand\n");
 				return GetScheduleOfType ( SCHED_ALERT_STAND );
 		}
@@ -2025,11 +2042,11 @@ Schedule_t *SecAssAlien::GetSchedule( void )
 		}
 
 		// hide more often from player on lower difficulty setting
-		int choosescale = 6;
+		int choosescale = 10;
 		if( g_iSkillLevel == SKILL_EASY )
 			choosescale = 3;
 		else if( g_iSkillLevel == SKILL_MEDIUM )
-			choosescale = 4;
+			choosescale = 6;
 
 		int choosex = RANDOM_LONG( 0, choosescale );
 

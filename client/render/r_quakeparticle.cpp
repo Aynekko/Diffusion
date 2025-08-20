@@ -512,6 +512,9 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			}
 		}
 
+		if( RI->params & RP_SKYPORTALVIEW )
+			curColor *= 0.5f * (1.0f + tr.sunlightscale);
+
 		curColor.x = bound( 0.0f, curColor.x, 1.0f );
 		curColor.y = bound( 0.0f, curColor.y, 1.0f );
 		curColor.z = bound( 0.0f, curColor.z, 1.0f );
@@ -950,6 +953,9 @@ bool CQuakePart::Evaluate( float gravity )
 			curColor *= newLight;
 		}
 	}
+
+	if( RI->params & RP_SKYPORTALVIEW )
+		curColor *= 0.5f * (1.0f + tr.sunlightscale);
 
 	curColor.x = bound( 0.0f, curColor.x, 1.0f );
 	curColor.y = bound( 0.0f, curColor.y, 1.0f );

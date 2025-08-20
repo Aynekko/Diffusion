@@ -328,6 +328,7 @@ Schedule_t	slInvestigateSound[] =
 		SIZEOFARRAY ( tlInvestigateSound ), 
 		bits_COND_NEW_ENEMY			|
 		bits_COND_SEE_FEAR			|
+		bits_COND_SEE_ENEMY			|
 		bits_COND_LIGHT_DAMAGE		|
 		bits_COND_HEAVY_DAMAGE		|
 		bits_COND_HEAR_SOUND,
@@ -361,6 +362,7 @@ Schedule_t	slInvestigateSoundRUN[] =
 		SIZEOFARRAY ( tlInvestigateSoundRUN ), 
 		bits_COND_NEW_ENEMY			|
 		bits_COND_SEE_FEAR			|
+		bits_COND_SEE_ENEMY			|
 		bits_COND_LIGHT_DAMAGE		|
 		bits_COND_HEAVY_DAMAGE		|
 		bits_COND_HEAR_SOUND,

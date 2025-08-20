@@ -208,6 +208,8 @@ typedef struct weapon_data_s
 #define DMG_WEAPON_SHOTGUN_XM	15
 #define DMG_WPN_KNIFE			27
 #define DMG_WPN_SNIPER			150
+#define DMG_WPN_DRONE			8
+#define DMG_WPN_DRONE_MONST		2
 
 //====================================================================
 // weapon menu positions

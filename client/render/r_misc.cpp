@@ -2176,7 +2176,7 @@ void R_Sprite_Smoke( TEMPENTITY *pTemp, float scale, int mode )
 	else
 		pTemp->entity.curstate.rendermode = kRenderTransAlpha;
 	pTemp->entity.curstate.renderfx = kRenderFxNone;
-	pTemp->entity.baseline.origin[2] = 30;
+	pTemp->entity.baseline.origin[2] += 30;
 	pTemp->entity.curstate.rendercolor.r = iColor;
 	pTemp->entity.curstate.rendercolor.g = iColor;
 	pTemp->entity.curstate.rendercolor.b = iColor;

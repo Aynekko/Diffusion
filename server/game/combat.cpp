@@ -585,15 +585,15 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 	// clear fire
 	if( IsOnFire )
 	{
-		pev->effects &= ~EF_DIMLIGHT;
-		IsOnFire = false;
-		RemoveFlag( F_ENTITY_ONFIRE );
 		pev->iuser3 = 0;
 		// probably died because of fire. make him black
 		pev->rendermode = kRenderTransColor;
 		pev->rendercolor = Vector( 10, 10, 10 ); // crispy critter
 		pev->renderamt = 255;
 	}
+	pev->effects &= ~EF_DIMLIGHT;
+	IsOnFire = false;
+	RemoveFlag( F_ENTITY_ONFIRE );
 
 	if ( HasMemory( bits_MEMORY_KILLED ) )
 	{
@@ -943,7 +943,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 //	}
 
 	// cool thingy :)
-	if( (pevAttacker->flags & FL_CLIENT) && (pevAttacker != pev) )
+	if( (pevAttacker->flags & FL_CLIENT) && (pevAttacker != pev) && !HasFlag( F_NOT_A_MONSTER ) )
 	{
 		CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pevAttacker);
 		if (pPlayer)
@@ -987,9 +987,9 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 					{
 						// calculate distance
 						// vuser1 is bolt's recorded spawn position
-						float CrossbowMeters = (GetAbsOrigin() - pevInflictor->vuser1).Length() * 0.024f;
+						float CrossbowMeters = (GetAbsOrigin() - pevInflictor->vuser1).Length() * 0.01905f;
 						// ALERT( at_aiconsole, "CrossbowMeters %f m\n", CrossbowMeters );
-						if( CrossbowMeters > 50 )
+						if( CrossbowMeters >= 25.0f )
 						{
 							pPlayer->SendAchievementStatToClient( ACH_CROSSBOW, 1, ACHVAL_ADD );
 						}
@@ -999,6 +999,9 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 					{
 						pPlayer->SendAchievementStatToClient( ACH_KILLENEMIESBALLS, 1, ACHVAL_ADD );
 					}
+
+					if( pPlayer->DrunkLevel == 5 )
+						pPlayer->SendAchievementStatToClient( ACH_DRUNK, 1, ACHVAL_ADD );
 				}
 			}
 
@@ -1027,7 +1030,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	}
 
 	// diffusion - catch fire if damaged by explosive barrel
-	if( (pev->flags & FL_MONSTER) && FClassnameIs( pevAttacker, "prop_explosive_barrel" ) )
+	if( (pev->flags & FL_MONSTER) && FClassnameIs( pevInflictor, "prop_explosive_barrel" ) )
 		SetFlag( F_ENTITY_ONFIRE );
 	
 	// react to the damage (get mad)

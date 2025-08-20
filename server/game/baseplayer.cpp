@@ -2293,7 +2293,6 @@ void CBasePlayer::Jump()
 	if ( pevGround && (pevGround->flags & FL_CONVEYOR) )
 		ApplyAbsVelocityImpulse( GetBaseVelocity( ));
 
-//	AchievementStats[ACH_JUMPS]++;
 	SendAchievementStatToClient( ACH_JUMPS, 1, ACHVAL_ADD );
 }
 
@@ -2849,6 +2848,10 @@ void CBasePlayer::PreThink( void )
 	// clear motion blur if not in car
 	if( !pCar && pev->vuser1.y > 0 )
 		pev->vuser1.y = 0;
+
+	// drunk? edit friction
+	if( DrunkLevel > 0 )
+		pev->friction = 1.0f - (DrunkLevel * 0.1f);
 
 	int buttonsChanged = (m_afButtonLast ^ pev->button);	// These buttons have changed this frame
 
@@ -3408,7 +3411,7 @@ void CBasePlayer::ManageDrone( void )
 							Vector vecShootOrigin = m_hDrone->GetAbsOrigin();
 							vecShootOrigin.z += 8.0f; // 8 not 16, so it would be a bit below the center
 
-							m_hDrone->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 5 );
+							m_hDrone->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, DMG_WPN_DRONE );
 							m_hDrone->m_iCounter--;
 							CSoundEnt::InsertSound( bits_SOUND_COMBAT, m_hDrone->pev->origin, 384, 0.3 );
 
@@ -4875,7 +4878,6 @@ void CBasePlayer::RegenerateHealth(void)
 				if (m_fRegenRemander >= 1)
 				{
 					TakeHealth(m_fRegenRemander, DMG_GENERIC);
-				//	AchievementStats[ACH_HPREGENERATE] += m_fRegenRemander;
 					SendAchievementStatToClient( ACH_HPREGENERATE, (int)m_fRegenRemander, ACHVAL_ADD );
 					m_fRegenRemander = 0;
 				}
@@ -4908,7 +4910,6 @@ void CBasePlayer::Dash(void)
 		{
 			SetAbsVelocity( DashRememberVelocity );
 			DashRememberVelocity = g_vecZero;
-			//	AchievementStats[ACH_DASH]++;
 			SendAchievementStatToClient( ACH_DASH, 1, ACHVAL_ADD );
 			Dashed = false;
 		}
@@ -8026,13 +8027,13 @@ void CBasePlayer::CheckVehicleAchievement(void)
 	if( gpGlobals->time < AchievementCheckTime )
 		return;
 
-	if( AchievementStats[ACH_CARDISTANCE] > 100 ) // send it only once in 100m
+	if( AchievementStats[ACH_CARDISTANCE] > 25 ) // send it only once in 25m
 	{
 		SendAchievementStatToClient( ACH_CARDISTANCE, (int)AchievementStats[ACH_CARDISTANCE], ACHVAL_ADD );
 		AchievementStats[ACH_CARDISTANCE] = 0;
 	}
 
-	if( AchievementStats[ACH_WATERJETDISTANCE] > 100 ) // send it only once in 100m
+	if( AchievementStats[ACH_WATERJETDISTANCE] > 25 ) // send it only once in 25m
 	{
 		SendAchievementStatToClient( ACH_WATERJETDISTANCE, (int)AchievementStats[ACH_WATERJETDISTANCE], ACHVAL_ADD );
 		AchievementStats[ACH_WATERJETDISTANCE] = 0;

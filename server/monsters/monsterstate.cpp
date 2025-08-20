@@ -146,7 +146,7 @@ void CBaseMonster::CheckFire(void)
 	}
 	
 	// monster got the flag, set him on fire
-	if( HasFlag(F_ENTITY_ONFIRE) && !IsOnFire )
+	if( HasFlag(F_ENTITY_ONFIRE) && !IsOnFire && pev->deadflag != DEAD_DEAD )
 	{
 		m_flCaughtFireTime = gpGlobals->time;
 		IsOnFire = true;

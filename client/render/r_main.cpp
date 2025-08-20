@@ -1467,6 +1467,9 @@ float R_ComputeFadingDistance( cl_entity_t *e )
 	
 	tr.fadeblend[e->index] = 1.0f;
 
+	if( e->index == 0 ) // do not process tempentities or world
+		return 1.0f;
+
 	if( r_fade_props->value <= 0 )
 		return tr.fadeblend[e->index];
 

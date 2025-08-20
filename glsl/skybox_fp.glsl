@@ -23,6 +23,7 @@ uniform vec3		u_LightDiffuse;
 uniform vec3		u_ViewOrigin;
 uniform vec4		u_FogParams;
 uniform float		u_GenericCondition;
+#define bUseSunDisk u_GenericCondition
 
 varying vec4		var_Vertex;
 varying vec2		var_TexCoord;
@@ -42,7 +43,7 @@ void main( void )
 
 	float sun_factor = 0.0;
 	
-	if( u_GenericCondition > 0.0 )
+	if( bUseSunDisk > 0.0 )
 		sun_factor = clamp( pow( dotv, 1536.0 ), 0.0, 1.0 ); // keep sun constant size
 
 	// under horizon line
@@ -54,8 +55,7 @@ void main( void )
 
 	if( u_FogParams.w > 0.0 )
 	{
-		float dist = length( var_ViewVec ); // var_ViewVec is not correct here for ranged fog
-		float fogFactor = exp( -dist * u_FogParams.w );
+		float fogFactor = exp( -32000.0 * u_FogParams.w );
 		fogFactor = clamp( fogFactor, 0.0, 1.0 );
 		diffuse.rgb = mix( u_FogParams.xyz, diffuse.rgb, fogFactor );
 	}

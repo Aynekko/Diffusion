@@ -543,7 +543,7 @@ void CAmmoCrate::DbgPrint( int Had, const char *AmmoType, int Max, int Given )
 
 int CAmmoCrate::CalcGive( int MaxAmmo, float Ratio )
 {
-	int out = (MaxAmmo - (MaxAmmo * Ratio)) * 0.25f;
+	int out = (MaxAmmo - (MaxAmmo * Ratio)) * 0.35f;
 	if( out < 1 ) out = 1;
 
 	return out;
@@ -603,7 +603,7 @@ void CAmmoCrate::GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float Curr
 		break;
 	case WEAPON_FIVESEVEN:
 		iGive = CalcGive( _57_MAX_CARRY, CurrentRatio );
-		pPlayer->GiveAmmo( (int)((_57_MAX_CARRY - (_57_MAX_CARRY * CurrentRatio)) * 0.5), "ammo57", _57_MAX_CARRY );
+		pPlayer->GiveAmmo( iGive, "ammo57", _57_MAX_CARRY );
 		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( "ammo57" ) ), "ammo57", _57_MAX_CARRY, iGive );
 		break;
 	case WEAPON_SNIPER:
