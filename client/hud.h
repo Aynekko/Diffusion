@@ -112,6 +112,7 @@ public:
 	int Init( void );
 	int VidInit( void );
 	int Draw( float flTime );
+	void DrawOfflineAmmo( float x, float y );
 	void Think( void );
 	void Reset( void );
 	int DrawWList( float flTime );

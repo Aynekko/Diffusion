@@ -40,6 +40,7 @@ extern int localanim_WeaponID;
 extern bool localanim_AllowRpgShoot;
 
 static float y_lerper[MAX_WEAPON_SLOTS];
+static float OFFLINEFlashAlphaAmmo = 0.0f;
 
 const char WeaponNames[TOTAL_WEAPONS][32] =
 {
@@ -990,6 +991,21 @@ bool CHudAmmo::PaintLowAmmo( void )
 //-------------------------------------------------------------------------
 // Drawing code
 //-------------------------------------------------------------------------
+void CHudAmmo::DrawOfflineAmmo( float x, float y )
+{
+	int r = 255;
+	int g = 0;
+	int b = 0;
+
+	OFFLINEFlashAlphaAmmo = 128.0f + (fabs( sin( tr.time * 3.0f ) ) * 128.0f);
+	OFFLINEFlashAlphaAmmo = bound( 128, OFFLINEFlashAlphaAmmo, 255 );
+
+	ScaleColors( r, g, b, (int)OFFLINEFlashAlphaAmmo );
+
+	DrawString( x, y, "O F F L I N E", r, g, b );
+}
+
+
 int CHudAmmo::Draw( float flTime )
 {
 	int a, x, y, r, g, b;
@@ -1026,6 +1042,8 @@ int CHudAmmo::Draw( float flTime )
 		return 0;
 
 	int iFlags = DHN_DRAWZERO; // draw 0 values
+
+	const bool bDrawOfflineAmmo = ( gHUD.IsDrawingOfflineHUD || CL_IsDead() || gHUD.HUDSuitOffline );
 
 	AmmoWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).right - gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).left;
 
@@ -1089,28 +1107,35 @@ int CHudAmmo::Draw( float flTime )
 			const float cell_b = 1.0f;
 
 			// draw the current clip
-			if( draw_cells )
+			if( bDrawOfflineAmmo )
 			{
-				for( int cell = 0; cell < total_cells; cell++ )
-				{
-					if( cell >= weapon_clip ) // draw grey cells
-						FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
-					else if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
-						FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
-					else
-						FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
-					cell_start_x += cell_width + cell_margin;
-				}
+				DrawOfflineAmmo( cell_start_x, cell_start_y );
 			}
-			else // we have too much ammo to draw separate cells, use single bar
+			else
 			{
-				// draw the full bar (dark)
-				FillRoundedRGBA( cell_start_x, cell_start_y, total_cells_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
-				// draw the bar of actual ammo on top of it
-				if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
-					FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
-				else
-					FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+				if( draw_cells )
+				{
+					for( int cell = 0; cell < total_cells; cell++ )
+					{
+						if( cell >= weapon_clip ) // draw grey cells
+							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+						else if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
+							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
+						else
+							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+						cell_start_x += cell_width + cell_margin;
+					}
+				}
+				else // we have too much ammo to draw separate cells, use single bar
+				{
+					// draw the full bar (dark)
+					FillRoundedRGBA( cell_start_x, cell_start_y, total_cells_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+					// draw the bar of actual ammo on top of it
+					if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
+						FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
+					else
+						FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+				}
 			}
 
 			// draw the ammo left in backpack, visualized by line
@@ -1119,13 +1144,33 @@ int CHudAmmo::Draw( float flTime )
 				float line_pos_x = pos_x + 10;
 				float line_pos_y = cell_start_y + cell_height + 5;
 				float line_h = 5 * gHUD.fScale;
-				// draw the full bar (dark)
-				FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - 28, line_h, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
-				// draw the bar of actual ammo on top of it
-				FillRoundedRGBA( line_pos_x, line_pos_y, ((((float)total_cells_width - 28) / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType )), line_h, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+
+				if( bDrawOfflineAmmo )
+				{
+					FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - 28, line_h, 2, Vector4D( 1.0f, 0.25f, 0.25f, OFFLINEFlashAlphaAmmo / 255.0f ) );
+				}
+				else
+				{
+					// draw the full bar (dark)
+					FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - 28, line_h, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+					// draw the bar of actual ammo on top of it
+					FillRoundedRGBA( line_pos_x, line_pos_y, ((((float)total_cells_width - 28) / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType )), line_h, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+				}
 				char ammo[8];
-				sprintf_s( ammo, "%i", gWR.CountAmmo( pw->iAmmoType ) );
-				DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, ammo, 70, 169, 255 );
+				if( !bDrawOfflineAmmo )
+				{
+					sprintf_s( ammo, "%i", gWR.CountAmmo( pw->iAmmoType ) );
+					DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, ammo, 70, 169, 255 );
+				}
+				else
+				{
+					int r = 255;
+					int g = 0;
+					int b = 0;
+					ScaleColors( r, g, b, (int)OFFLINEFlashAlphaAmmo );
+					DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, "000", r, g, b );
+				}
+				
 			}
 		}
 		else // old code (left by Camblu request)
@@ -1229,7 +1274,7 @@ int CHudAmmo::Draw( float flTime )
 	if( cl_oldammohud->value <= 0 )
 	{
 		// lastly, draw the weapon name
-		if( WeaponNames[WeaponID][0] != '\0' )
+		if( !bDrawOfflineAmmo && WeaponNames[WeaponID][0] != '\0' )
 		{
 			int text_pos_x = pos_x + 10;
 			int text_pos_y = pos_y + 2;
