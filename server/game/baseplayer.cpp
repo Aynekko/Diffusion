@@ -880,7 +880,7 @@ skip_shield:
 	}
 
 	// achievement
-	if( pevInflictor->owner != edict() && pevAttacker != pev ) // do not count the damage received from yourself
+	if( !(bitsDamageType & DMG_TRIGGER) && pevInflictor->owner != edict() && pevAttacker != pev ) // do not count the damage received from yourself or from trigger
 		SendAchievementStatToClient( ACH_RECEIVEDAMAGE, (int)flDamage, ACHVAL_ADD );
 
 	if (pev->health < pev->max_health)                // DiffusionRegen

@@ -45,6 +45,7 @@ GNU General Public License for more details.
 #define DMG_NUCLEAR			BIT(23) // dmg by nuclear explode
 #define DMG_MORTAR			BIT(24)	// Hit by air raid (done to distinguish grenade from mortar)
 #define DMG_EMP				BIT(25) // diffusion - EMP
+#define DMG_TRIGGER			BIT(26) // diffusion - damage was done by a trigger - this is used for "taking damage" achievement
 
 // these are the damage types that are allowed to gib corpses
 #define DMG_GIB_CORPSE		(DMG_CRUSH|DMG_FALL|DMG_BLAST|DMG_SONIC|DMG_CLUB|DMG_NUCLEAR )

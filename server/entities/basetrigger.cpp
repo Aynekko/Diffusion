@@ -215,21 +215,21 @@ void CBaseTrigger::HurtTouch(CBaseEntity* pOther)
 	}
 #endif
 
+	m_bitsDamageInflict |= DMG_TRIGGER;
+
 	if( fldmg < 0 )
 	{
 		if( !(g_pGameRules->IsMultiplayer() && pOther->IsPlayer() && pOther->pev->deadflag) )
 			pOther->TakeHealth( -fldmg, m_bitsDamageInflict );
 	}
 	else
-		pOther->TakeDamage(pev, pev, fldmg, m_bitsDamageInflict);
+		pOther->TakeDamage( pev, pev, fldmg, m_bitsDamageInflict );
 
 	// Store pain time so we can get all of the other entities on this frame
 	pev->pain_finished = gpGlobals->time;
 
 	// Apply damage every half second
-	pev->dmgtime = gpGlobals->time + 0.5;// half second delay until this trigger can hurt toucher again
-
-
+	pev->dmgtime = gpGlobals->time + 0.5f; // half second delay until this trigger can hurt toucher again
 
 	if (pev->target)
 	{
