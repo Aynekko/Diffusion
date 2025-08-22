@@ -124,6 +124,7 @@ void CKnife::PrimaryAttack( void )
 		m_pPlayer->FireBullets( 1, m_pPlayer->GetGunPosition( ), gpGlobals->v_forward, g_vecZero, 130, BULLET_PLAYER_CROWBAR, 0, DMG_WPN_KNIFE );
 	}
 
+	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
 	SendWeaponAnim( KNIFE_ATTACK1HIT );
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + KNIFE_NEXT_PA_TIME;
@@ -153,6 +154,7 @@ void CKnife::SecondaryAttack( void )
 		m_pPlayer->FireBullets( 1, m_pPlayer->GetGunPosition( ), gpGlobals->v_forward, g_vecZero, 130, BULLET_PLAYER_CROWBAR, 0, DMG_WPN_KNIFE * 2 );
 	}
 
+	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
 	SendWeaponAnim( KNIFE_ATTACK2HIT );
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + KNIFE_NEXT_SA_TIME;
