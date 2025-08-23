@@ -26,6 +26,8 @@
 #define SF_CAR_SQUEAKYBRAKES	BIT(8) // brakes make squeaky sound
 #define SF_CAR_EXHAUSTPOPS		BIT(9) // do exhaust pops when player releases acceleration pedal
 
+#define SF_CAR_DOIDLEUNSTICK	BIT(31) // internal flag
+
 // iuser1 is used for car spawn angle
 // fuser2 is used for both body and wheels' models to control the amount of dirt on the car
 // fuser3 on wheels is used to desync the sounds...thanks to FWGS update I have to do this, otherwise I'd need to use 4 different sounds :|
@@ -500,6 +502,8 @@ void CCar::Precache( void )
 	PRECACHE_SOUND( "weapons/mortarhit.wav" );
 
 	UTIL_PrecacheOther( "apc_projectile" );
+
+	pev->spawnflags |= SF_CAR_DOIDLEUNSTICK;
 }
 
 void CCar::Spawn( void )
@@ -973,11 +977,55 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 void CCar::TryUnstick(void)
 {
 	Vector hackz = GetAbsOrigin();
-	hackz.z += 1;
-	SetAbsOrigin( hackz );
+
+	TraceResult tr;
+	// trace 4 points...
+	Vector a = hackz + Vector( -16, -16, 32 );
+	UTIL_TraceLine( a, a - Vector(0,0,32), dont_ignore_monsters, dont_ignore_glass, edict(), &tr );
+	if( tr.flFraction < 1.0f )
+	{
+		hackz.z += 1.0f;
+		SetAbsOrigin( hackz );
+	}
+	else
+	{
+		Vector b = hackz + Vector( -16, 16, 32 );
+		UTIL_TraceLine( b, b - Vector( 0, 0, 32 ), dont_ignore_monsters, dont_ignore_glass, edict(), &tr );
+		if( tr.flFraction < 1.0f )
+		{
+			hackz.z += 1.0f;
+			SetAbsOrigin( hackz );
+		}
+		else
+		{
+			Vector c = hackz + Vector( 16, -16, 32 );
+			UTIL_TraceLine( c, c - Vector( 0, 0, 32 ), dont_ignore_monsters, dont_ignore_glass, edict(), &tr );
+			if( tr.flFraction < 1.0f )
+			{
+				hackz.z += 1.0f;
+				SetAbsOrigin( hackz );
+			}
+			else
+			{
+				Vector d = hackz + Vector( 16, 16, 32 );
+				UTIL_TraceLine( d, d - Vector( 0, 0, 32 ), dont_ignore_monsters, dont_ignore_glass, edict(), &tr );
+				if( tr.flFraction < 1.0f )
+				{
+					hackz.z += 1.0f;
+					SetAbsOrigin( hackz );
+				}
+				else
+				{
+					// if we got all the way here, all checks are passed and we are safe
+					pev->spawnflags &= ~SF_CAR_DOIDLEUNSTICK;
+					pev->flags &= ~FL_ONGROUND;
+				}
+			}
+		}
+	}
 
 	// reset chassis...
-	if( pChassis )
+	if( 0 )//pChassis )
 	{
 		Vector chass = pChassis->GetAbsAngles();
 		chass.x = chass.z = 0;
@@ -1580,6 +1628,8 @@ void CCar::Drive( void )
 
 	pev->friction = 0.0f; // always set this, otherwise issues on different framerates
 
+	pev->spawnflags |= SF_CAR_DOIDLEUNSTICK; // do unsticking procedure in Idle
+
 	const float AbsCarSpeed = fabs( CarSpeed );
 
 	// CAR STUCK???
@@ -1587,6 +1637,7 @@ void CCar::Drive( void )
 		StuckTime = gpGlobals->time;
 	if( (hDriver->pev->button & IN_RELOAD) && (gpGlobals->time > StuckTime + 5) )
 	{
+		ALERT( at_aiconsole, "CCar::TryUnstick by user\n" );
 		TryUnstick();
 
 		if( !SafeCarPos.IsNull() )
@@ -2509,7 +2560,7 @@ void CCar::Drive( void )
 	if( (AbsCarSpeed > 100.0f) && (ExpectedDist > 0.01f) && (Distance < ExpectedDist * 0.5f) && (gpGlobals->time > StuckTime + 1) && Collision.IsNull() )
 	{
 	//	ALERT( at_console, "this frame %f, next frame %f\n", Distance, ExpectedDist );
-		ALERT( at_aiconsole, "Car unstick\n" );
+		ALERT( at_aiconsole, "CCar::TryUnstick\n" );
 		TryUnstick();
 		StuckTime = gpGlobals->time;
 	}
@@ -3155,6 +3206,9 @@ void CCar::Idle( void )
 		if( (GetAbsOrigin() - pPlayer->GetAbsOrigin()).Length() > 2000 )
 			thinktime = 0.5;
 	}
+
+	if( HasSpawnFlags( SF_CAR_DOIDLEUNSTICK ) )
+		TryUnstick();
 
 	SetNextThink( thinktime );
 }
