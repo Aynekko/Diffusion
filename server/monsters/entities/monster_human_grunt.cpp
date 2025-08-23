@@ -2442,6 +2442,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 							) 
 						&& (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 666
 						&& pev->health > HGRUNT_LIMP_HEALTH
+						&& !HasConditions( bits_COND_LOW_HEALTH )
 						)
 						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
 
@@ -2555,6 +2556,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 
 					if( m_hEnemy
 						&& pev->health > HGRUNT_LIMP_HEALTH
+						&& !HasConditions( bits_COND_LOW_HEALTH )
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
 						&& (
 							(m_hEnemy->IsMonster() && !FClassnameIs( m_hEnemy, "monster_target" ))
@@ -3565,6 +3567,7 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 							)
 						&& (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 666
 						&& pev->health > HGRUNT_LIMP_HEALTH
+						&& !HasConditions( bits_COND_LOW_HEALTH )
 						)
 						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
 
@@ -3674,6 +3677,7 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 					
 					if( m_hEnemy
 						&& pev->health > HGRUNT_LIMP_HEALTH
+						&& !HasConditions( bits_COND_LOW_HEALTH )
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
 						&& (
 							(m_hEnemy->IsMonster() && !FClassnameIs( m_hEnemy, "monster_target" ))
