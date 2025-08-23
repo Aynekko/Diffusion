@@ -641,7 +641,8 @@ void CCar::ActivateSelfdrive( void )
 	LastGear = -1;
 	ShiftStartTime = gpGlobals->time - ShiftingTime;
 	CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
-	NewCameraAngle = CameraAngles.y;
+	NewCameraAngleY = CameraAngles.y;
+	NewCameraAngleX = 0;
 	AccelAddX = BrakeAddX = 0;
 	if( pExhaust1 )
 	{
@@ -946,7 +947,8 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			LastGear = -1;
 			ShiftStartTime = gpGlobals->time - ShiftingTime;
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
-			NewCameraAngle = CameraAngles.y;
+			NewCameraAngleY = CameraAngles.y;
+			NewCameraAngleX = 0;
 			AccelAddX = BrakeAddX = 0;
 			EnteringShake = 2.0f;
 			if( pExhaust1 )
@@ -2226,6 +2228,7 @@ void CCar::Drive( void )
 	AccelAddX = bound( -MaxLean * 0.2, AccelAddX, MaxLean * 0.2 );
 	
 	const float NewChassisAngX = -CrossChange * 0.5 * SuspDiff2 + BrakeAddX + AccelAddX + AddChassisShake - AccelAddX_ShiftAdd;
+	NewCameraAngleX = NewChassisAngX - BrakeAddX - AccelAddX + AccelAddX_ShiftAdd; // yeah...compensate it back
 	const float OldChassisAngX = ChassisAng.x;
 	AccelAddX_ShiftAdd = UTIL_Approach( 0.0f, AccelAddX_ShiftAdd, 10 * gpGlobals->frametime );
 	if( FrontWheelsInAir + RearWheelsInAir < 4 )
@@ -2933,31 +2936,34 @@ void CCar::Camera(void)
 		return;
 
 	const float AbsCarSpeed = fabs( CarSpeed );
+	const float ChassisAngleX = pChassis->GetAbsAngles().x;
+	const float ChassisAngleY = pChassis->GetAbsAngles().y;
 
-	if( !NewCameraAngle )
-		NewCameraAngle = pChassis->pev->angles.y;
+	if( !NewCameraAngleY )
+		NewCameraAngleY = ChassisAngleY;
 
 	if( !CamDistAdjust )
 		CamDistAdjust = 1.0f;
 
 	if( CarSpeed < -75 ) // going backwards
 	{
-		NewCameraAngle = UTIL_ApproachAngle( pChassis->pev->angles.y - 180, NewCameraAngle, 200 * gpGlobals->frametime ); // smooth it out
+		NewCameraAngleY = UTIL_ApproachAngle( ChassisAngleY - 180, NewCameraAngleY, 200 * gpGlobals->frametime ); // smooth it out
 	}
 	else if( CarSpeed > 25 || IsBoat || IsHeli )
 	{
 		if( AbsCarSpeed < MaxCarSpeed * 0.2f )
-			NewCameraAngle = UTIL_ApproachAngle( pChassis->pev->angles.y, NewCameraAngle, 200 * gpGlobals->frametime );
+			NewCameraAngleY = UTIL_ApproachAngle( ChassisAngleY, NewCameraAngleY, 200 * gpGlobals->frametime );
 		else
-			NewCameraAngle = pChassis->pev->angles.y;
+			NewCameraAngleY = ChassisAngleY;
 	}
 
-	const float anglediff = AngleDiff( NewCameraAngle, CameraAngles.y );
+	const float anglediff = AngleDiff( NewCameraAngleY, CameraAngles.y );
 	const float approach_speed = bound( 1.0f, AbsCarSpeed * 0.005f, 3.0f );
 
 	Vector vForward, vRight;
 	g_engfuncs.pfnAngleVectors( CameraAngles, vForward, vRight, NULL );
-	CameraAngles.y = UTIL_ApproachAngle( NewCameraAngle, CameraAngles.y, approach_speed * anglediff * gpGlobals->frametime );
+	CameraAngles.y = UTIL_ApproachAngle( NewCameraAngleY, CameraAngles.y, approach_speed * anglediff * gpGlobals->frametime );
+
 	if( CarSpeed < -10 ) // going backwards
 		vRight = -vRight;
 
@@ -2972,6 +2978,16 @@ void CCar::Camera(void)
 	}
 	else
 		CameraBrakeOffsetX = lerp( CameraBrakeOffsetX, 0, gpGlobals->frametime * 1.25f );
+
+	// lean the camera view according to the chassis angle (except boats), make sure to compensate the added offsets too
+	if( !IsBoat )
+	{
+		// NewCameraAngleX is being set in Drive()
+		if( CarSpeed >= 0.0f )
+			CameraAngles.x = lerp( CameraAngles.x, NewCameraAngleX, approach_speed * gpGlobals->frametime );
+		else
+			CameraAngles.x = lerp( CameraAngles.x, -NewCameraAngleX, approach_speed * gpGlobals->frametime );
+	}
 
 	TraceResult CamTr;
 
@@ -3033,6 +3049,9 @@ void CCar::Camera(void)
 			pCamera1->SetAbsAngles( CameraAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );
 		}
 	}
+
+	// bring back the car vectors
+	UTIL_MakeVectors( GetAbsAngles() );
 }
 
 //===============================================================================

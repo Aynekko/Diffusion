@@ -317,7 +317,8 @@ void CHelicopter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 			time = gpGlobals->time;
 			DriverMdlSequence = -1;
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
-			NewCameraAngle = CameraAngles.y;
+			NewCameraAngleY = CameraAngles.y;
+			NewCameraAngleX = 0;
 
 			SetNextThink( 0 );
 		}
@@ -818,6 +819,7 @@ void CHelicopter::Drive( void )
 		AccelAddX = UTIL_Approach( 0, AccelAddX, AccelRate * (1/(10 + (AbsCarSpeed * 0.1))) * gpGlobals->frametime );
 
 	float NewChassisAngX = AccelAddX;
+	NewCameraAngleX = NewChassisAngX;
 	ChassisAng.x = NewChassisAngX;
 
 	// Z - lateral rotation

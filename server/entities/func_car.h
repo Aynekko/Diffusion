@@ -114,7 +114,8 @@ public:
 	int CameraHeight;
 	int CameraDistance;
 	int FreeCameraDistance;
-	float NewCameraAngle;
+	float NewCameraAngleY;
+	float NewCameraAngleX;
 	float CamDistAdjust;
 	float BrakeAddX; // not saved
 	float AccelAddX; // not saved
