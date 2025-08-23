@@ -138,13 +138,13 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 			WRITE_COORD( vecOrigin.x );	// X
 			WRITE_COORD( vecOrigin.y );	// Y
 			WRITE_COORD( vecOrigin.z + 4 );	// Z
-			WRITE_BYTE( 16 );		// radius * 0.1
+			WRITE_BYTE( 32 );		// radius * 0.1
 			WRITE_BYTE( r );		// r
 			WRITE_BYTE( g );		// g
 			WRITE_BYTE( b );		// b
 			WRITE_BYTE( 10 );		// time * 10
-			WRITE_BYTE( 15 );		// decay * 0.1
-			WRITE_BYTE( 125 ); // brightness
+			WRITE_BYTE( 32 );		// decay * 0.1
+			WRITE_BYTE( 150 ); // brightness
 			WRITE_BYTE( 1 ); // shadows
 		MESSAGE_END();
 	}

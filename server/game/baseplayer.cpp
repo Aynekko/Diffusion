@@ -8009,7 +8009,7 @@ void CBasePlayer::CheckTutorMessage( int m_iId )
 	}
 
 	if( !FStrEq( TempString, "error" ) )
-		_snprintf_s( TempPic, sizeof( TempPic ), "sprites/tutor/%s", TempString );
+		_snprintf_s( TempPic, sizeof( TempPic ), "textures/!tutor/%s", TempString );
 
 	MESSAGE_BEGIN( MSG_ONE, gmsgStatusIconTutor, NULL, pev );
 		WRITE_STRING( TempString );
