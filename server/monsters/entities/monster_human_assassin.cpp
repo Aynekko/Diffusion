@@ -709,7 +709,12 @@ void CHAssassin :: HandleAnimEvent( MonsterEvent_t *pEvent )
 	case ASSASSIN_AE_TOSS1:
 		{
 			UTIL_MakeVectors( GetAbsAngles() );
-			CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 34 + Vector (0, 0, 32), m_vecTossVelocity, 2.0 );
+			CBaseEntity *pGrenade = CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 34 + Vector (0, 0, 32), m_vecTossVelocity, 2.0 );
+			if( pGrenade )
+			{
+				SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
+				pGrenade->pev->body = 1; // change to body without pin
+			}
 
 			m_flNextGrenadeCheck = gpGlobals->time + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
 			m_fThrowGrenade = FALSE;
@@ -1534,7 +1539,15 @@ void SecAss::HandleAnimEvent( MonsterEvent_t *pEvent )
 			SmokeDropped = true;
 		}
 		else
-			CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 34 + Vector( 0, 0, 32 ), m_vecTossVelocity, 2.0, true ); // EMP
+		{
+			CBaseEntity *pGrenade = CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 34 + Vector( 0, 0, 32 ), m_vecTossVelocity, 2.0, true ); // EMP
+			if( pGrenade )
+			{
+				SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
+				pGrenade->pev->body = 1; // change to body without pin
+				pGrenade->pev->skin = 1;
+			}
+		}
 
 		m_flNextGrenadeCheck = gpGlobals->time + 6;// wait six seconds before even looking again to see if a grenade can be thrown.
 		m_fThrowGrenade = FALSE;
@@ -1739,8 +1752,6 @@ void SecAssAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		break;
 	case ASSASSIN_AE_TOSS1:
 		{
-		//	UTIL_MakeVectors( GetAbsAngles() );
-		//	CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 34 + Vector (0, 0, 32), m_vecTossVelocity, 2.0 );
 			Vector vecStart = GetAbsOrigin() + gpGlobals->v_forward * 34 + Vector( 0, 0, 32 );
 			CBaseMonster *pBall = (CBaseMonster *)Create( "alien_super_ball", vecStart, g_vecZero, edict() );
 			if( pBall )

@@ -106,6 +106,48 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 			WRITE_BYTE( TE_EXPLFLAG_NONE );
 		MESSAGE_END();
 	}
+	else // EMP
+	{
+		byte r = 0;
+		byte g = 140;
+		byte b = 255;
+		Vector vecOrigin = GetAbsOrigin();
+		MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, vecOrigin );
+			WRITE_BYTE( TE_BEAMCYLINDER );
+			WRITE_COORD( vecOrigin.x );
+			WRITE_COORD( vecOrigin.y );
+			WRITE_COORD( vecOrigin.z + 4 );
+			WRITE_COORD( vecOrigin.x );
+			WRITE_COORD( vecOrigin.y );
+			WRITE_COORD( vecOrigin.z + 512 ); // reach damage radius over .4 seconds
+			WRITE_SHORT( g_sBlastTexture );
+			WRITE_BYTE( 0 ); // startframe
+			WRITE_BYTE( 0 ); // framerate
+			WRITE_BYTE( 4 ); // life
+			WRITE_BYTE( 32 );  // width
+			WRITE_BYTE( 16 );   // noise
+			WRITE_BYTE( r ); // R
+			WRITE_BYTE( g ); // G
+			WRITE_BYTE( b ); // B
+			WRITE_BYTE( 255 ); //brightness
+			WRITE_BYTE( 0 ); // speed
+		MESSAGE_END();
+
+		MESSAGE_BEGIN( MSG_PAS, gmsgTempEnt, vecOrigin );
+			WRITE_BYTE( TE_DLIGHT );
+			WRITE_COORD( vecOrigin.x );	// X
+			WRITE_COORD( vecOrigin.y );	// Y
+			WRITE_COORD( vecOrigin.z + 4 );	// Z
+			WRITE_BYTE( 16 );		// radius * 0.1
+			WRITE_BYTE( r );		// r
+			WRITE_BYTE( g );		// g
+			WRITE_BYTE( b );		// b
+			WRITE_BYTE( 10 );		// time * 10
+			WRITE_BYTE( 15 );		// decay * 0.1
+			WRITE_BYTE( 125 ); // brightness
+			WRITE_BYTE( 1 ); // shadows
+		MESSAGE_END();
+	}
 
 	// diffusion - throw a piece of metal
 	if( iContents != CONTENTS_WATER )
@@ -193,31 +235,7 @@ void CGrenade :: Smoke( void )
 {
 	Vector absOrigin = GetAbsOrigin();
 
-	if( IsEMPGrenade )
-	{
-		Vector vecOrigin = GetAbsOrigin();
-		MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, vecOrigin );
-			WRITE_BYTE( TE_BEAMCYLINDER );
-			WRITE_COORD( vecOrigin.x );
-			WRITE_COORD( vecOrigin.y );
-			WRITE_COORD( vecOrigin.z + 4 );
-			WRITE_COORD( vecOrigin.x );
-			WRITE_COORD( vecOrigin.y );
-			WRITE_COORD( vecOrigin.z + 512 ); // reach damage radius over .4 seconds
-			WRITE_SHORT( g_sBlastTexture );
-			WRITE_BYTE( 0 ); // startframe
-			WRITE_BYTE( 0 ); // framerate
-			WRITE_BYTE( 4 ); // life
-			WRITE_BYTE( 32 );  // width
-			WRITE_BYTE( 16 );   // noise
-			WRITE_BYTE( 0 ); // R
-			WRITE_BYTE( 140 ); // G
-			WRITE_BYTE( 255 ); // B
-			WRITE_BYTE( 200 ); //brightness
-			WRITE_BYTE( 0 ); // speed
-		MESSAGE_END();
-	}
-	else
+	if( !IsEMPGrenade )
 	{
 		if( UTIL_PointContents( absOrigin ) == CONTENTS_WATER )
 		{

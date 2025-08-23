@@ -165,11 +165,10 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD(DroneSpawned, FIELD_BOOLEAN),
 	DEFINE_KEYFIELD(wpns, FIELD_STRING, "wpns"),
 	DEFINE_KEYFIELD(m_iFlashlightCap, FIELD_INTEGER, "flashlight"),
-	DEFINE_FIELD(CanInvestigate, FIELD_INTEGER),
+	DEFINE_FIELD(bCanInvestigate, FIELD_BOOLEAN ),
 	DEFINE_FIELD(AttackStartTime, FIELD_TIME),
 	DEFINE_FIELD(CombatWaitTime, FIELD_TIME),
 	DEFINE_FIELD(FlashlightSpr, FIELD_CLASSPTR),
-	DEFINE_KEYFIELD(Silent, FIELD_BOOLEAN, "silent"),
 	DEFINE_KEYFIELD( ForceEMPGrenade, FIELD_BOOLEAN, "forceemp"),
 
 	// monster_alien_soldier:
@@ -888,11 +887,6 @@ void CHGrunt::KeyValue( KeyValueData *pkvd )
 	else if (FStrEq(pkvd->szKeyName, "flashlight"))
 	{
 		m_iFlashlightCap = Q_atoi(pkvd->szValue);
-		pkvd->fHandled = TRUE;
-	}
-	else if( FStrEq( pkvd->szKeyName, "silent" ) )
-	{
-		Silent = (Q_atoi( pkvd->szValue ) > 0 );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "forceemp" ) )
@@ -1703,6 +1697,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 					{
 						SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
 						pGrenade->pev->body = 1; // change to body without pin
+						pGrenade->pev->skin = (int)ForceEMPGrenade;
 					}
 					EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM );
 					m_fThrowGrenade = FALSE;
@@ -1717,6 +1712,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				{
 					SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
 					pGrenade->pev->body = 1; // change to body without pin
+					pGrenade->pev->skin = (int)ForceEMPGrenade;
 				}
 				EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM );
 				m_fThrowGrenade = FALSE;
@@ -1737,14 +1733,14 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT( 10,15 );;// wait 3-5 seconds before even looking again to see if a grenade can be thrown.
 		}
 		break;
-
+		/*
 		case HGRUNT_AE_GREN_DROP:
 		{
 			UTIL_MakeVectors( GetAbsAngles() );
 			CGrenade::ShootTimed( pev, GetAbsOrigin() + gpGlobals->v_forward * 17 - gpGlobals->v_right * 27 + gpGlobals->v_up * 6, g_vecZero, 3, ForceEMPGrenade );
 		}
 		break;
-
+		*/
 		case HGRUNT_AE_BURST1:
 		{
 			if( pev->sequence == LookupSequence( "runshootmp5" ) || pev->sequence == LookupSequence( "runshootshotgun" ) )
@@ -1947,10 +1943,10 @@ void CHGrunt::Spawn(void)
 		pev->skin = 1; // always dark skin
 	}
 
-	if( RANDOM_LONG(0,2) == 0)
-		CanInvestigate = 1;
+	if( RANDOM_LONG( 0, 2 ) == 0 )
+		bCanInvestigate = true;
 	else
-		CanInvestigate = 0;
+		bCanInvestigate = false;
 
 	CanSpawnDrone = false; // army guys don't have pocket drones
 
@@ -2366,7 +2362,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 			if (!HasConditions( bits_COND_SEE_ENEMY ) && ( pSound->m_iType & (bits_SOUND_PLAYER | bits_SOUND_COMBAT) ))
 				MakeIdealYaw( pSound->m_vecOrigin );
 			
-			if ( !HasConditions( bits_COND_SEE_ENEMY ) && pSound && (pSound->m_iType & bits_SOUND_COMBAT) && (pSound->m_entindex != ENTINDEX(edict()) ) && (CanInvestigate == 1) && (pev->health > HGRUNT_LIMP_HEALTH) )
+			if ( bCanInvestigate && !HasConditions( bits_COND_SEE_ENEMY ) && pSound && (pSound->m_iType & bits_SOUND_COMBAT) && (pSound->m_entindex != ENTINDEX(edict()) ) && (pev->health > HGRUNT_LIMP_HEALTH) )
 			{
 				// diffusion - grunts now can investigate sounds (taken from hassassin)
 				if( FOkToSpeak() )
@@ -3152,10 +3148,10 @@ void CHGruntAlien :: Spawn()
 
 	CanSpawnDrone = false; // alien guys don't have pocket drones, they are separate npcs
 
-	if( RANDOM_LONG(0,2) == 0)
-		CanInvestigate = 1;
+	if( RANDOM_LONG( 0, 2 ) == 0 )
+		bCanInvestigate = true;
 	else
-		CanInvestigate = 0;
+		bCanInvestigate = false;
 
 	CombatWaitTime = g_AlienCombatWaitTime[g_iSkillLevel];
 
@@ -3521,7 +3517,7 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 			if (!HasConditions( bits_COND_SEE_ENEMY ) && ( pSound->m_iType & (bits_SOUND_PLAYER | bits_SOUND_COMBAT) ))
 				MakeIdealYaw( pSound->m_vecOrigin );
 			
-			if ( !HasConditions( bits_COND_SEE_ENEMY ) && (pSound->m_iType & bits_SOUND_COMBAT) && (CanInvestigate == 1) && (pev->health > HGRUNT_LIMP_HEALTH) )
+			if( bCanInvestigate && !HasConditions( bits_COND_SEE_ENEMY ) && (pSound->m_iType & bits_SOUND_COMBAT) && (pev->health > HGRUNT_LIMP_HEALTH) )
 				// diffusion - grunts now can investigate sounds (taken from hassassin)
 				return GetScheduleOfType( SCHED_INVESTIGATE_SOUND );
 		}
@@ -4811,6 +4807,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 				{
 					SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
 					pGrenade->pev->body = 1; // change to body without pin
+					pGrenade->pev->skin = (int)ForceEMPGrenade;
 				}
 				EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM);
 				m_fThrowGrenade = FALSE;
@@ -4860,6 +4857,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 			{
 				SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
 				pGrenade->pev->body = 1; // change to body without pin
+				pGrenade->pev->skin = (int)ForceEMPGrenade;
 			}
 			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM);
 			m_fThrowGrenade = FALSE;
@@ -5401,14 +5399,12 @@ void CHGruntSecurity::Spawn()
 	{
 		AddWeapon(HGRUNT_9MMAR);
 		AddWeapon( HGRUNT_HANDGRENADE );
-		if( !Silent )
-			CanSpawnDrone = true;
+		CanSpawnDrone = true;
 	}
 	else if (FStrEq(STRING(wpns), "9mmar_gl"))
 	{
 		AddWeapon(HGRUNT_9MMAR);
-		if( !Silent )
-			AddWeapon(HGRUNT_GRENADELAUNCHER);
+		AddWeapon(HGRUNT_GRENADELAUNCHER);
 	}
 	else if (FStrEq(STRING(wpns), "shotgun"))
 	{
@@ -5423,8 +5419,7 @@ void CHGruntSecurity::Spawn()
 	{
 		AddWeapon(HGRUNT_SHOTGUN);
 		AddWeapon( HGRUNT_HANDGRENADE );
-		if( !Silent )
-			CanSpawnDrone = true;
+		CanSpawnDrone = true;
 	}
 	else
 	{
@@ -5438,14 +5433,11 @@ void CHGruntSecurity::Spawn()
 		case 0:
 			AddWeapon(HGRUNT_9MMAR);
 			AddWeapon( HGRUNT_HANDGRENADE );
-			if( !Silent )
+			switch( RANDOM_LONG( 0, 2 ) ) // diffusion - 60% chance that a grunt with handgrenade also has a drone
 			{
-				switch( RANDOM_LONG( 0, 2 ) ) // diffusion - 60% chance that a grunt with handgrenade also has a drone
-				{
-				case 0:	CanSpawnDrone = true; break;
-				case 1:	CanSpawnDrone = true; break;
-				case 2:	CanSpawnDrone = false; break;
-				}
+			case 0:	CanSpawnDrone = true; break;
+			case 1:	CanSpawnDrone = true; break;
+			case 2:	CanSpawnDrone = false; break;
 			}
 			break;
 		case 1:
@@ -5453,20 +5445,16 @@ void CHGruntSecurity::Spawn()
 			break;
 		case 2:
 			AddWeapon(HGRUNT_9MMAR);
-			if( !Silent )
-				AddWeapon(HGRUNT_GRENADELAUNCHER);
+			AddWeapon(HGRUNT_GRENADELAUNCHER);
 			break;
 		case 3:
 			AddWeapon(HGRUNT_SHOTGUN);
 			AddWeapon( HGRUNT_HANDGRENADE );
-			if( !Silent )
+			switch( RANDOM_LONG( 0, 2 ) ) // diffusion - 60% chance that a grunt with handgrenade also has a drone
 			{
-				switch( RANDOM_LONG( 0, 2 ) ) // diffusion - 60% chance that a grunt with handgrenade also has a drone
-				{
-				case 0:	CanSpawnDrone = true; break;
-				case 1:	CanSpawnDrone = true; break;
-				case 2:	CanSpawnDrone = false; break;
-				}
+			case 0:	CanSpawnDrone = true; break;
+			case 1:	CanSpawnDrone = true; break;
+			case 2:	CanSpawnDrone = false; break;
 			}
 			break;
 		}
@@ -5498,10 +5486,10 @@ void CHGruntSecurity::Spawn()
 
 	DroneSpawned = false;
 
-	if (RANDOM_LONG(0, 2) == 0)
-		CanInvestigate = 1;
+	if( RANDOM_LONG( 0, 2 ) == 0 )
+		bCanInvestigate = true;
 	else
-		CanInvestigate = 0;
+		bCanInvestigate = false;
 
 	CTalkMonster::g_talkWaitTime = 0;
 
@@ -5522,9 +5510,6 @@ void CHGruntSecurity::Spawn()
 		if( m_iFlashlightCap == 2 )
 			pev->effects |= EF_MONSTERFLASHLIGHT; // start ON
 	}
-
-	if( Silent )
-		ForceEMPGrenade = true;
 
 	MonsterInit();
 }

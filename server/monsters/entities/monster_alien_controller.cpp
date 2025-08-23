@@ -134,7 +134,7 @@ public:
 
 	int m_iSoundState;
 
-	int CanInvestigate;
+	bool bCanInvestigate;
 	CSprite *AlienEye;
 	float AlertSoundTime;
 };
@@ -147,7 +147,7 @@ BEGIN_DATADESC( CController )
 	DEFINE_ARRAY( m_iBallTime, FIELD_TIME, 2 ),
 	DEFINE_ARRAY( m_iBallCurrent, FIELD_INTEGER, 2 ),
 	DEFINE_FIELD( m_vecEstVelocity, FIELD_VECTOR ),
-	DEFINE_FIELD( CanInvestigate, FIELD_INTEGER ),
+	DEFINE_FIELD( bCanInvestigate, FIELD_BOOLEAN ),
 	DEFINE_FIELD( AlienEye, FIELD_CLASSPTR ),
 	DEFINE_FIELD( AlertSoundTime, FIELD_TIME ),
 END_DATADESC()
@@ -445,10 +445,10 @@ void CController :: Spawn()
 	m_MonsterState		= MONSTERSTATE_NONE;
 	AlertSoundTime = 0;
 
-	if( RANDOM_LONG(0,2) == 0)
-		CanInvestigate = 1;
+	if( RANDOM_LONG( 0, 2 ) == 0 )
+		bCanInvestigate = true;
 	else
-		CanInvestigate = 0;
+		bCanInvestigate = false;
 
 	MonsterInit();
 }
@@ -2163,7 +2163,7 @@ BEGIN_DATADESC( CDrone )
 	DEFINE_FIELD( AlienEye, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CriticalDamage, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_vecEstVelocity, FIELD_VECTOR ),
-	DEFINE_FIELD( CanInvestigate, FIELD_INTEGER ),
+	DEFINE_FIELD( bCanInvestigate, FIELD_BOOLEAN ),
 	DEFINE_FIELD( LastSparkTime, FIELD_TIME ),
 	DEFINE_FIELD( IsRocketDrone, FIELD_BOOLEAN ),
 	DEFINE_FIELD( SpawnTime, FIELD_TIME ),
@@ -3244,7 +3244,7 @@ BEGIN_DATADESC( CDroneAlien )
 	DEFINE_FIELD( AlienEye, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CriticalDamage, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_vecEstVelocity, FIELD_VECTOR ),
-	DEFINE_FIELD( CanInvestigate, FIELD_INTEGER ),
+	DEFINE_FIELD( bCanInvestigate, FIELD_BOOLEAN ),
 	DEFINE_FIELD( SecondaryAttackTime, FIELD_TIME ),
 END_DATADESC()
 
@@ -3849,7 +3849,7 @@ BEGIN_DATADESC( CAlienShip )
 	DEFINE_FIELD( AlienEye, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CriticalDamage, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_vecEstVelocity, FIELD_VECTOR ),
-	DEFINE_FIELD( CanInvestigate, FIELD_INTEGER ),
+	DEFINE_FIELD( bCanInvestigate, FIELD_BOOLEAN ),
 	DEFINE_FIELD( SecondaryAttackTime, FIELD_TIME ),
 	DEFINE_FIELD( DroneSpawnTime, FIELD_TIME ),
 	DEFINE_FIELD( MaxDrones, FIELD_INTEGER ),

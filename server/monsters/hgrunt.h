@@ -63,7 +63,7 @@ public:
 	virtual void GibMonster(void);
 	virtual void SpeakSentence(void);
 	void ClearEffects(void);
-	int CanInvestigate;
+	bool bCanInvestigate;
 
 	float AttackStartTime; // once the enemy is in sight, grunt began range attack, but he needs to wait, so...
 	float CombatWaitTime; // ...grunt waits for # seconds before shooting.
@@ -112,7 +112,6 @@ public:
 
 	static const char *pGruntSentences[];
 
-	bool Silent; // can't use loud weapons - no drone, and HG replaced with EMP
 	bool ForceEMPGrenade; // use EMP nade when handgrenade is specified
 
 	// monster_andrew_grunt
