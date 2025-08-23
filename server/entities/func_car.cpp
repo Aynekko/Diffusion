@@ -1416,24 +1416,83 @@ void CCar::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Col
 		hit_carblocker = false;
 	}
 
-	// sides!
+	// -------- sides! --------
+	UTIL_MakeVectors( pChassis->GetAbsAngles() );
+
+	// for additional checks for tail and front
+	Vector CheckAdd = g_vecZero;
+	const float width = (FrontSuspWidth + RearSuspWidth) * 0.3f;
+	const Vector vWidth = gpGlobals->v_right * width;
+	const Vector vSideStart = GetAbsOrigin() + gpGlobals->v_up * ((FrontWheelRadius + RearWheelRadius) * 0.5f) * 2.0f;
+
 	// left
-	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 30, GetAbsOrigin() + gpGlobals->v_up * 30 - gpGlobals->v_right * (FrontSuspWidth + RearSuspWidth) * 0.3, ignore_monsters, edict(), &trCol );
+	UTIL_TraceLine( vSideStart, vSideStart - vWidth, ignore_monsters, edict(), &trCol );
 	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
 		hit_carblocker = true;
 	if( trCol.flFraction < 1.0f || hit_carblocker )
 		ColPointLeft = gpGlobals->v_right * 100;
 	hit_carblocker = false;
+
+	// left tail and front
+	if( Forward != 0 )
+	{
+		// check tail
+		CheckAdd = -gpGlobals->v_forward * RearSuspDist;
+		UTIL_TraceLine( vSideStart + CheckAdd, vSideStart + CheckAdd - vWidth, ignore_monsters, edict(), &trCol );
+	//	UTIL_Sparks( trCol.vecEndPos );
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f || hit_carblocker )
+			ColPointLeft = gpGlobals->v_right * 100;
+		hit_carblocker = false;
+		// check front
+		CheckAdd = gpGlobals->v_forward * FrontSuspDist;
+		UTIL_TraceLine( vSideStart + CheckAdd, vSideStart + CheckAdd - vWidth, ignore_monsters, edict(), &trCol );
+	//	UTIL_Sparks( trCol.vecEndPos );
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f || hit_carblocker )
+			ColPointLeft = gpGlobals->v_right * 100;
+		hit_carblocker = false;
+	}
+
 	// right
-	UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * 30, GetAbsOrigin() + gpGlobals->v_up * 30 + gpGlobals->v_right * (FrontSuspWidth + RearSuspWidth) * 0.3, ignore_monsters, edict(), &trCol );
+	UTIL_TraceLine( vSideStart, vSideStart + vWidth, ignore_monsters, edict(), &trCol );
 	if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
 		hit_carblocker = true;
 	if( trCol.flFraction < 1.0f || hit_carblocker )
 		ColPointRight = -gpGlobals->v_right * 100;
+	hit_carblocker = false;
+
+	// right tail and front
+	if( Forward != 0 )
+	{
+		// check tail
+		CheckAdd = -gpGlobals->v_forward * RearSuspDist;
+		UTIL_TraceLine( vSideStart + CheckAdd, vSideStart + CheckAdd + vWidth, ignore_monsters, edict(), &trCol );
+	//	UTIL_Sparks( trCol.vecEndPos );
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f || hit_carblocker )
+			ColPointRight = -gpGlobals->v_right * 100;
+		hit_carblocker = false;
+		// check front
+		CheckAdd = gpGlobals->v_forward * FrontSuspDist;
+		UTIL_TraceLine( vSideStart + CheckAdd, vSideStart + CheckAdd + vWidth, ignore_monsters, edict(), &trCol );
+	//	UTIL_Sparks( trCol.vecEndPos );
+		if( UTIL_PointContents( trCol.vecEndPos ) == CONTENT_CARBLOCKER )
+			hit_carblocker = true;
+		if( trCol.flFraction < 1.0f || hit_carblocker )
+			ColPointRight = -gpGlobals->v_right * 100;
+		hit_carblocker = false;
+	}
 
 	Vector SideCollision = ColPointLeft + ColPointRight;
 
 	*Collision += SideCollision;
+
+	// bring back the car vectors
+	UTIL_MakeVectors( GetAbsAngles() );
 }
 
 void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *ChassisShake, float *surf_Mult )
@@ -3015,7 +3074,7 @@ void CCar::Idle( void )
 	//----------------------------
 	
 	// Forward turning controls if going backwards
-	int Forward = 1;
+	int Forward = 0;
 	const Vector CarAng = GetLocalAngles();
 
 	//----------------------------
@@ -3097,7 +3156,8 @@ void CCar::Idle( void )
 	}
 	else if( (FrontWheelsInAir + RearWheelsInAir == 4) || (FrontWheelsInAir == 2) )
 	{
-		CarSpeed += Forward * 200 * gpGlobals->frametime;
+	//	CarSpeed += Forward * 200 * gpGlobals->frametime;
+		CarSpeed += 200 * gpGlobals->frametime;
 	}
 	else if( RearWheelsInAir == 2 )
 	{
