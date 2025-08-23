@@ -3411,7 +3411,7 @@ void CBasePlayer::ManageDrone( void )
 							Vector vecShootOrigin = m_hDrone->GetAbsOrigin();
 							vecShootOrigin.z += 8.0f; // 8 not 16, so it would be a bit below the center
 
-							m_hDrone->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, DMG_WPN_DRONE );
+							m_hDrone->FireBullets( 1, vecShootOrigin, vecShootDir, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, DMG_WPN_DRONE, VARS( m_hDrone->pev->owner ) );
 							m_hDrone->m_iCounter--;
 							CSoundEnt::InsertSound( bits_SOUND_COMBAT, m_hDrone->pev->origin, 384, 0.3 );
 
