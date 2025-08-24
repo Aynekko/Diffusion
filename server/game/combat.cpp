@@ -1000,7 +1000,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 						pPlayer->SendAchievementStatToClient( ACH_KILLENEMIESBALLS, 1, ACHVAL_ADD );
 					}
 
-					if( pPlayer->DrunkLevel == 5 )
+					if( pPlayer->DrunkLevel > 0 )
 						pPlayer->SendAchievementStatToClient( ACH_DRUNK, 1, ACHVAL_ADD );
 				}
 			}
