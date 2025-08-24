@@ -1225,7 +1225,7 @@ int CHudAmmo::Draw( float flTime )
 		m_fFade2 = 0;
 
 	// Does weapon have secondary ammo?
-	if( pw->iAmmo2Type > 0 )
+	if( pw->iAmmo2Type > 0 && !bDrawOfflineAmmo )
 	{
 		if( cl_oldammohud->value <= 0 )
 		{
