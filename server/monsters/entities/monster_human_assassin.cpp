@@ -354,7 +354,7 @@ Schedule_t	slAssassinHide[] =
 //=========================================================
 Task_t tlAssassinHunt[] = 
 {
-	{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_RANGE_ATTACK1	},
+	{ TASK_SET_FAIL_SCHEDULE,	(float)SCHED_COMBAT_FACE	},
 	{ TASK_GET_PATH_TO_ENEMY,	(float)0		},
 	{ TASK_RUN_PATH,			(float)0		},
 	{ TASK_WAIT_FOR_MOVEMENT,	(float)0		},
@@ -970,8 +970,8 @@ BOOL CHAssassin :: CheckRangeAttack1 ( float flDot, float flDist )
 //			return TRUE;
 		UTIL_TraceLine( vecSrc, m_hEnemy->BodyTarget( vecSrc ), ignore_monsters, ignore_glass, ENT( pev ), &tr );
 		if( tr.flFraction == 1.0 )
-			return TRUE;	
-	}
+			return TRUE;
+		}
 
 	return FALSE;
 }
