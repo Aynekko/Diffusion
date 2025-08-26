@@ -37,19 +37,20 @@ enum Achievements_e
 	ACH_CH3_3MINS,			// 29 destroy the computer within 3 minutes
 	ACH_5DRONES,			// 30 kill 5 enemy drones while piloting a drone from 1st person
 	ACH_DRUNK,				// 31 kill 5 enemies while drunk
+	ACH_DIDNTLISTEN,		// 32 you didn't listen to Alice in ch5map2
 };
 
-#define TOTAL_ACHIEVEMENTS 32
+#define TOTAL_ACHIEVEMENTS 33
 
 const int AchievementGoals[TOTAL_ACHIEVEMENTS]
 {
-	100000, // ACH_BULLETSFIRED = 0,	// 0 fire # bullets
+	10000,	// ACH_BULLETSFIRED = 0,	// 0 fire # bullets
 	1000,	// ACH_JUMPS,				// 1 jump # times
 	100,	// ACH_AMMOCRATES,			// 2 find # ammo crates
 	5,		// ACH_DISARMEDMINES,		// 3 disarm # enemy mines (disarming your own doesn't count)
-	100,	// ACH_KILLENEMIES,			// 4 kill # enemies
-	10000,	// ACH_INFLICTDAMAGE,		// 5 inflict a total of # damage
-	25,		// ACH_KILLENEMIESSNIPER,	// 6 kill # enemies with weapon_sniper
+	666,	// ACH_KILLENEMIES,			// 4 kill # enemies
+	100000,	// ACH_INFLICTDAMAGE,		// 5 inflict a total of # damage
+	30,		// ACH_KILLENEMIESSNIPER,	// 6 kill # enemies with weapon_sniper
 	1,		// ACH_CH1,					// 7 complete chapter
 	1,		// ACH_CH2,					// 8
 	1,		// ACH_CH3,					// 9
@@ -59,12 +60,12 @@ const int AchievementGoals[TOTAL_ACHIEVEMENTS]
 	9000,	// ACH_HPREGENERATE,		// 13 regenerate a total of # health
 	10000,	// ACH_RECEIVEDAMAGE,		// 14 receive a total of # damage
 	1,		// ACH_OVERCOOK,			// 15 overcook the grenade
-	20,		// ACH_DRONESEC,			// 16 kill # security drones
-	20,		// ACH_DRONEALIEN,			// 17 kill # alien drones
+	30,		// ACH_DRONESEC,			// 16 kill # security drones
+	30,		// ACH_DRONEALIEN,			// 17 kill # alien drones
 	10,		// ACH_CROSSBOW,			// 18 kill # enemies on a certain distance with a crossbow
 	100,	// ACH_DASH,				// 19 dash # times
 	50,		// ACH_NOTES,				// 20 find 50 notes
-	20,		// ACH_KILLENEMIESBALLS,	// 21 kill # enemies with balls (weapon_ar2 or func_tankball)
+	30,		// ACH_KILLENEMIESBALLS,	// 21 kill # enemies with balls (weapon_ar2 or func_tankball)
 	1,		// ACH_REDDWELLER,			// 22 help the red dweller escape (chapter 1)
 	1,		// ACH_ASSEMBLEBLASTLEVEL,	// 23 get the first blast level by assembling the module on ch2map2
 	1,		// ACH_BROKENCAR,			// 24 break the car completely in chapter 1 intro
@@ -75,6 +76,7 @@ const int AchievementGoals[TOTAL_ACHIEVEMENTS]
 	1,		// ACH_CH3_3MINS,			// 29 destroy the computer within 3 minutes
 	5,		// ACH_5DRONES,				// 30 kill 5 enemy drones while piloting a drone from 1st person
 	5,		// ACH_DRUNK,				// 31 kill 5 enemies while drunk
+	1,		// ACH_DIDNTLISTEN,			// 32 you didn't listen to Alice in ch5map2
 };
 
 const char * const AchievementNames[TOTAL_ACHIEVEMENTS]
@@ -111,6 +113,7 @@ const char * const AchievementNames[TOTAL_ACHIEVEMENTS]
 	"ach_ch3_3mins",		// ACH_CH3_3MINS,			// 29 destroy the computer within 3 minutes
 	"ach_5drones",			// ACH_5DRONES,				// 30 kill 5 enemy drones while piloting a drone from 1st person
 	"ach_drunk",			// ACH_DRUNK,				// 31 kill 5 enemies while drunk
+	"ach_didntlisten",		// ACH_DIDNTLISTEN,			// 32 you didn't listen to Alice in ch5map2
 };
 
 enum Achievement_data_e

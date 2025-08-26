@@ -19,12 +19,36 @@
 // values are picked using g_iSkillLevel, so the first value is always zero
  
 // monster_gargantua --------------------------------------
+const int g_RoboHealth[] =
+{
+	0,
+	1500,
+	1800,
+	2200
+};
+
+const int g_RoboDmgSlash[] =
+{
+	0,
+	25,
+	30,
+	35
+};
+
+const float g_RoboBulletDmg[] =
+{
+	0,
+	4.0f,
+	5.0f,
+	6.0f
+};
+
 const int g_RoboRocketDamage[] =
 {
 	0,
 	30,
+	35,
 	40,
-	50,
 };
 
 // monster_security_heavydrone ----------------------------

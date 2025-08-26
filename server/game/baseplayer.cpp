@@ -3291,16 +3291,6 @@ void CBasePlayer::ManageDrone( void )
 			}
 			
 			DroneDistance = (int)((m_hDrone->GetAbsOrigin() - GetAbsOrigin()).Length() * 0.0254f);
-			// show drone health (and maybe other info)
-			/*
-			if( (gpGlobals->time > HUDtextTime + HUD_TEXT_DELAY) && !m_iHideHUD )
-			{
-				char msg[64];
-				sprintf( msg, "Drone HP: %i\n\nDistance: %i m\n\nAmmo: %i\n", (int)m_hDrone->pev->health, (int)(Distance * 0.0254f), m_hDrone->m_iCounter );
-				UTIL_HudMessage( this, m_DroneTextParms, msg );
-				HUDtextTime = gpGlobals->time;
-			}
-			*/
 			DroneHealth = m_hDrone->pev->health;
 			DroneAmmo = m_hDrone->m_iCounter;
 
@@ -3467,6 +3457,12 @@ void CBasePlayer::ManageDrone( void )
 
 				if( pev->effects & EF_PLAYERDRONECONTROL )
 				{
+					// reset player's X angle, look forward
+					Vector ang = GetAbsAngles();
+					ang.x = 0;
+					SetAbsAngles( ang );
+					pev->fixangle = TRUE;
+
 					pev->effects &= ~EF_PLAYERDRONECONTROL;
 					pev->flags &= ~FL_ONTRAIN;
 					m_hDrone->pev->angles.x = 0; // reset vertical turn
@@ -3500,6 +3496,12 @@ void CBasePlayer::ManageDrone( void )
 			pev->flags &= ~FL_ONTRAIN;
 			pev->effects &= ~EF_PLAYERDRONECONTROL;
 			DroneCrosshairUpdate = true;
+
+			// reset player's X angle, look forward
+			Vector ang = GetAbsAngles();
+			ang.x = 0;
+			SetAbsAngles( ang );
+			pev->fixangle = TRUE;
 
 			drone_forwmove = drone_sidemove = drone_upmove = 0;
 			DroneControl = false;

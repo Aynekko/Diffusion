@@ -18,6 +18,7 @@ pev->iuser2 = counter of uses
 */
 
 #define SF_AMMOPRINT_ONLYPRIMARYAMMO BIT(0) // give only primary ammo
+#define SF_AMMOPRINT_NOALIENWEAPONS BIT(1) // do not give ammo for gausniper and ar2
 
 class CAmmoPrinter : public CBaseDelay
 {
@@ -247,6 +248,15 @@ bool CAmmoPrinter::InvalidWeapon( CBasePlayerItem *m_pActiveItem )
 {
 	if( (m_pActiveItem->pszAmmo1() == NULL) && (m_pActiveItem->pszAmmo2() == NULL) )
 		return true;
+
+	if( HasSpawnFlags( SF_AMMOPRINT_NOALIENWEAPONS ) )
+	{
+		if( m_pActiveItem->m_iId == WEAPON_AR2 )
+			return true;
+
+		if( m_pActiveItem->m_iId == WEAPON_GAUSS )
+			return true;
+	}
 
 	if( m_pActiveItem->m_iId == WEAPON_DRONE )
 		return true;

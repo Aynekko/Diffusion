@@ -2595,7 +2595,7 @@ void CDrone :: RunTask ( Task_t *pTask )
 		{
 			Vector vecSrc = vecHand + GetAbsVelocity() * (m_flShootTime - gpGlobals->time);
 			
-			if( m_hEnemy != NULL )
+			if( m_hEnemy != NULL && m_hEnemy->IsAlive() )
 			{
 				Vector vecShootOrigin = GetGunPosition();
 				Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
@@ -3391,7 +3391,7 @@ void CDroneAlien :: RunTask ( Task_t *pTask )
 			Vector vecSrc = vecHand + GetAbsVelocity() * (m_flShootTime - gpGlobals->time);
 			Vector vecDir;
 			
-			if (m_hEnemy != NULL)
+			if( m_hEnemy != NULL && m_hEnemy->IsAlive() )
 			{
 				Vector	vecGunPos;
 				Vector	vecGunAngles;
@@ -4013,126 +4013,122 @@ void CAlienShip :: RunTask ( Task_t *pTask )
 		Vector vecHand, vecAngle;
 		GetAttachment( 2, vecHand, vecAngle );
 	
-		if (m_flShootTime < m_flShootEnd && m_flShootTime < gpGlobals->time)
+		if( m_flShootTime < m_flShootEnd && m_flShootTime < gpGlobals->time )
 		{
 			Vector vecSrc = vecHand + GetAbsVelocity() * (m_flShootTime - gpGlobals->time);
 			Vector vecDir;
 			
-			if (m_hEnemy != NULL)
+			if( m_hEnemy != NULL && m_hEnemy->IsAlive() && FInViewCone( m_hEnemy, 0.5 ) ) // ship has full field of view, so we must do another check for shooting
 			{
-				if( FInViewCone( m_hEnemy, 0.5 ) ) // ship has full field of view, so we must do another check for shooting
+				Vector	vecGunPos;
+				Vector	vecGunAngles;
+
+				CSprite *pMuzzleFlash = CSprite::SpriteCreate( "sprites/muzzle_shock_red.spr", GetAbsOrigin(), TRUE );
+				if( pMuzzleFlash )
 				{
-					ALERT( at_aiconsole, "AlienShip: ATTACK!\n" );
-					Vector	vecGunPos;
-					Vector	vecGunAngles;
-
-					CSprite *pMuzzleFlash = CSprite::SpriteCreate( "sprites/muzzle_shock_red.spr", GetAbsOrigin(), TRUE );
-					if( pMuzzleFlash )
-					{
-						if( ShootAttachment == 0 )
-							pMuzzleFlash->SetAttachment( edict(), 2 );
-						else if( ShootAttachment == 1 )
-							pMuzzleFlash->SetAttachment( edict(), 3 );
-						pMuzzleFlash->pev->scale = 1.5;
-						pMuzzleFlash->pev->rendermode = kRenderTransAdd;
-						pMuzzleFlash->pev->renderamt = 255;
-						pMuzzleFlash->AnimateAndDie( 25 );
-					}
-
 					if( ShootAttachment == 0 )
-					{
-						GetAttachment( 1, vecGunPos, vecGunAngles );
-						ShootAttachment = 1;
-					}
+						pMuzzleFlash->SetAttachment( edict(), 2 );
 					else if( ShootAttachment == 1 )
+						pMuzzleFlash->SetAttachment( edict(), 3 );
+					pMuzzleFlash->pev->scale = 1.5;
+					pMuzzleFlash->pev->rendermode = kRenderTransAdd;
+					pMuzzleFlash->pev->renderamt = 255;
+					pMuzzleFlash->AnimateAndDie( 25 );
+				}
+
+				if( ShootAttachment == 0 )
+				{
+					GetAttachment( 1, vecGunPos, vecGunAngles );
+					ShootAttachment = 1;
+				}
+				else if( ShootAttachment == 1 )
+				{
+					GetAttachment( 2, vecGunPos, vecGunAngles );
+					ShootAttachment = 0;
+				}
+
+				UTIL_MakeVectors( pev->angles );
+				Vector vecShootOrigin = vecGunPos + gpGlobals->v_forward * 32;
+
+				Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
+				vecGunAngles = UTIL_VecToAngles( vecShootDir );
+
+				// the time has come for secondary attack
+				if( gpGlobals->time > SecondaryAttackTime )
+				{
+					CBaseMonster *pBall = (CBaseMonster *)Create( "shootball", vecShootOrigin, vecGunAngles, edict() );
+					pBall->pev->scale = 0.3;
+					pBall->SetAbsVelocity( vecShootDir * 2000 );
+					pBall->pev->spawnflags |= BIT( 12 ); // ENVBALL_ALIENSHIP: explode on first bounce
+					pBall->pev->fuser2 = 75; // damage
+					EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "drone/alienship_shoot1.wav", 1, 0.3, 0, RANDOM_LONG( 30, 50 ) );
+					m_flShootTime += 2;
+					SecondaryAttackTime = gpGlobals->time + RANDOM_FLOAT( 7.0, 15.0 );
+				}
+				else // regular attack
+				{
+					switch( RANDOM_LONG( 0, 3 ) )
 					{
-						GetAttachment( 2, vecGunPos, vecGunAngles );
-						ShootAttachment = 0;
+					case 0: EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "drone/alienship_shoot1.wav", 1, 0.3, 0, RANDOM_LONG( 80, 90 ) ); break;
+					case 1: EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "drone/alienship_shoot2.wav", 1, 0.3, 0, RANDOM_LONG( 80, 90 ) ); break;
+					case 2: EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "drone/alienship_shoot3.wav", 1, 0.3, 0, RANDOM_LONG( 80, 90 ) ); break;
+					case 3: EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "drone/alienship_shoot4.wav", 1, 0.3, 0, RANDOM_LONG( 80, 90 ) ); break;
 					}
 
-					UTIL_MakeVectors( pev->angles );
-					Vector vecShootOrigin = vecGunPos + gpGlobals->v_forward * 32;
-
-					Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
-					vecGunAngles = UTIL_VecToAngles( vecShootDir );
-
-					// the time has come for secondary attack
-					if( gpGlobals->time > SecondaryAttackTime )
+					CBaseEntity *pShock = CBaseEntity::Create( "shock_beam", vecShootOrigin, vecGunAngles, edict() );
+					if( pShock )
 					{
-						CBaseMonster *pBall = (CBaseMonster *)Create( "shootball", vecShootOrigin, vecGunAngles, edict() );
-						pBall->pev->scale = 0.3;
-						pBall->SetAbsVelocity( vecShootDir * 2000 );
-						pBall->pev->spawnflags |= BIT( 12 ); // ENVBALL_ALIENSHIP: explode on first bounce
-						pBall->pev->fuser2 = 75; // damage
-						EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "drone/alienship_shoot1.wav", 1, 0.3, 0, RANDOM_LONG( 30, 50 ) );
-						m_flShootTime += 2;
-						SecondaryAttackTime = gpGlobals->time + RANDOM_FLOAT( 7.0, 15.0 );
+						pShock->pev->spawnflags |= BIT( 0 ); // SHOCK_ALIENSHIP
+						pShock->pev->dmg = 7.5;
+						pShock->pev->velocity = vecShootDir * 4000;
+						Vector AddVelocity = g_vecZero;
+						if( g_iSkillLevel == SKILL_HARD )
+							AddVelocity = m_hEnemy->pev->velocity + m_hEnemy->pev->basevelocity;
+						else if( g_iSkillLevel == SKILL_MEDIUM )
+							AddVelocity = m_hEnemy->pev->velocity.Normalize() * 150 + m_hEnemy->pev->basevelocity;
+						pShock->pev->velocity += AddVelocity;
+						pShock->pev->nextthink = gpGlobals->time;
 					}
-					else // regular attack
+				}
+
+				SetBlending( 0, vecGunAngles.x );
+				// Play combat sound.
+				CSoundEnt::InsertSound( bits_SOUND_COMBAT, GetAbsOrigin(), 1024, 0.3, ENTINDEX(edict()) );
+
+				// spawn a drone when the time comes to it (and when we are able to attack)
+				if( (gpGlobals->time > DroneSpawnTime) && (SpawnedDrones < MaxDrones) && HasConditions(bits_COND_CAN_RANGE_ATTACK1) )
+				{
+					Vector vecStart = GetAbsOrigin();
+					vecStart.x -= 40 * SpawnedDrones;
+					vecStart.z -= 100;  // spawn the drone at the bottom of the ship
+					CBaseMonster *pDrone = (CBaseMonster *)Create( "monster_alien_drone", vecStart, GetAbsAngles(), edict() );
+					if( pDrone )
 					{
-						switch( RANDOM_LONG( 0, 3 ) )
+						pDrone->m_iClass = m_iClass; // do not shoot at the owner!!!
+						// make the drone aware of the enemy which alien ship was angry at
+						// even if the drone didn't see him at the moment of spawn.
+						if( m_hEnemy != NULL )
 						{
-						case 0: EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "drone/alienship_shoot1.wav", 1, 0.3, 0, RANDOM_LONG( 80, 90 ) ); break;
-						case 1: EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "drone/alienship_shoot2.wav", 1, 0.3, 0, RANDOM_LONG( 80, 90 ) ); break;
-						case 2: EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "drone/alienship_shoot3.wav", 1, 0.3, 0, RANDOM_LONG( 80, 90 ) ); break;
-						case 3: EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "drone/alienship_shoot4.wav", 1, 0.3, 0, RANDOM_LONG( 80, 90 ) ); break;
+							pDrone->SetEnemy( m_hEnemy );
+							pDrone->SetConditions( bits_COND_NEW_ENEMY );
+							pDrone->m_IdealMonsterState = m_IdealMonsterState;
 						}
 
-						CBaseEntity *pShock = CBaseEntity::Create( "shock_beam", vecShootOrigin, vecGunAngles, edict() );
-						if( pShock )
+						DroneSpawnTime = gpGlobals->time + RANDOM_LONG( 20, 30 );
+						SpawnedDrones++;
+						EMIT_SOUND_DYN( edict(), CHAN_STATIC, "drone/alienship_dronespawn.wav", 1, 0.2, 0, RANDOM_LONG( 90, 110 ) );
+
+						// copy these parameters too to act similarly
+						pDrone->m_flDistLook = m_flDistLook;
+						pDrone->m_flDistTooClose = m_flDistTooClose;
+						pDrone->m_flDistTooFar = m_flDistTooFar;
+
+						// add targetname too
+						if( GetTargetname()[0] != '\0' )
 						{
-							pShock->pev->spawnflags |= BIT( 0 ); // SHOCK_ALIENSHIP
-							pShock->pev->dmg = 7.5;
-							pShock->pev->velocity = vecShootDir * 4000;
-							Vector AddVelocity = g_vecZero;
-							if( g_iSkillLevel == SKILL_HARD )
-								AddVelocity = m_hEnemy->pev->velocity + m_hEnemy->pev->basevelocity;
-							else if( g_iSkillLevel == SKILL_MEDIUM )
-								AddVelocity = m_hEnemy->pev->velocity.Normalize() * 150 + m_hEnemy->pev->basevelocity;
-							pShock->pev->velocity += AddVelocity;
-							pShock->pev->nextthink = gpGlobals->time;
-						}
-					}
-
-					SetBlending( 0, vecGunAngles.x );
-					// Play combat sound.
-					CSoundEnt::InsertSound( bits_SOUND_COMBAT, GetAbsOrigin(), 1024, 0.3, ENTINDEX(edict()) );
-
-					// spawn a drone when the time comes to it (and when we are able to attack)
-					if( (gpGlobals->time > DroneSpawnTime) && (SpawnedDrones < MaxDrones) && HasConditions(bits_COND_CAN_RANGE_ATTACK1) )
-					{
-						Vector vecStart = GetAbsOrigin();
-						vecStart.x -= 40 * SpawnedDrones;
-						vecStart.z -= 100;  // spawn the drone at the bottom of the ship
-						CBaseMonster *pDrone = (CBaseMonster *)Create( "monster_alien_drone", vecStart, GetAbsAngles(), edict() );
-						if( pDrone )
-						{
-							pDrone->m_iClass = m_iClass; // do not shoot at the owner!!!
-							// make the drone aware of the enemy which alien ship was angry at
-							// even if the drone didn't see him at the moment of spawn.
-							if( m_hEnemy != NULL )
-							{
-								pDrone->SetEnemy( m_hEnemy );
-								pDrone->SetConditions( bits_COND_NEW_ENEMY );
-								pDrone->m_IdealMonsterState = m_IdealMonsterState;
-							}
-
-							DroneSpawnTime = gpGlobals->time + RANDOM_LONG( 20, 30 );
-							SpawnedDrones++;
-							EMIT_SOUND_DYN( edict(), CHAN_STATIC, "drone/alienship_dronespawn.wav", 1, 0.2, 0, RANDOM_LONG( 90, 110 ) );
-
-							// copy these parameters too to act similarly
-							pDrone->m_flDistLook = m_flDistLook;
-							pDrone->m_flDistTooClose = m_flDistTooClose;
-							pDrone->m_flDistTooFar = m_flDistTooFar;
-
-							// add targetname too
-							if( GetTargetname()[0] != '\0' )
-							{
-								char newname[64];
-								sprintf_s( newname, "%s_drone", GetTargetname() );
-								pDrone->pev->targetname = MAKE_STRING( newname );
-							}
+							char newname[64];
+							sprintf_s( newname, "%s_drone", GetTargetname() );
+							pDrone->pev->targetname = MAKE_STRING( newname );
 						}
 					}
 				}

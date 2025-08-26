@@ -979,6 +979,8 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 void CCar::TryUnstick(void)
 {
 	Vector hackz = GetAbsOrigin();
+	hackz.z += 1.0f;
+	SetAbsOrigin( hackz );
 
 	TraceResult tr;
 	// trace 4 points...

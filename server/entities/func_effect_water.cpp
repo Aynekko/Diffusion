@@ -48,6 +48,9 @@ void CWaterEffect::Touch( CBaseEntity *pOther )
 	if( !pOther->IsPlayer() )
 		return;
 
+	if( pOther->pev->waterlevel == 3 )
+		return;
+
 	if( m_iState == STATE_OFF )
 	{
 		STOP_SOUND( ENT( pev ), CHAN_BODY, "ambience/water_stream_loop.wav" );

@@ -310,22 +310,6 @@ Schedule_t slGargSuppressBullets[] =
 	},
 };
 
-const int BigRoboHealth[] =
-{
-	0,
-	2000,
-	2500,
-	3000
-};
-
-const int BigRoboDmgSlash[] =
-{
-	0,
-	25,
-	35,
-	50
-};
-
 
 DEFINE_CUSTOM_SCHEDULES( CGargantua )
 {
@@ -352,7 +336,7 @@ void CGargantua :: Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= DONT_BLEED;
 	if( !pev->health )
-		pev->health = BigRoboHealth[g_iSkillLevel];
+		pev->health = g_RoboHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
 	//pev->view_ofs		= Vector ( 0, 0, 96 );// taken from mdl file
 	m_flFieldOfView = VIEW_FIELD_FULL;// width of forward view cone ( as a dotproduct result )
@@ -522,16 +506,7 @@ void CGargantua::FireBullet( void )
 	// MAKE 3 SOUNDS ON CLIENT !!!!!
 	EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "robo/shoot1.wav", 1, 0.4, 0, RANDOM_LONG( 90, 110 ) );
 
-	float BulletDmg;
-	switch( g_iSkillLevel )
-	{
-	default:
-	case SKILL_EASY: BulletDmg = 4.0f; break;
-	case SKILL_MEDIUM: BulletDmg = 5.0f; break;
-	case SKILL_HARD: BulletDmg = 6.0f; break;
-	}
-
-	FireBullets( 1, vecStart, vecAim, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_12MM, 1, BulletDmg );
+	FireBullets( 1, vecStart, vecAim, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_12MM, 1, g_RoboBulletDmg[g_iSkillLevel] );
 
 	pev->effects |= EF_MUZZLEFLASH;
 
@@ -837,7 +812,7 @@ void CGargantua::HandleAnimEvent(MonsterEvent_t *pEvent)
 	case GARG_AE_SLASH_LEFT:
 		{
 			// HACKHACK!!!
-			CBaseEntity *pHurt = GargantuaCheckTraceHullAttack( GARG_ATTACKDIST + 10.0, BigRoboDmgSlash[g_iSkillLevel], DMG_SLASH );
+			CBaseEntity *pHurt = GargantuaCheckTraceHullAttack( GARG_ATTACKDIST + 10.0, g_RoboDmgSlash[g_iSkillLevel], DMG_SLASH );
 			if (pHurt)
 			{
 				if ( pHurt->pev->flags & FL_MONSTER )

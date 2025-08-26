@@ -984,6 +984,8 @@ void CBaseDoor::Blocked( CBaseEntity *pOther )
 	// diffusion - remove the satchels and tripmines
 	if( FClassnameIs( pOther, "monster_satchel" ) || FClassnameIs( pOther, "monster_tripmine" ) )
 		UTIL_Remove( pOther );
+	else if( FClassnameIs( pOther, "_playersentry" ) )
+		UTIL_Remove( pOther );
 	else if( FClassnameIs( pOther, "_playerdrone" ) )
 		pOther->Use( NULL, NULL, USE_TOGGLE, 0 );
 

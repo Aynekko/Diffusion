@@ -252,8 +252,6 @@ int CWpnDrone::AddDuplicate( CBasePlayerItem *pOriginal )
 
 BOOL CWpnDrone::Deploy( void )
 {
-	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + DRONE_DEPLOY_TIME;
-
 //	ConfirmExplosion = 0;
 
 	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] > 0 )
@@ -261,10 +259,15 @@ BOOL CWpnDrone::Deploy( void )
 
 	// perform a check for an active drone to determine what we should deploy
 	if( CheckForDrone() )
+	{
+		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + 0.5f; // allow faster usage of attacks (call or first person mode)
 		return DefaultDeploy( "models/weapons/v_drone_radio.mdl", "models/weapons/p_drone_radio.mdl", DRONERADIO_DEPLOY, "default" );
+	}
 	else
 	{
-		// do we have a drone at all? if not, just draw the radio 
+		m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + DRONE_DEPLOY_TIME;
+
+		// do we have a drone at all? if not, just draw the tablet 
 		if ( m_pPlayer->m_rgAmmo[ PrimaryAmmoIndex() ] <= 0 )
 			return DefaultDeploy( "models/weapons/v_drone_radio.mdl", "models/weapons/p_drone_radio.mdl", DRONERADIO_DEPLOY, "default" );
 		else

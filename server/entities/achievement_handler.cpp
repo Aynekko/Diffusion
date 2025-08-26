@@ -52,7 +52,7 @@ void CAchievementHandler::KeyValue(KeyValueData* pkvd)
 
 void CAchievementHandler::Spawn(void)
 {
-	if (!Achievement)
+	if( !Achievement )
 	{
 		ALERT(at_aiconsole, "Achievement field is empty in \"%s\"!\n", GetTargetname());
 		UTIL_Remove(this);
@@ -64,20 +64,18 @@ void CAchievementHandler::Spawn(void)
 
 void CAchievementHandler::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
-	if (!pActivator || !pActivator->IsPlayer())
+	if( !pActivator || !pActivator->IsPlayer() )
 		pActivator = CBaseEntity::Instance(INDEXENT(1));
 
 	CBasePlayer* pPlayer = (CBasePlayer*)pActivator;
 
-	if (IsLockedByMaster(pActivator))
+	if( IsLockedByMaster( pActivator ) )
 		return;
 
 	const float PrevAchValue = pPlayer->AchievementStats[Achievement];
 
 	pPlayer->SendAchievementStatToClient( Achievement, Value, Mode );
 
-	ALERT(at_aiconsole, "Achievement %i affected by handler \"%s\" with value %i\n", Achievement, GetTargetname(), PrevAchValue, pPlayer->AchievementStats[Achievement], Value );
-
-	if (HasSpawnFlags(SF_ACH_REMOVE))
+	if( HasSpawnFlags( SF_ACH_REMOVE ) )
 		UTIL_Remove(this);
 }
