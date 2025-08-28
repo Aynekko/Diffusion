@@ -292,7 +292,7 @@ void CMRC::WeaponIdle( void )
 	ResetEmptySound( );
 
 	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
-
+	/*
 	if (m_flTimeWeaponIdle > gpGlobals->time)
 		return;
 
@@ -312,6 +312,7 @@ void CMRC::WeaponIdle( void )
 	SendWeaponAnim( iAnim );
 
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );// how long till we do this again.
+	*/
 }
 
 class CMRCAmmoClip : public CBasePlayerAmmo

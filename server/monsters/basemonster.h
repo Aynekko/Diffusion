@@ -53,6 +53,7 @@ public:
 		
 	MONSTERSTATE	m_MonsterState;// monster's current state
 	MONSTERSTATE	m_IdealMonsterState;// monster should change to this state
+	MONSTERSTATE	m_previousState;
 	
 	int		m_iTaskStatus;
 	Schedule_t	*m_pSchedule;

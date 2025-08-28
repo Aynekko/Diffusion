@@ -23,8 +23,8 @@ const int g_RoboHealth[] =
 {
 	0,
 	1500,
-	1800,
-	2200
+	1650,
+	2000
 };
 
 const int g_RoboDmgSlash[] =
@@ -39,16 +39,16 @@ const float g_RoboBulletDmg[] =
 {
 	0,
 	4.0f,
-	5.0f,
-	6.0f
+	4.5f,
+	5.0f
 };
 
 const int g_RoboRocketDamage[] =
 {
 	0,
 	30,
+	32,
 	35,
-	40,
 };
 
 // monster_security_heavydrone ----------------------------
@@ -56,8 +56,8 @@ const int g_DroneRocketDamage[] =
 {
 	0,
 	20,
-	25,
-	30
+	23,
+	26
 };
 
 // turrets ------------------------------------------------

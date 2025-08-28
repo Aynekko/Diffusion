@@ -1978,6 +1978,10 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 	bool DisableCullingForCubemap = false;
 	if( sv_cubemap_culling.value > 0 )
 	{
+		// fade distance is set to never go to client, ever
+		if( pEntity->pev->iuser4 > 0 && pEntity->pev->iuser4 < 10 )
+			return 0;
+
 		if( FClassnameIs( pEntity, "env_static" ) || FClassnameIs( pEntity, "func_wall" ) || FClassnameIs( pEntity, "func_illusionary" ) )
 			DisableCullingForCubemap = true;
 	}

@@ -722,7 +722,7 @@ void R_DrawRenderPasses( int passnum );
 void R_DrawLightScissors( void );
 void DrawLightProbes( void );
 void DrawWireFrame( void );
-void DrawNormals( void );
+void R_DrawNormals( void );
 bool ValidateFBO( void );
 void R_DrawTangentSpaces( void );
 

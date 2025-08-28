@@ -3179,6 +3179,8 @@ void R_DrawBrushList( void )
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 	GL_BindShader( NULL );
 	DrawWireFrame();
+	R_DrawTangentSpaces();
+	R_DrawNormals();
 
 	// clear the subview pointers after normalpass
 	if( RP_NORMALPASS() )

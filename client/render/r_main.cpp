@@ -1829,8 +1829,6 @@ void R_RenderScene( void )
 	R_DrawEntitiesOnList();
 
 	R_DrawCubeMaps(); // diffusioncubemaps
-	
-	R_DrawTangentSpaces();
 
 	// these must be before viewmodel
 	if( RP_NORMALPASS() )
@@ -2237,9 +2235,6 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 
 	if( CVAR_TO_BOOL( r_show_lightprobes ))
 		DrawLightProbes();
-
-	if( CVAR_TO_BOOL( r_show_normals ))
-		DrawNormals();
 
 	R_UnloadFarGrass();
 

@@ -75,6 +75,7 @@ BEGIN_DATADESC( CBaseMonster )
 	DEFINE_FIELD( m_LastHitGroup, FIELD_INTEGER ),
 	DEFINE_FIELD( m_MonsterState, FIELD_INTEGER ),
 	DEFINE_FIELD( m_IdealMonsterState, FIELD_INTEGER ),
+	DEFINE_FIELD( m_previousState, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iTaskStatus, FIELD_INTEGER ),
 
 	DEFINE_FIELD( m_iScheduleIndex, FIELD_INTEGER ),

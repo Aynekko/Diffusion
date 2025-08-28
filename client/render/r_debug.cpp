@@ -109,29 +109,30 @@ void DrawLightProbes( void )
 DrawNormals
 ================
 */
-void DrawNormals( void )
+void R_DrawNormals( void )
 {
-	Vector	temp;
-	float	vecLen = 4.0f;
+	if( !r_show_normals->value )
+		return;
+
+	Vector temp;
+	const float vecLen = 4.0f;
 
 	GL_Texture2D( GL_FALSE );
 	GL_Blend( GL_FALSE );
 	pglBegin( GL_LINES );
 
-	for( int i = 0; i < worldmodel->nummodelsurfaces; i++ )
+	for( int i = 0; i < tr.num_draw_surfaces; i++ )
 	{
-		msurface_t *surf = &worldmodel->surfaces[i];
-		mextrasurf_t *esrf = surf->info;
+		msurface_t *surf = tr.draw_surfaces[i].surface;
+		mextrasurf_t *es = surf->info;
+		bvert_t *v;
 
-		if( FBitSet( surf->flags, SURF_WATER|SURF_DRAWSKY ))
+		if( FBitSet( surf->flags, SURF_WATER | SURF_DRAWSKY ) )
 			continue;
 
-		if( !CHECKVISBIT( RI->visfaces, i ))
-			continue;
+		bvert_t *mv = &world->vertexes[es->firstvertex];
 
-		bvert_t *mv = &world->vertexes[esrf->firstvertex];
-
-		for( int j = 0; j < esrf->numverts; j++, mv++ )
+		for( int j = 0; j < es->numverts; j++, mv++ )
 		{
 			pglColor3f( 0.0f, 0.0f, 1.0f );
 			pglVertex3fv( mv->vertex );
@@ -156,25 +157,26 @@ void R_DrawTangentSpaces( void )
 	if( !r_show_tbn->value )
 		return;
 
-	float	temp[3];
-	float	vecLen = 4.0f;
+	float temp[3];
+	const float vecLen = 4.0f;
 
 	GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 	pglTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 	GL_Blend( GL_FALSE );
 	pglBegin( GL_LINES );
 
-	for( int i = 0; i < worldmodel->nummodelsurfaces; i++ )
+	for( int i = 0; i < tr.num_draw_surfaces; i++ )
 	{
-		msurface_t *surf = &worldmodel->surfaces[i];
-		mextrasurf_t *esrf = surf->info;
+		msurface_t *surf = tr.draw_surfaces[i].surface;
+		mextrasurf_t *es = surf->info;
+		bvert_t *v;
 
 		if( FBitSet( surf->flags, SURF_WATER | SURF_DRAWSKY ) )
 			continue;
 
-		bvert_t *mv = &world->vertexes[esrf->firstvertex];
+		bvert_t *mv = &world->vertexes[es->firstvertex];
 
-		for( int j = 0; j < esrf->numverts; j++, mv++ )
+		for( int j = 0; j < es->numverts; j++, mv++ )
 		{
 			pglColor3f( 1.0f, 0.0f, 0.0f );
 			pglVertex3fv( mv->vertex );

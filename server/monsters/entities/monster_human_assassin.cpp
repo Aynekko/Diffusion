@@ -35,6 +35,8 @@
 #include	"animation.h"
 
 extern DLL_GLOBAL int  g_iSkillLevel;
+float g_nextsmoketime = 0;
+bool g_smokeallowed = true;
 
 //=========================================================
 // monster-specific schedule types
@@ -149,7 +151,7 @@ BEGIN_DATADESC( CHAssassin )
 //	DEFINE_FIELD( m_iClipSize, FIELD_INTEGER ),
 //	DEFINE_FIELD( IdleTime, FIELD_TIME ),
 	DEFINE_FIELD( NextAttackTime, FIELD_TIME ),
-	DEFINE_FIELD( SmokeDropped, FIELD_BOOLEAN ),
+//	DEFINE_FIELD( SmokeDropped, FIELD_BOOLEAN ), // don't save, allow throwing smokes again after saverestore
 END_DATADESC()
 
 //=========================================================
@@ -1015,27 +1017,33 @@ void CHAssassin :: RunAI( void )
 {
 	CBaseMonster :: RunAI();
 
-	if( HasWeapon(HASS_WPN_TMP) && (g_iSkillLevel > SKILL_EASY) )
+	if( HasWeapon(HASS_WPN_TMP) ) // smoke girl
 	{
-	// always visible if moving
-		if (m_hEnemy == NULL || pev->deadflag != DEAD_NO || m_Activity == ACT_RUN || m_Activity == ACT_WALK || !(pev->flags & FL_ONGROUND))
-			m_iTargetRanderamt = 255;
-		else
-			m_iTargetRanderamt = 40;
-
-		if (pev->renderamt > m_iTargetRanderamt)
+		if( gpGlobals->time > g_nextsmoketime )
+			g_smokeallowed = true;
+		
+		if( g_iSkillLevel > SKILL_EASY )
 		{
-			if (pev->renderamt == 255)
-				EMIT_SOUND (ENT(pev), CHAN_BODY, "scripts/cloak.wav", 0.2, ATTN_NORM );
+			// always visible if moving
+			if( m_hEnemy == NULL || pev->deadflag != DEAD_NO || m_Activity == ACT_RUN || m_Activity == ACT_WALK || !(pev->flags & FL_ONGROUND) )
+				m_iTargetRanderamt = 255;
+			else
+				m_iTargetRanderamt = 40;
 
-			pev->renderamt = Q_max( pev->renderamt - 50, m_iTargetRanderamt );
-			pev->rendermode = kRenderTransTexture;
-		}
-		else if (pev->renderamt < m_iTargetRanderamt)
-		{
-			pev->renderamt = Q_min( pev->renderamt + 50, m_iTargetRanderamt );
-			if (pev->renderamt == 255)
-				pev->rendermode = kRenderNormal;
+			if( pev->renderamt > m_iTargetRanderamt )
+			{
+				if( pev->renderamt == 255 )
+					EMIT_SOUND( ENT( pev ), CHAN_BODY, "scripts/cloak.wav", 0.2, ATTN_NORM );
+
+				pev->renderamt = Q_max( pev->renderamt - 50, m_iTargetRanderamt );
+				pev->rendermode = kRenderTransTexture;
+			}
+			else if( pev->renderamt < m_iTargetRanderamt )
+			{
+				pev->renderamt = Q_min( pev->renderamt + 50, m_iTargetRanderamt );
+				if( pev->renderamt == 255 )
+					pev->rendermode = kRenderNormal;
+			}
 		}
 	}
 }
@@ -1440,6 +1448,9 @@ void SecAss :: Precache()
 	PRECACHE_SOUND("scripts/cloak.wav"); //new cloak sound for Diffusion
 	PRECACHE_SOUND( "weapons/smoke_grenade.wav" );
 	PRECACHE_SOUND( "weapons/emp_explode.wav" );
+
+	g_nextsmoketime = 0;
+	g_smokeallowed = true;
 }
 
 int	SecAss :: Classify ( void )
@@ -1458,7 +1469,7 @@ BOOL SecAss::CheckRangeAttack2( float flDot, float flDist )
 	if( !FBitSet( m_hEnemy->pev->flags, FL_ONGROUND ) )
 		return FALSE; // don't throw grenades at anything that isn't on the ground!
 
-	if( !SmokeDropped ) // time to throw smoke
+	if( g_smokeallowed && !SmokeDropped ) // time to throw smoke
 	{
 		if( !HasConditions( bits_COND_ENEMY_OCCLUDED ) && flDist <= 512 )
 		{
@@ -1523,7 +1534,7 @@ void SecAss::HandleAnimEvent( MonsterEvent_t *pEvent )
 	{
 		UTIL_MakeVectors( GetAbsAngles() );
 		// diffusion - throw a smoke!
-		if( !SmokeDropped )
+		if( g_smokeallowed && !SmokeDropped )
 		{
 			Vector org = GetAbsOrigin() + gpGlobals->v_forward * 40 + Vector( 0, 0, 32 );
 			MESSAGE_BEGIN( MSG_PAS, gmsgTempEnt, GetAbsOrigin() );
@@ -1537,6 +1548,8 @@ void SecAss::HandleAnimEvent( MonsterEvent_t *pEvent )
 				WRITE_BYTE( 50 ); // randomize position offset of each sprite (+/- 50 here)
 			MESSAGE_END();
 			SmokeDropped = true;
+			g_smokeallowed = false;
+			g_nextsmoketime = gpGlobals->time + 15.0f;
 		}
 		else
 		{

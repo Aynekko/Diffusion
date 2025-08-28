@@ -333,15 +333,17 @@ void CShotgunXM::WeaponIdle( void )
 				if( bUseAfterReloadEmpty )
 				{
 					SendWeaponAnim( SHOTGUNXM_END_RELOAD_EMPTY );
+					m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUNXM_RELOADEMPTY_FINISH_TIME;
 					bUseAfterReloadEmpty = false;
 				}
 				else
+				{
 					SendWeaponAnim( SHOTGUNXM_END_RELOAD );
+					m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + SHOTGUNXM_RELOAD_FINISH_TIME;
+				}
 
-				// play cocking sound
-			//	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/scock1.wav", 1, ATTN_NORM, 0, 95 + RANDOM_LONG(0,0x1f));
 				m_fInReload = 0;
-				m_flTimeWeaponIdle = gpGlobals->time + 1.5;
+				m_flTimeWeaponIdle = gpGlobals->time + 2.0f;
 			}
 		}
 		else

@@ -388,6 +388,9 @@ void CCineMonster :: PossessEntity( void )
 		if( HasSpawnFlags(SF_SCRIPT_NOINTERRUPT) ) // diffusion - must be tested more but should work well
 			pTarget->SetFlag(F_ENTITY_BUSY);
 
+		// save previous state
+		if( pTarget->m_MonsterState != MONSTERSTATE_SCRIPT ) // but not script state: this can happen when sequences are being used one after another
+			pTarget->m_previousState = pTarget->m_MonsterState;
 		pTarget->m_IdealMonsterState = MONSTERSTATE_SCRIPT;
 
 		if (m_iszIdle)
@@ -468,6 +471,9 @@ void CCineAI :: PossessEntity( void )
 		
 		ALERT( at_aiconsole, "\"%s\" found and used\n", STRING( pTarget->pev->targetname ) );
 
+		// save previous state
+		if( pTarget->m_MonsterState != MONSTERSTATE_SCRIPT ) // but not script state: this can happen when sequences are being used one after another
+			pTarget->m_previousState = pTarget->m_MonsterState;
 		pTarget->m_IdealMonsterState = MONSTERSTATE_SCRIPT;
 
 /*
@@ -607,8 +613,13 @@ void CCineMonster :: SequenceDone ( CBaseMonster *pMonster )
 //=========================================================
 void CCineMonster :: FixScriptMonsterSchedule( CBaseMonster *pMonster )
 {
-	if ( pMonster->m_IdealMonsterState != MONSTERSTATE_DEAD )
-		pMonster->m_IdealMonsterState = MONSTERSTATE_IDLE;
+	if( pMonster->m_IdealMonsterState != MONSTERSTATE_DEAD )
+	{
+		pMonster->m_IdealMonsterState = pMonster->m_previousState;
+		// don't let it be invalid
+		if( pMonster->m_IdealMonsterState == MONSTERSTATE_NONE )
+			pMonster->m_IdealMonsterState = MONSTERSTATE_IDLE;
+	}
 	pMonster->ClearSchedule();
 }
 
@@ -934,8 +945,13 @@ BOOL CBaseMonster :: CineCleanup( void )
 	}
 	// set them back into a normal state
 	pev->enemy = NULL;
-	if ( pev->health > 0 )
-		m_IdealMonsterState = MONSTERSTATE_IDLE; // m_previousState;
+	if( pev->health > 0 )
+	{
+		m_IdealMonsterState = m_previousState;
+		// don't let it be invalid
+		if( m_IdealMonsterState == MONSTERSTATE_NONE )
+			m_IdealMonsterState = MONSTERSTATE_IDLE;
+	}
 	else
 	{
 		// Dropping out because he got killed

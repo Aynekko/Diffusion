@@ -136,9 +136,10 @@ void CBaseMonster :: RunAI ( void )
 // ==========================================================================
 void CBaseMonster::CheckFire(void)
 {
-	if( HasFlag( F_FIRE_IMMUNE ) )
+	if( HasFlag( F_FIRE_IMMUNE ) || pev->deadflag != DEAD_NO )
 	{
 		// we are immune. so if we get the flag, get rid of it, just in case
+		// also do not set on fire dying or dead monsters
 		if( HasFlag( F_ENTITY_ONFIRE ) )
 			RemoveFlag( F_ENTITY_ONFIRE );
 
@@ -146,7 +147,7 @@ void CBaseMonster::CheckFire(void)
 	}
 	
 	// monster got the flag, set him on fire
-	if( HasFlag(F_ENTITY_ONFIRE) && !IsOnFire && pev->deadflag != DEAD_DEAD )
+	if( HasFlag(F_ENTITY_ONFIRE) && !IsOnFire )
 	{
 		m_flCaughtFireTime = gpGlobals->time;
 		IsOnFire = true;
