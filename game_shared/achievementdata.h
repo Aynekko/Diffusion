@@ -38,9 +38,11 @@ enum Achievements_e
 	ACH_5DRONES,			// 30 kill 5 enemy drones while piloting a drone from 1st person
 	ACH_DRUNK,				// 31 kill 5 enemies while drunk
 	ACH_DIDNTLISTEN,		// 32 you didn't listen to Alice in ch5map2
+	ACH_CARMAGEDDON,		// 33 run over 5 enemies with a car
+	ACH_ELECTROBLAST,		// 34 kill 30 enemies with electroblast
 };
 
-#define TOTAL_ACHIEVEMENTS 33
+#define TOTAL_ACHIEVEMENTS 35
 
 const int AchievementGoals[TOTAL_ACHIEVEMENTS]
 {
@@ -77,6 +79,8 @@ const int AchievementGoals[TOTAL_ACHIEVEMENTS]
 	5,		// ACH_5DRONES,				// 30 kill 5 enemy drones while piloting a drone from 1st person
 	5,		// ACH_DRUNK,				// 31 kill 5 enemies while drunk
 	1,		// ACH_DIDNTLISTEN,			// 32 you didn't listen to Alice in ch5map2
+	5,		// ACH_CARMAGEDDON,			// 33 run over 5 enemies with a car
+	30,		// ACH_ELECTROBLAST,		// 34 kill 30 enemies with electroblast
 };
 
 const char * const AchievementNames[TOTAL_ACHIEVEMENTS]
@@ -114,6 +118,8 @@ const char * const AchievementNames[TOTAL_ACHIEVEMENTS]
 	"ach_5drones",			// ACH_5DRONES,				// 30 kill 5 enemy drones while piloting a drone from 1st person
 	"ach_drunk",			// ACH_DRUNK,				// 31 kill 5 enemies while drunk
 	"ach_didntlisten",		// ACH_DIDNTLISTEN,			// 32 you didn't listen to Alice in ch5map2
+	"ach_carmageddon",		// ACH_CARMAGEDDON,			// 33 run over 5 enemies with a car
+	"ach_electroblast",		// ACH_ELECTROBLAST,		// 34 kill 30 enemies with electroblast
 };
 
 enum Achievement_data_e

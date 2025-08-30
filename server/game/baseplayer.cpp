@@ -5435,6 +5435,8 @@ void CBasePlayer :: Precache( void )
 	m_iClientBattery = -1;
 	m_iClientSndRoomtype = -1;
 	m_flFlashLightTime = 1;
+	m_iClientBlastChargesReady = -1;
+	m_iClientBlastAbilityLVL = -1;
 
 	m_bRainNeedsUpdate = true;
 

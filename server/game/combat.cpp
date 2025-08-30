@@ -959,11 +959,12 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	if ( pev->health <= 0 )
 	{
 		g_pevLastInflictor = pevInflictor;
-		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pevAttacker );
 
 		// achievement - this should be in killed, but for some reason tank not counted there...
 		if( pevAttacker->flags & FL_CLIENT )
 		{
+			CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pevAttacker );
+
 			// single player achievements - attacker is client, and I'm a monster
 			if( !(pev->flags & FL_CLIENT) && !HasFlag(F_NOT_A_MONSTER) )  // destroying the tripmine was counted as if killing the monster
 			{
@@ -1015,6 +1016,12 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			// achievement for both
 			if( pPlayer->m_pActiveItem && pPlayer->m_pActiveItem->m_iId == WEAPON_SNIPER )
 				pPlayer->SendAchievementStatToClient( ACH_KILLENEMIESSNIPER, 1, ACHVAL_ADD );
+
+			if( FClassnameIs( pevInflictor, "func_car" ) )
+				pPlayer->SendAchievementStatToClient( ACH_CARMAGEDDON, 1, ACHVAL_ADD );
+
+			if( pevInflictor == pPlayer->pev && pPlayer->BlastDMGOverride )
+				pPlayer->SendAchievementStatToClient( ACH_ELECTROBLAST, 1, ACHVAL_ADD );
 		}
 
 		if ( bitsDamageType & DMG_ALWAYSGIB )
