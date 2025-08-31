@@ -21,16 +21,16 @@
 
 class CEnvBall : public CBaseDelay
 {
-	DECLARE_CLASS(CEnvBall, CBaseDelay);
+	DECLARE_CLASS( CEnvBall, CBaseDelay );
 public:
-	void Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value);
-	void KeyValue(KeyValueData* pkvd);
-	int ObjectCaps(void) { return BaseClass::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
-	void Precache(void);
-	void Spawn(void);
-	void Wait(void);
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void KeyValue( KeyValueData *pkvd );
+	int ObjectCaps( void ) { return BaseClass::ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
+	void Precache( void );
+	void Spawn( void );
+	void Wait( void );
 
-	CBaseEntity* pBall;
+	CBaseEntity *pBall;
 
 	int InitialVelocity; // initial velocity of the ball
 
@@ -38,31 +38,29 @@ public:
 	int SpawnedBalls;
 	int ActiveBalls; // limit of active balls at once
 
-	int m_iTrail;
-
 	DECLARE_DATADESC();
 };
-LINK_ENTITY_TO_CLASS(env_ball, CEnvBall);
+LINK_ENTITY_TO_CLASS( env_ball, CEnvBall );
 
-BEGIN_DATADESC(CEnvBall)
-	DEFINE_KEYFIELD(InitialVelocity, FIELD_INTEGER, "startvelocity"),
-	DEFINE_KEYFIELD(MaxBalls, FIELD_INTEGER, "maxballs"),
-	DEFINE_KEYFIELD(ActiveBalls, FIELD_INTEGER, "maxactiveballs" ),
-	DEFINE_FIELD(pBall, FIELD_CLASSPTR),
-	DEFINE_FIELD(SpawnedBalls, FIELD_INTEGER),
-	DEFINE_FUNCTION(Wait),
+BEGIN_DATADESC( CEnvBall )
+	DEFINE_KEYFIELD( InitialVelocity, FIELD_INTEGER, "startvelocity" ),
+	DEFINE_KEYFIELD( MaxBalls, FIELD_INTEGER, "maxballs" ),
+	DEFINE_KEYFIELD( ActiveBalls, FIELD_INTEGER, "maxactiveballs" ),
+	DEFINE_FIELD( pBall, FIELD_CLASSPTR ),
+	DEFINE_FIELD( SpawnedBalls, FIELD_INTEGER ),
+	DEFINE_FUNCTION( Wait ),
 END_DATADESC();
 
-void CEnvBall::KeyValue(KeyValueData* pkvd)
+void CEnvBall::KeyValue( KeyValueData *pkvd )
 {
-	if (FStrEq(pkvd->szKeyName, "startvelocity"))
+	if( FStrEq( pkvd->szKeyName, "startvelocity" ) )
 	{
-		InitialVelocity = Q_atoi(pkvd->szValue);
+		InitialVelocity = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
-	else if (FStrEq(pkvd->szKeyName, "maxballs"))
+	else if( FStrEq( pkvd->szKeyName, "maxballs" ) )
 	{
-		MaxBalls = Q_atoi(pkvd->szValue);
+		MaxBalls = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "maxactiveballs" ) )
@@ -71,31 +69,29 @@ void CEnvBall::KeyValue(KeyValueData* pkvd)
 		pkvd->fHandled = TRUE;
 	}
 	else
-		CBaseDelay::KeyValue(pkvd);
+		CBaseDelay::KeyValue( pkvd );
 }
 
-void CEnvBall::Precache(void)
+void CEnvBall::Precache( void )
 {
-	UTIL_PrecacheOther("env_ballentity");
+	UTIL_PrecacheOther( "env_ballentity" );
 
-	if (!pev->spawnflags & ENVBALL_SILENT)
-		PRECACHE_SOUND("comball/spawn.wav");
-
-	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
+	if( !HasSpawnFlags( ENVBALL_SILENT ) )
+		PRECACHE_SOUND( "comball/spawn.wav" );
 }
 
-void CEnvBall::Spawn(void)
+void CEnvBall::Spawn( void )
 {
-	if (pev->spawnflags & ENVBALL_STARTON)
+	if( HasSpawnFlags( ENVBALL_STARTON ) )
 	{
-		SetThink(&CBaseEntity::SUB_CallUseToggle);
-		SetNextThink(0.25);
+		SetThink( &CBaseEntity::SUB_CallUseToggle );
+		SetNextThink( 0.25 );
 	}
 
-	if (m_flWait <= 0)
+	if( m_flWait <= 0 )
 		m_flWait = 0.2;
 
-	if (MaxBalls > 0)
+	if( MaxBalls > 0 )
 		SpawnedBalls = 0;
 	else
 		SpawnedBalls = -1;
@@ -105,24 +101,24 @@ void CEnvBall::Spawn(void)
 	Precache();
 }
 
-void CEnvBall::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
+void CEnvBall::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if (!pActivator || !pActivator->IsPlayer())
-		pActivator = CBaseEntity::Instance(INDEXENT(1));
+	if( !pActivator || !pActivator->IsPlayer() )
+		pActivator = CBaseEntity::Instance( INDEXENT( 1 ) );
 
-	CBasePlayer* pPlayer = (CBasePlayer*)pActivator;
+	CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
 
-	if (IsLockedByMaster(pActivator))
+	if( IsLockedByMaster( pActivator ) )
 		return;
 
-	if (pev->nextthink > gpGlobals->time)
+	if( pev->nextthink > gpGlobals->time )
 		return;
 
 	if( ActiveBalls > 0 ) // mapper has set to track active balls count
 	{
 		if( m_iCounter >= ActiveBalls )
 		{
-			if( HasSpawnFlags(ENVBALL_REFIRE) && (MaxBalls != SpawnedBalls) )
+			if( HasSpawnFlags( ENVBALL_REFIRE ) && (MaxBalls != SpawnedBalls) )
 			{
 				// try again later
 				SetThink( &CBaseEntity::SUB_CallUseToggle );
@@ -135,26 +131,26 @@ void CEnvBall::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 
 	//--------------------------------------------------------------------------
 	Vector SpawnAngles = GetAbsAngles();
-	if (HasSpawnFlags(ENVBALL_RANDOMDIR))
+	if( HasSpawnFlags( ENVBALL_RANDOMDIR ) )
 	{
-		SpawnAngles.x = RANDOM_LONG(0, 359);
-		SpawnAngles.y = RANDOM_LONG(0, 359);
-		SpawnAngles.z = RANDOM_LONG(0, 359);
+		SpawnAngles.x = RANDOM_LONG( 0, 359 );
+		SpawnAngles.y = RANDOM_LONG( 0, 359 );
+		SpawnAngles.z = RANDOM_LONG( 0, 359 );
 	}
 
-	CBaseEntity* pBall = Create("env_ballentity", GetAbsOrigin(), SpawnAngles, edict());
+	CBaseEntity *pBall = Create( "env_ballentity", GetAbsOrigin(), SpawnAngles, edict() );
 
-	if (!pBall)
+	if( !pBall )
 		return;
 
-	if (MaxBalls) // keep track of how many balls are spawned (if set)
+	if( MaxBalls ) // keep track of how many balls are spawned (if set)
 		SpawnedBalls++;
 
 	m_iCounter++; // increase counter of active balls. when ball dies/disappears, it will decrease this value.
 
 	//--------------------------------------------------------------------------
 
-	if (HasSpawnFlags(ENVBALL_SILENT))
+	if( HasSpawnFlags( ENVBALL_SILENT ) )
 		pBall->pev->spawnflags |= ENVBALL_SILENT;
 	else
 	{
@@ -162,19 +158,19 @@ void CEnvBall::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 		EMIT_SOUND_DYN( pBall->edict(), CHAN_BODY, "comball/fly_loop.wav", 0.5, ATTN_NORM, 0, 100 + RANDOM_LONG( -5, 5 ) );
 	}
 
-	if ( !HasSpawnFlags(ENVBALL_NOLIGHTEFFECTS) )
+	if( !HasSpawnFlags( ENVBALL_NOLIGHTEFFECTS ) )
 	{
-		MESSAGE_BEGIN(MSG_BROADCAST, gmsgTempEnt, pev->origin);
-			WRITE_BYTE(TE_DLIGHT);
-			WRITE_COORD(pev->origin.x);	// X
-			WRITE_COORD(pev->origin.y);	// Y
-			WRITE_COORD(pev->origin.z);	// Z
-			WRITE_BYTE(30);		// radius * 0.1
-			WRITE_BYTE(pev->rendercolor.x);		// r
-			WRITE_BYTE(pev->rendercolor.y);		// g
-			WRITE_BYTE(pev->rendercolor.z);		// b
-			WRITE_BYTE(25);		// time * 10
-			WRITE_BYTE(25);		// decay * 0.1
+		MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, pev->origin );
+			WRITE_BYTE( TE_DLIGHT );
+			WRITE_COORD( pev->origin.x );	// X
+			WRITE_COORD( pev->origin.y );	// Y
+			WRITE_COORD( pev->origin.z );	// Z
+			WRITE_BYTE( 30 );		// radius * 0.1
+			WRITE_BYTE( pev->rendercolor.x );		// r
+			WRITE_BYTE( pev->rendercolor.y );		// g
+			WRITE_BYTE( pev->rendercolor.z );		// b
+			WRITE_BYTE( 25 );		// time * 10
+			WRITE_BYTE( 25 );		// decay * 0.1
 			WRITE_BYTE( 100 ); // brightness
 			WRITE_BYTE( 1 ); // shadows
 		MESSAGE_END();
@@ -182,10 +178,10 @@ void CEnvBall::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 	else
 		pBall->pev->spawnflags |= ENVBALL_NOLIGHTEFFECTS;
 
-	if (pev->spawnflags & ENVBALL_DIEONMONSTER)
+	if( pev->spawnflags & ENVBALL_DIEONMONSTER )
 		pBall->pev->spawnflags |= ENVBALL_DIEONMONSTER;
 
-	if (pev->spawnflags & ENVBALL_ALLOWWATER)
+	if( pev->spawnflags & ENVBALL_ALLOWWATER )
 		pBall->pev->spawnflags |= ENVBALL_ALLOWWATER;
 
 	//--------------------------------------------------------------------------
@@ -193,15 +189,15 @@ void CEnvBall::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 	// set initial velocity of the ball
 	UTIL_MakeVectors( SpawnAngles );
 
-	if (!InitialVelocity)
-		pBall->SetAbsVelocity(gpGlobals->v_forward * RANDOM_LONG(100, 2500));
+	if( !InitialVelocity )
+		pBall->SetAbsVelocity( gpGlobals->v_forward * RANDOM_LONG( 100, 2500 ) );
 	else
 	{
-		if (InitialVelocity > 3000)
+		if( InitialVelocity > 3000 )
 			InitialVelocity = 3000;
-		if (InitialVelocity < 31) // it will explode if 30. less then 30 can result in ball being stuck
+		if( InitialVelocity < 31 ) // it will explode if 30. less then 30 can result in ball being stuck
 			InitialVelocity = 31;
-		pBall->SetAbsVelocity(gpGlobals->v_forward * InitialVelocity);
+		pBall->SetAbsVelocity( gpGlobals->v_forward * InitialVelocity );
 	}
 
 	// set the same name in case we want to track it or remove it
@@ -215,62 +211,49 @@ void CEnvBall::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useTy
 	if( pev->renderamt )
 		pBall->pev->renderamt = pev->renderamt;
 
-	if (!pev->rendercolor || (pev->rendercolor == g_vecZero))
+	if( !pev->rendercolor || (pev->rendercolor == g_vecZero) )
 	{
-		pev->rendercolor = Vector(252, 255, 215);
+		pev->rendercolor = Vector( 252, 255, 215 );
 		pBall->pev->rendercolor = pev->rendercolor;
 	}
 	else
 		pBall->pev->rendercolor = pev->rendercolor;
 
 	// set lifetime
-	if (pev->iuser2) // bounce limit
+	if( pev->iuser2 ) // bounce limit
 		pBall->pev->iuser2 = pev->iuser2;
-	if (pev->fuser1) // time limit
+	if( pev->fuser1 ) // time limit
 		pBall->pev->fuser1 = pev->fuser1;
 
 	// set damage
-	if (pev->fuser2)
+	if( pev->fuser2 )
 		pBall->pev->fuser2 = pev->fuser2;
 
-	if( HasSpawnFlags(ENVBALL_TAIL) )
-	{
-		// create trail
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
-			WRITE_BYTE( TE_BEAMFOLLOW );
-			WRITE_SHORT( pBall->entindex() );	// entity
-			WRITE_SHORT(m_iTrail );	// model
-			WRITE_BYTE( 6 ); // life
-			WRITE_BYTE( 5 );  // width
-			WRITE_BYTE( pev->rendercolor.x );   // r
-			WRITE_BYTE( pev->rendercolor.y );   // g
-			WRITE_BYTE( pev->rendercolor.z );   // b
-			WRITE_BYTE( 15 );	// brightness
-		MESSAGE_END();
-	}
+	if( HasSpawnFlags( ENVBALL_TAIL ) )
+		pBall->pev->spawnflags |= ENVBALL_TAIL;
 
 	//------------------------------------------------------------------
 
 	// spawn another ball after delay
-	if ((pev->spawnflags & ENVBALL_REFIRE) && (MaxBalls != SpawnedBalls))
+	if( (pev->spawnflags & ENVBALL_REFIRE) && (MaxBalls != SpawnedBalls) )
 	{
-		SetThink(&CBaseEntity::SUB_CallUseToggle);
-		SetNextThink(m_flWait);
+		SetThink( &CBaseEntity::SUB_CallUseToggle );
+		SetNextThink( m_flWait );
 	}
-	else if (MaxBalls == SpawnedBalls)
+	else if( MaxBalls == SpawnedBalls )
 	{
 		SpawnedBalls = 0;
-		SetThink(NULL);
-		SetNextThink(m_flWait);
+		SetThink( NULL );
+		SetNextThink( m_flWait );
 	}
-	else if (m_flWait > 0)
+	else if( m_flWait > 0 )
 	{
-		SetThink(&CEnvBall::Wait);
-		SetNextThink(m_flWait);
+		SetThink( &CEnvBall::Wait );
+		SetNextThink( m_flWait );
 	}
 }
 
-void CEnvBall::Wait(void)
+void CEnvBall::Wait( void )
 {
 	DontThink();
 }
@@ -280,33 +263,35 @@ void CEnvBall::Wait(void)
 //==========================================================================
 class CEnvBallEntity : public CBaseMonster
 {
-	DECLARE_CLASS(CEnvBallEntity, CBaseMonster);
+	DECLARE_CLASS( CEnvBallEntity, CBaseMonster );
 public:
-	void Spawn(void);
-	void Precache(void);
-	void AnimateThink(void);
-	void BounceTouch(CBaseEntity* pOther);
-	void ClearEffects(void);
-	void Explode(void);
+	void Spawn( void );
+	void Precache( void );
+	void AnimateThink( void );
+	void BounceTouch( CBaseEntity *pOther );
+	void ClearEffects( void );
+	void Explode( void );
 	virtual BOOL IsProjectile( void ) { return TRUE; }
 
 	int Bounced; // how many times did it bounce?
 	int SpriteExplosion;
 	float m_maxFrame;
 
+	int m_iTrail;
+
 	DECLARE_DATADESC();
 };
 
-LINK_ENTITY_TO_CLASS(env_ballentity, CEnvBallEntity);
+LINK_ENTITY_TO_CLASS( env_ballentity, CEnvBallEntity );
 
-BEGIN_DATADESC(CEnvBallEntity)
-	DEFINE_FUNCTION(AnimateThink),
-	DEFINE_FUNCTION(BounceTouch),
-	DEFINE_FUNCTION(Explode),
-	DEFINE_FIELD(Bounced, FIELD_INTEGER),
+BEGIN_DATADESC( CEnvBallEntity )
+	DEFINE_FUNCTION( AnimateThink ),
+	DEFINE_FUNCTION( BounceTouch ),
+	DEFINE_FUNCTION( Explode ),
+	DEFINE_FIELD( Bounced, FIELD_INTEGER ),
 END_DATADESC()
 
-void CEnvBallEntity::Spawn(void)
+void CEnvBallEntity::Spawn( void )
 {
 	Precache();
 
@@ -317,32 +302,32 @@ void CEnvBallEntity::Spawn(void)
 	pev->framerate = 100;
 	pev->frame = 0;
 
-	if( !pev->iuser4) SetFadeDistance(4000); // fadedistance
-	SetFlag(F_NOBACKCULL);
+	if( !pev->iuser4 ) SetFadeDistance( 4000 ); // fadedistance
+	SetFlag( F_NOBACKCULL );
 
-	SET_MODEL(ENT(pev), "sprites/comball.spr");
+	SET_MODEL( ENT( pev ), "sprites/comball.spr" );
 	m_maxFrame = (float)MODEL_FRAMES( pev->modelindex ) - 1;
 
-	if (!pev->rendermode)
+	if( !pev->rendermode )
 		pev->rendermode = kRenderTransAdd;
-	if (!pev->renderamt)
+	if( !pev->renderamt )
 		pev->renderamt = 150;
-	if (!pev->rendercolor)
-		pev->rendercolor = Vector(252, 255, 215);
-	if (!pev->iuser2)
+	if( !pev->rendercolor )
+		pev->rendercolor = Vector( 252, 255, 215 );
+	if( !pev->iuser2 )
 		pev->iuser2 = 0; // bounce limit: unlimited by default
-	if (!pev->fuser1)
+	if( !pev->fuser1 )
 		pev->fuser1 = 0; // time limit: unlimited by default
-	if (!pev->fuser2)
+	if( !pev->fuser2 )
 		pev->fuser2 = 0; // damage: no damage by default
 
-//	UTIL_SetSize(pev, Vector(-4, -4, -4), Vector(4, 4, 4));
-		UTIL_SetSize(pev, g_vecZero, g_vecZero);
+	//	UTIL_SetSize(pev, Vector(-4, -4, -4), Vector(4, 4, 4));
+	UTIL_SetSize( pev, g_vecZero, g_vecZero );
 
-	SetTouch(&CEnvBallEntity::BounceTouch);
+	SetTouch( &CEnvBallEntity::BounceTouch );
 
 	if( pev->owner )
-		m_hOwner = Instance(pev->owner);
+		m_hOwner = Instance( pev->owner );
 	pev->dmgtime = gpGlobals->time; // keep track of when ball spawned
 
 	Bounced = 0; // haven't bounced yet
@@ -351,43 +336,44 @@ void CEnvBallEntity::Spawn(void)
 	SetNextThink( 0.1 );
 }
 
-void CEnvBallEntity::Precache(void)
+void CEnvBallEntity::Precache( void )
 {
-	if (pev->model)
-		PRECACHE_MODEL((char*)STRING(pev->model));
+	if( pev->model )
+		PRECACHE_MODEL( (char *)STRING( pev->model ) );
 	else
-		PRECACHE_MODEL("sprites/comball.spr");
+		PRECACHE_MODEL( "sprites/comball.spr" );
 
-	if (!(pev->spawnflags & ENVBALL_SILENT))
+	if( !(pev->spawnflags & ENVBALL_SILENT) )
 	{
-		PRECACHE_SOUND("comball/fly_loop.wav");
-		PRECACHE_SOUND("comball/bounce1.wav");
-		PRECACHE_SOUND("comball/bounce2.wav");
-		PRECACHE_SOUND("comball/explosion.wav");
+		PRECACHE_SOUND( "comball/fly_loop.wav" );
+		PRECACHE_SOUND( "comball/bounce1.wav" );
+		PRECACHE_SOUND( "comball/bounce2.wav" );
+		PRECACHE_SOUND( "comball/explosion.wav" );
 		PRECACHE_SOUND( "comball/bounce_hit.wav" );
 	}
 
-	SpriteExplosion = PRECACHE_MODEL("sprites/white.spr");
+	SpriteExplosion = PRECACHE_MODEL( "sprites/white.spr" );
+	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
 }
 
-void CEnvBallEntity::AnimateThink(void)
+void CEnvBallEntity::AnimateThink( void )
 {
-	if (m_hOwner == NULL)
+	if( m_hOwner == NULL )
 		pev->owner = NULL;
 
-	if ((pev->fuser1 > 0) && (gpGlobals->time - pev->dmgtime > pev->fuser1))
+	if( (pev->fuser1 > 0) && (gpGlobals->time - pev->dmgtime > pev->fuser1) )
 	{
 		Explode();
 		return;
 	}
 
-	if (GetAbsVelocity().Length() < 30)
+	if( GetAbsVelocity().Length() < 30 )
 	{
 		Explode();
 		return;
 	}
 
-	if (!HasSpawnFlags(ENVBALL_ALLOWWATER) && (pev->waterlevel != 0))
+	if( !HasSpawnFlags( ENVBALL_ALLOWWATER ) && (pev->waterlevel != 0) )
 	{
 		Explode();
 		return;
@@ -398,28 +384,46 @@ void CEnvBallEntity::AnimateThink(void)
 	if( m_maxFrame > 0 )
 		pev->frame = fmod( pev->frame + frames, m_maxFrame );
 
-	SetNextThink(0);
+	if( HasSpawnFlags( ENVBALL_TAIL ) )
+	{
+		// create trail
+		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+			WRITE_BYTE( TE_BEAMFOLLOW );
+			WRITE_SHORT( entindex() );	// entity
+			WRITE_SHORT( m_iTrail );	// model
+			WRITE_BYTE( 6 ); // life
+			WRITE_BYTE( 5 );  // width
+			WRITE_BYTE( pev->rendercolor.x );   // r
+			WRITE_BYTE( pev->rendercolor.y );   // g
+			WRITE_BYTE( pev->rendercolor.z );   // b
+			WRITE_BYTE( 15 );	// brightness
+		MESSAGE_END();
+
+		pev->spawnflags &= ~ENVBALL_TAIL;
+	}
+
+	SetNextThink( 0 );
 }
 
-void CEnvBallEntity::BounceTouch(CBaseEntity* pOther)
+void CEnvBallEntity::BounceTouch( CBaseEntity *pOther )
 {
 	// balls touched. this is gay. delete.
-	if (FClassnameIs(pOther->pev, "env_ballentity") || FClassnameIs(pOther->pev, "shootball") || FClassnameIs(pOther->pev, "playerball"))
+	if( FClassnameIs( pOther->pev, "env_ballentity" ) || FClassnameIs( pOther->pev, "shootball" ) || FClassnameIs( pOther->pev, "playerball" ) )
 	{
 		// HACKHACK when two balls collide, they execute the same code so should be both deleted
 		// however one of them always stays alive. so we need to use this "hack"
-		UTIL_Remove(pOther);
+		UTIL_Remove( pOther );
 		Explode();
 		return;
 	}
 
-	UTIL_DoSparkNoSound(pev, GetAbsOrigin());
+	UTIL_DoSparkNoSound( pev, GetAbsOrigin() );
 
 	// keep track of bounces
-	if (pev->iuser2)
+	if( pev->iuser2 )
 	{
 		Bounced++;
-		if (Bounced > pev->iuser2)
+		if( Bounced > pev->iuser2 )
 		{
 			Explode();
 			return;
@@ -428,31 +432,31 @@ void CEnvBallEntity::BounceTouch(CBaseEntity* pOther)
 	else
 		Bounced = -1;
 
-	if (!(pev->spawnflags & ENVBALL_NOLIGHTEFFECTS) && (Bounced <= pev->iuser2))
+	if( !(pev->spawnflags & ENVBALL_NOLIGHTEFFECTS) && (Bounced <= pev->iuser2) )
 	{
 		TraceResult tr = UTIL_GetGlobalTrace();
 
 		Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3; // pull out the templight a bit from the touched surface
 
-		MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
-			WRITE_BYTE(TE_DLIGHT);
-			WRITE_COORD(vecOrg.x);	// X
-			WRITE_COORD(vecOrg.y);	// Y
-			WRITE_COORD(vecOrg.z);	// Z
-			WRITE_BYTE(10);		// radius * 0.1
-			WRITE_BYTE(pev->rendercolor.x);		// r
-			WRITE_BYTE(pev->rendercolor.y);		// g
-			WRITE_BYTE(pev->rendercolor.z);		// b
-			WRITE_BYTE(10);		// time * 10
-			WRITE_BYTE(15);		// decay * 0.1
+		MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg );
+			WRITE_BYTE( TE_DLIGHT );
+			WRITE_COORD( vecOrg.x );	// X
+			WRITE_COORD( vecOrg.y );	// Y
+			WRITE_COORD( vecOrg.z );	// Z
+			WRITE_BYTE( 10 );		// radius * 0.1
+			WRITE_BYTE( pev->rendercolor.x );		// r
+			WRITE_BYTE( pev->rendercolor.y );		// g
+			WRITE_BYTE( pev->rendercolor.z );		// b
+			WRITE_BYTE( 10 );		// time * 10
+			WRITE_BYTE( 15 );		// decay * 0.1
 			WRITE_BYTE( 100 ); // brightness
 			WRITE_BYTE( 0 ); // shadows
 		MESSAGE_END();
 	}
 
-	if (pOther->IsPlayer() || pOther->IsMonster())
+	if( pOther->IsPlayer() || pOther->IsMonster() )
 	{
-		if (HasSpawnFlags(ENVBALL_DIEONMONSTER))
+		if( HasSpawnFlags( ENVBALL_DIEONMONSTER ) )
 		{
 			Explode();
 			return;
@@ -463,18 +467,18 @@ void CEnvBallEntity::BounceTouch(CBaseEntity* pOther)
 			// UPD: FIXME I feel some lines can be unnecessary. It works, but must be looked into
 			Vector m_vecIdeal = pOther->GetAbsVelocity();
 			m_vecIdeal += (m_vecIdeal - GetAbsOrigin()).Normalize() * 100;
-			SetAbsVelocity(m_vecIdeal);
+			SetAbsVelocity( m_vecIdeal );
 			Vector vecDir = m_vecIdeal.Normalize();
 			TraceResult tr = UTIL_GetGlobalTrace();
-			float n = -DotProduct(tr.vecPlaneNormal, vecDir);
+			float n = -DotProduct( tr.vecPlaneNormal, vecDir );
 			vecDir = 2.0 * tr.vecPlaneNormal * n + vecDir;
-		//	m_vecIdeal = vecDir * m_vecIdeal.Length();
-		//	m_vecIdeal.z += 2; // so it won't stick to surface...
+			//	m_vecIdeal = vecDir * m_vecIdeal.Length();
+			//	m_vecIdeal.z += 2; // so it won't stick to surface...
 
-			if (pev->fuser2 > 0)
+			if( pev->fuser2 > 0 )
 			{
-				if (!HasSpawnFlags(ENVBALL_SILENT))
-					EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "comball/bounce_hit.wav", 1, 0.4, 0, RANDOM_LONG( 90, 110 ) );
+				if( !HasSpawnFlags( ENVBALL_SILENT ) )
+					EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/bounce_hit.wav", 1, 0.4, 0, RANDOM_LONG( 90, 110 ) );
 			}
 		}
 	}
@@ -490,24 +494,24 @@ void CEnvBallEntity::BounceTouch(CBaseEntity* pOther)
 		}
 	}
 
-	if (GetAbsVelocity().Length() > CVAR_GET_FLOAT("sv_maxvelocity"))
+	if( GetAbsVelocity().Length() > CVAR_GET_FLOAT( "sv_maxvelocity" ) )
 		pev->velocity *= 0.9; // ¯\_(ツ)_/¯
 
-	if (pev->fuser2 > 0)
+	if( pev->fuser2 > 0 )
 	{
-		entvars_t* pevOwner;
-		if (pev->owner)
-			pevOwner = VARS(pev->owner);
+		entvars_t *pevOwner;
+		if( pev->owner )
+			pevOwner = VARS( pev->owner );
 		else
 			pevOwner = NULL;
 
 		pev->owner = NULL; // can't traceline attack owner if this is set
-	//	RadiusDamage(GetAbsOrigin(), pev, pevOwner, pev->fuser2, pev->fuser2 * 2.5, CLASS_NONE, DMG_SHOCK);
+		//	RadiusDamage(GetAbsOrigin(), pev, pevOwner, pev->fuser2, pev->fuser2 * 2.5, CLASS_NONE, DMG_SHOCK);
 		pOther->TakeDamage( pev, pevOwner, pev->fuser2, DMG_SHOCK );
 	}
 
-	if (!(pev->spawnflags & ENVBALL_SILENT))
-		UTIL_ScreenShake(pev->origin, 5.0, 150.0, 0.5, 500, true);
+	if( !HasSpawnFlags(ENVBALL_SILENT) )
+		UTIL_ScreenShake( pev->origin, 5.0, 150.0, 0.5, 500, true );
 }
 /*
 void CEnvBallEntity::Slowdown(void)
@@ -528,87 +532,87 @@ void CEnvBallEntity::Slowdown(void)
 	}
 }
 */
-void CEnvBallEntity::ClearEffects(void)
+void CEnvBallEntity::ClearEffects( void )
 {
-	STOP_SOUND(ENT(pev), CHAN_BODY, "comball/fly_loop.wav");
-	
+	STOP_SOUND( ENT( pev ), CHAN_BODY, "comball/fly_loop.wav" );
+
 	// notify our owner env_ball that we died
 	if( m_hOwner != NULL && FClassnameIs( m_hOwner, "env_ball" ) )
 		m_hOwner->m_iCounter--;
 }
 
-void CEnvBallEntity::Explode(void)
+void CEnvBallEntity::Explode( void )
 {
-	if (!(pev->spawnflags & ENVBALL_NOLIGHTEFFECTS))
+	if( !HasSpawnFlags( ENVBALL_NOLIGHTEFFECTS ) )
 	{
 		// light
 		TraceResult tr = UTIL_GetGlobalTrace();
 		Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3;
 
-		MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
-		WRITE_BYTE(TE_DLIGHT);
-			WRITE_COORD(vecOrg.x);	// X
-			WRITE_COORD(vecOrg.y);	// Y
-			WRITE_COORD(vecOrg.z);	// Z
-			WRITE_BYTE(35);		// radius * 0.1
-			WRITE_BYTE(255);		// r
-			WRITE_BYTE(255);		// g
-			WRITE_BYTE(255);		// b			
-			WRITE_BYTE(30);		// time * 10
-			WRITE_BYTE(30);		// decay * 0.1
+		MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg );
+			WRITE_BYTE( TE_DLIGHT );
+			WRITE_COORD( vecOrg.x );	// X
+			WRITE_COORD( vecOrg.y );	// Y
+			WRITE_COORD( vecOrg.z );	// Z
+			WRITE_BYTE( 35 );		// radius * 0.1
+			WRITE_BYTE( 255 );		// r
+			WRITE_BYTE( 255 );		// g
+			WRITE_BYTE( 255 );		// b			
+			WRITE_BYTE( 30 );		// time * 10
+			WRITE_BYTE( 30 );		// decay * 0.1
 			WRITE_BYTE( 150 ); // brightness
 			WRITE_BYTE( 1 ); // shadows
 		MESSAGE_END();
 	}
 
 	// blast effect
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_BEAMCYLINDER);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z + RANDOM_LONG(500, 1000)); // reach damage radius over .2 seconds
-		WRITE_SHORT(SpriteExplosion);
-		WRITE_BYTE(0); // startframe
-		WRITE_BYTE(0); // framerate
-		WRITE_BYTE(4); // life
-		WRITE_BYTE(16);  // width
-		WRITE_BYTE(0);   // noise
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(120); // brightness
-		WRITE_BYTE(0);		// speed
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY, pev->origin );
+		WRITE_BYTE( TE_BEAMCYLINDER );
+		WRITE_COORD( pev->origin.x );
+		WRITE_COORD( pev->origin.y );
+		WRITE_COORD( pev->origin.z );
+		WRITE_COORD( pev->origin.x );
+		WRITE_COORD( pev->origin.y );
+		WRITE_COORD( pev->origin.z + RANDOM_LONG( 500, 1000 ) ); // reach damage radius over .2 seconds
+		WRITE_SHORT( SpriteExplosion );
+		WRITE_BYTE( 0 ); // startframe
+		WRITE_BYTE( 0 ); // framerate
+		WRITE_BYTE( 4 ); // life
+		WRITE_BYTE( 16 );  // width
+		WRITE_BYTE( 0 );   // noise
+		WRITE_BYTE( 255 );   // r, g, b
+		WRITE_BYTE( 255 );   // r, g, b
+		WRITE_BYTE( 255 );   // r, g, b
+		WRITE_BYTE( 120 ); // brightness
+		WRITE_BYTE( 0 );		// speed
 	MESSAGE_END();
 
 	// sparks
-	Create("spark_shower", pev->origin, g_vecZero, NULL);
+	Create( "spark_shower", pev->origin, g_vecZero, NULL );
 
 	// damage
-	if (pev->fuser2 > 0)
+	if( pev->fuser2 > 0 )
 	{
-		entvars_t* pevOwner;
-		if (pev->owner)
-			pevOwner = VARS(pev->owner);
+		entvars_t *pevOwner;
+		if( pev->owner )
+			pevOwner = VARS( pev->owner );
 		else
 			pevOwner = NULL;
 
 		pev->owner = NULL; // can't traceline attack owner if this is set
-		RadiusDamage(GetAbsOrigin(), pev, pevOwner, pev->fuser2, pev->fuser2 * 2.5, CLASS_NONE, DMG_SHOCK);
+		RadiusDamage( GetAbsOrigin(), pev, pevOwner, pev->fuser2, pev->fuser2 * 2.5, CLASS_NONE, DMG_SHOCK );
 	}
 
-	UTIL_DoSparkNoSound(pev, pev->origin);
+	UTIL_DoSparkNoSound( pev, pev->origin );
 
-	if (!(pev->spawnflags & ENVBALL_SILENT))
+	if( !HasSpawnFlags( ENVBALL_SILENT ) )
 	{
-		UTIL_ScreenShake(pev->origin, 10.0, 150.0, 1.0, 2000, true);
-		EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "comball/explosion.wav", 1, 0.3, 0, 100 + RANDOM_LONG(-10, 10));
+		UTIL_ScreenShake( pev->origin, 10.0, 150.0, 1.0, 2000, true );
+		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/explosion.wav", 1, 0.3, 0, 100 + RANDOM_LONG( -10, 10 ) );
 	}
 
-	SetTouch(NULL);
-	UTIL_Remove(this);
+	SetTouch( NULL );
+	UTIL_Remove( this );
 }
 
 
@@ -618,12 +622,12 @@ void CEnvBallEntity::Explode(void)
 
 class CEnvBallEntitySoldier : public CEnvBallEntity
 {
-	DECLARE_CLASS(CEnvBallEntitySoldier, CEnvBallEntity);
+	DECLARE_CLASS( CEnvBallEntitySoldier, CEnvBallEntity );
 public:
-	void Spawn(void);
-	void BounceTouch(CBaseEntity* pOther);
-	void Explode(void);
-	void AnimateThink(void);
+	void Spawn( void );
+	void BounceTouch( CBaseEntity *pOther );
+	void Explode( void );
+	void AnimateThink( void );
 	virtual BOOL IsProjectile( void ) { return TRUE; }
 
 	int GotOwnerClass; // we need to get the class of our owner, so we don't hurt our allies
@@ -631,41 +635,41 @@ public:
 	DECLARE_DATADESC();
 };
 
-LINK_ENTITY_TO_CLASS(shootball, CEnvBallEntitySoldier);
+LINK_ENTITY_TO_CLASS( shootball, CEnvBallEntitySoldier );
 
-BEGIN_DATADESC(CEnvBallEntitySoldier)
-	DEFINE_FUNCTION(AnimateThink),
-	DEFINE_FUNCTION(BounceTouch),
-	DEFINE_FUNCTION(Explode),
-	DEFINE_FIELD(Bounced, FIELD_INTEGER),
+BEGIN_DATADESC( CEnvBallEntitySoldier )
+	DEFINE_FUNCTION( AnimateThink ),
+	DEFINE_FUNCTION( BounceTouch ),
+	DEFINE_FUNCTION( Explode ),
+	DEFINE_FIELD( Bounced, FIELD_INTEGER ),
 END_DATADESC()
 
-void CEnvBallEntitySoldier::AnimateThink(void)
+void CEnvBallEntitySoldier::AnimateThink( void )
 {
-	if (m_hOwner == NULL)
+	if( m_hOwner == NULL )
 		pev->owner = NULL;
 	else
 	{
-		if (GotOwnerClass == 0)
+		if( GotOwnerClass == 0 )
 		{
 			m_iClass = m_hOwner->Classify();
 			GotOwnerClass = 1;
 		}
 	}
 
-	if ((pev->fuser1 > 0) && (gpGlobals->time - pev->dmgtime > pev->fuser1))
+	if( (pev->fuser1 > 0) && (gpGlobals->time - pev->dmgtime > pev->fuser1) )
 	{
 		Explode();
 		return;
 	}
 
-	if (GetAbsVelocity().Length() < 30)
+	if( GetAbsVelocity().Length() < 30 )
 	{
 		Explode();
 		return;
 	}
 
-	if (pev->waterlevel != 0)
+	if( pev->waterlevel != 0 )
 	{
 		Explode();
 		return;
@@ -676,10 +680,10 @@ void CEnvBallEntitySoldier::AnimateThink(void)
 	if( m_maxFrame > 0 )
 		pev->frame = fmod( pev->frame + frames, m_maxFrame );
 
-	SetNextThink(0);
+	SetNextThink( 0 );
 }
 
-void CEnvBallEntitySoldier::Spawn(void)
+void CEnvBallEntitySoldier::Spawn( void )
 {
 	Precache();
 
@@ -691,24 +695,24 @@ void CEnvBallEntitySoldier::Spawn(void)
 	//	if( !m_iClass )
 	//		m_iClass = CLASS_ALIEN_MILITARY;
 
-	SET_MODEL(ENT(pev), "sprites/comball.spr");
+	SET_MODEL( ENT( pev ), "sprites/comball.spr" );
 	m_maxFrame = (float)MODEL_FRAMES( pev->modelindex ) - 1;
 
 	pev->rendermode = kRenderTransAdd;
 	pev->renderamt = 150;
-	pev->rendercolor = Vector(252, 255, 215);
+	pev->rendercolor = Vector( 252, 255, 215 );
 	pev->iuser2 = 10; // bounce limit
 	pev->fuser1 = 5; // time limit: 5 seconds
 	pev->fuser2 = 60; // damage
 
-	UTIL_SetSize(pev, Vector(-4, -4, -4), Vector(4, 4, 4));
+	UTIL_SetSize( pev, Vector( -4, -4, -4 ), Vector( 4, 4, 4 ) );
 
-	SetThink(&CEnvBallEntitySoldier::AnimateThink);
-	SetTouch(&CEnvBallEntitySoldier::BounceTouch);
+	SetThink( &CEnvBallEntitySoldier::AnimateThink );
+	SetTouch( &CEnvBallEntitySoldier::BounceTouch );
 
-	if (pev->owner)
+	if( pev->owner )
 	{
-		m_hOwner = Instance(pev->owner);
+		m_hOwner = Instance( pev->owner );
 		m_iClass = m_hOwner->Classify();
 	}
 	pev->dmgtime = gpGlobals->time; // keep track of when ball spawned
@@ -717,22 +721,22 @@ void CEnvBallEntitySoldier::Spawn(void)
 	Bounced = 0; // haven't bounced yet
 
 	// light
-	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, pev->origin);
-		WRITE_BYTE(TE_DLIGHT);
-			WRITE_COORD(pev->origin.x);	// X
-			WRITE_COORD(pev->origin.y);	// Y
-			WRITE_COORD(pev->origin.z);	// Z
-			WRITE_BYTE(30);		// radius * 0.1
-			WRITE_BYTE(pev->rendercolor.x);		// r
-			WRITE_BYTE(pev->rendercolor.y);		// g
-			WRITE_BYTE(pev->rendercolor.z);		// b
-			WRITE_BYTE(25);		// time * 10
-			WRITE_BYTE(25);		// decay * 0.1
-			WRITE_BYTE( 100 ); // brightness
-			WRITE_BYTE( 1 ); // shadows
-		MESSAGE_END();
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, pev->origin );
+		WRITE_BYTE( TE_DLIGHT );
+		WRITE_COORD( pev->origin.x );	// X
+		WRITE_COORD( pev->origin.y );	// Y
+		WRITE_COORD( pev->origin.z );	// Z
+		WRITE_BYTE( 30 );		// radius * 0.1
+		WRITE_BYTE( pev->rendercolor.x );		// r
+		WRITE_BYTE( pev->rendercolor.y );		// g
+		WRITE_BYTE( pev->rendercolor.z );		// b
+		WRITE_BYTE( 25 );		// time * 10
+		WRITE_BYTE( 25 );		// decay * 0.1
+		WRITE_BYTE( 100 ); // brightness
+		WRITE_BYTE( 1 ); // shadows
+	MESSAGE_END();
 
-	EMIT_SOUND_DYN(edict(), CHAN_BODY, "comball/fly_loop.wav", 0.5, ATTN_NORM, 0, 100 + RANDOM_LONG(-5, 5));
+	EMIT_SOUND_DYN( edict(), CHAN_BODY, "comball/fly_loop.wav", 0.5, ATTN_NORM, 0, 100 + RANDOM_LONG( -5, 5 ) );
 
 	SetFadeDistance( 4000 ); // fadedistance
 
@@ -740,61 +744,61 @@ void CEnvBallEntitySoldier::Spawn(void)
 	pev->frame = 0;
 }
 
-void CEnvBallEntitySoldier::BounceTouch(CBaseEntity* pOther)
+void CEnvBallEntitySoldier::BounceTouch( CBaseEntity *pOther )
 {
-	if (HasSpawnFlags(ENVBALL_ALIENSHIP) )
+	if( HasSpawnFlags( ENVBALL_ALIENSHIP ) )
 	{
 		Explode();
 		return;
 	}
 
-	if (FClassnameIs(pOther->pev, "env_ballentity") || FClassnameIs(pOther->pev, "shootball") || FClassnameIs(pOther->pev, "playerball"))
+	if( FClassnameIs( pOther->pev, "env_ballentity" ) || FClassnameIs( pOther->pev, "shootball" ) || FClassnameIs( pOther->pev, "playerball" ) )
 	{
 		// when two balls collide, they execute the same code so should be both deleted
 		// however one of them always stays alive. so we need to use this "hack"
-		UTIL_Remove(pOther);
+		UTIL_Remove( pOther );
 		Explode();
 		return;
 	}
 
-	UTIL_DoSparkNoSound(pev, GetAbsOrigin());
+	UTIL_DoSparkNoSound( pev, GetAbsOrigin() );
 
 	pev->velocity *= 1.1;
 
 	Bounced++;
-	if (Bounced > pev->iuser2)
+	if( Bounced > pev->iuser2 )
 	{
 		Explode();
 		return;
 	}
 
-	switch (RANDOM_LONG(0, 1))
+	switch( RANDOM_LONG( 0, 1 ) )
 	{
-	case 0: EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "comball/bounce1.wav", 1, 0.4, 0, 100 + RANDOM_LONG(-10, 10)); break; // ...channel, wav file, volume, radius, flags, pitch
-	case 1: EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "comball/bounce2.wav", 1, 0.4, 0, 100 + RANDOM_LONG(-10, 10)); break;
+	case 0: EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/bounce1.wav", 1, 0.4, 0, 100 + RANDOM_LONG( -10, 10 ) ); break; // ...channel, wav file, volume, radius, flags, pitch
+	case 1: EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/bounce2.wav", 1, 0.4, 0, 100 + RANDOM_LONG( -10, 10 ) ); break;
 	}
 
 	TraceResult tr = UTIL_GetGlobalTrace();
 	Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3;
 
-	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
-	WRITE_BYTE(TE_DLIGHT);
-		WRITE_COORD(vecOrg.x);	// X
-		WRITE_COORD(vecOrg.y);	// Y
-		WRITE_COORD(vecOrg.z);	// Z
-		WRITE_BYTE(10);		// radius * 0.1
-		WRITE_BYTE(pev->rendercolor.x);		// r
-		WRITE_BYTE(pev->rendercolor.y);		// g
-		WRITE_BYTE(pev->rendercolor.z);		// b
-		WRITE_BYTE(10);		// time * 10
-		WRITE_BYTE(15);		// decay * 0.1
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg );
+		WRITE_BYTE( TE_DLIGHT );
+		WRITE_COORD( vecOrg.x );	// X
+		WRITE_COORD( vecOrg.y );	// Y
+		WRITE_COORD( vecOrg.z );	// Z
+		WRITE_BYTE( 10 );		// radius * 0.1
+		WRITE_BYTE( pev->rendercolor.x );		// r
+		WRITE_BYTE( pev->rendercolor.y );		// g
+		WRITE_BYTE( pev->rendercolor.z );		// b
+		WRITE_BYTE( 10 );		// time * 10
+		WRITE_BYTE( 15 );		// decay * 0.1
 		WRITE_BYTE( 100 ); // brightness
 		WRITE_BYTE( 0 ); // shadows
 	MESSAGE_END();
 
-	if ((pOther->IsMonster() || (pOther->IsPlayer())))
+	if( (pOther->IsMonster() || (pOther->IsPlayer())) )
 	{
-		if (pOther->Classify() == m_iClass)
+		if( pOther->Classify() == m_iClass )
 		{
 			// do nothing
 		}
@@ -805,71 +809,71 @@ void CEnvBallEntitySoldier::BounceTouch(CBaseEntity* pOther)
 		}
 	}
 
-	UTIL_ScreenShake(pev->origin, 5.0, 150.0, 0.5, 500, true);
+	UTIL_ScreenShake( pev->origin, 5.0, 150.0, 0.5, 500, true );
 }
 
-void CEnvBallEntitySoldier::Explode(void)
+void CEnvBallEntitySoldier::Explode( void )
 {
 	// light
 	TraceResult tr = UTIL_GetGlobalTrace();
 	Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3;
 
-	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
-		WRITE_BYTE(TE_DLIGHT);
-		WRITE_COORD(vecOrg.x);	// X
-		WRITE_COORD(vecOrg.y);	// Y
-		WRITE_COORD(vecOrg.z);	// Z
-		WRITE_BYTE(35);		// radius * 0.1
-		WRITE_BYTE(255);		// r			
-		WRITE_BYTE(255);		// g
-		WRITE_BYTE(255);		// b			
-		WRITE_BYTE(30);		// time * 10
-		WRITE_BYTE(30);		// decay * 0.1
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg );
+		WRITE_BYTE( TE_DLIGHT );
+		WRITE_COORD( vecOrg.x );	// X
+		WRITE_COORD( vecOrg.y );	// Y
+		WRITE_COORD( vecOrg.z );	// Z
+		WRITE_BYTE( 35 );		// radius * 0.1
+		WRITE_BYTE( 255 );		// r			
+		WRITE_BYTE( 255 );		// g
+		WRITE_BYTE( 255 );		// b			
+		WRITE_BYTE( 30 );		// time * 10
+		WRITE_BYTE( 30 );		// decay * 0.1
 		WRITE_BYTE( 150 ); // brightness
 		WRITE_BYTE( 1 ); // shadows
 	MESSAGE_END();
 
 	// blast effect
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_BEAMCYLINDER);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z + RANDOM_LONG(500, 1000));
-		WRITE_SHORT(SpriteExplosion);
-		WRITE_BYTE(0); // startframe
-		WRITE_BYTE(0); // framerate
-		WRITE_BYTE(4); // life
-		WRITE_BYTE(16);  // width
-		WRITE_BYTE(0);   // noise
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(120); // brightness
-		WRITE_BYTE(0);		// speed
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY, pev->origin );
+		WRITE_BYTE( TE_BEAMCYLINDER );
+		WRITE_COORD( pev->origin.x );
+		WRITE_COORD( pev->origin.y );
+		WRITE_COORD( pev->origin.z );
+		WRITE_COORD( pev->origin.x );
+		WRITE_COORD( pev->origin.y );
+		WRITE_COORD( pev->origin.z + RANDOM_LONG( 500, 1000 ) );
+		WRITE_SHORT( SpriteExplosion );
+		WRITE_BYTE( 0 ); // startframe
+		WRITE_BYTE( 0 ); // framerate
+		WRITE_BYTE( 4 ); // life
+		WRITE_BYTE( 16 );  // width
+		WRITE_BYTE( 0 );   // noise
+		WRITE_BYTE( 255 );   // r, g, b
+		WRITE_BYTE( 255 );   // r, g, b
+		WRITE_BYTE( 255 );   // r, g, b
+		WRITE_BYTE( 120 ); // brightness
+		WRITE_BYTE( 0 );		// speed
 	MESSAGE_END();
 
 	// sparks
-	Create("spark_shower", pev->origin, g_vecZero, NULL);
+	Create( "spark_shower", pev->origin, g_vecZero, NULL );
 	// damage
-	entvars_t* pevOwner;
-	if (pev->owner)
-		pevOwner = VARS(pev->owner);
+	entvars_t *pevOwner;
+	if( pev->owner )
+		pevOwner = VARS( pev->owner );
 	else
 		pevOwner = NULL;
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
-	RadiusDamage(GetAbsOrigin(), pev, pevOwner, pev->fuser2, pev->fuser2 * 2.5, m_iClass, DMG_SHOCK);
+	RadiusDamage( GetAbsOrigin(), pev, pevOwner, pev->fuser2, pev->fuser2 * 2.5, m_iClass, DMG_SHOCK );
 
-	UTIL_DoSparkNoSound(pev, pev->origin);
+	UTIL_DoSparkNoSound( pev, pev->origin );
 
-	UTIL_ScreenShake(GetAbsOrigin(), 10.0, 150.0, 1.0, 2000, true);
-	EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "comball/explosion.wav", 1, 0.3, 0, 100 + RANDOM_LONG(-10, 10));
+	UTIL_ScreenShake( GetAbsOrigin(), 10.0, 150.0, 1.0, 2000, true );
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/explosion.wav", 1, 0.3, 0, 100 + RANDOM_LONG( -10, 10 ) );
 
-	SetTouch(NULL);
-	UTIL_Remove(this);
+	SetTouch( NULL );
+	UTIL_Remove( this );
 }
 
 //==========================================================================
@@ -878,12 +882,12 @@ void CEnvBallEntitySoldier::Explode(void)
 
 class CEnvBallEntityPlayer : public CEnvBallEntity
 {
-	DECLARE_CLASS(CEnvBallEntityPlayer, CEnvBallEntity);
+	DECLARE_CLASS( CEnvBallEntityPlayer, CEnvBallEntity );
 public:
-	void Spawn(void);
-	void BounceTouch(CBaseEntity* pOther);
-	void Explode(void);
-	void AnimateThink(void);
+	void Spawn( void );
+	void BounceTouch( CBaseEntity *pOther );
+	void Explode( void );
+	void AnimateThink( void );
 	virtual BOOL IsProjectile( void ) { return TRUE; }
 
 	// player's energy ball has an ability to correct its course toward enemies (like hl2)
@@ -895,35 +899,35 @@ public:
 	DECLARE_DATADESC();
 };
 
-LINK_ENTITY_TO_CLASS(playerball, CEnvBallEntityPlayer);
+LINK_ENTITY_TO_CLASS( playerball, CEnvBallEntityPlayer );
 
-BEGIN_DATADESC(CEnvBallEntityPlayer)
-	DEFINE_FUNCTION(AnimateThink),
-	DEFINE_FUNCTION(BounceTouch),
-	DEFINE_FUNCTION(Explode),
-	DEFINE_FIELD(Bounced, FIELD_INTEGER),
+BEGIN_DATADESC( CEnvBallEntityPlayer )
+	DEFINE_FUNCTION( AnimateThink ),
+	DEFINE_FUNCTION( BounceTouch ),
+	DEFINE_FUNCTION( Explode ),
+	DEFINE_FIELD( Bounced, FIELD_INTEGER ),
 END_DATADESC()
 
-void CEnvBallEntityPlayer::AnimateThink(void)
+void CEnvBallEntityPlayer::AnimateThink( void )
 {
-	if (m_hOwner == NULL)
+	if( m_hOwner == NULL )
 		pev->owner = NULL;
 
 	SetNextThink( 0 );
 
-	if ((pev->fuser1 > 0) && (gpGlobals->time - pev->dmgtime > pev->fuser1))
+	if( (pev->fuser1 > 0) && (gpGlobals->time - pev->dmgtime > pev->fuser1) )
 	{
 		Explode();
 		return;
 	}
 
-	if (GetAbsVelocity().Length() < 30)
+	if( GetAbsVelocity().Length() < 30 )
 	{
 		Explode();
 		return;
 	}
 
-	if (pev->waterlevel != 0)
+	if( pev->waterlevel != 0 )
 	{
 		Explode();
 		return;
@@ -941,7 +945,7 @@ void CEnvBallEntityPlayer::AnimateThink(void)
 	}
 }
 
-void CEnvBallEntityPlayer::Spawn(void)
+void CEnvBallEntityPlayer::Spawn( void )
 {
 	Precache();
 
@@ -950,29 +954,29 @@ void CEnvBallEntityPlayer::Spawn(void)
 
 	pev->scale = 0.1;
 
-	SET_MODEL(ENT(pev), "sprites/comball.spr");
+	SET_MODEL( ENT( pev ), "sprites/comball.spr" );
 	m_maxFrame = (float)MODEL_FRAMES( pev->modelindex ) - 1;
 
 	pev->rendermode = kRenderTransAdd;
 	pev->renderamt = 150;
-	pev->rendercolor = Vector(252, 255, 215);
+	pev->rendercolor = Vector( 252, 255, 215 );
 	pev->iuser2 = 10; // bounce limit
 	pev->fuser1 = 5; // time limit: 5 seconds
 	pev->fuser2 = 200; // damage
 
 	float flSize = 4.0f;
-	UTIL_SetSize( pev, Vector( -flSize, -flSize, -flSize ), Vector( flSize, flSize, flSize ));
+	UTIL_SetSize( pev, Vector( -flSize, -flSize, -flSize ), Vector( flSize, flSize, flSize ) );
 
-	SetThink(&CEnvBallEntityPlayer::AnimateThink);
-	SetTouch(&CEnvBallEntityPlayer::BounceTouch);
+	SetThink( &CEnvBallEntityPlayer::AnimateThink );
+	SetTouch( &CEnvBallEntityPlayer::BounceTouch );
 
-	m_hOwner = Instance(pev->owner);
+	m_hOwner = Instance( pev->owner );
 	pev->dmgtime = gpGlobals->time; // keep track of when ball spawned
 	pev->nextthink = gpGlobals->time + 0.1;
 
 	Bounced = 0; // haven't bounced yet
 
-	EMIT_SOUND_DYN(edict(), CHAN_BODY, "comball/fly_loop.wav", 0.5, ATTN_NORM, 0, 100 + RANDOM_LONG(-5, 5));
+	EMIT_SOUND_DYN( edict(), CHAN_BODY, "comball/fly_loop.wav", 0.5, ATTN_NORM, 0, 100 + RANDOM_LONG( -5, 5 ) );
 
 	SetFadeDistance( 4000 ); // fadedistance
 	SetFlag( F_NOBACKCULL );
@@ -981,53 +985,53 @@ void CEnvBallEntityPlayer::Spawn(void)
 	pev->frame = 0;
 }
 
-void CEnvBallEntityPlayer::BounceTouch(CBaseEntity* pOther)
+void CEnvBallEntityPlayer::BounceTouch( CBaseEntity *pOther )
 {
-	if (FClassnameIs(pOther->pev, "env_ballentity") || FClassnameIs(pOther->pev, "shootball") || FClassnameIs(pOther->pev, "playerball")) // balls touched. this is gay. delete.
+	if( FClassnameIs( pOther->pev, "env_ballentity" ) || FClassnameIs( pOther->pev, "shootball" ) || FClassnameIs( pOther->pev, "playerball" ) ) // balls touched. this is gay. delete.
 	{
 		// when two balls collide, they execute the same code so should be both deleted
 		// however one of them always stays alive. so we need to use this "hack"
-		UTIL_Remove(pOther);
+		UTIL_Remove( pOther );
 		Explode();
 		return;
 	}
 
-	UTIL_DoSparkNoSound(pev, GetAbsOrigin());
+	UTIL_DoSparkNoSound( pev, GetAbsOrigin() );
 
 	pev->velocity *= 1.1;
 
 	Bounced++;
-	if (Bounced > pev->iuser2)
+	if( Bounced > pev->iuser2 )
 	{
 		Explode();
 		return;
 	}
 
-	switch (RANDOM_LONG(0, 1))
+	switch( RANDOM_LONG( 0, 1 ) )
 	{
-	case 0: EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "comball/bounce1.wav", 1, 0.4, 0, 100 + RANDOM_LONG(-10, 10)); break; // ...channel, wav file, volume, radius, flags, pitch
-	case 1: EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "comball/bounce2.wav", 1, 0.4, 0, 100 + RANDOM_LONG(-10, 10)); break;
+	case 0: EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/bounce1.wav", 1, 0.4, 0, 100 + RANDOM_LONG( -10, 10 ) ); break; // ...channel, wav file, volume, radius, flags, pitch
+	case 1: EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/bounce2.wav", 1, 0.4, 0, 100 + RANDOM_LONG( -10, 10 ) ); break;
 	}
 
 	TraceResult tr = UTIL_GetGlobalTrace();
 	Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3;
 
-	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
-		WRITE_BYTE(TE_DLIGHT);
-		WRITE_COORD(vecOrg.x);	// X
-		WRITE_COORD(vecOrg.y);	// Y
-		WRITE_COORD(vecOrg.z);	// Z
-		WRITE_BYTE(10);		// radius * 0.1
-		WRITE_BYTE(pev->rendercolor.x);		// r
-		WRITE_BYTE(pev->rendercolor.y);		// g
-		WRITE_BYTE(pev->rendercolor.z);		// b
-		WRITE_BYTE(10);		// time * 10
-		WRITE_BYTE(15);		// decay * 0.1
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg );
+		WRITE_BYTE( TE_DLIGHT );
+		WRITE_COORD( vecOrg.x );	// X
+		WRITE_COORD( vecOrg.y );	// Y
+		WRITE_COORD( vecOrg.z );	// Z
+		WRITE_BYTE( 10 );		// radius * 0.1
+		WRITE_BYTE( pev->rendercolor.x );		// r
+		WRITE_BYTE( pev->rendercolor.y );		// g
+		WRITE_BYTE( pev->rendercolor.z );		// b
+		WRITE_BYTE( 10 );		// time * 10
+		WRITE_BYTE( 15 );		// decay * 0.1
 		WRITE_BYTE( 100 ); // brightness
 		WRITE_BYTE( 0 ); // shadows
 	MESSAGE_END();
 
-	entvars_t* pevOwner = NULL;
+	entvars_t *pevOwner = NULL;
 
 	if( pev->owner )
 		pevOwner = VARS( pev->owner );
@@ -1065,7 +1069,7 @@ void CEnvBallEntityPlayer::BounceTouch(CBaseEntity* pOther)
 		{
 			if( pOther->edict() != pev->owner )
 			{
-				pOther->TakeDamage(pev, pevOwner, pev->fuser2, DMG_SHOCK);
+				pOther->TakeDamage( pev, pevOwner, pev->fuser2, DMG_SHOCK );
 				EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/bounce_hit.wav", 1, 0.4, 0, RANDOM_LONG( 90, 110 ) );
 				bStruckEntity = true;
 				return;
@@ -1088,7 +1092,7 @@ bool CEnvBallEntityPlayer::IsAttractiveTarget( CBaseEntity *pEntity )
 
 	if( pEntity->pev->flags & EF_NODRAW )
 		return false;
-	
+
 	if( !g_pGameRules->IsMultiplayer() ) // singleplayer
 	{
 		if( m_hOwner != NULL )
@@ -1126,7 +1130,7 @@ bool CEnvBallEntityPlayer::IsAttractiveTarget( CBaseEntity *pEntity )
 
 	// We must be able to hit them
 	TraceResult	tr;
-	UTIL_TraceLine( GetAbsOrigin(), pEntity->BodyTarget( GetAbsOrigin() ), dont_ignore_monsters, dont_ignore_glass, ENT(pev), &tr );
+	UTIL_TraceLine( GetAbsOrigin(), pEntity->BodyTarget( GetAbsOrigin() ), dont_ignore_monsters, dont_ignore_glass, ENT( pev ), &tr );
 
 	if( tr.flFraction < 1.0f && tr.pHit != pEntity->edict() )
 		return false;
@@ -1196,60 +1200,60 @@ void CEnvBallEntityPlayer::CorrectCourseTowardEnemy( void )
 	}
 }
 
-void CEnvBallEntityPlayer::Explode(void)
+void CEnvBallEntityPlayer::Explode( void )
 {
 	// light
 	TraceResult tr = UTIL_GetGlobalTrace();
 	Vector vecOrg = GetAbsOrigin() + tr.vecPlaneNormal * 3;
 
-	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg);
-		WRITE_BYTE(TE_DLIGHT);
-		WRITE_COORD(vecOrg.x);	// X
-		WRITE_COORD(vecOrg.y);	// Y
-		WRITE_COORD(vecOrg.z);	// Z
-		WRITE_BYTE(35);		// radius * 0.1
-		WRITE_BYTE(255);		// r			
-		WRITE_BYTE(255);		// g
-		WRITE_BYTE(255);		// b			
-		WRITE_BYTE(30);		// time * 10
-		WRITE_BYTE(30);		// decay * 0.1
+	MESSAGE_BEGIN( MSG_BROADCAST, gmsgTempEnt, vecOrg );
+		WRITE_BYTE( TE_DLIGHT );
+		WRITE_COORD( vecOrg.x );	// X
+		WRITE_COORD( vecOrg.y );	// Y
+		WRITE_COORD( vecOrg.z );	// Z
+		WRITE_BYTE( 35 );		// radius * 0.1
+		WRITE_BYTE( 255 );		// r			
+		WRITE_BYTE( 255 );		// g
+		WRITE_BYTE( 255 );		// b			
+		WRITE_BYTE( 30 );		// time * 10
+		WRITE_BYTE( 30 );		// decay * 0.1
 		WRITE_BYTE( 150 ); // brightness
 		WRITE_BYTE( 1 ); // shadows
 	MESSAGE_END();
 
 	// blast effect
-	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY, pev->origin);
-		WRITE_BYTE(TE_BEAMCYLINDER);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z);
-		WRITE_COORD(pev->origin.x);
-		WRITE_COORD(pev->origin.y);
-		WRITE_COORD(pev->origin.z + RANDOM_LONG(500, 1000)); // reach damage radius over .2 seconds
-		WRITE_SHORT(SpriteExplosion);
-		WRITE_BYTE(0); // startframe
-		WRITE_BYTE(0); // framerate
-		WRITE_BYTE(4); // life
-		WRITE_BYTE(16);  // width
-		WRITE_BYTE(0);   // noise
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(255);   // r, g, b
-		WRITE_BYTE(120); // brightness
-		WRITE_BYTE(0);		// speed
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY, pev->origin );
+		WRITE_BYTE( TE_BEAMCYLINDER );
+		WRITE_COORD( pev->origin.x );
+		WRITE_COORD( pev->origin.y );
+		WRITE_COORD( pev->origin.z );
+		WRITE_COORD( pev->origin.x );
+		WRITE_COORD( pev->origin.y );
+		WRITE_COORD( pev->origin.z + RANDOM_LONG( 500, 1000 ) ); // reach damage radius over .2 seconds
+		WRITE_SHORT( SpriteExplosion );
+		WRITE_BYTE( 0 ); // startframe
+		WRITE_BYTE( 0 ); // framerate
+		WRITE_BYTE( 4 ); // life
+		WRITE_BYTE( 16 );  // width
+		WRITE_BYTE( 0 );   // noise
+		WRITE_BYTE( 255 );   // r, g, b
+		WRITE_BYTE( 255 );   // r, g, b
+		WRITE_BYTE( 255 );   // r, g, b
+		WRITE_BYTE( 120 ); // brightness
+		WRITE_BYTE( 0 );		// speed
 	MESSAGE_END();
 
 	// sparks
-	Create("spark_shower", pev->origin, g_vecZero, NULL);
+	Create( "spark_shower", pev->origin, g_vecZero, NULL );
 
 	// damage
-	RadiusDamage(GetAbsOrigin(), pev, VARS(pev->owner), pev->fuser2, pev->fuser2 * 2.5, CLASS_PLAYER_ALLY, DMG_SHOCK);
+	RadiusDamage( GetAbsOrigin(), pev, VARS( pev->owner ), pev->fuser2, pev->fuser2 * 2.5, CLASS_PLAYER_ALLY, DMG_SHOCK );
 
-	UTIL_DoSparkNoSound(pev, pev->origin);
+	UTIL_DoSparkNoSound( pev, pev->origin );
 
-	UTIL_ScreenShake(GetAbsOrigin(), 10.0, 150.0, 1.0, 2000, true);
-	EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "comball/explosion.wav", 1, 0.3, 0, 100 + RANDOM_LONG(-10, 10));
+	UTIL_ScreenShake( GetAbsOrigin(), 10.0, 150.0, 1.0, 2000, true );
+	EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "comball/explosion.wav", 1, 0.3, 0, 100 + RANDOM_LONG( -10, 10 ) );
 
-	SetTouch(NULL);
-	UTIL_Remove(this);
+	SetTouch( NULL );
+	UTIL_Remove( this );
 }
