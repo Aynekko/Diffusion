@@ -3290,7 +3290,7 @@ void CBasePlayer::ManageDrone( void )
 				return;
 			}
 			
-			DroneDistance = (int)((m_hDrone->GetAbsOrigin() - GetAbsOrigin()).Length() * 0.0254f);
+			DroneDistance = (int)fUnitsToMeters( (m_hDrone->GetAbsOrigin() - GetAbsOrigin()).Length() );
 			DroneHealth = m_hDrone->pev->health;
 			DroneAmmo = m_hDrone->m_iCounter;
 

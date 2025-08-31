@@ -170,7 +170,7 @@ void CScreenEffects::DrawSpeedometer(void)
 	gEngfuncs.pTriAPI->End();
 
 	// kilometers
-	const float Distance = (gEngfuncs.GetLocalPlayer()->prevstate.origin - gEngfuncs.GetLocalPlayer()->curstate.origin).Length() * 0.01905f * 0.001f;
+	const float Distance = fUnitsToMeters( (gEngfuncs.GetLocalPlayer()->prevstate.origin - gEngfuncs.GetLocalPlayer()->curstate.origin).Length() ) * 0.001f;
 	float timedelta = g_fFrametime;
 	if( GET_MAX_CLIENTS() > 1 )
 		timedelta = gEngfuncs.GetLocalPlayer()->curstate.msg_time - gEngfuncs.GetLocalPlayer()->prevstate.msg_time;

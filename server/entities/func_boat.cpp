@@ -623,7 +623,7 @@ void CBoat::Drive( void )
 
 	// achievement
 	float Distance = (GetAbsOrigin() - PrevOrigin).Length();
-	Distance *= 0.01905f; // convert units to meters
+	Distance = fUnitsToMeters( Distance ); // convert units to meters
 	if( hDriver->pev->flags & FL_CLIENT )
 	{
 		CBasePlayer *plr = (CBasePlayer *)UTIL_PlayerByIndex( hDriver->entindex() );

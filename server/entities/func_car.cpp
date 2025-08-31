@@ -1763,7 +1763,7 @@ void CCar::Drive( void )
 	// achievement
 	float Distance = 0.0f;
 	Distance = (GetAbsOrigin() - PrevOrigin).Length();
-	Distance *= 0.01905f; // convert units to meters
+	Distance = fUnitsToMeters( Distance ); // convert units to meters
 	PrevOrigin = GetAbsOrigin();
 	if( hDriver->pev->flags & FL_CLIENT )
 	{
@@ -2619,7 +2619,7 @@ void CCar::Drive( void )
 
 	// unstick the car if this happens...
 	// stupid hack just to keep things playable because it can truly stick in a brush and it looks terrible
-	const float ExpectedDist = (pev->velocity * gpGlobals->frametime).Length() * 0.01905f; // predicted velocity next frame in meters
+	const float ExpectedDist = fUnitsToMeters( (pev->velocity * gpGlobals->frametime).Length() ); // predicted velocity next frame in meters
 	// we didn't make even a half of expected distance, likely stuck
 	if( (AbsCarSpeed > 100.0f) && (ExpectedDist > 0.01f) && (Distance < ExpectedDist * 0.5f) && (gpGlobals->time > StuckTime + 1) && Collision.IsNull() )
 	{

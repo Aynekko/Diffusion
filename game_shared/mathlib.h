@@ -372,6 +372,15 @@ inline float rsqrt( float number )
 	return y;
 }
 
+//=======================================================================================
+// diffusion: units/meters conversion
+// I use 1 unit equals to 0.01905 meters, or roughly 2 cm
+//=======================================================================================
+inline float fUnitsToMeters( float val )
+{
+	return val * 0.01905f;
+}
+
 // hermite basis function for smooth interpolation
 // Similar to Gain() above, but very cheap to call
 // value should be between 0 & 1 inclusive

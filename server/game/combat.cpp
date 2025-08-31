@@ -988,7 +988,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 					{
 						// calculate distance
 						// vuser1 is bolt's recorded spawn position
-						float CrossbowMeters = (GetAbsOrigin() - pevInflictor->vuser1).Length() * 0.01905f;
+						float CrossbowMeters = fUnitsToMeters( (GetAbsOrigin() - pevInflictor->vuser1).Length() );
 						// ALERT( at_aiconsole, "CrossbowMeters %f m\n", CrossbowMeters );
 						if( CrossbowMeters >= 25.0f )
 						{
