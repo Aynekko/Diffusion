@@ -108,6 +108,8 @@ int CHudStamina :: Draw(float flTime)
 	float cell_start_y = pos_y;
 	int cell;
 
+	pglEnable( GL_MULTISAMPLE_ARB );
+
 	for( cell = 0; cell < total_cells; cell++ )
 	{
 		if( cell >= stamina_val * 0.5f ) // draw grey cells
@@ -116,6 +118,8 @@ int CHudStamina :: Draw(float flTime)
 			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, a ) );
 		cell_start_x += cell_width + cell_margin;
 	}
+
+	pglDisable( GL_MULTISAMPLE_ARB );
 
 	// draw number
 	char number[5];

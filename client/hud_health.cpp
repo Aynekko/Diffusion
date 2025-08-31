@@ -174,6 +174,8 @@ int CHudHealthVisual :: Draw(float flTime)
 		GotHit = false;
 	}
 
+	pglEnable( GL_MULTISAMPLE_ARB );
+
 	float cell_start_x = pos_x + icon_size + 10;
 	float cell_start_y = pos_y;
 	int cell;
@@ -210,6 +212,8 @@ int CHudHealthVisual :: Draw(float flTime)
 			cell_start_x += cell_width + cell_margin;
 		}
 	}
+
+	pglDisable( GL_MULTISAMPLE_ARB );
 
 	// draw numbers
 	char numbers[16];
