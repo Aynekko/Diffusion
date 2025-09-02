@@ -572,7 +572,12 @@ void CFuncCarScript::ManagerThink( void )
 			m_iState = STATE_OFF;
 			pev->button = 0;
 			if( pCar )
-				pCar->hDriver = NULL;
+			{
+				if( FClassnameIs( pCar, "func_car" ) )
+					pCar->DeactivateSelfdrive();
+				else
+					pCar->hDriver = NULL;
+			}
 			SetThink( NULL );
 			DontThink();
 		}
@@ -638,12 +643,12 @@ void CFuncCarScript::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 				// posess the car
 				if( pCar != NULL )
 				{
-					if( FClassnameIs( pCar, "func_helicopter"))
+					if( FClassnameIs( pCar, "func_helicopter" ) )
 						pCar->SetThink( &CHelicopter::Drive );
 					else if( FClassnameIs( pCar, "func_boat" ) )
 						pCar->SetThink( &CBoat::Drive );
 					else
-						pCar->SetThink( &CCar::Drive );
+						pCar->ActivateSelfdrive();
 					
 					pCar->hDriver = this;
 					pCar->SetNextThink( 0 );
@@ -655,7 +660,12 @@ void CFuncCarScript::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 			m_iState = STATE_OFF;
 			pev->button = 0;
 			if( pCar )
-				pCar->hDriver = NULL;
+			{
+				if( FClassnameIs( pCar, "func_car" ) )
+					pCar->DeactivateSelfdrive();
+				else
+					pCar->hDriver = NULL;
+			}
 			SetThink( NULL );
 			DontThink();
 		}
