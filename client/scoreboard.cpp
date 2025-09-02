@@ -42,47 +42,7 @@ DECLARE_MESSAGE( m_Scoreboard, ScoreInfo );
 DECLARE_MESSAGE( m_Scoreboard, TeamInfo );
 DECLARE_MESSAGE( m_Scoreboard, TeamScore );
 
-int CHudScoreboard :: Init( void )
-{
-	gHUD.AddHudElem( this );
-
-	// Hook messages & commands here
-	HOOK_COMMAND( "+showscores", ShowScores );
-	HOOK_COMMAND( "-showscores", HideScores );
-
-	HOOK_MESSAGE( ScoreInfo );
-	HOOK_MESSAGE( TeamScore );
-	HOOK_MESSAGE( TeamInfo );
-
-	InitHUDData();
-
-	ypos_bottom = 0;
-
-	return 1;
-}
-
-int CHudScoreboard :: VidInit( void )
-{
-	VoicePic = LOAD_TEXTURE( "sprites/diffusion/voice_icon", NULL, 0, 0 );
-	boardA = 0.0f;
-	return 1;
-}
-
-void CHudScoreboard :: InitHUDData( void )
-{
-	m_iLastKilledBy = 0;
-	m_fLastKillTime = 0;
-	m_iPlayerNum = 0;
-	m_iNumTeams = 0;
-
-	m_iFlags &= ~HUD_ACTIVE;  // starts out inactive
-	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
-
-	memset( g_PlayerExtraInfo, 0, sizeof g_PlayerExtraInfo );
-	memset( g_TeamInfo, 0, sizeof g_TeamInfo );
-}
-
-/* 
+/*
 The scoreboard
 We have a minimum width of 1-320 - we could have the field widths scale with it?
 */
@@ -108,6 +68,69 @@ We have a minimum width of 1-320 - we could have the field widths scale with it?
 #define ROW_ROUNDING 7
 #define TXT_Y_OFFSET 6
 
+float ScoreBoardWidth = SCOREBOARD_WIDTH;
+float RowGap = ROW_GAP;
+float RowRangeMin = ROW_RANGE_MIN;
+float RowRangeMax = ROW_RANGE_MAX;
+float NameRangeMin = NAME_RANGE_MIN;
+float KillsRangeMin = KILLS_RANGE_MIN;
+float DeathsRangeMin = DEATHS_RANGE_MIN;
+float PingRangeMin = PING_RANGE_MIN;
+float PingRangeMax = PING_RANGE_MAX;
+float TxtYOffset = TXT_Y_OFFSET;
+float VoicePicSize = VOICE_PIC_SIZE;
+
+int CHudScoreboard :: Init( void )
+{
+	gHUD.AddHudElem( this );
+
+	// Hook messages & commands here
+	HOOK_COMMAND( "+showscores", ShowScores );
+	HOOK_COMMAND( "-showscores", HideScores );
+
+	HOOK_MESSAGE( ScoreInfo );
+	HOOK_MESSAGE( TeamScore );
+	HOOK_MESSAGE( TeamInfo );
+
+	InitHUDData();
+
+	ypos_bottom = 0;
+
+	return 1;
+}
+
+int CHudScoreboard :: VidInit( void )
+{
+	ScoreBoardWidth = SCOREBOARD_WIDTH * gHUD.fScale;
+	RowGap = ROW_GAP * gHUD.fScale;
+	RowRangeMin = ROW_RANGE_MIN * gHUD.fScale;
+	RowRangeMax = ROW_RANGE_MAX;
+	NameRangeMin = NAME_RANGE_MIN * gHUD.fScale;
+	KillsRangeMin = KILLS_RANGE_MIN * gHUD.fScale;
+	DeathsRangeMin = DEATHS_RANGE_MIN * gHUD.fScale;
+	PingRangeMin = PING_RANGE_MIN * gHUD.fScale;
+	PingRangeMax = PING_RANGE_MAX * gHUD.fScale;
+	TxtYOffset = TXT_Y_OFFSET * gHUD.fScale;
+	VoicePic = LOAD_TEXTURE( "sprites/diffusion/voice_icon", NULL, 0, 0 );
+	VoicePicSize = VOICE_PIC_SIZE * gHUD.fScale;
+	boardA = 0.0f;
+	return 1;
+}
+
+void CHudScoreboard :: InitHUDData( void )
+{
+	m_iLastKilledBy = 0;
+	m_fLastKillTime = 0;
+	m_iPlayerNum = 0;
+	m_iNumTeams = 0;
+
+	m_iFlags &= ~HUD_ACTIVE;  // starts out inactive
+	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
+
+	memset( g_PlayerExtraInfo, 0, sizeof g_PlayerExtraInfo );
+	memset( g_TeamInfo, 0, sizeof g_TeamInfo );
+}
+
 int CHudScoreboard :: Draw( float fTime )
 {
 	if( !m_iShowscoresHeld && !gHUD.m_iIntermission )
@@ -125,42 +148,42 @@ int CHudScoreboard :: Draw( float fTime )
 	// just sort the list on the fly
 	// list is sorted first by frags, then by deaths
 	float list_slot = 0;
-	int xpos_rel = (ScreenWidth - SCOREBOARD_WIDTH) / 2;
+	int xpos_rel = (ScreenWidth - ScoreBoardWidth) / 2;
 
 	// print the heading line
-	int ypos = ROW_RANGE_MIN + (list_slot * ROW_GAP) + ((ScreenHeight / 10) + 10);
-	int xpos = NAME_RANGE_MIN + xpos_rel;
+	int ypos = RowRangeMin + (list_slot * RowGap) + ((ScreenHeight / 10) + 10);
+	int xpos = NameRangeMin + xpos_rel;
 	int r = 255, g = 255, b = 255;
 	ScaleColors( r, g, b, boardA * 255 );
 
 	// diffusion - server name and map name (with background)
-	FillRoundedRGBA( xpos_rel, ypos - 65, SCOREBOARD_WIDTH, 50, 18, Vector4D( 0, 0, 0, 0.59f * boardA ) );
+	FillRoundedRGBA( xpos_rel, ypos - (50.0f * gHUD.fScale) - (15.0f * gHUD.fScale), ScoreBoardWidth, 50.0f * gHUD.fScale, 18, Vector4D( 0, 0, 0, 0.59f * boardA ) );
 	static char srvname[128];
 	Q_snprintf( srvname, sizeof( srvname ), "%s | %s", gHUD.m_szServerName, world->name );
-	DrawString( xpos, ypos - 50, srvname, r, g, b );
+	DrawString( xpos, ypos - (50 * gHUD.fScale), srvname, r, g, b );
 
 	// diffusion - table background
-	FillRoundedRGBA( xpos_rel, ypos - 10, SCOREBOARD_WIDTH, ypos_bottom, 18, Vector4D( 0, 0, 0, 0.59f * boardA ) ); // bottom border
+	FillRoundedRGBA( xpos_rel, ypos - 10, ScoreBoardWidth, ypos_bottom, 18, Vector4D( 0, 0, 0, 0.59f * boardA ) ); // bottom border
 
 	r = 255, g = 140, b = 0;
 	ScaleColors( r, g, b, boardA * 255 );
 
 	if( !gHUD.m_Teamplay ) 
-		DrawString( xpos, ypos + TXT_Y_OFFSET, "Player", r, g, b );
+		DrawString( xpos, ypos + TxtYOffset, "Player", r, g, b );
 	else
-		DrawString( xpos, ypos + TXT_Y_OFFSET, "Teams", r, g, b );
+		DrawString( xpos, ypos + TxtYOffset, "Teams", r, g, b );
 
 //	gHUD.DrawHudStringReverse( KILLS_RANGE_MAX + xpos_rel, ypos, 0, "Kills", 255, 140, 0 );
 //	gHUD.DrawHudString( DIVIDER_POS + xpos_rel, ypos, ScreenWidth, "/", 255, 140, 0 );
-	DrawString( KILLS_RANGE_MIN + xpos_rel, ypos + TXT_Y_OFFSET, "Kills", r, g, b );
-	DrawString( DEATHS_RANGE_MIN + xpos_rel, ypos + TXT_Y_OFFSET, "Deaths", r, g, b );
-	DrawString( PING_RANGE_MIN + xpos_rel, ypos + TXT_Y_OFFSET, "Ping", r, g, b );
+	DrawString( KillsRangeMin + xpos_rel, ypos + TxtYOffset, "Kills", r, g, b );
+	DrawString( DeathsRangeMin + xpos_rel, ypos + TxtYOffset, "Deaths", r, g, b );
+	DrawString( PingRangeMin + xpos_rel, ypos + TxtYOffset, "Ping", r, g, b );
 
 	list_slot += 1.2f;
-	ypos = ROW_RANGE_MIN + (list_slot * ROW_GAP) + ((ScreenHeight / 10) + 10);
-	xpos = NAME_RANGE_MIN + xpos_rel;
+	ypos = RowRangeMin + (list_slot * RowGap) + ((ScreenHeight / 10) + 10);
+	xpos = NameRangeMin + xpos_rel;
 
-	FillRGBA( xpos - 5, ypos, PING_RANGE_MAX - 5, 1, r, g, b, 255 );  // draw the separator line
+	FillRGBA( xpos - 5, ypos, PingRangeMax - 5, 1, r, g, b, 255 );  // draw the separator line
 	
 	list_slot += 0.4f;
 
@@ -255,13 +278,13 @@ int CHudScoreboard :: Draw( float fTime )
 		// draw out the best team
 		team_info_t *team_info = &g_TeamInfo[best_team];
 
-		ypos = ROW_RANGE_MIN + (list_slot * ROW_GAP) + ((ScreenHeight / 10) + 10);
+		ypos = RowRangeMin + (list_slot * RowGap) + ((ScreenHeight / 10) + 10);
 
 		// check we haven't drawn too far down
-		if( ypos > ROW_RANGE_MAX )  // don't draw to close to the lower border
+		if( ypos > RowRangeMax )  // don't draw to close to the lower border
 			break;
 
-		xpos = NAME_RANGE_MIN + xpos_rel;
+		xpos = NameRangeMin + xpos_rel;
 
 		r = 255, g = 225, b = 55; // draw the stuff kinda yellowish
 		ScaleColors( r, g, b, boardA * 255 );
@@ -269,27 +292,27 @@ int CHudScoreboard :: Draw( float fTime )
 		if( team_info->ownteam ) // if it is their team, draw the background different color
 		{
 			// overlay the background in blue, then draw the score text over it
-			FillRoundedRGBA( NAME_RANGE_MIN + xpos_rel - 5, ypos, PING_RANGE_MAX - 5, ROW_GAP, ROW_ROUNDING, Vector4D( 0.2f, 0.2f, 1.0f, 0.275f * boardA ) );
+			FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, Vector4D( 0.2f, 0.2f, 1.0f, 0.275f * boardA ) );
 		}
 
 		// draw their name (left to right)
-		DrawString( xpos, ypos + TXT_Y_OFFSET, team_info->name, r, g, b );
+		DrawString( xpos, ypos + TxtYOffset, team_info->name, r, g, b );
 
 		r = 25, g = 255, b = 25;
 		ScaleColors( r, g, b, boardA * 255 );
 
 		// draw kills (left to right)
-		gHUD.DrawHudNumberString( xpos_rel + KILLS_RANGE_MIN, ypos + TXT_Y_OFFSET, 0, team_info->frags, 25, 255, 25, true );
+		gHUD.DrawHudNumberString( xpos_rel + KillsRangeMin, ypos + TxtYOffset, 0, team_info->frags, 25, 255, 25, true );
 
 		// draw deaths
-		gHUD.DrawHudNumberString( xpos_rel + DEATHS_RANGE_MIN, ypos + TXT_Y_OFFSET, 0, team_info->deaths, 255, 25, 25, true );
+		gHUD.DrawHudNumberString( xpos_rel + DeathsRangeMin, ypos + TxtYOffset, 0, team_info->deaths, 255, 25, 25, true );
 
 		// draw ping & packetloss
 		static char buf[64];
 		Q_snprintf( buf, sizeof( buf ), "%d", team_info->ping );
 		UnpackRGB( r, g, b, RGB_YELLOWISH );
 		ScaleColors( r, g, b, boardA * 255 );
-		DrawStringReverse( xpos, ypos + TXT_Y_OFFSET, buf, r, g, b );
+		DrawStringReverse( xpos, ypos + TxtYOffset, buf, r, g, b );
 #if 0
 		// Packetloss removed on Kelly 'shipping nazi' Bailey's orders
 		Q_snprintf( buf, sizeof( buf ), " %d", team_info->packetloss );
@@ -345,13 +368,13 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 		// draw out the best player
 		hud_player_info_t *pl_info = &g_PlayerInfoList[best_player];
 
-		int ypos = ROW_RANGE_MIN + (list_slot * ROW_GAP) + ((ScreenHeight / 10) + 10);
+		int ypos = RowRangeMin + (list_slot * RowGap) + ((ScreenHeight / 10) + 10);
 
 		// check we haven't drawn too far down
-		if( ypos > ROW_RANGE_MAX )  // don't draw too close to the lower border
+		if( ypos > RowRangeMax )  // don't draw too close to the lower border
 			break;
 
-		int xpos = NAME_RANGE_MIN + xpos_rel;
+		int xpos = NameRangeMin + xpos_rel;
 		int r = 255, g = 255, b = 255;
 		ScaleColors( r, g, b, boardA * 255 );
 
@@ -361,33 +384,33 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 			{
 				// green is the suicide color? i wish this could do grey...
 				// diffusion - it can now! :)
-				FillRoundedRGBA( NAME_RANGE_MIN + xpos_rel - 5, ypos, PING_RANGE_MAX - 5, ROW_GAP, ROW_ROUNDING, Vector4D( 0.5f, 0.5f, 0.5f, 0.275f * boardA ) );
+				FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, Vector4D( 0.5f, 0.5f, 0.5f, 0.275f * boardA ) );
 			}
 			else
 			{
 				// Highlight the killers name - overlay the background in red,  then draw the score text over it
-				FillRoundedRGBA( NAME_RANGE_MIN + xpos_rel - 5, ypos, PING_RANGE_MAX - 5, ROW_GAP, ROW_ROUNDING, Vector4D( 1.0f, 0, 0, (boardA * 15.0f * (float)(m_fLastKillTime - gHUD.m_flTime )) / 255.0f ) );
+				FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, Vector4D( 1.0f, 0, 0, (boardA * 15.0f * (float)(m_fLastKillTime - gHUD.m_flTime )) / 255.0f ) );
 			}
 		}
 		else if( pl_info->thisplayer ) // if it is their name, draw it a different color
 		{
 			// overlay the background in blue, then draw the score text over it
-			FillRoundedRGBA( NAME_RANGE_MIN + xpos_rel - 5, ypos, PING_RANGE_MAX - 5, ROW_GAP, ROW_ROUNDING, Vector4D( 0.2f, 0.2f, 1.0f, 0.275f * boardA ) );
+			FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, Vector4D( 0.2f, 0.2f, 1.0f, 0.275f * boardA ) );
 		}
 
 		// draw their name (left to right)
-		DrawString( xpos + nameoffset, ypos + TXT_Y_OFFSET, pl_info->name, r, g, b );
+		DrawString( xpos + nameoffset, ypos + TxtYOffset, pl_info->name, r, g, b );
 
 		// if they are talking, draw the small icon right before the "kills" column
 		if( g_PlayerExtraInfo[best_player].isTalking )
 		{
-			int voice_pic_x = xpos_rel + KILLS_RANGE_MIN - VOICE_PIC_SIZE - 10;
-			int voice_pic_y = ypos + TXT_Y_OFFSET;
+			int voice_pic_x = xpos_rel + KillsRangeMin - VoicePicSize - 10;
+			int voice_pic_y = ypos + TxtYOffset;
 			GL_Bind( 0, VoicePic );
 			gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 			gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f * boardA );
 			gEngfuncs.pTriAPI->Begin( TRI_QUADS );		
-			DrawQuad( voice_pic_x, voice_pic_y, voice_pic_x + VOICE_PIC_SIZE, voice_pic_y + VOICE_PIC_SIZE );
+			DrawQuad( voice_pic_x, voice_pic_y, voice_pic_x + VoicePicSize, voice_pic_y + VoicePicSize );
 			gEngfuncs.pTriAPI->End();
 		}
 
@@ -395,13 +418,13 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 		ScaleColors( r, g, b, boardA * 255 );
 
 		// draw kills (left to right)
-		gHUD.DrawHudNumberString( xpos_rel + KILLS_RANGE_MIN, ypos + TXT_Y_OFFSET, 0, g_PlayerExtraInfo[best_player].frags, r, g, b, true );
+		gHUD.DrawHudNumberString( xpos_rel + KillsRangeMin, ypos + TxtYOffset, 0, g_PlayerExtraInfo[best_player].frags, r, g, b, true );
 
 		r = 255, g = 25, b = 25;
 		ScaleColors( r, g, b, boardA * 255 );
 
 		// draw deaths
-		gHUD.DrawHudNumberString( xpos_rel + DEATHS_RANGE_MIN, ypos + TXT_Y_OFFSET, 0, g_PlayerExtraInfo[best_player].deaths, r, g, b, true );
+		gHUD.DrawHudNumberString( xpos_rel + DeathsRangeMin, ypos + TxtYOffset, 0, g_PlayerExtraInfo[best_player].deaths, r, g, b, true );
 
 		r = 255, g = 255, b = 255;
 		ScaleColors( r, g, b, boardA * 255 );
@@ -412,7 +435,7 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 			Q_snprintf( buf, sizeof( buf ), "BOT" );
 		else
 			Q_snprintf( buf, sizeof( buf ), "%d", g_PlayerInfoList[best_player].ping );
-		DrawString( xpos_rel + PING_RANGE_MIN, ypos + TXT_Y_OFFSET, buf, r, g, b );
+		DrawString( xpos_rel + PingRangeMin, ypos + TxtYOffset, buf, r, g, b );
 #if 0		
 		// Packetloss removed on Kelly 'shipping nazi' Bailey's orders
 		if( g_PlayerInfoList[best_player].packetloss >= 63 )
@@ -430,7 +453,7 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 		list_slot++;
 	}
 
-	ypos_bottom = list_slot * ROW_GAP + 20;
+	ypos_bottom = list_slot * RowGap + 20;
 
 	return list_slot;
 }

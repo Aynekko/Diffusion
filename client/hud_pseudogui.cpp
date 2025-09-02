@@ -17,6 +17,12 @@ The texts are taken from titles.txt or feeded by MOTD from server.
 
 char Note[255];
 float active_button_alpha = 0;
+float text_start_x = 0;
+float text_start_y = 0;
+int text_frame_width = 0;
+const char *BtnText = NULL;
+int BtnTextWidth;
+
 #define FRAME_WIDTH 666
 #define FRAME_HEIGHT 666
 #define BUTTON_HEIGHT 50
@@ -33,6 +39,7 @@ void CPseudoGUI::CloseWindow( bool mouse )
 	
 	// close the window
 	m_iFlags &= ~HUD_ACTIVE;
+	curText[0] = '\0';
 	m_szMOTD[0] = '\0'; // terminate motd too
 }
 
@@ -60,6 +67,7 @@ int CPseudoGUI::Init( void )
 {
 	HOOK_MESSAGE( ShowNote );
 	m_szMOTD[0] = '\0';
+	curText[0] = '\0';
 	gHUD.AddHudElem( this );
 	return 1;
 }
@@ -69,11 +77,12 @@ int CPseudoGUI::VidInit( void )
 	m_iFlags = 0;
 	active_button_alpha = 0;
 	m_szMOTD[0] = '\0';
+	curText[0] = '\0';
 	scrolled_lines = 0;
 
 	// init frame
-	rFrame.w = FRAME_WIDTH;
-	rFrame.h = FRAME_HEIGHT;
+	rFrame.w = FRAME_WIDTH * gHUD.fScale;
+	rFrame.h = FRAME_HEIGHT * gHUD.fScale;
 	rFrame.x = (ScreenWidth / 2) - (rFrame.w / 2);
 	rFrame.y = (ScreenHeight / 2) - (rFrame.h / 2);
 	rFrame.r = rFrame.g = rFrame.b = 80.f / 255.f;
@@ -81,9 +90,33 @@ int CPseudoGUI::VidInit( void )
 
 	// init Close button
 	rClose.w = rFrame.w * 0.5f;
-	rClose.h = BUTTON_HEIGHT;
+	rClose.h = BUTTON_HEIGHT * gHUD.fScale;
 	rClose.x = rFrame.x + (rFrame.w / 2) - (rClose.w / 2);
-	rClose.y = (rFrame.y + rFrame.h) - rClose.h - 20; // frame bottom - button height - 20
+	rClose.y = (rFrame.y + rFrame.h) - rClose.h - 20 * gHUD.fScale; // frame bottom - button height - 20
+	client_textmessage_t *MsgClose = TextMessageGet( "BTTN_CLOSE" );
+	BtnText = NULL;
+	if( MsgClose )
+	{
+		// we need to count the length to figure out the coordinates...
+		BtnText = MsgClose->pMessage;
+		BtnTextWidth = 0;
+		while( *BtnText )
+		{
+			if( *BtnText == '\n' )
+				break;
+			else
+			{
+				unsigned char c = *BtnText;
+				BtnTextWidth += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+			}
+
+			BtnText++;
+		}
+
+		BtnText = MsgClose->pMessage;
+		rClose.w = BtnTextWidth + 300 * gHUD.fScale;
+		rClose.x = rFrame.x + (rFrame.w / 2) - (rClose.w / 2);
+	}
 	return 1;
 }
 
@@ -98,11 +131,112 @@ int CPseudoGUI::MsgFunc_ShowNote( const char *pszName, int iSize, void *pbuf )
 	return 1;
 }
 
+//==============================================================================
+// setup the message here to not do some calculations every frame
+// this can also be called from motd.cpp
+//==============================================================================
 void CPseudoGUI::Enable( void )
 {
+	// is it MOTD?
+	if( m_szMOTD[0] != '\0' )
+	{
+		strcpy_s( curText, m_szMOTD );
+	}
+	else
+	{
+		client_textmessage_t *tmp = TextMessageGet( Note );
+		if( !tmp )
+		{
+			ConPrintf( "^1Error:^7 Couldn't get message \"%s\" from titles.txt\n", Note );
+			return;
+		}
+
+		strcpy_s( curText, tmp->pMessage );
+	}
+
+	// Count lines
+	num_lines = 1;
+	const char *tmp_text = curText;
+	int width = 0;
+	int totaltextWidth = 0;
+
+	while( *tmp_text )
+	{
+		if( *tmp_text == '\n' )
+		{
+			num_lines++;
+			if( width > totaltextWidth )
+				totaltextWidth = width;
+			width = 0;
+		}
+		else
+		{
+			unsigned char c = *tmp_text; // note: this is important! always use this, don't just put *tmp_text into TextMessageDrawChar, it won't get width correctly!
+			width += TextMessageDrawChar( -1, -1, c, 0, 0, 0 );
+		}
+		tmp_text++;
+	}
+	
+	totaltextWidth += 5; // add a bit
+
+	border = 60 * gHUD.fScale;
+	text_start_x = rFrame.x + border;
+	text_start_y = rFrame.y + border;
+	text_frame_width = rFrame.w - border - border;
+
+	// re-init the frame if text is wider
+	if( totaltextWidth > text_frame_width )
+	{
+		float new_frame_width = border + totaltextWidth + border;
+		rFrame.w = new_frame_width;
+		rFrame.h = FRAME_HEIGHT * gHUD.fScale;
+		rFrame.x = (ScreenWidth / 2) - (rFrame.w / 2);
+		rFrame.y = (ScreenHeight / 2) - (rFrame.h / 2);
+		rFrame.r = rFrame.g = rFrame.b = 80.f / 255.f;
+		rFrame.a = 0.8f;
+
+		// init Close button
+		rClose.w = rFrame.w * 0.5f;
+		rClose.h = BUTTON_HEIGHT * gHUD.fScale;
+		rClose.x = rFrame.x + (rFrame.w / 2) - (rClose.w / 2);
+		rClose.y = (rFrame.y + rFrame.h) - rClose.h - 20 * gHUD.fScale; // frame bottom - button height - 20
+
+		client_textmessage_t *MsgClose = TextMessageGet( "BTTN_CLOSE" );
+		BtnText = NULL;
+		if( MsgClose )
+		{
+			// we need to count the length to figure out the coordinates...
+			BtnText = MsgClose->pMessage;
+			BtnTextWidth = 0;
+			while( *BtnText )
+			{
+				if( *BtnText == '\n' )
+					break;
+				else
+				{
+					unsigned char c = *BtnText;
+					BtnTextWidth += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+				}
+
+				BtnText++;
+			}
+
+			BtnText = MsgClose->pMessage;
+			rClose.w = BtnTextWidth + 300 * gHUD.fScale;
+			rClose.x = rFrame.x + (rFrame.w / 2) - (rClose.w / 2);
+		}
+
+		text_start_x = rFrame.x + border;
+		text_start_y = rFrame.y + border;
+		text_frame_width = rFrame.w - border - border;
+	}
+
 	m_iFlags |= HUD_ACTIVE;
 	active_button_alpha = 0;
 	scrolled_lines = 0;
+
+	// set cursor position to a plausible place
+	gEngfuncs.pfnSetMousePos( gEngfuncs.GetWindowCenterX(), gEngfuncs.GetWindowCenterY() + ScreenHeight * 0.15f );
 }
 
 int CPseudoGUI::Draw( float flTime )
@@ -114,31 +248,24 @@ int CPseudoGUI::Draw( float flTime )
 	if( !gHUD.m_Cursor.GetMousePosition() )
 		return 1;
 
+	if( curText[0] == '\0' )
+		return 1;
+
 	// draw darken frame
 	FillRoundedRGBA( rFrame.x, rFrame.y, rFrame.w, rFrame.h, 20, Vector4D( rFrame.r, rFrame.g, rFrame.b, rFrame.a ) );
 
-	const float text_start_x = rFrame.x + rFrame.w * 0.1f;
-	const float text_start_y = rFrame.y + rFrame.h * 0.1f;
-	const int text_frame_width = rFrame.w - ((text_start_x - rFrame.x - 15) * 2.0f);
-
 	// draw black background for text
-	gEngfuncs.pfnFillRGBABlend( text_start_x - 15, text_start_y - 15, text_frame_width, FRAME_HEIGHT - BUTTON_HEIGHT * 3, 0, 0, 0, 100 );
-	gEngfuncs.pfnFillRGBABlend( text_start_x - 10, text_start_y - 10, text_frame_width - 10, FRAME_HEIGHT - 10 - BUTTON_HEIGHT * 3, 0, 0, 0, 100 );
+	const float bord_from_below = rClose.h + 40 * gHUD.fScale;
+	const float bord1 = 15 * gHUD.fScale;
+	gEngfuncs.pfnFillRGBABlend( text_start_x - bord1, text_start_y - bord1, text_frame_width + bord1 * 2.0f, rFrame.h - border - bord_from_below + bord1, 0, 0, 0, 100 );
+	const float bord2 = 10 * gHUD.fScale;
+	gEngfuncs.pfnFillRGBABlend( text_start_x - bord2, text_start_y - bord2, text_frame_width + bord2 * 2.0f, rFrame.h - border - bord_from_below + bord2 * 0.5f, 0, 0, 0, 100 );
 
 	// draw text
-	// is it MOTD?
-	if( m_szMOTD[0] != '\0' )
-	{
-		client_textmessage_t MOTD;
-		MOTD.pMessage = m_szMOTD;
-		MOTD.r1 = MOTD.g1 = MOTD.b1 = 255;
-		MessageDraw( &MOTD, text_start_x, text_start_y );
-	}
-	else // it's a note
-		MessageDraw( TextMessageGet( Note ), text_start_x, text_start_y );
+	MessageDraw( curText, text_start_x, text_start_y );
 
 	// draw "Close" button
-	rClose.r = rClose.g = rClose.b = 25.f / 255.f;
+	rClose.r = rClose.g = rClose.b = 0.1f;// 25 / 255;
 	rClose.a = 0.75f;
 
 	// inactive button
@@ -150,8 +277,8 @@ int CPseudoGUI::Draw( float flTime )
 	else
 		active_button_alpha = CL_UTIL_Approach( 0.0f, active_button_alpha, 10 * g_fFrametime );
 
-	rClose.r = 70.f / 255.f;
-	rClose.g = 169.f / 255.f;
+	rClose.r = 0.275f;// 70 / 255;
+	rClose.g = 0.663f;// 169 / 255;
 	rClose.b = 1.0f;
 	rClose.a = active_button_alpha;
 
@@ -159,26 +286,8 @@ int CPseudoGUI::Draw( float flTime )
 		FillRoundedRGBA( rClose.x, rClose.y, rClose.w, rClose.h, 10, Vector4D( rClose.r, rClose.g, rClose.b, rClose.a ) );
 
 	// draw "close" text
-	char bttn_close[12];
-	sprintf_s( bttn_close, "BTTN_CLOSE" );
-	client_textmessage_t *MsgClose = TextMessageGet( bttn_close );
-	if( MsgClose )
-	{
-		// we need to count the length to figure out the coordinates...
-		const char *pText = MsgClose->pMessage;
-		int width = 0;
-		while( *pText )
-		{
-			if( *pText == '\n' )
-				break;
-			else
-				width += gHUD.m_scrinfo.charWidths[*pText];
-
-			pText++;
-		}
-
-		MessageDraw( MsgClose, rClose.x + (rClose.w / 2) - (width / 2), rClose.y + (rClose.h / 2) - (gHUD.m_scrinfo.iCharHeight / 2) );
-	}
+	if( BtnText )
+		DrawString( rClose.x + (rClose.w / 2) - (BtnTextWidth / 2), rClose.y + (rClose.h / 2) - (gHUD.m_scrinfo.iCharHeight / 2), BtnText, 255, 255, 255 );
 
 	// draw cursor last
 	gHUD.m_Cursor.DrawCursor();
@@ -187,114 +296,82 @@ int CPseudoGUI::Draw( float flTime )
 }
 
 // basically a copy-paste from hudmessages
-void CPseudoGUI::MessageDraw( client_textmessage_t *pMessage, int x, int y )
+void CPseudoGUI::MessageDraw( const char *pText, int x, int y )
 {
-	if( !pMessage )
-		return;
-
-	int i, j, length, width;
-	const char *pText;
+	int i, j;
 	const char *pLineStart;
-	message_parms_t m_parms;
-
-	pText = pMessage->pMessage;
-	// Count lines
-	m_parms.lines = 1;
-	m_parms.pMessage = pMessage;
-	length = 0;
-	width = 0;
-	m_parms.totalWidth = 0;
-
-	while( *pText )
-	{
-		if( *pText == '\n' )
-		{
-			m_parms.lines++;
-			if( width > m_parms.totalWidth )
-				m_parms.totalWidth = width;
-			width = 0;
-		}
-		else
-			width += gHUD.m_scrinfo.charWidths[*pText];
-		pText++;
-		length++;
-	}
-
-	m_parms.length = length;
-	m_parms.totalHeight = (m_parms.lines * gHUD.m_scrinfo.iCharHeight);
-
-	int text_end_pos = (ScreenHeight / 2) - (FRAME_HEIGHT / 2) + FRAME_HEIGHT - BUTTON_HEIGHT * 3;
-	int text_start_pos = y;
-	bool enable_scrollbar = (m_parms.totalHeight > (text_end_pos - text_start_pos)) && (m_parms.lines > 5); // hack to understand that it's not a button :D
+	const int totalHeight = (num_lines * gHUD.m_scrinfo.iCharHeight);
+	const int text_end_pos = (ScreenHeight / 2) - (rFrame.h / 2) + rFrame.h - (rClose.h * 3) + gHUD.m_scrinfo.iCharHeight;
+	const int text_start_pos = y;
+	const bool enable_scrollbar = (totalHeight > (text_end_pos - text_start_pos));
 	int lines_below = 0;
+	int tmp_y, tmp_x;
 
 	if( enable_scrollbar )
 	{
 		// we need to know how many lines went below the allowed drawing position
-		lines_below = (m_parms.totalHeight - (text_end_pos - text_start_pos)) / gHUD.m_scrinfo.iCharHeight;
-		scrolled_lines = bound( 0, scrolled_lines, lines_below );
-		m_parms.y = y - scrolled_lines * gHUD.m_scrinfo.iCharHeight;
+		lines_below = (totalHeight - (text_end_pos - text_start_pos)) / gHUD.m_scrinfo.iCharHeight;
+		scrolled_lines = bound( 0, scrolled_lines, lines_below - 1 );
+		tmp_y = y - scrolled_lines * gHUD.m_scrinfo.iCharHeight;
 	}
 	else
-		m_parms.y = y;
+		tmp_y = y;
 
-	pText = pMessage->pMessage;
+	const char *tmp_text = pText;
 
-	for( i = 0; i < m_parms.lines; i++ )
+	int lineLength = 0;
+
+	for( i = 0; i < num_lines; i++ )
 	{
 		if( enable_scrollbar )
 		{
-			if( i > m_parms.lines - lines_below + scrolled_lines )
+			if( i > num_lines - lines_below + scrolled_lines )
 				break;
 		}
 		
-		m_parms.lineLength = 0;
-		m_parms.width = 0;
-		pLineStart = pText;
-		while( *pText && *pText != '\n' )
+		lineLength = 0;
+		pLineStart = tmp_text;
+		while( *tmp_text && *tmp_text != '\n' )
 		{
-			unsigned char c = *pText;
-		//	m_parms.width += gHUD.m_scrinfo.charWidths[c];
-			m_parms.width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // thx to a1batross for idea (not ideal, but it will have to do...)
-			m_parms.lineLength++;
-			pText++;
+			unsigned char c = *tmp_text;
+			lineLength++;
+			tmp_text++;
 		}
 
-		pText++; // Skip LF
-
-		m_parms.x = x;
+		tmp_text++; // Skip LF
+		tmp_x = x;
 
 		// if we scrolled down, we don't draw text lines above the allowed zone - skip
 		if( enable_scrollbar && i < scrolled_lines )
 		{
-			m_parms.y += gHUD.m_scrinfo.iCharHeight;
+			tmp_y += gHUD.m_scrinfo.iCharHeight;
 			continue;
 		}
 
-		for( j = 0; j < m_parms.lineLength; j++ )
+		for( j = 0; j < lineLength; j++ )
 		{
-			m_parms.text = (unsigned char)pLineStart[j];
-			int next = m_parms.x;
+			unsigned char text = (unsigned char)pLineStart[j];
+			int next = tmp_x;
 
-			if( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
-				next += TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, pMessage->r1, pMessage->g1, pMessage->b1 );
-			m_parms.x = next;
+			if( tmp_x >= 0 && tmp_y >= 0 && next <= ScreenWidth )
+				next += TextMessageDrawChar( tmp_x, tmp_y, text, 255, 255, 255 );
+			tmp_x = next;
 		}
-		m_parms.y += gHUD.m_scrinfo.iCharHeight;
+		tmp_y += gHUD.m_scrinfo.iCharHeight;
 	}
 
 	if( enable_scrollbar && lines_below > 0 )
 	{
-		const int sbar_x = (ScreenWidth / 2) - (FRAME_WIDTH / 2) + (FRAME_WIDTH - 40);
-		const int sbar_w = 20;
-		const int sbar_h = (text_end_pos - text_start_pos);
-		FillRoundedRGBA( sbar_x, y, sbar_w, sbar_h, 2, Vector4D( 25.0f / 255.0f, 25.0f / 255.0f, 25.0f / 255.0f, 0.8f ) );
+		const float sbar_w = 20 * gHUD.fScale;
+		const float sbar_x = rFrame.x + rFrame.w - ((border - ( 15 * gHUD.fScale )) * 0.5f) - (sbar_w * 0.5f);
+		const float sbar_h = (text_end_pos - text_start_pos) + gHUD.m_scrinfo.iCharHeight;
+		FillRoundedRGBA( sbar_x, y, sbar_w, sbar_h, 2, Vector4D( 0.1f, 0.1f, 0.1f, 0.8f ) );
 
 		// scrollbar handle
-		const int handle_x = sbar_x;
-		const int handle_y = y + ((sbar_h / m_parms.lines) * scrolled_lines);
-		const int handle_h = sbar_h - ((sbar_h / m_parms.lines) * lines_below);
+		const float handle_x = sbar_x;
+		const float handle_y = y + ((sbar_h / num_lines) * scrolled_lines);
+		const float handle_h = sbar_h - ((sbar_h / num_lines) * (lines_below - 1));
 
-		FillRoundedRGBA( handle_x, handle_y, sbar_w, handle_h, 2, Vector4D( 125.0f / 255.0f, 125.0f / 255.0f, 125.0f / 255.0f, 0.8f ) );
+		FillRoundedRGBA( handle_x, handle_y, sbar_w, handle_h, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.8f ) );
 	}
 }

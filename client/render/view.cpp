@@ -175,6 +175,7 @@ cvar_t *r_blur_strength; // only horizontal blur
 cvar_t *r_shadowquality;
 cvar_t *r_mirrorquality;
 cvar_t *r_testdlight;
+cvar_t *hud_fontscale;
 
 cvar_t	v_iyaw_cycle = { "v_iyaw_cycle", "2", 0, 2 };
 cvar_t	v_iroll_cycle = { "v_iroll_cycle", "0.5", 0, 0.5 };
@@ -358,7 +359,7 @@ void V_Init( void )
 	vid_gamma = CVAR_GET_POINTER( "gamma" );
 	vid_brightness = CVAR_GET_POINTER( "brightness" );
 	r_polyoffset = CVAR_GET_POINTER( "gl_polyoffset" );
-
+	hud_fontscale = CVAR_GET_POINTER( "hud_fontscale" );
 	r_fullbright = CVAR_GET_POINTER( "r_fullbright" );
 	r_drawentities = CVAR_GET_POINTER( "r_drawentities" );
 	r_lighting_modulate = CVAR_GET_POINTER( "r_lighting_modulate" );

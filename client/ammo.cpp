@@ -1069,6 +1069,8 @@ int CHudAmmo::Draw( float flTime )
 	pos_x -= gHUD.fCenteredPadding;
 	float pos_y = ScreenHeight - (75 * gHUD.fScale); // same as hud_health
 
+	pglEnable( GL_MULTISAMPLE_ARB );
+
 	// Does weapon have any ammo at all?
 	if( m_pWeapon->iAmmoType > 0 )
 	{
@@ -1143,24 +1145,14 @@ int CHudAmmo::Draw( float flTime )
 			{
 				float line_pos_x = pos_x + 10;
 				float line_pos_y = cell_start_y + cell_height + 5;
-				float line_h = 5 * gHUD.fScale;
+				float line_h = 7.5f * gHUD.fScale;
+				float ammo_count_width = 3 * gHUD.fScale;
 
-				if( bDrawOfflineAmmo )
-				{
-					FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - 28, line_h, 2, Vector4D( 1.0f, 0.25f, 0.25f, OFFLINEFlashAlphaAmmo / 255.0f ) );
-				}
-				else
-				{
-					// draw the full bar (dark)
-					FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - 28, line_h, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
-					// draw the bar of actual ammo on top of it
-					FillRoundedRGBA( line_pos_x, line_pos_y, ((((float)total_cells_width - 28) / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType )), line_h, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
-				}
 				char ammo[8];
 				if( !bDrawOfflineAmmo )
 				{
 					sprintf_s( ammo, "%i", gWR.CountAmmo( pw->iAmmoType ) );
-					DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, ammo, 70, 169, 255 );
+					ammo_count_width += DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, ammo, 70, 169, 255 );
 				}
 				else
 				{
@@ -1168,9 +1160,21 @@ int CHudAmmo::Draw( float flTime )
 					int g = 0;
 					int b = 0;
 					ScaleColors( r, g, b, (int)OFFLINEFlashAlphaAmmo );
-					DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, "000", r, g, b );
+					ammo_count_width += DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, "000", r, g, b );
 				}
-				
+
+				// draw the line to the left of the ammo count
+				if( bDrawOfflineAmmo )
+				{
+					FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - ammo_count_width, line_h, 2, Vector4D( 1.0f, 0.25f, 0.25f, OFFLINEFlashAlphaAmmo / 255.0f ) );
+				}
+				else
+				{
+					// draw the full bar (dark)
+					FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - ammo_count_width, line_h, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+					// draw the bar of actual ammo on top of it
+					FillRoundedRGBA( line_pos_x, line_pos_y, ((((float)total_cells_width - ammo_count_width) / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType )), line_h, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+				}
 			}
 		}
 		else // old code (left by Camblu request)
@@ -1270,6 +1274,8 @@ int CHudAmmo::Draw( float flTime )
 			}
 		}
 	}
+
+	pglDisable( GL_MULTISAMPLE_ARB );
 
 	if( cl_oldammohud->value <= 0 )
 	{

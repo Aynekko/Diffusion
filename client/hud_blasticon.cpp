@@ -93,7 +93,7 @@ int CHudBlastIcons::Draw( float flTime )
 	//====================
 	if( BlastAbilityLVL > 0 )
 	{
-		x += (ScreenWidth / 32) + (360 * gHUD.fScale);
+		x += ((ScreenWidth / 32) + 360) * gHUD.fScale;
 
 		if( BlastChargesReady > 0 )
 		{

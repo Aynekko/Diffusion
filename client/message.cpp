@@ -288,7 +288,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 
 		while( *pText && *pText != '\n' )
 		{
-			unsigned char c = *pText;
+			unsigned char c = *pText; // note: this is important! always use this, don't just put *pText into TextMessageDrawChar, it won't get width correctly!
 		//	m_parms.width += gHUD.m_scrinfo.charWidths[c];
 			m_parms.width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // thx to a1batross for idea (not ideal, but it will have to do...)
 			m_parms.lineLength++;

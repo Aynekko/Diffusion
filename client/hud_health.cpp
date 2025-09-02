@@ -81,7 +81,7 @@ void CHudHealthVisual::DrawAliceHealth( void )
 	const float picsizex = 152 * 0.65f * gHUD.fScale * 0.75f;
 	const float picsizey = 500 * 0.65f * gHUD.fScale * 0.75f;
 	const float xpos = 35;
-	const float y = ScreenHeight - 500 * gHUD.fScale;
+	const float y = ScreenHeight - 450 * gHUD.fScale;
 
 	if( !bAliceDrawHealth )
 	{

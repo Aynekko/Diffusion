@@ -164,6 +164,9 @@ void CHud::SetupScale( void )
 		if( fCenteredPadding > (float)ScreenWidth * 0.2f )
 			fCenteredPadding = (float)ScreenWidth * 0.2f;
 	}
+
+	// keep it automatic
+	hud_fontscale->value = fScale;
 }
 
 void CHud :: VidInit( void )

@@ -47,7 +47,7 @@ void CMouseCursor::DrawCursor( void )
 		gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
 		GL_Color4f( 1, 1, 1, 1 );
 		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-		DrawQuad( x, y, x + CURSOR_SIZE, y + CURSOR_SIZE );
+		DrawQuad( x, y, x + CURSOR_SIZE * gHUD.fScale, y + CURSOR_SIZE * gHUD.fScale );
 		gEngfuncs.pTriAPI->End();
 	}
 	else // no image?

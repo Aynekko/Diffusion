@@ -868,12 +868,15 @@ public:
 	int VidInit( void );
 	int Draw( float flTime );
 	int MsgFunc_ShowNote( const char *pszName, int iSize, void *pbuf );
-	void MessageDraw( client_textmessage_t *pMessage, int x, int y );
+	void MessageDraw( const char *pText, int x, int y );
 	void Enable( void );
 	void CloseWindow( bool mouse = false );
 	
 	char m_szMOTD[MAX_MOTD_LENGTH];
+	char curText[2048];
 	int scrolled_lines;
+	int num_lines;
+	float border;
 
 	typedef struct
 	{

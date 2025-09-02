@@ -50,7 +50,7 @@ int CHudDroneBars::Draw( float flTime )
 		return 0;
 
 	const int default_x = (ScreenWidth / 32) - 30;
-	const int default_y = (ScreenHeight - 500 * gHUD.fScale) - 170; // (alice hud position) - 128(spr height) - margin
+	const int default_y = ScreenHeight - (450 * gHUD.fScale) - 128 - (40 * gHUD.fScale); // (alice hud position) - 128(spr height) - margin
 
 	if( !CanUseDrone )
 	{
@@ -106,7 +106,7 @@ int CHudDroneBars::Draw( float flTime )
 
 	// write distance
 	x = dronebar_lerp_x;
-	y = default_y - 28;
+	y = default_y - 28 * gHUD.fScale;
 	if( !DroneDeployed )
 		DrawString( x, y, "OFF", 255, 25, 25 );
 	else
@@ -118,7 +118,7 @@ int CHudDroneBars::Draw( float flTime )
 
 	// draw the drone icon above the bars and text
 	// x yet the same
-	y = default_y - 72;
+	y -= 50;
 	if( !DroneDeployed )
 		SPR_Set( m_hDroneIcon, 100, 100, 100 );
 	else

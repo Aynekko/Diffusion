@@ -86,6 +86,12 @@ void CHud::DrumsInput( int Slot )
 void CHud::Think( void )
 {
 	// diffusion - hud_fontscale quick change support
+	static float cachescale = 0.0f;
+	if( cachescale != fScale )
+	{
+		CVAR_SET_FLOAT( "hud_fontscale", fScale );
+		cachescale = fScale;
+	}
 	m_scrinfo.iSize = sizeof( m_scrinfo );
 	GetScreenInfo( &m_scrinfo );
 	
