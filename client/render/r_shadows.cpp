@@ -72,11 +72,12 @@ void R_ResetShadowTextures( void )
 
 	switch( ShadowQualityLevel )
 	{
-	case 0: ShadowViewport = 256; break;
-	case 1: ShadowViewport = 512; break;
-	case 2: ShadowViewport = 1024; break;
-	case 3: ShadowViewport = 2048; break;
-	case 4: ShadowViewport = 4096; break;
+	case 0: ShadowViewport = 256; break; // low
+	case 1: ShadowViewport = 512; break; // medium
+	case 2: ShadowViewport = 768; break; // high
+	case 3: ShadowViewport = 1280; break; // maximum
+	case 4: ShadowViewport = 2048; break; // hidden console preset
+	case 5: ShadowViewport = 4096; break; // are you nuts? :)
 	}
 
 	if( tr.lowmemory )
