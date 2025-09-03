@@ -260,6 +260,8 @@ public:
 	int ypos_bottom;
 
 	void GetAllPlayersInfo( void );
+
+	bool ThisPlayerTalking;
 };
 
 //

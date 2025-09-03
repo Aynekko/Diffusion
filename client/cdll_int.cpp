@@ -350,9 +350,13 @@ void HUD_VoiceStatus( int entindex, qboolean bTalking )
 {
 	if( entindex == -1 )
 		gHUD.m_ScreenEffects.ShouldDrawVoiceIcon = bTalking;
-
-	if( entindex > 0 && entindex <= MAX_PLAYERS + 1 )
-		g_PlayerExtraInfo[entindex].isTalking = bTalking;
+	else if( entindex == -2 )
+		gHUD.m_Scoreboard.ThisPlayerTalking = bTalking;
+	else
+	{
+		if( entindex > 0 && entindex <= MAX_PLAYERS + 1 )
+			g_PlayerExtraInfo[entindex].isTalking = bTalking;
+	}
 }
 
 void HUD_DirectorMessage( int iSize, void *pbuf )

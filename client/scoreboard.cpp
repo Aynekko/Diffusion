@@ -114,6 +114,7 @@ int CHudScoreboard :: VidInit( void )
 	VoicePic = LOAD_TEXTURE( "sprites/diffusion/voice_icon", NULL, 0, 0 );
 	VoicePicSize = VOICE_PIC_SIZE * gHUD.fScale;
 	boardA = 0.0f;
+	ThisPlayerTalking = false;
 	return 1;
 }
 
@@ -133,6 +134,12 @@ void CHudScoreboard :: InitHUDData( void )
 
 int CHudScoreboard :: Draw( float fTime )
 {
+	if( tr.time == tr.oldtime ) // paused
+		return 1;
+
+	if( CVAR_TO_BOOL( ui_is_active ) )
+		return 0;
+	
 	if( !m_iShowscoresHeld && !gHUD.m_iIntermission )
 	{
 		boardA = lerp( boardA, 0.0f, 30 * g_fFrametime );
@@ -402,7 +409,7 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 		DrawString( xpos + nameoffset, ypos + TxtYOffset, pl_info->name, r, g, b );
 
 		// if they are talking, draw the small icon right before the "kills" column
-		if( g_PlayerExtraInfo[best_player].isTalking )
+		if( g_PlayerExtraInfo[best_player].isTalking || (pl_info->thisplayer && ThisPlayerTalking) )
 		{
 			int voice_pic_x = xpos_rel + KillsRangeMin - VoicePicSize - 10;
 			int voice_pic_y = ypos + TxtYOffset;
