@@ -13,12 +13,13 @@
 
 #define SHOW_ACHIEVEMENT_TIME 7
 
-const float fTOTAL_WIDTH = 666.f;
+const float fTOTAL_WIDTH = 666.f; // minimum value
 const float fTOTAL_HEIGHT = 200.f;
 const float fBORDER = 20.f;
 const float fPIC_FRAME_SIZE = fTOTAL_HEIGHT - fBORDER - fBORDER;
 const float fBORDER2 = 10.f;
 const float fPIC_SIZE = fPIC_FRAME_SIZE - fBORDER2 - fBORDER2;
+int text_max_width = 0;
 
 DECLARE_COMMAND( m_StatusIconsAchievement, RefreshAchievementFile );
 DECLARE_COMMAND( m_StatusIconsAchievement, ResetAchievementFile );
@@ -57,27 +58,12 @@ int CHudAchievement::Draw( float flTime )
 	if( gHUD.m_flTime > AchStartTime + SHOW_ACHIEVEMENT_TIME )
 		y_direction = true;
 
-	int added_total_width = 0;
-	if( pText )
-	{
-		// get text width
-		// it can be long, so I need to make the frame bigger if needed
-		const char *tmp = pText->pMessage;
-		int tmpwidth = 0;
-		while( *tmp && *tmp != '\n' )
-		{
-			unsigned char c = *tmp;
-			tmpwidth += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
-			tmp++;
-		}
-
-		int final_width = fBORDER + fPIC_FRAME_SIZE + fBORDER + tmpwidth;
-		if( final_width > fTOTAL_WIDTH )
-			added_total_width = final_width - fTOTAL_WIDTH + fBORDER;
-	}
+	int final_width = fBORDER + fPIC_FRAME_SIZE + fBORDER + text_max_width + fBORDER;
+	if( final_width < fTOTAL_WIDTH )
+		final_width = fTOTAL_WIDTH;
 
 	// screen center
-	x = (ScreenWidth - (fTOTAL_WIDTH + added_total_width)) * 0.5f;
+	x = (ScreenWidth - final_width) * 0.5f;
 
 	if( !y_direction ) // achievement sprite is now showing
 	{
@@ -97,7 +83,7 @@ int CHudAchievement::Draw( float flTime )
 	}
 
 	// draw main frame
-	FillRoundedRGBA( x, y, fTOTAL_WIDTH + added_total_width, fTOTAL_HEIGHT, 20, Vector4D( 0.05f, 0.05f, 0.05f, 0.8f ) );
+	FillRoundedRGBA( x, y, final_width, fTOTAL_HEIGHT, 20, Vector4D( 0.05f, 0.05f, 0.05f, 0.8f ) );
 
 	// draw square frame RGB 70 169 255
 	FillRoundedRGBA( x + fBORDER, y + fBORDER, fPIC_FRAME_SIZE, fPIC_FRAME_SIZE, 10, Vector4D( 0.275f, 0.663f, 1.0f, 0.8f ) );
@@ -141,6 +127,35 @@ void CHudAchievement::EnableAchievement( char *pszIconName )
 	char txt[128];
 	sprintf_s( txt, "%s_text", pszIconName );
 	pText = TextMessageGet( txt ); // titles.txt
+
+	// get text width
+	// it can be long, so I need to make the frame bigger if needed
+	text_max_width = 0;
+	if( pText )
+	{
+		const char *tmp = pText->pMessage;
+		int tmpwidth = 0;
+		while( *tmp && *tmp != '\n' )
+		{
+			unsigned char c = *tmp;
+			tmpwidth += TextMessageDrawChar( -1, -1, c, 0, 0, 0 );
+			tmp++;
+		}
+		text_max_width = tmpwidth;
+	}
+	if( pTitle )
+	{
+		const char *tmp = pTitle->pMessage;
+		int tmpwidth = 0;
+		while( *tmp && *tmp != '\n' )
+		{
+			unsigned char c = *tmp;
+			tmpwidth += TextMessageDrawChar( -1, -1, c, 0, 0, 0 );
+			tmp++;
+		}
+		if( tmpwidth > text_max_width )
+			text_max_width = tmpwidth;
+	}
 
 	y = ScreenHeight + 200; // starting position below the bottom of the screen
 	IsAchDrawing = true;
