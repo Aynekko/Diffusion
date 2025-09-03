@@ -1056,6 +1056,11 @@ int CTalkMonster :: FIdleHello( void )
 				
 				return TRUE;
 			}
+
+			// diffusion - if player has notarget on, go ahead and assume you said hello
+			// otherwise npc will be stuck here
+			if( pPlayer->pev->flags & FL_NOTARGET )
+				SetBits( m_bitsSaid, bit_saidHelloPlayer );
 		}
 	}
 	return FALSE;
