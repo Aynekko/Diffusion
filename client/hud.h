@@ -665,6 +665,7 @@ public:
 	int Init(void);
 	int VidInit(void);
 	int Draw(float flTime);
+	int DrawCrosshairs( float flTime );
 	int x; int y;
 	SpriteHandle m_hCrosshairStatic;
 	int MsgFunc_CrosshairStatic( const char *pszName, int iSize, void *pbuf );
@@ -699,21 +700,21 @@ public:
 	int GaussSound;
 
 	void Reset( void );
-	void LoadCrosshairForWeapon( int WeaponID );
+	void VidInitCrosshairs( void );
 	void DrawGaussZoomedHUD( void );
 private:
-	typedef struct
-	{
-		char szSpriteName[MAX_SPRITE_NAME_LENGTH];
-		SpriteHandle spr;
-		wrect_t rc;
-		unsigned char r, g, b;
-	} crosshair_static_t;
-
 	WEAPON	*m_pWeapon;
 
-	crosshair_static_t m_CrosshairStatic;
-	crosshair_static_t m_HM;
+	typedef struct
+	{
+		int texture; // GL texture num
+		int	w;
+		int	h;
+	} crosshair_t;
+
+	crosshair_t crosshair[TOTAL_WEAPONS][2];
+	crosshair_t crosshair_default[2];
+	crosshair_t hitmarker[2];
 };
 
 class CZoom : public CHudBase
