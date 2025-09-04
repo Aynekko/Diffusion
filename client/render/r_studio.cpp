@@ -4716,8 +4716,8 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 			// get remap colors
 			if( m_pPlayerInfo != NULL )
 			{
-				m_nTopColor = bound( 0, m_pPlayerInfo->topcolor, 360 );
-				m_nBottomColor = bound( 0, m_pPlayerInfo->bottomcolor, 360 );
+				m_nTopColor = bound( 0, m_pPlayerInfo->topcolor, 255 );
+				m_nBottomColor = bound( 0, m_pPlayerInfo->bottomcolor, 255 );
 			}
 			else
 			{
