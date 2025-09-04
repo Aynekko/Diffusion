@@ -170,7 +170,7 @@ int CHudCrosshairStatic::Draw( float flTime )
 					TempDamageDealt = DamageDealt; // cache to avoid doing text trickery every frame
 				}
 
-				DrawString( (int)((ScreenWidth - width) * 0.5f), y - 10, dmg, r, g, b );
+				DrawString( (int)((ScreenWidth - width) * 0.5f), y - (10 * gHUD.fScale), dmg, r, g, b );
 			}
 		}
 		else
