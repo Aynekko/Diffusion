@@ -162,7 +162,7 @@ R_CreateSingleBush
 create a bush with specified pos
 ================
 */
-bool R_CreateSingleBush( msurface_t *surf, mextrasurf_t *es, grasshdr_t *hdr, const Vector &pos, float size )
+static bool R_CreateSingleBush( msurface_t *surf, mextrasurf_t *es, grasshdr_t *hdr, const Vector &pos, float size, float height )
 {
 	for( int i = 0; i < 16; i++ )
 	{
@@ -176,7 +176,7 @@ bool R_CreateSingleBush( msurface_t *surf, mextrasurf_t *es, grasshdr_t *hdr, co
 #ifdef GRASS_PACKED_VERTEX
 		entry->normal[0] = FloatToHalf( dir.x );
 		entry->normal[1] = FloatToHalf( dir.y );
-		entry->normal[2] = FloatToHalf( dir.z );
+		entry->normal[2] = FloatToHalf( dir.z * height );
 		entry->normal[3] = FloatToHalf( scale );
 		entry->center[0] = FloatToHalf( pos.x );
 		entry->center[1] = FloatToHalf( pos.y );
@@ -197,7 +197,7 @@ bool R_CreateSingleBush( msurface_t *surf, mextrasurf_t *es, grasshdr_t *hdr, co
 	return true;
 }
 
-void R_CreateSurfaceVBO( grass_t *out )
+static void R_CreateSurfaceVBO( grass_t *out )
 {
 	if( !m_iNumVertex ) return; // empty mesh?
 
@@ -318,8 +318,9 @@ bool R_BuildGrassMesh( msurface_t *surf, mextrasurf_t *es, grassentry_t *entry, 
 				continue;	// rejected by heightmap
 
 			float size = RANDOM_FLOAT( entry->min, entry->max );
+			float height = RANDOM_FLOAT( entry->mintall, entry->maxtall );
 
-			if( !R_CreateSingleBush( surf, es, hdr, pos, size ))
+			if( !R_CreateSingleBush( surf, es, hdr, pos, size, height ))
 				goto build_mesh; // vertices is out (more than 2048 bushes per surface created)
 		}
 	}
@@ -1241,6 +1242,27 @@ void R_GrassInit( void )
 			entry.max = Q_atof( token );
 			entry.max = bound( entry.min, entry.max, 100.0f );
 			if( entry.min > entry.max ) entry.min = entry.max;
+
+			pfile = COM_ParseLine( pfile, token );
+			if( !pfile )
+			{
+				ALERT( at_error, "R_GrassInit: missed grass min height scale at line %i\n", parse_line );
+				parse_line++;
+				continue;
+			}
+			entry.mintall = Q_atof( token );
+			entry.mintall = bound( 0.01f, entry.mintall, 100.0f );
+
+			pfile = COM_ParseLine( pfile, token );
+			if( !pfile )
+			{
+				ALERT( at_error, "R_GrassInit: missed grass max height scale at line %i\n", parse_line );
+				parse_line++;
+				continue;
+			}
+			entry.maxtall = Q_atof( token );
+			entry.maxtall = bound( entry.mintall, entry.maxtall, 100.0f );
+			if( entry.mintall > entry.maxtall ) entry.mintall = entry.maxtall;
 
 			pfile = COM_ParseLine( pfile, token );
 			if( pfile )

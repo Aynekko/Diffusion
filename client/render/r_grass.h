@@ -28,12 +28,14 @@ GNU General Public License for more details.
 
 typedef struct grassentry_s
 {
-	char		name[16];		// name of level texture
-	byte		texture;		// number in array of grass textures
-	float		density;		// grass density (0 - 100)
-	float		min;		// min grass scale
-	float		max;		// max grass scale
-	int		seed;		// seed for predictable random (auto-filled)
+	char name[16];		// name of level texture
+	byte texture;		// number in array of grass textures
+	float density;		// grass density (0 - 100)
+	float min;		// min grass scale
+	float max;		// max grass scale
+	float mintall; // min height scale
+	float maxtall; // max height scale
+	int seed;		// seed for predictable random (auto-filled)
 } grassentry_t;
 
 // 52 bytes here
