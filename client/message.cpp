@@ -31,6 +31,7 @@ DECLARE_MESSAGE( m_Message, GameTitle )
 client_textmessage_t g_pCustomMessage;
 const char *g_pCustomName = "Custom";
 char g_pCustomText[1024];
+char pTempText[maxHUDMessages][4096];
 
 int CHudMessage::Init( void )
 {
@@ -477,6 +478,14 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 			}
 
 			m_pMessages[i] = tempMessage;
+
+			// replace the keybindings like #attack# etc.
+			char temp[4096];
+			pTempText[i][0] = '\0';
+			_snprintf_s( temp, sizeof( temp ), m_pMessages[i]->pMessage );
+			UTIL_ReplaceKeyBindings( temp, sizeof( temp ), pTempText[i] );
+			m_pMessages[i]->pMessage = pTempText[i];
+
 			m_startTime[i] = time;
 			return;
 		}
