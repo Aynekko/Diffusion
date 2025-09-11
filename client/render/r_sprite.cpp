@@ -859,11 +859,8 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 
 	if( CVAR_TO_BOOL( r_sprites_batch ) )
 	{
-		if( m_pSpriteHeader->numframes == 1 &&
-			(m_pCurrentEntity->curstate.rendermode == kRenderConstantGlow ||
-				m_pCurrentEntity->curstate.rendermode == kRenderGlow ||
-				m_pCurrentEntity->curstate.rendermode == kRenderTransAdd)
-			)
+		// only batching additive or glow sprites
+		if( m_pCurrentEntity->curstate.rendermode == kRenderConstantGlow || m_pCurrentEntity->curstate.rendermode == kRenderGlow || m_pCurrentEntity->curstate.rendermode == kRenderTransAdd )
 		{
 			// find slot
 			const int texnum = frame->gl_texturenum;
