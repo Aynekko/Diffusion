@@ -47,6 +47,13 @@ void CSpriteModelRenderer::VidInit( void )
 void CSpriteModelRenderer::ResetRenderCache( void )
 {
 	cached_sprite_texture = -1;
+	for( int i = 0; i < MAX_SPRITE_BATCHES; i++ )
+	{
+		SpriteBatchGlow[i].texture = 0;
+		SpriteBatchGlow[i].numverts = 0;
+		SpriteBatchAdditive[i].texture = 0;
+		SpriteBatchAdditive[i].numverts = 0;
+	}
 }
 
 /*
@@ -57,12 +64,12 @@ CSpriteModelRenderer
 */
 CSpriteModelRenderer :: CSpriteModelRenderer( void )
 {
-	m_fDoInterp	= true;
-	m_pCurrentEntity	= NULL;
-	m_pCvarLerping	= NULL;
-	m_pCvarLighting	= NULL;
-	m_pSpriteHeader	= NULL;
-	m_pRenderModel	= NULL;
+	m_fDoInterp = true;
+	m_pCurrentEntity = NULL;
+	m_pCvarLerping = NULL;
+	m_pCvarLighting = NULL;
+	m_pSpriteHeader = NULL;
+	m_pRenderModel = NULL;
 }
 
 CSpriteModelRenderer :: ~CSpriteModelRenderer( void )
@@ -600,6 +607,103 @@ int CSpriteModelRenderer :: SpriteAllowLerping( cl_entity_t *e, msprite_t *pspri
 	return true;
 }
 
+//====================================================================================
+// RenderSpritesBatch: batching is being done only for glow and additive
+// sprites which have 1 frame
+// The gain is barely noticeable, but I leave it here to not waste the work done :)
+//====================================================================================
+void CSpriteModelRenderer::RenderSpritesBatch( void )
+{
+	if( !CVAR_TO_BOOL( r_sprites_batch ) )
+		return;
+
+	sprite_batch_t *pSpriteBatch;
+	
+	bool bRenderSet = false;
+
+	// glow sprites
+	pSpriteBatch = SpriteBatchGlow;
+	GL_DepthTest( GL_FALSE );
+	for( int i = 0; i < MAX_SPRITE_BATCHES; i++ )
+	{
+		if( pSpriteBatch[i].texture == 0 )
+			break;
+
+		if( !bRenderSet )
+		{
+			GL_Blend( GL_TRUE );
+			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+			GL_DepthMask( GL_FALSE );
+			GL_Cull( GL_NONE ); // might be two-side
+
+			R_LoadIdentity();
+
+			pglBindVertexArray( 0 );
+			pglEnableClientState( GL_VERTEX_ARRAY );
+			pglEnableClientState( GL_COLOR_ARRAY );
+			pglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+
+			bRenderSet = true;
+		}
+
+		GL_Bind( GL_TEXTURE0, pSpriteBatch[i].texture );
+		pglVertexPointer( 3, GL_FLOAT, sizeof( Vector ), pSpriteBatch[i].SpriteVertexesArray );
+		pglColorPointer( 4, GL_UNSIGNED_BYTE, 0, pSpriteBatch[i].SpriteColorArray );
+		pglTexCoordPointer( 2, GL_FLOAT, 0, pSpriteBatch[i].SpriteTexCoordsArray );
+
+		pglDrawArrays( GL_TRIANGLE_STRIP, 0, pSpriteBatch[i].numverts );
+
+		r_stats.c_sprite_batches_drawn++;
+	}
+
+	// additive sprites
+	pSpriteBatch = SpriteBatchAdditive;
+	GL_DepthTest( GL_TRUE );
+	for( int i = 0; i < MAX_SPRITE_BATCHES; i++ )
+	{
+		if( pSpriteBatch[i].texture == 0 )
+			break;
+
+		if( !bRenderSet )
+		{
+			GL_Blend( GL_TRUE );
+			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+			GL_DepthMask( GL_FALSE );
+			GL_Cull( GL_NONE ); // might be two-side
+
+			R_LoadIdentity();
+
+			pglBindVertexArray( 0 );
+			pglEnableClientState( GL_VERTEX_ARRAY );
+			pglEnableClientState( GL_COLOR_ARRAY );
+			pglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+
+			bRenderSet = true;
+		}
+
+		GL_Bind( GL_TEXTURE0, pSpriteBatch[i].texture );
+		pglVertexPointer( 3, GL_FLOAT, sizeof( Vector ), pSpriteBatch[i].SpriteVertexesArray );
+		pglColorPointer( 4, GL_UNSIGNED_BYTE, 0, pSpriteBatch[i].SpriteColorArray );
+		pglTexCoordPointer( 2, GL_FLOAT, 0, pSpriteBatch[i].SpriteTexCoordsArray );
+
+		pglDrawArrays( GL_TRIANGLE_STRIP, 0, pSpriteBatch[i].numverts );
+
+		r_stats.c_sprite_batches_drawn++;
+	}
+
+	if( bRenderSet )
+	{
+		pglDisableClientState( GL_VERTEX_ARRAY );
+		pglDisableClientState( GL_COLOR_ARRAY );
+		pglDisableClientState( GL_TEXTURE_COORD_ARRAY );
+
+		GL_Blend( GL_FALSE );
+		GL_Cull( GL_FRONT );
+		pglDepthFunc( GL_LEQUAL );
+		pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
+		pglColor4ub( 255, 255, 255, 255 );
+	}
+}
 
 /*
 =================
@@ -637,39 +741,6 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 
 	if( SpriteOccluded( scale ))
 		return; // sprite culled
-
-	r_stats.c_sprite_models_drawn++;
-
-	if( m_pSpriteHeader->texFormat == SPR_ALPHTEST && m_pCurrentEntity->curstate.rendermode != kRenderTransAdd )
-	{
-		GL_AlphaTest( GL_TRUE );
-		GL_AlphaFunc( GL_GREATER, 0.5f );
-	}
-
-	// select proper rendermode
-	switch( m_pCurrentEntity->curstate.rendermode )
-	{
-	case kRenderTransAlpha:
-		GL_DepthMask( GL_FALSE );
-	case kRenderTransColor:
-	case kRenderTransTexture:
-	case kRenderFade:
-		GL_Blend( GL_TRUE );
-		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-		break;
-	case kRenderGlow:
-	case kRenderConstantGlow:
-		GL_DepthTest( GL_FALSE );
-	case kRenderTransAdd:
-		GL_Blend( GL_TRUE );
-		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
-		GL_DepthMask( GL_FALSE );
-		break;
-	case kRenderNormal:
-	default:
-		GL_Blend( GL_FALSE );
-		break;
-	}
 	
 	if( tr.fogEnabled && m_pSpriteHeader->texFormat != SPR_ALPHTEST )
 	{
@@ -768,11 +839,8 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 
 			SinCos( angle, &sr, &cr );
 
-			for( int i = 0; i < 3; i++ )
-			{
-				v_right[i] = (RI->vright[i] * cr + RI->vup[i] * sr);
-				v_up[i] = RI->vright[i] * -sr + RI->vup[i] * cr;
-			}
+			v_right = RI->vright * cr + RI->vup * sr;
+			v_up = RI->vright * -sr + RI->vup * cr;
 		}
 		break;
 	case SPR_FWD_PARALLEL: // normal sprite
@@ -789,10 +857,140 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 		break;
 	}
 
+	if( CVAR_TO_BOOL( r_sprites_batch ) )
+	{
+		if( m_pSpriteHeader->numframes == 1 &&
+			(m_pCurrentEntity->curstate.rendermode == kRenderConstantGlow ||
+				m_pCurrentEntity->curstate.rendermode == kRenderGlow ||
+				m_pCurrentEntity->curstate.rendermode == kRenderTransAdd)
+			)
+		{
+			// find slot
+			const int texnum = frame->gl_texturenum;
+			int i;
+			int slot = -1;
+
+			sprite_batch_t *sprBatch = m_pCurrentEntity->curstate.rendermode == kRenderTransAdd ? SpriteBatchAdditive : SpriteBatchGlow;
+
+			for( i = 0; i < MAX_SPRITE_BATCHES; i++ )
+			{
+				if( sprBatch[i].texture == 0 || sprBatch[i].texture == frame->gl_texturenum )
+				{
+					slot = i;
+					break;
+				}
+			}
+
+			// found free slot
+			if( slot != -1 )
+			{
+				Vector point;
+				byte transparency = tr.blend * 255;
+				sprBatch[slot].texture = texnum;
+				Vector clr = color * 255;
+				Vector org = sprite_origin;
+				Vector up = v_up;
+				Vector right = v_right;
+
+				// vertex 1
+				point = org + up * (frame->up * scale) + right * (frame->left * scale);
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][0] = clr.x;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][1] = clr.y;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][2] = clr.z;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][3] = transparency;
+				sprBatch[slot].SpriteTexCoordsArray[sprBatch[slot].numverts] = Vector2D( 0.0f, 0.0f );
+				sprBatch[slot].SpriteVertexesArray[sprBatch[slot].numverts] = point;
+				sprBatch[slot].numverts++;
+
+				// repeat first vertex
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][0] = clr.x;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][1] = clr.y;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][2] = clr.z;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][3] = transparency;
+				sprBatch[slot].SpriteTexCoordsArray[sprBatch[slot].numverts] = Vector2D( 0.0f, 0.0f );
+				sprBatch[slot].SpriteVertexesArray[sprBatch[slot].numverts] = point;
+				sprBatch[slot].numverts++;
+
+				// vertex 2
+				point = org + up * (frame->up * scale) + right * (frame->right * scale);
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][0] = clr.x;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][1] = clr.y;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][2] = clr.z;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][3] = transparency;
+				sprBatch[slot].SpriteTexCoordsArray[sprBatch[slot].numverts] = Vector2D( 1.0f, 0.0f );
+				sprBatch[slot].SpriteVertexesArray[sprBatch[slot].numverts] = point;
+				sprBatch[slot].numverts++;
+
+				// vertex 3
+				point = org + up * (frame->down * scale) + right * (frame->left * scale);
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][0] = clr.x;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][1] = clr.y;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][2] = clr.z;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][3] = transparency;
+				sprBatch[slot].SpriteTexCoordsArray[sprBatch[slot].numverts] = Vector2D( 0.0f, 1.0f );
+				sprBatch[slot].SpriteVertexesArray[sprBatch[slot].numverts] = point;
+				sprBatch[slot].numverts++;
+
+				// vertex 4
+				point = org + up * (frame->down * scale) + right * (frame->right * scale);
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][0] = clr.x;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][1] = clr.y;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][2] = clr.z;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][3] = transparency;
+				sprBatch[slot].SpriteTexCoordsArray[sprBatch[slot].numverts] = Vector2D( 1.0f, 1.0f );
+				sprBatch[slot].SpriteVertexesArray[sprBatch[slot].numverts] = point;
+				sprBatch[slot].numverts++;
+
+				// repeat last vertex
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][0] = clr.x;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][1] = clr.y;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][2] = clr.z;
+				sprBatch[slot].SpriteColorArray[sprBatch[slot].numverts][3] = transparency;
+				sprBatch[slot].SpriteTexCoordsArray[sprBatch[slot].numverts] = Vector2D( 1.0f, 1.0f );
+				sprBatch[slot].SpriteVertexesArray[sprBatch[slot].numverts] = point;
+				sprBatch[slot].numverts++;
+
+				// successfully added the sprite to batch, don't touch the legacy rendering code
+				return;
+			}
+		}
+	}
+
 	R_LoadIdentity();
 
 	if( m_pSpriteHeader->facecull == SPR_CULL_NONE || m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide )
 		GL_Cull( GL_NONE );
+
+	if( m_pSpriteHeader->texFormat == SPR_ALPHTEST && m_pCurrentEntity->curstate.rendermode != kRenderTransAdd )
+	{
+		GL_AlphaTest( GL_TRUE );
+		GL_AlphaFunc( GL_GREATER, 0.5f );
+	}
+
+	// select proper rendermode
+	switch( m_pCurrentEntity->curstate.rendermode )
+	{
+	case kRenderTransAlpha:
+		GL_DepthMask( GL_FALSE );
+	case kRenderTransColor:
+	case kRenderTransTexture:
+	case kRenderFade:
+		GL_Blend( GL_TRUE );
+		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+		break;
+	case kRenderGlow:
+	case kRenderConstantGlow:
+		GL_DepthTest( GL_FALSE );
+	case kRenderTransAdd:
+		GL_Blend( GL_TRUE );
+		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+		GL_DepthMask( GL_FALSE );
+		break;
+	case kRenderNormal:
+	default:
+		GL_Blend( GL_FALSE );
+		break;
+	}
 		
 	if( oldframe == frame )
 	{
@@ -826,6 +1024,8 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 		}
 		cached_sprite_texture = -1;
 	}
+
+	r_stats.c_sprite_models_drawn++;
 
 	// draw the sprite 'lightmap' :-)
 	if( SpriteHasLightmap( m_pSpriteHeader->texFormat ))

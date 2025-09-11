@@ -504,6 +504,7 @@ typedef struct
 	unsigned int	c_studio_models_drawn;
 	unsigned int	c_studio_meshes_drawn;
 	unsigned int	c_sprite_models_drawn;
+	unsigned int	c_sprite_batches_drawn;
 	unsigned int	c_cables;
 	unsigned int	c_particles_total;
 	unsigned int	c_particles_culled;

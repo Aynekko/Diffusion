@@ -41,6 +41,7 @@ extern cvar_t	*r_fullbright;
 extern cvar_t	*r_drawentities;
 extern cvar_t	*r_drawworld;
 extern cvar_t	*r_drawsprites;
+extern cvar_t	*r_sprites_batch;
 extern cvar_t *r_drawmodels;
 extern cvar_t	*r_allow_3dsky;
 extern cvar_t	*gl_allow_portals;

@@ -18,6 +18,19 @@ GNU General Public License for more details.
 
 #include "sprite.h"
 
+// for sprites with a single frame only! - batch rendering (glow etc.)
+#define MAX_SPRITE_VERTS 65536
+#define MAX_SPRITE_BATCHES 64
+
+struct sprite_batch_t
+{
+	int texture;
+	Vector SpriteVertexesArray[MAX_SPRITE_VERTS];
+	byte SpriteColorArray[MAX_SPRITE_VERTS][4];
+	Vector2D SpriteTexCoordsArray[MAX_SPRITE_VERTS];
+	unsigned short numverts;
+};
+
 /*
 ====================
 CSpriteModelRenderer
@@ -35,6 +48,9 @@ public:
 	void Init( void );
 	void VidInit( void );
 	void ResetRenderCache( void );
+	sprite_batch_t SpriteBatchGlow[MAX_SPRITE_BATCHES];
+	sprite_batch_t SpriteBatchAdditive[MAX_SPRITE_BATCHES];
+	void RenderSpritesBatch( void );
 
 	virtual void SpriteDrawModel( void );
 
