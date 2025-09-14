@@ -80,6 +80,22 @@ float PingRangeMax = PING_RANGE_MAX;
 float TxtYOffset = TXT_Y_OFFSET;
 float VoicePicSize = VOICE_PIC_SIZE;
 
+static const char *DefaultLoc[5] =
+{
+	"Players",
+	"Teams",
+	"Kills",
+	"Deaths",
+	"Ping",
+};
+
+static char PlayersText[64];
+static char TeamsText[64];
+static char KillsText[64];
+static char DeathsText[64];
+static char PingText[64];
+static int num_players = 0;
+
 int CHudScoreboard :: Init( void )
 {
 	gHUD.AddHudElem( this );
@@ -95,6 +111,39 @@ int CHudScoreboard :: Init( void )
 	InitHUDData();
 
 	ypos_bottom = 0;
+
+	// language localization from titles.txt
+	client_textmessage_t *tmpmsg;
+
+	tmpmsg = TextMessageGet( "SCORE_PLAYERS" );
+	if( tmpmsg )
+		sprintf_s( PlayersText, tmpmsg->pMessage );
+	else
+		sprintf_s( PlayersText, DefaultLoc[0] );
+
+	tmpmsg = TextMessageGet( "SCORE_TEAMS" );
+	if( tmpmsg )
+		sprintf_s( TeamsText, tmpmsg->pMessage );
+	else
+		sprintf_s( TeamsText, DefaultLoc[1] );
+
+	tmpmsg = TextMessageGet( "SCORE_KILLS" );
+	if( tmpmsg )
+		sprintf_s( KillsText, tmpmsg->pMessage );
+	else
+		sprintf_s( KillsText, DefaultLoc[2] );
+
+	tmpmsg = TextMessageGet( "SCORE_DEATHS" );
+	if( tmpmsg )
+		sprintf_s( DeathsText, tmpmsg->pMessage );
+	else
+		sprintf_s( DeathsText, DefaultLoc[3] );
+
+	tmpmsg = TextMessageGet( "SCORE_PING" );
+	if( tmpmsg )
+		sprintf_s( PingText, tmpmsg->pMessage );
+	else
+		sprintf_s( PingText, DefaultLoc[4] );
 
 	return 1;
 }
@@ -141,14 +190,12 @@ int CHudScoreboard :: Draw( float fTime )
 		return 0;
 	
 	if( !m_iShowscoresHeld && !gHUD.m_iIntermission )
-	{
-		boardA = lerp( boardA, 0.0f, 30 * g_fFrametime );
-
-		if( boardA <= 0.0f )
-			return 1;
-	}
+		boardA = lerp( boardA, 0.0f, 30.0f * g_fFrametime );
 	else
-		boardA = lerp( boardA, 1.0f, 20 * g_fFrametime );
+		boardA = lerp( boardA, 1.0f, 20.0f * g_fFrametime );
+
+	if( boardA <= 0.001f ) // lerping means it will never actually reach zero? cool to know...
+		return 1;
 
 	GetAllPlayersInfo();
 
@@ -171,20 +218,23 @@ int CHudScoreboard :: Draw( float fTime )
 
 	// diffusion - table background
 	FillRoundedRGBA( xpos_rel, ypos - 10, ScoreBoardWidth, ypos_bottom, 18, Vector4D( 0, 0, 0, 0.59f * boardA ) ); // bottom border
-
+	
 	r = 255, g = 140, b = 0;
 	ScaleColors( r, g, b, boardA * 255 );
 
-	if( !gHUD.m_Teamplay ) 
-		DrawString( xpos, ypos + TxtYOffset, "Player", r, g, b );
+	char player_text[128];
+	if( !gHUD.m_Teamplay )
+		sprintf_s( player_text, "%s | (%i/%i)", PlayersText, num_players, tr.viewparams.maxclients );
 	else
-		DrawString( xpos, ypos + TxtYOffset, "Teams", r, g, b );
+		sprintf_s( player_text, "%s | (%i/%i)", TeamsText, num_players, tr.viewparams.maxclients );
+
+	DrawString( xpos, ypos + TxtYOffset, player_text, r, g, b );
 
 //	gHUD.DrawHudStringReverse( KILLS_RANGE_MAX + xpos_rel, ypos, 0, "Kills", 255, 140, 0 );
 //	gHUD.DrawHudString( DIVIDER_POS + xpos_rel, ypos, ScreenWidth, "/", 255, 140, 0 );
-	DrawString( KillsRangeMin + xpos_rel, ypos + TxtYOffset, "Kills", r, g, b );
-	DrawString( DeathsRangeMin + xpos_rel, ypos + TxtYOffset, "Deaths", r, g, b );
-	DrawString( PingRangeMin + xpos_rel, ypos + TxtYOffset, "Ping", r, g, b );
+	DrawString( KillsRangeMin + xpos_rel, ypos + TxtYOffset, KillsText, r, g, b );
+	DrawString( DeathsRangeMin + xpos_rel, ypos + TxtYOffset, DeathsText, r, g, b );
+	DrawString( PingRangeMin + xpos_rel, ypos + TxtYOffset, PingText, r, g, b );
 
 	list_slot += 1.2f;
 	ypos = RowRangeMin + (list_slot * RowGap) + ((ScreenHeight / 10) + 10);
@@ -258,6 +308,7 @@ int CHudScoreboard :: Draw( float fTime )
 	}
 
 	// Draw the teams
+	bool team_drawn = false; // do not draw the divider above first team
 	while( 1 )
 	{
 		int highest_frags = -99999; int lowest_deaths = 99999;
@@ -285,6 +336,17 @@ int CHudScoreboard :: Draw( float fTime )
 		// draw out the best team
 		team_info_t *team_info = &g_TeamInfo[best_team];
 
+		if( team_drawn )
+		{
+			// draw white divider
+			list_slot += 0.25f;
+			ypos = RowRangeMin + (list_slot * RowGap) + ((ScreenHeight / 10) + 10);
+			r = 100, g = 100, b = 100;
+			ScaleColors( r, g, b, boardA * 255 );
+			FillRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, 2, r, g, b, boardA * 255 );
+			list_slot += 0.5f;
+		}
+
 		ypos = RowRangeMin + (list_slot * RowGap) + ((ScreenHeight / 10) + 10);
 
 		// check we haven't drawn too far down
@@ -309,17 +371,20 @@ int CHudScoreboard :: Draw( float fTime )
 		ScaleColors( r, g, b, boardA * 255 );
 
 		// draw kills (left to right)
-		gHUD.DrawHudNumberString( xpos_rel + KillsRangeMin, ypos + TxtYOffset, 0, team_info->frags, 25, 255, 25, true );
+		gHUD.DrawHudNumberString( xpos_rel + KillsRangeMin, ypos + TxtYOffset, 0, team_info->frags, r, g, b, true );
+
+		r = 255, g = 25, b = 25;
+		ScaleColors( r, g, b, boardA * 255 );
 
 		// draw deaths
-		gHUD.DrawHudNumberString( xpos_rel + DeathsRangeMin, ypos + TxtYOffset, 0, team_info->deaths, 255, 25, 25, true );
+		gHUD.DrawHudNumberString( xpos_rel + DeathsRangeMin, ypos + TxtYOffset, 0, team_info->deaths, r, g, b, true );
 
 		// draw ping & packetloss
 		static char buf[64];
 		Q_snprintf( buf, sizeof( buf ), "%d", team_info->ping );
 		UnpackRGB( r, g, b, RGB_YELLOWISH );
 		ScaleColors( r, g, b, boardA * 255 );
-		DrawStringReverse( xpos, ypos + TxtYOffset, buf, r, g, b );
+		DrawString( xpos_rel + PingRangeMin, ypos + TxtYOffset, buf, r, g, b );
 #if 0
 		// Packetloss removed on Kelly 'shipping nazi' Bailey's orders
 		Q_snprintf( buf, sizeof( buf ), " %d", team_info->packetloss );
@@ -330,10 +395,12 @@ int CHudScoreboard :: Draw( float fTime )
 
 		// draw all the players that belong to this team, indented slightly
 		list_slot = DrawPlayers( xpos_rel, list_slot, 10, team_info->name );
+
+		team_drawn = true;
 	}
 
 	// draw all the players who are not in a team
-	list_slot += 0.5;
+	list_slot += 0.25f;
 	DrawPlayers( xpos_rel, list_slot, 0, "" );
 
 	return 1;
@@ -342,7 +409,7 @@ int CHudScoreboard :: Draw( float fTime )
 //==========================================================
 // returns the number of players drawn and ypos_bottom
 //==========================================================
-int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset, char *team )
+float CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset, char *team )
 {
 	// draw the players, in order,  and restricted to team if set
 	while( 1 )
@@ -467,12 +534,20 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 
 void CHudScoreboard :: GetAllPlayersInfo( void )
 {
-	for( int i = 1; i < MAX_PLAYERS; i++ )
+	num_players = 0;
+	int i;
+
+	for( i = 1; i < MAX_PLAYERS; i++ )
 	{
 		GetPlayerInfo( i, &g_PlayerInfoList[i] );
 
+		if( g_PlayerInfoList[i].name == NULL )
+			continue;
+
 		if( g_PlayerInfoList[i].thisplayer )
 			m_iPlayerNum = i;  // !!!HACK: this should be initialized elsewhere... maybe gotten from the engine
+
+		num_players++;
 	}
 }
 

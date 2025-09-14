@@ -209,7 +209,7 @@ void CSniperRifle::PrimaryAttack()
 	Cone = bound( 0.001, Cone, 0.10 );
 
 	int AddNonZoomedPunch = 0;
-	if( m_pPlayer->ZoomState == 0 ) // non-zoomed player always gets a punch.
+	if( m_pPlayer->ZoomState == 0 && !(m_pPlayer->pev->flags & FL_FAKECLIENT) ) // non-zoomed player always gets a punch. (except bots, they can't zoom)
 		AddNonZoomedPunch = 5;
 
 	if( Cone < 0.0025 )

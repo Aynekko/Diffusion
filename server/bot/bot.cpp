@@ -8,6 +8,7 @@
 #include "weapons/weapons.h"
 #include "entities/soundent.h"
 #include "game/gamerules.h"
+#include "game/teamplay_gamerules.h"
 #include "animation.h"
 
 #include "bot.h"
@@ -470,7 +471,7 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 	size_t length;
 	int index;  // index into array of predefined names
 	bool found = false;
-	
+
 	if ((skin == NULL) || (*skin == 0))
 	{
 		// pick a random skin
@@ -648,7 +649,15 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 		infobuffer = GET_INFOBUFFER( BotClass->edict( ) );
 		clientIndex = ENTINDEX( BotClass->edict() );// BotClass->entindex();
 
-		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "model", "robo" );
+		CHalfLifeTeamplay *TeamGameRules = NULL;
+		if( g_pGameRules->IsTeamplay() )
+		{
+			TeamGameRules = (CHalfLifeTeamplay *)g_pGameRules;
+			SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "model", (char*)TeamGameRules->TeamWithFewestPlayers() );
+		}
+		else
+			SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "model", "robo" );
+
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "skill", c_skill );
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "index", c_index );
 
@@ -2170,14 +2179,14 @@ void CBot::BotThink( void )
 		pev->button |= IN_DUCK;
 
 	// if the bot is dead, randomly press fire to respawn...
-	if ((pev->health < 1) || (pev->deadflag != DEAD_NO))
+	if( (pev->health < 1) || (pev->deadflag != DEAD_NO) )
 	{
-		if (RANDOM_LONG(1, 100) > 60)
+		if( RANDOM_LONG( 1, 100 ) > 60 )
 			pev->button = IN_ATTACK;
 
-		g_engfuncs.pfnRunPlayerMove( edict( ), pev->v_angle, f_move_speed,
-									0, 0, pev->button, 0,
-									gpGlobals->frametime * 1000 );
+		g_engfuncs.pfnRunPlayerMove( edict(), pev->v_angle, f_move_speed,
+			0, 0, pev->button, 0,
+			gpGlobals->frametime * 1000 );
 		return;
 	}
 

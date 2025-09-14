@@ -397,4 +397,4 @@ protected:
 	BOOL m_iEndIntermissionButtonHit;
 };
 
-extern DLL_GLOBAL CGameRules*	g_pGameRules;
+extern DLL_GLOBAL CGameRules* g_pGameRules;

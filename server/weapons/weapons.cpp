@@ -1175,6 +1175,9 @@ void CBasePlayerWeapon :: ResetEmptySound( void )
 
 void CBasePlayerWeapon::LowAmmoMsg(CBasePlayer* pPlayer)
 {
+	if( pPlayer->pev->flags & FL_FAKECLIENT )
+		return;
+	
 	if( gpGlobals->time > pPlayer->HUDtextTime + HUD_TEXT_DELAY )
 	{
 		UTIL_ShowMessage( "UTIL_LOWAMMO", pPlayer );

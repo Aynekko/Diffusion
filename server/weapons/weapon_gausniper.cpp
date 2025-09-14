@@ -389,7 +389,7 @@ void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 	UpdateHUD(); // update weapon skin
 
 	Vector vecDeviate = g_vecZero;
-	if( m_pPlayer->ZoomState == 0 ) // non-zoomed player can't have a straight shot
+	if( m_pPlayer->ZoomState == 0 && !(m_pPlayer->pev->flags & FL_FAKECLIENT) ) // non-zoomed player can't have a straight shot (except bots, they can't zoom)
 		vecDeviate = Vector( RANDOM_LONG( -200, 200 ), RANDOM_LONG( -200, 200 ), RANDOM_LONG( -200, 200 ) );
 
 	Vector vecSrc = vecOrigSrc;

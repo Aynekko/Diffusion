@@ -23,12 +23,14 @@
 #include "game/gamerules.h"
 #include "game/teamplay_gamerules.h"
 #include "game/game.h"
+#include "bot/bot.h"
 
 static char team_names[MAX_TEAMS][MAX_TEAMNAME_LENGTH];
 static int team_scores[MAX_TEAMS];
 static int num_teams = 0;
 
 extern DLL_GLOBAL BOOL g_fGameOver;
+extern respawn_t bot_respawn[32];
 
 CHalfLifeTeamplay :: CHalfLifeTeamplay()
 {
@@ -64,6 +66,33 @@ CHalfLifeTeamplay :: CHalfLifeTeamplay()
 		m_teamLimit = FALSE;
 
 	RecountTeams();
+
+	InitServerMessages();
+	InitServerSounds();
+
+	BotCheckTime = gpGlobals->time + 10.0;
+
+	static float previous_time = 999999999;
+	if( previous_time > gpGlobals->time )
+	{
+		for( int index = 0; index < 32; index++ )
+		{
+			if( (bot_respawn[index].is_used) && (bot_respawn[index].state != BOT_NEED_TO_RESPAWN) )
+			{
+				// bot has already been "kicked" by server so just set flag
+				bot_respawn[index].state = BOT_NEED_TO_RESPAWN;
+
+				// if the map was changed set the respawn time...
+				RespawnTime = 5.0;
+			}
+		}
+	}
+
+	// initialize bonuses (a skull icon which eventually spawns after player's death)
+	for( int i = 0; i < MAX_ACTIVE_BONUSES; i++ )
+		BonusSpawnPoints[i] = g_vecZero;
+
+	NextBonusSpawnTime = gpGlobals->time;
 }
 
 extern cvar_t timeleft, fragsleft;
@@ -131,6 +160,12 @@ void CHalfLifeTeamplay :: Think ( void )
 
 	last_frags = frags_remaining;
 	last_time  = time_remaining;
+
+	ManageMessages();
+
+	ManageBots();
+
+	ManageBonuses();
 }
 
 //=========================================================

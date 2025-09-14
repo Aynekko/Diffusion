@@ -45,10 +45,10 @@ public:
 	virtual BOOL IsValidTeam( const char *pTeamName );
 	const char *SetDefaultPlayerTeam( CBasePlayer *pPlayer );
 	virtual void ChangePlayerTeam( CBasePlayer *pPlayer, const char *pTeamName, BOOL bKill, BOOL bGib );
+	const char *TeamWithFewestPlayers( void );
 
 private:
 	void RecountTeams( bool bResendInfo = FALSE );
-	const char *TeamWithFewestPlayers( void );
 
 	BOOL m_DisableDeathMessages;
 	BOOL m_DisableDeathPenalty;
