@@ -113,6 +113,9 @@ void ClientDisconnect( edict_t *pEdict )
 
 	CBaseEntity *pEntity = (CBaseEntity *)CBaseEntity::Instance( pEdict );
 
+	if( !pEntity )
+		return;
+
 	char text[256] = "";
 	if( pEntity->pev->netname && !(pEntity->pev->flags & FL_FAKECLIENT) )
 	{
@@ -139,6 +142,7 @@ void ClientDisconnect( edict_t *pEdict )
 	pEntity->pev->solid = SOLID_NOT;// nonsolid
 	pEntity->pev->effects = 0;// clear any effects
 	pEntity->pev->flags = 0;// clear any flags
+	pEntity->pev->deadflag = DEAD_DEAD;
 	pEntity->RelinkEntity( TRUE );
 
 	g_pGameRules->ClientDisconnected( pEdict );
@@ -1177,6 +1181,19 @@ void ServerDeactivate( void )
 
 	g_serveractive = 0;
 
+	// kick all bots
+	for( int i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		CBaseEntity *plr = UTIL_PlayerByIndex( i );
+
+		if( plr && plr->pev->flags & FL_FAKECLIENT )
+		{
+			char cmd[40];
+			sprintf( cmd, "kick \"%s\"\n", STRING( plr->pev->netname ) );
+			SERVER_COMMAND( cmd );
+		}
+	}
+
 	// Peform any shutdown operations here...
 	WorldPhysic->FreeAllBodies();
 
@@ -1205,6 +1222,13 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 	{
 		if ( pEdictList[i].free )
 			continue;
+
+		if( pEdictList[i].v.flags & FL_FAKECLIENT )
+		{
+			FREE_PRIVATE( &pEdictList[i] );
+			pEdictList[i].v.flags = 0;
+			pEdictList[i].free = 1;
+		}
 		
 		// Clients aren't necessarily initialized until ClientPutInServer()
 		// diffusion - https://github.com/ValveSoftware/halflife/issues/3282

@@ -241,13 +241,13 @@ void CHudMessage::MessageScanStart( void )
 	}
 }
 
-void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
+void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, int id )
 {
 	int i, j, length, width;
 	const char *pText;
 	const char *pLineStart;
 
-	pText = pMessage->pMessage;
+	pText = pTempText[id];
 	// Count lines
 	m_parms.lines = 1;
 	m_parms.time = time;
@@ -275,7 +275,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 	m_parms.totalHeight = (m_parms.lines * gHUD.m_scrinfo.iCharHeight);
 
 	m_parms.y = YPosition( pMessage->y, m_parms.totalHeight );
-	pText = pMessage->pMessage;
+	pText = pTempText[id];
 
 	m_parms.charTime = 0;
 
@@ -391,7 +391,7 @@ int CHudMessage::Draw( float fTime )
 				endTime = m_startTime[i] + pMessage->fadein + pMessage->fadeout + pMessage->holdtime;
 				break;
 			case 2:	// Fade in is per character in scanning messages
-				endTime = m_startTime[i] + (pMessage->fadein * strlen( pMessage->pMessage )) + pMessage->fadeout + pMessage->holdtime;
+				endTime = m_startTime[i] + (pMessage->fadein * strlen( pTempText[i] )) + pMessage->fadeout + pMessage->holdtime;
 				break;
 			}
 
@@ -403,7 +403,7 @@ int CHudMessage::Draw( float fTime )
 				// effect 0 is fade in/fade out
 				// effect 1 is flickery credits
 				// effect 2 is write out (training room)
-				MessageDrawScan( pMessage, messageTime );
+				MessageDrawScan( pMessage, messageTime, i );
 
 				drawn++;
 			}
@@ -484,7 +484,6 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 			pTempText[i][0] = '\0';
 			_snprintf_s( temp, sizeof( temp ), m_pMessages[i]->pMessage );
 			UTIL_ReplaceKeyBindings( temp, sizeof( temp ), pTempText[i] );
-			m_pMessages[i]->pMessage = pTempText[i];
 
 			m_startTime[i] = time;
 			return;

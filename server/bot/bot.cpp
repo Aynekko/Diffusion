@@ -62,11 +62,19 @@ respawn_t bot_respawn[32] = {
    {FALSE, BOT_IDLE, "", "", "", NULL}, {FALSE, BOT_IDLE, "", "", "", NULL},
    {FALSE, BOT_IDLE, "", "", "", NULL}, {FALSE, BOT_IDLE, "", "", "", NULL}};
 
-#define MAX_SKINS 10
+#define MAX_SKINS 18
 
 // indicate which models are currently used for random model allocation
 BOOL skin_used[MAX_SKINS] =
 {
+	FALSE,
+	FALSE,
+	FALSE,
+	FALSE,
+	FALSE,
+	FALSE,
+	FALSE,
+	FALSE,
 	FALSE,
 	FALSE,
 	FALSE,
@@ -82,34 +90,28 @@ BOOL skin_used[MAX_SKINS] =
 // store the names of the models...
 char *bot_skins[MAX_SKINS] = 
 {
-	"barney",
-	"gina",
-	"gman",
-	"gordon",
-	"helmet",
-	"hgrunt",
-	"recon",
-	"robo",
-	"scientist",
-	"zombie",
+	"a",
+	"b",
+	"c",
+	"d",
+	"e",
+	"f",
+	"g",
+	"h",
+	"i",
+	"j",
+	"k",
+	"l",
+	"m",
+	"n",
+	"o",
+	"p",
+	"q",
+	"r",
 };
 
 // store the player names for each of the models...
-/*
-char *bot_names[MAX_SKINS] = 
-{
-	"Barney",
-	"Gina",
-	"G-Man",
-	"Gordon",
-	"Helmet",
-	"H-Grunt",
-	"Recon",
-	"Robo",
-	"Scientist",
-	"Zombie",
-};*/
-char *bot_names[MAX_SKINS] =
+static const char *bot_names[MAX_SKINS] =
 {
 	"Jackal",
 	"Weasel",
@@ -121,10 +123,18 @@ char *bot_names[MAX_SKINS] =
 	"Maverick",
 	"Bandit",
 	"Lunatic",
+	"Mike Oxlong",
+	"Dixie Normous",
+	"Hugh Jass",
+	"Deez Nuts",
+	"Punisher",
+	"Botzilla",
+	"Nut Jobber",
+	"Trash Can Kicker",
 };
 
 // how often (out of 1000 times) the bot will pause, based on bot skill
-float pause_frequency[5] = 
+static const float pause_frequency[5] = 
 {
 	4,
 	7,
@@ -134,7 +144,7 @@ float pause_frequency[5] =
 };
 
 // how long the bot will delay when paused, based on bot skill
-float pause_time[5][2] =
+static const float pause_time[5][2] =
 {
 	{0.2f, 0.5f},
 	{0.5f, 1.0f},
@@ -455,16 +465,16 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 	char c_skill[2];
 	char c_skin[BOT_SKIN_LEN+1];
 	char c_name[BOT_NAME_LEN+1];
-	char c_index[3];
+	char c_index[4];
 	int i, j;
 	size_t length;
 	int index;  // index into array of predefined names
-	BOOL found = FALSE;
+	bool found = false;
 	
 	if ((skin == NULL) || (*skin == 0))
 	{
 		// pick a random skin
-		index = RANDOM_LONG(0, 9);  // there are ten possible skins
+		index = RANDOM_LONG( 0, MAX_SKINS - 1 );
 
 		// check if this skin has already been used...
 		while (skin_used[index] == TRUE)
@@ -491,11 +501,11 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 				skin_used[i] = FALSE;
 		}
 
-		strcpy( c_skin, bot_skins[index] );
+		strcpy_s( c_skin, bot_skins[index] );
    }
    else
    {
-		strncpy( c_skin, skin, BOT_SKIN_LEN);
+		strncpy_s( c_skin, skin, BOT_SKIN_LEN);
 		c_skin[BOT_SKIN_LEN] = 0;  // make sure c_skin is null terminated
    }
 
@@ -512,16 +522,16 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 			index++;
 	}
 
-   if (found == TRUE)
+   if( found )
    {
 	  if ((name != NULL) && (*name != 0))
 	  {
-		 strncpy( c_name, name, 31 );
-		 c_name[31] = 0;  // make sure c_name is null terminated
+		 strncpy_s( c_name, name, BOT_NAME_LEN );
+		 c_name[BOT_NAME_LEN] = 0;  // make sure c_name is null terminated
 	  }
 	  else
 	  {
-		 strcpy( c_name, bot_names[index] );
+		 strcpy_s( c_name, bot_names[index] );
 	  }
    }
    else
@@ -533,16 +543,16 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 
 	  GET_GAME_DIR(dir_name);
 
-	  sprintf(filename, "%s\\models\\player\\%s", dir_name, c_skin);
+	  sprintf_s(filename, "%s\\models\\player\\%s", dir_name, c_skin);
 
 	  if (stat(filename, &stat_str) != 0)
 	  {
-		 sprintf(filename, "valve\\models\\player\\%s", c_skin);
+		  sprintf_s( filename, "valve\\models\\player\\%s", c_skin );
 		 if (stat(filename, &stat_str) != 0)
 		 {
 			char err_msg[80];
 
-			sprintf( err_msg, "model \"%s\" is unknown.\n", c_skin );
+			sprintf_s( err_msg, "model \"%s\" is unknown.\n", c_skin );
 			UTIL_ClientPrintAll( HUD_PRINTNOTIFY, err_msg );
 			if (IS_DEDICATED_SERVER())
 			   printf(err_msg);
@@ -560,35 +570,35 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 	  }
 
 	  // copy the name of the model to the bot's name...
-	  strncpy( c_name, skin, BOT_SKIN_LEN);
+	  strncpy_s( c_name, skin, BOT_SKIN_LEN);
 	  c_name[BOT_SKIN_LEN] = 0;  // make sure c_skin is null terminated
-   }
 
-   length = strlen(c_name);
+	  length = strlen( c_name );
 
-   // remove any illegal characters from name...
-   for (i = 0; i < length; i++)
-   {
-	  if ((c_name[i] <= ' ') || (c_name[i] > '~') ||
-		  (c_name[i] == '"'))
+	  // remove any illegal characters from name...
+	  for( i = 0; i < length; i++ )
 	  {
-		 for (j = i; j < length; j++)  // shuffle chars left (and null)
-			c_name[j] = c_name[j+1];
-		 length--;
-	  }               
+		  if( (c_name[i] <= ' ') || (c_name[i] > '~') ||
+			  (c_name[i] == '"') )
+		  {
+			  for( j = i; j < length; j++ )  // shuffle chars left (and null)
+				  c_name[j] = c_name[j + 1];
+			  length--;
+		  }
+	  }
    }
 
 	skill_level = 0;
 
-	if ((skill != NULL) && (*skill != 0))
-		sscanf( skill, "%d", &skill_level );
+	if( (skill != NULL) && (*skill != 0) )
+		skill_level = Q_atoi( skill );
 	else
 		skill_level = f_botskill;
 
 	if ((skill_level < 1) || (skill_level > 5))
 		skill_level = f_botskill;
 
-	sprintf( c_skill, "%d", skill_level );
+	sprintf_s( c_skill, "%d", skill_level );
 	
 	BotEnt = CREATE_FAKE_CLIENT( c_name );
 
@@ -625,8 +635,8 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 		bot_respawn[index].is_used = TRUE;  // this slot is used
 
 		// don't store the name here, it might change if same as another
-		strcpy(bot_respawn[index].skin, c_skin);
-		strcpy(bot_respawn[index].skill, c_skill);
+		strcpy_s(bot_respawn[index].skin, c_skin);
+		strcpy_s(bot_respawn[index].skill, c_skill);
 
 		sprintf(ptr, "Creating bot \"%s\" using model %s with skill=%d\n", c_name, c_skin, skill_level);
 		UTIL_ClientPrintAll( HUD_PRINTNOTIFY, ptr);
@@ -638,34 +648,21 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 		infobuffer = GET_INFOBUFFER( BotClass->edict( ) );
 		clientIndex = ENTINDEX( BotClass->edict() );// BotClass->entindex();
 
-	//	SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "model", c_skin );
-		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "model", "robo" ); // TEMP?
+		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "model", "robo" );
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "skill", c_skill );
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "index", c_index );
 
 		// randomize the skin
 		char TmpText[8];
-		sprintf( TmpText, "%i", RANDOM_LONG( 0, 255 ) );
+		sprintf( TmpText, "%d", RANDOM_LONG( 0, 255 ) );
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "topcolor", TmpText );
-		sprintf( TmpText, "%i", RANDOM_LONG( 0, 255 ) );
+		sprintf( TmpText, "%d", RANDOM_LONG( 0, 255 ) );
 		SET_CLIENT_KEY_VALUE( clientIndex, infobuffer, "bottomcolor", TmpText );
 		
 		ClientConnect( BotClass->edict( ), c_name, "127.0.0.1", ptr );
 		
 	//	DispatchSpawn( BotClass->edict( ) );
 		ClientPutInServer( BotClass->edict() );
-
-		// PURGE THE GHOSTS (fix this shit please)
-		if( name != NULL )
-		{
-			// just spam kick command 5 times to kick this bot from clients
-			for( int x = 0; x < 5; x++ )
-			{
-				char cmd[40];
-				sprintf( cmd, "kick \"%s\"\n", name );
-				SERVER_COMMAND( cmd );
-			}
-		}
 	}
 }
 
@@ -691,18 +688,16 @@ void CBot::BotFixIdealYaw( void )
 
 void CBot::Spawn( )
 {
-	char c_skill[2];
-	char c_index[3];
-
 	SetFlag( F_BOT );
 
 	CBasePlayer::Spawn();
 
-	pev->flags = FL_FAKECLIENT;
+	pev->flags |= FL_FAKECLIENT;
 
+	char *infobuffer = GET_INFOBUFFER( edict() );
+	
 	// set the respawn index value based on key from BotCreate
-	strcpy(c_index, GET_INFO_KEY_VALUE(GET_INFOBUFFER(edict( )), "index") );
-	sscanf(c_index, "%d", &respawn_index);
+	respawn_index = Q_atoi( GET_INFO_KEY_VALUE( infobuffer, "index" ) );
 
 	bot_respawn[respawn_index].pBot = (CBasePlayer *)this;
 
@@ -716,13 +711,12 @@ void CBot::Spawn( )
 
 	// bot starts out in "paused" state since it hasn't moved yet...
 	bot_was_paused = TRUE;
-	v_prev_origin = pev->origin;
+	v_prev_origin = GetAbsOrigin();
 
 	f_shoot_time = 0;
 
 	// get bot's skill level (0=good, 4=bad)
-	strcpy(c_skill, GET_INFO_KEY_VALUE(GET_INFOBUFFER(edict( )), "skill") );
-	sscanf(c_skill, "%d", &bot_skill);
+	bot_skill = Q_atoi( GET_INFO_KEY_VALUE( infobuffer, "skill" ) );
 	bot_skill--;  // make 0 based for array index (now 0-4)
 
 	f_max_speed = CVAR_GET_FLOAT("sv_maxspeed");
@@ -825,7 +819,7 @@ int CBot::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker,
    if (pBotEnemy == NULL)
    {
 	  // face the attacker...
-	  Vector v_enemy = pAttacker->pev->origin - pev->origin;
+	  Vector v_enemy = pAttacker->GetAbsOrigin() - GetAbsOrigin();
 	  Vector bot_angles = UTIL_VecToAngles( v_enemy );
 
 	  pev->ideal_yaw = bot_angles.y;
@@ -845,7 +839,7 @@ int CBot::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker,
 	   (f_pain_time <= gpGlobals->time) && (pev->health > 0) &&
 	   ( !IS_DEDICATED_SERVER() ))
    {
-	  float distance = (pAttacker->pev->origin - pev->origin).Length( );
+	  float distance = (pAttacker->GetAbsOrigin() - GetAbsOrigin()).Length( );
 
 	  // check if the distance to attacker is close enough (otherwise
 	  // the attacker is too far away to hear the pain sounds)
@@ -932,16 +926,16 @@ int CBot::BotInFieldOfView(Vector dest)
 
 BOOL CBot::BotEntityIsVisible( Vector dest )
 {
-	Vector BotEyes = pev->origin + pev->view_ofs;
+	Vector BotEyes = GetAbsOrigin() + pev->view_ofs;
 	
 	// can't jump here
-	if( dest.z - pev->origin.z > 45.0f )
+	if( dest.z - GetAbsOrigin().z > 45.0f )
 		return FALSE;
 	
 	TraceResult tr;
 
    // trace a line from bot's eyes to destination...
-   UTIL_TraceLine( pev->origin + pev->view_ofs, dest, ignore_monsters,
+   UTIL_TraceLine( GetAbsOrigin() + pev->view_ofs, dest, ignore_monsters,
 				   ENT(pev), &tr );
 
    // check if line of sight to object is not blocked (i.e. visible)
@@ -1095,7 +1089,7 @@ void CBot::BotUnderWater( void )
    // look from eye position straight forward (remember: the bot is looking
    // upwards at a 60 degree angle so TraceLine will go out and up...
 
-   v_src = pev->origin + pev->view_ofs;  // EyePosition()
+   v_src = GetAbsOrigin() + pev->view_ofs;  // EyePosition()
    v_forward = v_src + gpGlobals->v_forward * 90;
 
    // trace from the bot's eyes straight forward...
@@ -1158,7 +1152,7 @@ void CBot::BotFindItem( void )
 
    min_distance = radius + 1.0;
 
-   while ((pEntity = UTIL_FindEntityInSphere( pEntity, pev->origin, radius )) != NULL)
+   while ((pEntity = UTIL_FindEntityInSphere( pEntity, GetAbsOrigin(), radius )) != NULL)
    {
 	  can_pickup = FALSE;  // assume can't use it until known otherwise
 
@@ -1170,7 +1164,7 @@ void CBot::BotFindItem( void )
 		 // BModels have 0,0,0 for origin so must use VecBModelOrigin...
 		 entity_origin = VecBModelOrigin(pEntity->pev);
 
-		 vecStart = pev->origin + pev->view_ofs;
+		 vecStart = GetAbsOrigin() + pev->view_ofs;
 		 vecEnd = entity_origin;
 
 		 angle_to_entity = BotInFieldOfView( vecEnd - vecStart );
@@ -1188,7 +1182,7 @@ void CBot::BotFindItem( void )
 			// LONG ladders, the center MAY be hundreds of units above
 			// the bot.  Fake an origin at the same level as the bot...
 			/*
-			entity_origin.z = pev->origin.z;
+			entity_origin.z = GetAbsOrigin().z;
 			vecEnd = entity_origin;
 
 			// trace a line from bot's eyes to func_ladder entity...
@@ -1360,9 +1354,9 @@ void CBot::BotFindItem( void )
 
 	  else  // everything else...
 	  {
-		 entity_origin = pEntity->pev->origin;
+		 entity_origin = pEntity->GetAbsOrigin();
 
-		 vecStart = pev->origin + pev->view_ofs;
+		 vecStart = GetAbsOrigin() + pev->view_ofs;
 		 vecEnd = entity_origin;
 
 		 // find angles from bot origin to entity...
@@ -1376,7 +1370,7 @@ void CBot::BotFindItem( void )
 		 {
 			 // diffusion - the crate can be inside invisible brush collision
 			 TraceResult trCrate;
-			 UTIL_TraceLine( pev->origin + pev->view_ofs, vecEnd, ignore_monsters, ENT( pev ), &tr );
+			 UTIL_TraceLine( GetAbsOrigin() + pev->view_ofs, vecEnd, ignore_monsters, ENT( pev ), &tr );
 			 if( tr.flFraction != 1.0f )
 			 {
 				if( tr.pHit != NULL )
@@ -1493,14 +1487,14 @@ void CBot::BotFindItem( void )
 			// check if entity is an armed tripmine
 			else if (strcmp("monster_tripmine", item_name) == 0)
 			{
-			   float distance = (pEntity->pev->origin - pev->origin).Length( );
+			   float distance = (pEntity->GetAbsOrigin() - GetAbsOrigin()).Length( );
 
 			   if (b_see_tripmine)
 			   {
 				  // see if this tripmine is closer to bot...
-				  if (distance < (v_tripmine_origin - pev->origin).Length())
+				  if (distance < (v_tripmine_origin - GetAbsOrigin()).Length())
 				  {
-					 v_tripmine_origin = pEntity->pev->origin;
+					 v_tripmine_origin = pEntity->GetAbsOrigin();
 					 b_shoot_tripmine = FALSE;
 
 					 // see if bot is far enough to shoot the tripmine...
@@ -1513,7 +1507,7 @@ void CBot::BotFindItem( void )
 			   else
 			   {
 				  b_see_tripmine = TRUE;
-				  v_tripmine_origin = pEntity->pev->origin;
+				  v_tripmine_origin = pEntity->GetAbsOrigin();
 				  b_shoot_tripmine = FALSE;
 
 				  // see if bot is far enough to shoot the tripmine...
@@ -1539,7 +1533,7 @@ void CBot::BotFindItem( void )
 
 	  if (can_pickup) // if the bot found something it can pickup...
 	  {
-		 float distance = (entity_origin - pev->origin).Length( );
+		 float distance = (entity_origin - GetAbsOrigin()).Length( );
 
 		 // see if it's the closest item so far...
 		 if (distance < min_distance)
@@ -1554,10 +1548,10 @@ void CBot::BotFindItem( void )
    if (pPickupEntity != NULL)
    {
 	  // let's head off toward that item...
-	  Vector v_item = pickup_origin - pev->origin;
+	  Vector v_item = pickup_origin - GetAbsOrigin();
 
 	  Vector bot_angles = UTIL_VecToAngles( v_item );
-	  if( pev->velocity.Length2D() > 20 )
+	  if( GetAbsVelocity().Length2D() > 20 )
 	  {
 		  pev->ideal_yaw = bot_angles.y;
 
@@ -1618,7 +1612,7 @@ void CBot::BotUseLift( void )
 
 	  UTIL_MakeVectors( pev->v_angle );
 
-	  v_src = pev->origin + pev->view_ofs;
+	  v_src = GetAbsOrigin() + pev->view_ofs;
 	  v_forward = v_src + gpGlobals->v_forward * 90;
 	  v_right = v_src + gpGlobals->v_right * 90;
 	  v_left = v_src + gpGlobals->v_right * -90;
@@ -1760,7 +1754,7 @@ BOOL CBot::BotCantMoveForward( TraceResult *tr )
 
    // first do a trace from the bot's eyes forward...
 
-   v_src = pev->origin + pev->view_ofs;  // EyePosition()
+   v_src = GetAbsOrigin() + pev->view_ofs;  // EyePosition()
    v_forward = v_src + gpGlobals->v_forward * 40;
 
    // trace from the bot's eyes straight forward...
@@ -1774,7 +1768,7 @@ BOOL CBot::BotCantMoveForward( TraceResult *tr )
 
    // bot's head is clear, check at waist level...
 
-   v_src = pev->origin;
+   v_src = GetAbsOrigin();
    v_forward = v_src + gpGlobals->v_forward * 40;
 
    // trace from the bot's waist straight forward...
@@ -1817,7 +1811,7 @@ BOOL CBot::BotCanJumpUp( void )
    // use center of the body first...
 
    // maximum jump height is 45, so check one unit above that (46)
-   v_source = pev->origin + Vector(0, 0, -36 + 46);
+   v_source = GetAbsOrigin() + Vector(0, 0, -36 + 46);
    v_dest = v_source + gpGlobals->v_forward * 24;
 
    // trace a line forward at maximum jump height...
@@ -1828,7 +1822,7 @@ BOOL CBot::BotCanJumpUp( void )
 	  return FALSE;
 
    // now check same height to one side of the bot...
-   v_source = pev->origin + gpGlobals->v_right * 16 + Vector(0, 0, -36 + 46);
+   v_source = GetAbsOrigin() + gpGlobals->v_right * 16 + Vector(0, 0, -36 + 46);
    v_dest = v_source + gpGlobals->v_forward * 24;
 
    // trace a line forward at maximum jump height...
@@ -1839,7 +1833,7 @@ BOOL CBot::BotCanJumpUp( void )
 	  return FALSE;
 
    // now check same height on the other side of the bot...
-   v_source = pev->origin + gpGlobals->v_right * -16 + Vector(0, 0, -36 + 46);
+   v_source = GetAbsOrigin() + gpGlobals->v_right * -16 + Vector(0, 0, -36 + 46);
    v_dest = v_source + gpGlobals->v_forward * 24;
 
    // trace a line forward at maximum jump height...
@@ -1852,7 +1846,7 @@ BOOL CBot::BotCanJumpUp( void )
    // now trace from head level downward to check for obstructions...
 
    // start of trace is 24 units in front of bot, 72 units above head...
-   v_source = pev->origin + gpGlobals->v_forward * 24;
+   v_source = GetAbsOrigin() + gpGlobals->v_forward * 24;
 
    // offset 72 units from top of head (72 + 36)
    v_source.z = v_source.z + 108;
@@ -1869,7 +1863,7 @@ BOOL CBot::BotCanJumpUp( void )
 	  return FALSE;
 
    // now check same height to one side of the bot...
-   v_source = pev->origin + gpGlobals->v_right * 16 + gpGlobals->v_forward * 24;
+   v_source = GetAbsOrigin() + gpGlobals->v_right * 16 + gpGlobals->v_forward * 24;
    v_source.z = v_source.z + 108;
    v_dest = v_source + Vector(0, 0, -99);
 
@@ -1881,7 +1875,7 @@ BOOL CBot::BotCanJumpUp( void )
 	  return FALSE;
 
    // now check same height on the other side of the bot...
-   v_source = pev->origin + gpGlobals->v_right * -16 + gpGlobals->v_forward * 24;
+   v_source = GetAbsOrigin() + gpGlobals->v_right * -16 + gpGlobals->v_forward * 24;
    v_source.z = v_source.z + 108;
    v_dest = v_source + Vector(0, 0, -99);
 
@@ -1920,7 +1914,7 @@ BOOL CBot::BotCanDuckUnder( void )
    // use center of the body first...
 
    // duck height is 36, so check one unit above that (37)
-   v_source = pev->origin + Vector(0, 0, -36 + 37);
+   v_source = GetAbsOrigin() + Vector(0, 0, -36 + 37);
    v_dest = v_source + gpGlobals->v_forward * 24;
 
    // trace a line forward at duck height...
@@ -1931,7 +1925,7 @@ BOOL CBot::BotCanDuckUnder( void )
 	  return FALSE;
 
    // now check same height to one side of the bot...
-   v_source = pev->origin + gpGlobals->v_right * 16 + Vector(0, 0, -36 + 37);
+   v_source = GetAbsOrigin() + gpGlobals->v_right * 16 + Vector(0, 0, -36 + 37);
    v_dest = v_source + gpGlobals->v_forward * 24;
 
    // trace a line forward at duck height...
@@ -1942,7 +1936,7 @@ BOOL CBot::BotCanDuckUnder( void )
 	  return FALSE;
 
    // now check same height on the other side of the bot...
-   v_source = pev->origin + gpGlobals->v_right * -16 + Vector(0, 0, -36 + 37);
+   v_source = GetAbsOrigin() + gpGlobals->v_right * -16 + Vector(0, 0, -36 + 37);
    v_dest = v_source + gpGlobals->v_forward * 24;
 
    // trace a line forward at duck height...
@@ -1955,7 +1949,7 @@ BOOL CBot::BotCanDuckUnder( void )
    // now trace from the ground up to check for object to duck under...
 
    // start of trace is 24 units in front of bot near ground...
-   v_source = pev->origin + gpGlobals->v_forward * 24;
+   v_source = GetAbsOrigin() + gpGlobals->v_forward * 24;
    v_source.z = v_source.z - 35;  // offset to feet + 1 unit up
 
    // end point of trace is 72 units straight up from start...
@@ -1969,7 +1963,7 @@ BOOL CBot::BotCanDuckUnder( void )
 	  return FALSE;
 
    // now check same height to one side of the bot...
-   v_source = pev->origin + gpGlobals->v_right * 16 + gpGlobals->v_forward * 24;
+   v_source = GetAbsOrigin() + gpGlobals->v_right * 16 + gpGlobals->v_forward * 24;
    v_source.z = v_source.z - 35;  // offset to feet + 1 unit up
    v_dest = v_source + Vector(0, 0, 72);
 
@@ -1981,7 +1975,7 @@ BOOL CBot::BotCanDuckUnder( void )
 	  return FALSE;
 
    // now check same height on the other side of the bot...
-   v_source = pev->origin + gpGlobals->v_right * -16 + gpGlobals->v_forward * 24;
+   v_source = GetAbsOrigin() + gpGlobals->v_right * -16 + gpGlobals->v_forward * 24;
    v_source.z = v_source.z - 35;  // offset to feet + 1 unit up
    v_dest = v_source + Vector(0, 0, 72);
 
@@ -2027,7 +2021,7 @@ BOOL CBot::BotFollowUser( void )
    BOOL user_visible;
    float f_distance;
 
-   Vector vecEnd = pBotUser->pev->origin + pBotUser->pev->view_ofs;
+   Vector vecEnd = pBotUser->GetAbsOrigin() + pBotUser->pev->view_ofs;
 
    pev->v_angle.x = 0;  // reset pitch to 0 (level horizontally)
    pev->v_angle.z = 0;  // reset roll to 0 (straight up and down)
@@ -2054,7 +2048,7 @@ BOOL CBot::BotFollowUser( void )
 		 f_bot_use_time = gpGlobals->time;  // reset "last visible time"
 
 	  // face the user
-	  Vector v_user = pBotUser->pev->origin - pev->origin;
+	  Vector v_user = pBotUser->GetAbsOrigin() - GetAbsOrigin();
 	  Vector bot_angles = UTIL_VecToAngles( v_user );
 
 	  pev->ideal_yaw = bot_angles.y;
@@ -2092,7 +2086,7 @@ BOOL CBot::BotCheckWallOnLeft( void )
 
    // do a trace to the left...
 
-   v_src = pev->origin;
+   v_src = GetAbsOrigin();
    v_left = v_src + gpGlobals->v_right * -40;  // 40 units to the left
 
    UTIL_TraceLine( v_src, v_left, dont_ignore_monsters, ENT(pev), &tr);
@@ -2119,7 +2113,7 @@ BOOL CBot::BotCheckWallOnRight( void )
 
    // do a trace to the right...
 
-   v_src = pev->origin;
+   v_src = GetAbsOrigin();
    v_right = v_src + gpGlobals->v_right * 40;  // 40 units to the right
 
    UTIL_TraceLine( v_src, v_right, dont_ignore_monsters, ENT(pev), &tr);
@@ -2198,11 +2192,11 @@ void CBot::BotThink( void )
 	}
 
 	// see how far bot has moved since the previous position...
-	v_diff = v_prev_origin - pev->origin;
+	v_diff = v_prev_origin - GetAbsOrigin();
 
 	moved_distance = v_diff.Length();
 
-	v_prev_origin = pev->origin;  // save current position as previous
+	v_prev_origin = GetAbsOrigin();  // save current position as previous
 
 	f_move_speed = f_max_speed;  // set to max speed unless known otherwise
 
@@ -2253,7 +2247,7 @@ void CBot::BotThink( void )
 				f_duck_release_time = 0;
 				next_camping_time = gpGlobals->time + RANDOM_LONG( 10, 20 );
 			}
-			else if( pBotEnemy != NULL && ((pBotEnemy->pev->origin - pev->origin).Length() < 200) )
+			else if( pBotEnemy != NULL && ((pBotEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() < 200) )
 			{
 				// enemy is too close. stop camping
 				IsCamping = false;
@@ -2280,7 +2274,7 @@ void CBot::BotThink( void )
 					while( degrees < 360 )
 					{
 						UTIL_MakeVectors( LookVector );
-						const Vector start = pev->origin + pev->view_ofs;
+						const Vector start = GetAbsOrigin() + pev->view_ofs;
 						const Vector end = start + gpGlobals->v_forward * 1000;
 						UTIL_TraceLine( start, end, dont_ignore_monsters, ENT( pev ), &tr );
 						float view_distance = (start - tr.vecEndPos).Length();
@@ -2294,7 +2288,7 @@ void CBot::BotThink( void )
 							IsCamping = false;
 							f_duck_release_time = 0;
 							next_camping_time = gpGlobals->time + RANDOM_LONG( 10, 20 );
-							ALERT( at_console, "Bad bot camping spot at %i %i %i, check waypoint\n", (int)pev->origin.x, (int)pev->origin.y, (int)pev->origin.z );
+							ALERT( at_console, "Bad bot camping spot at %i %i %i, check waypoint\n", (int)GetAbsOrigin().x, (int)GetAbsOrigin().y, (int)GetAbsOrigin().z );
 						}
 					}
 					//ALERT( at_console, "bot camping turn attempts: %i\n", degrees / 15 );
@@ -2341,7 +2335,7 @@ void CBot::BotThink( void )
 
 			if( pBotPickupItem )
 			{
-				if( (pBotPickupItem->pev->origin - pev->origin).Length() < 100 )
+				if( (pBotPickupItem->GetAbsOrigin() - GetAbsOrigin()).Length() < 100 )
 				{
 					if( FClassnameIs( pBotPickupItem, "ammocrate" ) && !pBotPickupItem->HasFlag( F_ENTITY_BUSY ) )
 					{
@@ -2370,7 +2364,7 @@ void CBot::BotThink( void )
 				{
 					Vector tripmine_angles;
 
-					tripmine_angles = UTIL_VecToAngles( v_tripmine_origin - pev->origin );
+					tripmine_angles = UTIL_VecToAngles( v_tripmine_origin - GetAbsOrigin() );
 
 					// face away from the tripmine
 					pev->ideal_yaw = -tripmine_angles.y;
@@ -2432,7 +2426,7 @@ void CBot::BotThink( void )
 					BotUnderWater( );
 
 				// diffusion - bot stuck...
-				if( pev->velocity.Length2D() < 10 )
+				if( GetAbsVelocity().Length2D() < 10 )
 				{
 					if( !IsCamping )
 					{
@@ -2574,9 +2568,9 @@ void CBot::FindNearbyWaypoints( float Distance )
 		for( i = WaypointsLoaded - 1; i >= 0; i-- )
 		{
 			// it's close enough
-			if( (pev->origin - vWaypoint[i]).Length() <= Distance )
+			if( (GetAbsOrigin() - vWaypoint[i]).Length() <= Distance )
 			{
-				if( fabs( pev->origin.z - vWaypoint[i].z ) < 100 )
+				if( fabs( GetAbsOrigin().z - vWaypoint[i].z ) < 100 )
 				{
 					vNearbyWaypoints[iNearbyWaypoints] = vWaypoint[i];
 					iNearbyWaypoints++;
@@ -2589,9 +2583,9 @@ void CBot::FindNearbyWaypoints( float Distance )
 		for( i = 0; i < WaypointsLoaded; i++ )
 		{
 			// it's close enough
-			if( (pev->origin - vWaypoint[i]).Length() <= Distance )
+			if( (GetAbsOrigin() - vWaypoint[i]).Length() <= Distance )
 			{
-				if( fabs( pev->origin.z - vWaypoint[i].z ) < 100 )
+				if( fabs( GetAbsOrigin().z - vWaypoint[i].z ) < 100 )
 				{
 					vNearbyWaypoints[iNearbyWaypoints] = vWaypoint[i];
 					iNearbyWaypoints++;
@@ -2648,10 +2642,10 @@ bool CBot::BotTryWaypoint( void )
 	if( CurrentWaypointID > -1 )
 	{
 		// it's still far enough. let's go
-		if( PointFlag[CurrentWaypointID] == W_FLAG_LADDER && (pev->origin - vWaypoint[CurrentWaypointID]).Length() > 30 )
+		if( PointFlag[CurrentWaypointID] == W_FLAG_LADDER && (GetAbsOrigin() - vWaypoint[CurrentWaypointID]).Length() > 30 )
 		{
 			// let's head off toward that point... (and look at it)
-			Vector vPoint = vWaypoint[CurrentWaypointID] - pev->origin;
+			Vector vPoint = vWaypoint[CurrentWaypointID] - GetAbsOrigin();
 			pev->v_angle = UTIL_VecToAngles( vPoint );
 
 			if( pev->v_angle.x > 180 )
@@ -2669,16 +2663,16 @@ bool CBot::BotTryWaypoint( void )
 			pev->ideal_yaw = pev->v_angle.y;
 			BotFixIdealYaw();
 
-			if( pev->velocity.Length() < 10 ) // stuck again...
+			if( GetAbsVelocity().Length() < 10 ) // stuck again...
 			{
 				CurrentWaypointID = -1;
 				f_find_item = gpGlobals->time + 1;
 			}
 		}
-		else if( (pev->origin - vWaypoint[CurrentWaypointID]).Length2D() > 30 )
+		else if( (GetAbsOrigin() - vWaypoint[CurrentWaypointID]).Length2D() > 30 )
 		{ 
 			// let's head off toward that point...
-			Vector vPoint = vWaypoint[CurrentWaypointID] - pev->origin;
+			Vector vPoint = vWaypoint[CurrentWaypointID] - GetAbsOrigin();
 			Vector bot_angles = UTIL_VecToAngles( vPoint );
 
 			pev->ideal_yaw = bot_angles.y;
@@ -2690,7 +2684,7 @@ bool CBot::BotTryWaypoint( void )
 		//	UTIL_Sparks( vWaypoint[CurrentWaypointID] ); // DEBUGDEBUG
 
 			// stuck on something, try to jump
-			if( pev->velocity.Length2D() < 10 )
+			if( GetAbsVelocity().Length2D() < 10 )
 			{
 				// do duckjump
 				pev->button |= IN_DUCK;
@@ -2734,7 +2728,7 @@ bool CBot::BotTryWaypoint( void )
 		else // we are too close to this point (arrived!), invalidate it and choose another
 		{	
 			TraceResult trArrivalTest;
-			UTIL_TraceLine( pev->origin + pev->view_ofs, vWaypoint[CurrentWaypointID], ignore_monsters, ENT( pev ), &trArrivalTest );
+			UTIL_TraceLine( GetAbsOrigin() + pev->view_ofs, vWaypoint[CurrentWaypointID], ignore_monsters, ENT( pev ), &trArrivalTest );
 
 			if( trArrivalTest.flFraction < 1.0f )
 			{
@@ -2871,7 +2865,7 @@ bool CBot::BotTryWaypoint( void )
 					break; // found enough points
 				
 				TraceResult tr;
-				UTIL_TraceLine( pev->origin + pev->view_ofs, vNearbyWaypoints[i], ignore_monsters, ENT( pev ), &tr );
+				UTIL_TraceLine( GetAbsOrigin() + pev->view_ofs, vNearbyWaypoints[i], ignore_monsters, ENT( pev ), &tr );
 				// visible!
 				if( tr.flFraction == 1.0 )
 				{
@@ -2890,10 +2884,10 @@ bool CBot::BotTryWaypoint( void )
 				iNearbyWaypointNum = RememberNum[0];
 				if( ValidPoint > 1 )
 				{
-					float NearbyDistance = (pev->origin - vNearbyWaypoints[iNearbyWaypointNum]).Length();
+					float NearbyDistance = (GetAbsOrigin() - vNearbyWaypoints[iNearbyWaypointNum]).Length();
 					for( int c = 0; c < ValidPoint; c++ )
 					{
-						float NewNearbyDistance = (pev->origin - vNearbyWaypoints[RememberNum[c]]).Length();
+						float NewNearbyDistance = (GetAbsOrigin() - vNearbyWaypoints[RememberNum[c]]).Length();
 						if( NewNearbyDistance < NearbyDistance )
 						{
 							iNearbyWaypointNum = RememberNum[c];
@@ -2919,7 +2913,7 @@ bool CBot::BotTryWaypoint( void )
 		else
 			NewPoint = vWaypoint[CurrentWaypointID];
 
-		Vector vPoint = NewPoint - pev->origin;
+		Vector vPoint = NewPoint - GetAbsOrigin();
 
 		Vector bot_angles = UTIL_VecToAngles( vPoint );
 

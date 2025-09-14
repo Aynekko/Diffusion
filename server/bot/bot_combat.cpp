@@ -19,58 +19,58 @@
 extern int f_Observer;  // flag to indicate if player is in observer mode
 
 // weapon firing delay based on skill (min and max delay for each weapon)
-float primary_fire_delay[WEAPON_G36C +1][5][2] = {
-   // WEAPON_NONE - NOT USED
-   {{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
-   // WEAPON_KNIFE
-   {{0.0f, 0.1f}, {0.2f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.6f, 1.0f}},
-   // WEAPON_BERETTA (9mm)
-   {{0.0f, 0.1f}, {0.1f, 0.2f}, {0.2f, 0.3f}, {0.3f, 0.4f}, {0.4f, 0.5f}},
-   // WEAPON_DEAGLE (357)
-   {{0.0f, 0.25f}, {0.2f, 0.5f}, {0.4f, 0.8f}, {1.0f, 1.3f}, {1.5f, 2.0f}},
-   // WEAPON_MP5 (9mmAR)
-   {{0.0f, 0.1f}, {0.1f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.5f, 0.8f}},
-   // WEAPON_CHAINGUN - NOT USED
-   {{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
-   // WEAPON_CROSSBOW
-   {{0.0f, 0.25f}, {0.2f, 0.4f}, {0.5f, 0.7f}, {0.8f, 1.0f}, {1.0f, 1.3f}},
-   // WEAPON_SHOTGUN
-   {{0.0f, 0.25f}, {0.2f, 0.5f}, {0.4f, 0.8f}, {0.6f, 1.2f}, {0.8f, 2.0f}},
-   // WEAPON_RPG
-   {{1.0f, 3.0f}, {2.0f, 4.0f}, {3.0f, 5.0f}, {4.0f, 6.0f}, {5.0f, 7.0f}},
-   // WEAPON_GAUSS
-   {{0.0f, 0.1f}, {0.2f, 0.3f}, {0.3f, 0.5f}, {0.5f, 0.8f}, {1.0f, 1.2f}},
-   // WEAPON_EGON
-   {{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
-   // WEAPON_HORNETGUN
-   {{0.0f, 0.1f}, {0.25f, 0.4f}, {0.4f, 0.7f}, {0.6f, 1.0f}, {1.0f, 1.5f}},
-   // WEAPON_HANDGRENADE
-   {{1.0f, 1.4f}, {1.4f, 2.0f}, {1.8f, 2.6f}, {2.0f, 3.0f}, {2.5f, 3.8f}},
-   // WEAPON_TRIPMINE
-   {{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
-   // WEAPON_SATCHEL
-   {{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
-   // WEAPON_SNARK
-   {{0.0f, 0.1f}, {0.1f, 0.2f}, {0.2f, 0.5f}, {0.5f, 0.7f}, {0.6f, 1.0f}},
-   // WEAPON_AR2
-   {{0.0f, 0.1f}, {0.1f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.5f, 0.8f}},
-   // WEAPON_DRONE - NOT USED
-   {{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
-   // WEAPON_SENTRY - NOT USED
-   {{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
-   // WEAPON_HKMP5
-   {{0.0f, 0.1f}, {0.1f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.5f, 0.8f}},
-   // WEAPON_FIVESEVEN
-   {{0.0f, 0.1f}, {0.1f, 0.2f}, {0.2f, 0.3f}, {0.3f, 0.4f}, {0.4f, 0.5f}},
-   // WEAPON_SNIPER
-   {{0.0f, 0.25f}, {0.2f, 0.4f}, {0.5f, 0.7f}, {0.8f, 1.0f}, {1.0f, 1.3f}},
-   // WEAPON_SHOTGUN_XM
-   {{0.0f, 0.25f}, {0.2f, 0.5f}, {0.4f, 0.8f}, {0.6f, 1.2f}, {0.8f, 2.0f}},
-   // WEAPON_G36C
-   {{0.0f, 0.1f}, {0.1f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.5f, 0.8f}},
-   };
+static const float primary_fire_delay[WEAPON_G36C + 1][5][2] = {
+	// WEAPON_NONE - NOT USED
+	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
+	// WEAPON_KNIFE
+	{{0.0f, 0.1f}, {0.2f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.6f, 1.0f}},
+	// WEAPON_BERETTA (9mm)
+	{{0.0f, 0.1f}, {0.1f, 0.2f}, {0.2f, 0.3f}, {0.3f, 0.4f}, {0.4f, 0.5f}},
+	// WEAPON_DEAGLE (357)
+	{{0.0f, 0.25f}, {0.2f, 0.5f}, {0.4f, 0.8f}, {1.0f, 1.3f}, {1.5f, 2.0f}},
+	// WEAPON_MP5 (9mmAR)
+	{{0.0f, 0.1f}, {0.1f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.5f, 0.8f}},
+	// WEAPON_CHAINGUN - NOT USED
+	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
+	// WEAPON_CROSSBOW
+	{{0.0f, 0.25f}, {0.2f, 0.4f}, {0.5f, 0.7f}, {0.8f, 1.0f}, {1.0f, 1.3f}},
+	// WEAPON_SHOTGUN
+	{{0.0f, 0.25f}, {0.2f, 0.5f}, {0.4f, 0.8f}, {0.6f, 1.2f}, {0.8f, 2.0f}},
+	// WEAPON_RPG
+	{{1.0f, 1.4f}, {1.4f, 2.0f}, {1.8f, 2.6f}, {2.0f, 3.0f}, {2.5f, 3.8f}},
+	// WEAPON_GAUSS
+	{{0.0f, 0.1f}, {0.2f, 0.3f}, {0.3f, 0.5f}, {0.5f, 0.8f}, {1.0f, 1.2f}},
+	// WEAPON_EGON
+	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
+	// WEAPON_HORNETGUN
+	{{0.0f, 0.1f}, {0.25f, 0.4f}, {0.4f, 0.7f}, {0.6f, 1.0f}, {1.0f, 1.5f}},
+	// WEAPON_HANDGRENADE
+	{{1.0f, 1.4f}, {1.4f, 2.0f}, {1.8f, 2.6f}, {2.0f, 3.0f}, {2.5f, 3.8f}},
+	// WEAPON_TRIPMINE
+	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
+	// WEAPON_SATCHEL
+	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
+	// WEAPON_SNARK
+	{{0.0f, 0.1f}, {0.1f, 0.2f}, {0.2f, 0.5f}, {0.5f, 0.7f}, {0.6f, 1.0f}},
+	// WEAPON_AR2
+	{{0.0f, 0.1f}, {0.1f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.5f, 0.8f}},
+	// WEAPON_DRONE - NOT USED
+	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
+	// WEAPON_SENTRY - NOT USED
+	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
+	// WEAPON_HKMP5
+	{{0.0f, 0.1f}, {0.1f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.5f, 0.8f}},
+	// WEAPON_FIVESEVEN
+	{{0.0f, 0.1f}, {0.1f, 0.2f}, {0.2f, 0.3f}, {0.3f, 0.4f}, {0.4f, 0.5f}},
+	// WEAPON_SNIPER
+	{{0.0f, 0.25f}, {0.2f, 0.4f}, {0.5f, 0.7f}, {0.8f, 1.0f}, {1.0f, 1.3f}},
+	// WEAPON_SHOTGUN_XM
+	{{0.0f, 0.25f}, {0.2f, 0.5f}, {0.4f, 0.8f}, {0.6f, 1.2f}, {0.8f, 2.0f}},
+	// WEAPON_G36C
+	{{0.0f, 0.1f}, {0.1f, 0.3f}, {0.3f, 0.5f}, {0.4f, 0.6f}, {0.5f, 0.8f}},
+};
 
-float secondary_fire_delay[WEAPON_G36C +1][5][2] = {
+static const float secondary_fire_delay[WEAPON_G36C +1][5][2] = {
 	// WEAPON_NONE - NOT USED
 	{{0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}, {0.0f, 0.0f}},
 	// WEAPON_KNIFE - Not applicable
@@ -178,7 +178,7 @@ CBaseEntity * CBot::BotFindEnemy( void )
 		 // if enemy is still visible and in field of view, keep it
 
 		 // face the enemy
-		 Vector v_enemy = pBotEnemy->pev->origin - pev->origin;
+		 Vector v_enemy = pBotEnemy->GetAbsOrigin() - GetAbsOrigin();
 		 Vector bot_angles = UTIL_VecToAngles( v_enemy );
 
 		 pev->ideal_yaw = bot_angles.y;
@@ -237,7 +237,7 @@ CBaseEntity * CBot::BotFindEnemy( void )
 	  // see if bot can see the player...
 	  if (FInViewCone( &vecEnd ) && FVisible( vecEnd ))
 	  {
-		 float distance = (pPlayer->pev->origin - pev->origin).Length();
+		 float distance = (pPlayer->GetAbsOrigin() - GetAbsOrigin()).Length();
 		 if (distance < nearestdistance)
 		 {
 			nearestdistance = distance;
@@ -275,7 +275,7 @@ CBaseEntity * CBot::BotFindEnemy( void )
 			// it's an enemy turret
 			if( FInViewCone( &vecEnd ) && FVisible( vecEnd ) )
 			{
-				float turret_distance = (pTurret->pev->origin - pev->origin).Length();
+				float turret_distance = (pTurret->GetAbsOrigin() - GetAbsOrigin()).Length();
 				// this turret is farther then current enemy player
 				if( turret_distance > nearestdistance )
 					continue;
@@ -292,7 +292,7 @@ CBaseEntity * CBot::BotFindEnemy( void )
 	if (pNewEnemy)
 	{
 		// face the enemy
-		Vector v_enemy = pNewEnemy->pev->origin - pev->origin;
+		Vector v_enemy = pNewEnemy->GetAbsOrigin() - GetAbsOrigin();
 		Vector bot_angles = UTIL_VecToAngles( v_enemy );
 
 		pev->ideal_yaw = bot_angles.y;
@@ -312,7 +312,7 @@ Vector CBot::BotBodyTarget( CBaseEntity *pBotEnemy )
    float f_scale;
    int d_x, d_y, d_z;
 
-   f_distance = (pBotEnemy->pev->origin - pev->origin).Length();
+   f_distance = (pBotEnemy->GetAbsOrigin() - GetAbsOrigin()).Length();
 
    if (f_distance > 1000)
 	  f_scale = 1.0;
@@ -519,7 +519,7 @@ BOOL CBot::BotFireWeapon( Vector v_enemy_origin, int weapon_choice, BOOL primary
    float distance = v_enemy.Length();  // how far away is the enemy?
 
    // is enemy at least 45 units below bot? (for handgrenades and snarks)
-   if (v_enemy_origin.z < (pev->origin.z - 45))
+   if (v_enemy_origin.z < (GetAbsOrigin().z - 45))
 	  enemy_below = TRUE;
    else
 	  enemy_below = FALSE;
@@ -784,7 +784,7 @@ BOOL CBot::BotFireWeapon( Vector v_enemy_origin, int weapon_choice, BOOL primary
 
 				// aim correctly
 				Vector EnemyCalculatedPos = v_enemy_origin;
-				EnemyCalculatedPos += ((EnemyCalculatedPos - pev->origin).Length() / 800) * pBotEnemy->pev->velocity;
+				EnemyCalculatedPos += ((EnemyCalculatedPos - GetAbsOrigin()).Length() / 800) * pBotEnemy->GetAbsVelocity();
 				Vector vecToss = VecCheckThrow( pev, GetGunPosition(), EnemyCalculatedPos, 800, 0.5 );
 				pev->v_angle = UTIL_VecToAngles( vecToss );
 
@@ -1071,7 +1071,7 @@ camping_weapons:
 
 				// aim correctly
 				Vector EnemyCalculatedPos = v_enemy_origin;
-				EnemyCalculatedPos += ((EnemyCalculatedPos - pev->origin).Length() / 3500) * pBotEnemy->pev->velocity;
+				EnemyCalculatedPos += ((EnemyCalculatedPos - pev->origin).Length() / 3500) * pBotEnemy->GetAbsVelocity();
 				Vector vecToss = VecCheckThrow( pev, GetGunPosition(), EnemyCalculatedPos, 3500, 0.35 ); // 3500 is BOLT_AIR_VELOCITY, 0.35 is pev->gravity of the bolt
 				pev->v_angle = UTIL_VecToAngles( vecToss );
 
@@ -1287,7 +1287,7 @@ void CBot::BotShootAtEnemy( void )
 	if (f_shoot_time <= gpGlobals->time)
 	{
 		// select the best weapon to use at this distance and fire...
-		BotFireWeapon( pBotEnemy->pev->origin );
+		BotFireWeapon( pBotEnemy->GetAbsOrigin() );
 	}
 
 	v_enemy.z = 0;  // ignore z component (up & down)

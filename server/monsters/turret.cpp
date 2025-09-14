@@ -612,7 +612,7 @@ CBaseEntity *CBaseTurret::AcquireTarget(void)
 						// it's an enemy turret
 						if( FInViewCone( &pTurret->EyePosition() ) && FVisible( pTurret->EyePosition() ) )
 						{
-							float turret_distance = (pTurret->pev->origin - pev->origin).Length();
+							float turret_distance = (pTurret->GetAbsOrigin() - GetAbsOrigin()).Length();
 							// this turret is farther then current enemy player
 							if( turret_distance > iNearest )
 								continue;
@@ -635,6 +635,14 @@ void CBaseTurret::ActiveThink(void)
 {
 	int fAttack = 0;
 	Vector vecDirToEnemy;
+
+	if( m_hEnemy == NULL )
+	{
+		m_flLastSight = gpGlobals->time + m_flMaxWait;
+		SetNextThink( 0.1 );
+		SetThink( &CBaseTurret::SearchThink );
+		return;
+	}
 
 	SetNextThink(0.1);
 	StudioFrameAdvance();
@@ -664,7 +672,7 @@ void CBaseTurret::ActiveThink(void)
 		}
 	}
 
-	Vector vecMid = GetLocalOrigin() + pev->view_ofs;
+	Vector vecMid = GetAbsOrigin() + pev->view_ofs;
 	Vector vecMidEnemy = m_hEnemy->BodyTarget( vecMid );
 
 	// Look for our current enemy

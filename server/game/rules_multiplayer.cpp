@@ -362,7 +362,7 @@ void CGameRules::ManageBots(void)
 	
 	if( RespawnTime > 1.0 && gpGlobals->time >= RespawnTime )
 	{
-		BotCheckTime = gpGlobals->time + 5.0;
+		BotCheckTime = gpGlobals->time + 2.0;
 		
 		// find bot needing to be respawned from previous map or server restart
 		while( (index < 32) && (bot_respawn[index].state != BOT_NEED_TO_RESPAWN) )
@@ -398,6 +398,12 @@ void CGameRules::ManageBots(void)
 		CvarsChanged = true;
 	}
 
+	if( max_bots > 16 )
+	{
+		max_bots = 16;
+		CvarsChanged = true;
+	}
+
 	if( CvarsChanged )
 	{
 		CVAR_SET_STRING( "bot_min", UTIL_dtos1(min_bots) );
@@ -406,7 +412,7 @@ void CGameRules::ManageBots(void)
 	
 	if( gpGlobals->time > BotCheckTime )
 	{
-		BotCheckTime = gpGlobals->time + 5.0;
+		BotCheckTime = gpGlobals->time + 2.0;
 		
 		// count active players on the map
 		int playercount = 0;// CountPlayers();
@@ -1921,7 +1927,7 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 	char szCommands[ 1500 ];
 	char szRules[ 1500 ];
 	int minplayers = 0, maxplayers = 0;
-	strcpy( szFirstMapInList, "hldm1" );  // the absolute default level is hldm1
+	strcpy( szFirstMapInList, "dm_test" );  // the absolute default level is dm_test
 
 	int	curplayers;
 	BOOL do_cycle = TRUE;

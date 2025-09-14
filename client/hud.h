@@ -550,7 +550,7 @@ public:
 
 	void MessageAdd( const char *pName, float time );
 	void MessageAdd(client_textmessage_t * newMessage );
-	void MessageDrawScan( client_textmessage_t *pMessage, float time );
+	void MessageDrawScan( client_textmessage_t *pMessage, float time, int id );
 	void MessageScanStart( void );
 	void MessageScanNextChar( void );
 	void Reset( void );

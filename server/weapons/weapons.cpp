@@ -212,8 +212,10 @@ int DamageDecal( CBaseEntity *pEntity, int bitsDamageType )
 	if( bitsDamageType & DMG_SLASH )
 		return DECAL_GUNSHOT5; // diffusion - knife line decal
 	
-	if ( !pEntity )
-		return (DECAL_GUNSHOT1 + RANDOM_LONG(0,3));
+	if( !pEntity )
+		// use 1 decal for optimization purposes - these decals all look alike anyway
+		return DECAL_GUNSHOT1;
+	//	return (DECAL_GUNSHOT1 + RANDOM_LONG(0,3));
 	
 	return pEntity->DamageDecal( bitsDamageType );
 }

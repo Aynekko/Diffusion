@@ -241,7 +241,7 @@ void DrawDecalsBatch( void )
 	cached_shader = -1;
 	num_render_decals = 0;
 
-	int	i;
+	unsigned int i;
 	const cl_entity_t *e = RI->currententity;
 	ASSERT(e != NULL);
 

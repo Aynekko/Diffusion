@@ -1184,6 +1184,12 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 
 	SetAnimation( PLAYER_DIE );
 
+	// reset torso controllers
+	pev->controller[0] = 0x7F;
+	pev->controller[1] = 0x7F;
+	pev->controller[2] = 0x7F;
+	pev->controller[3] = 0x7F;
+
 	m_flDeathAnimationStartTime = gpGlobals->time;
 	
 	pev->modelindex = g_ulModelIndexPlayer;    // don't use eyes
@@ -5287,7 +5293,7 @@ void CBasePlayer::Spawn( void )
 	if( g_pGameRules->IsMultiplayer() )
 	{
 		BlastAbilityLVL = 1; // UNDONE - make a server cvar?
-		ShieldAvailableLVL = 1;
+		ShieldAvailableLVL = 3;
 	}
 	BlastChargesReady = 0;
 	LastSwimUpSound = -1.0f;
