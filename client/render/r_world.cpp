@@ -603,20 +603,33 @@ static int R_SolidSurfaceCompare( const gl_bmodelface_t &a, const gl_bmodelface_
 // R_TransSurfaceCompare: compare translucent surfaces.
 // Sorts surfaces from far to near
 //=====================================================================
-static int R_TransSurfaceCompare( const gl_bmodelface_t *a, const gl_bmodelface_t *b )
+static int R_TransSurfaceCompare( const gl_bmodelface_t &a, const gl_bmodelface_t &b )
 {
-	msurface_t *surf1 = (msurface_t *)a->surface;
-	msurface_t *surf2 = (msurface_t *)b->surface;
+	msurface_t *surf1 = (msurface_t *)a.surface;
+	msurface_t *surf2 = (msurface_t *)b.surface;
 	Vector org1 = RI->currententity->origin + surf1->info->origin;
 	Vector org2 = RI->currententity->origin + surf2->info->origin;
 	float len1 = DotProduct( org1, RI->vforward ) - RI->viewplanedist;
 	float len2 = DotProduct( org2, RI->vforward ) - RI->viewplanedist;
 
 	// compare by plane dists
-	if( len1 > len2 )
-		return -1;
-	if( len1 < len2 )
-		return 0;
+	if( len1 != len2 )
+		return len1 > len2;
+
+	const mextrasurf_t *esrf1 = surf1->info;
+	const mextrasurf_t *esrf2 = surf2->info;
+
+	// 1. shaders
+	if( esrf1->shaderNum[0] != esrf2->shaderNum[0] )
+		return esrf1->shaderNum[0] > esrf2->shaderNum[0];
+
+	// 2. texture number
+	if( esrf1->gl_texturenum != esrf2->gl_texturenum )
+		return esrf1->gl_texturenum > esrf2->gl_texturenum;
+
+	// 3. lightmap texture number
+	if( esrf1->lightmaptexturenum != esrf2->lightmaptexturenum )
+		return esrf1->lightmaptexturenum > esrf2->lightmaptexturenum;
 
 	return 0;
 }
@@ -3195,7 +3208,7 @@ void R_DrawBrushList( void )
 	DrawDecalsBatch();
 }
 
-void R_SetRenderMode( cl_entity_t *e )
+static void R_SetRenderMode( cl_entity_t *e )
 {
 	GL_DepthMask( GL_TRUE );
 
@@ -3338,8 +3351,8 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 	if( translucent )
 	{
 		if( !FBitSet( clmodel->flags, MODEL_LIQUID ) )
-			std::sort( tr.draw_surfaces, tr.draw_surfaces + tr.num_draw_surfaces, R_SolidSurfaceCompare ); // use solid?
-		//	qsort( tr.draw_surfaces, tr.num_draw_surfaces, sizeof( gl_bmodelface_t ), (cmpfunc)R_TransSurfaceCompare );
+			//	std::sort( tr.draw_surfaces, tr.draw_surfaces + tr.num_draw_surfaces, R_SolidSurfaceCompare ); // use solid?
+			std::sort( tr.draw_surfaces, tr.draw_surfaces + tr.num_draw_surfaces, R_TransSurfaceCompare );
 	}
 	else
 		std::sort( tr.draw_surfaces, tr.draw_surfaces + tr.num_draw_surfaces, R_SolidSurfaceCompare );

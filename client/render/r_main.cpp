@@ -1936,7 +1936,7 @@ void HUD_PrintStats( void )
 		R_Speeds_Printf( "%3i wpoly %3i epoly\n", r_stats.c_world_polys, r_stats.c_studio_polys );
 		R_Speeds_Printf( "%3i spoly %3i grass\n\n", r_stats.c_sprite_polys, r_stats.c_grass_polys );
 		R_Speeds_Printf( "%3i mdl (%3i meshes) %3i spr (+ %i batches)\n", r_stats.c_studio_models_drawn, r_stats.c_studio_meshes_drawn, r_stats.c_sprite_models_drawn, r_stats.c_sprite_batches_drawn );
-		R_Speeds_Printf( "%3i temp entities, %3i decals\n", r_stats.c_active_tents_count, r_stats.c_decals );
+		R_Speeds_Printf( "%3i temp entities, %3i decals (%i batches)\n", r_stats.c_active_tents_count, r_stats.c_decals, r_stats.c_decals_batches );
 		R_Speeds_Printf( "%3i particles (%i total)\n", r_stats.c_particles_total - r_stats.c_particles_culled, r_stats.c_particles_total );
 		R_Speeds_Printf( "%3i cables\n\n", r_stats.c_cables );
 		R_Speeds_Printf( "%3i mirrors\n", r_stats.c_mirror_passes );
