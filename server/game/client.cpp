@@ -146,6 +146,19 @@ void ClientDisconnect( edict_t *pEdict )
 	pEntity->RelinkEntity( TRUE );
 
 	g_pGameRules->ClientDisconnected( pEdict );
+
+	// remove player's turrets
+	CBaseEntity *pTurret = NULL;
+	while( (pTurret = UTIL_FindEntityByClassname( pTurret, "_playersentry" )) != NULL )
+	{
+		// not sure but just in case - a turret already marked for deletion
+		if( pTurret->pev->flags & FL_KILLME )
+			continue;
+
+		// only deleting the turrets of specific player
+		if( pTurret->pev->owner == pEdict )
+			UTIL_Remove( pTurret );
+	}
 }
 
 

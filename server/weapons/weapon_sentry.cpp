@@ -22,6 +22,7 @@
 #include "player.h"
 #include "entities/soundent.h"
 #include "game/gamerules.h"
+#include "game/game.h"
 
 class CWpnSentry : public CBasePlayerWeapon
 {
@@ -138,10 +139,13 @@ void CWpnSentry::Holster(void)
 
 bool CWpnSentry::SpawnTest( void )
 {
+	if( m_pPlayer->pev->waterlevel == 3 )
+		return false;
+
 	TraceResult tracer;
 	Vector anglesAim = m_pPlayer->pev->v_angle;
 
-	if( anglesAim.x > 15.0f ) // small hack for more intuitive turret placing at the floor
+	if( anglesAim.x > 15.0f ) // small hack for more intuitive turret placing on the floor
 		anglesAim.x = 15.0f;
 
 	anglesAim.x *= 0.75;
@@ -150,6 +154,9 @@ bool CWpnSentry::SpawnTest( void )
 //	Vector vecEnd = vecSrc + gpGlobals->v_forward * 50;
 	Vector vecSrc = m_pPlayer->GetAbsOrigin() + gpGlobals->v_forward * 50 + gpGlobals->v_up * 10;
 
+	if( UTIL_PointContents( vecSrc ) == CONTENTS_WATER )
+		return false;
+
 	UTIL_TraceHull( vecSrc, vecSrc, dont_ignore_monsters, human_hull, m_pPlayer->edict(), &tracer );
 	if( (tracer.flFraction < 1.0f) || tracer.fAllSolid )
 		return false;
@@ -157,10 +164,6 @@ bool CWpnSentry::SpawnTest( void )
 	// don't spawn behind the glass!!!
 	UTIL_TraceLine( m_pPlayer->GetAbsOrigin(), vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &tracer );
 	if( (tracer.flFraction < 1.0f) || tracer.fAllSolid )
-		return false;
-
-	// last thing...
-	if( UTIL_PointContents( vecSrc ) == CONTENTS_WATER )
 		return false;
 
 	return true;
@@ -183,7 +186,39 @@ void CWpnSentry::PrimaryAttack()
 		return;
 	}
 
+	bool bAllowSpawnInMP = true;
+
+	if( gpGlobals->maxClients > 1 )
+	{
+		// count spawned turrets by this player
+		CBaseEntity *pTurret = NULL;
+		int turret_count = 0;
+		int turret_max = mp_maxturrets.value;
+		while( (pTurret = UTIL_FindEntityByClassname( pTurret, "_playersentry" )) != NULL )
+		{
+			// not sure but just in case - a turret already marked for deletion
+			if( pTurret->pev->flags & FL_KILLME )
+				continue;
+
+			if( pTurret->pev->owner == m_pPlayer->edict() )
+				turret_count++;
+
+			if( turret_count >= turret_max )
+			{
+				bAllowSpawnInMP = false;
+				break;
+			}
+		}
+	}
+
 	// perform spawn check
+	if( !bAllowSpawnInMP )
+	{
+		UTIL_ShowMessage( "UTIL_TOOMANY", m_pPlayer );
+		m_flNextPrimaryAttack = gpGlobals->time + 0.2;
+		return;
+	}
+
 	if( !SpawnTest() )
 	{
 		UTIL_ShowMessage( "UTIL_CANTSPAWN", m_pPlayer );
@@ -308,7 +343,7 @@ void CWpnSentry::WeaponIdle( void )
 			m_hTestModel->SetAbsOrigin( SpawnPos );
 			m_hTestModel->RelinkEntity( FALSE );
 
-			if( !SpawnTest() || (m_pPlayer->pev->waterlevel == 3) )
+			if( !SpawnTest() )
 				m_hTestModel->pev->rendercolor = Vector( 255, 50, 50 );
 			else
 				m_hTestModel->pev->rendercolor = Vector( 50, 255, 50 );
@@ -317,7 +352,7 @@ void CWpnSentry::WeaponIdle( void )
 	else
 	{
 		if( m_hTestModel != NULL )
-			m_hTestModel->pev->effects |= EF_NODRAW;
+			m_hTestModel->pev->rendercolor = Vector( 255, 50, 50 );
 	}
 
 	if (m_flTimeWeaponIdle > gpGlobals->time)
