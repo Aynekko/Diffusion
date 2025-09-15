@@ -442,19 +442,14 @@ void R_DrawSkyBox( void )
 	GL_AlphaTest( GL_FALSE );
 	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE );
 
+	float magicgamma = vid_gamma->value * 0.65f + vid_brightness->value * 0.35f;
+	magicgamma = RemapVal( magicgamma, 1.17f, 3.00f, 0.5f, 1.5f );
+
 	// make sure that light_environment is present
-	// affect the skybox with fog and draw the sun disk
-	if( tr.sky_normal != g_vecZero && CheckShader( glsl.skyboxEnv ) )
+	// affect the skybox with fog
+	if( CheckShader( glsl.skyboxEnv ) )
 	{
-		Vector sky_color = tr.sky_ambient * (1.0f / 128.0f) * r_lighting_modulate->value;
-		Vector sky_vec = tr.sky_normal.Normalize();
-		bool sundisk = false;
-		if( tr.shader_modifier )
-			sundisk = (tr.shader_modifier->curstate.iuser3 > 0);
-
 		GL_BindShader( glsl.skyboxEnv );
-
-		ColorNormalize( sky_color, sky_color );
 
 		float fogdensity = 0.0f;
 		if( RI->params & RP_SKYPORTALVIEW )
@@ -468,11 +463,8 @@ void R_DrawSkyBox( void )
 		else
 			fogdensity = tr.fogDensity * 0.5f;
 		
-		pglUniform3fARB( RI->currentshader->u_LightDir, sky_vec.x, sky_vec.y, sky_vec.z );
-		pglUniform3fARB( RI->currentshader->u_LightDiffuse, sky_color.x, sky_color.y, sky_color.z );
-		pglUniform3fARB( RI->currentshader->u_ViewOrigin, RI->vieworg.x, RI->vieworg.y, RI->vieworg.z );
 		pglUniform4fARB( RI->currentshader->u_FogParams, tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], fogdensity );
-		pglUniform1fARB( RI->currentshader->u_GenericCondition, (float)sundisk );
+		pglUniform1fARB( RI->currentshader->u_GenericCondition, magicgamma );
 	}
 
 	for( int i = 0; i < 6; i++ )
