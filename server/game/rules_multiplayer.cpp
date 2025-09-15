@@ -77,6 +77,10 @@ CHalfLifeMultiplay :: CHalfLifeMultiplay()
 			SERVER_COMMAND( szCommand );
 		}
 	}
+	else if( sv_startfromui.value != 0 ) // already executed by the UI
+	{
+		ALERT( at_console, "Listen server config file already executed by UI\n" );
+	}
 	else
 	{
 		// listen server
@@ -91,6 +95,8 @@ CHalfLifeMultiplay :: CHalfLifeMultiplay()
 			SERVER_COMMAND( szCommand );
 		}
 	}
+
+	CVAR_SET_STRING( "sv_startfromui", "0" );
 
 	InitServerMessages();
 	InitServerSounds();

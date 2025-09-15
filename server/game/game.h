@@ -62,6 +62,7 @@ extern cvar_t mp_explodesatchels;
 extern cvar_t mp_allow_bonuses;
 extern cvar_t sv_train_debug;
 extern cvar_t mp_maxturrets;
+extern cvar_t sv_startfromui;
 
 extern cvar_t bot_show_all_points;
 extern cvar_t bot_max;
