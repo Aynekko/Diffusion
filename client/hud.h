@@ -1008,6 +1008,7 @@ public:
 	bool ShieldOn;
 	float NextDrawingOfflineHUDTime; // time in the future when we are allowed to draw "offline" again
 	Vector DroneColor;
+	bool bUsingBhop;
 
 	// saved cursor movement
 	Vector2D MxMy;

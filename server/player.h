@@ -540,6 +540,7 @@ public:
 	bool Submerged; // reached pev->waterlevel 3
 	float ButtonFreezeTime; // the time when the player was freezed by a button
 	bool IsUpsideDown; // I need this to activate certain effects when changing the state
+	bool BhopEnabled;
 
 	// weapon_drone
 	bool DroneDeployed; // true if a friendly drone is present on the map

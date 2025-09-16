@@ -1089,35 +1089,26 @@ returns the blocked flags:
 */
 int PM_ClipVelocity( Vector in, Vector normal, Vector &out, float overbounce )
 {
-	float	backoff;
-	float	change;
+	float backoff;
 	float angle;
-	int		i, blocked;
+	int i, blocked;
 	
 	angle = normal[ 2 ];
 
-	blocked = 0x00;            // Assume unblocked.
-	if (angle > 0)      // If the plane that is blocking us has a positive z component, then assume it's a floor.
-		blocked |= 0x01;		// 
-	if (!angle)         // If the plane has no Z, it is vertical (wall/step)
-		blocked |= 0x02;		// 
+	blocked = 0x00; // Assume unblocked.
+	if( angle > 0 ) // If the plane that is blocking us has a positive z component, then assume it's a floor.
+		blocked |= 0x01;
+	if( !angle ) // If the plane has no Z, it is vertical (wall/step)
+		blocked |= 0x02;
 	
 	// Determine how far along plane to slide based on incoming direction.
 	// Scale by overbounce factor.
-	backoff = DotProduct (in, normal) * overbounce;
-
-	for( i = 0; i < 3; i++ )
-	{
-		change = normal[i]*backoff;
-		out[i] = in[i] - change;
-		// If out velocity is too small, zero it out.
-		if (out[i] > -STOP_EPSILON && out[i] < STOP_EPSILON)
-			out[i] = 0;
-	}
+	backoff = DotProduct( in, normal ) * overbounce;
+	out = in - normal * backoff;
 
 	// iterate once to make sure we aren't still moving through the plane
 	float adjust = DotProduct( out, normal );
-	if( adjust <= 0.0f )
+	if( adjust < 0.0f )
 	{
 		// min this against a small number (but no further from zero than -DIST_EPSILON) to account for crossing a plane with a near-parallel normal
 		adjust = min( adjust, -DIST_EPSILON );
@@ -1183,7 +1174,7 @@ int PM_FlyMove( void )
 	int			numplanes;
 	Vector		planes[MAX_CLIP_PLANES];
 	Vector		primal_velocity, original_velocity;
-	Vector      new_velocity;
+	Vector      new_velocity = g_vecZero;
 	int			i, j;
 	pmtrace_t	trace;
 	Vector		end;
@@ -1201,13 +1192,12 @@ int PM_FlyMove( void )
 
 	for( int bumpcount = 0; bumpcount < numbumps; bumpcount++ )
 	{
-		if( pmove->velocity == g_vecZero )
+		if( pmove->velocity.Length() == 0.0f )
 			break;
 
 		// Assume we can move all the way from the current origin to the
-		//  end point.
-		for (i=0 ; i<3 ; i++)
-			end[i] = pmove->origin[i] + time_left * pmove->velocity[i];
+		// end point.
+		VectorMA( pmove->origin, time_left, pmove->velocity, end );
 
 		// See if we can make it from origin to end point.
 		trace = pmove->PM_PlayerTrace (pmove->origin, end, PM_NORMAL, -1 );
@@ -1229,7 +1219,7 @@ int PM_FlyMove( void )
 		//  copy the end position into the pmove->origin and 
 		//  zero the plane counter.
 		if( trace.fraction > 0 )
-		{	
+		{
 			// actually covered some distance
 			pmove->origin = trace.endpos;
 			original_velocity = pmove->velocity;
@@ -1284,7 +1274,10 @@ int PM_FlyMove( void )
 
 // modify original_velocity so it parallels all of the clip planes
 //
-		if ( pmove->movetype == MOVETYPE_WALK && ((pmove->onground == -1) || (pmove->friction != 1)) )	// reflect player velocity
+		// reflect player velocity
+		// Only give this a try for first impact plane because you can get yourself stuck in an acute corner by jumping in place
+		// and pressing forward and nobody was really using this bounce/reflection feature anyway...
+		if( numplanes == 1 && pmove->movetype == MOVETYPE_WALK && pmove->onground == -1 )
 		{
 			for( i = 0; i < numplanes; i++ )
 			{
@@ -1301,22 +1294,20 @@ int PM_FlyMove( void )
 		}
 		else
 		{
-			for (i=0 ; i<numplanes ; i++)
+			for( i = 0; i < numplanes; i++ )
 			{
-				PM_ClipVelocity (
-					original_velocity,
-					planes[i],
-					pmove->velocity,
-					1);
-				for (j=0 ; j<numplanes ; j++)
-					if (j != i)
+				PM_ClipVelocity( original_velocity, planes[i], pmove->velocity, 1 );
+				for( j = 0; j < numplanes; j++ )
+				{
+					if( j != i )
 					{
 						// Are we now moving against this plane?
-						if (DotProduct (pmove->velocity, planes[j]) < 0)
+						if( DotProduct( pmove->velocity, planes[j] ) < 0 )
 							break;	// not ok
 					}
-				if (j == numplanes)  // Didn't have to clip, so we're ok
-					break;
+					if( j == numplanes )  // Didn't have to clip, so we're ok
+						break;
+				}
 			}
 			
 			// Did we go all the way through plane set
@@ -1337,6 +1328,7 @@ int PM_FlyMove( void )
 					break;
 				}
 				dir = CrossProduct (planes[0], planes[1]);
+				dir.Normalize();
 				d = DotProduct (dir, pmove->velocity);
 				pmove->velocity = dir * d;
 			}
@@ -1410,7 +1402,6 @@ void PM_WalkMove( void )
 	int			oldonground;
 
 	Vector		wishvel;
-	float       spd;
 	float		fmove, smove;
 	Vector		wishdir;
 	float		wishspeed;
@@ -1477,14 +1468,6 @@ void PM_WalkMove( void )
 
 	// Add in any base velocity to the current velocity.
 	pmove->velocity += pmove->basevelocity;
-
-	spd = pmove->velocity.Length();
-
-	if( spd < 1.0f )
-	{
-		pmove->velocity = g_vecZero;
-		return;
-	}
 
 	// If we are not moving, do nothing
 	//if (!pmove->velocity[0] && !pmove->velocity[1] && !pmove->velocity[2])
@@ -2794,6 +2777,10 @@ PM_Jump
 void PM_Jump (void)
 {
 	qboolean cansuperjump = false;
+	bool bUsingBhop = Q_atoi( pmove->PM_Info_ValueForKey( pmove->physinfo, "bhop" ) ) > 0;
+#ifdef CLIENT_DLL
+	gHUD.bUsingBhop = bUsingBhop;
+#endif
 
 	if (pmove->dead || pmove->flags & FL_ONTRAIN) // diffusion - added ontrain
 	{
@@ -2859,17 +2846,22 @@ void PM_Jump (void)
 		// Flag that we jumped.
 		// HACK HACK HACK
 		// Remove this when the game .dll no longer does physics code!!!!
-		pmove->oldbuttons |= IN_JUMP;	// don't jump again until released
+		if( !bUsingBhop )
+			pmove->oldbuttons |= IN_JUMP;	// don't jump again until released
 		return;		// in air, so no effect
 	}
 
-	if ( pmove->oldbuttons & IN_JUMP )
-		return;		// don't pogo stick
+	if( !bUsingBhop )
+	{
+		if( pmove->oldbuttons & IN_JUMP )
+			return;		// don't pogo stick
+	}
 
 	// In the air now.
 	pmove->onground = -1;
 
-	PM_PreventMegaBunnyJumping();
+	if( !bUsingBhop )
+		PM_PreventMegaBunnyJumping();
 
 	PM_PlayStepSound( PM_MapTextureTypeStepType( pmove->chtexturetype ), 1.0 );
 

@@ -63,6 +63,7 @@ cvar_t  ai_disable = { "ai_disable", "0", FCVAR_CHEAT };
 cvar_t  sv_ignore_triggers = { "sv_ignore_triggers", "0", FCVAR_CHEAT };
 cvar_t	mp_dash_air = { "mp_dash_air", "1", FCVAR_SERVER };
 cvar_t	mp_alwaysgib = { "mp_alwaysgib", "0", FCVAR_SERVER };
+cvar_t	sv_enablebunnyhopping = { "sv_enablebunnyhopping", "0", FCVAR_SERVER };
 cvar_t	mp_killercamera = { "mp_killercamera", "1", FCVAR_SERVER };
 cvar_t	mp_weaponbonus = { "mp_weaponbonus", "1", FCVAR_SERVER };
 cvar_t	mp_hidecorpses = { "mp_hidecorpses", "0", FCVAR_SERVER };
@@ -204,6 +205,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &sv_train_debug );
 	CVAR_REGISTER( &mp_maxturrets );
 	CVAR_REGISTER( &sv_startfromui );
+	CVAR_REGISTER( &sv_enablebunnyhopping );
 
 	//START BOT
 	CVAR_REGISTER( &cvar_bot );

@@ -2273,8 +2273,11 @@ void CBasePlayer::Jump()
 	// jump velocity is sqrt( height * gravity * 2)
 
 	// If this isn't the first frame pressing the jump button, break out.
-	if ( !FBitSet( m_afButtonPressed, IN_JUMP ) )
-		return;         // don't pogo stick
+	if( !BhopEnabled )
+	{
+		if( !FBitSet( m_afButtonPressed, IN_JUMP ) )
+			return;         // don't pogo stick
+	}
 
 	if ( !(pev->flags & FL_ONGROUND) || !pev->groundentity )
 		return;
@@ -2865,6 +2868,17 @@ void CBasePlayer::PreThink( void )
 	// UNDONE: Do we need auto-repeat?
 	m_afButtonPressed = buttonsChanged & pev->button;		// The changed ones still down are "pressed"
 	m_afButtonReleased = buttonsChanged & (~pev->button);	// The ones not down are "released"
+
+	if( sv_enablebunnyhopping.value > 0 && !BhopEnabled )
+	{
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "bhop", "1" );
+		BhopEnabled = true;
+	}
+	else if( sv_enablebunnyhopping.value <= 0 && BhopEnabled )
+	{
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "bhop", "0" );
+		BhopEnabled = false;
+	}
 
 	g_pGameRules->PlayerThink( this );
 
@@ -5166,7 +5180,17 @@ void CBasePlayer::Spawn( void )
 
 	g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
 	g_engfuncs.pfnSetPhysicsKeyValue( edict(), "hl", "1" );
-	g_engfuncs.pfnSetPhysicsKeyValue( edict(), "incar", "0" );
+
+	if( sv_enablebunnyhopping.value > 0 )
+	{
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "bhop", "1" );
+		BhopEnabled = true;
+	}
+	else
+	{
+		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "bhop", "0" );
+		BhopEnabled = false;
+	}
 
 	pev->fov = m_flFOV = 0;// init field of view.
 	m_iClientFOV		= -1; // make sure fov reset is sent
