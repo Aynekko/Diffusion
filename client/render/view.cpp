@@ -423,7 +423,7 @@ void V_Init( void )
 
 	// cubemaps
 	gEngfuncs.pfnAddCommand( "buildcubemaps", CL_BuildCubemaps_f );
-	gl_cubemaps = CVAR_REGISTER( "gl_cubemaps", "0", FCVAR_ARCHIVE );
+	gl_cubemaps = CVAR_REGISTER( "gl_cubemaps", "1", FCVAR_ARCHIVE );
 
 	ADD_COMMAND( "centerview", V_StartPitchDrift );
 
