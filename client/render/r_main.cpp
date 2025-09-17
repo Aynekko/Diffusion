@@ -459,12 +459,6 @@ void R_CheckChanges( void )
 		settings_changed = true;
 	}
 
-	if (FBitSet(r_sun_allowed->flags, FCVAR_CHANGED))
-	{
-		ClearBits(r_sun_allowed->flags, FCVAR_CHANGED);
-		settings_changed = true;
-	}
-
 	if( FBitSet( gl_allow_portals->flags, FCVAR_CHANGED ))
 	{
 		ClearBits( gl_allow_portals->flags, FCVAR_CHANGED );

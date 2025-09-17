@@ -81,7 +81,6 @@ extern cvar_t *gl_hbao;
 extern cvar_t *gl_ssao_debug;
 extern cvar_t *gl_tonemap;
 extern cvar_t	*thirdperson;
-extern cvar_t	*r_sun_allowed;
 extern cvar_t *cl_showmsgs;
 extern cvar_t *cl_viewmodelblend;
 extern cvar_t *cl_viewmodel_offset_x;

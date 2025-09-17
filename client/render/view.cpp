@@ -128,7 +128,6 @@ cvar_t *r_show_cubemaps;
 cvar_t *r_bloom_sprites;
 cvar_t *r_bloom;
 cvar_t *thirdperson;
-cvar_t *r_sun_allowed;
 cvar_t *cl_hitsound;
 cvar_t *cl_muzzlelight;
 cvar_t *cl_localweaponanims;
@@ -399,17 +398,16 @@ void V_Init( void )
 	r_blur = CVAR_REGISTER( "r_blur", "1", FCVAR_ARCHIVE );
 	r_blur_threshold = CVAR_REGISTER( "r_blur_threshold", "5", FCVAR_ARCHIVE );
 	r_blur_strength = CVAR_REGISTER( "r_blur_strength", "1", FCVAR_ARCHIVE );
-	r_sun_allowed = CVAR_REGISTER( "r_sun_allowed", "1", FCVAR_ARCHIVE );
 	gl_sunshafts = CVAR_REGISTER( "gl_sunshafts", "1", FCVAR_ARCHIVE );
 	gl_sunshafts_blur = CVAR_REGISTER( "gl_sunshafts_blur", "0.15", FCVAR_ARCHIVE );
 	gl_sunshafts_brightness = CVAR_REGISTER( "gl_sunshafts_brightness", "0", FCVAR_ARCHIVE );
 	gl_sunshafts_adaptive = CVAR_REGISTER( "gl_sunshafts_adaptive", "0", FCVAR_ARCHIVE );
 	gl_ssao = CVAR_REGISTER( "gl_ssao", "0", FCVAR_ARCHIVE );
-	gl_hbao = CVAR_REGISTER( "gl_hbao", "1", FCVAR_ARCHIVE );
+	gl_hbao = CVAR_REGISTER( "gl_hbao", "0", FCVAR_ARCHIVE );
 	gl_ssao_debug = CVAR_REGISTER( "gl_ssao_debug", "0", FCVAR_CHEAT );
 	gl_tonemap = CVAR_REGISTER( "gl_tonemap", "0", FCVAR_ARCHIVE );
-	r_shadowquality = CVAR_REGISTER( "r_shadowquality", "0", FCVAR_ARCHIVE );
-	r_mirrorquality = CVAR_REGISTER( "r_mirrorquality", "0", FCVAR_ARCHIVE );
+	r_shadowquality = CVAR_REGISTER( "r_shadowquality", "2", FCVAR_ARCHIVE );
+	r_mirrorquality = CVAR_REGISTER( "r_mirrorquality", "3", FCVAR_ARCHIVE );
 	r_testdlight = CVAR_REGISTER( "r_testdlight", "0", FCVAR_CHEAT );
 	gl_lensflare = CVAR_REGISTER( "gl_lensflare", "1", FCVAR_ARCHIVE );
 	gl_water_refraction = CVAR_REGISTER( "gl_water_refraction", "1", FCVAR_ARCHIVE );
@@ -441,6 +439,7 @@ void V_VidInit( void )
 	PrevViewOrg = g_vecZero;
 	gun_roll_angle = 0;
 	weapon_move_angles = g_vecZero;
+	if( vid_brightness->value <= 0.0 ) CVAR_SET_FLOAT( "brightness", 1.5f ); // set default brightness to middle
 }
 
 float V_CalcBob( struct ref_params_s *pparams )
