@@ -1828,6 +1828,15 @@ void CBasePlayer::WaterMove()
 	}
 }
 
+void CBasePlayer::OnTeleport( void )
+{
+	// reset torso controllers
+	pev->controller[0] = 0x7F;
+	pev->controller[1] = 0x7F;
+	pev->controller[2] = 0x7F;
+	pev->controller[3] = 0x7F;
+}
+
 
 // TRUE if the player is attached to a ladder
 BOOL CBasePlayer::IsOnLadder( void )

@@ -310,6 +310,7 @@ public:
 	
 	void UpdatePlayerSound ( void );
 	void DeathSound ( void );
+	void OnTeleport( void );
 
 	void TransferReset( void );
 	void UpdateKeyCatchers( void );
