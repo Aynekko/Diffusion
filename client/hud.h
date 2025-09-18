@@ -625,7 +625,7 @@ public:
 	void MessageDraw( client_textmessage_t *pMessage, int x, int y, bool GetSize = false );
 
 	client_textmessage_t *tutorial;
-	char tutorial_text[2048];
+	char tutorial_text[8192];
 	int Twidth;
 	int Theight;
 };
@@ -876,7 +876,7 @@ public:
 	void CloseWindow( bool mouse = false );
 	
 	char m_szMOTD[MAX_MOTD_LENGTH];
-	char curText[2048];
+	const char *curText;
 	int scrolled_lines;
 	int num_lines;
 	float border;

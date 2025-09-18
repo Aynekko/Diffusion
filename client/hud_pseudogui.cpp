@@ -39,7 +39,7 @@ void CPseudoGUI::CloseWindow( bool mouse )
 	
 	// close the window
 	m_iFlags &= ~HUD_ACTIVE;
-	curText[0] = '\0';
+	curText = NULL;
 	m_szMOTD[0] = '\0'; // terminate motd too
 }
 
@@ -67,7 +67,7 @@ int CPseudoGUI::Init( void )
 {
 	HOOK_MESSAGE( ShowNote );
 	m_szMOTD[0] = '\0';
-	curText[0] = '\0';
+	curText = NULL;
 	gHUD.AddHudElem( this );
 	return 1;
 }
@@ -77,7 +77,7 @@ int CPseudoGUI::VidInit( void )
 	m_iFlags = 0;
 	active_button_alpha = 0;
 	m_szMOTD[0] = '\0';
-	curText[0] = '\0';
+	curText = NULL;
 	scrolled_lines = 0;
 
 	// init frame
@@ -140,7 +140,7 @@ void CPseudoGUI::Enable( void )
 	// is it MOTD?
 	if( m_szMOTD[0] != '\0' )
 	{
-		strcpy_s( curText, m_szMOTD );
+		curText = m_szMOTD;
 	}
 	else
 	{
@@ -151,7 +151,7 @@ void CPseudoGUI::Enable( void )
 			return;
 		}
 
-		strcpy_s( curText, tmp->pMessage );
+		curText = tmp->pMessage;
 	}
 
 	// Count lines
@@ -248,7 +248,7 @@ int CPseudoGUI::Draw( float flTime )
 	if( !gHUD.m_Cursor.GetMousePosition() )
 		return 1;
 
-	if( curText[0] == '\0' )
+	if( curText == NULL )
 		return 1;
 
 	// draw darken frame
@@ -303,14 +303,13 @@ void CPseudoGUI::MessageDraw( const char *pText, int x, int y )
 	const int totalHeight = (num_lines * gHUD.m_scrinfo.iCharHeight);
 	const int text_end_pos = (ScreenHeight / 2) - (rFrame.h / 2) + rFrame.h - (rClose.h * 3) + gHUD.m_scrinfo.iCharHeight;
 	const int text_start_pos = y;
-	const bool enable_scrollbar = (totalHeight > (text_end_pos - text_start_pos));
-	int lines_below = 0;
+	// we need to know how many lines went below the allowed drawing position
+	int lines_below = (totalHeight - (text_end_pos - text_start_pos)) / gHUD.m_scrinfo.iCharHeight;
+	const bool enable_scrollbar = (lines_below - 1 > 0);
 	int tmp_y, tmp_x;
 
 	if( enable_scrollbar )
 	{
-		// we need to know how many lines went below the allowed drawing position
-		lines_below = (totalHeight - (text_end_pos - text_start_pos)) / gHUD.m_scrinfo.iCharHeight;
 		scrolled_lines = bound( 0, scrolled_lines, lines_below - 1 );
 		tmp_y = y - scrolled_lines * gHUD.m_scrinfo.iCharHeight;
 	}
@@ -362,6 +361,7 @@ void CPseudoGUI::MessageDraw( const char *pText, int x, int y )
 
 	if( enable_scrollbar && lines_below > 0 )
 	{
+		pglEnable( GL_MULTISAMPLE_ARB );
 		const float sbar_w = 20 * gHUD.fScale;
 		const float sbar_x = rFrame.x + rFrame.w - ((border - ( 15 * gHUD.fScale )) * 0.5f) - (sbar_w * 0.5f);
 		const float sbar_h = (text_end_pos - text_start_pos) + gHUD.m_scrinfo.iCharHeight;
@@ -373,5 +373,6 @@ void CPseudoGUI::MessageDraw( const char *pText, int x, int y )
 		const float handle_h = sbar_h - ((sbar_h / num_lines) * (lines_below - 1));
 
 		FillRoundedRGBA( handle_x, handle_y, sbar_w, handle_h, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.8f ) );
+		pglDisable( GL_MULTISAMPLE_ARB );
 	}
 }

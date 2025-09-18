@@ -1110,6 +1110,9 @@ int CBaseMonster :: CheckEnemy ( CBaseEntity *pEnemy )
 
 	The problem lies here - look for the comment: // checkthisfaceideal
 	I commented out TASK_FACE_IDEAL there and the problem is gone. Needs to look into.
+
+	UPD sept 2025: TASK_FACE_ENEMY should fix it? https://github.com/FreeSlave/halflife-featureful/commit/d630aa53c3c52b7d803326cf6168fcc249f543d6
+	not gonna test it just yet
 	*/
 	if ( !FVisible( pEnemy ) )
 	{
