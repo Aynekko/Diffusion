@@ -2039,8 +2039,7 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 		SERVER_COMMAND( szCommands );
 }
 
-#define MAX_MOTD_CHUNK	  60
-#define MAX_MOTD_LENGTH   1536 // (MAX_MOTD_CHUNK * 4)
+#define MAX_MOTD_CHUNK	  128
 
 void CGameRules :: SendMOTDToClient( edict_t *client )
 {

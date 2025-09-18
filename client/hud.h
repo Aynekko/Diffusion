@@ -62,7 +62,6 @@ typedef struct cvar_s	cvar_t;
 #define HUD_INTERMISSION	2
 
 #define MAX_PLAYER_NAME_LENGTH	32
-#define MAX_MOTD_LENGTH		1536
 
 #define ROLL_CURVE_ZERO		20	// roll less than this is clamped to zero
 #define ROLL_CURVE_LINEAR		90	// roll greater than this is copied out

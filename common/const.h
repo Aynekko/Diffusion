@@ -963,4 +963,6 @@ const Vector2D sunflower[50] =
 #define DRONE_MAX_HEALTH 200
 #define DRONE_MAX_AMMO 250
 
+#define MAX_MOTD_LENGTH	4096
+
 #endif//CONST_H
