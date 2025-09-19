@@ -445,6 +445,7 @@ private:
 		GLfloat m_glmatrix[16];
 
 		int numlods; // number of LODs
+		bool bHasAdditiveMeshes;
 	};
 
 	struct Decal_t

@@ -4973,6 +4973,8 @@ void CStudioModelRenderer::AddMeshToDrawList( studiohdr_t *phdr, const vbomesh_t
 	entry->parent = e;
 	entry->model = m_pRenderModel;
 	entry->additive = FBitSet( mat->flags, STUDIO_NF_ADDITIVE ) ? true : false;
+	if( entry->additive )
+		m_pModelInstance->bHasAdditiveMeshes = true;
 }
 
 /*
@@ -5398,7 +5400,8 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	//	QSortStudioMeshes( m_DrawMeshes, 0, m_nNumDrawMeshes - 1 );
 		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes, SortSolidMeshes );
 		// then push additive meshes to be the last to draw
-		std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes, SortSolidMeshesByAdditive );
+		if( m_pModelInstance->bHasAdditiveMeshes )
+			std::sort( m_DrawMeshes, m_DrawMeshes + m_nNumDrawMeshes, SortSolidMeshesByAdditive );
 	}
 	
 	// sorting list to reduce shader switches
