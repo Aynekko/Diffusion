@@ -355,7 +355,6 @@
     <ClCompile Include="ammohistory.cpp" />
     <ClCompile Include="ammo_secondary.cpp" />
     <ClCompile Include="animatex.cpp" />
-    <ClCompile Include="battery.cpp" />
     <ClCompile Include="cdll_int.cpp" />
     <ClCompile Include="crosshair.cpp" />
     <ClCompile Include="death.cpp" />

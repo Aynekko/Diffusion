@@ -23,9 +23,6 @@
     <ClCompile Include="ammohistory.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="battery.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\game_shared\bone_setup.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

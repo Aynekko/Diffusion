@@ -126,6 +126,8 @@ void CSmokeGrenade::PrimaryAttack( void )
 		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_WEAPON, "weapons/gren_pull.wav", 1.0, ATTN_NORM );
 		m_flTimeWeaponIdle = gpGlobals->time + 0.5;
 	}
+
+	UTIL_ShowMessage( "UTIL_GRENSAFE1", m_pPlayer );
 }
 
 void CSmokeGrenade::WeaponIdle( void )

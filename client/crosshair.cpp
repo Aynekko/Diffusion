@@ -89,6 +89,7 @@ void CHudCrosshairStatic::VidInitCrosshairs( void )
 
 			case WEAPON_SNIPER:
 			case WEAPON_HANDGRENADE:
+			case WEAPON_SMOKEGRENADE:
 			case WEAPON_SATCHEL:
 			case WEAPON_SENTRY:
 			case WEAPON_GAUSS:
@@ -115,6 +116,7 @@ void CHudCrosshairStatic::VidInitCrosshairs( void )
 
 		case WEAPON_SNIPER:
 		case WEAPON_HANDGRENADE:
+		case WEAPON_SMOKEGRENADE:
 		case WEAPON_SATCHEL:
 		case WEAPON_SENTRY:
 		case WEAPON_GAUSS:
