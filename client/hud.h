@@ -785,7 +785,7 @@ public:
 
 	// hint
 	float hint_alpha;
-	char pHint[512];
+	char pHint[4096];
 	int hint_width;
 	int hint_height;
 	float hint_drawstart_time;
