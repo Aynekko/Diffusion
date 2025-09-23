@@ -109,14 +109,14 @@ void main( void )
 	light = u_LightDiffuse.rgb;	// light color
 
 	// texture or procedural spotlight
-	light *= 1.5 * Brightness * tex_projection.rgb;
+	light *= Brightness * tex_projection.rgb;
 #elif defined( GRASS_LIGHT_OMNIDIRECTIONAL )
 	#if defined( GRASS_HAS_SHADOWS )
 		shadow = ShadowOmni( -var_LightVec, u_ShadowParams );
 		if( shadow <= 0.0 ) discard; // fast reject
 	#endif
 	light = u_LightDiffuse.rgb;
-	light *= 1.5 * Brightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
+	light *= Brightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 #endif
 
 	if( u_FogParams.w > 0.0 )
