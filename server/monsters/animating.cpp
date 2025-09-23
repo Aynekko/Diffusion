@@ -137,57 +137,57 @@ float CBaseAnimating :: StudioGaitFrameAdvance( void )
 	}
 	
 	float delta = gpGlobals->frametime;
+	Vector vel = GetAbsVelocity();
+	Vector ang = GetAbsAngles();
 
 	if( pev->movetype == MOVETYPE_FLY )
-		m_flGaitMovement = pev->velocity.Length() * delta;
+		m_flGaitMovement = vel.Length() * delta;
 	else
-		m_flGaitMovement = pev->velocity.Length2D() * delta;
+		m_flGaitMovement = vel.Length2D() * delta;
 
-	if( pev->velocity.Length2D() < 0.1f )
+	if( vel.Length2D() < 0.1f )
 	{
-		float flYawDiff;
-		
-		flYawDiff = pev->angles[YAW] - m_flGaitYaw;
-		flYawDiff = flYawDiff - (int)(flYawDiff / 360) * 360;
+		float flYawDiff = ang[YAW] - m_flGaitYaw;
+		flYawDiff -= (int)(flYawDiff / 360.0f) * 360.0f;
 
-		if( flYawDiff > 180 ) flYawDiff -= 360;
-		if( flYawDiff < -180 ) flYawDiff += 360;
+		if( flYawDiff > 180.0f ) flYawDiff -= 360.0f;
+		if( flYawDiff < -180.0f ) flYawDiff += 360.0f;
 
 		if( delta < 0.25f )
 			flYawDiff *= delta * 4.0f;
 		else flYawDiff *= delta;
 
 		m_flGaitYaw += flYawDiff;
-		m_flGaitYaw = m_flGaitYaw - (int)(m_flGaitYaw / 360) * 360;
+		m_flGaitYaw -= (int)(m_flGaitYaw / 360.0f) * 360.0f;
 
 		m_flGaitMovement = 0.0f;
 	}
 	else
 	{
-		float gaityaw = RAD2DEG( atan2( pev->velocity.y, pev->velocity.x ));
+		float gaityaw = RAD2DEG( atan2( vel.y, vel.x ));
 		m_flGaitYaw = bound( -180.0f, gaityaw, 180.0f );
 	}
 
 	// calc side to side turning
 	float flYaw;
 	if( pev->effects & EF_UPSIDEDOWN )
-		flYaw = -pev->angles[YAW] + m_flGaitYaw; // view direction relative to movement
+		flYaw = -ang[YAW] + m_flGaitYaw; // view direction relative to movement
 	else
-		flYaw = pev->angles[YAW] - m_flGaitYaw; // view direction relative to movement
+		flYaw = ang[YAW] - m_flGaitYaw; // view direction relative to movement
 
 	if( pev->effects & EF_UPSIDEDOWN )
-		flYaw = flYaw - (int)(flYaw / 360) * 360;
+		flYaw -= (int)(flYaw / 360.0f) * 360.0f;
 	else
-		flYaw = flYaw + (int)(flYaw / 360) * 360;
+		flYaw += (int)(flYaw / 360.0f) * 360.0f;
 
-	if( flYaw < -180.0f ) flYaw += 350.0f;// flYaw += 360.0f;
-	if( flYaw > 180.0f ) flYaw -= 350.0f;//flYaw -= 360.0f;
+	if( flYaw < -180.0f ) flYaw += 360.0f;
+	if( flYaw > 180.0f ) flYaw -= 360.0f;
 
-//	flYaw = (int)flYaw;
+	flYaw = (int)flYaw;
 
 	// kill the yaw jitter
-//	if( flYaw > -1.0f && flYaw < 1.0f )
-//		flYaw = 0.0f;
+	if( flYaw > -1.0f && flYaw < 1.0f )
+		flYaw = 0.0f;
 
 	if( flYaw > 120.0f )
 	{
@@ -203,7 +203,7 @@ float CBaseAnimating :: StudioGaitFrameAdvance( void )
 	}
 
 	// classic Half-Life method
-	byte iTorsoAdjust = (byte)bound( 0, ((flYaw * 1.5f / 4.0f) + 30) / (60.0f / 255.0f), 255 ); // diffusion x1.5 hack!!! 
+	byte iTorsoAdjust = (byte)bound( 0, ((flYaw / 4.0f) + 30) / (60.0f / 255.0f), 255 ); // diffusion x1.5 hack!!! 
 	
 	// value it's already in range 0-255
 	pev->controller[0] = iTorsoAdjust;
@@ -218,10 +218,12 @@ float CBaseAnimating :: StudioGaitFrameAdvance( void )
 
 	SetBlending( 0, ((pev->angles[PITCH]) * 3.0f));
 
-	pev->angles[YAW] = m_flGaitYaw;
+	ang[YAW] = m_flGaitYaw;
 
-	if( pev->angles[YAW] < -0.0f )
-		pev->angles[YAW] += 360.0f;
+	if( ang[YAW] < -0.0f )
+		ang[YAW] += 360.0f;
+
+	SetAbsAngles( ang );
 
 //	CalcGaitFrame(GetModelPtr(), m_flPoseParameter, pev->gaitsequence, pev->fuser1, m_flGaitMovement);
 	int localMaxFrame = GetBoneSetup()->LocalMaxFrame( pev->gaitsequence );

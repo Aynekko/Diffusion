@@ -2785,7 +2785,7 @@ StudioInterpolateBlends
 void CStudioModelRenderer::StudioInterpolateBlends( cl_entity_t *e, float dadt )
 {
 	mstudiobonecontroller_t *pbonecontroller = (mstudiobonecontroller_t *)((byte *)m_pStudioHeader + m_pStudioHeader->bonecontrollerindex);
-	
+	dadt = 1.0f; // FIXME !!!!
 	// interpolate controllers
 	for( int j = 0; j < m_pStudioHeader->numbonecontrollers; j++ )
 	{
