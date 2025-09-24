@@ -24,7 +24,7 @@ uniform sampler2DShadow	u_ShadowMap;
 
 float ShadowProj( vec4 projection, vec2 texel, float NdotL )
 {
-	vec3 coord = vec3( projection.xyz / (projection.w + 0.002) ); // z-bias
+	vec3 coord = vec3( projection.xyz / (projection.w + 0.004) ); // z-bias
 	coord.s = float( clamp( float( coord.s ), texel.x, 1.0 - texel.x ) );
 	coord.t = float( clamp( float( coord.t ), texel.y, 1.0 - texel.y ) );
 	coord.r = float( clamp( float( coord.r ), 0.0, 1.0 ) );
