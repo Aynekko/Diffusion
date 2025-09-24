@@ -1602,6 +1602,18 @@ void CFuncTrackTrain :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	if( IsLockedByMaster( ))
 		return;
 
+	// diffusion - this is a fucking retarded hack to keep multiple train carts synchronized (framerate issues):
+	// when the train reaches the end point, I fire trigger_relay with this value and the affected trains
+	// reset to their initial positions, and after a second I restart them.
+	// Initially I used teleport path_tracks but traincarts were de-syncing after a while (usually instantly after first teleport at 30 fps)
+	if( value == 666.0f )
+	{
+		Stop();
+		SetThink( &CFuncTrackTrain::Find );
+		SetNextThink( 0 );
+		return;
+	}
+
 	if( useType == USE_RESET )
 	{
 		if( FBitSet( pev->spawnflags, SF_TRACKTRAIN_FORWARDONLY ))
