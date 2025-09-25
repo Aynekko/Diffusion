@@ -1289,19 +1289,22 @@ CBaseEntity* CBaseMonster :: CheckTraceHullAttack( float flDist, int iDamage, in
 // the caller's forward view cone. The dot product is performed
 // in 2d, making the view cone infinitely tall. 
 //=========================================================
-BOOL CBaseMonster :: FInViewCone ( CBaseEntity *pEntity, float m_flFieldOfView )
+BOOL CBaseMonster::FInViewCone( CBaseEntity *pEntity, float m_flFieldOfView )
 {
-	Vector2D	vec2LOS;
-	float	flDot;
-
-	UTIL_MakeVectors ( GetAbsAngles() );
+	if( m_flFieldOfView == VIEW_FIELD_FULL )
+		return TRUE;
 	
-	vec2LOS = ( pEntity->GetAbsOrigin() - GetAbsOrigin() ).Make2D();
+	Vector2D vec2LOS;
+	float flDot;
+
+	UTIL_MakeVectors( GetAbsAngles() );
+
+	vec2LOS = (pEntity->GetAbsOrigin() - GetAbsOrigin()).Make2D();
 	vec2LOS = vec2LOS.Normalize();
 
-	flDot = DotProduct (vec2LOS , gpGlobals->v_forward.Make2D() );
+	flDot = DotProduct( vec2LOS, gpGlobals->v_forward.Make2D() );
 
-	if ( flDot > m_flFieldOfView )
+	if( flDot > m_flFieldOfView )
 		return TRUE;
 	else
 		return FALSE;
