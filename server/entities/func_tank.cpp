@@ -335,6 +335,9 @@ void CBaseTank :: Spawn( void )
 	if( !m_flAttenuation )
 		m_flAttenuation = ATTN_NORM; // large radius
 
+	if( m_minRange > m_maxRange )
+		m_minRange = m_maxRange;
+
 	SetNextThink( 1.0 );
 }
 
@@ -634,8 +637,8 @@ void CBaseTank :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 
 CBaseEntity *CBaseTank :: FindTarget( void )
 {
-	Vector2D	vec2LOS;
-	float		flDot;
+	Vector2D vec2LOS;
+	float flDot;
 	
 	// normal mode: find the client in PVS
 	if( !m_iszFireTarget && !m_iTankClass )
@@ -645,6 +648,10 @@ CBaseEntity *CBaseTank :: FindTarget( void )
 			return pClientTarget;
 		if( pClientTarget )
 		{
+			// check distance
+			if( !InRange( (pClientTarget->GetAbsOrigin() - GetAbsOrigin()).Length() ) )
+				return NULL;
+
 			// check view cone
 			UTIL_MakeVectors( CachedAngles );
 			vec2LOS = (pClientTarget->GetAbsOrigin() - GetAbsOrigin()).Make2D();
@@ -667,6 +674,11 @@ CBaseEntity *CBaseTank :: FindTarget( void )
 	CBaseEntity *pReturn = NULL;
 	int iBestRelationship = R_DL;
 	float flDist = 8192, flNearest = 8192; // so first visible entity will become the closest.
+	if( m_maxRange > 0.0f )
+	{
+		flDist = m_maxRange;
+		flNearest = m_maxRange;
+	}
 
 	// check all the entities
 	while ( !FNullEnt( pent ) )
@@ -1493,13 +1505,13 @@ void CFuncTankGun::Fire( const Vector &barrelEnd, const Vector &forward, entvars
 				switch( m_bulletType )
 				{
 				case TANK_BULLET_9MM:
-					FireBullets( 1, FireOrigin, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_9MM, 1, m_iBulletDamage, pevAttacker ); // was barrelEnd
+					FireBullets( 1, FireOrigin, forward, gTankSpread[m_spread], m_maxRange > 0.0f ? m_maxRange : 8192, BULLET_MONSTER_9MM, 1, m_iBulletDamage, pevAttacker ); // was barrelEnd
 					break;
 				case TANK_BULLET_MP5:
-					FireBullets( 1, FireOrigin, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_MP5, 1, m_iBulletDamage, pevAttacker );
+					FireBullets( 1, FireOrigin, forward, gTankSpread[m_spread], m_maxRange > 0.0f ? m_maxRange : 8192, BULLET_MONSTER_MP5, 1, m_iBulletDamage, pevAttacker );
 					break;
 				case TANK_BULLET_12MM:
-					FireBullets( 1, FireOrigin, forward, gTankSpread[m_spread], 4096, BULLET_MONSTER_12MM, 1, m_iBulletDamage, pevAttacker );
+					FireBullets( 1, FireOrigin, forward, gTankSpread[m_spread], m_maxRange > 0.0f ? m_maxRange : 8192, BULLET_MONSTER_12MM, 1, m_iBulletDamage, pevAttacker );
 					break;
 				case TANK_BULLET_NONE:
 				default: break;
