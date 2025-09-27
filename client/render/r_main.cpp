@@ -1033,12 +1033,29 @@ void R_FindViewLeaf( void )
 {
 	RI->oldviewleaf = RI->viewleaf;
 	RI->viewleaf = Mod_PointInLeaf( RI->pvsorigin, worldmodel->nodes );
+
 	if( RP_NORMALPASS() ) // yes, normalpass only. just in case - don't mess with other passes...
 	{
 		if( RI->viewleaf != RI->oldviewleaf )
 		{
 			memset( RI->bBoxVisible, -1, sizeof( RI->bBoxVisible ) ); // reset entity cached cull state
 			//	Msg( "cull cache reset!\n" );
+		}
+	}
+
+	if( RI->params & RP_SKYPORTALVIEW )
+	{
+		// in case the camera entity or position has changed, reset everything
+		if( tr.sky_camera_origin != tr.sky_camera->curstate.origin )
+		{
+			tr.sky_camera_origin = tr.sky_camera->curstate.origin;
+			tr.sky_camera_leaf = NULL;
+		}
+		if( tr.sky_camera_leaf != RI->viewleaf )
+		{
+			// Msg( "sky cull cache reset!\n" );
+			memset( RI->bBoxVisibleSkybox, -1, sizeof( RI->bBoxVisibleSkybox ) ); // reset entity cached cull state
+			tr.sky_camera_leaf = RI->viewleaf;
 		}
 	}
 }

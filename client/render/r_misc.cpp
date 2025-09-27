@@ -2053,6 +2053,9 @@ void R_NewMap( void )
 	tr.realframecount = 0;
 	RI->viewleaf = NULL; // it's may be data from previous map
 	memset( RI->bBoxVisible, -1, sizeof( RI->bBoxVisible ) ); // reset entity cached cull state
+	memset( RI->bBoxVisibleSkybox, -1, sizeof( RI->bBoxVisibleSkybox ) );
+	tr.sky_camera_leaf = NULL;
+	tr.sky_camera_origin = g_vecZero;
 
 	// setup the skybox sides
 	for( i = 0; i < 6; i++ )

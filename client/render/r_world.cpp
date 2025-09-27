@@ -3470,6 +3470,9 @@ void R_MarkLeaves( void )
 		tr.fResetVis = false;
 		RI->viewleaf = NULL;
 		memset( RI->bBoxVisible, -1, sizeof( RI->bBoxVisible ) ); // reset entity cached cull state
+		memset( RI->bBoxVisibleSkybox, -1, sizeof( RI->bBoxVisibleSkybox ) );
+		tr.sky_camera_leaf = NULL;
+		tr.sky_camera_origin = g_vecZero;
 	}
 
 	if( RI->viewleaf == RI->oldviewleaf && RI->viewleaf != NULL )

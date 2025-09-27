@@ -320,6 +320,7 @@ typedef struct
 	float		viewplanedist;
 	mplane_t		clipPlane;
 	int bBoxVisible[8192]; // cache cull state for an entity here if the leaf is unchanged !!! NORMALPASS ONLY (I'm scared to break stuff in other passes yet)
+	int bBoxVisibleSkybox[8192]; // let's try :)
 } ref_instance_t;
 
 typedef struct
@@ -394,6 +395,8 @@ typedef struct
 	int		num_draw_decals;
 
 	cl_entity_t	*sky_camera;
+	mleaf_t *sky_camera_leaf;
+	Vector sky_camera_origin;
 	bool fIgnoreSkybox; // we already draw 3d skybox, so don't overwrite it in current pass
 	bool bSkySurfFound; // sets to true if a sky surface was found and turns on 3D sky for the next frame
 	ref_params_t viewparams;		// local copy of ref_params_t

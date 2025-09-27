@@ -384,7 +384,11 @@ void R_CheckSkyPortal( cl_entity_t *skyPortal )
 	tr.fIgnoreSkybox = false;
 
 	if( tr.sky_camera == NULL )
+	{
+		tr.sky_camera_leaf = NULL;
+		tr.sky_camera_origin = g_vecZero;
 		return;
+	}
 
 	if( !CVAR_TO_BOOL( r_allow_3dsky ) )
 	{

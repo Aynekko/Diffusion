@@ -407,18 +407,28 @@ bool Mod_BoxVisible( const Vector mins, const Vector maxs, const byte *visbits )
 
 	// during normalpass, use cached cull value, if the viewleaf is the same as last frame.
 	// this culling is expensive stuff
-	bool use_cache = (
+	const bool bSkyboxView = (RI->params & RP_SKYPORTALVIEW);
+	const bool use_cache = (
 		r_cached_box_culling->value > 0 &&
 		RI->currentlight == NULL &&
 		RI->currententity != NULL &&
 		(RI->currententity->index > 0) &&
-		RP_NORMALPASS()
+		(RI->currententity->index < 8192) &&
+		(RP_NORMALPASS() || bSkyboxView)
 		);
 
 	if( use_cache )
 	{
-		if( RI->bBoxVisible[RI->currententity->index] != -1 && (RI->currententity->curstate.origin == RI->currententity->prevstate.origin) )
-			return RI->bBoxVisible[RI->currententity->index] > 0 ? true : false;
+		if( !bSkyboxView )
+		{
+			if( RI->bBoxVisible[RI->currententity->index] != -1 && (RI->currententity->curstate.origin == RI->currententity->prevstate.origin) )
+				return RI->bBoxVisible[RI->currententity->index] > 0 ? true : false;
+		}
+		else // 3D sky
+		{
+			if( RI->bBoxVisibleSkybox[RI->currententity->index] != -1 && (RI->currententity->curstate.origin == RI->currententity->prevstate.origin) )
+				return RI->bBoxVisibleSkybox[RI->currententity->index] > 0 ? true : false;
+		}
 	}
 
 	count = Mod_BoxLeafnums( mins, maxs, leafList, SIZEOFARRAY( leafList ), &headnode );
@@ -431,7 +441,12 @@ bool Mod_BoxVisible( const Vector mins, const Vector maxs, const byte *visbits )
 		if( CHECKVISBIT( visbits, leafList[i] ) )
 		{
 			if( use_cache )
-				RI->bBoxVisible[RI->currententity->index] = 1;
+			{
+				if( !bSkyboxView )
+					RI->bBoxVisible[RI->currententity->index] = 1;
+				else
+					RI->bBoxVisibleSkybox[RI->currententity->index] = 1;
+			}
 			return true;
 		}
 	}
@@ -439,12 +454,22 @@ bool Mod_BoxVisible( const Vector mins, const Vector maxs, const byte *visbits )
 	if( Mod_HeadnodeVisible( headnode, visbits ) )
 	{
 		if( use_cache )
-			RI->bBoxVisible[RI->currententity->index] = 1;
+		{
+			if( !bSkyboxView )
+				RI->bBoxVisible[RI->currententity->index] = 1;
+			else
+				RI->bBoxVisibleSkybox[RI->currententity->index] = 1;
+		}
 		return true;
 	}
 
 	if( use_cache )
-		RI->bBoxVisible[RI->currententity->index] = 0;
+	{
+		if( !bSkyboxView )
+			RI->bBoxVisible[RI->currententity->index] = 0;
+		else
+			RI->bBoxVisibleSkybox[RI->currententity->index] = 0;
+	}
 
 	return false;
 }
