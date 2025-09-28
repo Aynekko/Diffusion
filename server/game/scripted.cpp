@@ -105,6 +105,11 @@ void CCineMonster :: KeyValue( KeyValueData *pkvd )
 		m_iszFireOnPossess = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "ActionModel" ) )
+	{
+		m_actionmodel = ALLOC_STRING( pkvd->szValue );;
+		pkvd->fHandled = TRUE;
+	}
 	else
 	{
 		BaseClass::KeyValue( pkvd );
@@ -122,7 +127,8 @@ BEGIN_DATADESC( CCineMonster )
 	DEFINE_KEYFIELD( m_iszFireOnPossess, FIELD_STRING, "m_iszFireOnPossess" ),
 	DEFINE_FIELD( m_iDelay, FIELD_INTEGER ),
 	DEFINE_FIELD( m_startTime, FIELD_TIME ),
-
+	DEFINE_KEYFIELD( m_actionmodel, FIELD_STRING, "ActionModel" ),
+	DEFINE_FIELD( m_originalmodel, FIELD_STRING ),
 	DEFINE_FIELD( m_saved_movetype, FIELD_INTEGER ),
 	DEFINE_FIELD( m_saved_solid, FIELD_INTEGER ),
 	DEFINE_FIELD( m_saved_effects, FIELD_INTEGER ),
@@ -162,6 +168,9 @@ void CCineMonster :: Spawn( void )
 		m_interruptable = FALSE;
 	else
 		m_interruptable = TRUE;
+
+	if( m_actionmodel > 0 )
+		PRECACHE_MODEL( STRING( m_actionmodel ) );
 }
 
 void CCineMonster :: ClearEffects( void )
@@ -521,6 +530,16 @@ BOOL CCineMonster :: StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comp
 		return FALSE;
 	}
 
+	if( iszSeq == m_iszPlay )
+	{
+		if( m_actionmodel > 0 )
+		{
+			// remember old model, set new model for action
+			m_originalmodel = pTarget->pev->model;
+			SET_MODEL( pTarget->edict(), STRING( m_actionmodel ) );
+		}
+	}
+
 	pTarget->pev->sequence = pTarget->LookupSequence( STRING( iszSeq ) );
 	if (pTarget->pev->sequence == -1)
 	{
@@ -590,6 +609,12 @@ void CCineMonster :: SequenceDone ( CBaseMonster *pMonster )
 	{
 		SetThink( &CBaseEntity::SUB_Remove );
 		pev->nextthink = gpGlobals->time + 0.1;
+	}
+
+	if( m_actionmodel > 0 )
+	{
+		// set original model back
+		SET_MODEL( pMonster->edict(), STRING( m_originalmodel ) );
 	}
 	
 	// This is done so that another sequence can take over the monster when triggered by the first
@@ -892,6 +917,10 @@ BOOL CBaseMonster :: CineCleanup( void )
 	// If we actually played a sequence
 	if ( pOldCine && pOldCine->m_iszPlay )
 	{
+		if( pOldCine->m_actionmodel > 0 )
+		{
+			SET_MODEL( edict(), STRING( pOldCine->m_originalmodel ) );
+		}
 		if ( !(pOldCine->pev->spawnflags & SF_SCRIPT_NOSCRIPTMOVEMENT) )
 		{
 			// reset position

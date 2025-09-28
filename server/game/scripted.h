@@ -94,6 +94,8 @@ public:
 	int m_saved_effects;
 //	Vector m_vecOrigOrigin;
 	BOOL m_interruptable;
+	string_t m_actionmodel;
+	string_t m_originalmodel;
 
 	bool monster_not_found; // for debug alert
 };
