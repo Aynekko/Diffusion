@@ -481,6 +481,13 @@ void CTalkMonster :: StartTask( Task_t *pTask )
 		}
 		break;
 
+	case TASK_ALICE_FACE_FOLLOW:
+		if( m_hTargetEnt != NULL )
+			MakeIdealYaw( m_hTargetEnt->GetAbsOrigin() );
+		else
+			TaskFail();
+		break;
+
 	case TASK_PLAY_SCRIPT:
 		m_hTalkTarget = NULL;
 		CBaseMonster::StartTask( pTask );
@@ -546,6 +553,29 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 			{
 				TaskFail();
 			}
+		}
+		break;
+
+	case TASK_ALICE_FACE_FOLLOW:
+		if( m_hTargetEnt != NULL )
+		{
+			MakeIdealYaw( m_hTargetEnt->GetAbsOrigin() );
+			pev->ideal_yaw -= headyaw; // !!!
+			float diff = fabs( FlYawDiff() );
+			if( diff > 120 )
+				SetTurnActivity();
+
+			if( m_IdealActivity == ACT_TURN_LEFT || m_IdealActivity == ACT_TURN_RIGHT )
+			{
+				ChangeYaw( pev->yaw_speed );
+				if( fabs( FlYawDiff() ) < 10 )
+					m_IdealActivity = ACT_IDLE;
+			}
+
+			IdleHeadTurn( m_hTargetEnt->GetAbsOrigin() );
+
+			if( diff < 10 )
+				TaskComplete();
 		}
 		break;
 

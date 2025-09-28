@@ -1331,7 +1331,7 @@ void CHGrunt :: RunAI( void )
 	else
 	{
 		RunningShooting = false;
-		SetBoneController( 1, 0 );
+		SetBoneController( 2, 0 );
 	}
 }
 
@@ -2107,7 +2107,7 @@ bool CHGrunt::BodyTurn( const Vector &vecTarget )
 		return false;
 
 	// turn towards vector
-	SetBoneController( 1, yaw );
+	SetBoneController( 2, yaw );
 
 	return true;
 }
@@ -2210,7 +2210,6 @@ void CHGrunt :: DeathSound ( void )
 void CHGrunt :: SetActivity ( Activity NewActivity )
 {
 	int	iSequence = ACTIVITY_NOT_AVAILABLE;
-	void *pmodel = GET_MODEL_PTR( ENT(pev) );
 
 	switch ( NewActivity)
 	{
@@ -4627,7 +4626,6 @@ BOOL CHGruntSecurityGeneral::CheckRangeAttack2Impl( float grenadeSpeed, float fl
 void CHGruntSecurityGeneral::SetActivity(Activity NewActivity)
 {
 	int	iSequence = ACTIVITY_NOT_AVAILABLE;
-	void* pmodel = GET_MODEL_PTR(ENT(pev));
 
 	switch (NewActivity)
 	{
@@ -5793,7 +5791,6 @@ void CAndrewGrunt::CollectPoints(void)
 void CAndrewGrunt::SetActivity( Activity NewActivity )
 {
 	int	iSequence = ACTIVITY_NOT_AVAILABLE;
-	void *pmodel = GET_MODEL_PTR( ENT( pev ) );
 
 	// reset renderfx with new activity
 	pev->renderfx = 0;

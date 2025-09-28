@@ -92,6 +92,7 @@ enum
 	TASK_TLK_EYECONTACT,	// maintain eyecontact with person who I'm talking to
 	TASK_TLK_IDEALYAW,		// set ideal yaw to face who I'm talking to
 	TASK_FACE_PLAYER,		// Face the player
+	TASK_ALICE_FACE_FOLLOW,	// custom to not ruin anything else by accident
 
 	LAST_TALKMONSTER_TASK,			// MUST be last
 };

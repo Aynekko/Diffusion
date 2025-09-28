@@ -442,6 +442,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 				{
 					TaskComplete();
 					RouteClear();		// Stop moving
+					break; // do not touch head turn code below
 				}
 				else if ( distance < 190 && m_movementActivity != ACT_WALK )
 					m_movementActivity = ACT_WALK;

@@ -153,6 +153,7 @@ public:
 	void			IdleHeadTurn( const Vector &vecFriend );
 	void ResetHeadTurn( void );
 	float headyaw;
+	float headpitch;
 	int m_voicePitch;
 
 	BOOL		HasWeapon( int weaponnum ) { return FBitSet( m_iWeapons[weaponnum >> 3], BIT( weaponnum & 7 )); }

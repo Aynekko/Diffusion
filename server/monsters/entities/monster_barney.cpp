@@ -184,7 +184,7 @@ Schedule_t slBarneyEnemyDraw[] =
 Task_t	tlBaFaceTarget[] =
 {
 	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE },
-	{ TASK_FACE_TARGET,			(float)0		},
+	{ TASK_ALICE_FACE_FOLLOW,			(float)0		},
 //	{ TASK_SET_ACTIVITY,		(float)ACT_IDLE },
 	{ TASK_SET_SCHEDULE,		(float)SCHED_TARGET_CHASE },
 };
@@ -1142,6 +1142,7 @@ public:
 	Schedule_t *GetScheduleOfType ( int Type );
 	int DamageDecal( int bitsDamageType );
 	void RunAI(void);
+	void SetActivity( Activity NewActivity );
 
 	void TalkInit(void);
 	void AlertSound(void);
@@ -1810,4 +1811,39 @@ void CAlice::Killed( entvars_t *pevAttacker, int iGib )
 	AliceSendHUDData( false );
 
 	CBarney::Killed( pevAttacker, iGib );
+}
+
+void CAlice::SetActivity( Activity NewActivity )
+{
+	int	iSequence = ACTIVITY_NOT_AVAILABLE;
+
+	switch( NewActivity )
+	{
+	case ACT_WALK:
+		if( m_fGunDrawn )
+			iSequence = LookupSequence( "walk_pistol" );
+		break;
+	case ACT_RUN:
+		if( m_fGunDrawn )
+			iSequence = LookupSequence( "run_pistol" );
+		break;
+	}
+
+	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
+
+	// Set to the desired anim, or default anim if the desired is not present
+	if( iSequence > ACTIVITY_NOT_AVAILABLE )
+	{
+		if( pev->sequence != iSequence || !m_fSequenceLoops )
+			pev->frame = 0;
+
+		pev->sequence = iSequence;	// Set to the reset anim (if it's there)
+		ResetSequenceInfo();
+		SetYawSpeed();
+	}
+	else
+	{
+		// Not available try to get default anim
+		CBaseMonster::SetActivity( NewActivity );
+	}
 }

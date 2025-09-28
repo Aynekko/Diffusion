@@ -4021,18 +4021,26 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 		#endif
 
 		// diffusion - smooth light change for everything else (moving models like viewmodel, players etc)
+		const bool bDoLerp = !(ent->curstate.effects & EF_NOLIGHTLERP);
 		m_pModelInstance->lighting.curambientlight = CL_UTIL_Approach( lighting.ambientlight, m_pModelInstance->lighting.curambientlight, 300 * g_fFrametime );
 		m_pModelInstance->lighting.curshadelight = CL_UTIL_Approach( lighting.shadelight, m_pModelInstance->lighting.curshadelight, 300 * g_fFrametime );
-		m_pModelInstance->lighting.ambientlight = m_pModelInstance->lighting.curambientlight;
-		m_pModelInstance->lighting.shadelight = m_pModelInstance->lighting.curshadelight;
+		m_pModelInstance->lighting.ambientlight = bDoLerp ? m_pModelInstance->lighting.curambientlight : lighting.ambientlight;
+		m_pModelInstance->lighting.shadelight = bDoLerp ? m_pModelInstance->lighting.curshadelight : lighting.shadelight;
 
 		// lerp color too
 		m_pModelInstance->lighting.color = LerpRGB( m_pModelInstance->lighting.color, lighting.color, g_fFrametime );
+		if( !bDoLerp )
+			m_pModelInstance->lighting.color = lighting.color;
 
 		m_pModelInstance->lighting.curplightvec = m_pModelInstance->m_plightmatrix.VectorIRotate( lighting.plightvec ); // turn back to model space
-		m_pModelInstance->lighting.plightvec.x = lerp( m_pModelInstance->lighting.plightvec.x, m_pModelInstance->lighting.curplightvec.x, 20 * g_fFrametime );
-		m_pModelInstance->lighting.plightvec.y = lerp( m_pModelInstance->lighting.plightvec.y, m_pModelInstance->lighting.curplightvec.y, 20 * g_fFrametime );
-		m_pModelInstance->lighting.plightvec.z = lerp( m_pModelInstance->lighting.plightvec.z, m_pModelInstance->lighting.curplightvec.z, 20 * g_fFrametime );
+		if( bDoLerp )
+		{
+			m_pModelInstance->lighting.plightvec.x = lerp( m_pModelInstance->lighting.plightvec.x, m_pModelInstance->lighting.curplightvec.x, 20 * g_fFrametime );
+			m_pModelInstance->lighting.plightvec.y = lerp( m_pModelInstance->lighting.plightvec.y, m_pModelInstance->lighting.curplightvec.y, 20 * g_fFrametime );
+			m_pModelInstance->lighting.plightvec.z = lerp( m_pModelInstance->lighting.plightvec.z, m_pModelInstance->lighting.curplightvec.z, 20 * g_fFrametime );
+		}
+		else
+			m_pModelInstance->lighting.plightvec = m_pModelInstance->lighting.curplightvec;
 	}
 }
 

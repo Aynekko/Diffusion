@@ -155,7 +155,7 @@
 #define EF_SKIPPVS			BIT(20)	// this entity skips PVS check in AddToFullPack, thus always present at all times
 #define EF_ROTATING			BIT(21) // client-side func_rotating - non-solid and very simple
 #define EF_UPSIDEDOWN		BIT(22) // player is upside down
-// BIT(23) // unused
+#define EF_NOLIGHTLERP		BIT(23) // no light lerping on studio model
 #define EF_NOREFLECT		BIT(24)	// Entity won't reflecting in mirrors
 #define EF_REFLECTONLY		BIT(25)	// Entity will be drawing only in mirrors
 #define EF_WATERSIDES		BIT(26)	// Do not remove sides for func_water entity

@@ -2156,6 +2156,7 @@ void CBaseMonster :: MonsterInit ( void )
 	SetEyePosition();
 
 	headyaw = 0;
+	headpitch = 0;
 //	LastServerTime = gpGlobals->time;
 
 	// create a monster collision box
@@ -3892,14 +3893,17 @@ void CBaseMonster::IdleHeadTurn( const Vector &vecFriend )
 		return;
 
 	float yaw = VecToYaw( vecFriend - GetAbsOrigin() ) - GetAbsAngles().y;
+	float pitch = UTIL_VecToPitch( vecFriend - GetAbsOrigin() );
 
 	if( yaw > 180 ) yaw -= 360;
 	if( yaw < -180 ) yaw += 360;
 
 	headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime, true );
+	headpitch = UTIL_ApproachAngle( pitch, headpitch, 165 * gpGlobals->frametime, true );
 
 	// turn towards vector
 	SetBoneController( 0, headyaw );
+	SetBoneController( 1, headpitch );
 }
 
 //==============================================================================
@@ -3911,7 +3915,9 @@ void CBaseMonster::ResetHeadTurn( void )
 		return;
 
 	headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
+	headpitch = UTIL_ApproachAngle( 0.0f, headpitch, 120 * gpGlobals->frametime, true );
 	SetBoneController( 0, headyaw );
+	SetBoneController( 1, headpitch );
 }
 
 void CBaseMonster::CorpseFallThink( void )

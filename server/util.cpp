@@ -1535,7 +1535,38 @@ void UTIL_SetSize( entvars_t *pev, const Vector &vecMin, const Vector &vecMax )
 	
 float UTIL_VecToYaw( const Vector &vec )
 {
-	return VEC_TO_YAW(vec);
+	float yaw;
+
+	if( !vec ) return 0.0f;
+
+	if( vec[1] == 0.0f && vec[0] == 0.0f )
+	{
+		yaw = 0.0f;
+	}
+	else
+	{
+		yaw = (int)(atan2( vec[1], vec[0] ) * 180.0 / M_PI);
+		if( yaw < 0 ) yaw += 360.0f;
+	}
+	return yaw;
+}
+
+float UTIL_VecToPitch( const Vector &vec )
+{
+	if( vec.y == 0 && vec.x == 0 )
+	{
+		if( vec.z < 0 )
+			return 180.0f;
+		else
+			return -180.0f;
+	}
+
+	float dist = vec.Length2D();
+	float pitch = atan2( -vec.z, dist );
+
+	pitch = RAD2DEG( pitch );
+
+	return pitch;
 }
 
 void UTIL_SetOrigin( CBaseEntity *pEntity, const Vector &vecOrigin )
