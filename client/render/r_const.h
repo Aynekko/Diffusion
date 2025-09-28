@@ -47,7 +47,6 @@ GNU General Public License for more details.
 #define MAX_DECAL_SURFS	4096
 #define MAX_FRAMEBUFFERS	MAX_SUBVIEW_TEXTURES
 #define TURBSCALE		( 256.0f / M_PI2 )
-#define REFPVS_RADIUS	2.0f
 #define MOD_FRAMES		20
 #define STAIR_INTERP_TIME	100.0f
 #define GLOWSHELL_FACTOR	(1.0f / 128.0f)

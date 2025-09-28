@@ -117,5 +117,6 @@ extern cvar_t *ui_videooptions_active;
 extern cvar_t *ui_forcenoblur;
 extern cvar_t *cl_background;
 extern cvar_t *hud_fontscale;
+extern cvar_t *r_pvs_radius;
 
 #endif//R_CVARS_H
