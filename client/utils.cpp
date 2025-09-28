@@ -407,7 +407,7 @@ bool Mod_BoxVisible( const Vector mins, const Vector maxs, const byte *visbits )
 
 	// during normalpass, use cached cull value, if the viewleaf is the same as last frame.
 	// this culling is expensive stuff
-	const bool bSkyboxView = (RI->params & RP_SKYPORTALVIEW);
+	const bool bSkyboxView = (RI->params & RP_SKYPORTALVIEW) && !(RI->params & RP_SCREENVIEW) && !(RI->params & RP_PORTALVIEW) && !(RI->params & RP_MIRRORVIEW);
 	const bool use_cache = (
 		r_cached_box_culling->value > 0 &&
 		RI->currentlight == NULL &&

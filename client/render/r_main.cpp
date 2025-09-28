@@ -1043,7 +1043,8 @@ void R_FindViewLeaf( void )
 		}
 	}
 
-	if( RI->params & RP_SKYPORTALVIEW )
+	const bool bSkyboxView = (RI->params & RP_SKYPORTALVIEW) && !(RI->params & RP_SCREENVIEW) && !(RI->params & RP_PORTALVIEW) && !(RI->params & RP_MIRRORVIEW);
+	if( bSkyboxView )
 	{
 		// in case the camera entity or position has changed, reset everything
 		if( tr.sky_camera_origin != tr.sky_camera->curstate.origin )
