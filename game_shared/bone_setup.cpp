@@ -2037,7 +2037,7 @@ void CStudioBoneSetup :: CalcPoseSingle( Vector pos[], Vector4D q[], int sequenc
 	}
 
 	// list is cleared
-//	SetBoneControllers( NULL ); // diffusion - this causes controllers to reset when the sequence changes. Figure out why is this needed here? Disabled for now.
+	SetBoneControllers( NULL );
 }
 
 //-----------------------------------------------------------------------------

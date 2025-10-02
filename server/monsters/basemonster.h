@@ -150,7 +150,7 @@ public:
 	virtual BOOL	IsAlive( void ) { return (pev->deadflag != DEAD_DEAD); }
 	virtual BOOL	ShouldFadeOnDeath( void );
 
-	void			IdleHeadTurn( const Vector &vecFriend );
+	void IdleHeadTurn( CBaseEntity *pTarget );
 	void ResetHeadTurn( void );
 	float headyaw;
 	float headpitch;

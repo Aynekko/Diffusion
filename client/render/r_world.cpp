@@ -3495,7 +3495,7 @@ void R_MarkLeaves( void )
 	if( r_novis->value || FBitSet( RI->params, RP_OVERVIEW ) || !worldmodel->visdata || IsBuildingCubemaps() )
 		novis = true;
 
-	ENGINE_SET_PVS( RI->pvsorigin, r_pvs_radius->value, RI->visbytes, FBitSet( RI->params, RP_MERGEVISIBILITY ), novis );
+	ENGINE_SET_PVS( RI->pvsorigin, r_pvs_radius ? r_pvs_radius->value : 2.0f, RI->visbytes, FBitSet( RI->params, RP_MERGEVISIBILITY ), novis );
 	R_UpdateEngineVisibility();
 	RI->visframecount++;
 

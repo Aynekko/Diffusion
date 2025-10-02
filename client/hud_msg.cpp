@@ -643,6 +643,16 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 	}
 	break;
 
+	case TE_NPCCLIP:
+	{
+		pos.x = READ_COORD();
+		pos.y = READ_COORD();
+		pos.z = READ_COORD();
+		Model = READ_BYTE();
+		R_EmptyClipNPC( Model, pos );
+	}
+	break;
+
 	case TE_BEAMPARTICLES:
 	{
 		entityIndex = READ_SHORT();

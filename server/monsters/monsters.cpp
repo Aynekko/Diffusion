@@ -2274,7 +2274,7 @@ void CBaseMonster :: StartMonster ( void )
 	}
 	*/
 
-	ResetSequenceInfo(); // TTTEST
+//	ResetSequenceInfo(); // TTTEST
 }
 
 
@@ -3035,7 +3035,7 @@ void CBaseMonster :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		}
 		break;
 
-	case SCRIPT_EVENT_SOUND:			// Play a named wave file
+	case SCRIPT_EVENT_SOUND: // Play a named wave file // NOTE: if sample name starts with a '*', it will activate mouth controller
 		if( !Q_strnicmp( pEvent->options, "common/npc_step", 15 ))
 			StepSound();
 		else EMIT_SOUND( edict(), CHAN_BODY, pEvent->options, 1.0, ATTN_IDLE );
@@ -3886,17 +3886,26 @@ void CBaseMonster::SentenceStop( void )
 //==============================================================================
 // IdleHeadTurn: turn head towards supplied origin
 //==============================================================================
-void CBaseMonster::IdleHeadTurn( const Vector &vecFriend )
+void CBaseMonster::IdleHeadTurn( CBaseEntity *pTarget )
 {
 	// turn head in desired direction only if ent has a turnable head
 	if( !(m_afCapability & bits_CAP_TURN_HEAD) )
 		return;
+
+	if( !pTarget )
+		return;
+
+	Vector vecFriend = pTarget->GetAbsOrigin();
+	if( pTarget->IsPlayer() )
+		vecFriend.z -= 36; // hack - compensate for player's origin
 
 	float yaw = VecToYaw( vecFriend - GetAbsOrigin() ) - GetAbsAngles().y;
 	float pitch = UTIL_VecToPitch( vecFriend - GetAbsOrigin() );
 
 	if( yaw > 180 ) yaw -= 360;
 	if( yaw < -180 ) yaw += 360;
+	if( pitch > 180 ) pitch -= 360;
+	if( pitch < -180 ) pitch += 360;
 
 	headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime, true );
 	headpitch = UTIL_ApproachAngle( pitch, headpitch, 165 * gpGlobals->frametime, true );

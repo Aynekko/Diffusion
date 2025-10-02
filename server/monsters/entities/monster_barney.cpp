@@ -37,6 +37,7 @@
 #define	BARNEY_AE_SHOOT		( 3 )
 #define	BARNEY_AE_HOLSTER		( 4 )
 #define	BARNEY_AE_RELOAD	( 5 )
+#define BARNEY_AE_DROPCLIP ( 6 )
 
 #define	BARNEY_BODY_GUNHOLSTERED	0
 #define	BARNEY_BODY_GUNDRAWN	1
@@ -109,6 +110,8 @@ public:
 
 	void RunAI(void);
 
+	bool m_bStanding;
+
 	CUSTOM_SCHEDULES;
 };
 
@@ -123,6 +126,7 @@ BEGIN_DATADESC( CBarney )
 	DEFINE_FIELD( m_flPlayerDamage, FIELD_FLOAT ),
 	DEFINE_FIELD( m_iClipSize, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flNextHolsterTime, FIELD_TIME ),
+	DEFINE_FIELD( m_bStanding, FIELD_BOOLEAN ),
 END_DATADESC()
 
 int CBarney::ObjectCaps(void)
@@ -566,6 +570,8 @@ void CBarney :: BarneyFirePistol ( void )
 //=========================================================
 void CBarney :: HandleAnimEvent( MonsterEvent_t *pEvent )
 {
+	Vector pos = g_vecZero;
+
 	switch( pEvent->event )
 	{
 	case BARNEY_AE_SHOOT:
@@ -590,6 +596,17 @@ void CBarney :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		ClearConditions( bits_COND_NO_AMMO_LOADED );
 		break;
 
+	case BARNEY_AE_DROPCLIP:
+		UTIL_MakeVectors( GetAbsAngles() );
+		pos = GetAbsOrigin() + gpGlobals->v_forward * 20 + gpGlobals->v_up * 40;
+		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pos );
+			WRITE_BYTE( TE_NPCCLIP );
+			WRITE_COORD( pos.x );
+			WRITE_COORD( pos.y );
+			WRITE_COORD( pos.z );
+			WRITE_BYTE( WEAPON_FIVESEVEN ); // for Alice
+		MESSAGE_END();
+		break;
 
 	default:
 		CTalkMonster::HandleAnimEvent( pEvent );
@@ -961,10 +978,11 @@ Schedule_t *CBarney :: GetSchedule ( void )
 	{
 	case MONSTERSTATE_COMBAT:
 		{
+			// always push holster time forward when in combat
+			m_flNextHolsterTime = gpGlobals->time + RANDOM_FLOAT( 10.0, 15.0 );
 // dead enemy
 			if ( HasConditions( bits_COND_ENEMY_DEAD | bits_COND_ENEMY_LOST ) )
 			{
-				m_flNextHolsterTime = gpGlobals->time + RANDOM_FLOAT( 6.0, 10.0 );
 				// call base class, all code to handle dead enemies is centralized there.
 				return CBaseMonster :: GetSchedule();
 			}
@@ -1141,7 +1159,9 @@ public:
 	Schedule_t *GetSchedule ( void );
 	Schedule_t *GetScheduleOfType ( int Type );
 	int DamageDecal( int bitsDamageType );
+	void StartTask( Task_t *pTask );
 	void RunAI(void);
+	Activity GetSmallFlinchActivity( void );
 	void SetActivity( Activity NewActivity );
 
 	void TalkInit(void);
@@ -1182,6 +1202,7 @@ BEGIN_DATADESC( CAlice )
 	DEFINE_FIELD( m_flPlayerDamage, FIELD_FLOAT ),
 	DEFINE_FIELD( m_iClipSize, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flNextHolsterTime, FIELD_TIME ),
+	DEFINE_FIELD( m_bStanding, FIELD_BOOLEAN ),
 END_DATADESC()
 
 void CAlice::Precache( void )
@@ -1333,6 +1354,11 @@ BOOL CAlice :: CheckRangeAttack1 ( float flDot, float flDist )
 {
 	if ( flDist <= 2048 && flDot >= 0.5 )
 	{
+		if( flDist <= 800 )
+			m_bStanding = true;
+		else
+			m_bStanding = false;
+
 		if ( gpGlobals->time > m_checkAttackTime )
 		{
 			TraceResult tr;
@@ -1364,9 +1390,9 @@ void CAlice :: BarneyFirePistol ( void )
 
 	pev->effects |= EF_MUZZLEFLASH;
 
-	if (pev->frags)
+	if( pev->frags )
 	{
-		FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_2DEGREES, 2048, BULLET_PLAYER_357);
+		FireBullets(1, vecShootOrigin, vecShootDir, m_bStanding ? VECTOR_CONE_3DEGREES : VECTOR_CONE_2DEGREES, 2048, BULLET_PLAYER_357);
 		if (RANDOM_LONG(0, 1))
 			EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, "weapons/357_shot1.wav", 1, ATTN_NORM, 0, 100 );
 		else
@@ -1374,7 +1400,7 @@ void CAlice :: BarneyFirePistol ( void )
 	}
 	else
 	{
-		FireBullets(1, vecShootOrigin, vecShootDir, VECTOR_CONE_1DEGREES, 2048, BULLET_MONSTER_9MM, 1, 15); // 15 dmg
+		FireBullets(1, vecShootOrigin, vecShootDir, m_bStanding ? VECTOR_CONE_3DEGREES : VECTOR_CONE_2DEGREES, 2048, BULLET_MONSTER_9MM, 1, 15); // 15 dmg
 
 		int pitchShift = RANDOM_LONG( 0, 20 );
 	
@@ -1440,6 +1466,98 @@ int CAlice :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float
 	return ret;
 }
 
+void CAlice::StartTask( Task_t *pTask )
+{
+	switch( pTask->iTask )
+	{
+		case TASK_SMALL_FLINCH:
+		{
+			m_IdealActivity = GetSmallFlinchActivity();
+			break;
+		}
+		default:
+		{
+			CTalkMonster::StartTask( pTask );
+			break;
+		}
+	}
+}
+
+Activity CAlice::GetSmallFlinchActivity( void )
+{
+	Activity	flinchActivity;
+	BOOL		fTriedDirection;
+	float		flDot;
+
+	fTriedDirection = FALSE;
+	UTIL_MakeVectors( GetAbsAngles() );
+	flDot = DotProduct( gpGlobals->v_forward, g_vecAttackDir * -1 );
+
+	switch( m_LastHitGroup )
+	{
+		// pick a region-specific flinch
+	case HITGROUP_HEAD:
+		flinchActivity = ACT_FLINCH_HEAD;
+		break;
+	case HITGROUP_STOMACH:
+		flinchActivity = ACT_FLINCH_STOMACH;
+		break;
+	case HITGROUP_LEFTARM:
+		flinchActivity = ACT_FLINCH_LEFTARM;
+		break;
+	case HITGROUP_RIGHTARM:
+		flinchActivity = ACT_FLINCH_RIGHTARM;
+		break;
+	case HITGROUP_LEFTLEG:
+		flinchActivity = ACT_FLINCH_LEFTLEG;
+		break;
+	case HITGROUP_RIGHTLEG:
+		flinchActivity = ACT_FLINCH_RIGHTLEG;
+		break;
+	case HITGROUP_GENERIC:
+	default:
+		// just get a generic flinch.
+		flinchActivity = ACT_SMALL_FLINCH;
+		break;
+	}
+
+	// do we have a sequence for the ideal activity?
+	const bool bPistolPose = (m_fGunDrawn && m_hEnemy != NULL);
+	int iSequence = ACTIVITY_NOT_AVAILABLE;
+	switch( flinchActivity )
+	{
+	case ACT_FLINCH_LEFTARM:
+		if( bPistolPose )
+			iSequence = LookupSequence( "laflinchpist" );
+		else
+			iSequence = LookupSequence( "laflinch" );
+		break;
+	case ACT_FLINCH_RIGHTARM:
+		if( bPistolPose )
+			iSequence = LookupSequence( "raflinchpist" );
+		else
+			iSequence = LookupSequence( "raflinch" );
+		break;
+	case ACT_FLINCH_LEFTLEG:
+		if( bPistolPose )
+			iSequence = LookupSequence( "llflinchpist" );
+		else
+			iSequence = LookupSequence( "llflinch" );
+		break;
+	case ACT_FLINCH_RIGHTLEG:
+		if( bPistolPose )
+			iSequence = LookupSequence( "rlflinchpist" );
+		else
+			iSequence = LookupSequence( "rlflinch" );
+		break;
+	}
+
+	if( iSequence == ACTIVITY_NOT_AVAILABLE )
+		flinchActivity = ACT_SMALL_FLINCH;
+
+	return flinchActivity;
+}
+
 void CAlice :: RunAI(void) // health regeneration
 {
 	if( pev->health < pev->max_health && IsAlive() )
@@ -1498,7 +1616,7 @@ Schedule_t *CAlice :: GetSchedule ( void )
 
 	if( HasConditions( bits_COND_NEW_ENEMY ))
 	{
-		if (pev->health < 150)
+		if( pev->health < pev->max_health * 0.3f )
 		{
 			if (gpGlobals->time > CoverFailTime)
 			{
@@ -1517,11 +1635,13 @@ Schedule_t *CAlice :: GetSchedule ( void )
 		{
 			float dist_to_player = IsFollowing() ? (m_hTargetEnt->GetAbsOrigin() - GetAbsOrigin()).Length() : 0.0f;
 
+			// always push holster time forward when in combat
+			m_flNextHolsterTime = gpGlobals->time + RANDOM_FLOAT( 6.0, 10.0 );
+			m_flIdleReloadTime = m_flNextHolsterTime - 3;
+
 			// dead enemy
 			if ( HasConditions( bits_COND_ENEMY_DEAD | bits_COND_ENEMY_LOST ) )
 			{
-				m_flNextHolsterTime = gpGlobals->time + RANDOM_FLOAT( 6.0, 10.0 );
-				m_flIdleReloadTime = m_flNextHolsterTime - 3;
 				// call base class, all code to handle dead enemies is centralized there.
 				return CBaseMonster :: GetSchedule();
 			}
@@ -1535,7 +1655,7 @@ Schedule_t *CAlice :: GetSchedule ( void )
 					return GetScheduleOfType( SCHED_ALICE_GETBACKTOPLAYER );
 				}
 			}
-			else if( pev->health < 150 )
+			else if( pev->health < pev->max_health * 0.3f )
 			{
 				if( (HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE )) ) // low hp - try to hide
 				{
@@ -1551,12 +1671,12 @@ Schedule_t *CAlice :: GetSchedule ( void )
 			}
 
 			// when getting back to player, check for enemy visibility and forget about them if no line of sight
-			if( IsFollowing() && dist_to_player < 300 && !HasConditions( bits_COND_SEE_ENEMY ) )
-			{
-				m_hEnemy = NULL;
-				SetState( MONSTERSTATE_ALERT );
-				return CBaseMonster::GetSchedule();
-			}
+		//	if( IsFollowing() && dist_to_player < 300 && !HasConditions( bits_COND_SEE_ENEMY ) )
+		//	{
+		//		m_hEnemy = NULL;
+		//		SetState( MONSTERSTATE_ALERT );
+		//		return CBaseMonster::GetSchedule();
+		//	}
 				
 			// wait for one schedule to draw gun
 			if (!m_fGunDrawn )
@@ -1693,9 +1813,7 @@ Schedule_t* CAlice :: GetScheduleOfType ( int Type )
 //		return slIdleStand;
 
 	case SCHED_BARNEY_HOLSTER:
-		if ( m_hEnemy == NULL )
-			return slBarneyHolster;
-		break;
+		return slBarneyHolster;
 
 	case SCHED_RANGE_ATTACK1:
 		return slBaRangeAttack1;
@@ -1816,20 +1934,40 @@ void CAlice::Killed( entvars_t *pevAttacker, int iGib )
 void CAlice::SetActivity( Activity NewActivity )
 {
 	int	iSequence = ACTIVITY_NOT_AVAILABLE;
+	const bool bPistolPose = (m_fGunDrawn && m_hEnemy != NULL);
 
 	switch( NewActivity )
 	{
 	case ACT_WALK:
-		if( m_fGunDrawn )
+		if( bPistolPose )
 			iSequence = LookupSequence( "walk_pistol" );
+		else
+			iSequence = LookupSequence( "walk" );
 		break;
 	case ACT_RUN:
-		if( m_fGunDrawn )
+		if( bPistolPose )
 			iSequence = LookupSequence( "run_pistol" );
+		else
+			iSequence = LookupSequence( "run" );
+		break;
+	case ACT_SMALL_FLINCH:
+		iSequence = LookupSequence( "smlflinch" );
+		break;
+	case ACT_RANGE_ATTACK1:
+		if( m_bStanding )
+			iSequence = LookupSequence( "shootgun" );
+		else
+			iSequence = LookupSequence( "idle_pistol_sit_shoot" );
+		break;
+	case ACT_RELOAD:
+		if( bPistolPose )
+			iSequence = LookupSequence( "reload" );
+		else
+			iSequence = LookupSequence( "idle_reload" );
 		break;
 	}
 
-	m_Activity = NewActivity; // Go ahead and set this so it doesn't keep trying when the anim is not present
+	m_Activity = NewActivity;
 
 	// Set to the desired anim, or default anim if the desired is not present
 	if( iSequence > ACTIVITY_NOT_AVAILABLE )

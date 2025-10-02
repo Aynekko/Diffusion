@@ -2782,10 +2782,14 @@ StudioInterpolateBlends
 
 ====================
 */
-void CStudioModelRenderer::StudioInterpolateBlends( cl_entity_t *e, float dadt )
+void CStudioModelRenderer::StudioInterpolateControllers( cl_entity_t *e, float dadt )
 {
 	mstudiobonecontroller_t *pbonecontroller = (mstudiobonecontroller_t *)((byte *)m_pStudioHeader + m_pStudioHeader->bonecontrollerindex);
-	dadt = 1.0f; // FIXME !!!!
+
+	// FIXME !!!! (do not interpolate for now in singleplayer)
+	// the reason: controllers are being reset when sequence changes
+	if( tr.viewparams.maxclients == 1 ) dadt = 1.0f;
+
 	// interpolate controllers
 	for( int j = 0; j < m_pStudioHeader->numbonecontrollers; j++ )
 	{
@@ -2814,6 +2818,7 @@ void CStudioModelRenderer::StudioInterpolateBlends( cl_entity_t *e, float dadt )
 			}
 
 			m_pModelInstance->m_controller[i] = bound( 0, Q_rint( value ), 255 );
+			e->latched.prevcontroller[i] = e->curstate.controller[i];
 		}
 	}
 }
@@ -3307,7 +3312,7 @@ void CStudioModelRenderer::StudioSetupBones( void )
 	}
 
 	cycle = f / m_boneSetup.LocalMaxFrame( e->curstate.sequence );
-	StudioInterpolateBlends( e, dadt_blend );
+	StudioInterpolateControllers( e, dadt_blend );
 
 	m_boneSetup.InitPose( pos, q );
 	m_boneSetup.UpdateRealTime( tr.time );

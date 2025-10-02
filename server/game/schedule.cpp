@@ -103,7 +103,7 @@ void CBaseMonster :: ChangeSchedule ( Schedule_t *pNewSchedule )
 // this is very useful code if you can isolate a test case in a level with a single monster. It will notify
 // you of every schedule selection the monster makes.
 #if 0
-	if ( FClassnameIs( pev, "monster_human_grunt" ) )// && FStrEq(GetTargetname(), "bridger4") )
+	if ( FClassnameIs( pev, "monster_alice" ) )// && FStrEq(GetTargetname(), "bridger4") )
 	{
 		Task_t *pTask = GetTask();
 		
@@ -302,7 +302,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 
 			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
 			{
-				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+				IdleHeadTurn( m_hTalkTarget );
 			}
 			else
 			{
@@ -397,7 +397,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 						m_IdealActivity = ACT_IDLE;
 				}
 
-				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+				IdleHeadTurn( m_hTalkTarget );
 			}
 			else
 			{
@@ -451,7 +451,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 
 				if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
 				{
-					IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+					IdleHeadTurn( m_hTalkTarget );
 				}
 				else
 				{
@@ -470,7 +470,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 			}
 			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
 			{
-				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+				IdleHeadTurn( m_hTalkTarget );
 			}
 			else
 			{
@@ -532,6 +532,18 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 	case TASK_SPECIAL_ATTACK2:
 	case TASK_RELOAD:
 		{
+			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
+			{
+				IdleHeadTurn( m_hTalkTarget );
+			}
+			else if( m_hEnemy != NULL )
+			{
+				IdleHeadTurn( m_hEnemy );
+			}
+			else
+			{
+				ResetHeadTurn();
+			}
 			MakeIdealYaw ( m_vecEnemyLKP );
 			ChangeYaw ( pev->yaw_speed );
 			if ( m_fSequenceFinished )
@@ -554,7 +566,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 			// diffusion - turn head when talking in script idle state
 			// look at who I'm talking to
 			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
-				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+				IdleHeadTurn( m_hTalkTarget );
 			else
 			{
 				ResetHeadTurn();
@@ -576,7 +588,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 		{
 			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
 			{
-				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+				IdleHeadTurn( m_hTalkTarget );
 			}
 			else
 			{
@@ -591,7 +603,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 	default:
 		if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
 		{
-			IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+			IdleHeadTurn( m_hTalkTarget );
 		}
 		else
 		{

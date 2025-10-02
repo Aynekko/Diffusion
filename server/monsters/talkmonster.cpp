@@ -507,11 +507,11 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 	case TASK_TLK_LOOK_AT_CLIENT:
 	{
 		// Get edict for one player
-		edict_t *pPlayer = g_engfuncs.pfnPEntityOfEntIndex( 1 );
+		CBaseEntity *pPlayer = UTIL_PlayerByIndex( 1 );
 
 		// track head to the client for a while.
 		if( pPlayer && m_MonsterState == MONSTERSTATE_IDLE && !IsMoving() && !IsTalking() )
-			IdleHeadTurn( pPlayer->v.origin );
+			IdleHeadTurn( pPlayer );
 		else
 		{
 			// started moving or talking
@@ -522,11 +522,11 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		if( pTask->iTask == TASK_TLK_CLIENT_STARE )
 		{
 			// fail out if the player looks away or moves away.
-			if( (pPlayer->v.origin - GetAbsOrigin()).Length2D() > TLK_STARE_DIST )	 
+			if( (pPlayer->GetAbsOrigin() - GetAbsOrigin()).Length2D() > TLK_STARE_DIST )	 
 				TaskFail(); // player moved away.
 
-			UTIL_MakeVectors( pPlayer->v.angles );
-			if( UTIL_DotPoints( pPlayer->v.origin, GetAbsOrigin(), gpGlobals->v_forward ) < m_flFieldOfView )
+			UTIL_MakeVectors( pPlayer->GetAbsAngles() );
+			if( UTIL_DotPoints( pPlayer->GetAbsOrigin(), GetAbsOrigin(), gpGlobals->v_forward ) < m_flFieldOfView )
 				TaskFail(); // player looked away
 		}
 
@@ -543,7 +543,7 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 			{
 				MakeIdealYaw ( pPlayer->GetAbsOrigin() );
 				ChangeYaw ( pev->yaw_speed );
-				IdleHeadTurn( pPlayer->GetAbsOrigin() );
+				IdleHeadTurn( pPlayer );
 				if ( gpGlobals->time > m_flWaitFinished && FlYawDiff() < 10 )
 				{
 					TaskComplete();
@@ -572,7 +572,7 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 					m_IdealActivity = ACT_IDLE;
 			}
 
-			IdleHeadTurn( m_hTargetEnt->GetAbsOrigin() );
+			IdleHeadTurn( m_hTargetEnt );
 
 			if( diff < 10 )
 				TaskComplete();
@@ -596,7 +596,7 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 					m_IdealActivity = ACT_IDLE;
 			}
 
-			IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+			IdleHeadTurn( m_hTalkTarget );
 			if( HasConditions( bits_COND_CLIENT_PUSH ) ) // interrupt, start moving!
 				TaskComplete();
 		}
@@ -621,7 +621,7 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 
 			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
 			{
-				IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+				IdleHeadTurn( m_hTalkTarget );
 			}
 			else
 			{
@@ -633,7 +633,7 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 		if (IsTalking() && m_hTalkTarget != NULL)
 		{
 			// ALERT(at_console, "walking, talking\n");
-			IdleHeadTurn( m_hTalkTarget->GetAbsOrigin() );
+			IdleHeadTurn( m_hTalkTarget );
 		}
 		else
 		{

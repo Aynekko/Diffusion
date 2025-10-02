@@ -358,6 +358,8 @@ void CBaseAnimating::DispatchAnimEvents( float flInterval )
 	// FIXME: I have to do this or some events get missed, and this is probably causing the problem below
 	// diffusion - not needed because monsters are thinking every frame
 //	flInterval = 0.1;
+	// UPD Oct 2025: this seems to work well, how'd I never think of that?
+	flInterval = gpGlobals->frametime;
 
 	// FIX: this still sometimes hits events twice
 	float flStart = pev->frame + (m_flLastEventCheck - pev->animtime) * m_flFrameRate * pev->framerate;

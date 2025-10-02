@@ -279,7 +279,7 @@ private:
 	// Determine current frame for rendering
 	virtual float StudioEstimateFrame ( mstudioseqdesc_t *pseqdesc );
 
-	virtual void StudioInterpolateBlends( cl_entity_t *e, float dadt );
+	virtual void StudioInterpolateControllers( cl_entity_t *e, float dadt );
 
 	virtual void StudioInterpolatePoseParams( cl_entity_t *e, float dadt );
 
