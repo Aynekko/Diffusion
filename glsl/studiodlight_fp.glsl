@@ -185,18 +185,6 @@ void main( void )
 	light *= 2 * u_DynLightBrightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 #endif
 
-	// remove this if HDR is implemented
-	// this is a hack to remove overbright on brighter textures
-	light *= 1.0 - (0.25 * length( diffuse.rgb ));
-
-	if( u_FogParams.w > 0.0 )
-	{
-		float dist = length( var_ViewVec );
-		float fogFactor = exp( -dist * u_FogParams.w );
-		fogFactor = clamp( fogFactor, 0.0, 1.0 );
-		atten = mix( 0.0, atten, fogFactor );
-	}
-
 	// do modified hemisperical lighting
 	float NdotL = saturate( dot( N, L ));
 	if( NdotL <= 0.0 ) discard; // fast reject
@@ -209,6 +197,12 @@ void main( void )
 
 	diffuse.rgb *= light.rgb * NdotL * atten * shadow;
 
+	// !!! remove this if HDR is implemented
+	// this is a hack to remove overbright on brighter textures
+	float hack = 1.0 - (0.5 * length( diffuse.rgb ));
+	if( hack < 0.5 ) hack = 0.5;
+	diffuse.rgb *= hack;
+
 	// apply specular lighting
 #if defined( STUDIO_SPECULAR )
 	vec3 glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
@@ -218,6 +212,14 @@ void main( void )
 	#endif
 	diffuse.rgb += gloss * shadow;
 #endif
+
+	if( u_FogParams.w > 0.0 )
+	{
+		float dist = length( var_ViewVec );
+		float fogFactor = exp( -dist * u_FogParams.w );
+		fogFactor = clamp( fogFactor, 0.0, 1.0 );
+		atten = mix( 0.0, atten, fogFactor );
+	}
 
 	// compute final color
 	gl_FragColor = diffuse;
