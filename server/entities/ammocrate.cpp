@@ -32,9 +32,6 @@ public:
 	int NumberOfUses; // keep count
 	string_t m_weaponNames[MAX_EQUIP];
 	int m_weaponCount[MAX_EQUIP];
-//	void GenerateCrateText( void );
-//	hudtextparms_t m_AmmoCrateTextParms;
-//	char WpnText[128];
 	void GiveItems( CBasePlayer *pPlayer );
 	void GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float CurrentRatio );
 	void DbgPrint( int Had, const char *AmmoType, int Max, int Given );
@@ -56,7 +53,6 @@ BEGIN_DATADESC(CAmmoCrate)
 	DEFINE_FIELD(Equipped, FIELD_INTEGER),
 	DEFINE_FIELD(NumberOfUses, FIELD_INTEGER),
 	DEFINE_FIELD(m_hActivator, FIELD_EHANDLE),
-//	DEFINE_ARRAY(WpnText, FIELD_CHARACTER, 128),
 	DEFINE_KEYFIELD( MaxOpen, FIELD_INTEGER, "maxopen" ),
 END_DATADESC();
 
@@ -128,123 +124,7 @@ void CAmmoCrate::Spawn(void)
 			AmmoIcon->SetFadeDistance( 1000 );
 		}
 	}
-
-//	GenerateCrateText();
 }
-
-//=========================================================================
-// GenerateCrateText: make the text string with items' names and ammo counts
-//=========================================================================
-/*
-void CAmmoCrate::GenerateCrateText(void)
-{	
-	char TmpText[32];
-	string_t TmpString;
-	int TmpAmmoCount;
-
-	// weird symbols in the beginning if I don't do this...
-	strcpy( WpnText, "" );
-
-	for( int i = 0; i < MAX_EQUIP; i++ )
-	{
-		if( !m_weaponNames[i] )
-			break;
-
-		if( !strcmp( STRING(m_weaponNames[i]), "weapon_handgrenade" ) )
-		{
-			TmpString = MAKE_STRING( "Grenade" );
-			TmpAmmoCount = m_weaponCount[i];
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "weapon_tripmine" ) )
-		{
-			TmpString = MAKE_STRING( "Tripmine" );
-			TmpAmmoCount = m_weaponCount[i];
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_ARgrenades" ) )
-		{
-			TmpString = MAKE_STRING( "MRC grenade" );
-			TmpAmmoCount = m_weaponCount[i];
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_9mmAR" ) )
-		{
-			TmpString = MAKE_STRING( "MRC ammo" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_MRCCLIP_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_crossbow" ) )
-		{
-			TmpString = MAKE_STRING( "Crossbow arrow" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_CROSSBOWCLIP_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_357" ) )
-		{
-			TmpString = MAKE_STRING( "Deagle ammo" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_357BOX_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_gaussclip" ) )
-		{
-			TmpString = MAKE_STRING( "Alien sniper ammo" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_URANIUMBOX_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_fiveseven" ) )
-		{
-			TmpString = MAKE_STRING( "Fiveseven ammo" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_FIVESEVEN_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_hkmp5" ) )
-		{
-			TmpString = MAKE_STRING( "MP5 ammo" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_HKMP5_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_9mmclip" ) )
-		{
-			TmpString = MAKE_STRING( "Beretta ammo" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_BERETTACLIP_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_rpgclip" ) )
-		{
-			TmpString = MAKE_STRING( "RPG" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_RPGCLIP_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "weapon_satchel" ) )
-		{
-			TmpString = MAKE_STRING( "Satchel" );
-			TmpAmmoCount = m_weaponCount[i];
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_buckshot" ) )
-		{
-			TmpString = MAKE_STRING( "Shotgun ammo" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_BUCKSHOTBOX_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_sniper" ) )
-		{
-			TmpString = MAKE_STRING( "Sniper ammo" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_SNIPER_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_g36c" ) )
-		{
-			TmpString = MAKE_STRING( "G36C ammo" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_G36C_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_ar2" ) )
-		{
-			TmpString = MAKE_STRING( "Alien rifle ammo" );
-			TmpAmmoCount = m_weaponCount[i] * AR2_DEFAULT_GIVE;
-		}
-		else if( !strcmp( STRING( m_weaponNames[i] ), "ammo_ar2ball" ) )
-		{
-			TmpString = MAKE_STRING( "Alien rifle energy ball" );
-			TmpAmmoCount = m_weaponCount[i] * AMMO_M203BOX_GIVE;
-		}
-		else
-		{
-			TmpString = MAKE_STRING( "< undefined >" );
-			TmpAmmoCount = m_weaponCount[i];
-		}
-
-		sprintf( TmpText, "%s (%i)\n", STRING( TmpString ), TmpAmmoCount );
-		strcat( WpnText, (char *)(TmpText) );
-	}
-}*/
 
 void CAmmoCrate::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE useType, float value)
 {
@@ -312,29 +192,6 @@ void CAmmoCrate::CrateEquip(void)
 		// UPD: no need
 //		if( NumberOfUses == MaxOpen )
 		pev->body = 1;
-
-		// show text
-		/*
-		m_AmmoCrateTextParms.channel = 16;
-		m_AmmoCrateTextParms.x = 0.7;
-		m_AmmoCrateTextParms.y = 0.7;
-		m_AmmoCrateTextParms.effect = 2;
-
-		m_AmmoCrateTextParms.r1 = 0;
-		m_AmmoCrateTextParms.g1 = 170;
-		m_AmmoCrateTextParms.b1 = 255;
-		m_AmmoCrateTextParms.a1 = 200;
-
-		m_AmmoCrateTextParms.r2 = 255;
-		m_AmmoCrateTextParms.g2 = 255;
-		m_AmmoCrateTextParms.b2 = 255;
-		m_AmmoCrateTextParms.a2 = 200;
-		m_AmmoCrateTextParms.fadeinTime = 0.03;
-		m_AmmoCrateTextParms.fadeoutTime = 0.5;
-		m_AmmoCrateTextParms.holdTime = 5;
-		m_AmmoCrateTextParms.fxTime = 0;
-			
-		UTIL_HudMessage(pActivator, m_AmmoCrateTextParms, WpnText);*/
 
 		SUB_UseTargets(pPlayer, USE_TOGGLE, 0);
 

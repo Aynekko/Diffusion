@@ -1743,6 +1743,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		*/
 		case HGRUNT_AE_BURST1:
 		{
+			bBurstSoundPlayed = false;
 			if( pev->sequence == LookupSequence( "runshootmp5" ) || pev->sequence == LookupSequence( "runshootshotgun" ) )
 			{
 				if( !RunningShooting )
@@ -1765,6 +1766,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			if ( HasWeapon( HGRUNT_9MMAR ))
 			{
 				PlayClientSound( this, 252, 0, (m_cAmmoLoaded <= 15 ? m_cAmmoLoaded : 0), org );
+				bBurstSoundPlayed = true;
 				Shoot();
 			}
 			else
@@ -1796,6 +1798,13 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				MESSAGE_END();
 			}
 			Shoot();
+			if( !bBurstSoundPlayed )
+			{
+				Vector org = GetAbsOrigin();
+				org.z += 40;
+				PlayClientSound( this, 252, 0, (m_cAmmoLoaded <= 15 ? m_cAmmoLoaded : 0), org );
+				bBurstSoundPlayed = true;
+			}
 		}
 		break;
 		case HGRUNT_AE_KICK:
@@ -2262,6 +2271,9 @@ void CHGrunt :: SetActivity ( Activity NewActivity )
 				iSequence = LookupSequence( "runshootmp5" );
 			else
 				iSequence = LookupSequence( "runshootshotgun" );
+
+			if( iSequence > ACTIVITY_NOT_AVAILABLE && pev->sequence != iSequence )
+				pev->frame = 0;
 		}
 		else
 			iSequence = LookupSequence( "run" );

@@ -132,6 +132,7 @@ public:
 	float ScaleDifficultyTime;
 	bool AndrewHealthbar; // don't save
 	int cached_hp; // don't save
+	bool bBurstSoundPlayed; // don't save
 };
 
 //=========================================================
