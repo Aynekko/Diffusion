@@ -960,7 +960,8 @@ public:
 	void ResetSequenceInfo ( );
 	void DispatchAnimEvents ( float flFutureInterval = 0.1 ); // Handle events that have happend since last time called up until X seconds into the future
 	virtual void HandleAnimEvent( MonsterEvent_t *pEvent ) { return; };
-	float SetBoneController ( int iController, float flValue );
+	float AngleToController( int iController, float flValue );
+	float SetBoneController ( int iController, float flValue, bool test = false );
 	void InitBoneControllers ( void );
 	float SetBlending ( int iBlender, float flValue );
 	void GetBonePosition ( int iBone, Vector &origin, Vector &angles );

@@ -519,7 +519,7 @@ int GetAnimationEvent( void *pmodel, int sequence, MonsterEvent_t *pMonsterEvent
 	return 0;
 }
 
-float SetController( void *pmodel, byte *controller, int iController, float flValue )
+float SetController( void *pmodel, byte *controller, int iController, float flValue, bool test )
 {
 	studiohdr_t *pstudiohdr;
 
@@ -567,7 +567,9 @@ float SetController( void *pmodel, byte *controller, int iController, float flVa
 	int setting = 255 * (flValue - pbonecontroller->start) / (pbonecontroller->end - pbonecontroller->start);
 
 	setting = bound( 0, setting, 255 );
-	controller[iController] = setting;
+
+	if( !test )
+		controller[iController] = setting;
 
 	return setting * (1.0f / 255.0f) * (pbonecontroller->end - pbonecontroller->start) + pbonecontroller->start;
 }

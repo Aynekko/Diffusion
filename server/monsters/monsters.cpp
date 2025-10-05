@@ -2157,7 +2157,6 @@ void CBaseMonster :: MonsterInit ( void )
 
 	headyaw = 0;
 	headpitch = 0;
-//	LastServerTime = gpGlobals->time;
 
 	// create a monster collision box
 	m_pUserData = WorldPhysic->CreateBoxFromEntity( this );
@@ -2752,21 +2751,6 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 			delta = 0.25f;
 		speed = yawSpeed * delta;
 		angles.y = UTIL_ApproachAngle( ideal, current, speed, true );
-		/*
-		// turn head in desired direction only if they have a turnable head
-		if (m_afCapability & bits_CAP_TURN_HEAD)
-		{
-			// make sure that headyaw is not already controlled by talking
-			if( m_flTalkTime < gpGlobals->time && m_hTalkTarget == NULL )
-			{
-				float yaw = pev->ideal_yaw - angles.y;
-				if( yaw > 180 ) yaw -= 360;
-				if( yaw < -180 ) yaw += 360;
-				headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime, true );
-				SetBoneController( 0, headyaw );
-			}
-		}
-		*/
 
 		SetAbsAngles( angles );
 	}
@@ -3895,17 +3879,19 @@ void CBaseMonster::IdleHeadTurn( CBaseEntity *pTarget )
 	if( !pTarget )
 		return;
 
-	Vector vecFriend = pTarget->GetAbsOrigin();
-	if( pTarget->IsPlayer() )
-		vecFriend.z -= 36; // hack - compensate for player's origin
+	Vector vecFriend = pTarget->GetAbsOrigin() + pTarget->pev->view_ofs;
+	Vector vecMe = GetAbsOrigin() + pev->view_ofs;
 
-	float yaw = VecToYaw( vecFriend - GetAbsOrigin() ) - GetAbsAngles().y;
-	float pitch = UTIL_VecToPitch( vecFriend - GetAbsOrigin() );
+	float yaw = VecToYaw( vecFriend - vecMe ) - GetAbsAngles().y;
+	float pitch = UTIL_VecToPitch( vecFriend - vecMe );
 
 	if( yaw > 180 ) yaw -= 360;
 	if( yaw < -180 ) yaw += 360;
 	if( pitch > 180 ) pitch -= 360;
 	if( pitch < -180 ) pitch += 360;
+
+	yaw = AngleToController( 0, yaw );
+	pitch = AngleToController( 1, pitch );
 
 	headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime, true );
 	headpitch = UTIL_ApproachAngle( pitch, headpitch, 165 * gpGlobals->frametime, true );

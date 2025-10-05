@@ -377,13 +377,20 @@ void CBaseAnimating::DispatchAnimEvents( float flInterval )
 		HandleAnimEvent( &event );
 }
 
-//=========================================================
-//=========================================================
-float CBaseAnimating :: SetBoneController ( int iController, float flValue )
+//==========================================================================================
+// AngleToController: runs SetController function and returns the adjusted/bounded value
+// which user desires to set, but not actually setting the controller itself
+//==========================================================================================
+float CBaseAnimating::AngleToController( int iController, float flValue )
+{
+	return SetBoneController( iController, flValue, true );
+}
+
+float CBaseAnimating::SetBoneController ( int iController, float flValue, bool test )
 {
 	void *pmodel = GET_MODEL_PTR( ENT(pev) );
 
-	return SetController( pmodel, pev->controller, iController, flValue );
+	return SetController( pmodel, pev->controller, iController, flValue, test );
 }
 
 //=========================================================
