@@ -36,7 +36,6 @@ int GetSequenceFlags( void *pmodel, int sequence );
 //void CalcGaitFrame( void *pmodel, float poseparams[], int &gaitsequence, float &flGaitFrame, float flGaitMovement );
 void CalcGaitFrame( void *pmodel, int &gaitsequence, float &flGaitFrame, float flGaitMovement, int numframes );
 float SetController( void *pmodel, byte *controller, int iController, float flValue, bool test = false );
-float TestControllerForValue( void *pmodel, byte *controller, int iController, float flValue );
 float SetBlending( void *pmodel, int sequence, byte *blending, int iBlender, float flValue );
 int GetEyePosition( void *pmodel, Vector &vecEyePosition );
 void SequencePrecache( void *pmodel, const char *pSequenceName );

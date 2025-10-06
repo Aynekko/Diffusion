@@ -75,12 +75,19 @@ void CTriggerTeleportPoint::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, U
 		EntityVelocity = pEntity->GetAbsVelocity();
 
 	Vector EntityAngles = TargetAng;
-	if ( HasSpawnFlags(PT_KEEP_ANGLES) )
+	if( HasSpawnFlags( PT_KEEP_ANGLES ) )
 		EntityAngles = pEntity->GetAbsAngles();
 
 	// offset to correctly teleport the player...
 	if( pEntity->IsPlayer() )
+	{
 		TargetOrg.z += 36;
+		if( !HasSpawnFlags( PT_KEEP_ANGLES ) )
+		{
+			pEntity->SetAbsAngles( TargetAng );
+			pev->fixangle = TRUE;
+		}
+	}
 
 	// wake up monster - if I teleport it, I want him up and running
 	if( pEntity->IsMonster() && pEntity->HasSpawnFlags( SF_MONSTER_ASLEEP ) )

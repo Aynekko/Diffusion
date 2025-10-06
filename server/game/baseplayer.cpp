@@ -1835,6 +1835,9 @@ void CBasePlayer::OnTeleport( void )
 	pev->controller[1] = 0x7F;
 	pev->controller[2] = 0x7F;
 	pev->controller[3] = 0x7F;
+	pev->gaitsequence = 0;
+	pev->sequence = 0;
+	pev->frame = 0;
 }
 
 
