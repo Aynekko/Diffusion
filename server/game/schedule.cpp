@@ -357,7 +357,11 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 		{
 			ChangeYaw( pev->yaw_speed );
 
-			if( m_flTalkTime < gpGlobals->time && m_hTalkTarget == NULL )
+			if( m_flTalkTime > gpGlobals->time && m_hTalkTarget != NULL )
+			{
+				IdleHeadTurn( m_hTalkTarget );
+			}
+			else
 			{
 				ResetHeadTurn();
 			}

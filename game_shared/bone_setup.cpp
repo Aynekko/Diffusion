@@ -2037,7 +2037,7 @@ void CStudioBoneSetup :: CalcPoseSingle( Vector pos[], Vector4D q[], int sequenc
 	}
 
 	// list is cleared
-	SetBoneControllers( NULL );
+//	SetBoneControllers( NULL ); // moved to AddSequenceLayers FIXME
 }
 
 //-----------------------------------------------------------------------------
@@ -2054,6 +2054,8 @@ void CStudioBoneSetup :: AddSequenceLayers( CIKContext *pIKContext, Vector pos[]
 
 		if( FBitSet( pLayer->flags, STUDIO_AL_LOCAL ))
 			continue;
+
+		SetBoneControllers( NULL ); // FIXME scientists reset their head controllers when sequence changes, but Alice's model has the controller broken this way (moves twice as far)
 
 		float layerCycle = cycle;
 		float layerWeight = flWeight;

@@ -3893,8 +3893,8 @@ void CBaseMonster::IdleHeadTurn( CBaseEntity *pTarget )
 	yaw = AngleToController( 0, yaw );
 	pitch = AngleToController( 1, pitch );
 
-	headyaw = UTIL_ApproachAngle( yaw, headyaw, 165 * gpGlobals->frametime, true );
-	headpitch = UTIL_ApproachAngle( pitch, headpitch, 165 * gpGlobals->frametime, true );
+	headyaw = lerp( headyaw, yaw, 10.0f * gpGlobals->frametime );
+	headpitch = lerp( headpitch, pitch, 10.0f * gpGlobals->frametime );
 
 	// turn towards vector
 	SetBoneController( 0, headyaw );
@@ -3909,8 +3909,8 @@ void CBaseMonster::ResetHeadTurn( void )
 	if( !(m_afCapability & bits_CAP_TURN_HEAD) )
 		return;
 
-	headyaw = UTIL_ApproachAngle( 0.0f, headyaw, 120 * gpGlobals->frametime, true );
-	headpitch = UTIL_ApproachAngle( 0.0f, headpitch, 120 * gpGlobals->frametime, true );
+	headyaw = lerp( headyaw, 0.0f, 10.0f * gpGlobals->frametime );
+	headpitch = lerp( headpitch, 0.0f, 10.0f * gpGlobals->frametime );
 	SetBoneController( 0, headyaw );
 	SetBoneController( 1, headpitch );
 }
