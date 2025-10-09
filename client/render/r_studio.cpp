@@ -4027,8 +4027,8 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 
 		// diffusion - smooth light change for everything else (moving models like viewmodel, players etc)
 		const bool bDoLerp = !(ent->curstate.effects & EF_NOLIGHTLERP);
-		m_pModelInstance->lighting.curambientlight = CL_UTIL_Approach( lighting.ambientlight, m_pModelInstance->lighting.curambientlight, 300 * g_fFrametime );
-		m_pModelInstance->lighting.curshadelight = CL_UTIL_Approach( lighting.shadelight, m_pModelInstance->lighting.curshadelight, 300 * g_fFrametime );
+		m_pModelInstance->lighting.curambientlight = lerp( m_pModelInstance->lighting.curambientlight, lighting.ambientlight, 10.0f * g_fFrametime );
+		m_pModelInstance->lighting.curshadelight = lerp( m_pModelInstance->lighting.curshadelight, lighting.shadelight, 10.0f * g_fFrametime );
 		m_pModelInstance->lighting.ambientlight = bDoLerp ? m_pModelInstance->lighting.curambientlight : lighting.ambientlight;
 		m_pModelInstance->lighting.shadelight = bDoLerp ? m_pModelInstance->lighting.curshadelight : lighting.shadelight;
 
