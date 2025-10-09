@@ -489,7 +489,8 @@ void CTalkMonster :: StartTask( Task_t *pTask )
 		break;
 
 	case TASK_PLAY_SCRIPT:
-		m_hTalkTarget = NULL;
+		if( !IsTalking() )
+			m_hTalkTarget = NULL;
 		CBaseMonster::StartTask( pTask );
 		break;
 
