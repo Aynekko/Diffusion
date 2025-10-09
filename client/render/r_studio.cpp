@@ -2788,7 +2788,7 @@ void CStudioModelRenderer::StudioInterpolateControllers( cl_entity_t *e, float d
 
 	// FIXME !!!! (do not interpolate for now in singleplayer)
 	// the reason: controllers are being reset when sequence changes
-	if( tr.viewparams.maxclients == 1 ) dadt = 1.0f;
+	if( m_pPlayerInfo ) dadt = 1.0f;
 
 	// interpolate controllers
 	for( int j = 0; j < m_pStudioHeader->numbonecontrollers; j++ )
