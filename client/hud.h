@@ -304,6 +304,7 @@ struct extra_player_info_t
 	char teamname[MAX_TEAM_NAME];
 	bool isBot;
 	bool isTalking; // using voice right now
+	bool isSpectator;
 };
 
 struct team_info_t

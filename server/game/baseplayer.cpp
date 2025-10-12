@@ -2366,10 +2366,8 @@ void CBasePlayer::RefreshScore( void )
 		WRITE_SHORT( m_iDeaths );
 		WRITE_SHORT( 0 );
 		WRITE_SHORT( g_pGameRules->GetTeamIndex( m_szTeamName ) + 1 );
-		if( HasFlag( F_BOT ) )
-			WRITE_BYTE( 1 );
-		else
-			WRITE_BYTE( 0 );
+		WRITE_BYTE( HasFlag( F_BOT ) ? 1 : 0 );
+		WRITE_BYTE( IsObserver() ? 1 : 0 );
 	MESSAGE_END();
 }
 
@@ -6751,11 +6749,6 @@ void CBasePlayer :: UpdateClientData( void )
 				plr = (CBasePlayer*)UTIL_PlayerByIndex(i);
 				if (!plr || !plr->IsObserver())
 					continue;
-
-				MESSAGE_BEGIN(MSG_ONE, gmsgSpectator, NULL, pev);
-				WRITE_BYTE(ENTINDEX(plr->edict()));	// index number of primary entity
-					WRITE_BYTE(1);
-				MESSAGE_END();
 			}
 
 			g_pGameRules->InitHUD( this );

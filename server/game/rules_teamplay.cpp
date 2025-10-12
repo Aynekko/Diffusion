@@ -324,10 +324,8 @@ void CHalfLifeTeamplay::ChangePlayerTeam( CBasePlayer *pPlayer, const char *pTea
 		WRITE_SHORT( pPlayer->m_iDeaths );
 		WRITE_SHORT( 0 );
 		WRITE_SHORT( g_pGameRules->GetTeamIndex( pPlayer->m_szTeamName ) + 1 );
-		if( pPlayer->HasFlag( F_BOT ) )
-			WRITE_BYTE( 1 );
-		else
-			WRITE_BYTE( 0 );
+		WRITE_BYTE( pPlayer->HasFlag( F_BOT ) ? 1 : 0 );
+		WRITE_BYTE( pPlayer->IsObserver() ? 1 : 0 );
 	MESSAGE_END();
 }
 

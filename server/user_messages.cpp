@@ -41,7 +41,6 @@ int gmsgGeigerRange = 0;
 int gmsgTeamNames = 0;
 int gmsgStatusText = 0;
 int gmsgStatusValue = 0;
-int gmsgSpectator = 0;
 int gmsgWeaponAnim = 0;
 int gmsgHealthbars = 0;
 int gmsgHealthbarCenter = 0;
@@ -115,7 +114,6 @@ void LinkUserMessages( void )
 	gmsgTeamNames = REG_USER_MSG( "TeamNames", -1 );
 	gmsgStatusText = REG_USER_MSG( "StatusText", -1 );
 	gmsgStatusValue = REG_USER_MSG( "StatusValue", 3 );
-	gmsgSpectator = REG_USER_MSG( "Spectator", 2 );	// sends observer status on entering and exiting observer mode (it is not used in client dll)
 	gmsgWeaponAnim = REG_USER_MSG( "WeaponAnim", 3 );
 	gmsgHealthbars = REG_USER_MSG( "Healthbars", -1 );
 	gmsgHealthbarCenter = REG_USER_MSG( "HealthbarCenter", -1 );

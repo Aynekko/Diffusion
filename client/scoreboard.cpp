@@ -507,6 +507,8 @@ float CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffs
 		static char buf[64];
 		if( g_PlayerExtraInfo[best_player].isBot )
 			Q_snprintf( buf, sizeof( buf ), "BOT" );
+		else if( g_PlayerExtraInfo[best_player].isSpectator )
+			Q_snprintf( buf, sizeof( buf ), "SPEC" );
 		else
 			Q_snprintf( buf, sizeof( buf ), "%d", g_PlayerInfoList[best_player].ping );
 		DrawString( xpos_rel + PingRangeMin, ypos + TxtYOffset, buf, r, g, b );
@@ -562,7 +564,8 @@ int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *p
 	short deaths = READ_SHORT();
 	short playerclass = READ_SHORT();
 	short teamnumber = READ_SHORT();
-	int isBot = READ_BYTE();
+	bool isBot = (READ_BYTE() > 0);
+	bool isSpectator = (READ_BYTE() > 0);
 
 	if( cl > 0 && cl <= MAX_PLAYERS )
 	{
@@ -575,7 +578,8 @@ int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *p
 		if( g_PlayerExtraInfo[cl].teamnumber < 0 )
 			g_PlayerExtraInfo[cl].teamnumber = 0;
 
-		g_PlayerExtraInfo[cl].isBot = (isBot > 0);
+		g_PlayerExtraInfo[cl].isBot = isBot;
+		g_PlayerExtraInfo[cl].isSpectator = isSpectator;
 
 #ifdef XASH_64BIT
 		discord_integration::on_player_count_update();

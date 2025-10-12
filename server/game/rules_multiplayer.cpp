@@ -786,16 +786,8 @@ void CHalfLifeMultiplay :: InitHUD( CBasePlayer *pl )
 		WRITE_SHORT( 0 );
 		WRITE_SHORT( 0 );
 		WRITE_SHORT( 0 );
-		if( pl->HasFlag( F_BOT ) )
-			WRITE_BYTE( 1 );
-		else
-			WRITE_BYTE( 0 );
-	MESSAGE_END();
-
-	// Send player spectator status (it is not used in client dll)
-	MESSAGE_BEGIN(MSG_ALL, gmsgSpectator);
-		WRITE_BYTE(pl->entindex());
-		WRITE_BYTE(pl->IsObserver());
+		WRITE_BYTE( pl->HasFlag( F_BOT ) ? 1 : 0 );
+		WRITE_BYTE( pl->IsObserver() ? 1 : 0 );
 	MESSAGE_END();
 
 	SendMOTDToClient( pl->edict() );
@@ -813,10 +805,8 @@ void CHalfLifeMultiplay :: InitHUD( CBasePlayer *pl )
 				WRITE_SHORT( plr->m_iDeaths );
 				WRITE_SHORT( 0 );
 				WRITE_SHORT( GetTeamIndex( plr->m_szTeamName ) + 1 );
-				if( plr->HasFlag( F_BOT ) )
-					WRITE_BYTE( 1 );
-				else
-					WRITE_BYTE( 0 );
+				WRITE_BYTE( plr->HasFlag( F_BOT ) ? 1 : 0 );
+				WRITE_BYTE( plr->IsObserver() ? 1 : 0 );
 			MESSAGE_END();
 		}
 	}
@@ -867,12 +857,6 @@ void CHalfLifeMultiplay :: ClientDisconnected( edict_t *pClient )
 			pPlayer->pCar->Use( pPlayer, pPlayer, USE_OFF, 0 ); // get out of the damn car
 
 		pPlayer->RemoveAllItems( TRUE );// destroy all of the players weapons and items
-
-		// Tell all clients this player isn't a spectator anymore
-		MESSAGE_BEGIN(MSG_ALL, gmsgSpectator);
-			WRITE_BYTE(ENTINDEX(pClient));
-			WRITE_BYTE(0);
-		MESSAGE_END();
 	}
 }
 
@@ -1148,10 +1132,8 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 		WRITE_SHORT( pVictim->m_iDeaths );
 		WRITE_SHORT( 0 );
 		WRITE_SHORT( GetTeamIndex( pVictim->m_szTeamName ) + 1 );
-		if( pVictim->HasFlag( F_BOT ) )
-			WRITE_BYTE( 1 );
-		else
-			WRITE_BYTE( 0 );
+		WRITE_BYTE( pVictim->HasFlag( F_BOT ) ? 1 : 0 );
+		WRITE_BYTE( pVictim->IsObserver() ? 1 : 0 );
 	MESSAGE_END();
 
 	// killers score, if it's a player
@@ -1166,10 +1148,8 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 			WRITE_SHORT( PK->m_iDeaths );
 			WRITE_SHORT( 0 );
 			WRITE_SHORT( GetTeamIndex( PK->m_szTeamName) + 1 );
-			if( PK->HasFlag( F_BOT ) )
-				WRITE_BYTE( 1 );
-			else
-				WRITE_BYTE( 0 );
+			WRITE_BYTE( PK->HasFlag( F_BOT ) ? 1 : 0 );
+			WRITE_BYTE( PK->IsObserver() ? 1 : 0 );
 		MESSAGE_END();
 
 		// let the killer paint another decal as soon as he'd like.

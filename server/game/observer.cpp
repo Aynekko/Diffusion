@@ -108,11 +108,8 @@ void CBasePlayer::StartObserver(void)
 		WRITE_STRING("");
 	MESSAGE_END();
 
-	// Send Spectator message (it is not used in client dll)
-	MESSAGE_BEGIN(MSG_ALL, gmsgSpectator);
-		WRITE_BYTE(ENTINDEX(edict()));	// index number of primary entity
-		WRITE_BYTE(1);
-	MESSAGE_END();
+	// Send isSpectator message
+	RefreshScore();
 }
 
 //=========================================================
@@ -126,12 +123,6 @@ void CBasePlayer::StopObserver(void)
 
 	GetClassPtr((CBasePlayer*)pev)->Spawn();
 	pev->nextthink = -1;
-
-	// Send Spectator message (it is not used in client dll)
-	MESSAGE_BEGIN(MSG_ALL, gmsgSpectator);
-	WRITE_BYTE(ENTINDEX(edict()));	// index number of primary entity
-		WRITE_BYTE(0);
-	MESSAGE_END();
 
 	// Update Team Status
 	MESSAGE_BEGIN(MSG_ALL, gmsgTeamInfo);

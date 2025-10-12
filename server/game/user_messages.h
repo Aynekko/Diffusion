@@ -38,7 +38,6 @@ extern int gmsgGeigerRange;
 extern int gmsgTeamNames;
 extern int gmsgStatusText;
 extern int gmsgStatusValue;
-extern int gmsgSpectator;
 extern int gmsgWeaponAnim;
 extern int gmsgHealthbars;
 extern int gmsgHealthbarCenter;
