@@ -73,6 +73,7 @@ enum
 
 int g_fGruntQuestion;				// true if an idle grunt asked a question. Cleared when someone answers.
 bool g_bGruntAlert;
+int g_iGruntEquipRandom = 0;
 
 extern DLL_GLOBAL int		g_iSkillLevel;
 
@@ -1904,8 +1905,9 @@ void CHGrunt::Spawn(void)
 	{
 		// shuffle properly because it's still not exactly random it seems
 		int rnd = RANDOM_LONG( 0, 3 );
-		rnd = RANDOM_LONG( 0, 3 );
-		rnd = RANDOM_LONG( 0, 3 );
+		while( rnd == g_iGruntEquipRandom )
+			rnd = RANDOM_LONG( 0, 3 );
+		g_iGruntEquipRandom = rnd;
 		switch( rnd )
 		{
 		case 0:
@@ -3092,8 +3094,9 @@ void CHGruntAlien :: Spawn()
 	{
 		// shuffle properly because it's still not exactly random it seems
 		int rnd = RANDOM_LONG( 0, 3 );
-		rnd = RANDOM_LONG( 0, 3 );
-		rnd = RANDOM_LONG( 0, 3 );
+		while( rnd == g_iGruntEquipRandom )
+			rnd = RANDOM_LONG( 0, 3 );
+		g_iGruntEquipRandom = rnd;
 
 		switch( rnd )
 		{
@@ -5435,8 +5438,9 @@ void CHGruntSecurity::Spawn()
 	{
 		// shuffle properly because it's still not exactly random it seems
 		int rnd = RANDOM_LONG( 0, 3 );
-		rnd = RANDOM_LONG( 0, 3 );
-		rnd = RANDOM_LONG( 0, 3 );
+		while( rnd == g_iGruntEquipRandom )
+			rnd = RANDOM_LONG( 0, 3 );
+		g_iGruntEquipRandom = rnd;
 
 		switch( rnd )
 		{
