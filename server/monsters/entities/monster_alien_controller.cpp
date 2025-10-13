@@ -2807,14 +2807,12 @@ void CDrone :: RunTask ( Task_t *pTask )
 			CSquadMonster::RunTask( pTask );
 			break;
 		}
-		
-		float distance;
 
 		if( m_hTargetEnt == NULL )
 			TaskFail();
 		else
 		{
-			distance = (m_vecMoveGoal - GetLocalOrigin()).Length2D();
+			float distance = (m_vecMoveGoal - GetLocalOrigin()).Length2D();
 			// Re-evaluate when you think you're finished, or the target has moved too far
 			if( (distance < pTask->flData) || (m_vecMoveGoal - m_hTargetEnt->GetAbsOrigin()).Length() > pTask->flData * 0.5 )
 			{

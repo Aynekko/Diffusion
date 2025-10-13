@@ -95,7 +95,7 @@ BOOL CWpnDrone::IsUseable(void)
 	DroneDeployed = m_pPlayer->DroneDeployed;
 
 	// show test model
-	if( m_pPlayer->CanShoot && m_pPlayer->CanUseDrone && (gpGlobals->time >= m_flNextPrimaryAttack) && !m_pPlayer->DroneDeployed && (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0) )
+	if( m_pPlayer->CanShoot && m_pPlayer->CanUseDrone && !m_pPlayer->DroneDeployed && (m_pPlayer->m_rgAmmo[PrimaryAmmoIndex()] > 0) )
 	{
 		if( !m_hTestModel )
 		{
@@ -121,6 +121,7 @@ BOOL CWpnDrone::IsUseable(void)
 			Vector SpawnPos = m_pPlayer->GetAbsOrigin() + gpGlobals->v_forward * 50 + gpGlobals->v_up * 20;
 			m_hTestModel->SetAbsOrigin( SpawnPos );
 			m_hTestModel->RelinkEntity( FALSE );
+			m_hTestModel->SetAbsAngles( Vector( 0.0f, anglesAim.y, 0.0f ) );
 			
 			if( m_pPlayer->DroneHealth < 50.0f )
 			{
@@ -140,7 +141,7 @@ BOOL CWpnDrone::IsUseable(void)
 					NextSmokeTime = gpGlobals->time + 0.25;
 				}
 			}
-			else if( !SpawnTest() || (m_pPlayer->pev->waterlevel == 3) )
+			else if( !SpawnTest() )
 				m_hTestModel->pev->rendercolor = Vector( 255, 50, 50 );
 			else
 				m_hTestModel->pev->rendercolor = Vector( 50, 255, 50 );
@@ -336,7 +337,8 @@ void CWpnDrone::PrimaryAttack( void )
 		anglesAim.x *= 0.8;
 		UTIL_MakeVectors( anglesAim );
 		Vector SpawnPos = m_pPlayer->GetAbsOrigin() + gpGlobals->v_forward * 50 + gpGlobals->v_up * 20;
-		CBaseMonster *pDrone = (CBaseMonster*)Create( "_playerdrone", SpawnPos, g_vecZero, m_pPlayer->edict() );
+		Vector SpawnAng = (m_hTestModel != NULL) ? m_hTestModel->GetAbsAngles() : g_vecZero;
+		CBaseMonster *pDrone = (CBaseMonster*)Create( "_playerdrone", SpawnPos, SpawnAng, m_pPlayer->edict() );
 		if( pDrone )
 		{
 			pDrone->m_iClass = CLASS_PLAYER_ALLY;
@@ -462,6 +464,9 @@ void CWpnDrone::SecondaryAttack( void )
 
 bool CWpnDrone::SpawnTest( void )
 {
+	if( m_pPlayer->pev->waterlevel == 3 )
+		return false;
+
 	TraceResult tracer;
 	Vector anglesAim = m_pPlayer->pev->v_angle;
 	anglesAim.x *= 0.75;

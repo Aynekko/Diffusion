@@ -35,16 +35,14 @@ public:
 	int AddToPlayer( CBasePlayer *pPlayer );
 
 	void PrimaryAttack( void );
-	void SecondaryAttack( void );
-//	int SecondaryAmmoIndex( void );
 	BOOL Deploy( void );
 	void Holster( void );
 	void WeaponIdle( void );
+	BOOL IsUseable( void );
 
 	bool SpawnTest( void );
 
 	EHANDLE m_hTestModel;
-	float RotateAngle;
 
 	DECLARE_DATADESC();
 };
@@ -53,17 +51,7 @@ LINK_ENTITY_TO_CLASS( weapon_sentry, CWpnSentry );
 
 BEGIN_DATADESC( CWpnSentry )
 	DEFINE_FIELD( m_hTestModel, FIELD_EHANDLE ),
-	DEFINE_FIELD( RotateAngle, FIELD_FLOAT ),
 END_DATADESC()
-
-//=========================================================
-//=========================================================
-/*
-int CWpnSentry::SecondaryAmmoIndex( void )
-{
-	return m_iSecondaryAmmoType;
-}
-*/
 
 void CWpnSentry::Spawn( void )
 {
@@ -241,7 +229,8 @@ void CWpnSentry::PrimaryAttack()
 	anglesAim.x *= 0.75;
 	UTIL_MakeVectors( anglesAim );
 	Vector SpawnPos = m_pPlayer->GetAbsOrigin() + gpGlobals->v_forward * 50 - gpGlobals->v_up * 10;
-	CBaseMonster *pSentry = (CBaseMonster*)Create( "_playersentry", SpawnPos, Vector(0,RotateAngle,0), m_pPlayer->edict() );
+	Vector SpawnAng = (m_hTestModel != NULL) ? m_hTestModel->GetAbsAngles() : g_vecZero;
+	CBaseMonster *pSentry = (CBaseMonster*)Create( "_playersentry", SpawnPos, SpawnAng, m_pPlayer->edict() );
 	if( pSentry )
 	{
 		pSentry->m_iClass = CLASS_PLAYER_ALLY;
@@ -276,45 +265,16 @@ void CWpnSentry::PrimaryAttack()
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 }
 
-// rotate the turret before spawn, and also update the position
-void CWpnSentry::SecondaryAttack(void)
-{
-	if( m_hTestModel == NULL )
-		return;
-	
-	Vector anglesAim = m_pPlayer->pev->v_angle;
-	if( anglesAim.x > 15.0f ) // small hack for more intuitive turret placing at the floor
-		anglesAim.x = 15.0f;
-
-	anglesAim.x *= 0.75;
-	UTIL_MakeVectors( anglesAim );
-	Vector vecSrc = m_pPlayer->GetAbsOrigin();
-	Vector vecEnd = vecSrc + gpGlobals->v_forward * 50 - gpGlobals->v_up * 10;
-
-	m_hTestModel->pev->rendercolor = Vector( 255, 255, 50 );
-
-	Vector SentryAng = m_hTestModel->GetLocalAngles();
-	RotateAngle += 100 * gpGlobals->frametime;
-	if( RotateAngle > 360 ) RotateAngle = 0;
-	SentryAng.y = RotateAngle;
-	
-	if( m_hTestModel->pev->effects & EF_NODRAW )
-		m_hTestModel->pev->effects &= ~EF_NODRAW;
-	m_hTestModel->SetAbsOrigin( vecEnd );
-	m_hTestModel->SetLocalAngles( SentryAng );
-}
-
-void CWpnSentry::WeaponIdle( void )
+BOOL CWpnSentry::IsUseable( void )
 {
 	if( !m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
-		return;
-	
-	ResetEmptySound( );
+		return FALSE;
 
-	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
+	// push this forward so this function can always run
+	m_flNextSecondaryAttack = gpGlobals->time + 1;
 
 	// show test model
-	if( m_pPlayer->CanShoot && m_flNextPrimaryAttack < gpGlobals->time )
+	if( m_pPlayer->CanShoot )
 	{
 		if( m_hTestModel == NULL )
 		{
@@ -341,6 +301,7 @@ void CWpnSentry::WeaponIdle( void )
 			UTIL_MakeVectors( anglesAim );
 			Vector SpawnPos = m_pPlayer->GetAbsOrigin() + gpGlobals->v_forward * 50 - gpGlobals->v_up * 10;
 			m_hTestModel->SetAbsOrigin( SpawnPos );
+			m_hTestModel->SetAbsAngles( Vector( 0.0f, anglesAim.y, 0.0f ) );
 			m_hTestModel->RelinkEntity( FALSE );
 
 			if( !SpawnTest() )
@@ -354,6 +315,18 @@ void CWpnSentry::WeaponIdle( void )
 		if( m_hTestModel != NULL )
 			m_hTestModel->pev->rendercolor = Vector( 255, 50, 50 );
 	}
+
+	return TRUE;
+}
+
+void CWpnSentry::WeaponIdle( void )
+{
+	if( !m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] )
+		return;
+	
+	ResetEmptySound( );
+
+	m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
 	if (m_flTimeWeaponIdle > gpGlobals->time)
 		return;
