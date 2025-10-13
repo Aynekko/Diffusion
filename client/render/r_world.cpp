@@ -3477,6 +3477,7 @@ void R_MarkLeaves( void )
 
 	if( RI->viewleaf == RI->oldviewleaf && RI->viewleaf != NULL )
 	{
+		ENGINE_SET_PVS( RI->pvsorigin, r_pvs_radius ? r_pvs_radius->value : 2.0f, RI->visbytes, FBitSet( RI->params, RP_MERGEVISIBILITY ), novis );
 		R_UpdateEngineVisibility();
 		return;
 	}

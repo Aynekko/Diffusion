@@ -288,7 +288,7 @@ void R_DrawSkyPortal( cl_entity_t *skyPortal )
 {
 	R_PushRefState();
 
-	RI->params = ( RI->params|RP_SKYPORTALVIEW ) & ~(RP_OLDVIEWLEAF|RP_CLIPPLANE);
+	RI->params = ( RI->params|RP_SKYPORTALVIEW ) & ~(RP_CLIPPLANE);
 	RI->pvsorigin = skyPortal->curstate.origin;
 	RI->frustum.DisablePlane( FRUSTUM_FAR );
 	RI->frustum.DisablePlane( FRUSTUM_NEAR );
@@ -316,6 +316,7 @@ void R_DrawSkyPortal( cl_entity_t *skyPortal )
 
 	r_stats.c_sky_passes++;
 
+	R_FindViewLeaf();
 	R_RenderScene();
 	R_PopRefState();
 }
@@ -403,12 +404,8 @@ void R_CheckSkyPortal( cl_entity_t *skyPortal )
 	// don't allow recursive 3dsky
 	if( FBitSet( RI->params, RP_SKYPORTALVIEW ))
 		return;
-		
-	if( !FBitSet( RI->params, RP_OLDVIEWLEAF ))
-		R_FindViewLeaf();
 
 	R_SetupFrustum();
-	R_MarkLeaves();
 
 	if( FBitSet( RI->params, RP_MIRRORVIEW ))
 		tr.modelorg = RI->pvsorigin;
@@ -420,7 +417,11 @@ void R_CheckSkyPortal( cl_entity_t *skyPortal )
 	if( tr.bSkySurfFound )
 		RI->params |= RP_SKYVISIBLE;
 	else if( (RI->params & RP_SCREENVIEW) || (RI->params & RP_PORTALVIEW) )
+	{
+		R_FindViewLeaf();
+		R_MarkLeaves();
 		R_WorldFindSky(); // expensive. Instead find sky surface during normalpass and delay 3d skybox state by 1 frame using bDraw3DSky
+	}
 
 	if( FBitSet( RI->params, RP_SKYVISIBLE ))
 	{

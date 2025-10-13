@@ -1071,15 +1071,8 @@ static void R_SetupFrame( void )
 	// setup viewplane dist
 	RI->viewplanedist = DotProduct( RI->vieworg, RI->vforward );
 
-//	if( !CVAR_TO_BOOL( r_nosort ))
-//	{
-//		// sort translucents entities by rendermode and distance
-//		qsort( tr.trans_entities, tr.num_trans_entities, sizeof( cl_entity_t* ), (cmpfunc)R_TransEntityCompare );
-//	}
-
 	// current viewleaf
-	if( !FBitSet( RI->params, RP_OLDVIEWLEAF ))
-		R_FindViewLeaf();
+	R_FindViewLeaf();
 }
 
 /*
@@ -1787,8 +1780,6 @@ RI->refdef must be set before the first call
 */
 void R_RenderScene( void )
 {
-	char empty[MAX_REF_STACK];
-
 	// set the worldmodel
 	if( (worldmodel = GET_ENTITY( 0 )->model) == NULL )
 		HOST_ERROR( "R_RenderScene: NULL worldmodel\n" );
@@ -1797,6 +1788,7 @@ void R_RenderScene( void )
 	{
 		int	num_faces = 0;
 		unsigned int i;
+		char empty[MAX_REF_STACK];
 
 		if( glState.stack_position > 0 )
 			num_faces = R_GetPrevInstance()->num_subview_faces;

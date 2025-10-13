@@ -86,7 +86,7 @@ int R_SetupMirrorView( msurface_t *surf, cl_entity_t *camera, matrix4x4 &viewmat
 
 	plane.dist += ON_EPSILON; // to prevent z-fighting with reflective water
 
-	RI->params = RP_MIRRORVIEW|RP_CLIPPLANE|RP_OLDVIEWLEAF;
+	RI->params = RP_MIRRORVIEW|RP_CLIPPLANE;
 	RI->frustum.SetPlane( FRUSTUM_NEAR, plane.normal, plane.dist );
 	RI->clipPlane = plane;
 
@@ -619,6 +619,7 @@ void R_DrawSubviewPasses( void )
 		if( surf->info->parent->curstate.iuser3 == -671 )
 			RI->params |= RP_IGNORE_3DSKY;
 
+		R_FindViewLeaf();
 		R_RenderScene();
 
 		RI->reject_face = NULL;
@@ -896,8 +897,7 @@ static void R_RenderDroneView( void )
 	if( RP_OUTSIDE( RI->viewleaf ) )
 		return;
 
-	if( !FBitSet( RI->params, RP_OLDVIEWLEAF ) )
-		R_FindViewLeaf();
+	R_FindViewLeaf();
 	R_SetupFrustum();
 	R_MarkLeaves();
 
@@ -942,6 +942,7 @@ static void R_RenderDroneView( void )
 
 	memcpy( viewport, RI->viewport, sizeof( viewport ) );
 
+	R_FindViewLeaf();
 	R_RenderScene();
 
 	if( !drone_view_tex )
@@ -979,8 +980,7 @@ static void R_RenderStudioScreen( cl_entity_t *e )
 	
 	Vector origin, angles, forward;
 
-	if( !FBitSet( RI->params, RP_OLDVIEWLEAF ) )
-		R_FindViewLeaf();
+	R_FindViewLeaf();
 	R_SetupFrustum();
 	R_MarkLeaves();
 
@@ -1090,8 +1090,7 @@ void R_RenderSubview( void )
 	if( RP_OUTSIDE( RI->viewleaf ))
 		return;
 
-	if( !FBitSet( RI->params, RP_OLDVIEWLEAF ))
-		R_FindViewLeaf();
+	R_FindViewLeaf();
 	R_SetupFrustum();
 	R_MarkLeaves();
 

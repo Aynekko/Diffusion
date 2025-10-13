@@ -349,8 +349,7 @@ static void R_ShadowPassSetupFrame( plight_t *pl, int split = 0 )
 	else
 		RI->frustum = pl->frustum;
 
-	if(!( RI->params & RP_OLDVIEWLEAF ))
-		R_FindViewLeaf();
+	R_FindViewLeaf();
 
 	RI->currentlight = pl;
 }
