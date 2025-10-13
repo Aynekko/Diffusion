@@ -71,6 +71,7 @@ void CEnvBonus::BonusTouch( CBaseEntity *pOther )
 
 	// equip the player
 	pPlayer->pev->health += 25;
+	pPlayer->m_flStaminaValue = 100;
 
 	switch( EquipmentRandom )
 	{
