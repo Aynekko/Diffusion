@@ -313,6 +313,11 @@ int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 		gHUD.m_Puzzle.m_iFlags &= ~HUD_ACTIVE;
 		return 0;
 	}
+	else if( gHUD.m_CodeInput.m_iFlags & HUD_ACTIVE && bEscButton )
+	{
+		gHUD.m_CodeInput.DisableCodeScreen();
+		return 0;
+	}
 
 	if( (gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) && (keynum == K_ENTER || keynum == K_MOUSE1 || bUseButton || !Q_strcmp(pszCurrentBinding, "+attack")) )
 	{
