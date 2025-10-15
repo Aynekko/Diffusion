@@ -158,8 +158,7 @@ void main( void )
 
 #if defined( STUDIO_HAS_COLORMASK )
 	vec4 colormask = texture2D( u_ColorMask, var_TexDiffuse );
-	if( colormask.a > 0.5 )
-		diffuse.rgb *= u_RenderColor.rgb;
+	diffuse.rgb = mix( diffuse.rgb, diffuse.rgb * u_RenderColor.rgb, colormask.r );
 #else
 	diffuse.rgb *= u_RenderColor.rgb; // kRenderTransColor
 #endif
