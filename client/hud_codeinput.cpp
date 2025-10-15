@@ -19,7 +19,6 @@ int CHudCodeInput::Init( void )
 {
 	HOOK_MESSAGE( CodeInput );
 	gHUD.AddHudElem( this );
-	m_iFlags |= HUD_ACTIVE;
 	return 1;
 }
 
@@ -44,6 +43,7 @@ void CHudCodeInput::DisableCodeScreen(void)
 	memset( num_user, 0, sizeof( num_user ) );
 	CloseTime = 0.0f;
 	CodeSuccess = false;
+	m_iFlags &= ~HUD_ACTIVE;
 }
 
 void CHudCodeInput::EnterCode( int num )
@@ -83,6 +83,8 @@ int CHudCodeInput::MsgFunc_CodeInput( const char *pszName, int iSize, void *pbuf
 	g = 255;
 	b = 255;
 	memset( num_user, 0, sizeof( num_user ) );
+
+	m_iFlags |= HUD_ACTIVE;
 
 	return 1;
 }
