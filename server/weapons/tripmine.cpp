@@ -21,6 +21,7 @@
 #include "player.h"
 #include "effects.h"
 #include "game/gamerules.h"
+#include "entities/soundent.h"
 
 #define TRIPMINE_PRIMARY_VOLUME	450
 
@@ -623,8 +624,11 @@ void CTripmine::PrimaryAttack( void )
 		if (pEntity && (pEntity->IsBSPModel() || pEntity->IsCustomModel()) && !(pEntity->pev->flags & FL_CONVEYOR))
 		{
 			Vector angles = UTIL_VecToAngles( tr.vecPlaneNormal );
+			Vector pos = tr.vecEndPos + tr.vecPlaneNormal * 8.0f;
 
-			CBaseEntity *pEnt = CBaseEntity::Create( "monster_tripmine", tr.vecEndPos + tr.vecPlaneNormal * 8, angles, m_pPlayer->edict() );
+			CBaseEntity *pEnt = CBaseEntity::Create( "monster_tripmine", pos, angles, m_pPlayer->edict() );
+			// make npcs aware
+			CSoundEnt::InsertSound( bits_SOUND_COMBAT, pos, 250, 0.1f );
 
 			// g-cont. attach tripmine to the wall
 			// NOTE: we should always attach the tripmine because our parent it's our owner too

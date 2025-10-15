@@ -46,6 +46,7 @@ used iuser3 "flags":
 -669 cable
 -670 turned on monitor
 -671 do not render 3D sky - only used in brush entities (func_portal or mirrors)
+-672 smoke (wounded turret/drone etc.), vuser1.z is used as height offset
 */
 
 #define DEFAULT_SMOOTHNESS	0.35f
@@ -411,6 +412,17 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 					g_pParticles.Smoke( ent->index, type, ent->curstate.origin - Vector(0,0,ent->curstate.iuser2 * 0.25), g_vecZero, 1, dust_speed, dust_scale, dust_randomize_pos, 0, Vector(1,1,1), 1000 );
 
 				tr.ParticleTime[ParticleEntIndex] = tr.time + (1.0f / (1.0f + ent->curstate.fuser1 * 0.1f));
+			}
+		}
+
+		if( ent->curstate.iuser3 == -672 ) // turret smoke
+		{
+			const int ParticleEntIndex = ent->index;
+			const float height_offset = ent->curstate.vuser1.z;
+			if( tr.time > tr.ParticleTime[ParticleEntIndex] )
+			{
+				g_pParticles.SmokeParticles( ParticleEntIndex, ent->curstate.origin + Vector( 0, 0, height_offset ), 1, 0.0f, 1.0f, 2.0f );
+				tr.ParticleTime[ParticleEntIndex] = tr.time + 0.25f;
 			}
 		}
 

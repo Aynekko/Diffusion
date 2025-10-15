@@ -22,6 +22,7 @@
 #include "player.h"
 #include "game/gamerules.h"
 #include "game/game.h"
+#include "entities/soundent.h"
 
 class CSatchelCharge : public CGrenade
 {
@@ -184,6 +185,8 @@ void CSatchelCharge :: BounceSound( void )
 		case 2:	EMIT_SOUND(ENT(pev), CHAN_VOICE, "weapons/g_bounce3.wav", 1, ATTN_NORM);	break;
 		}
 
+		// make npcs aware
+		CSoundEnt::InsertSound( bits_SOUND_DANGER, GetAbsOrigin(), 250, 0.1f );
 		LastBounceSoundTime = gpGlobals->time;
 	}
 }

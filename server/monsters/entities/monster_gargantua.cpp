@@ -360,6 +360,9 @@ void CGargantua :: Spawn()
 	ShootAttachment = false;
 
 	Remember( bits_MEMORY_FLINCHED ); // !!! don't flinch
+
+	pev->iuser3 = 0; // will be set to -672 when hp is low, to enable smoke effect on client
+	pev->vuser1.z = 150; // offset for smoke effect
 }
 
 
@@ -421,6 +424,7 @@ void CGargantua :: RunAI( void )
 
 	if( IsAlive() && (pev->health <= pev->max_health * 0.2f) )
 	{
+		pev->iuser3 = -672; // enable smoke
 		if( gpGlobals->time > LastSparkTime )
 		{
 			UTIL_DoSpark(pev, EyePosition());
@@ -741,11 +745,13 @@ void CGargantua::DeathEffect( void )
 
 void CGargantua::Killed( entvars_t *pevAttacker, int iGib )
 {
+	pev->iuser3 = 0; // disable smoke effect
 	CBaseMonster::Killed( pevAttacker, GIB_NEVER );
 }
 
 void CGargantua::ClearEffects(void)
 {
+	pev->iuser3 = 0; // disable smoke effect
 	STOP_SOUND( ENT(pev), CHAN_STATIC, "robo/idle.wav" );
 	STOP_SOUND( ENT(pev), CHAN_VOICE, "robo/warning1.wav" );
 	STOP_SOUND( ENT(pev), CHAN_STATIC, "robo/warning2.wav" );

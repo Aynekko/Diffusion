@@ -1468,6 +1468,9 @@ void CSentry::Spawn()
 	SetTouch(&CSentry::SentryTouch);
 	SetThink(&CBaseTurret::Initialize);	
 	SetNextThink( 0.3 );
+	
+	pev->iuser3 = 0; // will be set to -672 when hp is low, to enable smoke effect on client
+	pev->vuser1.z = 30; // offset for smoke effect
 }
 
 void CSentry::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
@@ -1532,8 +1535,12 @@ int CSentry::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float f
 
 	pev->health -= flDamage;
 
+	if( pev->health < pev->max_health * 0.35f )
+		pev->iuser3 = -672; // enable smoke effect
+
 	if (pev->health <= 0)
 	{
+		pev->iuser3 = 0; // clear smoke effect
 		pev->health = 0;
 		pev->takedamage = DAMAGE_NO;
 		pev->dmgtime = gpGlobals->time;

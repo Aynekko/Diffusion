@@ -2220,6 +2220,7 @@ void CDrone :: Spawn()
 		if( IsRocketDrone )
 			pev->health = RocketDroneHealth[g_iSkillLevel];
 	}
+	pev->max_health = pev->health;
 	pev->view_ofs		= Vector( 0, 0, 6 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_WIDE;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	if( FClassnameIs( pev, "_playerdrone" ) )
@@ -2261,6 +2262,10 @@ void CDrone :: Spawn()
 		SetFlag( F_ENTITY_BUSY ); // drone can't be grabbed back right now.
 		ObjectCaps(); // refresh just in case
 	}
+
+	// smoke effect for npc drones only
+	pev->iuser3 = 0; // will be set to -672 when hp is low, to enable smoke effect on client
+	pev->vuser1.z = 10; // offset for smoke effect
 
 	SetFlag( F_METAL_MONSTER);
 
@@ -2454,7 +2459,7 @@ void CDrone :: RunAI( void )
 		}*/
 	}
 	
-	if( IsAlive() && (pev->health <= 30) )
+	if( IsAlive() && (pev->health <= pev->max_health * 0.4f) )
 	{
 		if( gpGlobals->time > LastSparkTime )
 		{
@@ -3007,7 +3012,7 @@ int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 //	vecSparkOrigin.x -= 32; 
 //	UTIL_DoSparkNoSound( pev, vecSparkOrigin);
 //------------------------------------------------
-	if (pev->health < 40)
+	if( pev->health < pev->max_health * 0.4f )
 	{
 		Vector vecOrigin = GetAbsOrigin();
 		
@@ -3025,6 +3030,8 @@ int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 		if( !CriticalDamage )
 		{
 			EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_damage.wav", 0.5, ATTN_NORM );
+			if( !HasFlag( F_PLAYER_DRONE ) )
+				pev->iuser3 = -672; // enable smoke effect
 			CriticalDamage = true;
 		}
 	}
@@ -3052,6 +3059,7 @@ int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 
 void CDrone::Killed( entvars_t *pevAttacker, int iGib )
 {
+	pev->iuser3 = 0; // disable smoke effect
 	pev->takedamage = DAMAGE_NO;
 	pev->deadflag = DEAD_DEAD;
 	FCheckAITrigger();
@@ -3166,6 +3174,7 @@ void CDrone::Killed( entvars_t *pevAttacker, int iGib )
 
 void CDrone::ClearEffects(void)
 {
+	pev->iuser3 = 0; // disable smoke effect
 	STOP_SOUND( ENT(pev), CHAN_STATIC, "drone/drone_running.wav" );
 	STOP_SOUND( ENT(pev), CHAN_STATIC, "drone/drone_damage.wav" );
 	STOP_SOUND( ENT(pev), CHAN_STATIC, "drone/drone_spawn.wav" );
@@ -3268,6 +3277,7 @@ void CDroneAlien :: Spawn()
 	pev->flags			|= FL_FLY;
 	m_bloodColor		= DONT_BLEED;
 	if (!pev->health) pev->health	= 75;
+	pev->max_health = pev->health;
 	pev->view_ofs		= Vector( 0, 0, -2 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_WIDE;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -3661,7 +3671,7 @@ int CDroneAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 //	vecSparkOrigin.x -= 32; 
 //	UTIL_DoSparkNoSound( pev, vecSparkOrigin);
 //------------------------------------------------
-	if (pev->health < 40)
+	if( pev->health < pev->max_health * 0.4f )
 	{
 		Vector vecOrigin = GetAbsOrigin();
 		
@@ -3887,7 +3897,8 @@ void CAlienShip :: Spawn()
 
 	pev->flags			|= FL_FLY;
 	m_bloodColor		= DONT_BLEED;
-	if (!pev->health) pev->health	= 3000;
+	if( !pev->health ) pev->health = 3000;
+	pev->max_health = pev->health;
 	pev->view_ofs		= Vector( 0, 0, -2 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_FULL;// indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -4339,7 +4350,7 @@ int CAlienShip::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 			WRITE_BYTE( 30 ); // pos randomize
 		MESSAGE_END();
 
-		if( (gpGlobals->time > CriticalHitTime) && (pev->health > 500) )
+		if( (gpGlobals->time > CriticalHitTime) && (pev->health > pev->max_health * 0.2f) )
 		{
 			EMIT_SOUND_DYN( edict(), CHAN_STATIC, "drone/alienship_hit.wav", 1, 0.2, 0, RANDOM_LONG(90,110) );
 			CriticalHitTime = gpGlobals->time + 5;
@@ -4358,7 +4369,7 @@ int CAlienShip::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	if( bitsDamageType & DMG_SHOCK )
 		flDamage *= 2;
 
-	if (pev->health < 500)
+	if( pev->health < pev->max_health * 0.2f )
 	{
 		if( !CriticalDamage )
 		{
