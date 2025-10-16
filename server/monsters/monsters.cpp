@@ -2217,6 +2217,8 @@ void CBaseMonster :: StartPatrol ( CBaseEntity* path )
 //=========================================================
 void CBaseMonster :: StartMonster ( void )
 {
+	ResetSequenceInfo();
+
 	// update capabilities
 	if ( LookupActivity ( ACT_RANGE_ATTACK1 ) != ACTIVITY_NOT_AVAILABLE )
 		m_afCapability |= bits_CAP_RANGE_ATTACK1;
@@ -2272,8 +2274,6 @@ void CBaseMonster :: StartMonster ( void )
 		ChangeSchedule( GetScheduleOfType( SCHED_WAIT_TRIGGER ) );
 	}
 	*/
-
-//	ResetSequenceInfo(); // TTTEST
 }
 
 
