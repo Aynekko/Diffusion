@@ -236,7 +236,7 @@ void main( void )
 #else
 	vec3 L;
 	#if defined( STUDIO_BUMP )
-		L = normalize( var_LightVec );
+		L = var_LightVec;
 		float NdotB = ComputeStaticBump( L, N );
 		light_diffuse = var_LightDiffuse * NdotB;
 	#else	
@@ -258,7 +258,7 @@ void main( void )
 		#endif	
 		diffuse.rgb += gloss_sum;
 	#else
-		L = normalize( var_LightVec );
+		L = var_LightVec;
 		float NdotLGloss = saturate( dot( N, L ));
 		vec3 glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
 		vec3 gloss = ComputeSpecular( N, V, L, glossmap, u_GlossSmoothness, u_GlossScale ) * NdotLGloss;

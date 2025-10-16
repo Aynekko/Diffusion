@@ -249,14 +249,14 @@ void main( void )
 #if defined( STUDIO_BUMP ) || defined( STUDIO_INTERIOR )
 	// transform into tangent space
 	#ifndef STUDIO_VERTEX_LIGHTING
-		var_LightVec = -srcL * tbn * MeshScale;
+		var_LightVec = normalize( -srcL * tbn * MeshScale );
 	#endif
 	var_ViewVec = srcV * tbn * MeshScale;
 	var_Normal = srcN * tbn;
 #else
 	// leave in worldspace
 	#ifndef STUDIO_VERTEX_LIGHTING	
-		var_LightVec = -srcL * MeshScale;
+		var_LightVec = normalize( -srcL * MeshScale );
 	#endif		
 	var_ViewVec = srcV * MeshScale;
 	var_Normal = srcN;
