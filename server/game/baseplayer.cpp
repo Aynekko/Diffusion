@@ -5191,17 +5191,6 @@ void CBasePlayer::Spawn( void )
 	g_engfuncs.pfnSetPhysicsKeyValue( edict(), "slj", "0" );
 	g_engfuncs.pfnSetPhysicsKeyValue( edict(), "hl", "1" );
 
-	if( sv_enablebunnyhopping.value > 0 )
-	{
-		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "bhop", "1" );
-		BhopEnabled = true;
-	}
-	else
-	{
-		g_engfuncs.pfnSetPhysicsKeyValue( edict(), "bhop", "0" );
-		BhopEnabled = false;
-	}
-
 	pev->fov = m_flFOV = 0;// init field of view.
 	m_iClientFOV		= -1; // make sure fov reset is sent
 	m_iClientWeaponID = -1;
@@ -5487,6 +5476,8 @@ void CBasePlayer :: Precache( void )
 
 	if ( gInitHUD )
 		m_fInitHUD = TRUE;
+
+	BhopEnabled = false;
 }
 
 //
