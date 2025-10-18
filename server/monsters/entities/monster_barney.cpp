@@ -1773,7 +1773,7 @@ Schedule_t *CAlice :: GetSchedule ( void )
 				return GetScheduleOfType( SCHED_MOVE_AWAY );
 
 			// try to say something about smells
-			TrySmellTalk();
+		//	TrySmellTalk();
 		break;
 	}
 	
