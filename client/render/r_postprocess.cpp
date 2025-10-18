@@ -460,7 +460,9 @@ void RenderSunShafts( void )
 
 void MotionBlur(void)
 {
-	if( gHUD.DrunkLevel > 0 )
+	static float drunk_amount = 0.0f;
+
+	if( gHUD.DrunkLevel > 0 || drunk_amount > 0.0f )
 		goto allow_drunk;
 	
 	if( !CVAR_TO_BOOL( r_blur ) )
@@ -480,8 +482,11 @@ void MotionBlur(void)
 	Accum = bound( 0, Accum, 0.2 );
 
 allow_drunk:
-	if( gHUD.DrunkLevel > 0 )
-		Accum = gHUD.DrunkLevel * 0.1f;
+	if( gHUD.DrunkLevel > 0 || drunk_amount > 0.0f )
+	{
+		drunk_amount = CL_UTIL_Approach( gHUD.DrunkLevel * 0.1f, drunk_amount, g_fFrametime );
+		Accum = drunk_amount;
+	}
 
 	Vector org;
 	R_TransformDeviceToScreen( g_vecZero, org ); // FIXME just center of the screen...
