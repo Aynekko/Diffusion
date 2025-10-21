@@ -203,8 +203,8 @@ typedef struct weapon_data_s
 #define DMG_WPN_GAUSS			10
 #define DMG_WPN_GAUSS_FULL		150
 //#define DMG_WPN_HKMP5			using BULLET_PLAYER_MP5 damage (15)
-#define DMG_WPN_PISTOL			27
-//#define DMG_WPN_SHOTGUN		using BULLET_PLAYER_BUCKSHOT damage (13x6 primary, 13x12 sec.)
+#define DMG_WPN_PISTOL			25
+#define DMG_WPN_SHOTGUN			15
 #define DMG_WEAPON_SHOTGUN_XM	15
 #define DMG_WPN_KNIFE			27
 #define DMG_WPN_SNIPER			150

@@ -232,7 +232,7 @@ void CShotgun::PrimaryAttack()
 		Vector vecSrc	 = m_pPlayer->GetGunPosition( );
 		Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 
-		m_pPlayer->FireBullets( 6, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0 );
+		m_pPlayer->FireBullets( 6, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0, DMG_WPN_SHOTGUN );
 
 		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 6, ACHVAL_ADD );
 
@@ -334,7 +334,7 @@ void CShotgun::SecondaryAttack( void )
 		Vector vecSrc = m_pPlayer->GetGunPosition( );
 		Vector vecAiming = m_pPlayer->GetAutoaimVector( AUTOAIM_5DEGREES );
 	
-		m_pPlayer->FireBullets( 12, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0 );
+		m_pPlayer->FireBullets( 12, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0, DMG_WPN_SHOTGUN );
 
 		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 12, ACHVAL_ADD );
 
