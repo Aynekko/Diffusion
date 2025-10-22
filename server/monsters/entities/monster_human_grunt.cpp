@@ -333,6 +333,7 @@ Schedule_t slGruntRunAndFire[] =
 		bits_COND_NO_AMMO_LOADED |
 		bits_COND_HEAVY_DAMAGE |
 		bits_COND_LOW_HEALTH |
+		bits_COND_ENEMY_TOOCLOSE |
 		bits_COND_HEAR_SOUND,
 
 		bits_SOUND_DANGER,
@@ -1982,6 +1983,8 @@ void CHGrunt::Spawn(void)
 	}
 
 	MonsterInit();
+
+	m_flDistTooClose = 180.0f;
 }
 
 //=========================================================
@@ -2444,14 +2447,15 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 				if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 				{
 					if( m_hEnemy 
-						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY) 
+						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
+						&& !HasConditions( bits_COND_LOW_HEALTH )
+						&& !HasConditions( bits_COND_ENEMY_TOOCLOSE )
 						&& (
 							(m_hEnemy->IsMonster() && !FClassnameIs(m_hEnemy, "monster_target")) 
 							|| m_hEnemy->IsPlayer()
 							) 
 						&& (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 666
 						&& pev->health > HGRUNT_LIMP_HEALTH
-						&& !HasConditions( bits_COND_LOW_HEALTH )
 						)
 						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
 
@@ -2566,6 +2570,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 					if( m_hEnemy
 						&& pev->health > HGRUNT_LIMP_HEALTH
 						&& !HasConditions( bits_COND_LOW_HEALTH )
+						&& !HasConditions( bits_COND_ENEMY_TOOCLOSE )
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
 						&& (
 							(m_hEnemy->IsMonster() && !FClassnameIs( m_hEnemy, "monster_target" ))
@@ -3175,6 +3180,8 @@ void CHGruntAlien :: Spawn()
 		AlienEye->SetFadeDistance( 1000 );
 
 	MonsterInit();
+
+	m_flDistTooClose = 180.0f;
 }
 
 //=========================================================
@@ -3571,13 +3578,14 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 				{
 					if( m_hEnemy
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
+						&& !HasConditions( bits_COND_LOW_HEALTH )
+						&& !HasConditions( bits_COND_ENEMY_TOOCLOSE )
 						&& (
 							(m_hEnemy->IsMonster() && !FClassnameIs( m_hEnemy, "monster_target" ))
 							|| m_hEnemy->IsPlayer()
 							)
 						&& (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length() > 666
 						&& pev->health > HGRUNT_LIMP_HEALTH
-						&& !HasConditions( bits_COND_LOW_HEALTH )
 						)
 						return GetScheduleOfType( SCHED_GRUNT_RUN_AND_FIRE );
 
@@ -3688,6 +3696,7 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 					if( m_hEnemy
 						&& pev->health > HGRUNT_LIMP_HEALTH
 						&& !HasConditions( bits_COND_LOW_HEALTH )
+						&& !HasConditions( bits_COND_ENEMY_TOOCLOSE )
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
 						&& (
 							(m_hEnemy->IsMonster() && !FClassnameIs( m_hEnemy, "monster_target" ))
@@ -4424,6 +4433,7 @@ void CHGruntSecurityGeneral::Spawn()
 
 	MonsterInit();
 
+	m_flDistTooClose = 180.0f;
 }
 
 void CHGruntSecurityGeneral::Precache()
@@ -5526,6 +5536,8 @@ void CHGruntSecurity::Spawn()
 	}
 
 	MonsterInit();
+
+	m_flDistTooClose = 180.0f;
 }
 
 void CHGruntSecurity::Precache()
@@ -5737,6 +5749,8 @@ void CAndrewGrunt::Spawn()
 	ScaleDifficultyTime = 0;
 
 	MonsterInit();
+
+	m_flDistTooClose = 180.0f;
 }
 
 void CAndrewGrunt::Precache()
