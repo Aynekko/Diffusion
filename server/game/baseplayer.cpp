@@ -5853,7 +5853,7 @@ void CBasePlayer::SelectLastItem( void )
 	if( InCar )
 	{
 		if( pCar )
-			pCar->SecondaryCamera = !pCar->SecondaryCamera;
+			pCar->CameraMode++;
 		return;
 	}
 	

@@ -571,7 +571,7 @@ void CHelicopter::Drive( void )
 	if( CarSpeed == 0.0f )
 		TurnRate = 1;
 	int CameraSwayRate = 0;
-	if( SecondaryCamera )
+	if( CameraMode == CAMERA_SECONDARY )
 		CameraSwayRate = MaxCamera2Sway;
 
 	if( InAir ) // heli can always turn
@@ -607,7 +607,7 @@ void CHelicopter::Drive( void )
 	Turning = bound( -max_turn_val, Turning, max_turn_val );
 
 	int CameraMovingBound = 0;
-	if( SecondaryCamera )
+	if( CameraMode == CAMERA_SECONDARY )
 		CameraMovingBound = MaxCamera2Sway;
 
 	CameraMoving = bound( -CameraMovingBound, CameraMoving, CameraMovingBound );

@@ -1,6 +1,16 @@
 //===========================================================
 // diffusion - func_car stuff
 //===========================================================
+
+// camera modes
+enum
+{
+	CAMERA_PRIMARY1 = 0,	// near
+	CAMERA_PRIMARY2,		// far
+	CAMERA_SECONDARY,		// interior or other secondary camera
+	CAMERA_INVALID			// last
+};
+
 class CCar : public CBaseDelay
 {
 	DECLARE_CLASS( CCar, CBaseDelay );
@@ -109,7 +119,7 @@ public:
 	Vector CameraAngles;
 	float CameraBrakeOffsetX; // not saved
 	int MaxCamera2Sway;
-	bool SecondaryCamera; // 2nd camera is active
+	int CameraMode; // 2nd camera is active
 	// default camera view
 	int CameraHeight;
 	int CameraDistance;

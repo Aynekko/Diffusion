@@ -1800,7 +1800,7 @@ void CCar::Drive( void )
 	float TurnRate = TurningRate / (1 + AbsCarSpeed);
 	TurnRate = (Forward == 0 ? 1 : Forward) * bound( 0, TurnRate, 250 );
 	int CameraSwayRate = 0;
-	if( SecondaryCamera )
+	if( CameraMode == CAMERA_SECONDARY )
 		CameraSwayRate = MaxCamera2Sway;
 
 	if( !TurningOverride )
@@ -1838,7 +1838,7 @@ void CCar::Drive( void )
 	const float AbsTurning = fabs( Turning );
 
 	int CameraMovingBound = 0;
-	if( SecondaryCamera )
+	if( CameraMode == CAMERA_SECONDARY )
 		CameraMovingBound = MaxCamera2Sway;
 
 	CameraMoving = bound( -CameraMovingBound, CameraMoving, CameraMovingBound );
@@ -2931,6 +2931,15 @@ void CCar::Wheels( int *FRW_InAir, int *FLW_InAir, int *RRW_InAir, int *RLW_InAi
 //===============================================================================
 void CCar::Camera(void)
 {
+	if( CameraMode >= CAMERA_INVALID )
+		CameraMode = 0;
+
+	if( !pCamera2 )
+	{
+		if( CameraMode >= CAMERA_SECONDARY )
+			CameraMode = 0;
+	}
+	
 	if( !AllowCamera )
 		return;
 
@@ -3012,13 +3021,10 @@ void CCar::Camera(void)
 	}
 	else
 	{
-		if( !pCamera2 )
-			SecondaryCamera = false;
-
 		Vector CamOrg;
 		float BackSway = CarSpeed * 0.01;
 
-		if( SecondaryCamera )
+		if( CameraMode == CAMERA_SECONDARY )
 		{
 			SET_VIEW( hDriver->edict(), pCamera2->edict() );
 			CamOrg = Camera2LocalOrigin;
@@ -3030,6 +3036,10 @@ void CCar::Camera(void)
 		}
 		else if( pCamera1 )
 		{
+			float CameraModeMult = 1.0f;
+			if( CameraMode == CAMERA_PRIMARY2 )
+				CameraModeMult = 1.25f;
+
 			// just like in NFS MW, move camera closer if we don't press accelerate (car is slowing down)
 			if( AbsCarSpeed > 50 )
 			{
@@ -3045,7 +3055,7 @@ void CCar::Camera(void)
 					CamDistAdjust = lerp( CamDistAdjust, 1.0f, gpGlobals->frametime );
 			}
 			SET_VIEW( hDriver->edict(), pCamera1->edict() );
-			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * CameraDistance * CamDistAdjust, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * CameraDistance * CamDistAdjust * CameraModeMult, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 			CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 			pCamera1->SetAbsOrigin( CamOrg );
 			pCamera1->SetAbsAngles( CameraAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );

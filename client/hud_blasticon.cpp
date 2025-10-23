@@ -95,35 +95,22 @@ int CHudBlastIcons::Draw( float flTime )
 	{
 		x += ((ScreenWidth / 32) + 360) * gHUD.fScale;
 
-		if( BlastChargesReady > 0 )
-		{
-			if( CanElectroBlast )
-				UnpackRGB( r1, g1, b1, gHUD.m_iHUDColor );
-			else
-				UnpackRGB( r1, g1, b1, RGB_GREY ); // grey
-
-			if( AlphaFade1 < 255 )
-				AlphaFade1 += 150 * g_fFrametime;
-
-			if( img_circle && circlea1 > 0.0f )
-			{
-				const float scale = 150.0f / (1.0f + circlea1);
-				GL_Bind( 0, img_circle );
-				gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-				GL_Color4f( 0.275f, 0.663f, 1.0f, circlea1 ); // 70 169 255
-				DrawQuad( x + icon_size - scale, y + icon_size - scale, x + scale, y + scale );
-				gEngfuncs.pTriAPI->End();
-			}
-		}
+		if( CanElectroBlast && BlastChargesReady > 0 )
+			UnpackRGB( r1, g1, b1, gHUD.m_iHUDColor );
 		else
-		{
-			if( CanElectroBlast )
-				UnpackRGB( r1, g1, b1, RGB_RED );
-			else
-				UnpackRGB( r1, g1, b1, RGB_GREY );
+			UnpackRGB( r1, g1, b1, RGB_GREY ); // grey
 
-			if( AlphaFade1 > 0.0f )
-				AlphaFade1 -= 250 * g_fFrametime;
+		if( AlphaFade1 < 255 )
+			AlphaFade1 += 150 * g_fFrametime;
+
+		if( img_circle && circlea1 > 0.0f )
+		{
+			const float scale = 150.0f / (1.0f + circlea1);
+			GL_Bind( 0, img_circle );
+			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+			GL_Color4f( 0.275f, 0.663f, 1.0f, circlea1 ); // 70 169 255
+			DrawQuad( x + icon_size - scale, y + icon_size - scale, x + scale, y + scale );
+			gEngfuncs.pTriAPI->End();
 		}
 
 		AlphaFade1 = bound( 0, AlphaFade1, 255 );
@@ -145,35 +132,22 @@ int CHudBlastIcons::Draw( float flTime )
 	{
 		x += padding + icon_size;
 
-		if( BlastChargesReady > 1 )
-		{
-			if( CanElectroBlast )
-				UnpackRGB( r2, g2, b2, gHUD.m_iHUDColor );
-			else
-				UnpackRGB( r2, g2, b2, RGB_GREY ); // grey
-
-			if( AlphaFade2 < 255 )
-				AlphaFade2 += 150 * g_fFrametime;
-
-			if( img_circle && circlea2 > 0.0f )
-			{
-				const float scale = 150.0f / (1.0f + circlea2);
-				GL_Bind( 0, img_circle );
-				gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-				GL_Color4f( 0.275f, 0.663f, 1.0f, circlea2 ); // 70 169 255
-				DrawQuad( x + icon_size - scale, y + icon_size - scale, x + scale, y + scale );
-				gEngfuncs.pTriAPI->End();
-			}
-		}
+		if( CanElectroBlast && BlastChargesReady > 1 )
+			UnpackRGB( r2, g2, b2, gHUD.m_iHUDColor );
 		else
-		{
-			if( CanElectroBlast )
-				UnpackRGB( r2, g2, b2, RGB_RED );
-			else
-				UnpackRGB( r2, g2, b2, RGB_GREY ); // grey
+			UnpackRGB( r2, g2, b2, RGB_GREY ); // grey
 
-			if( AlphaFade2 > 0.0f )
-				AlphaFade2 -= 250 * g_fFrametime;
+		if( AlphaFade2 < 255 )
+			AlphaFade2 += 150 * g_fFrametime;
+
+		if( img_circle && circlea2 > 0.0f )
+		{
+			const float scale = 150.0f / (1.0f + circlea2);
+			GL_Bind( 0, img_circle );
+			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+			GL_Color4f( 0.275f, 0.663f, 1.0f, circlea2 ); // 70 169 255
+			DrawQuad( x + icon_size - scale, y + icon_size - scale, x + scale, y + scale );
+			gEngfuncs.pTriAPI->End();
 		}
 
 		AlphaFade2 = bound( 0, AlphaFade2, 255 );
@@ -195,35 +169,22 @@ int CHudBlastIcons::Draw( float flTime )
 	{
 		x += padding + icon_size;
 
-		if( BlastChargesReady > 2 )
-		{
-			if( CanElectroBlast )
-				UnpackRGB( r3, g3, b3, gHUD.m_iHUDColor );
-			else
-				UnpackRGB( r3, g3, b3, RGB_GREY ); // grey
-
-			if( AlphaFade3 < 255 )
-				AlphaFade3 += 150 * g_fFrametime;
-
-			if( img_circle && circlea3 > 0.0f )
-			{
-				const float scale = 150.0f / (1.0f + circlea3);
-				GL_Bind( 0, img_circle );
-				gEngfuncs.pTriAPI->Begin( TRI_QUADS );
-				GL_Color4f( 0.275f, 0.663f, 1.0f, circlea3 ); // 70 169 255
-				DrawQuad( x + icon_size - scale, y + icon_size - scale, x + scale, y + scale );
-				gEngfuncs.pTriAPI->End();
-			}
-		}
+		if( CanElectroBlast && BlastChargesReady > 2 )
+			UnpackRGB( r3, g3, b3, gHUD.m_iHUDColor );
 		else
-		{
-			if( CanElectroBlast )
-				UnpackRGB( r3, g3, b3, RGB_RED );
-			else
-				UnpackRGB( r3, g3, b3, RGB_GREY ); // grey
+			UnpackRGB( r3, g3, b3, RGB_GREY ); // grey
 
-			if( AlphaFade3 > 0.0f )
-				AlphaFade3 -= 250 * g_fFrametime;
+		if( AlphaFade3 < 255 )
+			AlphaFade3 += 150 * g_fFrametime;
+
+		if( img_circle && circlea3 > 0.0f )
+		{
+			const float scale = 150.0f / (1.0f + circlea3);
+			GL_Bind( 0, img_circle );
+			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+			GL_Color4f( 0.275f, 0.663f, 1.0f, circlea3 ); // 70 169 255
+			DrawQuad( x + icon_size - scale, y + icon_size - scale, x + scale, y + scale );
+			gEngfuncs.pTriAPI->End();
 		}
 
 		AlphaFade3 = bound( 0, AlphaFade3, 255 );

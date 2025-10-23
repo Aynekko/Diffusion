@@ -1540,6 +1540,19 @@ int CSentry::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float f
 
 	if (pev->health <= 0)
 	{
+		// drop the turret if it's holdable
+		CBasePlayer *pPlayer = NULL;
+		for( int i = 1; i <= gpGlobals->maxClients; i++ )
+		{
+			pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( i );
+
+			if( !pPlayer )
+				continue;
+
+			if( pPlayer->m_pHoldableItem == this )
+				pPlayer->DropHoldableItem( 50 );
+		}
+
 		pev->iuser3 = 0; // clear smoke effect
 		pev->health = 0;
 		pev->takedamage = DAMAGE_NO;

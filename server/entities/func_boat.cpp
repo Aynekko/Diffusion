@@ -659,7 +659,7 @@ void CBoat::Drive( void )
 		TurnRate = 1;
 	float OpposeTurn = 1.0f;
 	int CameraSwayRate = 0;
-	if( SecondaryCamera )
+	if( CameraMode == CAMERA_SECONDARY )
 		CameraSwayRate = MaxCamera2Sway;
 
 	if( !InAir ) // boat can always turn
@@ -702,7 +702,7 @@ void CBoat::Drive( void )
 	Turning = bound( -max_turn_val, Turning, max_turn_val );
 
 	int CameraMovingBound = 0;
-	if( SecondaryCamera )
+	if( CameraMode == CAMERA_SECONDARY )
 		CameraMovingBound = MaxCamera2Sway;
 
 	CameraMoving = bound( -CameraMovingBound, CameraMoving, CameraMovingBound );

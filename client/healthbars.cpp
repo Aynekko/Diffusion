@@ -171,16 +171,14 @@ int CHealthbars::Draw( float flTime )
 	if( !ent )
 		return 1;
 
-	Vector org = ent->origin + ((ent->curstate.mins + ent->curstate.maxs) / 2.f);
+	Vector org = ent->origin + ((ent->curstate.mins + ent->curstate.maxs) * 0.5f);
 	if( !bCentered )
 		org.z += (ent->curstate.mins - ent->curstate.maxs).Length() * 0.5f;
 
 	float Transparency = 255.0f;
 
-	float current_fov = gHUD.m_flFOV;
-	if( current_fov == 0.0f )
-		current_fov = 80.0f;
-
+	// for FOV above 80 it is assumed that distance remains unchanged
+	float current_fov = bound( 10.0f, gHUD.m_flFOV, 80.0f );
 	float DistanceToEnt = (tr.viewparams.vieworg - org).Length();
 	float DisappearStartDist = DISAPPEAR_START_DIST * (80 / current_fov) * (barsize + 1) * 3;
 	if( DistanceToEnt > DisappearStartDist )
