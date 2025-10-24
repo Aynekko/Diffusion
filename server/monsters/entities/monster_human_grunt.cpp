@@ -4390,7 +4390,7 @@ void CHGruntSecurityGeneral::Spawn()
 	pev->effects = 0;
 	if( !pev->health ) pev->health = g_SecurityGeneralHealth[g_iSkillLevel];
 	pev->max_health = pev->health;
-	m_flFieldOfView = -1;   // 360
+	m_flFieldOfView = VIEW_FIELD_FULL;   // 360
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_flNextGrenadeCheck = gpGlobals->time + 1;
 	m_flNextPainTime = gpGlobals->time;
@@ -5708,7 +5708,7 @@ void CAndrewGrunt::Spawn()
 
 	pev->max_health = pev->health;
 
-	m_flFieldOfView = -1;   // 360
+	m_flFieldOfView = VIEW_FIELD_FULL;   // 360
 	m_MonsterState = MONSTERSTATE_NONE;
 	m_flNextGrenadeCheck = gpGlobals->time + 1;
 	m_flNextPainTime = gpGlobals->time;
@@ -5751,6 +5751,9 @@ void CAndrewGrunt::Spawn()
 	MonsterInit();
 
 	m_flDistTooClose = 180.0f;
+
+	for( int i = 0; i < MAX_ANDREW_SPAWNS; i++ )
+		AndrewRespawnPoint[i] = g_vecZero;
 }
 
 void CAndrewGrunt::Precache()
@@ -5803,7 +5806,7 @@ void CAndrewGrunt::CollectPoints(void)
 
 	while( (pAndrewRespawnPoint = UTIL_FindEntityByClassname( pAndrewRespawnPoint, "info_andrew_spawn_point")) != NULL )
 	{
-		if( RespawnPoints > MAX_ANDREW_SPAWNS - 1 ) // fixed limit for now
+		if( RespawnPoints == MAX_ANDREW_SPAWNS ) // fixed limit for now
 		{
 			ALERT( at_aiconsole, "^2Andrew Grunt:^7 found too many spawn points! Max. is %i.\n", MAX_ANDREW_SPAWNS );
 			break;
@@ -6121,6 +6124,8 @@ void CAndrewGrunt::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector v
 
 	if( AndrewSpecialMode )
 	{
+		UTIL_Sparks( ptr->vecEndPos );
+
 		switch( RANDOM_LONG( 0, 4 ) )
 		{
 		case 0: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit1.wav", 1, ATTN_NORM ); break;
@@ -6650,8 +6655,8 @@ void CAndrewGrunt::Andrew_Escape(void)
 	int Tries = 0; // to prevent a possible loop, when all points are close to player (wtf?)
 
 	// check if the player is too close to this point. if so, choose another
-	edict_t *pPlayer = INDEXENT( 1 );
-	Vector PlayerOrigin = pPlayer->v.origin;
+	CBaseEntity *pPlayer = UTIL_PlayerByIndex( 1 );
+	Vector PlayerOrigin = pPlayer->GetAbsOrigin();
 
 ChooseAnEscapePoint:
 	int RandomPointNum = RANDOM_LONG( 0, RespawnPoints - 1 );
@@ -6665,7 +6670,7 @@ ChooseAnEscapePoint:
 	{
 		RandomPointNum = RANDOM_LONG( 0, RespawnPoints - 1 );
 	}
-	else if( (PlayerOrigin - AndrewRespawnPoint[RandomPointNum]).Length() < 1250 ) // need far distance
+	else if( (PlayerOrigin - AndrewRespawnPoint[RandomPointNum]).Length() < 1250.0f ) // need far distance
 	{
 		ALERT( at_aiconsole, "^2Andrew Grunt:^7 spawn point %i is too close to the player, choosing another...\n", RandomPointNum );
 		Tries++;
@@ -6689,7 +6694,11 @@ ChooseAnEscapePoint:
 	WarpEffect();
 	pev->velocity = g_vecZero;
 	ClearSchedule();
-	Teleport( &AndrewRespawnPoint[RandomPointNum], &GetAbsAngles(), &g_vecZero );
+
+	// Teleport( &AndrewRespawnPoint[RandomPointNum], &GetAbsAngles(), &g_vecZero ); // I sense this might be the cause of the random crashes somehow
+	pev->flags &= ~FL_ONGROUND;
+	UTIL_SetOrigin( this, AndrewRespawnPoint[RandomPointNum] );
+
 	AndrewSpecialMode = true;
 	SpecialModeHealth = 150;
 	FireRocketTime = gpGlobals->time + 2;
@@ -6712,8 +6721,8 @@ ChooseAPoint:
 	int RandomPointNum = RANDOM_LONG( 0, RespawnPoints - 1 );
 
 	// check if the player is too close to this point. if so, choose another
-	edict_t *pPlayer = INDEXENT( 1 );
-	Vector PlayerOrigin = pPlayer->v.origin;
+	CBaseEntity *pPlayer = UTIL_PlayerByIndex( 1 );
+	Vector PlayerOrigin = pPlayer->GetAbsOrigin();
 
 	// too many tries or spawn points were never collected
 	if( RespawnPoints == 0 )
@@ -6725,7 +6734,7 @@ ChooseAPoint:
 	{
 		RandomPointNum = RANDOM_LONG( 0, RespawnPoints - 1 );
 	}
-	else if( (PlayerOrigin - AndrewRespawnPoint[RandomPointNum]).Length() < 750 )
+	else if( (PlayerOrigin - AndrewRespawnPoint[RandomPointNum]).Length() < 1000.0f )
 	{
 		ALERT( at_aiconsole, "^2Andrew Grunt:^7 spawn point %i is too close to the player, choosing another...\n", RandomPointNum );
 		Tries++;
@@ -6747,7 +6756,11 @@ ChooseAPoint:
 	
 	// now teleport
 	WarpEffect();
-	Teleport( &AndrewRespawnPoint[RandomPointNum], &GetAbsAngles(), &g_vecZero );
+	
+	// Teleport( &AndrewRespawnPoint[RandomPointNum], &GetAbsAngles(), &g_vecZero );
+	pev->flags &= ~FL_ONGROUND;
+	UTIL_SetOrigin( this, AndrewRespawnPoint[RandomPointNum] );
+
 	AndrewSpecialMode = false;
 	AndrewEscapeTime = gpGlobals->time + 20; // when the next escape attempt happens
 	RocketCount = 0;

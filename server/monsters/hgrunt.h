@@ -127,7 +127,6 @@ public:
 	int RocketCount;
 	float SpecialModeHealth;
 	int m_iTrail;
-	void WarpEffect( void );
 	float DifficultyScaler;
 	float ScaleDifficultyTime;
 	bool AndrewHealthbar; // don't save
