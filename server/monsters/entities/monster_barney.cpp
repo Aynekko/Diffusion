@@ -1738,7 +1738,7 @@ Schedule_t *CAlice :: GetSchedule ( void )
 			{
 				if (m_flIdleReloadTime < gpGlobals->time)
 				{
-					if (m_cAmmoLoaded < m_iClipSize)
+					if( m_cAmmoLoaded < m_iClipSize / 2 ) // don't reload if wasted just one bullet or something
 						return GetScheduleOfType( SCHED_RELOAD );
 					else if (m_flNextHolsterTime < gpGlobals->time)
 						return GetScheduleOfType( SCHED_BARNEY_HOLSTER);
@@ -1755,7 +1755,8 @@ Schedule_t *CAlice :: GetSchedule ( void )
 				}
 				else
 				{
-					if ( m_fGunDrawn && (m_cAmmoLoaded < m_iClipSize) && (m_flIdleReloadTime < gpGlobals->time) )
+					// don't reload if wasted just one bullet or something
+					if( m_fGunDrawn && (m_cAmmoLoaded < m_iClipSize / 2) && (m_flIdleReloadTime < gpGlobals->time) )
 					{
 						if( !IsTalking() )
 							PlaySentence( "ALICE_RELOAD", 2.5, VOL_NORM, ATTN_IDLE );

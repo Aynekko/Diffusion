@@ -295,6 +295,9 @@ void CMonsterMaker :: DeathNotice ( entvars_t *pevChild )
 	{
 		pevChild->owner = NULL;
 	}
+
+	if( m_iMaxLiveChildren == 1 )
+		SetNextThink( m_flDelay );
 }
 
 
