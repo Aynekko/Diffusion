@@ -161,7 +161,11 @@ void CRenderFxManager::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TY
 {
 	if (!FStringNull(pev->target))
 	{
-		CBaseEntity* pTarget = UTIL_FindEntityByTargetname(NULL, STRING(pev->target), pActivator);
+		CBaseEntity *pTarget = NULL;
+		if( !Q_strcmp( STRING( pev->target ), "player" ) )
+			pTarget = UTIL_PlayerByIndex( 1 );
+		else
+			pTarget = UTIL_FindEntityByTargetname(NULL, STRING(pev->target), pActivator);
 		BOOL first = TRUE;
 		while (pTarget != NULL)
 		{
