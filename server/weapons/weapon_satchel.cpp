@@ -122,7 +122,7 @@ void CSatchelCharge::SatchelSlide( CBaseEntity *pOther )
 
 void CSatchelCharge :: SatchelThink( void )
 {
-	if (!IsInWorld())
+	if( !IsInWorld() )
 	{
 		UTIL_Remove( this );
 		return;
@@ -137,7 +137,7 @@ void CSatchelCharge :: SatchelThink( void )
 		DoWaterCheck = true;
 	}
 
-	if (pev->waterlevel == 3)
+	if( pev->waterlevel == 3 )
 	{
 		pev->movetype = MOVETYPE_FLY;
 		Vector vecVelocity = GetAbsVelocity() * 0.8f;
@@ -152,9 +152,17 @@ void CSatchelCharge :: SatchelThink( void )
 			MakeWaterSplash( org + Vector( 0, 0, 512 ), org, 1 );
 		}
 	}
-	else if (pev->waterlevel == 0)
+	else if( pev->waterlevel == 0 )
 	{
 		pev->movetype = MOVETYPE_BOUNCE;
+		if( (pev->flags & FL_ONGROUND) && pev->velocity.Length() < 0.01f )
+		{
+			// become completely still and passable
+			pev->velocity = g_vecZero;
+			pev->solid = SOLID_NOT;
+			pev->movetype = MOVETYPE_NONE;
+			pev->gravity = 0;
+		}
 	}
 	else
 	{
