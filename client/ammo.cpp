@@ -833,6 +833,12 @@ void CHudAmmo::UserCmd_NextWeapon( void )
 		gHUD.m_PseudoGUI.scrolled_lines++; // scroll down
 		return;
 	}
+
+	if( gHUD.InCar )
+	{
+		ClientCmd( "car_zoomout" );
+		return;
+	}
 	
 	if( gHUD.m_fPlayerDead || ( gHUD.m_iHideHUDDisplay & ( HIDEHUD_WPNS | HIDEHUD_ALL | HIDEHUD_WPNS_HOLDABLEITEM | HIDEHUD_WPNS_CUSTOM)))
 		return;
@@ -880,6 +886,12 @@ void CHudAmmo::UserCmd_PrevWeapon( void )
 	if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
 	{
 		gHUD.m_PseudoGUI.scrolled_lines--; // scroll up
+		return;
+	}
+
+	if( gHUD.InCar )
+	{
+		ClientCmd( "car_zoomin" );
 		return;
 	}
 	

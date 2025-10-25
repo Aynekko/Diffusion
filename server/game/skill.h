@@ -60,6 +60,15 @@ const int g_DroneRocketDamage[] =
 	26
 };
 
+// monster_apache -----------------------------------------
+const int g_ApacheHealth[] =
+{
+	0,
+	350,
+	400,
+	500
+};
+
 // turrets ------------------------------------------------
 const int g_turretHealth[] =
 {

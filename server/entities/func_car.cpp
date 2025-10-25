@@ -114,6 +114,8 @@ BEGIN_DATADESC( CCar )
 	DEFINE_FIELD( DriftAmount, FIELD_FLOAT ),
 	DEFINE_KEYFIELD( ShiftingTime, FIELD_FLOAT, "shiftingtime" ),
 	DEFINE_FIELD( num_exhausts, FIELD_INTEGER ),
+	DEFINE_FIELD( CameraModeAddDist, FIELD_FLOAT ),
+	DEFINE_FIELD( TmpCameraModeAddDist, FIELD_FLOAT ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( func_car, CCar );
@@ -502,6 +504,8 @@ void CCar::Precache( void )
 	PRECACHE_SOUND( "weapons/mortarhit.wav" );
 
 	UTIL_PrecacheOther( "apc_projectile" );
+
+	bTankTowerView = true;
 
 	pev->spawnflags |= SF_CAR_DOIDLEUNSTICK;
 }
@@ -951,6 +955,7 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			NewCameraAngleX = 0;
 			AccelAddX = BrakeAddX = 0;
 			EnteringShake = 2.0f;
+			bTankTowerView = true;
 			if( pExhaust1 )
 			{
 				pExhaust1->pev->iuser3 = -665;
@@ -1800,7 +1805,7 @@ void CCar::Drive( void )
 	float TurnRate = TurningRate / (1 + AbsCarSpeed);
 	TurnRate = (Forward == 0 ? 1 : Forward) * bound( 0, TurnRate, 250 );
 	int CameraSwayRate = 0;
-	if( CameraMode == CAMERA_SECONDARY )
+	if( SecondaryCamera )
 		CameraSwayRate = MaxCamera2Sway;
 
 	if( !TurningOverride )
@@ -1838,7 +1843,7 @@ void CCar::Drive( void )
 	const float AbsTurning = fabs( Turning );
 
 	int CameraMovingBound = 0;
-	if( CameraMode == CAMERA_SECONDARY )
+	if( SecondaryCamera )
 		CameraMovingBound = MaxCamera2Sway;
 
 	CameraMoving = bound( -CameraMovingBound, CameraMoving, CameraMovingBound );
@@ -2664,7 +2669,15 @@ void CCar::Drive( void )
 			TowerAngles.y += TankTowerRotationOffset;
 		}
 
-		pTankTower->SetLocalAngles( TowerAngles );
+		if( TowerAngles.y > 180 )
+			TowerAngles.y -= 360;
+		if( TowerAngles.y < -180 )
+			TowerAngles.y += 360;
+		
+		if( !bTankTowerView && CamUnlocked )
+			pTankTower->SetAbsAngles( TowerAngles );
+		else
+			pTankTower->SetLocalAngles( TowerAngles );
 
 		if( (hDriver->pev->button & IN_ATTACK) && (gpGlobals->time > LastShootTime + 1) )
 		{
@@ -2931,15 +2944,6 @@ void CCar::Wheels( int *FRW_InAir, int *FLW_InAir, int *RRW_InAir, int *RLW_InAi
 //===============================================================================
 void CCar::Camera(void)
 {
-	if( CameraMode >= CAMERA_INVALID )
-		CameraMode = 0;
-
-	if( !pCamera2 )
-	{
-		if( CameraMode >= CAMERA_SECONDARY )
-			CameraMode = 0;
-	}
-	
 	if( !AllowCamera )
 		return;
 
@@ -2949,6 +2953,10 @@ void CCar::Camera(void)
 	const float AbsCarSpeed = fabs( CarSpeed );
 	const float ChassisAngleX = pChassis->GetAbsAngles().x;
 	const float ChassisAngleY = pChassis->GetAbsAngles().y;
+
+	CameraModeAddDist = bound( 0.0f, CameraModeAddDist, 200.0f );
+	// lerp to the new position
+	TmpCameraModeAddDist = lerp( TmpCameraModeAddDist, CameraModeAddDist, 10.0f * gpGlobals->frametime );
 
 	if( !NewCameraAngleY )
 		NewCameraAngleY = ChassisAngleY;
@@ -3002,7 +3010,7 @@ void CCar::Camera(void)
 
 	TraceResult CamTr;
 
-	if( CamUnlocked && pTankTower )
+	if( CamUnlocked && pTankTower && bTankTowerView )
 	{
 		SET_VIEW( hDriver->edict(), pTankTower->edict() );
 	}
@@ -3014,17 +3022,20 @@ void CCar::Camera(void)
 		Vector CamOrg;
 
 		UTIL_MakeVectors( DriverAngles );
-		UTIL_TraceLine( hDriver->GetAbsOrigin(), hDriver->GetAbsOrigin() - gpGlobals->v_forward * FreeCameraDistance, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+		UTIL_TraceLine( hDriver->GetAbsOrigin(), hDriver->GetAbsOrigin() - gpGlobals->v_forward * (FreeCameraDistance + TmpCameraModeAddDist), dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 		CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 		pFreeCam->SetAbsOrigin( CamOrg );
 		pFreeCam->SetAbsAngles( DriverAngles );
 	}
 	else
 	{
+		if( !pCamera2 )
+			SecondaryCamera = false;
+
 		Vector CamOrg;
 		float BackSway = CarSpeed * 0.01;
 
-		if( CameraMode == CAMERA_SECONDARY )
+		if( SecondaryCamera )
 		{
 			SET_VIEW( hDriver->edict(), pCamera2->edict() );
 			CamOrg = Camera2LocalOrigin;
@@ -3036,10 +3047,6 @@ void CCar::Camera(void)
 		}
 		else if( pCamera1 )
 		{
-			float CameraModeMult = 1.0f;
-			if( CameraMode == CAMERA_PRIMARY2 )
-				CameraModeMult = 1.25f;
-
 			// just like in NFS MW, move camera closer if we don't press accelerate (car is slowing down)
 			if( AbsCarSpeed > 50 )
 			{
@@ -3055,7 +3062,7 @@ void CCar::Camera(void)
 					CamDistAdjust = lerp( CamDistAdjust, 1.0f, gpGlobals->frametime );
 			}
 			SET_VIEW( hDriver->edict(), pCamera1->edict() );
-			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * CameraDistance * CamDistAdjust * CameraModeMult, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * (CameraDistance + TmpCameraModeAddDist) * CamDistAdjust, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 			CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 			pCamera1->SetAbsOrigin( CamOrg );
 			pCamera1->SetAbsAngles( CameraAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );

@@ -818,7 +818,7 @@ void CAPCProjectile::Spawn( void )
 	SetThink( &CAPCProjectile::AccelerateThink );
 	SetNextThink( 0.1 );
 
-	pev->dmg = 75;
+	pev->dmg = 120.0f;
 }
 
 

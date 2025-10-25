@@ -5853,7 +5853,13 @@ void CBasePlayer::SelectLastItem( void )
 	if( InCar )
 	{
 		if( pCar )
-			pCar->CameraMode++;
+		{
+			if( pCar->CamUnlocked && pCar->pTankTower )
+				pCar->bTankTowerView = !pCar->bTankTowerView;
+			else
+				pCar->SecondaryCamera = !pCar->SecondaryCamera;
+		}
+
 		return;
 	}
 	

@@ -558,10 +558,6 @@ void ClientCommand( edict_t *pEntity )
 		pPlayer->ForceClientDllUpdate();
 		return;
 	}
-	
-	// diffusion - convert command to lowercase
-//	for( int i = 0; pcmd[i] != 0; i++ )
-//		pcmd[i] = tolower( pcmd[i] );
 
 	const bool Cheats = (g_flWeaponCheat != 0.0);
 	
@@ -584,6 +580,16 @@ void ClientCommand( edict_t *pEntity )
 	else if( FIStrEq( pcmd, "electroblast" ) )
 	{
 		pPlayer->ElectroblastButton = true;
+	}
+	else if( FIStrEq( pcmd, "car_zoomin" ) )
+	{
+		if( pPlayer->pCar )
+			pPlayer->pCar->CameraModeAddDist -= 25.0f;
+	}
+	else if( FIStrEq( pcmd, "car_zoomout" ) )
+	{
+		if( pPlayer->pCar )
+			pPlayer->pCar->CameraModeAddDist += 25.0f;
 	}
 	else if( FIStrEq( pcmd, "shield" ) )
 	{

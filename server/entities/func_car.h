@@ -2,15 +2,6 @@
 // diffusion - func_car stuff
 //===========================================================
 
-// camera modes
-enum
-{
-	CAMERA_PRIMARY1 = 0,	// near
-	CAMERA_PRIMARY2,		// far
-	CAMERA_SECONDARY,		// interior or other secondary camera
-	CAMERA_INVALID			// last
-};
-
 class CCar : public CBaseDelay
 {
 	DECLARE_CLASS( CCar, CBaseDelay );
@@ -112,6 +103,7 @@ public:
 	int RearBumperLength;
 	bool AllowCamera; // when Car is used with value 2.0, the camera toggles. this is to allow using trigger_camera while in car
 	bool CamUnlocked;
+	bool bTankTowerView; // not saved
 	bool CarInAir;
 	float EnteringShake; // shake the car when driver enters it (not saved)
 	Vector Camera2LocalOrigin;
@@ -119,11 +111,13 @@ public:
 	Vector CameraAngles;
 	float CameraBrakeOffsetX; // not saved
 	int MaxCamera2Sway;
-	int CameraMode; // 2nd camera is active
+	bool SecondaryCamera; // 2nd camera is active
 	// default camera view
 	int CameraHeight;
 	int CameraDistance;
 	int FreeCameraDistance;
+	float CameraModeAddDist;
+	float TmpCameraModeAddDist; // used for lerping
 	float NewCameraAngleY;
 	float NewCameraAngleX;
 	float CamDistAdjust;
