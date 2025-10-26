@@ -84,7 +84,7 @@ void CWpnSentry::Precache( void )
 int CWpnSentry::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "sentry";
+	p->pszAmmo1 = g_WpnAmmo[WEAPON_SENTRY];
 	p->iMaxAmmo1 = 1;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;

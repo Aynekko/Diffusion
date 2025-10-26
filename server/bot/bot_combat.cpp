@@ -122,27 +122,27 @@ static const float secondary_fire_delay[WEAPON_G36C +1][5][2] = {
 	};   
 
 ammo_check_t ammo_check[] = {
-   {"ammo_glockclip", "9mm", _9MM_MAX_CARRY},
-   {"ammo_9mmclip", "9mm", _9MM_MAX_CARRY},
-   {"ammo_9mmAR", "mrcbullets", _9MM_MAX_CARRY},
-   {"ammo_9mmbox", "9mm", _9MM_MAX_CARRY},
-   {"ammo_mp5clip", "mrcbullets", _9MM_MAX_CARRY},
-   {"ammo_chainboxclip", "9mm", _9MM_MAX_CARRY},
+   {"ammo_glockclip", g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY},
+   {"ammo_9mmclip", g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY},
+   {"ammo_9mmAR", g_WpnAmmo[WEAPON_MRC], _9MM_MAX_CARRY},
+   {"ammo_9mmbox", g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY},
+   {"ammo_mp5clip", g_WpnAmmo[WEAPON_MRC], _9MM_MAX_CARRY},
+   {"ammo_chainboxclip", g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY},
    {"ammo_mp5grenades", "ARgrenades", M203_GRENADE_MAX_CARRY},
    {"ammo_ARgrenades", "ARgrenades", M203_GRENADE_MAX_CARRY},
-   {"ammo_buckshot", "buckshot", BUCKSHOT_MAX_CARRY},
-   {"ammo_crossbow", "bolts", BOLT_MAX_CARRY},
-   {"ammo_357", "deagle", DEAGLE_MAX_CARRY},
-   {"ammo_rpgclip", "rockets", ROCKET_MAX_CARRY},
-   {"ammo_egonclip", "uranium", URANIUM_MAX_CARRY},
-   {"ammo_gaussclip", "uranium", URANIUM_MAX_CARRY},
+   {"ammo_buckshot", g_WpnAmmo[WEAPON_SHOTGUN], BUCKSHOT_MAX_CARRY},
+   {"ammo_crossbow", g_WpnAmmo[WEAPON_CROSSBOW], BOLT_MAX_CARRY},
+   {"ammo_357", g_WpnAmmo[WEAPON_DEAGLE], DEAGLE_MAX_CARRY},
+   {"ammo_rpgclip", g_WpnAmmo[WEAPON_RPG], ROCKET_MAX_CARRY},
+   {"ammo_egonclip", g_WpnAmmo[WEAPON_GAUSS], URANIUM_MAX_CARRY},
+   {"ammo_gaussclip", g_WpnAmmo[WEAPON_GAUSS], URANIUM_MAX_CARRY},
 
-   {"ammo_ar2", "ar2ammo", AR2_MAX_CARRY},
+   {"ammo_ar2", g_WpnAmmo[WEAPON_AR2], AR2_MAX_CARRY},
    {"ammo_ar2ball", "ar2ball", M203_GRENADE_MAX_CARRY},
-   {"ammo_fiveseven", "ammo57", _57_MAX_CARRY },
-   {"ammo_g36c", "g36cammo", _9MM_MAX_CARRY},
-   {"ammo_hkmp5", "hkmp5ammo", _9MM_MAX_CARRY },
-	{"ammo_sniper", "sniperammo", SNIPER_MAX_CARRY},
+   {"ammo_fiveseven", g_WpnAmmo[WEAPON_FIVESEVEN], _57_MAX_CARRY },
+   {"ammo_g36c", g_WpnAmmo[WEAPON_G36C], _9MM_MAX_CARRY},
+   {"ammo_hkmp5", g_WpnAmmo[WEAPON_HKMP5], _9MM_MAX_CARRY },
+	{"ammo_sniper", g_WpnAmmo[WEAPON_SNIPER], SNIPER_MAX_CARRY},
    {"", 0, 0}};
 
 // sounds for Bot taunting after a kill...
@@ -402,37 +402,37 @@ void CBot::BotWeaponInventory( void )
 
 	// diffusion: added clips check (   + ((CBasePlayerWeapon*)m_rgpPlayerItems[i])->m_iClip;   )
 
-		if (strcmp("9mm", CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
+		if( strcmp( g_WpnAmmo[WEAPON_BERETTA], CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
 		{
 			primary_ammo[WEAPON_BERETTA] = m_rgAmmo[i];
 			if( weapon_ptr[WEAPON_BERETTA] )
 				primary_ammo[WEAPON_BERETTA] += ((CBasePlayerWeapon *)weapon_ptr[WEAPON_BERETTA])->m_iClip;
 		}
-		else if (strcmp("357", CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
+		else if( strcmp( g_WpnAmmo[WEAPON_DEAGLE], CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
 		{
 			primary_ammo[WEAPON_DEAGLE] = m_rgAmmo[i];
 			if( weapon_ptr[WEAPON_DEAGLE] )
 				primary_ammo[WEAPON_DEAGLE] += ((CBasePlayerWeapon *)weapon_ptr[WEAPON_DEAGLE])->m_iClip;
 		}
-		else if( strcmp( "mrcbullets", CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
+		else if( strcmp( g_WpnAmmo[WEAPON_MRC], CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
 		{
 			primary_ammo[WEAPON_MRC] = m_rgAmmo[i];
 			if( weapon_ptr[WEAPON_MRC] )
 				primary_ammo[WEAPON_MRC] += ((CBasePlayerWeapon *)weapon_ptr[WEAPON_MRC])->m_iClip;
 		}
-		else if( strcmp( "g36cammo", CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
+		else if( strcmp( g_WpnAmmo[WEAPON_G36C], CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
 		{
 			primary_ammo[WEAPON_G36C] = m_rgAmmo[i];
 			if( weapon_ptr[WEAPON_G36C] )
 				primary_ammo[WEAPON_G36C] += ((CBasePlayerWeapon *)weapon_ptr[WEAPON_G36C])->m_iClip;
 		}
-		else if( strcmp( "hkmp5ammo", CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
+		else if( strcmp( g_WpnAmmo[WEAPON_HKMP5], CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
 		{
 			primary_ammo[WEAPON_HKMP5] = m_rgAmmo[i];
 			if( weapon_ptr[WEAPON_HKMP5] )
 				primary_ammo[WEAPON_HKMP5] += ((CBasePlayerWeapon *)weapon_ptr[WEAPON_HKMP5])->m_iClip;
 		}
-		else if( strcmp( "ammo57", CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
+		else if( strcmp( g_WpnAmmo[WEAPON_FIVESEVEN], CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
 		{
 			primary_ammo[WEAPON_FIVESEVEN] = m_rgAmmo[i];
 			if( weapon_ptr[WEAPON_FIVESEVEN] )
@@ -442,13 +442,13 @@ void CBot::BotWeaponInventory( void )
 		{
 			secondary_ammo[WEAPON_MRC] = m_rgAmmo[i];
 		}
-		else if (strcmp("bolts", CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
+		else if (strcmp(g_WpnAmmo[WEAPON_CROSSBOW], CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
 		{
 			primary_ammo[WEAPON_CROSSBOW] = m_rgAmmo[i];
 			if( weapon_ptr[WEAPON_CROSSBOW] )
 				primary_ammo[WEAPON_CROSSBOW] += ((CBasePlayerWeapon *)weapon_ptr[WEAPON_CROSSBOW])->m_iClip;
 		}
-		else if (stricmp("buckshot", CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
+		else if (stricmp(g_WpnAmmo[WEAPON_SHOTGUN], CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
 		{
 			primary_ammo[WEAPON_SHOTGUN] = m_rgAmmo[i];
 			if( weapon_ptr[WEAPON_SHOTGUN] )
@@ -457,23 +457,23 @@ void CBot::BotWeaponInventory( void )
 			if( weapon_ptr[WEAPON_SHOTGUN_XM] )
 				primary_ammo[WEAPON_SHOTGUN_XM] += ((CBasePlayerWeapon *)weapon_ptr[WEAPON_SHOTGUN_XM])->m_iClip;
 		}
-		else if( stricmp( "rockets", CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
+		else if( stricmp( g_WpnAmmo[WEAPON_RPG], CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
 		{
 			primary_ammo[WEAPON_RPG] = m_rgAmmo[i];
 			if( weapon_ptr[WEAPON_RPG] )
 				primary_ammo[WEAPON_RPG] += ((CBasePlayerWeapon *)weapon_ptr[WEAPON_RPG])->m_iClip;
 		}
-		else if( stricmp( "sniperammo", CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
+		else if( stricmp( g_WpnAmmo[WEAPON_SNIPER], CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
 		{
 			primary_ammo[WEAPON_SNIPER] = m_rgAmmo[i];
 			if( weapon_ptr[WEAPON_SNIPER] )
 				primary_ammo[WEAPON_SNIPER] += ((CBasePlayerWeapon *)weapon_ptr[WEAPON_SNIPER])->m_iClip;
 		}
-		else if (strcmp("uranium", CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
+		else if (strcmp(g_WpnAmmo[WEAPON_GAUSS], CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
 		{
 			primary_ammo[WEAPON_GAUSS] = m_rgAmmo[i];
 		}
-		else if( strcmp( "ar2ammo", CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
+		else if( strcmp( g_WpnAmmo[WEAPON_AR2], CBasePlayerItem::AmmoInfoArray[i].pszName ) == 0 )
 		{
 			primary_ammo[WEAPON_AR2] = m_rgAmmo[i];
 			if( weapon_ptr[WEAPON_AR2] )
@@ -483,13 +483,13 @@ void CBot::BotWeaponInventory( void )
 		{
 			secondary_ammo[WEAPON_AR2] = m_rgAmmo[i];
 		}
-		else if (stricmp("Hand Grenade", CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
+		else if (stricmp(g_WpnAmmo[WEAPON_HANDGRENADE], CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
 		primary_ammo[WEAPON_HANDGRENADE] = m_rgAmmo[i];
-		else if (stricmp("Trip Mine", CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
+		else if (stricmp( g_WpnAmmo[WEAPON_TRIPMINE], CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
 		primary_ammo[WEAPON_TRIPMINE] = m_rgAmmo[i];
-		else if (stricmp("Satchel Charge", CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
+		else if (stricmp(g_WpnAmmo[WEAPON_SATCHEL], CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
 		primary_ammo[WEAPON_SATCHEL] = m_rgAmmo[i];
-		else if (stricmp("Snarks", CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
+		else if (stricmp( g_WpnAmmo[WEAPON_SNARK], CBasePlayerItem::AmmoInfoArray[i].pszName) == 0)
 		primary_ammo[WEAPON_SNARK] = m_rgAmmo[i];
 	}
 }

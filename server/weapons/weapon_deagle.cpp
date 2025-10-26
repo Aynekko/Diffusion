@@ -43,7 +43,7 @@ LINK_ENTITY_TO_CLASS( weapon_357, CDeagle );
 int CDeagle::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "deagle";
+	p->pszAmmo1 = g_WpnAmmo[WEAPON_DEAGLE];
 	p->iMaxAmmo1 = DEAGLE_MAX_CARRY;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
@@ -237,7 +237,7 @@ class CDeagleAmmo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
-		if (pOther->GiveAmmo( AMMO_DEAGLEBOX_GIVE, "deagle", DEAGLE_MAX_CARRY ) != -1)
+		if (pOther->GiveAmmo( AMMO_DEAGLEBOX_GIVE, g_WpnAmmo[WEAPON_DEAGLE], DEAGLE_MAX_CARRY ) != -1)
 		{
 		//	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
 			PlayPickupSound( pOther );

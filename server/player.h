@@ -368,7 +368,7 @@ public:
 	void SnapEyeAngles( const Vector &viewAngles );
 	void RefreshScore( void );
 
-	int  GiveAmmo( int iAmount, char *szName, int iMax );
+	int  GiveAmmo( int iAmount, const char *szName, int iMax );
 	void SendAmmoUpdate(CBasePlayer* pPlayer);
 
 	void WaterMove( void );

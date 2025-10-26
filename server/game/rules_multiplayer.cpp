@@ -946,41 +946,41 @@ void CHalfLifeMultiplay :: PlayerSpawn( CBasePlayer *pPlayer )
 	{
 		pPlayer->GiveNamedItem( "weapon_knife" );
 		pPlayer->GiveNamedItem( "weapon_9mmhandgun" );
-		pPlayer->GiveAmmo( 68, "9mm", _9MM_MAX_CARRY ); // 4 full reloads
+		pPlayer->GiveAmmo( 68, g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY ); // 4 full reloads
 
 		switch (pPlayer->m_iBonusWeaponLevel)
 		{
 		case 3:
 			pPlayer->GiveNamedItem("weapon_hkmp5");
-			pPlayer->GiveAmmo(MP5_DEFAULT_GIVE, "hkmp5ammo", _9MM_MAX_CARRY);
+			pPlayer->GiveAmmo(MP5_DEFAULT_GIVE, g_WpnAmmo[WEAPON_HKMP5], _9MM_MAX_CARRY);
 			pPlayer->m_iBonusWeaponID = WEAPON_HKMP5;
 		break;
 		case 4:
 			pPlayer->GiveNamedItem("weapon_9mmAR");
-			pPlayer->GiveAmmo(MRC_DEFAULT_GIVE, "mrcbullets", _9MM_MAX_CARRY);
+			pPlayer->GiveAmmo(MRC_DEFAULT_GIVE, g_WpnAmmo[WEAPON_MRC], _9MM_MAX_CARRY);
 			pPlayer->m_iBonusWeaponID = WEAPON_MRC;
 		break;
 		case 5:
 			pPlayer->GiveNamedItem( "weapon_g36c" );
-			pPlayer->GiveAmmo( G36C_DEFAULT_GIVE, "g36cammo", _9MM_MAX_CARRY );
+			pPlayer->GiveAmmo( G36C_DEFAULT_GIVE, g_WpnAmmo[WEAPON_G36C], _9MM_MAX_CARRY );
 			pPlayer->m_iBonusWeaponID = WEAPON_G36C;
 		break;
 		case 6:
 			pPlayer->GiveNamedItem("weapon_9mmAR");
-			pPlayer->GiveAmmo(MRC_DEFAULT_GIVE, "mrcbullets", _9MM_MAX_CARRY);
+			pPlayer->GiveAmmo(MRC_DEFAULT_GIVE, g_WpnAmmo[WEAPON_MRC], _9MM_MAX_CARRY);
 			pPlayer->GiveAmmo(AMMO_M203BOX_GIVE, "ARgrenades", M203_GRENADE_MAX_CARRY);
 			pPlayer->m_iBonusWeaponID = WEAPON_MRC;
 		break;
 		case 7:
 		case 8:
 			pPlayer->GiveNamedItem("weapon_gausniper");
-			pPlayer->GiveAmmo(AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY);
+			pPlayer->GiveAmmo(AMMO_URANIUMBOX_GIVE, g_WpnAmmo[WEAPON_GAUSS], URANIUM_MAX_CARRY);
 			pPlayer->m_iBonusWeaponID = WEAPON_GAUSS;
 		break;
 		case 9:
 		case 10:
 			pPlayer->GiveNamedItem("weapon_ar2");
-			pPlayer->GiveAmmo(AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY);
+			pPlayer->GiveAmmo(AMMO_URANIUMBOX_GIVE, g_WpnAmmo[WEAPON_GAUSS], URANIUM_MAX_CARRY);
 			pPlayer->m_iBonusWeaponID = WEAPON_AR2;
 		break;
 		}

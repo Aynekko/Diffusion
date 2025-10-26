@@ -2451,7 +2451,7 @@ void CDrone :: RunAI( void )
 				pPlayer->DroneHealth = pev->health;
 				pPlayer->DroneAmmo = 0;
 				pPlayer->DroneDeployed = false;
-				pPlayer->GiveAmmo( 1, "drone", 1 );
+				pPlayer->GiveAmmo( 1, g_WpnAmmo[WEAPON_DRONE], 1 );
 				UTIL_ShowMessage( "UTIL_DRONEAMMOOUT", pPlayer );
 			}
 			UTIL_Remove( this );
@@ -2694,7 +2694,7 @@ void CDrone :: RunTask ( Task_t *pTask )
 								pPlayerOwner->DroneHealth = pev->health;
 								pPlayerOwner->DroneAmmo = 0;
 								pPlayerOwner->DroneDeployed = false;
-								pPlayerOwner->GiveAmmo( 1, "drone", 1 );
+								pPlayerOwner->GiveAmmo( 1, g_WpnAmmo[WEAPON_DRONE], 1 );
 								DontThink();
 								m_fInCombat = FALSE;
 								UTIL_Remove( this );
@@ -2937,7 +2937,7 @@ void CDrone::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useTyp
 
 	if( pPlayer )
 	{
-		pPlayer->GiveAmmo( 1, "drone", 1 );
+		pPlayer->GiveAmmo( 1, g_WpnAmmo[WEAPON_DRONE], 1 );
 		pPlayer->DroneHealth = pev->health;
 		pPlayer->DroneAmmo = m_iCounter;
 		pPlayer->DroneDeployed = false;
@@ -3075,7 +3075,7 @@ void CDrone::Killed( entvars_t *pevAttacker, int iGib )
 			pPlayer->DroneHealth = 0;
 			pPlayer->DroneAmmo = 0;
 			pPlayer->DroneDeployed = false;
-			pPlayer->GiveAmmo( 1, "drone", 1 );
+			pPlayer->GiveAmmo( 1, g_WpnAmmo[WEAPON_DRONE], 1 );
 		}
 	}
 	

@@ -89,7 +89,7 @@ void C_AR2::Precache( void )
 int C_AR2::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "ar2ammo";
+	p->pszAmmo1 = g_WpnAmmo[WEAPON_AR2];
 	p->iMaxAmmo1 = AR2_MAX_CARRY;
 	p->pszAmmo2 = "ar2balls";
 	p->iMaxAmmo2 = M203_GRENADE_MAX_CARRY;
@@ -314,7 +314,7 @@ class CAR2Ammo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		int bResult = (pOther->GiveAmmo( AR2_DEFAULT_GIVE, "ar2ammo", AR2_MAX_CARRY ) != -1);
+		int bResult = (pOther->GiveAmmo( AR2_DEFAULT_GIVE, g_WpnAmmo[WEAPON_AR2], AR2_MAX_CARRY ) != -1);
 		if( bResult )
 		{
 		//	EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );
@@ -385,11 +385,11 @@ class CAmmoCrystalPack : public CBasePlayerAmmo
 			bResult = true;
 
 		// give ar2 ammo
-		if( (pOther->GiveAmmo( (int)(AR2_MAX_CARRY * 0.5f), "ar2ammo", AR2_MAX_CARRY ) != -1) )
+		if( (pOther->GiveAmmo( (int)(AR2_MAX_CARRY * 0.5f), g_WpnAmmo[WEAPON_AR2], AR2_MAX_CARRY ) != -1) )
 			bResult = true;
 
 		// give alien sniper ammo
-		if( pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY ) != -1 )
+		if( pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, g_WpnAmmo[WEAPON_GAUSS], URANIUM_MAX_CARRY ) != -1 )
 			bResult = true;
 
 		if( bResult )

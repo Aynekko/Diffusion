@@ -187,7 +187,7 @@ void CWpnDrone::Precache( void )
 int CWpnDrone::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "drone";
+	p->pszAmmo1 = g_WpnAmmo[WEAPON_DRONE];
 	p->iMaxAmmo1 = 1;// 3;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;

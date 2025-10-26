@@ -102,6 +102,35 @@ typedef struct weapon_data_s
 
 #define MAX_NORMAL_BATTERY	100
 
+const char * const g_WpnAmmo[] =
+{
+	"'\0'",			// WEAPON_NONE
+	"'\0'",			// WEAPON_KNIFE
+	"9mm",			// WEAPON_BERETTA
+	"deagle",		// WEAPON_DEAGLE
+	"mrcbullets",	// WEAPON_MRC
+	"'\0'",			// WEAPON_CYCLER
+	"bolts",		// WEAPON_CROSSBOW
+	"buckshot",		// WEAPON_SHOTGUN
+	"rockets",		// WEAPON_RPG
+	"uranium",		// WEAPON_GAUSS
+	"'\0'",			// WEAPON_EGON
+	"'\0'",			// WEAPON_HORNETGUN
+	"Hand Grenade", // WEAPON_HANDGRENADE
+	"Trip Mine",	// WEAPON_TRIPMINE
+	"Satchel",		// WEAPON_SATCHEL
+	"Snarks",		// WEAPON_SNARK
+	"ar2ammo",		// WEAPON_AR2
+	"drone",		// WEAPON_DRONE
+	"sentry",		// WEAPON_SENTRY
+	"hkmp5ammo",	// WEAPON_HKMP5
+	"ammo57",		// WEAPON_FIVESEVEN
+	"sniperammo",	// WEAPON_SNIPER
+	"buckshot",		// WEAPON_SHOTGUN_XM
+	"g36cammo",		// WEAPON_G36C
+	"Smoke Grenade", // WEAPON_SMOKEGRENADE
+};
+
 // weapon weight factors (for auto-switching)   (-1 = noswitch)
 #define CROWBAR_WEIGHT		0
 #define BERETTA_WEIGHT		10

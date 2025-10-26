@@ -142,7 +142,7 @@ int CGauss::AddToPlayer( CBasePlayer *pPlayer )
 int CGauss::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "uranium";
+	p->pszAmmo1 = g_WpnAmmo[WEAPON_GAUSS];
 	p->iMaxAmmo1 = URANIUM_MAX_CARRY;
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->pszAmmo2 = NULL;
@@ -625,7 +625,7 @@ class CGaussAmmo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
-		if (pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, "uranium", URANIUM_MAX_CARRY ) != -1)
+		if (pOther->GiveAmmo( AMMO_URANIUMBOX_GIVE, g_WpnAmmo[WEAPON_GAUSS], URANIUM_MAX_CARRY ) != -1)
 		{
 		//	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
 			PlayPickupSound( pOther );

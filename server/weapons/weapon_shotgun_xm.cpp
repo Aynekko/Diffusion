@@ -90,7 +90,7 @@ int CShotgunXM::AddToPlayer( CBasePlayer *pPlayer )
 int CShotgunXM::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = "buckshot";
+	p->pszAmmo1 = g_WpnAmmo[WEAPON_SHOTGUN];
 	p->iMaxAmmo1 = BUCKSHOT_MAX_CARRY;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;

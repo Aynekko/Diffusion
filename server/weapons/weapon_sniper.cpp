@@ -113,7 +113,7 @@ void CSniperRifle::Precache( void )
 int CSniperRifle::GetItemInfo( ItemInfo *p )
 {
 	p->pszName = STRING( pev->classname );
-	p->pszAmmo1 = "sniperammo";
+	p->pszAmmo1 = g_WpnAmmo[WEAPON_SNIPER];
 	p->iMaxAmmo1 = SNIPER_MAX_CARRY;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
@@ -342,7 +342,7 @@ class CSniperAmmo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther )
 	{
-		int bResult = (pOther->GiveAmmo( AMMO_SNIPER_GIVE, "sniperammo", SNIPER_MAX_CARRY ) != -1);
+		int bResult = (pOther->GiveAmmo( AMMO_SNIPER_GIVE, g_WpnAmmo[WEAPON_SNIPER], SNIPER_MAX_CARRY ) != -1);
 
 		if( bResult )
 		//	EMIT_SOUND( ENT( pev ), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM );

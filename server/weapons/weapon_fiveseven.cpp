@@ -68,7 +68,7 @@ void CWpnFiveSeven::Precache( void )
 int CWpnFiveSeven::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "ammo57";
+	p->pszAmmo1 = g_WpnAmmo[WEAPON_FIVESEVEN];
 	p->iMaxAmmo1 = 100;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
@@ -229,7 +229,7 @@ class CWpnFiveSevenAmmo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
-		if (pOther->GiveAmmo( AMMO_FIVESEVEN_GIVE, "ammo57", _57_MAX_CARRY ) != -1)
+		if (pOther->GiveAmmo( AMMO_FIVESEVEN_GIVE, g_WpnAmmo[WEAPON_FIVESEVEN], _57_MAX_CARRY ) != -1)
 		{
 		//	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
 			PlayPickupSound( pOther );

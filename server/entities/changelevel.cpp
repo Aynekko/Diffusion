@@ -263,7 +263,7 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 		if( pPlayerx->m_hDrone != NULL )
 		{
 			UTIL_Remove( pPlayerx->m_hDrone );
-			pPlayerx->GiveAmmo( 1, "drone", 1 );
+			pPlayerx->GiveAmmo( 1, g_WpnAmmo[WEAPON_DRONE], 1 );
 		}
 		pPlayerx->m_pFlashlightMonster = NULL;
 	}

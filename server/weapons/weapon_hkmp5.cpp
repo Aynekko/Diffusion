@@ -79,7 +79,7 @@ void CWeaponHKMP5::Precache( void )
 int CWeaponHKMP5::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
-	p->pszAmmo1 = "hkmp5ammo";
+	p->pszAmmo1 = g_WpnAmmo[WEAPON_HKMP5];
 	p->iMaxAmmo1 = _9MM_MAX_CARRY;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
@@ -249,7 +249,7 @@ class CHKMP5AmmoClip : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
-		int bResult = (pOther->GiveAmmo( AMMO_HKMP5_GIVE, "hkmp5ammo", _9MM_MAX_CARRY) != -1);
+		int bResult = (pOther->GiveAmmo( AMMO_HKMP5_GIVE, g_WpnAmmo[WEAPON_HKMP5], _9MM_MAX_CARRY) != -1);
 
 		if (bResult)
 			PlayPickupSound( pOther );
