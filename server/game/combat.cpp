@@ -920,8 +920,14 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	{
 		// diffusion - don't add any velocity if player is already moving too fast
 		Vector MyVelocity = GetAbsVelocity();
-		if( MyVelocity.Length() < 400 )	
-			SetAbsVelocity( MyVelocity + vecDir * -DamageForce( flDamage ) );
+		if( MyVelocity.Length() < 400 )
+		{
+			
+			Vector DmgAddedVelocity = vecDir * -DamageForce( flDamage );
+			// do not rocket jump
+			DmgAddedVelocity.z *= 0.1f;
+			SetAbsVelocity( MyVelocity + DmgAddedVelocity );
+		}
 	}
 
 	// do the damage
