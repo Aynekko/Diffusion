@@ -75,6 +75,7 @@ public:
 	void SearchThink(void);
 	void AutoSearchThink(void);
 	void TurretDeath(void);
+	void PostDeathThink( void ) {  };
 
 	virtual void SpinDownCall(void) { m_iSpin = 0; }
 	virtual void SpinUpCall(void) { m_iSpin = 1; }
@@ -168,6 +169,7 @@ BEGIN_DATADESC( CBaseTurret )
 	DEFINE_FUNCTION( Deploy ),
 	DEFINE_FUNCTION( Retire ),
 	DEFINE_FUNCTION( Initialize ),
+	DEFINE_FUNCTION( PostDeathThink ),
 END_DATADESC()
 
 
@@ -1376,6 +1378,7 @@ public:
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	void SentryTouch( CBaseEntity *pOther );
 	void SentryDeath( void );
+	void PostDeathThink( void );
 	void Retire(void);
 	int ObjectCaps( void );
 
@@ -1614,6 +1617,8 @@ void CSentry :: SentryDeath( void )
 {
 	BOOL iActive = FALSE;
 
+	pev->flags &= ~FL_ONGROUND;
+
 	StudioFrameAdvance( );
 	SetNextThink( 0.1 );
 
@@ -1665,8 +1670,26 @@ void CSentry :: SentryDeath( void )
 	if (m_fSequenceFinished && pev->dmgtime + 5 < gpGlobals->time)
 	{
 		pev->framerate = 0;
-		SetThink( NULL );
+		if( FClassnameIs( this, "_playersentry" ) )
+		{
+			SetThink( &CSentry::PostDeathThink );
+			SetNextThink( 0 );
+			m_iCounter = 0;
+		}
+		else
+			SetThink( NULL );
 	}
+}
+
+void CSentry::PostDeathThink( void )
+{
+	pev->flags &= ~FL_ONGROUND;
+	m_iCounter++;
+
+	if( m_iCounter == 60 )
+		SetThink( &CBaseEntity::SUB_FadeOut );
+
+	SetNextThink( 1.0 );
 }
 
 void CSentry::Retire(void)
