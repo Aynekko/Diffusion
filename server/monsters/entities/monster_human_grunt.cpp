@@ -2446,6 +2446,13 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 
 				if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 				{
+					if( HasWeapon( HGRUNT_GRENADELAUNCHER ) && HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) && OccupySlot( bits_SLOTS_HGRUNT_GRENADE ) )
+					{
+						// shoot a grenade if you can
+						if( RANDOM_LONG( 0, 100 ) > 60 )
+							return GetScheduleOfType( SCHED_RANGE_ATTACK2 );
+					}
+
 					if( m_hEnemy 
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
 						&& !HasConditions( bits_COND_LOW_HEALTH )
@@ -3578,6 +3585,13 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 
 				if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 				{
+					if( HasWeapon( HGRUNT_GRENADELAUNCHER ) && HasConditions( bits_COND_CAN_RANGE_ATTACK2 ) && OccupySlot( bits_SLOTS_HGRUNT_GRENADE ) )
+					{
+						// shoot a grenade if you can
+						if( RANDOM_LONG( 0, 100 ) > 60 )
+							return GetScheduleOfType( SCHED_RANGE_ATTACK2 );
+					}
+
 					if( m_hEnemy
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
 						&& !HasConditions( bits_COND_LOW_HEALTH )

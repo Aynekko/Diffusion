@@ -45,6 +45,15 @@ void CEnvHoldable::Spawn( void )
 // hack to not stuck
 void CEnvHoldable::Think(void)
 {
+	if( gpGlobals->maxClients == 1 )
+	{
+		// hack for singleplayer, reported by PsyWarVeteran
+		// if you stand on capsules in the beginning of ch2map2, they will fall down through the world
+		// that'll show 'em!
+		if( pev->owner == NULL )
+			pev->owner = UTIL_PlayerByIndex( 1 )->edict();
+	}
+
 	SetNextThink( 1.0 );
 	pev->flags &= ~FL_ONGROUND;
 }
