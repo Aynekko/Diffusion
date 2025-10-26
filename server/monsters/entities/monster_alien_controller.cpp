@@ -3331,6 +3331,10 @@ void CDroneAlien :: Precache()
 	PRECACHE_SOUND("drone/aliendrone_shoot2.wav");
 	PRECACHE_SOUND("drone/aliendrone_shoot3.wav");
 	PRECACHE_SOUND("drone/aliendrone_shoot4.wav");
+	PRECACHE_SOUND( "drone/aliendrone_shoot1_d.wav" );
+	PRECACHE_SOUND( "drone/aliendrone_shoot2_d.wav" );
+	PRECACHE_SOUND( "drone/aliendrone_shoot3_d.wav" );
+	PRECACHE_SOUND( "drone/aliendrone_shoot4_d.wav" );
 
 	PRECACHE_SOUND("buttons/spark1.wav");
 	PRECACHE_SOUND("buttons/spark2.wav");
@@ -3435,40 +3439,22 @@ void CDroneAlien :: RunTask ( Task_t *pTask )
 				Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 				vecGunAngles = UTIL_VecToAngles(vecShootDir);
 
-				/*
-				if( gpGlobals->time > SecondaryAttackTime + RANDOM_FLOAT(7.0, 15.0))
+				PlayClientSound( this, 239, 0, 0, vecShootOrigin );
+				CBaseEntity *pShock = CBaseEntity::Create("shock_beam", vecShootOrigin, vecGunAngles, edict());
+				if( pShock )
 				{
-					CBaseMonster *pBall = (CBaseMonster*)Create( "shootball", vecShootOrigin, vecGunAngles, edict() );
-					pBall->pev->spawnflags |= BIT(12); // ENVBALL_ALIENSHIP: explode on first bounce
-					pBall->SetAbsVelocity( vecShootDir * 700 );
-					m_flShootTime += 10;
-					SecondaryAttackTime = gpGlobals->time;
-				}
-				else
-				{*/
-					switch( RANDOM_LONG(0,3) )
-					{
-					case 0: EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "drone/aliendrone_shoot1.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110)); break;
-					case 1: EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "drone/aliendrone_shoot2.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110)); break;
-					case 2: EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "drone/aliendrone_shoot3.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110)); break;
-					case 3: EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "drone/aliendrone_shoot4.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110)); break;
-					}
-					CBaseEntity *pShock = CBaseEntity::Create("shock_beam", vecShootOrigin, vecGunAngles, edict());
-					if( pShock )
-					{
-						pShock->pev->scale = 0.5;
-						pShock->pev->velocity = vecShootDir * ProjectileVelocity[g_iSkillLevel];
+					pShock->pev->scale = 0.5;
+					pShock->pev->velocity = vecShootDir * ProjectileVelocity[g_iSkillLevel];
 
-						Vector AddVelocity = g_vecZero;
-						if( g_iSkillLevel == SKILL_HARD )
-							AddVelocity = m_hEnemy->pev->velocity + m_hEnemy->pev->basevelocity;
-						else if( g_iSkillLevel == SKILL_MEDIUM )
-							AddVelocity = m_hEnemy->pev->velocity.Normalize() * 150 + m_hEnemy->pev->basevelocity;
-						pShock->pev->velocity += AddVelocity;
-						pShock->pev->nextthink = gpGlobals->time;
-						pShock->pev->dmg = 1.25;
-					}
-			//	}
+					Vector AddVelocity = g_vecZero;
+					if( g_iSkillLevel == SKILL_HARD )
+						AddVelocity = m_hEnemy->pev->velocity + m_hEnemy->pev->basevelocity;
+					else if( g_iSkillLevel == SKILL_MEDIUM )
+						AddVelocity = m_hEnemy->pev->velocity.Normalize() * 150 + m_hEnemy->pev->basevelocity;
+					pShock->pev->velocity += AddVelocity;
+					pShock->pev->nextthink = gpGlobals->time;
+					pShock->pev->dmg = 1.25;
+				}
 
 				SetBlending( 0, vecGunAngles.x );
 				// Play fire sound.

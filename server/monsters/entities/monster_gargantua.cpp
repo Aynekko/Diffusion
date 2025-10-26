@@ -507,8 +507,7 @@ void CGargantua::FireBullet( void )
 	Vector vecStart = vecGunPos;
 	Vector vecAim = ShootAtEnemy( vecStart );
 
-	// MAKE 3 SOUNDS ON CLIENT !!!!!
-	EMIT_SOUND_DYN( ENT( pev ), CHAN_WEAPON, "robo/shoot1.wav", 1, 0.4, 0, RANDOM_LONG( 90, 110 ) );
+	PlayClientSound( this, 244, 0, 0, vecGunPos );
 
 	FireBullets( 1, vecStart, vecAim, VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_12MM, 1, g_RoboBulletDmg[g_iSkillLevel] );
 
@@ -581,7 +580,7 @@ void CGargantua::RocketAttack(void)
 	Vector vecAim = ShootAtEnemy( vecStart );
 
 	bool shoot_under_feet = false;
-	if( m_hEnemy != NULL && (m_hEnemy->pev->flags & FL_ONGROUND) )
+	if( m_hEnemy->pev->flags & FL_ONGROUND )
 		shoot_under_feet = true;
 
 	if( m_vecEnemyLKP.z > vecStart.z )
@@ -592,22 +591,30 @@ void CGargantua::RocketAttack(void)
 
 	vecGunAngles = UTIL_VecToAngles( vecAim );
 
-	CBaseMonster *pRocket = (CBaseMonster*)Create( "robo_rocket2", vecStart, vecGunAngles, edict() );
-	
-	if (pRocket)
+	TraceResult	tr;
+	// verify that a rocket fired from the gun will travel an acceptable distance, don't shoot at walls
+	// if it's too close, just skip this rocket
+	UTIL_TraceLine( vecStart, m_hEnemy->BodyTarget( vecStart ), ignore_monsters, ignore_glass, ENT( pev ), &tr );
+	float dist = (vecStart - tr.vecEndPos).Length();
+	if( dist > 400 )
 	{
-	//	if( m_hEnemy != NULL ) // disable auto-following, it's too hard!
-	//		pRocket->m_hEnemy = m_hEnemy;
+		CBaseMonster *pRocket = (CBaseMonster *)Create( "robo_rocket2", vecStart, vecGunAngles, edict() );
+
+		if( pRocket )
+		{
+			//	if( m_hEnemy != NULL ) // disable auto-following, it's too hard!
+			//		pRocket->m_hEnemy = m_hEnemy;
+		}
+
+		Vector angles;
+		Vector org = GetAbsOrigin();
+		org.z += 64;
+		Vector dir = m_hEnemy->BodyTarget( org ) - org;
+		angles = UTIL_VecToAngles( dir );
+		angles.y -= GetAbsAngles().y;
+
+		CSoundEnt::InsertSound( bits_SOUND_COMBAT, GetAbsOrigin(), 1024, 0.3, ENTINDEX( edict() ) );
 	}
-
-	Vector angles;
-	Vector org = GetAbsOrigin();
-	org.z += 64;
-	Vector dir = m_hEnemy->BodyTarget(org) - org;
-	angles = UTIL_VecToAngles( dir );
-	angles.y -= GetAbsAngles().y;
-
-	CSoundEnt::InsertSound ( bits_SOUND_COMBAT, GetAbsOrigin(), 1024, 0.3, ENTINDEX(edict()) );
 }
 
 //=========================================================

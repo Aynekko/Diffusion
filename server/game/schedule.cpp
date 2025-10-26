@@ -342,7 +342,6 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 
 	case TASK_FACE_ENEMY:
 		{
-			MakeIdealYaw( m_vecEnemyLKP );
 			ChangeYaw( pev->yaw_speed );
 
 			if ( FacingIdeal() )

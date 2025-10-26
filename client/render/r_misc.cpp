@@ -2523,6 +2523,48 @@ void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoV
 		sndname[0] = "weapons/rocketfire1.wav";
 		num = 0;
 	break;
+	case 239: // monster_alien_drone
+		sndname[0] = "drone/aliendrone_shoot1.wav";
+		sndname[1] = "drone/aliendrone_shoot2.wav";
+		sndname[2] = "drone/aliendrone_shoot3.wav";
+		sndname[3] = "drone/aliendrone_shoot4.wav";
+		sndname_d[0] = "drone/aliendrone_shoot1_d.wav";
+		sndname_d[1] = "drone/aliendrone_shoot2_d.wav";
+		sndname_d[2] = "drone/aliendrone_shoot3_d.wav";
+		sndname_d[3] = "drone/aliendrone_shoot4_d.wav";
+		num = RANDOM_LONG( 0, 3 );
+		break;
+	case 240: // monster_alien_soldier launcher
+		sndname[0] = "weapons/alien_launcher.wav";
+		sndname_d[0] = "weapons/alien_launcher_d.wav";
+		num = 0;
+		break;
+	case 241: // monster_alien_soldier rifle black
+		sndname[0] = "weapons/alien_hks1.wav";
+		sndname[1] = "weapons/alien_hks2.wav";
+		sndname_d[0] = "weapons/alien_hks1_d.wav";
+		sndname_d[1] = "weapons/alien_hks2_d.wav";
+		num = RANDOM_LONG( 0, 1 );
+		break;
+	case 242: // monster_alien_soldier shotgun
+		sndname[0] = "weapons/alien_shotgun.wav";
+		sndname_d[0] = "weapons/alien_shotgun_d.wav";
+		num = 0;
+		break;
+	case 243: // monster_alien_soldier rifle blue
+		sndname[0] = "weapons/ar2_shoot.wav";
+		sndname_d[0] = "weapons/ar2_shoot_d.wav";
+		num = 0;
+		break;
+	case 244: // monster_gargantua
+		sndname[0] = "robo/shoot1.wav";
+		sndname[1] = "robo/shoot2.wav";
+		sndname[2] = "robo/shoot3.wav";
+		sndname_d[0] = "robo/shoot1_d.wav";
+		sndname_d[1] = "robo/shoot2_d.wav";
+		sndname_d[2] = "robo/shoot3_d.wav";
+		num = RANDOM_LONG( 0, 2 );
+		break;
 	case 245: // monster_security_general 9mmAR
 		sndname[0] = "hgrunt/general_mgun.wav";
 		sndname_d[0] = "hgrunt/general_mgun_d.wav";

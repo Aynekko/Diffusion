@@ -3210,12 +3210,13 @@ void CHGruntAlien :: Precache()
 	PRECACHE_SOUND( "hgrunt/ag_nade_beep.wav" );
 
 	PRECACHE_SOUND( "weapons/alien_launcher.wav" );
-	PRECACHE_SOUND( "weapons/alien_shotgun1.wav" );
-	PRECACHE_SOUND( "weapons/alien_shotgun2.wav" );
-	PRECACHE_SOUND( "weapons/alien_shotgun3.wav" );
-	PRECACHE_SOUND( "weapons/alien_shotgun4.wav" );
+	PRECACHE_SOUND( "weapons/alien_launcher_d.wav" );
+	PRECACHE_SOUND( "weapons/alien_shotgun.wav" );
+	PRECACHE_SOUND( "weapons/alien_shotgun_d.wav" );
 	PRECACHE_SOUND( "weapons/alien_hks1.wav" );
 	PRECACHE_SOUND( "weapons/alien_hks2.wav" );
+	PRECACHE_SOUND( "weapons/alien_hks1_d.wav" );
+	PRECACHE_SOUND( "weapons/alien_hks2_d.wav" );
 	PRECACHE_SOUND( "weapons/alien_reload1.wav" );
 
 	PRECACHE_SOUND("zombie/claw_miss2.wav");// because we use the basemonster SWIPE animation event
@@ -3236,6 +3237,7 @@ void CHGruntAlien :: Precache()
 	UTIL_PrecacheOther( "alien_shotgun_ball" );
 	UTIL_PrecacheOther( "shock_beam" );
 	PRECACHE_SOUND( "weapons/ar2_shoot.wav" );
+	PRECACHE_SOUND( "weapons/ar2_shoot_d.wav" );
 	PRECACHE_MODEL("sprites/muzzle_shock.spr");
 
 	PRECACHE_SOUND("drone/drone_hit1.wav");
@@ -3961,11 +3963,6 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_GREN_LAUNCH:
 		{
-			if (AlternateShoot == 1)
-				EMIT_SOUND(ENT(pev), CHAN_WEAPON, "comball/spawn.wav", 1, ATTN_NORM);
-			else
-				EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/alien_launcher.wav", 1, ATTN_NORM);
-
 			Vector vecStart, angleGun;
 			GetAttachment( 0, vecStart, angleGun );
 			UTIL_MakeVectors ( GetAbsAngles() );
@@ -3979,6 +3976,7 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				CBaseMonster *pBall = (CBaseMonster*)Create( "shootball", vecStart, angleGun, edict() );
 				if( pBall )
 				{
+					EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "comball/spawn.wav", 1, ATTN_NORM );
 					Vector AddVelocity = g_vecZero;
 					if( m_hEnemy != NULL )
 					{
@@ -3996,6 +3994,7 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				CBaseMonster *pBall = (CBaseMonster*)Create( "alien_super_ball", vecStart, angleGun, edict() );
 				if( pBall )
 				{
+					PlayClientSound( this, 240, 0, 0, vecShootOrigin );
 					pBall->SetAbsVelocity( ShootAtEnemy( vecStart ) * 100 );
 					if( m_hEnemy != NULL )
 						pBall->m_hEnemy = m_hEnemy;
@@ -4159,8 +4158,7 @@ void CHGruntAlien :: Shoot ( void )
 		SetBlending( 0, -angDir.x );
 	
 		// Play fire sound.
-		// DISTANT SOUNDS !!!!!
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/ar2_shoot.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110));
+		PlayClientSound( this, 243, 0, 0, LightOrg );
 		CSoundEnt::InsertSound(bits_SOUND_COMBAT, GetAbsOrigin(), 1024, 0.3, ENTINDEX(edict()) );
 
 		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, LightOrg );
@@ -4179,17 +4177,7 @@ void CHGruntAlien :: Shoot ( void )
 		MESSAGE_END();
 	}
 	else // shoot controller balls
-	{
-		switch(RANDOM_LONG( 0, 1 ))
-		{
-		case 0:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/alien_hks1.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110) );
-			break;
-		case 1:
-			EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/alien_hks2.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110) );
-			break;
-		}
-	
+	{	
 		Vector vecStart, angleGun;
 		GetAttachment( 0, vecStart, angleGun );
 		UTIL_MakeVectors ( GetAbsAngles() );
@@ -4197,6 +4185,8 @@ void CHGruntAlien :: Shoot ( void )
 		Vector vecShootOrigin = GetGunPosition();// +gpGlobals->v_forward * 32;
 		Vector vecShootDir = ShootAtEnemy( vecShootOrigin );
 		angleGun = UTIL_VecToAngles(vecShootDir);
+
+		PlayClientSound( this, 241, 0, 0, vecShootOrigin );
 
 		CBaseMonster *pBall = (CBaseMonster*)Create( "alien_energy_ball", vecStart, angleGun, edict() );
 		if( pBall )
@@ -4241,22 +4231,6 @@ void CHGruntAlien :: Shotgun ( void )
 	if (m_hEnemy == NULL)
 		return;
 
-	switch(RANDOM_LONG( 0, 3 ))
-	{
-	case 0:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/alien_shotgun1.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110) );
-		break;
-	case 1:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/alien_shotgun2.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110) );
-		break;
-	case 2:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/alien_shotgun3.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110) );
-		break;
-	case 3:
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/alien_shotgun4.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110) );
-		break;
-	}
-
 	Vector vecStart, angleGun;
 	GetAttachment( 0, vecStart, angleGun );
 	UTIL_MakeVectors ( GetAbsAngles() );
@@ -4298,6 +4272,8 @@ void CHGruntAlien :: Shotgun ( void )
 		pBall->SetAbsVelocity( (ShootAtEnemy( vecStart ) * 3000) + AddVelocity );
 		pBall->m_hEnemy = m_hEnemy;
 	}
+
+	PlayClientSound( this, 242, 0, 0, vecShootOrigin );
 	
 	m_cAmmoLoaded--;// take away a bullet!
 	Vector angDir = UTIL_VecToAngles( vecShootDir );
