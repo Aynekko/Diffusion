@@ -818,8 +818,6 @@ void CWorld :: Precache( void )
 	else
 		CVAR_SET_FLOAT( "mp_defaultteam", 0 );
 
-	// g-cont. moved here so cheats will working on restore level
-	g_flWeaponCheat = CVAR_GET_FLOAT( "sv_cheats" );  // Is the impulse 101 command allowed?
 	UPDATE_PACKED_FOG( pev->impulse );
 
 	// watersplash

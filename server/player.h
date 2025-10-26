@@ -622,6 +622,7 @@ public:
 	
 
 	// ===== ACHIEVEMENTS =====
+	bool bCheatsWereUsed;
 	void CheckVehicleAchievement( void );
 	float AchievementCheckTime; // last time we checked for a completed achievement (this is so few ach-s won't activate at the same time)
 	float AchievementStats[TOTAL_ACHIEVEMENTS]; // here we keep pure stats of what the player did and then compare them to goals

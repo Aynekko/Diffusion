@@ -242,6 +242,7 @@ BEGIN_DATADESC( CBasePlayer )
 
 	DEFINE_FIELD( m_flLastWeaponSwitchTime, FIELD_TIME ),
 	DEFINE_FIELD( LoudWeaponsRestricted, FIELD_BOOLEAN),
+	DEFINE_FIELD( bCheatsWereUsed, FIELD_BOOLEAN ),
 END_DATADESC()
 
 extern cvar_t sv_regeneration;
@@ -6292,6 +6293,8 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 {
 	if( g_flWeaponCheat == 0.0 )
 		return;
+	else
+		bCheatsWereUsed = true;
 
 	CBaseEntity *pEntity;
 	TraceResult tr;
@@ -8083,7 +8086,7 @@ void CBasePlayer::SendAchievementStatToClient( int AchNum, int Value, int Mode )
 	if( HasFlag( F_BOT ) )
 		return;
 
-	if( g_flWeaponCheat != 0.0 )
+	if( bCheatsWereUsed || g_flWeaponCheat != 0.0 )
 	{
 	//	ALERT( at_aiconsole, "Achievement: %i, value: %i. NOT SENT - cheats enabled.\n", AchNum, Value );
 		return;

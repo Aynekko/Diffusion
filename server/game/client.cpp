@@ -1345,15 +1345,14 @@ void StartFrame( void )
 
 void StartFrame( void )
 {
+	g_flWeaponCheat = CVAR_GET_FLOAT( "sv_cheats" );  // Is the impulse 101 command allowed?
+
 	// START BOT
-
-	static int index, i;
-
 	// loop through all the players...
 	
 	if( gpGlobals->maxClients > 1 ) // diffusion - not in singleplayer!
 	{
-		for( i = 1; i <= gpGlobals->maxClients; i++ )
+		for( int i = 1; i <= gpGlobals->maxClients; i++ )
 		{
 			CBaseEntity *pPlayer;
 
