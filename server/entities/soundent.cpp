@@ -380,3 +380,73 @@ int CSoundEnt :: ClientSoundIndex ( edict_t *pClient )
 
 	return iReturn;
 }
+
+
+//========================================================================
+// diffusion - this entity emits "sound" upon use for monsters to react at
+//========================================================================
+
+class CEnvSoundEnt : public CBaseDelay
+{
+	DECLARE_CLASS( CEnvSoundEnt, CBaseDelay );
+public:
+	void Spawn( void );
+	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+};
+
+LINK_ENTITY_TO_CLASS( env_soundent, CEnvSoundEnt );
+
+void CEnvSoundEnt::Spawn( void )
+{
+	pev->solid = SOLID_NOT;
+	SetBits( m_iFlags, MF_POINTENTITY );
+
+	// sound type
+	if( !pev->sequence || pev->sequence < 0 )
+		pev->sequence = 0;
+
+	// radius
+	if( !pev->frags || pev->frags < 0.0f )
+		pev->frags = 300.0f;
+
+	// time
+	if( !pev->scale || pev->scale < 0.0f )
+		pev->scale = 1.0f;
+}
+
+void CEnvSoundEnt::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if( IsLockedByMaster( pActivator ) )
+		return;
+
+	const int SoundType = pev->sequence;
+	const float Radius = pev->frags;
+	const float Time = pev->scale;
+	const Vector pos = GetAbsOrigin();
+
+	switch( SoundType )
+	{
+		default:
+		case 0:
+			CSoundEnt::InsertSound( bits_SOUND_COMBAT, pos, Radius, Time );
+			break;
+		case 1:
+			CSoundEnt::InsertSound( bits_SOUND_WORLD, pos, Radius, Time );
+			break;
+		case 2:
+			CSoundEnt::InsertSound( bits_SOUND_PLAYER, pos, Radius, Time );
+			break;
+		case 3:
+			CSoundEnt::InsertSound( bits_SOUND_CARCASS, pos, Radius, Time );
+			break;
+		case 4:
+			CSoundEnt::InsertSound( bits_SOUND_MEAT, pos, Radius, Time );
+			break;
+		case 5:
+			CSoundEnt::InsertSound( bits_SOUND_DANGER, pos, Radius, Time );
+			break;
+		case 6:
+			CSoundEnt::InsertSound( bits_SOUND_GARBAGE, pos, Radius, Time );
+			break;
+	}
+}

@@ -591,12 +591,12 @@ void CGargantua::RocketAttack(void)
 
 	vecGunAngles = UTIL_VecToAngles( vecAim );
 
-	TraceResult	tr;
+//	TraceResult	tr;
 	// verify that a rocket fired from the gun will travel an acceptable distance, don't shoot at walls
 	// if it's too close, just skip this rocket
-	UTIL_TraceLine( vecStart, m_hEnemy->BodyTarget( vecStart ), ignore_monsters, ignore_glass, ENT( pev ), &tr );
-	float dist = (vecStart - tr.vecEndPos).Length();
-	if( dist > 400 )
+//	UTIL_TraceLine( vecStart, m_hEnemy->BodyTarget( vecStart ), ignore_monsters, ignore_glass, ENT( pev ), &tr );
+//	float dist = (vecStart - tr.vecEndPos).Length();
+//	if( dist > 400 )
 	{
 		CBaseMonster *pRocket = (CBaseMonster *)Create( "robo_rocket2", vecStart, vecGunAngles, edict() );
 
@@ -667,6 +667,9 @@ void CGargantua::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 		return;
 	}
 
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
+		return;
+
 	// UNDONE: Hit group specific damage?
 	if ( bitsDamageType & DMG_BLAST )  // diffusion - was bitsDamageType & (GARG_DAMAGE|DMG_BLAST)
 	{
@@ -706,6 +709,9 @@ int CGargantua::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 		return 0;
 
 	if( bitsDamageType & DMG_SLASH ) // knife xD
+		return 0;
+
+	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 
 	if ( IsAlive() )

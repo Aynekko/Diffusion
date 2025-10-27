@@ -50,6 +50,7 @@ public:
 	int	m_iProvoked;
 	int	m_voicePitch;
 	int	m_iBloodColor;
+	int m_iNoDamage;
 	float	m_fFramerate;
 	float	m_fController0;
 	float	m_fController1;
@@ -90,6 +91,7 @@ BEGIN_DATADESC(CEnvCustomize)
 	DEFINE_KEYFIELD( m_HealthBarType, FIELD_INTEGER, "m_HealthBarType" ),
 	DEFINE_KEYFIELD( m_bWakeUp, FIELD_BOOLEAN, "m_bWakeUp" ),
 	DEFINE_KEYFIELD( m_iLightLerp, FIELD_INTEGER, "m_iLightLerp" ),
+	DEFINE_KEYFIELD( m_iNoDamage, FIELD_INTEGER, "m_iNoDamage" ),
 END_DATADESC()
 
 void CEnvCustomize::KeyValue(KeyValueData* pkvd)
@@ -212,6 +214,11 @@ void CEnvCustomize::KeyValue(KeyValueData* pkvd)
 	else if( FStrEq( pkvd->szKeyName, "m_iLightLerp" ) )
 	{
 		m_iLightLerp = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "m_iNoDamage" ) )
+	{
+		m_iNoDamage = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -469,6 +476,14 @@ void CEnvCustomize::Affect(CBaseEntity* pTarget, USE_TYPE useType)
 			pMonster->pev->effects |= EF_NOLIGHTLERP; // disable lerp
 		else if( m_iLightLerp == 2 )
 			pMonster->pev->effects &= ~EF_NOLIGHTLERP; // enable lerp
+	}
+
+	if( m_iNoDamage > 0 )
+	{
+		if( m_iNoDamage == 1 )
+			pMonster->pev->spawnflags &= ~SF_MONSTER_NODAMAGE; // disable
+		else if( m_iNoDamage == 2 )
+			pMonster->pev->spawnflags |= SF_MONSTER_NODAMAGE; // enable
 	}
 
 	switch (GetActionFor(m_iPrisoner, pMonster->pev->spawnflags & SF_MONSTER_PRISONER, useType, "prisoner"))
