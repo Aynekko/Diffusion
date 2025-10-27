@@ -2315,6 +2315,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 	float cached_glossscale = -1.0f;
 	float cached_glosssmoothness = -1.0f;
 	float cached_embossscale = -1.0f;
+	int cached_landscape = -1;
 
 	GL_BlendFunc( GL_ONE, GL_ONE );
 	startv = MAX_MAP_ELEMS;
@@ -2352,6 +2353,8 @@ void R_DrawLightForSurfList( plight_t *pl )
 
 		if( cached_texture != iTexnum )
 			flush_buffer = true;
+
+		const int bLandscape = FBitSet( s->flags, SURF_LANDSCAPE ) ? 1 : 0;
 
 		if( flush_buffer )
 		{
@@ -2418,9 +2421,10 @@ void R_DrawLightForSurfList( plight_t *pl )
 			cached_glossscale = -1.0f;
 			cached_glosssmoothness = -1.0f;
 			cached_embossscale = -1.0f;
+			cached_landscape = -1;
 		}
 
-		if( cached_texture != iTexnum )
+		if( cached_texture != iTexnum || cached_landscape != bLandscape )
 		{
 			const mtexinfo_t *tx = s->texinfo;
 			const mfaceinfo_t *land = tx->faceinfo;
@@ -2565,6 +2569,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 				GL_Cull( GL_FRONT );
 
 			cached_texture = iTexnum;
+			cached_landscape = FBitSet( s->flags, SURF_LANDSCAPE ) ? 1 : 0;
 		}
 
 		if( es->firstvertex < startv )
@@ -2817,6 +2822,7 @@ void R_DrawBrushList( void )
 	float cached_glosssmoothness = -1.0f;
 	float cached_embossscale = -1.0f;
 	float cached_fresnel = -1.0f;
+	int cached_landscape = -1;
 	Vector2D cached_reflectscale = { -1.0f, 0.0f };
 	Vector cubemap_params[3];
 	Vector4D brush_params[3];
@@ -2854,6 +2860,8 @@ void R_DrawBrushList( void )
 
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
 			flush_buffer = true;
+
+		const int bLandscape = FBitSet( s->flags, SURF_LANDSCAPE ) ? 1 : 0;
 
 		if( RI->currentshader && RI->currentshader->status & SHADER_USE_CUBEMAPS )
 		{
@@ -2915,6 +2923,7 @@ void R_DrawBrushList( void )
 			cached_texture = NULL;
 			cached_lightmap = -1;
 			cached_mirror = -1;
+			cached_landscape = -1;
 
 			// diffusioncubemaps
 			cached_cubemap = NULL;
@@ -2926,7 +2935,7 @@ void R_DrawBrushList( void )
 			cached_reflectscale = { -1.0f, 0.0f };
 		}
 
-		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != iTexnum) )
+		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != iTexnum) || (cached_landscape != bLandscape) )
 		{
 			const mtexinfo_t *tx = s->texinfo;
 			const mfaceinfo_t *land = tx->faceinfo;
@@ -2985,7 +2994,6 @@ void R_DrawBrushList( void )
 			}
 			else
 			{
-
 				if( RI->currentshader->status & SHADER_USE_SPECULAR )
 				{
 					if( MT.GlossSmoothness != cached_glosssmoothness )
@@ -3076,6 +3084,7 @@ void R_DrawBrushList( void )
 			cached_texture = iTexnum;
 			cached_texofs[0] = -1.0f;
 			cached_texofs[1] = -1.0f;
+			cached_landscape = FBitSet( s->flags, SURF_LANDSCAPE ) ? 1 : 0;
 		}
 
 		if( cached_lightmap != es->lightmaptexturenum )
