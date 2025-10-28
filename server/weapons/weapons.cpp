@@ -1219,7 +1219,8 @@ void CBasePlayerAmmo::Spawn( void )
 	pev->solid = SOLID_TRIGGER;
 	UTIL_SetSize(pev, Vector(-16, -16, 0), Vector(16, 16, 16));
 
-	SetFadeDistance( 1000 ); // diffusion UNDONE - cvar?
+	if( !pev->iuser4 )
+		SetFadeDistance( 1000 ); // diffusion UNDONE - cvar?
 
 	SetTouch(&CBasePlayerAmmo::DefaultTouch );
 }
