@@ -540,10 +540,11 @@ void CGrenade:: Spawn( void )
 	
 	pev->solid = SOLID_BBOX;
 
+	SET_MODEL( ENT( pev ), "models/weapons/grenade.mdl" );
+
 	if( IsEMPGrenade )
-		SET_MODEL( ENT( pev ), "models/weapons/w_battery.mdl" );
-	else
-		SET_MODEL(ENT(pev), "models/weapons/grenade.mdl");
+		pev->skin = 1;
+		
 	UTIL_SetSize(pev, Vector( 0, 0, 0), Vector(0, 0, 0));
 
 	pev->dmg = 100;
