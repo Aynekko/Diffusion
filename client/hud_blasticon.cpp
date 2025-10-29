@@ -105,7 +105,7 @@ int CHudBlastIcons::Draw( float flTime )
 
 		if( img_circle && circlea1 > 0.0f )
 		{
-			const float scale = 150.0f / (1.0f + circlea1);
+			const float scale = 150.0f / (0.75f + circlea1);
 			GL_Bind( 0, img_circle );
 			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 			GL_Color4f( 0.275f, 0.663f, 1.0f, circlea1 ); // 70 169 255
@@ -142,7 +142,7 @@ int CHudBlastIcons::Draw( float flTime )
 
 		if( img_circle && circlea2 > 0.0f )
 		{
-			const float scale = 150.0f / (1.0f + circlea2);
+			const float scale = 150.0f / (0.75f + circlea2);
 			GL_Bind( 0, img_circle );
 			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 			GL_Color4f( 0.275f, 0.663f, 1.0f, circlea2 ); // 70 169 255
@@ -179,7 +179,7 @@ int CHudBlastIcons::Draw( float flTime )
 
 		if( img_circle && circlea3 > 0.0f )
 		{
-			const float scale = 150.0f / (1.0f + circlea3);
+			const float scale = 150.0f / (0.75f + circlea3);
 			GL_Bind( 0, img_circle );
 			gEngfuncs.pTriAPI->Begin( TRI_QUADS );
 			GL_Color4f( 0.275f, 0.663f, 1.0f, circlea3 ); // 70 169 255
