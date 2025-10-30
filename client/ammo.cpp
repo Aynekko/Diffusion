@@ -1098,7 +1098,7 @@ int CHudAmmo::Draw( float flTime )
 			int weapon_clip = (pw->iClip >= 0) ? pw->iClip : gWR.CountAmmo( pw->iAmmoType );
 			if( WeaponID == WEAPON_RPG )
 			{
-				weapon_clip = gWR.CountAmmo( pw->iAmmoType ) + pw->iClip;
+				weapon_clip = gWR.CountAmmo( pw->iAmmoType );
 				total_cells = ROCKET_MAX_CARRY;
 			}
 			/*
@@ -1131,7 +1131,9 @@ int CHudAmmo::Draw( float flTime )
 				{
 					for( int cell = 0; cell < total_cells; cell++ )
 					{
-						if( cell >= weapon_clip ) // draw grey cells
+						if( cell == 0 && WeaponID == WEAPON_RPG && pw->iClip ) // for RPG, draw the first cell as green if the rocket is ready
+							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.25f, 1.0f, 0.25f, 0.65f + (m_fFade / 255.f) ) );
+						else if( cell >= weapon_clip ) // draw grey cells
 							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
 						else if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
 							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
