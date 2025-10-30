@@ -3702,65 +3702,70 @@ void CBasePlayer::ManageElectroBlast( void )
 	if( pCar )
 		goto skip_blast;
 
-	if( ElectroblastButton && (gpGlobals->time > LastBlastTime + 3) && (BlastChargesReady > 0) )
+	if( ElectroblastButton )
 	{
-		LastBlastTime = gpGlobals->time;
-		
-		if( !CanElectroBlast ) // disabled by script
+		if( (gpGlobals->time > LastBlastTime + 3) && (BlastChargesReady > 0) )
 		{
-			UTIL_ShowMessage( "UTIL_NOBLAST", this );
-			goto skip_blast;
+			LastBlastTime = gpGlobals->time;
+
+			if( !CanElectroBlast ) // disabled by script
+			{
+				UTIL_ShowMessage( "UTIL_NOBLAST", this );
+				goto skip_blast;
+			}
+
+			// do blast
+			UTIL_ScreenShakeLocal( this, GetAbsOrigin(), 10.0, 150.0, 1.0, 400, true );
+
+			Vector vecOrigin = GetAbsOrigin();
+			MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, vecOrigin );
+				WRITE_BYTE( TE_BEAMCYLINDER );
+				WRITE_COORD( vecOrigin.x );
+				WRITE_COORD( vecOrigin.y );
+				WRITE_COORD( vecOrigin.z + 4 );
+				WRITE_COORD( vecOrigin.x );
+				WRITE_COORD( vecOrigin.y );
+				WRITE_COORD( vecOrigin.z + 666 ); // reach damage radius over .4 seconds
+				WRITE_SHORT( g_sBlastTexture );
+				WRITE_BYTE( 0 ); // startframe
+				WRITE_BYTE( 0 ); // framerate
+				WRITE_BYTE( 4 ); // life
+				WRITE_BYTE( 64 );  // width
+				WRITE_BYTE( 32 );   // noise
+				WRITE_BYTE( 200 ); // R
+				WRITE_BYTE( 0 ); // G
+				WRITE_BYTE( 45 ); // B
+				WRITE_BYTE( 125 ); //brightness
+				WRITE_BYTE( 0 ); // speed
+			MESSAGE_END();
+
+			BlastDMGOverride = true; // don't hit yourself with your own blast
+			RadiusDamage( pev, pev, 150, 666, CLASS_PLAYER_ALLY, DMG_SHOCK );
+
+			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "player/electroblast.wav", 1.0, 0.3, 0, RANDOM_LONG( 95, 105 ) );
+
+			BlastChargesReady--;
+
+			m_flStaminaValue = 1.0f;
+			m_flStaminaWait = gpGlobals->time + 5.0f;
+
+			MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
+				WRITE_BYTE( TE_DLIGHT );
+				WRITE_COORD( pev->origin.x );	// X
+				WRITE_COORD( pev->origin.y );	// Y
+				WRITE_COORD( pev->origin.z );	// Z
+				WRITE_BYTE( 35 );		// radius * 0.1
+				WRITE_BYTE( 200 );		// r
+				WRITE_BYTE( 0 );		// g
+				WRITE_BYTE( 45 );		// b
+				WRITE_BYTE( 15 );		// time * 10
+				WRITE_BYTE( 25 );		// decay * 0.1
+				WRITE_BYTE( 125 ); // brightness
+				WRITE_BYTE( 0 ); // shadows
+			MESSAGE_END();
 		}
-
-		// do blast
-		UTIL_ScreenShakeLocal( this, GetAbsOrigin(), 10.0, 150.0, 1.0, 400, true );
-
-		Vector vecOrigin = GetAbsOrigin();
-		MESSAGE_BEGIN( MSG_PAS, SVC_TEMPENTITY, vecOrigin );
-			WRITE_BYTE( TE_BEAMCYLINDER );
-			WRITE_COORD( vecOrigin.x );
-			WRITE_COORD( vecOrigin.y );
-			WRITE_COORD( vecOrigin.z + 4 );
-			WRITE_COORD( vecOrigin.x );
-			WRITE_COORD( vecOrigin.y );
-			WRITE_COORD( vecOrigin.z + 666 ); // reach damage radius over .4 seconds
-			WRITE_SHORT( g_sBlastTexture );
-			WRITE_BYTE( 0 ); // startframe
-			WRITE_BYTE( 0 ); // framerate
-			WRITE_BYTE( 4 ); // life
-			WRITE_BYTE( 64 );  // width
-			WRITE_BYTE( 32 );   // noise
-			WRITE_BYTE( 200 ); // R
-			WRITE_BYTE( 0 ); // G
-			WRITE_BYTE( 45 ); // B
-			WRITE_BYTE( 125 ); //brightness
-			WRITE_BYTE( 0 ); // speed
-		MESSAGE_END();
-
-		BlastDMGOverride = true; // don't hit yourself with your own blast
-		RadiusDamage( pev, pev, 150, 666, CLASS_PLAYER_ALLY, DMG_SHOCK );
-
-		EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "player/electroblast.wav", 1.0, 0.3, 0, RANDOM_LONG(95,105) );
-
-		BlastChargesReady--;
-
-		m_flStaminaValue = 1.0f;
-		m_flStaminaWait = gpGlobals->time + 5.0f;
-
-		MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
-			WRITE_BYTE( TE_DLIGHT );
-			WRITE_COORD( pev->origin.x );	// X
-			WRITE_COORD( pev->origin.y );	// Y
-			WRITE_COORD( pev->origin.z );	// Z
-			WRITE_BYTE( 35 );		// radius * 0.1
-			WRITE_BYTE( 200 );		// r
-			WRITE_BYTE( 0 );		// g
-			WRITE_BYTE( 45 );		// b
-			WRITE_BYTE( 15 );		// time * 10
-			WRITE_BYTE( 25 );		// decay * 0.1
-			WRITE_BYTE( 125 ); // brightness
-			WRITE_BYTE( 0 ); // shadows
-		MESSAGE_END();
+		else
+			UTIL_ShowMessage( "UTIL_BLASTNOTREADY", this );
 	}
 
 	skip_blast:
