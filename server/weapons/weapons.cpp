@@ -725,8 +725,16 @@ void CBasePlayerItem::DefaultTouch( CBaseEntity *pOther )
 	// can I have this?
 	if ( !g_pGameRules->CanHavePlayerItem( pPlayer, this ) )
 	{
-		if ( gEvilImpulse101 || HasFlag(F_FROM_AMMOBOX) )
+		if( gEvilImpulse101 || HasFlag( F_FROM_AMMOBOX ) )
+		{
+			// notify the crate that player didn't receive any ammo
+			if( HasFlag( F_FROM_AMMOBOX ) && m_hOwner != NULL )
+			{
+				m_hOwner->m_iCounter++;
+				m_hOwner = NULL;
+			}
 			UTIL_Remove( this );
+		}
 
 		return;
 	}
@@ -1270,8 +1278,16 @@ void CBasePlayerAmmo :: DefaultTouch( CBaseEntity *pOther )
 	else if( gEvilImpulse101 )
 		// evil impulse 101 hack, kill always
 		UTIL_Remove( this );
-	else if( HasFlag(F_FROM_AMMOBOX) )
+	else if( HasFlag( F_FROM_AMMOBOX ) )
+	{
+		// notify the crate that player didn't receive any ammo
+		if( m_hOwner != NULL )
+		{
+			m_hOwner->m_iCounter++;
+			m_hOwner = NULL;
+		}
 		UTIL_Remove( this );
+	}
 }
 
 //=========================================================

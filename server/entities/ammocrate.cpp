@@ -258,6 +258,10 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 
 	pPlayer->SendAchievementStatToClient( ACH_AMMOCRATES, 1, ACHVAL_ADD );
 
+	// if player didn't receive any ammo from items (ammo full)
+	// replace it with the dynamic ammo call
+	m_iCounter = 0;
+
 	// give items written in the entity
 	for( i = 0; i < MAX_EQUIP; i++ )
 	{
@@ -273,6 +277,7 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 				// diffusion - with this flag the item will delete itself, if player can't have it (ammo full)
 				// this is to prevent the ammo/weapon respawn, i.e. from ammo crates
 				pEnt->SetFlag( F_FROM_AMMOBOX );
+				pEnt->m_hOwner = this; // make the item aware about this crate, it will report back to m_iCounter
 				DispatchTouch( pEnt->edict(), pPlayer->edict() );
 			}
 			else
@@ -284,7 +289,7 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 	}
 
 	// dynamic resupply - give player what he needs the most
-	if( !HasSpawnFlags( SF_DYNAMIC_RESUPPLY ) )
+	if( !HasSpawnFlags( SF_DYNAMIC_RESUPPLY ) && m_iCounter == 0 )
 		return;
 
 	// weapon ids which have the lowest ammo
@@ -396,9 +401,28 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 	}
 
 	GiveDynamicAmmo( pPlayer, LowestAmmoId1, RatioAmmoId1 );
-	GiveDynamicAmmo( pPlayer, LowestAmmoId2, RatioAmmoId2 * 0.8f );
-	GiveDynamicAmmo( pPlayer, LowestAmmoId3, RatioAmmoId3 * 0.65f );
+	if( !HasSpawnFlags( SF_DYNAMIC_RESUPPLY ) )
+	{
+		m_iCounter--;
+		if( m_iCounter == 0 )
+		{
+			PlayPickupSound( pPlayer );
+			return;
+		}
+	}
 
+	GiveDynamicAmmo( pPlayer, LowestAmmoId2, RatioAmmoId2 * 0.8f );
+	if( !HasSpawnFlags( SF_DYNAMIC_RESUPPLY ) )
+	{
+		m_iCounter--;
+		if( m_iCounter == 0 )
+		{
+			PlayPickupSound( pPlayer );
+			return;
+		}
+	}
+
+	GiveDynamicAmmo( pPlayer, LowestAmmoId3, RatioAmmoId3 * 0.65f );
 	PlayPickupSound( pPlayer );
 }
 
