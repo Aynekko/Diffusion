@@ -103,7 +103,6 @@ public:
 	int RearBumperLength;
 	bool AllowCamera; // when Car is used with value 2.0, the camera toggles. this is to allow using trigger_camera while in car
 	bool CamUnlocked;
-	bool bTankTowerView; // not saved
 	bool CarInAir;
 	float EnteringShake; // shake the car when driver enters it (not saved)
 	Vector Camera2LocalOrigin;
@@ -116,8 +115,10 @@ public:
 	int CameraHeight;
 	int CameraDistance;
 	int FreeCameraDistance;
-	float CameraModeAddDist;
-	float TmpCameraModeAddDist; // used for lerping
+	float CameraModeAddDist_Main;
+	float TmpCameraModeAddDist_Main; // used for lerping
+	float CameraModeAddDist_Free;
+	float TmpCameraModeAddDist_Free; // used for lerping
 	float NewCameraAngleY;
 	float NewCameraAngleX;
 	float CamDistAdjust;
@@ -187,6 +188,10 @@ public:
 
 	bool IsBoat;
 	bool IsHeli;
+
+	float fMouseTouchedON;
+	float fMouseTouchedOFF;
+	Vector LastPlayerAngles;
 
 	DECLARE_DATADESC();
 };

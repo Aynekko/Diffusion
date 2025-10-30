@@ -3629,14 +3629,6 @@ void CBasePlayer::ManageCar( void )
 
 	if( FlashlightIsOn() )
 		FlashlightTurnOff();
-
-	if( pev->button & IN_ATTACK2 )
-		pCar->CamUnlocked = true;
-	else
-	{
-		if( fabs( pCar->CarSpeed ) > 100 )
-			pCar->CamUnlocked = false;
-	}
 }
 
 //=====================================================================================
@@ -5860,8 +5852,12 @@ void CBasePlayer::SelectLastItem( void )
 	{
 		if( pCar )
 		{
-			if( pCar->CamUnlocked && pCar->pTankTower )
-				pCar->bTankTowerView = !pCar->bTankTowerView;
+			if( pCar->CamUnlocked )
+			{
+				pCar->fMouseTouchedOFF = CAR_CAMERA_MOUSE_WAIT_OFF;
+				pCar->fMouseTouchedON = 0.0f;
+				pCar->CamUnlocked = false;
+			}
 			else
 				pCar->SecondaryCamera = !pCar->SecondaryCamera;
 		}

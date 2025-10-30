@@ -584,12 +584,22 @@ void ClientCommand( edict_t *pEntity )
 	else if( FIStrEq( pcmd, "car_zoomin" ) )
 	{
 		if( pPlayer->pCar )
-			pPlayer->pCar->CameraModeAddDist -= 25.0f;
+		{
+			if( pPlayer->pCar->CamUnlocked )
+				pPlayer->pCar->CameraModeAddDist_Free -= 25.0f;
+			else if( !pPlayer->pCar->SecondaryCamera )
+				pPlayer->pCar->CameraModeAddDist_Main -= 25.0f;
+		}
 	}
 	else if( FIStrEq( pcmd, "car_zoomout" ) )
 	{
 		if( pPlayer->pCar )
-			pPlayer->pCar->CameraModeAddDist += 25.0f;
+		{
+			if( pPlayer->pCar->CamUnlocked )
+				pPlayer->pCar->CameraModeAddDist_Free += 25.0f;
+			else if( !pPlayer->pCar->SecondaryCamera )
+				pPlayer->pCar->CameraModeAddDist_Main += 25.0f;
+		}
 	}
 	else if( FIStrEq( pcmd, "shield" ) )
 	{

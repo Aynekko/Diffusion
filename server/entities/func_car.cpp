@@ -114,8 +114,10 @@ BEGIN_DATADESC( CCar )
 	DEFINE_FIELD( DriftAmount, FIELD_FLOAT ),
 	DEFINE_KEYFIELD( ShiftingTime, FIELD_FLOAT, "shiftingtime" ),
 	DEFINE_FIELD( num_exhausts, FIELD_INTEGER ),
-	DEFINE_FIELD( CameraModeAddDist, FIELD_FLOAT ),
-	DEFINE_FIELD( TmpCameraModeAddDist, FIELD_FLOAT ),
+	DEFINE_FIELD( CameraModeAddDist_Main, FIELD_FLOAT ),
+	DEFINE_FIELD( TmpCameraModeAddDist_Main, FIELD_FLOAT ),
+	DEFINE_FIELD( CameraModeAddDist_Free, FIELD_FLOAT ),
+	DEFINE_FIELD( TmpCameraModeAddDist_Free, FIELD_FLOAT ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( func_car, CCar );
@@ -504,8 +506,6 @@ void CCar::Precache( void )
 	PRECACHE_SOUND( "weapons/mortarhit.wav" );
 
 	UTIL_PrecacheOther( "apc_projectile" );
-
-	bTankTowerView = true;
 
 	pev->spawnflags |= SF_CAR_DOIDLEUNSTICK;
 }
@@ -955,7 +955,6 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			NewCameraAngleX = 0;
 			AccelAddX = BrakeAddX = 0;
 			EnteringShake = 2.0f;
-			bTankTowerView = true;
 			if( pExhaust1 )
 			{
 				pExhaust1->pev->iuser3 = -665;
@@ -2653,12 +2652,13 @@ void CCar::Drive( void )
 	//----------------------------
 	if( pTankTower )
 	{
+		const bool bAimingView = (hDriver->pev->button & IN_ATTACK2);
 		// rotate tower
 		Vector TowerAngles = ChassisAng;
 		if( pChassisMdl )
 			TowerAngles = pChassisMdl->GetLocalAngles();
 
-		if( CamUnlocked )
+		if( bAimingView || CamUnlocked )
 		{
 			// turret moves almost freely because we use it as a camera
 			TowerAngles = hDriver->pev->v_angle;
@@ -2668,13 +2668,8 @@ void CCar::Drive( void )
 		{
 			TowerAngles.y += TankTowerRotationOffset;
 		}
-
-		if( TowerAngles.y > 180 )
-			TowerAngles.y -= 360;
-		if( TowerAngles.y < -180 )
-			TowerAngles.y += 360;
 		
-		if( !bTankTowerView && CamUnlocked )
+		if( bAimingView || CamUnlocked )
 			pTankTower->SetAbsAngles( TowerAngles );
 		else
 			pTankTower->SetLocalAngles( TowerAngles );
@@ -2947,16 +2942,54 @@ void CCar::Camera(void)
 	if( !AllowCamera )
 		return;
 
-	if( !(hDriver->pev->flags & FL_CLIENT) )
+	if( !hDriver || !(hDriver->pev->flags & FL_CLIENT) )
 		return;
+
+	if( !LastPlayerAngles )
+		LastPlayerAngles = hDriver->pev->v_angle;
 
 	const float AbsCarSpeed = fabs( CarSpeed );
 	const float ChassisAngleX = pChassis->GetAbsAngles().x;
 	const float ChassisAngleY = pChassis->GetAbsAngles().y;
 
-	CameraModeAddDist = bound( 0.0f, CameraModeAddDist, 200.0f );
-	// lerp to the new position
-	TmpCameraModeAddDist = lerp( TmpCameraModeAddDist, CameraModeAddDist, 10.0f * gpGlobals->frametime );
+	// this is also used to stop free camera from snapping back on vehicles with no turret
+	const bool bAimingView = (hDriver->pev->button & IN_ATTACK2);
+
+	if( hDriver->pev->v_angle != LastPlayerAngles )
+	{
+		if( fMouseTouchedON < CAR_CAMERA_MOUSE_WAIT_ON )
+			fMouseTouchedON += gpGlobals->frametime;
+		
+		if( fMouseTouchedON >= CAR_CAMERA_MOUSE_WAIT_ON )
+		{
+			fMouseTouchedOFF = 0.0f;
+			CamUnlocked = true;
+		}
+	}
+	else
+	{
+		if( fMouseTouchedOFF < CAR_CAMERA_MOUSE_WAIT_OFF )
+			fMouseTouchedOFF += gpGlobals->frametime;
+
+		if( fMouseTouchedOFF >= CAR_CAMERA_MOUSE_WAIT_OFF )
+		{
+			fMouseTouchedON = 0.0f;
+			CamUnlocked = false;
+		}
+	}
+
+	if( CamUnlocked )
+	{
+		CameraModeAddDist_Free = bound( 0.0f, CameraModeAddDist_Free, 200.0f );
+		// lerp to the new position
+		TmpCameraModeAddDist_Free = lerp( TmpCameraModeAddDist_Free, CameraModeAddDist_Free, 10.0f * gpGlobals->frametime );
+	}
+	else if( !SecondaryCamera )
+	{
+		CameraModeAddDist_Main = bound( 0.0f, CameraModeAddDist_Main, 100.0f );
+		// lerp to the new position
+		TmpCameraModeAddDist_Main = lerp( TmpCameraModeAddDist_Main, CameraModeAddDist_Main, 10.0f * gpGlobals->frametime );
+	}
 
 	if( !NewCameraAngleY )
 		NewCameraAngleY = ChassisAngleY;
@@ -3010,11 +3043,11 @@ void CCar::Camera(void)
 
 	TraceResult CamTr;
 
-	if( CamUnlocked && pTankTower && bTankTowerView )
+	if( pTankTower && bAimingView )
 	{
 		SET_VIEW( hDriver->edict(), pTankTower->edict() );
 	}
-	else if( CamUnlocked && pFreeCam )
+	else if( (CamUnlocked || bAimingView) && pFreeCam )
 	{
 		SET_VIEW( hDriver->edict(), pFreeCam->edict() );
 		TraceResult CamTr;
@@ -3022,7 +3055,7 @@ void CCar::Camera(void)
 		Vector CamOrg;
 
 		UTIL_MakeVectors( DriverAngles );
-		UTIL_TraceLine( hDriver->GetAbsOrigin(), hDriver->GetAbsOrigin() - gpGlobals->v_forward * (FreeCameraDistance + TmpCameraModeAddDist), dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+		UTIL_TraceLine( hDriver->GetAbsOrigin(), hDriver->GetAbsOrigin() - gpGlobals->v_forward * (FreeCameraDistance + TmpCameraModeAddDist_Free), dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 		CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 		pFreeCam->SetAbsOrigin( CamOrg );
 		pFreeCam->SetAbsAngles( DriverAngles );
@@ -3062,7 +3095,7 @@ void CCar::Camera(void)
 					CamDistAdjust = lerp( CamDistAdjust, 1.0f, gpGlobals->frametime );
 			}
 			SET_VIEW( hDriver->edict(), pCamera1->edict() );
-			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * (CameraDistance + TmpCameraModeAddDist) * CamDistAdjust, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * (CameraDistance + TmpCameraModeAddDist_Main) * CamDistAdjust, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 			CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 			pCamera1->SetAbsOrigin( CamOrg );
 			pCamera1->SetAbsAngles( CameraAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );
@@ -3071,6 +3104,8 @@ void CCar::Camera(void)
 
 	// bring back the car vectors
 	UTIL_MakeVectors( GetAbsAngles() );
+
+	LastPlayerAngles = hDriver->pev->v_angle;
 }
 
 //===============================================================================

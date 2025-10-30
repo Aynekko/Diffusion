@@ -36,6 +36,9 @@ class CBotCam;
 #define USEICON_LOCKED 4
 #define USEICON_INTERACTION 5 // animated circle when pressing button
 
+#define CAR_CAMERA_MOUSE_WAIT_ON 0.15f // mouse must be moved for this amount of seconds to trigger free camera
+#define CAR_CAMERA_MOUSE_WAIT_OFF 1.25f // camera will go back to normal when mouse isn't moved for this amount of seconds
+
 //
 // Player PHYSICS FLAGS bits
 //
