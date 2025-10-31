@@ -731,7 +731,7 @@ void CHAssassin :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			pev->flags &= ~FL_ONGROUND;
 			SetAbsVelocity( m_vecJumpVelocity );
 			m_flNextJump = gpGlobals->time + 3.0;
-			if( !HasSpawnFlags( SF_MONSTER_GAG ) )
+			if( !HasSpawnFlags( SF_MONSTER_GAG ) && m_MonsterState == MONSTERSTATE_COMBAT ) // be silent when idle
 				EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_jump.wav", 1, ATTN_NORM, 0, RANDOM_LONG(95,105) );
 		}
 		return;
@@ -1575,7 +1575,7 @@ void SecAss::HandleAnimEvent( MonsterEvent_t *pEvent )
 		pev->flags &= ~FL_ONGROUND;
 		SetAbsVelocity( m_vecJumpVelocity );
 		m_flNextJump = gpGlobals->time + 3.0;
-		if( !HasSpawnFlags( SF_MONSTER_GAG ) )
+		if( !HasSpawnFlags( SF_MONSTER_GAG ) && m_MonsterState == MONSTERSTATE_COMBAT ) // be silent when idle
 			EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "assassin/ass_jump.wav", 1, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) );
 	}
 	return;
