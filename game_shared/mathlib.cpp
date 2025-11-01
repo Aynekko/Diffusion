@@ -756,6 +756,7 @@ Frac is 0.0 to 1.0
 */
 void InterpolateOrigin( const Vector& start, const Vector& end, Vector& output, float frac, bool back )
 {
+	frac = bound( 0.0f, frac, 1.0f );
 	if( back ) output += frac * ( end - start );
 	else output = start + frac * ( end - start );
 }
@@ -770,7 +771,9 @@ Frac is 0.0 to 1.0 ( i.e., should probably be clamped, but doesn't have to be )
 */
 void InterpolateAngles( const Vector& start, const Vector& end, Vector& output, float frac, bool back )
 {
-#if 0
+#if 1
+	frac = bound( 0.0f, frac, 1.0f ); // diffusion - better clamp it, issues at low fps
+
 	Vector4D src, dest;
 
 	// convert to quaternions

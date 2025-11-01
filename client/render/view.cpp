@@ -1553,8 +1553,60 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 
 	if( view )
 	{
-		pparams->vieworg = view->origin;
-		pparams->viewangles = view->angles;
+		// interpolate views for vehicle
+		static Vector CarViewAng = g_vecZero;
+		static Vector CarViewOrg = g_vecZero;
+		static float spd_adjust = 0.0f;
+		static cl_entity_t *tmpViewEnt = NULL;
+		if( tmpViewEnt == NULL || view->player )
+			tmpViewEnt = view;
+
+		if( gHUD.InCar )
+		{
+			if( tmpViewEnt != view )
+			{
+				spd_adjust = 46.0f;
+				tmpViewEnt = view;
+			}
+
+			if( spd_adjust > 0.0f )
+				spd_adjust -= g_fFrametime * 25.0f;
+			if( spd_adjust < 0.0f )
+				spd_adjust = 0.0f;
+
+			if( view->curstate.iuser3 == -673 ) // this camera indicates that we are lerping to it, otherwise instant view snap
+			{
+				if( CarViewOrg == g_vecZero )
+					CarViewOrg = view->origin;
+				if( CarViewAng == g_vecZero )
+					CarViewAng = view->angles;
+
+				float orgspd = gHUD.CarSpeed * 0.75f;
+				orgspd = bound( 4.0f, (gHUD.CarSpeed * 0.75f), 50.0f );
+				orgspd -= spd_adjust;
+				orgspd = bound( 4.0f, orgspd, 50.0f ); // this is why spd_adjust is 46
+			//	gEngfuncs.Con_NPrintf( 1, "spd_adjust %.1f, orgspd %.1f\n", spd_adjust, orgspd );
+				InterpolateOrigin( CarViewOrg, view->origin, CarViewOrg, orgspd * g_fFrametime );
+				InterpolateAngles( CarViewAng, view->angles, CarViewAng, orgspd * g_fFrametime );
+				pparams->viewangles = CarViewAng;
+				pparams->vieworg = CarViewOrg;
+			}
+			else
+			{
+				pparams->vieworg = view->origin;
+				pparams->viewangles = view->angles;
+				CarViewOrg = g_vecZero;
+				CarViewAng = g_vecZero;
+			}
+		}
+		else
+		{
+			tmpViewEnt = NULL;
+			pparams->vieworg = view->origin;
+			pparams->viewangles = view->angles;
+			CarViewOrg = g_vecZero;
+			CarViewAng = g_vecZero;
+		}
 
 		if( view == tr.pDrone )
 		{

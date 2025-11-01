@@ -47,6 +47,7 @@ used iuser3 "flags":
 -670 turned on monitor
 -671 do not render 3D sky - only used in brush entities (func_portal or mirrors)
 -672 smoke (wounded turret/drone etc.), vuser1.z is used as height offset
+-673 camera attached to the car (used in view.cpp)
 */
 
 #define DEFAULT_SMOOTHNESS	0.35f

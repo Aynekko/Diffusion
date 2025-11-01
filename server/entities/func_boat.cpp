@@ -380,6 +380,7 @@ void CBoat::Setup( void )
 	{
 		pCamera1->SetNullModel();
 		pCamera1->pev->effects |= EF_SKIPPVS;
+		pCamera1->pev->iuser3 = -673;
 		if( !CameraHeight )
 		{
 			if( pChassisMdl )
@@ -438,6 +439,7 @@ void CBoat::Setup( void )
 				FreeCameraDistance = CameraDistance;
 		}
 		pFreeCam->pev->effects |= EF_SKIPPVS;
+		pFreeCam->pev->iuser3 = -673;
 	}
 
 	if( pev->iuser1 ) // rotate boat

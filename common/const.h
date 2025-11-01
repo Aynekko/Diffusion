@@ -191,8 +191,8 @@
 #define CF_ONLYFORCEDSHADOWS BIT(14) // only entities with kRenderFxForceShadow will cast shadows
 
 // entity flags
-#define EFLAG_SLERP			1	// do studio interpolation of this entity
-#define EFLAG_INTERMISSION		2	// it's a intermission spot
+#define EFLAG_SLERP			BIT(0)	// do studio interpolation of this entity
+#define EFLAG_INTERMISSION	BIT(1)	// it's a intermission spot
 
 // should be defined at all
 #define MAXSTUDIOPOSEPARAM		24

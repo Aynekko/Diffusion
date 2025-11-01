@@ -142,6 +142,8 @@ _forceinline T Lerp( float flPercent, T const &A, T const &B )
 
 inline float lerp( float start, float end, float frac )
 {
+	frac = bound( 0.0f, frac, 1.0f );
+
 	// Exact, monotonic, bounded, determinate, and (for a=b=0) consistent:
 	if( start <= 0 && end >= 0 || start >= 0 && end <= 0 )
 		return frac * end + (1 - frac) * start;

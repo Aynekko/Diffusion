@@ -379,6 +379,7 @@ void CHelicopter::Setup( void )
 	{
 		pCamera1->SetNullModel();
 		pCamera1->pev->effects |= EF_SKIPPVS;
+		pCamera1->pev->iuser3 = -673;
 		if( !CameraHeight )
 		{
 			if( pChassisMdl )
@@ -459,6 +460,7 @@ void CHelicopter::Setup( void )
 				FreeCameraDistance = CameraDistance;
 		}
 		pFreeCam->pev->effects |= EF_SKIPPVS;
+		pFreeCam->pev->iuser3 = -673;
 	}
 
 	if( pDoorHandle1 )
@@ -1002,7 +1004,8 @@ void CHelicopter::Drive( void )
 		}
 	}
 
-	if( pTankTower && CamUnlocked )
+	const bool bAimingView = (hDriver->pev->button & IN_ATTACK2);
+	if( pTankTower && bAimingView )
 	{
 		// rotate tower
 		Vector TowerAngles = ChassisAng;
@@ -1012,7 +1015,10 @@ void CHelicopter::Drive( void )
 		// turret moves almost freely because we use it as a camera
 		TowerAngles = hDriver->pev->v_angle;
 		TowerAngles.x *= 0.4f; // let's not get carried away...
-		pTankTower->SetAbsAngles( TowerAngles );
+		if( bAimingView || CamUnlocked )
+			pTankTower->SetAbsAngles( TowerAngles );
+		else
+			pTankTower->SetLocalAngles( TowerAngles );
 
 		if( (hDriver->pev->button & IN_ATTACK) && (gpGlobals->time > LastShootTime + 0.125f) )
 		{

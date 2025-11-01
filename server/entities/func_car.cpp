@@ -1145,6 +1145,7 @@ void CCar::Setup( void )
 			else
 				CameraHeight = 80;
 		}
+		pCamera1->pev->iuser3 = -673;
 	}
 
 	if( pCamera2 )
@@ -1201,6 +1202,7 @@ void CCar::Setup( void )
 				FreeCameraDistance = CameraDistance;
 		}
 		pFreeCam->pev->effects |= EF_SKIPPVS;
+		pFreeCam->pev->iuser3 = -673;
 	}
 
 	if( pDoorHandle1 )
