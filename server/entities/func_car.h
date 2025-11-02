@@ -2,6 +2,23 @@
 // diffusion - func_car stuff
 //===========================================================
 
+#define ADDDIRT_SPEED_THRESHOLD 125.0f // car speed when body dirt state is affected (excluding water)
+
+#define SF_CAR_ONLYTRIGGER		BIT(0) // only trigger or external button
+#define SF_CAR_TURBO			BIT(1) // turbo sound (*pfsshhh...*)
+#define SF_CAR_STARTSILENT		BIT(2) // StartSilent = true
+#define SF_CAR_DRIFTMODE		BIT(3) // DriftMode = true
+#define SF_CAR_GEARWHINE		BIT(4) // whining transmission sound, like a race car (hello NFS MW)
+#define SF_CAR_ELECTRIC			BIT(5) // for now this only makes different sounds
+#define SF_CAR_CANTBEDIRTY		BIT(6) // don't accumulate dirt or wetness
+#define SF_CAR_TURNREARWHEELS	BIT(7) // rear wheels will turn too
+#define SF_CAR_SQUEAKYBRAKES	BIT(8) // brakes make squeaky sound
+#define SF_CAR_EXHAUSTPOPS		BIT(9) // do exhaust pops when player releases acceleration pedal
+
+#define SF_CAR_DOIDLEUNSTICK	BIT(31) // internal flag
+
+#define CAR_FOV 85
+
 class CCar : public CBaseDelay
 {
 	DECLARE_CLASS( CCar, CBaseDelay );

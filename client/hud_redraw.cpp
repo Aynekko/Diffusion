@@ -94,6 +94,25 @@ void CHud::Think( void )
 	}
 	m_scrinfo.iSize = sizeof( m_scrinfo );
 	GetScreenInfo( &m_scrinfo );
+
+	// think about default fov
+	static float cachefov = -1.0f;
+	if( cachefov == -1.0f )
+		cachefov = default_fov->value;
+	if( m_flFOV == 0.0f )
+	{
+		// only let players adjust up in fov,  and only if they are not overriden by something else
+		m_flFOV = default_fov->value;
+	}
+	else if( cachefov != default_fov->value || m_flFOV != 0.0f )
+	{
+		cl_entity_t *viewent = GET_ENTITY( tr.viewparams.viewentity );
+		if( !IsZooming && !IsZoomed && viewent && viewent->player )
+		{
+			m_flFOV = default_fov->value;
+			cachefov = m_flFOV;
+		}
+	}
 	
 	HUDLIST *pList = m_pHudList;
 
@@ -102,14 +121,6 @@ void CHud::Think( void )
 		if( pList->p->m_iFlags & HUD_ACTIVE )
 			pList->p->Think();
 		pList = pList->pNext;
-	}
-
-	// think about default fov
-	if( m_flFOV == 0.0f )
-	{
-		// only let players adjust up in fov,  and only if they are not overriden by something else
-//		m_iFOV = max( default_fov->value, 90 );  
-		m_flFOV = default_fov->value;
 	}
 
 	SuitIsOffline();

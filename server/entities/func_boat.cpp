@@ -236,7 +236,10 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 			return;
 
 		if( AllowCamera ) // only set view if camera was allowed, otherwise maybe we were using some external camera, don't interrupt it
+		{
 			SET_VIEW( pPlayer->edict(), pPlayer->edict() );
+			pPlayer->m_flFOV = 0;
+		}
 
 		// reset player's angles, look in the vehicle direction
 		pPlayer->SetAbsAngles( GetAbsAngles() );
@@ -283,6 +286,7 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 			return;
 
 		pPlayer->pCar = this;
+		pPlayer->m_flFOV = CAR_FOV;
 
 		if( hDriver == NULL )
 		{

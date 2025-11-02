@@ -142,7 +142,8 @@ void CWeaponG36C::ResetZoom( void )
 	m_fZoomInUse = 0;
 	m_fInZoom = 0;
 	m_pPlayer->ZoomState = 0;
-	m_pPlayer->m_flFOV = 0;
+	if( m_pPlayer->pCar == NULL || m_pPlayer->CameraEntity[0] != '\0' )
+		m_pPlayer->m_flFOV = 0;
 
 	MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
 		WRITE_BYTE( m_pPlayer->ZoomState );
