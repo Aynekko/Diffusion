@@ -62,6 +62,7 @@ float		v_cameraRelaxAngle = 5.0f;
 float		v_cameraFocusAngle = 35.0f;
 qboolean	v_resetCamera = 1;
 float gun_roll_angle = 0;
+static cl_entity_t *tmpViewEnt = NULL;
 
 #define	HL2_BOB_CYCLE_MIN	1.0f
 #define	HL2_BOB_CYCLE_MAX	0.45f
@@ -441,6 +442,7 @@ void V_VidInit( void )
 	PrevViewOrg = g_vecZero;
 	gun_roll_angle = 0;
 	weapon_move_angles = g_vecZero;
+	tmpViewEnt = NULL;
 	if( vid_brightness->value <= 0.0 ) CVAR_SET_FLOAT( "brightness", 1.5f ); // set default brightness to middle
 }
 
@@ -1556,8 +1558,7 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 		// interpolate views for vehicle
 		static Vector CarViewAng = g_vecZero;
 		static Vector CarViewOrg = g_vecZero;
-		static float spd_adjust = 0.0f;
-		static cl_entity_t *tmpViewEnt = NULL;
+		static float lerptime = 1.0f;
 		if( tmpViewEnt == NULL || view->player )
 			tmpViewEnt = view;
 
@@ -1565,14 +1566,9 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 		{
 			if( tmpViewEnt != view )
 			{
-				spd_adjust = 46.0f;
+				lerptime = 0.0f;
 				tmpViewEnt = view;
 			}
-
-			if( spd_adjust > 0.0f )
-				spd_adjust -= g_fFrametime * 25.0f;
-			if( spd_adjust < 0.0f )
-				spd_adjust = 0.0f;
 
 			if( view->curstate.iuser3 == -673 ) // this camera indicates that we are lerping to it, otherwise instant view snap
 			{
@@ -1581,13 +1577,10 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 				if( CarViewAng == g_vecZero )
 					CarViewAng = view->angles;
 
-				float orgspd = gHUD.CarSpeed * 0.75f;
-				orgspd = bound( 4.0f, (gHUD.CarSpeed * 0.75f), 50.0f );
-				orgspd -= spd_adjust;
-				orgspd = bound( 4.0f, orgspd, 50.0f ); // this is why spd_adjust is 46
-			//	gEngfuncs.Con_NPrintf( 1, "spd_adjust %.1f, orgspd %.1f\n", spd_adjust, orgspd );
-				InterpolateOrigin( CarViewOrg, view->origin, CarViewOrg, orgspd * g_fFrametime );
-				InterpolateAngles( CarViewAng, view->angles, CarViewAng, orgspd * g_fFrametime );
+				if( lerptime < 1.0f )
+					lerptime += g_fFrametime * (lerptime + 0.25f);
+				InterpolateOrigin( CarViewOrg, view->origin, CarViewOrg, lerptime );
+				InterpolateAngles( CarViewAng, view->angles, CarViewAng, lerptime );
 				pparams->viewangles = CarViewAng;
 				pparams->vieworg = CarViewOrg;
 			}
@@ -1602,6 +1595,7 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 		else
 		{
 			tmpViewEnt = NULL;
+			lerptime = 1.0f;
 			pparams->vieworg = view->origin;
 			pparams->viewangles = view->angles;
 			CarViewOrg = g_vecZero;

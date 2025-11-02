@@ -757,8 +757,22 @@ Frac is 0.0 to 1.0
 void InterpolateOrigin( const Vector& start, const Vector& end, Vector& output, float frac, bool back )
 {
 	frac = bound( 0.0f, frac, 1.0f );
-	if( back ) output += frac * ( end - start );
-	else output = start + frac * ( end - start );
+
+	if( frac == 0.0f )
+	{
+		output = start;
+		return;
+	}
+	else if( frac == 1.0f )
+	{
+		output = end;
+		return;
+	}
+
+	if( back )
+		output += frac * ( end - start );
+	else
+		output = start + frac * ( end - start );
 }
 
 /*
@@ -773,6 +787,17 @@ void InterpolateAngles( const Vector& start, const Vector& end, Vector& output, 
 {
 #if 1
 	frac = bound( 0.0f, frac, 1.0f ); // diffusion - better clamp it, issues at low fps
+
+	if( frac == 0.0f )
+	{
+		output = start;
+		return;
+	}
+	else if( frac == 1.0f )
+	{
+		output = end;
+		return;
+	}
 
 	Vector4D src, dest;
 
