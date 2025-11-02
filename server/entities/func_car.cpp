@@ -783,8 +783,11 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 		}
 
 		// reset player's angles, look in the vehicle direction
-		pPlayer->SetAbsAngles( GetAbsAngles() );
-		pPlayer->pev->fixangle = TRUE;
+		if( !(pPlayer->pev->effects & EF_UPSIDEDOWN) )
+		{
+			pPlayer->SetAbsAngles( GetAbsAngles() );
+			pPlayer->pev->fixangle = TRUE;
+		}
 		CamUnlocked = false;
 		if( pTankTower )
 		{

@@ -20,6 +20,7 @@
 #include "animation.h"
 #include "game/saverestore.h"
 #include "bs_defs.h"
+#include "player.h"
 
 BEGIN_DATADESC( CBaseAnimating )
 	DEFINE_FIELD( m_flFrameRate, FIELD_FLOAT ),
@@ -114,7 +115,16 @@ void StudioPlayerBlend( void *pmodel, int &pBlend, float &pPitch )
 
 float CBaseAnimating :: StudioGaitFrameAdvance( void ) 
 {
-	if( pev->effects & EF_UPSIDEDOWN )
+	bool bUpsideDown = false;
+	CBasePlayer *pPlayer = NULL;
+	if( IsPlayer() )
+	{
+		pPlayer = (CBasePlayer *)this;
+		if( pev->effects & EF_UPSIDEDOWN && pPlayer->pCar == NULL )
+			bUpsideDown = true;
+	}
+
+	if( bUpsideDown )
 	{
 		Vector UpDownAng = GetAbsAngles();
 		UpDownAng.z -= 180;
@@ -170,12 +180,12 @@ float CBaseAnimating :: StudioGaitFrameAdvance( void )
 
 	// calc side to side turning
 	float flYaw;
-	if( pev->effects & EF_UPSIDEDOWN )
+	if( bUpsideDown )
 		flYaw = -ang[YAW] + m_flGaitYaw; // view direction relative to movement
 	else
 		flYaw = ang[YAW] - m_flGaitYaw; // view direction relative to movement
 
-	if( pev->effects & EF_UPSIDEDOWN )
+	if( bUpsideDown )
 		flYaw -= (int)(flYaw / 360.0f) * 360.0f;
 	else
 		flYaw += (int)(flYaw / 360.0f) * 360.0f;

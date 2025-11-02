@@ -526,7 +526,7 @@ void CL_AdjustAngles( float frametime, Vector &viewangles )
 		V_StopPitchDrift ();
 
 	int upside_down_pitch = 0;
-	if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN )
+	if( gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN && !gHUD.InCar )
 		upside_down_pitch = 180;
 
 	viewangles[PITCH] = bound( -(cl_pitchup->value + upside_down_pitch), viewangles[PITCH], cl_pitchdown->value - upside_down_pitch );
