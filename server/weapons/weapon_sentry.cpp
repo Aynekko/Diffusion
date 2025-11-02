@@ -286,11 +286,12 @@ BOOL CWpnSentry::IsUseable( void )
 				m_hTestModel->pev->renderamt = 175;
 				m_hTestModel->pev->renderfx = kRenderFxFullbrightNoShadows;
 				m_hTestModel->pev->effects |= EF_SKIPPVS;
+				m_hTestModel->pev->effects |= EF_NODRAW;
 			}
 		}
 		else
 		{
-			if( m_hTestModel->pev->effects & EF_NODRAW )
+			if( m_hTestModel->pev->effects & EF_NODRAW && gpGlobals->time > m_flNextPrimaryAttack )
 				m_hTestModel->pev->effects &= ~EF_NODRAW;
 
 			Vector anglesAim = m_pPlayer->pev->v_angle;

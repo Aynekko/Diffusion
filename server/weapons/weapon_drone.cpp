@@ -108,11 +108,12 @@ BOOL CWpnDrone::IsUseable(void)
 				m_hTestModel->pev->renderfx = kRenderFxFullbrightNoShadows;
 				m_hTestModel->pev->skin = 1; // green eye
 				m_hTestModel->pev->effects |= EF_NODRAW;
+				m_hTestModel->pev->effects |= EF_SKIPPVS;
 			}
 		}
 		else
 		{
-			if( m_hTestModel->pev->effects & EF_NODRAW )
+			if( m_hTestModel->pev->effects & EF_NODRAW && gpGlobals->time > m_flNextPrimaryAttack )
 				m_hTestModel->pev->effects &= ~EF_NODRAW;
 
 			Vector anglesAim = m_pPlayer->pev->v_angle;
