@@ -15,7 +15,7 @@ uniform vec4 u_DroneScreen;
 const float wobble_intensity = 0.002;
 const float grade_intensity = 0.25;
 const float line_intensity = 2.;
-const float vignette_intensity = 0.2;
+const float vignette_intensity = 0.05;
 
 float rand(vec2 co)
 {
