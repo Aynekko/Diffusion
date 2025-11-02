@@ -1389,10 +1389,11 @@ void SV_CheckVelocity( CBaseEntity *pEntity )
 {
 	Vector origin = pEntity->GetAbsOrigin();
 	Vector vecAbsVelocity = pEntity->GetAbsVelocity();
-	float maxVelocity = CVAR_GET_FLOAT( "sv_maxvelocity" );
+	const float maxVelocity = CVAR_GET_FLOAT( "sv_maxvelocity" );
 	bool bReset = false;
 
 	// bound velocity
+	/*
 	for( int i = 0; i < 3; i++ )
 	{
 		if( IS_NAN( vecAbsVelocity[i] ))
@@ -1419,6 +1420,11 @@ void SV_CheckVelocity( CBaseEntity *pEntity )
 			vecAbsVelocity[i] = -maxVelocity;
 			bReset = true;
 		}
+	}*/
+	if( vecAbsVelocity.Length() > maxVelocity )
+	{
+		vecAbsVelocity = vecAbsVelocity.Normalize() * maxVelocity;
+		bReset = true;
 	}
 
 	if( bReset )
