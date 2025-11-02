@@ -3408,6 +3408,9 @@ bool CCar::ExitCar( CBaseEntity *pPlayer )
 	const Vector CarCenter = GetAbsOrigin() + gpGlobals->v_up * 46; // (human hull height / 2) + 10
 	Vector vecSrc, vecEnd;
 
+	const float iHeightCheck = 160.0f;
+	Vector vPotentialPoint = g_vecZero;
+
 	// check left side of the car first
 	vecSrc = pWheel2->GetAbsOrigin() + gpGlobals->v_up * (38 - FrontWheelRadius) - gpGlobals->v_right * 50 - gpGlobals->v_forward * (FrontSuspDist + RearSuspDist) * 0.5;
 	vecEnd = vecSrc;
@@ -3415,8 +3418,16 @@ bool CCar::ExitCar( CBaseEntity *pPlayer )
 	UTIL_TraceLine( CarCenter, vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
 	if( (TrExit.flFraction == 1.0f) && !TrExit.fAllSolid && (VisCheck.flFraction == 1.0f) )
 	{
-		pPlayer->SetAbsOrigin( vecSrc );
-		return true;
+		// mark this as a potential spot
+		// now check if we fall down? 200 units
+		vPotentialPoint = vecSrc;
+		UTIL_TraceLine( vecSrc, vecSrc - Vector( 0, 0, iHeightCheck ), dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
+		if( VisCheck.flFraction != 1.0f )
+		{
+			// we won't fall far down.
+			pPlayer->SetAbsOrigin( vecSrc );
+			return true;
+		}
 	}
 
 	// can't spawn there, now check right side
@@ -3426,8 +3437,16 @@ bool CCar::ExitCar( CBaseEntity *pPlayer )
 	UTIL_TraceLine( CarCenter, vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
 	if( (TrExit.flFraction == 1.0f) && !TrExit.fAllSolid && (VisCheck.flFraction == 1.0f) )
 	{
-		pPlayer->SetAbsOrigin( vecSrc );
-		return true;
+		// mark this as a potential spot
+		// now check if we fall down?
+		vPotentialPoint = vecSrc;
+		UTIL_TraceLine( vecSrc, vecSrc - Vector( 0, 0, iHeightCheck ), dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
+		if( VisCheck.flFraction != 1.0f )
+		{
+			// we won't fall far down.
+			pPlayer->SetAbsOrigin( vecSrc );
+			return true;
+		}
 	}
 
 	// can't spawn both, try front of the car
@@ -3437,8 +3456,16 @@ bool CCar::ExitCar( CBaseEntity *pPlayer )
 	UTIL_TraceLine( CarCenter, vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
 	if( (TrExit.flFraction == 1.0f) && !TrExit.fAllSolid && (VisCheck.flFraction == 1.0f) )
 	{
-		pPlayer->SetAbsOrigin( vecSrc );
-		return true;
+		// mark this as a potential spot
+		// now check if we fall down?
+		vPotentialPoint = vecSrc;
+		UTIL_TraceLine( vecSrc, vecSrc - Vector( 0, 0, iHeightCheck ), dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
+		if( VisCheck.flFraction != 1.0f )
+		{
+			// we won't fall far down.
+			pPlayer->SetAbsOrigin( vecSrc );
+			return true;
+		}
 	}
 
 	// can't spawn, try back of the car
@@ -3448,7 +3475,21 @@ bool CCar::ExitCar( CBaseEntity *pPlayer )
 	UTIL_TraceLine( CarCenter, vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
 	if( (TrExit.flFraction == 1.0f) && !TrExit.fAllSolid && (VisCheck.flFraction == 1.0f) )
 	{
-		pPlayer->SetAbsOrigin( vecSrc );
+		// mark this as a potential spot
+		// now check if we fall down?
+		vPotentialPoint = vecSrc;
+		UTIL_TraceLine( vecSrc, vecSrc - Vector( 0, 0, iHeightCheck ), dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
+		if( VisCheck.flFraction != 1.0f )
+		{
+			// we won't fall far down.
+			pPlayer->SetAbsOrigin( vecSrc );
+			return true;
+		}
+	}
+
+	if( vPotentialPoint != g_vecZero )
+	{
+		pPlayer->SetAbsOrigin( vPotentialPoint );
 		return true;
 	}
 

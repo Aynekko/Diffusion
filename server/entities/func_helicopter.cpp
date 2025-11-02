@@ -1541,15 +1541,26 @@ bool CHelicopter::ExitCar( CBaseEntity *pPlayer )
 	Vector HeliCenter = GetAbsOrigin() + gpGlobals->v_up * 38; // (human hull height / 2) + 2
 	Vector vecSrc, vecEnd;
 
-	// check left side of the car first
+	const float iHeightCheck = 160.0f;
+	Vector vPotentialPoint = g_vecZero;
+
+	// check left side of the heli first
 	vecSrc = HeliCenter - gpGlobals->v_right * (HeliWidth + 65);
 	vecEnd = vecSrc;
 	UTIL_TraceHull( vecSrc, vecEnd, dont_ignore_monsters, human_hull, edict(), &TrExit );
 	UTIL_TraceLine( HeliCenter, vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
 	if( (TrExit.flFraction == 1.0f) && !TrExit.fAllSolid && (VisCheck.flFraction == 1.0f) )
 	{
-		pPlayer->SetAbsOrigin( vecSrc );
-		return true;
+		// mark this as a potential spot
+		// now check if we fall down?
+		vPotentialPoint = vecSrc;
+		UTIL_TraceLine( vecSrc, vecSrc - Vector( 0, 0, iHeightCheck ), dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
+		if( VisCheck.flFraction != 1.0f )
+		{
+			// we won't fall far down.
+			pPlayer->SetAbsOrigin( vecSrc );
+			return true;
+		}
 	}
 
 	// can't spawn there, now check right side
@@ -1559,8 +1570,16 @@ bool CHelicopter::ExitCar( CBaseEntity *pPlayer )
 	UTIL_TraceLine( HeliCenter, vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
 	if( (TrExit.flFraction == 1.0f) && !TrExit.fAllSolid && (VisCheck.flFraction == 1.0f) )
 	{
-		pPlayer->SetAbsOrigin( vecSrc );
-		return true;
+		// mark this as a potential spot
+		// now check if we fall down?
+		vPotentialPoint = vecSrc;
+		UTIL_TraceLine( vecSrc, vecSrc - Vector( 0, 0, iHeightCheck ), dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
+		if( VisCheck.flFraction != 1.0f )
+		{
+			// we won't fall far down.
+			pPlayer->SetAbsOrigin( vecSrc );
+			return true;
+		}
 	}
 
 	// can't spawn both, try front
@@ -1570,8 +1589,16 @@ bool CHelicopter::ExitCar( CBaseEntity *pPlayer )
 	UTIL_TraceLine( HeliCenter, vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
 	if( (TrExit.flFraction == 1.0f) && !TrExit.fAllSolid && (VisCheck.flFraction == 1.0f) )
 	{
-		pPlayer->SetAbsOrigin( vecSrc );
-		return true;
+		// mark this as a potential spot
+		// now check if we fall down?
+		vPotentialPoint = vecSrc;
+		UTIL_TraceLine( vecSrc, vecSrc - Vector( 0, 0, iHeightCheck ), dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
+		if( VisCheck.flFraction != 1.0f )
+		{
+			// we won't fall far down.
+			pPlayer->SetAbsOrigin( vecSrc );
+			return true;
+		}
 	}
 
 	// can't spawn, try back
@@ -1581,7 +1608,21 @@ bool CHelicopter::ExitCar( CBaseEntity *pPlayer )
 	UTIL_TraceLine( HeliCenter, vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
 	if( (TrExit.flFraction == 1.0f) && !TrExit.fAllSolid && (VisCheck.flFraction == 1.0f) )
 	{
-		pPlayer->SetAbsOrigin( vecSrc );
+		// mark this as a potential spot
+		// now check if we fall down?
+		vPotentialPoint = vecSrc;
+		UTIL_TraceLine( vecSrc, vecSrc - Vector( 0, 0, iHeightCheck ), dont_ignore_monsters, dont_ignore_glass, edict(), &VisCheck );
+		if( VisCheck.flFraction != 1.0f )
+		{
+			// we won't fall far down.
+			pPlayer->SetAbsOrigin( vecSrc );
+			return true;
+		}
+	}
+
+	if( vPotentialPoint != g_vecZero )
+	{
+		pPlayer->SetAbsOrigin( vPotentialPoint );
 		return true;
 	}
 
