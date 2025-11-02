@@ -257,6 +257,21 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			org.y += sin( spd * curParticle->m_flSinSpeed + (tr.time * 5.5f) + 0.7f ) * curParticle->m_flSinSpeed * 0.8f;
 		}
 
+		// special case for waterfall
+		if( curParticle->ParticleType == TYPE_WATERFALL )
+		{
+			Vector test = org - Vector( 0, 0, curLength * 2.0f );
+			if( POINT_CONTENTS( test ) == CONTENTS_WATER )
+			{
+				curParticle->m_flAlphaVelocity = -1.5f;
+			//	if( curParticle->EntIndex > 0 )
+			//		ParticleCountPerEnt[curParticle->EntIndex]--;
+			//	ParticleArray.DeleteCurrent();
+			//	partcounter--;
+			//	goto skip_particle;
+			}
+		}
+
 		int contents = POINT_CONTENTS( org );
 
 		if( FBitSet( curParticle->m_iFlags, FPART_NOTINSOLID ) && contents == CONTENTS_SOLID )
