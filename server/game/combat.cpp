@@ -1587,6 +1587,13 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		{
 			CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
+			if( pentIgnore != NULL ) // func_breakable subshot
+			{
+				// don't shoot ourselves
+				if( pEntity->pev == pevAttacker )
+					continue;
+			}
+
 			bool bFuncBreakable = FClassnameIs( pEntity, "func_breakable" );
 			float BreakableHealth = 0.0f;
 			if( bFuncBreakable )
@@ -1670,7 +1677,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 			ApplyMultiDamage( pev, pevAttacker );
 
 			// func_breakable shoot-through feature
-			if( bFuncBreakable )
+			if( bFuncBreakable && iBulletType != BULLET_PLAYER_CROWBAR )
 			{
 				// compare health after damage and subtract the result from bullet damage
 				float NewBulletDmg = 0.0f;
