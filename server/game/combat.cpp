@@ -1515,10 +1515,10 @@ void CBaseEntity::MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 }
 
 //=========================================================
-// FireBullets: Go to the trouble of combining multiple pellets into a single damage call.
+// FireBullets: Go to the trouble of combining multiple pellets into a single damage call. - diffusion - it's no longer doing that because of func_breakable implementation
 // diffusion - Now with distance-based damage.
 //=========================================================
-void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, float iDamage, entvars_t *pevAttacker )
+void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, float iDamage, entvars_t *pevAttacker, edict_t *pentIgnore )
 {
 	static int tracerCount;
 	int tracer;
@@ -1529,7 +1529,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 	if ( pevAttacker == NULL )
 		pevAttacker = pev;  // the default attacker is ourselves
 
-	ClearMultiDamage();
+//	ClearMultiDamage();
 	if( iBulletType == BULLET_PLAYER_CROWBAR )
 		gMultiDamage.type = DMG_SLASH | DMG_NEVERGIB;
 	else
@@ -1551,7 +1551,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		Vector vecEnd;
 
 		vecEnd = vecSrc + vecDir * flDistance;
-		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
+		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, pentIgnore != NULL ? pentIgnore : ENT(pev)/*pentIgnore*/, &tr);
 
 		tracer = 0;
 		if (iTracerFreq != 0 && (tracerCount++ % iTracerFreq) == 0)
@@ -1587,6 +1587,11 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		{
 			CBaseEntity *pEntity = CBaseEntity::Instance(tr.pHit);
 
+			bool bFuncBreakable = FClassnameIs( pEntity, "func_breakable" );
+			float BreakableHealth = 0.0f;
+			if( bFuncBreakable )
+				BreakableHealth = pEntity->pev->health; // remember health before the damage
+
 			// diffusion - distance-based damage
 			float BulletDamage = 0;
 			float RangeModifier = 1.0;
@@ -1606,14 +1611,17 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 			}
 
 			if( iDamage )
-				BulletDamage = iDamage * pow(RangeModifier,(Distance/500));
+				BulletDamage = iDamage * pow( RangeModifier, (Distance / 500) );
 			else
-				BulletDamage = BulletDamage * pow(RangeModifier,(Distance/500));
-				
+				BulletDamage = BulletDamage * pow( RangeModifier, (Distance / 500) );
+
 			if( iBulletType != BULLET_PLAYER_CROWBAR )
 			{
-				if( Distance < 150 )
-					BulletDamage *= 1.25;
+				if( pentIgnore == NULL ) // if it's not null, then it's a subshot from a breakable - don't multiply the damage
+				{
+					if( Distance < 150 )
+						BulletDamage *= 1.25;
+				}
 
 				// less damage if shot was fired from underwater
 				if( pevAttacker->waterlevel == 3 )
@@ -1629,6 +1637,8 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 			pTextureName = TRACE_TEXTURE( tr.pHit, vecSrc, vecEnd );
 			if( pTextureName && !Q_strnicmp( pTextureName, "sky", 3 ) )
 				ShouldDecal = false;
+
+			ClearMultiDamage();
 
 			if( iBulletType == BULLET_NONE )
 			{
@@ -1656,6 +1666,23 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 					DecalGunshot( &tr, iBulletType );
 				}
 			}
+
+			ApplyMultiDamage( pev, pevAttacker );
+
+			// func_breakable shoot-through feature
+			if( bFuncBreakable )
+			{
+				// compare health after damage and subtract the result from bullet damage
+				float NewBulletDmg = 0.0f;
+				if( pEntity->pev->health <= 0 )
+					NewBulletDmg = BulletDamage - BreakableHealth;
+				else
+					NewBulletDmg = BulletDamage - (BreakableHealth - pEntity->pev->health);
+			//	ALERT( at_console, "BulletDamage %.2f, beforehp %.2f, afterhp %.2f, NewBulletDmg %.2f\n", BulletDamage, BreakableHealth, pEntity->pev->health, NewBulletDmg );
+
+				if( NewBulletDmg > 0.0f && NewBulletDmg < BulletDamage )
+					FireBullets( 1, tr.vecEndPos + vecDir * 4, vecDir, g_vecZero, flDistance, iBulletType, iTracerFreq, NewBulletDmg, pevAttacker, pEntity->edict() );
+			}
 		}
 
 		// make bullet trails
@@ -1664,7 +1691,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		MakeWaterSplash( vecSrc, tr.vecEndPos, 1 );
 	}
 
-	ApplyMultiDamage(pev, pevAttacker);
+//	ApplyMultiDamage(pev, pevAttacker);
 }
 
 void CBaseEntity :: TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )

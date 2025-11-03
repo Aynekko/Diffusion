@@ -537,7 +537,7 @@ public:
 	void SUB_FadeOut ( void );
 	void SUB_CallUseToggle( void ) { this->Use( this, this, USE_TOGGLE, 0 ); }
 	int ShouldToggle( USE_TYPE useType, BOOL currentState );
-	void FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShooting,	Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, float iDamage = 0, entvars_t *pevAttacker = NULL );
+	void FireBullets( ULONG cShots, Vector vecSrc, Vector vecDirShooting,	Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq = 4, float iDamage = 0, entvars_t *pevAttacker = NULL, edict_t *pentIgnore = NULL );
 	void Teleport( const Vector *newPosition, const Vector *newAngles, const Vector *newVelocity );
 	void GetVectors( Vector *pForward, Vector *pRight, Vector *pUp ) const;
 
