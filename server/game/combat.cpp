@@ -1530,10 +1530,6 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		pevAttacker = pev;  // the default attacker is ourselves
 
 //	ClearMultiDamage();
-	if( iBulletType == BULLET_PLAYER_CROWBAR )
-		gMultiDamage.type = DMG_SLASH | DMG_NEVERGIB;
-	else
-		gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
 
 	for (ULONG iShot = 1; iShot <= cShots; iShot++)
 	{
@@ -1646,6 +1642,10 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 				ShouldDecal = false;
 
 			ClearMultiDamage();
+			if( iBulletType == BULLET_PLAYER_CROWBAR )
+				gMultiDamage.type = DMG_SLASH | DMG_NEVERGIB;
+			else
+				gMultiDamage.type = DMG_BULLET | DMG_NEVERGIB;
 
 			if( iBulletType == BULLET_NONE )
 			{
