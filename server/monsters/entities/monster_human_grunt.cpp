@@ -5775,6 +5775,13 @@ void CAndrewGrunt::Precache()
 	PRECACHE_SOUND( "hgrunt/rich_warp.wav" );
 	PRECACHE_SOUND( "hgrunt/rich_rocket.wav" );
 
+	// warpball
+	PRECACHE_MODEL( "sprites/lgtning.spr" );
+	PRECACHE_MODEL( "sprites/Fexplo1.spr" );
+	PRECACHE_SOUND( "hgrunt/rich_warp.wav" );
+	PRECACHE_SOUND( "debris/beamstart2.wav" );
+	PRECACHE_SOUND( "debris/beamstart7.wav" );
+
 	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
 
 	if( !m_voicePitch ) m_voicePitch = 100;
