@@ -2967,8 +2967,11 @@ void CCar::Camera(void)
 
 		if( fMouseTouchedOFF >= CAR_CAMERA_MOUSE_WAIT_OFF )
 		{
-			fMouseTouchedON = 0.0f;
-			CamUnlocked = false;
+			if( AbsCarSpeed > 200.0f )
+			{
+				fMouseTouchedON = 0.0f;
+				CamUnlocked = false;
+			}
 		}
 	}
 
