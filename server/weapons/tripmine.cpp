@@ -75,6 +75,7 @@ class CTripmineGrenade : public CGrenade
 
 	float skin_change_time; // not saved
 	bool IsTripped; // do not the beam!
+	Vector PrevOrigin;
 };
 
 LINK_ENTITY_TO_CLASS( monster_tripmine, CTripmineGrenade );
@@ -96,6 +97,7 @@ BEGIN_DATADESC( CTripmineGrenade )
 	DEFINE_FIELD( DisarmStartTime, FIELD_TIME ),
 	DEFINE_FIELD( Disarmed, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_pSprite, FIELD_CLASSPTR ),
+	DEFINE_FIELD( PrevOrigin, FIELD_VECTOR ),
 END_DATADESC()
 
 void CTripmineGrenade :: Spawn( void )
@@ -363,6 +365,7 @@ void CTripmineGrenade :: MakeBeam( void )
 		m_pBeam->SetBrightness( 20 ); // 64
 	//	m_pBeam->SetParent( this ); // this doesn't work with BEAM_POINTS beam!!!
 		m_pBeam->SetWidth( 2 );
+		PrevOrigin = vecStart;
 	}
 
 	
@@ -415,7 +418,25 @@ void CTripmineGrenade :: BeamBreakThink( void  )
 			m_hOwner = g_pWorld;// world-placed mine
 	}
 
+	// update beam
+	Vector vecStart = GetAbsOrigin() - m_vecDir * 7;
+	if( vecStart != PrevOrigin )
+	{
+		Vector vecTmpEnd = GetAbsOrigin() + m_vecDir * 2048 * m_flBeamLength;
+		m_pBeam->PointsInit( vecStart, vecTmpEnd );
+		m_pSprite->SetAbsOrigin( vecTmpEnd );
+	}
+	PrevOrigin = vecStart;
+
 	TraceResult tr;
+
+	// check the back of the mine
+	UTIL_TraceLine( GetAbsOrigin(), GetAbsOrigin() - m_vecDir * 10, dont_ignore_monsters, ENT( pev ), &tr );
+	if( tr.flFraction == 1.0f )
+	{
+		Killed( VARS( pev->owner ), GIB_NORMAL );
+		return;
+	}
 
 	// HACKHACK Set simple box using this really nice global!
 	gpGlobals->trace_flags = FTRACE_SIMPLEBOX;
