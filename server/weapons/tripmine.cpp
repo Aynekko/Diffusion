@@ -502,8 +502,8 @@ void CTripmineGrenade::Killed( entvars_t *pevAttacker, int iGib )
 	CBaseEntity *pActivator = NULL;
 	if( pevAttacker != NULL )
 		pActivator = CBaseEntity::Instance( pevAttacker );
-	if( pActivator )
-		UTIL_FireTargets( GetTarget(), pActivator, pActivator, USE_TOGGLE, 0 );
+	
+	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
 
 	float Delay;
 

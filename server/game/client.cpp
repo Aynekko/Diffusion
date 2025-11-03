@@ -875,7 +875,10 @@ void ClientCommand( edict_t *pEntity )
 					pTarget = UTIL_FindEntityByTargetname( pTarget, CMD_ARGV( 1 ) );
 				}
 
-				ALERT(at_console, "%3d entities deleted.\n", DeleteCount);
+				if( DeleteCount == 0 )
+					ALERT( at_console, "Nothing to delete." );
+				else
+					ALERT( at_console, "%3d entities deleted.\n", DeleteCount );
 			}
 			else
 				ALERT(at_console, "-- Removes a name-specified entity.\n-- Usage: e_del <targetname>\n");
@@ -912,7 +915,10 @@ void ClientCommand( edict_t *pEntity )
 					pTarget = UTIL_FindEntityByClassname( pTarget, CMD_ARGV( 1 ) );
 				}
 
-				ALERT( at_console, "%3d entities deleted.\n", DeleteCount );
+				if( DeleteCount == 0 )
+					ALERT( at_console, "Nothing to delete." );
+				else
+					ALERT( at_console, "%3d entities deleted.\n", DeleteCount );
 			}
 			else
 				ALERT( at_console, "-- Removes all entities of specified class.\n-- Usage: e_delclass <classname>\n" );
