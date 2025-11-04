@@ -1529,7 +1529,8 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 	if ( pevAttacker == NULL )
 		pevAttacker = pev;  // the default attacker is ourselves
 
-//	ClearMultiDamage();
+	if( cShots > 1 )
+		ClearMultiDamage();
 
 	for (ULONG iShot = 1; iShot <= cShots; iShot++)
 	{
@@ -1590,7 +1591,8 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 					continue;
 			}
 
-			bool bFuncBreakable = FClassnameIs( pEntity, "func_breakable" );
+			// exclude shotguns, damage display gets buggy.
+			bool bFuncBreakable = (cShots == 1 && FClassnameIs( pEntity, "func_breakable" ));
 			float BreakableHealth = 0.0f;
 			if( bFuncBreakable )
 				BreakableHealth = pEntity->pev->health; // remember health before the damage
@@ -1641,7 +1643,9 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 			if( pTextureName && !Q_strnicmp( pTextureName, "sky", 3 ) )
 				ShouldDecal = false;
 
-			ClearMultiDamage();
+			if( cShots == 1 )
+				ClearMultiDamage();
+
 			if( iBulletType == BULLET_PLAYER_CROWBAR )
 				gMultiDamage.type = DMG_SLASH | DMG_NEVERGIB;
 			else
@@ -1674,7 +1678,8 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 				}
 			}
 
-			ApplyMultiDamage( pev, pevAttacker );
+			if( cShots == 1 )
+				ApplyMultiDamage( pev, pevAttacker );
 
 			// func_breakable shoot-through feature
 			if( bFuncBreakable && iBulletType != BULLET_PLAYER_CROWBAR )
@@ -1698,7 +1703,8 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		MakeWaterSplash( vecSrc, tr.vecEndPos, 1 );
 	}
 
-//	ApplyMultiDamage(pev, pevAttacker);
+	if( cShots > 1 )
+		ApplyMultiDamage(pev, pevAttacker);
 }
 
 void CBaseEntity :: TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType )
