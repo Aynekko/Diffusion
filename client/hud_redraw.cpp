@@ -99,19 +99,21 @@ void CHud::Think( void )
 	static float cachefov = -1.0f;
 	if( cachefov == -1.0f )
 		cachefov = default_fov->value;
-	if( m_flFOV == 0.0f )
-	{
-		// only let players adjust up in fov,  and only if they are not overriden by something else
-		m_flFOV = default_fov->value;
-	}
-	else if( cachefov != default_fov->value || m_flFOV != 0.0f )
+
+	if( cachefov != default_fov->value )
 	{
 		cl_entity_t *viewent = GET_ENTITY( tr.viewparams.viewentity );
-		if( !IsZooming && !IsZoomed && viewent && viewent->player )
+		if( viewent && viewent->player )
 		{
-			m_flFOV = default_fov->value;
-			cachefov = m_flFOV;
+			m_flFOV = 0.0f;
+			cachefov = default_fov->value;
 		}
+	}
+
+	if( m_flFOV == 0.0f )
+	{
+		// only let players adjust up in fov, and only if they are not overriden by something else
+		m_flFOV = default_fov->value;
 	}
 	
 	HUDLIST *pList = m_pHudList;
