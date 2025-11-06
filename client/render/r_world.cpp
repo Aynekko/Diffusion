@@ -2831,6 +2831,8 @@ void R_DrawBrushList( void )
 
 	int i;
 
+	bool bGotScreencopy = false;
+
 	for( i = 0; i < tr.num_draw_surfaces; i++ )
 	{
 		const gl_bmodelface_t *entry = &tr.draw_surfaces[i];
@@ -3033,17 +3035,21 @@ void R_DrawBrushList( void )
 			{
 				// request screen depth
 				GL_Bind( GL_TEXTURE6, tr.screen_depth ); // u_DepthMap
-				pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+				if( !bGotScreencopy )
+					pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 				// request screen color
 				GL_Bind( GL_TEXTURE3, tr.screen_color ); // u_ScreenMap
-				pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+				if( !bGotScreencopy )
+					pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 				GL_Bind( GL_TEXTURE4, tr.waterTextures[(int)(tr.time * 20.0f) % WATER_TEXTURES] ); // u_NormalMap
 
 			//	float brushbounds = 4096.0f;// 2.0f * (e->curstate.mins - e->curstate.maxs).Length();
 			//	pglUniform1fARB( RI->currentshader->u_zFar, -brushbounds );
 				pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, screensizeinv.x, screensizeinv.y );
+
+				bGotScreencopy = true;
 			}
 
 			// diffusion - interior mapping
