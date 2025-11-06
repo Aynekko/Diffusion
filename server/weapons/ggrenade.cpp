@@ -713,7 +713,7 @@ CGrenade * CGrenade:: ShootTimed( entvars_t *pevOwner, Vector vecStart, Vector v
 	pGrenade->pev->gravity = 0.6;
 	pGrenade->pev->friction = 0.8;
 
-	pGrenade->pev->dmg = 125;
+	pGrenade->pev->dmg = 130;
 	pGrenade->pev->scale = 0.75; // diffusion - the grenade was too big
 
 	return pGrenade;

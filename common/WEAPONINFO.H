@@ -227,13 +227,13 @@ const char * const g_WpnAmmo[] =
 // diffusion - weapon damage
 #define DMG_WPN_MRC				15
 #define DMG_WPN_CROSSBOW		110
-//#define DMG_WPN_DEAGLE		using BULLET_PLAYER_357 damage (70)
+//#define DMG_WPN_DEAGLE		using BULLET_PLAYER_357 damage (90)
 #define DMG_WPN_FIVESEVEN		35
 #define DMG_WPN_GAUSS			10
 #define DMG_WPN_GAUSS_FULL		150
 //#define DMG_WPN_HKMP5			using BULLET_PLAYER_MP5 damage (15)
 #define DMG_WPN_PISTOL			25
-#define DMG_WPN_SHOTGUN			15
+#define DMG_WPN_SHOTGUN			17
 #define DMG_WEAPON_SHOTGUN_XM	15
 #define DMG_WPN_KNIFE			27
 #define DMG_WPN_SNIPER			150
@@ -594,8 +594,8 @@ enum beretta_e
 #define SENTRY_DEPLOY_TIME		2.0
 
 #define SHOTGUN_DEPLOY_TIME		0.6
-#define SHOTGUN_NEXT_PA_TIME	1.2
-#define SHOTGUN_NEXT_SA_TIME	1.6
+#define SHOTGUN_NEXT_PA_TIME	0.9
+#define SHOTGUN_NEXT_SA_TIME	1.2
 #define SHOTGUN_STARTRELOAD_TIME 0.6
 #define SHOTGUN_RELOAD_TIME		0.7
 #define SHOTGUN_RELOAD_FINISH_TIME 0.7

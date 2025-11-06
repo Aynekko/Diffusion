@@ -1609,7 +1609,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 				case BULLET_PLAYER_12MM:		BulletDamage = 150; RangeModifier = 0.99; break;
 				case BULLET_MONSTER_MP5:		BulletDamage = 6; RangeModifier = 0.9;break;
 				case BULLET_MONSTER_12MM:		BulletDamage = 35; RangeModifier = 0.99; break;
-				case BULLET_PLAYER_357:			BulletDamage = 70; RangeModifier = 0.9; break;
+				case BULLET_PLAYER_357:			BulletDamage = 90; RangeModifier = 0.9; break;
 				case BULLET_PLAYER_9MM:			BulletDamage = 10; RangeModifier = 0.8; break;	
 				case BULLET_PLAYER_MP5:			BulletDamage = 15; RangeModifier = 0.9; break;
 				case BULLET_PLAYER_BUCKSHOT:	BulletDamage = 13; RangeModifier = 0.7; break;
