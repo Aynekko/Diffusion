@@ -19,6 +19,9 @@
 
 #define CAR_FOV 85
 
+#define CAR_CAMERA_MOUSE_WAIT_ON 0.2f // mouse must be moved for this amount of seconds to trigger free camera
+#define CAR_CAMERA_MOUSE_WAIT_OFF 1.25f // camera will go back to normal when mouse isn't moved for this amount of seconds
+
 class CCar : public CBaseDelay
 {
 	DECLARE_CLASS( CCar, CBaseDelay );
@@ -75,9 +78,9 @@ public:
 	CBaseEntity *pWheel3;
 	CBaseEntity *pWheel4;
 	CBaseEntity *pChassis;
-	CBaseEntity *pCamera1;
+	EHANDLE pCamera1;
 	CBaseEntity *pCamera2;
-	CBaseEntity *pFreeCam;
+	EHANDLE pFreeCam;
 	CBaseEntity *pCarHurt;
 	CBaseAnimating *pDriverMdl;
 	CBaseAnimating *pChassisMdl;
