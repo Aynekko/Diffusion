@@ -3053,7 +3053,10 @@ void CBasePlayer::PreThink( void )
 
 	if( HasWeapon( WEAPON_SUIT ) && BrokenSuit && (gpGlobals->time > NextBrokenDmgTime) )
 	{
-		TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), RANDOM_LONG( 3, 15 ), DMG_SHOCK );
+		float dmg_amt = RANDOM_FLOAT( 3.0f, 15.0f );
+		if( dmg_amt >= pev->health ) // don't die
+			dmg_amt = pev->health * 0.5f;
+		TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), dmg_amt, DMG_SHOCK );
 		UTIL_DoSpark( pev, GetAbsOrigin() );
 		// add glitch effect
 		MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );

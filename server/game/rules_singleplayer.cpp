@@ -237,6 +237,37 @@ int CHalfLifeRules :: IPointsForKill( CBasePlayer *pAttacker, CBasePlayer *pKill
 void CHalfLifeRules :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, entvars_t *pInflictor )
 {
 	UTIL_FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
+
+	CBaseEntity *pTheKiller = CBaseEntity::Instance( pKiller );
+
+	if( pTheKiller != NULL && pTheKiller->IsMonster() )
+	{
+		// send a prompt to player to use suit's abilities, if player died from an NPC
+		if( pVictim->CanDash && pVictim->BlastAbilityLVL > 0 )
+		{
+			// player has both abilities
+			switch( RANDOM_LONG( 0, 2 ) )
+			{
+			case 0:
+				UTIL_ShowMessage( "UTIL_USEDASH", pVictim );
+				break;
+			case 1:
+				UTIL_ShowMessage( "UTIL_USEBLAST", pVictim );
+				break;
+			case 2:
+				UTIL_ShowMessage( "UTIL_USEBOTH", pVictim );
+				break;
+			}
+		}
+		else if( pVictim->CanDash )
+		{
+			UTIL_ShowMessage( "UTIL_USEDASH", pVictim );
+		}
+		else if( pVictim->BlastAbilityLVL > 0 )
+		{
+			UTIL_ShowMessage( "UTIL_USEBLAST", pVictim );
+		}
+	}
 }
 
 //=========================================================
