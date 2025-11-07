@@ -851,6 +851,7 @@ void DroneScreenShader( void );
 void HeatDistortionShader( void );
 void LensFlare( void );
 void DownScale( void );
+void RequestDepthTexture( void );
 
 //
 // r_shadows.cpp
