@@ -437,11 +437,14 @@ void HUD_TempEntUpdate(
 					{
 						damp *= 0.5f;
 
-						if( traceNormal.z > 0.9f ) // hit floor?
+						bool bStop = ( pTemp->entity.curstate.origin == pTemp->entity.prevstate.origin );
+
+						if( bStop || traceNormal.z > 0.9f ) // hit floor?
 						{
 							if( pTemp->entity.baseline.origin[2] <= 0 && pTemp->entity.baseline.origin[2] >= gravity * 3 )
 							{
 								damp = 0; // stop
+								pTemp->hitSound = 0;
 								pTemp->flags &= ~(FTENT_ROTATE|FTENT_GRAVITY|FTENT_SLOWGRAVITY|FTENT_COLLIDEWORLD|FTENT_SMOKETRAIL);
 								pTemp->entity.angles.x = 0;
 								pTemp->entity.angles.z = 0;
