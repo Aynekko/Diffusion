@@ -1763,14 +1763,14 @@ Schedule_t *CAlice :: GetSchedule ( void )
 						return GetScheduleOfType( SCHED_RELOAD );
 					}
 
-					if( HasConditions( bits_COND_CLIENT_PUSH ) )
+					if( bAliceFollowing && HasConditions( bits_COND_CLIENT_PUSH ) )
 						return GetScheduleOfType( SCHED_MOVE_AWAY_FOLLOW );
 
 					return GetScheduleOfType( SCHED_TARGET_FACE );
 				}
 			}
 
-			if( HasConditions( bits_COND_CLIENT_PUSH ) )
+			if( bAliceFollowing && HasConditions( bits_COND_CLIENT_PUSH ) )
 				return GetScheduleOfType( SCHED_MOVE_AWAY );
 
 			// try to say something about smells
