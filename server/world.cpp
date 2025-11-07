@@ -708,7 +708,7 @@ void CWorld :: Precache( void )
 	PRECACHE_SOUND("common/null.wav");				// clears sound channels
 	PRECACHE_MODEL("sprites/null.spr"); // used by SetNullModel
 
-	PRECACHE_SOUND( SND_AMMO_RESPAWN );//!!! temporary sound for respawning weapons.
+	PRECACHE_SOUND( SND_AMMO_RESPAWN );
 	PRECACHE_SOUND( "items/gunpickup2.wav" );// player picks up a gun.
 
 	PRECACHE_SOUND( "common/bodydrop3.wav" );// dead bodies hitting the ground (animation events)

@@ -244,7 +244,7 @@ void CAmmoCrate::SimpleWait(void)
 	if (AmmoIcon)
 		AmmoIcon->SetBrightness(255);
 	if (g_pGameRules->IsMultiplayer())
-		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, SND_AMMO_RESPAWN, 1, ATTN_NORM, 0, 150);
+		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, SND_AMMO_RESPAWN, 1, ATTN_NORM, 0, PITCH_NORM );
 	SetThink(NULL);
 	return;
 }

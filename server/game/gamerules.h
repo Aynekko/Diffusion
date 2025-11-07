@@ -25,7 +25,7 @@ class CBasePlayerAmmo;
 
 #define SND_PLAYER_JOIN "misc/player_join.wav"
 #define SND_PLAYER_LEFT "misc/player_left.wav"
-#define SND_AMMO_RESPAWN "items/suitchargeok1.wav"
+#define SND_AMMO_RESPAWN "items/item_respawn.wav"
 
 #define ITEM_RESPAWN_TIME	30
 #define WEAPON_RESPAWN_TIME	20

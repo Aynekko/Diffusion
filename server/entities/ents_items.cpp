@@ -177,7 +177,7 @@ void CItem::Materialize( void )
 	if ( pev->effects & EF_NODRAW )
 	{
 		// changing from invisible state to visible.
-		EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, SND_AMMO_RESPAWN, 1, ATTN_NORM, 0, 150 );
+		EMIT_SOUND_DYN( ENT(pev), CHAN_WEAPON, SND_AMMO_RESPAWN, 1, ATTN_NORM, 0, PITCH_NORM );
 		pev->effects &= ~EF_NODRAW;
 		pev->effects |= EF_MUZZLEFLASH;
 	}
