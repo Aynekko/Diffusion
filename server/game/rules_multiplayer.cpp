@@ -1053,13 +1053,15 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 
 	if( mp_killercamera.value > 0 )
 	{
+		bool bSkipKillerCam = (FClassnameIs( pInflictor, "_playersentry" ) || FClassnameIs( pInflictor, "monster_tripmine" ));
+
 		// save the killer entity to follow him
-		if( pTheKiller != pVictim && !(pVictim->pev->flags & FL_FAKECLIENT) )
+		if( pTheKiller != pVictim && !(pVictim->pev->flags & FL_FAKECLIENT) && !bSkipKillerCam )
 			pVictim->m_hKiller = pTheKiller;
 	}
 
 	// in multiplayer, handle bonus level if a player killed us (make sure it's not a suicide...)
-	if( ((pKiller->flags & FL_CLIENT) || (pKiller->flags & FL_FAKECLIENT)) && (pKiller != pVictim->pev) && (mp_weaponbonus.value > 0) )
+	if( (mp_weaponbonus.value > 0) && ((pKiller->flags & FL_CLIENT) || (pKiller->flags & FL_FAKECLIENT)) && (pKiller != pVictim->pev) )
 	{
 		if( pVictim->m_iBonusWeaponLevel < 10 )
 			pVictim->m_iBonusWeaponLevel++;
