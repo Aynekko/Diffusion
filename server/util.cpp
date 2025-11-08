@@ -823,8 +823,9 @@ CBaseEntity *UTIL_FindEntityByString( CBaseEntity *pStartEntity, const char *szK
 
 	pentEntity = FIND_ENTITY_BY_STRING( pentEntity, szKeyword, szValue );
 
-	if (!FNullEnt(pentEntity))
-		return CBaseEntity::Instance(pentEntity);
+	if( !FNullEnt( pentEntity ) && UTIL_IsValidEntity( pentEntity ) )
+		return CBaseEntity::Instance( pentEntity );
+
 	return NULL;
 }
 
@@ -2536,6 +2537,7 @@ void UTIL_Remove( CBaseEntity *pEntity, bool remove_children )
 
 	pEntity->UpdateOnRemove();
 	pEntity->pev->flags |= FL_KILLME;
+	pEntity->pev->classname = 0; // diffusion - I think this must be cleared, because some entites might look this entity up and use it, and it will be removed next frame
 	pEntity->pev->targetname = 0;
 	pEntity->pev->effects = 0; // diffusion
 }

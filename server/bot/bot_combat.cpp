@@ -152,101 +152,103 @@ char scientist_taunt[][30] = { SC_TNT1, SC_TNT2, SC_TNT3, SC_TNT4, SC_TNT5 };
 
 CBaseEntity * CBot::BotFindEnemy( void )
 {
-   Vector vecEnd;
+	Vector vecEnd;
 
-   if (pBotEnemy != NULL)  // does the bot already have an enemy?
-   {
-	  vecEnd = pBotEnemy->EyePosition();
+	if (pBotEnemy != NULL)  // does the bot already have an enemy?
+	{
+		vecEnd = pBotEnemy->EyePosition();
 
-	  // if the enemy is dead or has switched to botcam mode...
-	  // diffusion - NOTE: the takedamage check has been added because it sets in ClientDisconnect()
-	  // this fixed the issue when bots were still attracted to "disconnected bots" when they leave (their leftover edicts)
-	  if( !pBotEnemy->IsAlive() || (pBotEnemy->pev->effects & EF_NODRAW) || (pBotEnemy->pev->takedamage == DAMAGE_NO))
-	  {
-		 if (!pBotEnemy->IsAlive())  // is the enemy dead?, assume bot killed it
-		 {
+		// if the enemy is dead or has switched to botcam mode...
+		// diffusion - NOTE: the takedamage check has been added because it sets in ClientDisconnect()
+		// this fixed the issue when bots were still attracted to "disconnected bots" when they leave (their leftover edicts)
+		if( !pBotEnemy->IsAlive() || (pBotEnemy->pev->effects & EF_NODRAW) || (pBotEnemy->pev->takedamage == DAMAGE_NO))
+		{
+			if (!pBotEnemy->IsAlive())  // is the enemy dead?, assume bot killed it
+			{
 			// stay here longer. I'm having a good time here!
 			if( IsCamping )
 				camping_end_time += RANDOM_LONG(15,30);
-		 }
+			}
 
-		 // don't have an enemy anymore so null out the pointer...
-		 pBotEnemy = NULL;
-	  }
-	  else if ( FInViewCone( &vecEnd ) && FVisible( vecEnd ) )
-	  {
-		 // if enemy is still visible and in field of view, keep it
+			// don't have an enemy anymore so null out the pointer...
+			pBotEnemy = NULL;
+		}
+		else if ( FInViewCone( &vecEnd ) && FVisible( vecEnd ) )
+		{
+			// if enemy is still visible and in field of view, keep it
 
-		 // face the enemy
-		 Vector v_enemy = pBotEnemy->GetAbsOrigin() - GetAbsOrigin();
-		 Vector bot_angles = UTIL_VecToAngles( v_enemy );
+			// face the enemy
+			Vector v_enemy = pBotEnemy->GetAbsOrigin() - GetAbsOrigin();
+			Vector bot_angles = UTIL_VecToAngles( v_enemy );
 
-		 pev->ideal_yaw = bot_angles.y;
+			pev->ideal_yaw = bot_angles.y;
 
-		 // check for wrap around of angle...
-		 BotFixIdealYaw();
+			// check for wrap around of angle...
+			BotFixIdealYaw();
 
-		 return pBotEnemy;
-	  }
-   }
+			return pBotEnemy;
+		}
+	}
 
-   int i;
-   float nearestdistance = 1500;
-   CBaseEntity *pNewEnemy = NULL;
+	int i;
+	float nearestdistance = 1500;
+	CBaseEntity *pNewEnemy = NULL;
 
-   // search the world for players...
-   for (i = 1; i <= gpGlobals->maxClients; i++)
-   {
-	  CBasePlayer *pPlayer = (CBasePlayer*)UTIL_PlayerByIndex( i );
+	// search the world for players...
+	for( i = 1; i <= gpGlobals->maxClients; i++ )
+	{
+		CBasePlayer *pPlayer = (CBasePlayer*)UTIL_PlayerByIndex( i );
 
-	  // skip invalid players and skip self (i.e. this bot)
-	  if ((!pPlayer) || (pPlayer == this))
-		 continue;
-
-	  // this can be a leftover edict of disconnected player or bot
-	  if( pPlayer->pev->takedamage == DAMAGE_NO )
-		  continue;
-
-	  // skip this player if not alive (i.e. dead or dying)
-	  if (pPlayer->pev->deadflag != DEAD_NO)
-		 continue;
-
-	  // skip players that are not bots in observer mode...
-	  if (pPlayer->IsNetClient() && f_Observer)
-		 continue;
-
-	  // skip players that are in botcam mode...
-	  if (pPlayer->pev->effects & EF_NODRAW)
-		 continue;
-
-	  // don't waste time on spawn-protected or godmode players
-	  if( pPlayer->IsSpawnProtected || (pPlayer->pev->flags & FL_GODMODE) )
-		  continue;
-
-	  // is team play enabled?
-	  if (g_pGameRules->IsTeamplay())
-	  {
-		 // don't target your teammates if team names match...
-		 if (UTIL_TeamsMatch(g_pGameRules->GetTeamID(this),
-							 g_pGameRules->GetTeamID(pPlayer)))
+		// skip invalid players and skip self (i.e. this bot)
+		if( !pPlayer || (pPlayer == this) )
 			continue;
-	  }
 
-	  vecEnd = pPlayer->EyePosition();
+		// this can be a leftover edict of disconnected player or bot
+		if( pPlayer->pev->takedamage == DAMAGE_NO )
+			continue;
 
-	  // see if bot can see the player...
-	  if (FInViewCone( &vecEnd ) && FVisible( vecEnd ))
-	  {
-		 float distance = (pPlayer->GetAbsOrigin() - GetAbsOrigin()).Length();
-		 if (distance < nearestdistance)
-		 {
-			nearestdistance = distance;
-			pNewEnemy = pPlayer;
+		// skip this player if not alive (i.e. dead or dying)
+		if (pPlayer->pev->deadflag != DEAD_NO)
+			continue;
 
-			pBotUser = NULL;  // don't follow user when enemy found
-		 }
-	  }
-   }
+		if( pPlayer->IsObserver() )
+			continue;
+
+		// skip players that are not bots in observer mode...
+		if (pPlayer->IsNetClient() && f_Observer)
+			continue;
+
+		// skip players that are in botcam mode...
+		if (pPlayer->pev->effects & EF_NODRAW)
+			continue;
+
+		// don't waste time on spawn-protected or godmode players
+		if( pPlayer->IsSpawnProtected || (pPlayer->pev->flags & FL_GODMODE) )
+			continue;
+
+		// is team play enabled?
+		if (g_pGameRules->IsTeamplay())
+		{
+			// don't target your teammates if team names match...
+			if( UTIL_TeamsMatch( g_pGameRules->GetTeamID( this ), g_pGameRules->GetTeamID( pPlayer ) ) )
+				continue;
+		}
+
+		vecEnd = pPlayer->EyePosition();
+
+		// see if bot can see the player...
+		if (FInViewCone( &vecEnd ) && FVisible( vecEnd ))
+		{
+			float distance = (pPlayer->GetAbsOrigin() - GetAbsOrigin()).Length();
+			if (distance < nearestdistance)
+			{
+				nearestdistance = distance;
+				pNewEnemy = pPlayer;
+
+				pBotUser = NULL;  // don't follow user when enemy found
+			}
+		}
+	}
 
 	// diffusion - now perform search for turrets.
 	CBaseEntity *pTurret = NULL;
@@ -289,7 +291,7 @@ CBaseEntity * CBot::BotFindEnemy( void )
 			continue;
 	}
 
-	if (pNewEnemy)
+	if( pNewEnemy )
 	{
 		// face the enemy
 		Vector v_enemy = pNewEnemy->GetAbsOrigin() - GetAbsOrigin();
@@ -301,7 +303,7 @@ CBaseEntity * CBot::BotFindEnemy( void )
 		BotFixIdealYaw();
 	}
 
-	return (pNewEnemy);
+	return pNewEnemy;
 }
 
 

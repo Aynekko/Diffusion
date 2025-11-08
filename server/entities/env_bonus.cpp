@@ -21,9 +21,15 @@ public:
 	void BonusTouch( CBaseEntity *pOther );
 	void SpawnItemFor( char *szName, CBasePlayer *pPlayer );
 	int EquipmentRandom;
+
+	DECLARE_DATADESC();
 };
 
 LINK_ENTITY_TO_CLASS( env_bonus, CEnvBonus );
+
+BEGIN_DATADESC( CEnvBonus )
+	DEFINE_FUNCTION( BonusTouch ),
+END_DATADESC()
 
 void CEnvBonus::Precache(void)
 {
