@@ -17,7 +17,7 @@
 #include "utils.h"
 #include "r_local.h"
 #include "pm_movevars.h"
-#include "features.h"
+#include "enginefeatures.h"
 #include "r_cvars.h"
 
 static byte	*gpBuf;

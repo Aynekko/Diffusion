@@ -26,7 +26,7 @@ GNU General Public License for more details.
 #include "triangleapi.h"
 #include "r_sprite.h"
 #include "pm_movevars.h"
-#include "WEAPONINFO.H"
+#include "weaponinfo.h"
 #include "r_shader.h"
 
 CQuakePartSystem g_pParticles;

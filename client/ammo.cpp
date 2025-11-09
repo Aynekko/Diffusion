@@ -25,7 +25,7 @@
 #include "pm_defs.h"
 #include "event_api.h"
 #include "r_local.h"
-#include "WEAPONINFO.H"
+#include "weaponinfo.h"
 #include "triangleapi.h"
 
 int		g_weaponselect = 0;

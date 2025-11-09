@@ -28,7 +28,7 @@ GNU General Public License for more details.
 #include "entity_types.h"
 #include "r_shader.h"
 #include "r_world.h"
-#include "features.h"
+#include "enginefeatures.h"
 #include <vector>
 #include <algorithm>
 
