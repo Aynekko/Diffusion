@@ -1925,6 +1925,7 @@ void CBasePlayer::PlayerDeathThink(void)
 			if( !m_hKiller->IsAlive() )
 			{
 				m_hKiller = NULL;
+				fLerpToKiller = 0.0f;
 				StartDeathCam(); // go to dead camera.
 			}
 			else
@@ -1943,19 +1944,12 @@ void CBasePlayer::PlayerDeathThink(void)
 				{
 					Vector MyOrg = GetAbsOrigin();
 					Vector KillerOrg = m_hKiller->GetAbsOrigin();
-					float dist_to_killer = bound( 1.0f, (MyOrg - KillerOrg).Length(), 1000.0f );
-					if( dist_to_killer < 15.0f )
-					{
-						SetAbsOrigin( KillerOrg );
-					}
-					else // lerp into killer's position
-					{
-						Vector dest = MyOrg;
-						float lerpspeed = (2000 * gpGlobals->frametime) / dist_to_killer;
-						VectorLerp( MyOrg, lerpspeed, KillerOrg, dest );
-						SetAbsOrigin( dest );
-
-					}
+					// lerp into killer's position
+					Vector dest;
+					if( fLerpToKiller < 1.0f )
+						fLerpToKiller += 2.0f * gpGlobals->frametime;
+					VectorLerp( MyOrg, fLerpToKiller, KillerOrg, dest );
+					SetAbsOrigin( dest );
 				}
 			}
 		}
@@ -5381,6 +5375,7 @@ void CBasePlayer::Spawn( void )
 	CreateFlashlightMonster();
 
 	m_hKiller = NULL;
+	fLerpToKiller = 0.0f;
 }
 
 void CBasePlayer::SetHUDTexts(void)

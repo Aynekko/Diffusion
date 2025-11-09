@@ -310,9 +310,23 @@ inline float DotProductAbs( const Vector& a, const Vector& b ) { return( fabs( a
 inline Vector CrossProduct( const Vector& a, const Vector& b ) { return Vector( a.y*b.z - a.z*b.y, a.z*b.x - a.x*b.z, a.x*b.y - a.y*b.x ); }
 inline void VectorLerp( const Vector& src1, float t, const Vector& src2, Vector& dest )
 {
-	dest.x = src1.x + (src2.x - src1.x) * t;
-	dest.y = src1.y + (src2.y - src1.y) * t;
-	dest.z = src1.z + (src2.z - src1.z) * t;
+	if( t < 0.0f ) t = 0.0f;
+	else if( t > 1.0f ) t = 1.0f;
+
+	if( t == 0.0f )
+	{
+		dest = src1;
+	}
+	else if( t == 1.0f )
+	{
+		dest = src2;
+	}
+	else
+	{
+		dest.x = src1.x + (src2.x - src1.x) * t;
+		dest.y = src1.y + (src2.y - src1.y) * t;
+		dest.z = src1.z + (src2.z - src1.z) * t;
+	}
 }
 
 #define vec3_t Vector

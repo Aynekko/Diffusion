@@ -659,6 +659,7 @@ public:
 	float gtbdPrev; // for CheckTimeBasedDamage()
 
 	EHANDLE m_hKiller;
+	float fLerpToKiller;
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025
