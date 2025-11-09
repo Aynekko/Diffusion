@@ -2,6 +2,11 @@
 // diffusion - simple animating texture class to use instead of sprites
 //============================================================================
 
+#ifndef _WIN32
+#include <limits.h>
+#define MAX_PATH PATH_MAX
+#endif // _WIN32
+
 #define MAX_ANIMATEX_FRAMES 256
 // flags
 #define ATX_STOPATLASTFRAME BIT(0)

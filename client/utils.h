@@ -25,6 +25,11 @@ GNU General Public License for more details.
 #include <stdarg.h>  // "
 #include <string> // for strncpy()
 
+#ifndef _WIN32
+#include <limits.h>
+#define MAX_PATH PATH_MAX
+#endif // _WIN32
+
 typedef unsigned char byte;
 typedef unsigned short word;
 
