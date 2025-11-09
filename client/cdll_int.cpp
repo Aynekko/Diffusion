@@ -254,10 +254,11 @@ void HUD_Reset(void)
 static int *VGUI_GetRect( void )
 {
 	static int extent[4];
+#ifdef _WIN32
 	RECT wrect;
 
 	if( GetWindowRect( GetActiveWindow(), &wrect ))
-          {
+	{
 		if( !wrect.left )
 		{
 			// fullscreen
@@ -275,6 +276,12 @@ static int *VGUI_GetRect( void )
 			extent[3] = wrect.bottom - 4;
 		}
 	}
+#else
+	extent[0] = gEngfuncs.GetWindowCenterX() - ScreenWidth / 2;
+	extent[1] = gEngfuncs.GetWindowCenterY() - ScreenHeight / 2;
+	extent[2] = gEngfuncs.GetWindowCenterX() + ScreenWidth / 2;
+	extent[3] = gEngfuncs.GetWindowCenterY() + ScreenHeight / 2;
+#endif
 	return extent;	
 }
 
