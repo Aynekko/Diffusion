@@ -569,9 +569,10 @@ void CBasePlayerItem :: FallInit( void )
 	SetTouch( &CBasePlayerItem::DefaultTouch );
 	SetThink(&CBasePlayerItem::FallThink );
 
-	SetFadeDistance( 1000 ); // diffusion - UNDONE should be a cvar?
+	if( !pev->iuser4 || pev->iuser4 <= 0 )
+		SetFadeDistance( 1000 ); // diffusion - UNDONE should be a cvar?
 
-	SetNextThink( 0.1 );
+	SetNextThink( 0 );
 }
 
 //=========================================================
@@ -617,6 +618,22 @@ void CBasePlayerItem::FallThink ( void )
 	angles.y -= 80 * gpGlobals->frametime;
 	angles.z += 60 * gpGlobals->frametime;
 	SetAbsAngles( angles );
+
+	// if stuck in the air for too long, assume we are done
+	if( HasFlag( F_WEAPON_DESPAWN ) && m_flDelay > 0.0f )
+	{
+		if( gpGlobals->time > m_flDelay )
+		{
+			if( !FNullEnt( pev->owner ) && !HasSpawnFlags( SF_AMMO_DONTFALL ) )
+			{
+				int pitch = 95 + RANDOM_LONG( 0, 29 );
+				EMIT_SOUND_DYN( ENT( pev ), CHAN_VOICE, "items/weapondrop1.wav", 1, ATTN_NORM, 0, pitch );
+			}
+			Materialize();
+			return;
+		}
+
+	}
 }
 
 //=========================================================

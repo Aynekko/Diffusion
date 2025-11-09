@@ -1542,10 +1542,10 @@ void SecAss::HandleAnimEvent( MonsterEvent_t *pEvent )
 				WRITE_COORD( org.x );
 				WRITE_COORD( org.y );
 				WRITE_COORD( org.z );
-				WRITE_BYTE( 50 ); // num of sprites
+				WRITE_BYTE( 75 ); // num of sprites
 				WRITE_BYTE( 2 ); // speed of decay (*0.01)
-				WRITE_BYTE( 50 ); // scale
-				WRITE_BYTE( 50 ); // randomize position offset of each sprite (+/- 50 here)
+				WRITE_BYTE( 55 ); // scale
+				WRITE_BYTE( 75 ); // randomize position offset of each sprite (+/- 75 here)
 			MESSAGE_END();
 			SmokeDropped = true;
 			g_smokeallowed = false;

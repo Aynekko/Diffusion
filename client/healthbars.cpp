@@ -197,7 +197,7 @@ int CHealthbars::Draw( float flTime )
 	dist_mult = bound( 0.1, dist_mult, 1 );
 	// also scale by fov, taking 80 fov as default
 
-	const float fov_mult = current_fov / 80.0f;
+	const float fov_mult = bound( 40.0f, current_fov, 100.0f ) / 80.0f;
 	dist_mult *= fov_mult;
 
 	float width = (BAR_SCALE * 10 * (barsize+1)) / dist_mult;

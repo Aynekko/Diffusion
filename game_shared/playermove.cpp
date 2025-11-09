@@ -1412,8 +1412,8 @@ void PM_WalkMove( void )
 	pmtrace_t trace;
 
 // DiffusionSprint by Ku2zoff
-	qboolean  bIsSprint;
-	float iSprintFactor = 135.0f;
+	bool bIsSprint;
+	const float iSprintFactor = 1.35f;
 	if ( (pmove->cmd.buttons & IN_RUN) && (pmove->cmd.buttons & IN_FORWARD) && !(pmove->flags & FL_DUCKING) )
 	{
 		pmove->oldbuttons |= IN_RUN;
@@ -1437,10 +1437,9 @@ void PM_WalkMove( void )
 	pmove->forward = pmove->forward.Normalize();  // Normalize remainder of vectors.
 	pmove->right = pmove->right.Normalize();    // 
 
-//	for (i=0 ; i<2 ; i++)       // Determine x and y parts of velocity
-//		wishvel[i] = pmove->forward[i]*fmove + pmove->right[i]*smove;
+	// Determine x and y parts of velocity
 	if( bIsSprint && (!(pmove->flags & FL_DUCKING)) )
-		wishvel = pmove->forward * (fmove * iSprintFactor) + pmove->right * smove * iSprintFactor * 0.75f;
+		wishvel = pmove->forward * (fmove * iSprintFactor) + pmove->right * (smove * iSprintFactor * 0.75f);
 	else
 		wishvel = pmove->forward * fmove + pmove->right * smove;
 	
@@ -1450,13 +1449,22 @@ void PM_WalkMove( void )
 	wishspeed = wishdir.Length();
 	wishdir = wishdir.Normalize();
 
-//
-// Clamp to server defined max speed
-//
-	if( wishspeed > pmove->maxspeed )
+	// Clamp to server defined max speed
+	if( !bIsSprint )
 	{
-		wishvel *= ( pmove->maxspeed / wishspeed );
-		wishspeed = pmove->maxspeed;
+		if( wishspeed > pmove->maxspeed / iSprintFactor )
+		{
+			wishvel *= ((pmove->maxspeed / iSprintFactor) / wishspeed);
+			wishspeed = pmove->maxspeed / iSprintFactor;
+		}
+	}
+	else
+	{
+		if( wishspeed > pmove->maxspeed )
+		{
+			wishvel *= (pmove->maxspeed / wishspeed);
+			wishspeed = pmove->maxspeed;
+		}
 	}
 
 	// Set pmove velocity

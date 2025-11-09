@@ -7923,6 +7923,7 @@ void CBasePlayer::DropPlayerItem(char* pszItemName)
 		pDrop->pev->spawnflags |= SF_NORESPAWN;// never respawn
 		pDrop->SetFadeDistance( 700 );
 		pDrop->SetFlag( F_WEAPON_DESPAWN );
+		pDrop->m_flDelay = gpGlobals->time + 30.0f; // if the weapon stuck in the air for this long, assume it landed - don't keep it forever
 
 		int iAmmoIndex = GetAmmoIndex( pWeaponItem->pszAmmo1() );
 		if( iAmmoIndex != -1 )
