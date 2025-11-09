@@ -1298,14 +1298,17 @@ int PM_FlyMove( void )
 			{
 				PM_ClipVelocity( original_velocity, planes[i], pmove->velocity, 1 );
 				for( j = 0; j < numplanes; j++ )
+				{
 					if( j != i )
 					{
 						// Are we now moving against this plane?
 						if( DotProduct( pmove->velocity, planes[j] ) < 0 )
 							break;	// not ok
 					}
-					if( j == numplanes )  // Didn't have to clip, so we're ok
-						break;
+				}
+
+				if( j == numplanes )  // Didn't have to clip, so we're ok
+					break;
 			}
 			
 			// Did we go all the way through plane set
