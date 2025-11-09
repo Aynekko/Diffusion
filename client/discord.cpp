@@ -1,6 +1,7 @@
 #include "build.h"
 
-#ifdef XASH_64BIT
+// a1ba: keep it win32 only for now
+#if XASH_64BIT && XASH_WIN32
 
 // OpenAG
 #include <cstdint>
