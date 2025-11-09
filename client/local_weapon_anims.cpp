@@ -254,6 +254,9 @@ void V_LocalWeaponAnimations( struct ref_params_s *pparams )
 		CurrentPAmmoClip = gHUD.m_Ammo.m_pWeapon->iClip;
 		CurrentSAmmoClip = gWR.CountAmmo( gHUD.m_Ammo.m_pWeapon->iAmmo2Type );
 		MaxSAmmoCapacity = gHUD.m_Ammo.m_pWeapon->iMax2; // check if weapon has secondary ammo at all
+
+		if( CurrentPAmmoClip == -1 ) // this weapon doesn't have a clip (AR2)
+			CurrentPAmmoClip = gWR.CountAmmo( gHUD.m_Ammo.m_pWeapon->iAmmoType );
 	}
 
 	if( !gHUD.CanShoot )
