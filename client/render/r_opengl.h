@@ -16,7 +16,9 @@ GNU General Public License for more details.
 #ifndef R_OPENGL_H
 #define R_OPENGL_H
 
+#ifdef _WIN32
 #include <windows.h>
+#endif // _WIN32
 
 #ifndef APIENTRY
 #define APIENTRY
@@ -1251,7 +1253,6 @@ EXTERN void ( APIENTRY *pglGetFramebufferAttachmentParameteriv )(GLenum target, 
 EXTERN void ( APIENTRY *pglBlitFramebuffer )(GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter);
 EXTERN void ( APIENTRY *pglCopyImageSubData )( GLuint srcName, GLenum srcTarget, GLint srcLevel, GLint srcX, GLint srcY, GLint srcZ, GLuint dstName, GLenum dstTarget, GLint dstLevel, GLint dstX, GLint dstY, GLint dstZ, GLsizei srcWidth, GLsizei srcHeight, GLsizei srcDepth );
 EXTERN void ( APIENTRY *pglGenerateMipmap )(GLenum target);
-EXTERN PROC ( WINAPI *pwglGetProcAddress)( const char * );
 
 EXTERN void ( APIENTRY *pglBindVertexArray )( GLuint array );
 EXTERN void ( APIENTRY *pglDeleteVertexArrays )( GLsizei n, const GLuint *arrays );

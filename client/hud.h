@@ -48,6 +48,10 @@
 
 typedef struct cvar_s	cvar_t;
 
+#ifndef _WIN32
+#define _cdecl
+#endif // _WIN32
+
 #define DHN_DRAWZERO 		1
 #define DHN_2DIGITS  		2
 #define DHN_3DIGITS  		4
