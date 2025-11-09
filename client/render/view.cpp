@@ -1056,7 +1056,7 @@ void V_CalcSpectatorRefdef( struct ref_params_s *pparams )
 int V_FindViewModelByWeaponModel( int weaponindex )
 {
 	// diffusion - FIXME need to check all the models and assignations...
-	static char *modelmap[][2] = {
+	static const char *modelmap[][2] = {
 		{ "models/p_crossbow.mdl",		"models/v_crossbow.mdl"		},
 		{ "models/p_crowbar.mdl",		"models/v_crowbar.mdl"		},
 		{ "models/p_egon.mdl",			"models/v_egon.mdl"			},

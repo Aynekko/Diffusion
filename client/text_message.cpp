@@ -98,7 +98,7 @@ char *CHudTextMessage::BufferedLocaliseTextString( const char *msg )
 // Simplified version of LocaliseTextString;  assumes string is only one word
 char *CHudTextMessage::LookupString( const char *msg, int *msg_dest )
 {
-	if( !msg ) return "";
+	if( !msg ) return (char *)"";
 
 	// '#' character indicates this is a reference to a string in titles.txt, and not the string itself
 	if( msg[0] == '#' ) 

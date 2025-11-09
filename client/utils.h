@@ -68,7 +68,7 @@ typedef struct dllfunc_s
 
 client_sprite_t *GetSpriteList( client_sprite_t *pList, const char *psz, int iRes, int iCount );
 extern void DrawQuad( float xmin, float ymin, float xmax, float ymax );
-extern void ALERT( ALERT_TYPE level, char *szFmt, ... );
+extern void ALERT( ALERT_TYPE level, const char *szFmt, ... );
 
 struct model_s *Mod_Handle( int modelIndex );
 

@@ -71,7 +71,7 @@ int HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppin
 //	Implementation of bone setup class
 //
 //================================================================================================
-void CBaseBoneSetup::debugMsg( char *szFmt, ... )
+void CBaseBoneSetup::debugMsg( const char *szFmt, ... )
 {
 	char	buffer[2048];	// must support > 1k messages
 	va_list	args;

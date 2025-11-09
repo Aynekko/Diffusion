@@ -18,7 +18,7 @@ public:
 	float r, g, b, a;
 	int flags;
 
-	void Init( char *Tex );
+	void Init( const char *Tex );
 	bool Initialized( void );
 	void SetPos( int x_min, int y_min, int x_max, int y_max );
 	int GetTotalFrames( void );

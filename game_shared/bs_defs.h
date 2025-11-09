@@ -334,7 +334,7 @@ private:
 	matrix3x4		targetBoneToWorld[MAXSTUDIOBONES];
 public:
 	// import table
-	virtual void debugMsg( char *szFmt, ... ) {}
+	virtual void debugMsg( const char *szFmt, ... ) {}
 	virtual mstudioanim_t *GetAnimSourceData( mstudioseqdesc_t *pseqdesc );
 	virtual void debugLine( const Vector& origin, const Vector& dest, int r, int g, int b, bool noDepthTest = false, float duration = 0.0f ) {}
 

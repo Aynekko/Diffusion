@@ -202,7 +202,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	gHUD.m_Scoreboard.GetAllPlayersInfo();
 
 	// Get the Killer's name
-	char *killer_name = g_PlayerInfoList[killer].name;
+	const char *killer_name = g_PlayerInfoList[killer].name;
 
 	if( !killer_name )
 	{
@@ -217,7 +217,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	}
 
 	// Get the Victim's name
-	char *victim_name = NULL;
+	const char *victim_name = NULL;
 
 	// If victim is -1, the killer killed a specific, non-player object (like a sentrygun)
 	if((( char )victim) != -1 )

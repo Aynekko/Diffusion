@@ -241,7 +241,7 @@ public:
 	void InitHUDData( void );
 	int VidInit( void );
 	int Draw( float flTime );
-	float DrawPlayers( int xoffset, float listslot, int nameoffset = 0, char *team = NULL ); // returns the ypos where it finishes drawing
+	float DrawPlayers( int xoffset, float listslot, int nameoffset = 0, const char *team = NULL ); // returns the ypos where it finishes drawing
 	void UserCmd_ShowScores( void );
 	void UserCmd_HideScores( void );
 	int MsgFunc_ScoreInfo( const char *pszName, int iSize, void *pbuf );
@@ -588,8 +588,8 @@ public:
 
 	// had to make these public so CHud could access them (to enable concussion icon)
 	// could use a friend declaration instead...
-	void EnableIcon( char *pszIconName, byte red, byte green, byte blue );
-	void DisableIcon( char *pszIconName );
+	void EnableIcon( const char *pszIconName, byte red, byte green, byte blue );
+	void DisableIcon( const char *pszIconName );
 
 private:
 	typedef struct

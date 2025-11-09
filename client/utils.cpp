@@ -146,7 +146,7 @@ pfnAlertMessage
 
 =============
 */
-void ALERT( ALERT_TYPE level, char *szFmt, ... )
+void ALERT( ALERT_TYPE level, const char *szFmt, ... )
 {
 	char	buffer[2048];	// must support > 1k messages
 	va_list	args;

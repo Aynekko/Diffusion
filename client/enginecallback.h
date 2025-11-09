@@ -76,7 +76,7 @@ extern render_api_t gRenderfuncs;
 #define DrawSetTextColor	(*gEngfuncs.pfnDrawSetTextColor)
 
 // sound functions (we can't use macroses - this names is collide with standard windows methods)
-inline void PlaySound( char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
+inline void PlaySound( const char *szSound, float vol ) { gEngfuncs.pfnPlaySoundByName( szSound, vol ); }
 inline void PlaySound( int iSound, float vol ) { gEngfuncs.pfnPlaySoundByIndex( iSound, vol ); }
 
 // render api callbacks

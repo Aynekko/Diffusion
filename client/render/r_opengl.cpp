@@ -968,7 +968,7 @@ obsolete
 void GL_CheckForErrors_( const char *filename, const int fileline )
 {
 	int	err;
-	char	*str;
+	const char	*str;
 
 	if( !CVAR_TO_BOOL( gl_check_errors ))
 		return;

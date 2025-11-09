@@ -4,7 +4,7 @@
 #include "utils.h"
 #include "r_opengl.h"
 
-void CAnimatex::Init( char *Tex )
+void CAnimatex::Init( const char *Tex )
 {
 	if( Initialized() )
 		return;

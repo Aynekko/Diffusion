@@ -2387,8 +2387,8 @@ void R_Explosion( Vector pos, int model, float scale, float framerate, int flags
 //==========================================================================================
 void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoVolume )
 {
-	char *sndname[5] = { NULL, NULL, NULL, NULL, NULL };
-	char *sndname_d[5] = { NULL, NULL, NULL, NULL, NULL };
+	const char *sndname[5] = { NULL, NULL, NULL, NULL, NULL };
+	const char *sndname_d[5] = { NULL, NULL, NULL, NULL, NULL };
 	int num = -1;
 	const cl_entity_t *player = gEngfuncs.GetLocalPlayer();
 	int Channel = CHAN_WEAPON;

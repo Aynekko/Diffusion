@@ -418,7 +418,7 @@ int CHudScoreboard :: Draw( float fTime )
 //==========================================================
 // returns the number of players drawn and ypos_bottom
 //==========================================================
-float CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset, char *team )
+float CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset, const char *team )
 {
 	// draw the players, in order,  and restricted to team if set
 	while( 1 )

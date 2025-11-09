@@ -80,7 +80,7 @@ check cubemap sides for valid
 */
 static bool Mod_CheckCubemap( const char *name )
 {
-	char *suf[6] = { "px", "nx", "py", "ny", "pz", "nz" };
+	const char *suf[6] = { "px", "nx", "py", "ny", "pz", "nz" };
 	int	valid_sides = 0;
 	char	sidename[64];
 	int	iCompare;
@@ -109,7 +109,7 @@ remove cubemap images from HDD
 */
 static void Mod_DeleteCubemap( const char *name )
 {
-	char *suf[6] = { "px", "nx", "py", "ny", "pz", "nz" };
+	const char *suf[6] = { "px", "nx", "py", "ny", "pz", "nz" };
 	char	sidename[64];
 
 	for( int i = 0; i < 6; i++ )
