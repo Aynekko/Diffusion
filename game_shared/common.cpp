@@ -13,11 +13,14 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 
+#ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
+#endif // _WIN32
 #include <stdio.h>
 #include <vector.h>
 #include <stringlib.h>
+#include <ctype.h>
 
 /*
 ============
@@ -159,7 +162,7 @@ char *COM_ParseFileExt( char *data, char *token, long token_size, bool allowNewL
 		
 // skip whitespace
 skipwhite:
-	while(( c = ((byte)*data)) <= ' ' )
+	while(( c = ((unsigned char)*data)) <= ' ' )
 	{
 		if( c == 0 )
 			return NULL;	// end of file;
@@ -187,7 +190,7 @@ skipwhite:
 		data++;
 		while( 1 )
 		{
-			c = (byte)*data++;
+			c = (unsigned char)*data++;
 			if( c == '\"' || !c )
 			{
 				if( len < token_size )
@@ -222,7 +225,7 @@ skipwhite:
 			token[len] = c;
 		data++;
 		len++;
-		c = ((byte)*data);
+		c = ((unsigned char)*data);
 
 		if( c == '{' || c == '}' || c == ')' || c == '(' || c == '\'' || c == ',' || c == '|' )
 			break;
