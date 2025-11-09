@@ -119,7 +119,7 @@ int CHudDeathNotice :: Draw( float flTime )
 			continue;
 		}
 
-		rgDeathNoticeList[i].flDisplayTime = min( rgDeathNoticeList[i].flDisplayTime, gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME );
+		rgDeathNoticeList[i].flDisplayTime = Q_min( rgDeathNoticeList[i].flDisplayTime, gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME );
 
 		// Draw the death notice
 		rgDeathNoticeList[i].ypos_lerp = lerp( rgDeathNoticeList[i].ypos_lerp, YRES( DEATHNOTICE_TOP ) + (DEATHNOTICE_SPACING * i), 7.0f * g_fFrametime );

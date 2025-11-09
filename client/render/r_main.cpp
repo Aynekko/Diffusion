@@ -71,9 +71,9 @@ static void CubeFace(const vec3_t org, int v0, int v1, int v2, int v3, float siz
 	unclamped[1] = TEXTURE_TO_TEXGAMMA(color[1]) * scale;
 	unclamped[2] = TEXTURE_TO_TEXGAMMA(color[2]) * scale;
 
-	col[0] = min((unclamped[0] >> 7), 255);
-	col[1] = min((unclamped[1] >> 7), 255);
-	col[2] = min((unclamped[2] >> 7), 255);
+	col[0] = Q_min((unclamped[0] >> 7), 255);
+	col[1] = Q_min((unclamped[1] >> 7), 255);
+	col[2] = Q_min((unclamped[2] >> 7), 255);
 
 	//	pglColor3ub( col[0], col[1], col[2] );
 	pglColor3ub(color[0], color[1], color[2]);

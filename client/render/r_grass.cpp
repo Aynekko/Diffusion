@@ -1269,7 +1269,7 @@ void R_GrassInit( void )
 			{
 				// seed is optional
 				entry.seed = Q_atoi( token );
-				entry.seed = max( 1, entry.seed );
+				entry.seed = Q_max( 1, entry.seed );
 			}
 			else entry.seed = random_seed++;
 

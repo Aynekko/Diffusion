@@ -478,8 +478,8 @@ float V_CalcBob( struct ref_params_s *pparams )
 
 	bob = sqrt( vel[0] * vel[0] + vel[1] * vel[1] ) * cl_bob->value;
 	bob = bob * 0.3 + bob * 0.7 * sin( cycle );
-	//	bob = min( bob, 4 );
-	//	bob = max( bob, -7 );
+	//	bob = Q_min( bob, 4 );
+	//	bob = Q_max( bob, -7 );
 	return bob;
 }
 
@@ -1958,7 +1958,7 @@ void V_LandDip( struct ref_params_s *pparams)
 	}
 	else
 	{
-		float landseconds = max(pparams->time - landtime, 0.0f);
+		float landseconds = Q_max(pparams->time - landtime, 0.0f);
 		float landFraction = SimpleSpline( landseconds / 0.25f );
 		clamp( landFraction, 0.0f, 1.0f );
 		float flDipAmount = (1 / 300) * 0.1f;  //200 = flOldFallVel
@@ -2083,7 +2083,7 @@ void V_InterpolatePos( struct ref_params_s *pparams )
 			{
 				frac = (t - ViewInterp.OriginTime[foundidx & ORIGIN_MASK]) / dt;
 				delta = ViewInterp.Origins[(foundidx + 1) & ORIGIN_MASK] - ViewInterp.Origins[foundidx & ORIGIN_MASK];
-				frac = min( 1.0, frac );
+				frac = Q_min( 1.0, frac );
 
 				neworg = ViewInterp.Origins[foundidx & ORIGIN_MASK] + delta * frac;
 

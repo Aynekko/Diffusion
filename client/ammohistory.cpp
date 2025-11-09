@@ -174,7 +174,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 	{
 		if( rgAmmoHistory[i].type )
 		{
-			rgAmmoHistory[i].DisplayTime = min( rgAmmoHistory[i].DisplayTime, gHUD.m_flTime + HISTORY_DRAW_TIME );
+			rgAmmoHistory[i].DisplayTime = Q_min( rgAmmoHistory[i].DisplayTime, gHUD.m_flTime + HISTORY_DRAW_TIME );
 
 			if ( rgAmmoHistory[i].DisplayTime <= flTime )
 			{ 
@@ -224,14 +224,14 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 					FillRoundedRGBA( xpos - text_width - 10, ypos_new - 5, text_width + 25, gHUD.m_scrinfo.iCharHeight + 10, 10, Vector4D( 0.275f, 0.663f, 1.0f, 0.002f * scale ) ); // blue frame for text
 					int r, g, b;
 					UnpackRGB( r, g, b, gHUD.m_iHUDColor );
-					ScaleColors( r, g, b, min( scale, 255 ) );
+					ScaleColors( r, g, b, Q_min( scale, 255 ) );
 					gHUD.DrawHudNumberString( xpos - text_width - 30, ypos_new, xpos - text_width - 100, rgAmmoHistory[i].iCount, r, g, b );
 					// draw text
 					pText = pMsg ? pMsg->pMessage : ammoname;
 					int textpos_x = xpos - text_width;
 					
 					r = 255; g = 255; b = 255;
-					ScaleColors( r, g, b, min( scale, 255 ) );
+					ScaleColors( r, g, b, Q_min( scale, 255 ) );
 					DrawString( textpos_x, ypos_new, pText, r, g, b );
 				}
 			}
@@ -249,7 +249,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 					UnpackRGB( r, g, b, RGB_REDISH ); // if the weapon doesn't have ammo, display it as red
 
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				ScaleColors( r, g, b, min( scale, 255 ));
+				ScaleColors( r, g, b, Q_min( scale, 255 ));
 
 				// get position, lerp to it
 				ypos -= 35 + AMMO_PICKUP_PICK_HEIGHT;
@@ -275,7 +275,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 
 				UnpackRGB( r, g, b, gHUD.m_iHUDColor );
 				float scale = ( rgAmmoHistory[i].DisplayTime - flTime ) * 80;
-				ScaleColors( r, g, b, min( scale, 255 ));
+				ScaleColors( r, g, b, Q_min( scale, 255 ));
 
 				// get position, lerp to it
 				ypos -= 30 + AMMO_PICKUP_PICK_HEIGHT;
