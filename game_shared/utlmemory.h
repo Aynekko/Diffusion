@@ -16,10 +16,23 @@
 
 #include <string.h>
 #include <malloc.h>
+#ifdef _MSC_VER
 #include <new.h>
+#else // !_MSC_VER
+#include <new>
+#include <alloca.h>
+#endif // !_MSC_VER
+#include <utility>
 
 #define ALIGN_VALUE( val, alignment )	(( val + alignment - 1 ) & ~( alignment - 1 ))
-#define stackalloc( _size )		_alloca( ALIGN_VALUE( _size, 16 ) )
+
+#ifndef _WIN32
+#define __cdecl
+#define stackalloc( _size )	alloca( ALIGN_VALUE( _size, 16 ) )
+#else // _WIN32
+#define stackalloc( _size )	alloca( ALIGN_VALUE( _size, 16 ) )
+#endif
+
 #define stackfree( _p )		0
 
 template <typename T>
@@ -27,6 +40,31 @@ inline T AlignValue( T val, size_t alignment )
 {
 	return (T)( ( (size_t)val + alignment - 1 ) & ~( alignment - 1 ) );
 }
+
+#ifndef _WIN32
+static inline void *_aligned_malloc( size_t size, size_t align )
+{
+	void *ret;
+	if( posix_memalign( &ret, align, size ))
+		return nullptr;
+
+	return ret;
+}
+
+static inline void *_aligned_realloc( void *ptr, size_t size, size_t align )
+{
+	void *newptr = _aligned_malloc( size, align );
+	if( !newptr )
+		return nullptr;
+
+	memcpy( newptr, ptr, size );
+	free( ptr );
+	return newptr;
+}
+
+#define _aligned_free free
+
+#endif // _WIN32
 
 //-----------------------------------------------------------------------------
 // Methods to invoke the constructor, copy constructor, and destructor
@@ -135,7 +173,10 @@ public:
 	void Purge( int numElements );
 
 	// is the memory externally allocated?
-	bool IsExternallyAllocated() const;
+	bool IsExternallyAllocated() const
+	{
+		return m_nGrowSize < 0;
+	}
 
 	// is the memory read only?
 	bool IsReadOnly() const;
@@ -189,9 +230,9 @@ public:
 
 	void Grow( int nCount = 1 )
 	{
-		if ( IsExternallyAllocated() )
+		if ( BaseClass::IsExternallyAllocated() )
 		{
-			ConvertToGrowableMemory( m_nMallocGrowSize );
+			BaseClass::ConvertToGrowableMemory( m_nMallocGrowSize );
 		}
 		BaseClass::Grow( nCount );
 	}
@@ -201,10 +242,10 @@ public:
 		if ( CUtlMemory<T>::m_nAllocationCount >= num )
 			return;
 
-		if ( IsExternallyAllocated() )
+		if ( BaseClass::IsExternallyAllocated() )
 		{
 			// Can't grow a buffer whose memory was externally allocated 
-			ConvertToGrowableMemory( m_nMallocGrowSize );
+			BaseClass::ConvertToGrowableMemory( m_nMallocGrowSize );
 		}
 
 		BaseClass::EnsureCapacity( num );
@@ -344,9 +385,9 @@ void CUtlMemory<T,I>::Init( int nGrowSize /*= 0*/, int nInitSize /*= 0*/ )
 template< class T, class I >
 void CUtlMemory<T,I>::Swap( CUtlMemory<T,I> &mem )
 {
-	swap( m_nGrowSize, mem.m_nGrowSize );
-	swap( m_pMemory, mem.m_pMemory );
-	swap( m_nAllocationCount, mem.m_nAllocationCount );
+	std::swap( m_nGrowSize, mem.m_nGrowSize );
+	std::swap( m_pMemory, mem.m_pMemory );
+	std::swap( m_nAllocationCount, mem.m_nAllocationCount );
 }
 
 
@@ -447,17 +488,6 @@ inline const T& CUtlMemory<T,I>::Element( I i ) const
 	assert( IsIdxValid(i) );
 	return m_pMemory[i];
 }
-
-
-//-----------------------------------------------------------------------------
-// is the memory externally allocated?
-//-----------------------------------------------------------------------------
-template< class T, class I >
-bool CUtlMemory<T,I>::IsExternallyAllocated() const
-{
-	return (m_nGrowSize < 0);
-}
-
 
 //-----------------------------------------------------------------------------
 // is the memory read only?
@@ -754,10 +784,10 @@ CUtlMemoryAligned<T, nAlignment>::CUtlMemoryAligned( int nGrowSize, int nInitAll
 	CUtlMemory<T>::m_pMemory = 0; 
 	CUtlMemory<T>::m_nAllocationCount = nInitAllocationCount;
 	CUtlMemory<T>::m_nGrowSize = nGrowSize;
-	ValidateGrowSize();
+	CUtlMemory<T>::ValidateGrowSize();
 
 	// Alignment must be a power of two
-	COMPILE_TIME_ASSERT( (nAlignment & (nAlignment-1)) == 0 );
+	static_assert( (nAlignment & (nAlignment-1)) == 0 );
 	assert( (nGrowSize >= 0) && (nGrowSize != CUtlMemory<T>::EXTERNAL_BUFFER_MARKER) );
 	if ( CUtlMemory<T>::m_nAllocationCount )
 	{
@@ -830,7 +860,7 @@ void CUtlMemoryAligned<T, nAlignment>::Grow( int num )
 {
 	assert( num > 0 );
 
-	if ( IsExternallyAllocated() )
+	if ( CUtlMemory<T>::IsExternallyAllocated() )
 	{
 		// Can't grow a buffer whose memory was externally allocated 
 		assert(0);
@@ -865,7 +895,7 @@ inline void CUtlMemoryAligned<T, nAlignment>::EnsureCapacity( int num )
 	if ( CUtlMemory<T>::m_nAllocationCount >= num )
 		return;
 
-	if ( IsExternallyAllocated() )
+	if ( CUtlMemory<T>::IsExternallyAllocated() )
 	{
 		// Can't grow a buffer whose memory was externally allocated 
 		assert(0);
@@ -891,7 +921,7 @@ inline void CUtlMemoryAligned<T, nAlignment>::EnsureCapacity( int num )
 template< class T, int nAlignment >
 void CUtlMemoryAligned<T, nAlignment>::Purge()
 {
-	if ( !IsExternallyAllocated() )
+	if ( !CUtlMemory<T>::IsExternallyAllocated() )
 	{
 		if ( CUtlMemory<T>::m_pMemory )
 		{
