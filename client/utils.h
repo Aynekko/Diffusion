@@ -36,7 +36,7 @@ extern int r_currentMessageNum;
 extern float v_idlescale;
 
 extern int g_iXashEngineBuildNumber;
-extern BOOL g_fRenderInitialized;
+extern bool g_fRenderInitialized;
 
 #define SND_SPAWNING		(1<<8)		// we're spawing, used in some cases for ambients 
 #define SND_STOP			(1<<5)		// stop sound

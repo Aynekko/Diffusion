@@ -43,7 +43,7 @@ char r_depth_msg[2048];
 ref_instance_t	*RI = &glState.stack[0];
 float gldepthmin, gldepthmax;
 model_t *worldmodel = NULL;	// must be set at begin each frame
-BOOL g_fRenderInitialized = FALSE;
+bool g_fRenderInitialized = false;
 int r_currentMessageNum = 0;
 Vector PrevViewAngles = g_vecZero;
 Vector PrevViewOrg = g_vecZero;
@@ -2253,7 +2253,7 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 	return 1;
 }
 
-BOOL HUD_SpeedsMessage( char *out, size_t size )
+int HUD_SpeedsMessage( char *out, size_t size )
 {
 	if( !g_fRenderInitialized || !CVAR_TO_BOOL( gl_renderer ))
 		return false; // let the engine use built-in counters
@@ -2317,7 +2317,7 @@ int HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_inter
 {
 	if ( !callback || !renderfuncs || version != CL_RENDER_INTERFACE_VERSION )
 	{
-		return FALSE;
+		return false;
 	}
 
 	size_t iImportSize = sizeof( render_interface_t );
@@ -2332,9 +2332,9 @@ int HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_inter
 	// get pointer to movevars
 	tr.movevars = gEngfuncs.pEventAPI->EV_GetMovevars();
 
-	g_fRenderInitialized = TRUE;
+	g_fRenderInitialized = true;
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================

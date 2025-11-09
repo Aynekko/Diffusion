@@ -572,7 +572,7 @@ static void GL_InitExtensions( void )
 	if( !GL_Support( R_OPENGL_110 ))
 	{
 		ConPrintf( "^1Error:^7 OpenGL 1.0 can't be installed. Custom renderer disabled.\n" );
-		g_fRenderInitialized = FALSE;
+		g_fRenderInitialized = false;
 		return;
 	}
 
@@ -611,7 +611,7 @@ static void GL_InitExtensions( void )
 	if( !GL_Support( R_DRAW_RANGEELEMENTS_EXT ))
 	{
 		ConPrintf( "^1Error:^7 GL_EXT_draw_range_elements not supported. Custom renderer disabled\n" );
-		g_fRenderInitialized = FALSE;
+		g_fRenderInitialized = false;
 		return;
 	}
 
@@ -628,7 +628,7 @@ static void GL_InitExtensions( void )
 	if( !GL_Support( R_ARB_MULTITEXTURE ))
 	{
 		ConPrintf( "^1Error:^7 GL_ARB_multitexture is not supported. Custom renderer disabled.\n" );
-		g_fRenderInitialized = FALSE;
+		g_fRenderInitialized = false;
 		return;
 	}
 
@@ -677,7 +677,7 @@ static void GL_InitExtensions( void )
 	if( !GL_Support( R_ARB_VERTEX_BUFFER_OBJECT_EXT ))
 	{
 		ALERT( at_error, "GL_ARB_vertex_buffer_object not support. Custom renderer disabled\n" );
-		g_fRenderInitialized = FALSE;
+		g_fRenderInitialized = false;
 		return;
 	}
 
@@ -686,7 +686,7 @@ static void GL_InitExtensions( void )
 	if( !GL_Support( R_ARB_VERTEX_ARRAY_OBJECT_EXT ))
 	{
 		ALERT( at_error, "GL_ARB_vertex_array_object not support. Custom renderer disabled\n" );
-		g_fRenderInitialized = FALSE;
+		g_fRenderInitialized = false;
 		return;
 	}
 
@@ -700,7 +700,7 @@ static void GL_InitExtensions( void )
 	if( !GL_Support( R_SHADER_OBJECTS_EXT ))
 	{
 		ConPrintf( "^1Error:^7 GL_ARB_shader_objects not support. Custom renderer disabled\n" );
-		g_fRenderInitialized = FALSE;
+		g_fRenderInitialized = false;
 		return;
 	}
 
@@ -709,7 +709,7 @@ static void GL_InitExtensions( void )
 	if( !GL_Support( R_SHADER_GLSL100_EXT ))
 	{
 		ConPrintf( "^1Error:^7 GL_ARB_shading_language_100 not support. Custom renderer disabled\n" );
-		g_fRenderInitialized = FALSE;
+		g_fRenderInitialized = false;
 		return;
 	}
 
@@ -718,7 +718,7 @@ static void GL_InitExtensions( void )
 	if( !GL_Support( R_VERTEX_SHADER_EXT ))
 	{
 		ConPrintf( "^1Error:^7 GL_ARB_vertex_shader not support. Custom renderer disabled\n" );
-		g_fRenderInitialized = FALSE;
+		g_fRenderInitialized = false;
 		return;
 	}
 
@@ -727,7 +727,7 @@ static void GL_InitExtensions( void )
 	if( !GL_Support( R_FRAGMENT_SHADER_EXT ))
 	{
 		ConPrintf( "^1Error:^7 GL_ARB_fragment_shader not support. Custom renderer disabled\n" );
-		g_fRenderInitialized = FALSE;
+		g_fRenderInitialized = false;
 		return;
 	}
 
@@ -775,7 +775,7 @@ static void GL_InitExtensions( void )
 	if( glConfig.max_skinning_bones < 32 )
 	{
 		ALERT( at_error, "Hardware Skinning not supported. Custom renderer disabled\n" );
-		g_fRenderInitialized = FALSE;
+		g_fRenderInitialized = false;
 		return;
 	}
 	else if( glConfig.max_skinning_bones < MAXSTUDIOBONES )

@@ -1151,7 +1151,7 @@ public:
 	
 	void AddHudElem( CHudBase *p );
 	float GetSensitivity() { return m_flMouseSensitivity; }
-	BOOL HasWeapon( int weaponnum ) { return FBitSet( m_iWeaponBits[weaponnum >> 3], BIT( weaponnum & 7 )); }
+	bool HasWeapon( int weaponnum ) { return FBitSet( m_iWeaponBits[weaponnum >> 3], BIT( weaponnum & 7 )); }
 	void AddWeapon( int weaponnum ) { SetBits( m_iWeaponBits[weaponnum >> 3], BIT( weaponnum & 7 )); }
 
 	void DrumsInput( int Slot );
