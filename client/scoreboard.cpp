@@ -34,6 +34,7 @@ hud_player_info_t		g_PlayerInfoList[MAX_PLAYERS+1];	// player info from the engi
 extra_player_info_t		g_PlayerExtraInfo[MAX_PLAYERS+1];	// additional player info sent directly to the client dll
 team_info_t		g_TeamInfo[MAX_TEAMS+1];
 static float boardA = 0.0f;
+static float boardlerper = 0.0f;
 
 DECLARE_COMMAND( m_Scoreboard, ShowScores );
 DECLARE_COMMAND( m_Scoreboard, HideScores );
@@ -190,11 +191,19 @@ int CHudScoreboard :: Draw( float fTime )
 		return 0;
 	
 	if( !m_iShowscoresHeld && !gHUD.m_iIntermission )
-		boardA = lerp( boardA, 0.0f, 30.0f * g_fFrametime );
+	{
+		if( boardlerper > 0.0f )
+			boardlerper -= 7.0f * g_fFrametime;
+	}
 	else
-		boardA = lerp( boardA, 1.0f, 20.0f * g_fFrametime );
+	{
+		if( boardlerper < 1.0f )
+			boardlerper += 7.0f * g_fFrametime;
+	}
 
-	if( boardA <= 0.001f ) // lerping means it will never actually reach zero? cool to know...
+	boardA = lerp( 0.0f, 1.0f, boardlerper );
+
+	if( boardA <= 0.0f )
 		return 1;
 
 	GetAllPlayersInfo();

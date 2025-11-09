@@ -35,7 +35,7 @@ int CScreenEffects::VidInit(void)
 	SpeedometerGears.Init( "sprites/diffusion/speed_gears/speed_gears" );
 	LastOrigin = g_vecZero;
 	SaveIcon = LOAD_TEXTURE( "sprites/diffusion/saveicon.dds", NULL, 0, 0 );
-	VoiceIcon = LOAD_TEXTURE( "sprites/diffusion/voice_icon", NULL, 0, 0 );
+	VoiceIcon = LOAD_TEXTURE( "sprites/diffusion/voice_icon.dds", NULL, 0, 0 );
 	ShouldDrawVoiceIcon = false;
 
 	return 1;
@@ -49,6 +49,7 @@ int CScreenEffects::Draw( float flTime )
 	DrawCinematicBorder();
 	DrawGameSaved();
 	DrawVoiceIcon();
+	DrawVoicePlayers();
 
 	return 1;
 }
@@ -291,6 +292,64 @@ void CScreenEffects::DrawShieldVignette(void)
 		DrawQuad( 0, 0, ScreenWidth, ScreenHeight );
 		gEngfuncs.pTriAPI->End();
 	}
+}
+
+void CScreenEffects::DrawVoicePlayers( void )
+{
+	// figure out how many players are talking
+	int voices = 0;
+	const int MaxClients = GET_MAX_CLIENTS();
+	gHUD.m_Scoreboard.GetAllPlayersInfo();
+	for( int i = 1; i < MaxClients; i++ )
+	{
+		if( g_PlayerInfoList[i].name == NULL )
+			continue;
+		if( g_PlayerExtraInfo[i].isTalking )
+			voices++;
+	}
+
+	if( voices == 0 )
+		return;
+
+	// position expands from center right
+	const int iBORDER = 10;
+	float y = ScreenHeight * 0.5f;
+	int h;
+	GetConsoleStringSize( "ABCD", NULL, &h );
+	h += iBORDER; // now we have total height of one line including 5px border
+	y -= (voices * h) * 0.5f;
+	const int icon_size = h - iBORDER;
+
+	// draw all icons
+	GL_Bind( 0, VoiceIcon );
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAlpha );
+	gEngfuncs.pTriAPI->Color4f( 1.0f, 1.0f, 1.0f, 1.0f );
+	int x_pos = ScreenWidth - iBORDER - icon_size;
+	int y_pos = y;
+	for( int i = 0; i < voices; i++ )
+	{
+		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+		DrawQuad( x_pos, y_pos, x_pos + icon_size, y_pos + icon_size );
+		gEngfuncs.pTriAPI->End();
+		y_pos += icon_size + iBORDER;
+	}
+
+	// now draw all names
+	x_pos = 0;
+	y_pos = y;
+	for( int i = 1; i < MaxClients; i++ )
+	{
+		if( g_PlayerInfoList[i].name == NULL )
+			continue;
+		if( !g_PlayerExtraInfo[i].isTalking )
+			continue;
+
+		x_pos = ScreenWidth - iBORDER - icon_size - iBORDER - ConsoleStringLen( g_PlayerInfoList[i].name );
+		DrawConsoleString( x_pos, y_pos, g_PlayerInfoList[i].name );
+		y_pos += h;
+	}
+
+	
 }
 
 //===============================================

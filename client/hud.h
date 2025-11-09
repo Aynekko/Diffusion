@@ -842,6 +842,7 @@ public:
 	void DrawShieldVignette( void );
 	void DrawGameSaved( void );
 	void DrawVoiceIcon( void );
+	void DrawVoicePlayers( void );
 	bool ShouldDrawVoiceIcon;
 	bool ShouldDrawGameSaved;
 	bool SaveIcon_Reset;
