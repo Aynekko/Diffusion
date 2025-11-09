@@ -973,12 +973,13 @@ void V_CalcSpectatorRefdef( struct ref_params_s *pparams )
 
 	if( pparams->nextView == 0 )
 	{
+		Vector null_vec( 0, 0, 0 );
 		// first renderer cycle, full screen
 
 		switch( g_iUser1 )
 		{
 		case OBS_CHASE_LOCKED:
-			V_GetChasePos( g_iUser2, Vector( 0, 0, 0 ), v_origin, v_angles );
+			V_GetChasePos( g_iUser2, null_vec, v_origin, v_angles );
 			break;
 
 		case OBS_CHASE_FREE:

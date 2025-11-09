@@ -969,6 +969,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	{
 	case kRenderTransAlpha:
 		GL_DepthMask( GL_FALSE );
+		// fallthrough
 	case kRenderTransColor:
 	case kRenderTransTexture:
 	case kRenderFade:
@@ -978,6 +979,7 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 	case kRenderGlow:
 	case kRenderConstantGlow:
 		GL_DepthTest( GL_FALSE );
+		// fallthrough
 	case kRenderTransAdd:
 		GL_Blend( GL_TRUE );
 		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );

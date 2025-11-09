@@ -470,33 +470,33 @@ void RenderSunShafts( void )
 void MotionBlur(void)
 {
 	static float drunk_amount = 0.0f;
+	float Accum;
 
-	if( gHUD.DrunkLevel > 0 || drunk_amount > 0.0f )
-		goto allow_drunk;
-	
-	if( !CVAR_TO_BOOL( r_blur ) )
-		return;
-
-	float PlayerVelocity = tr.viewparams.simvel.Length();
-	const int Threshold = CVAR_GET_FLOAT( "r_blur_threshold" );
-
-	// player is in car
-	if( gEngfuncs.GetLocalPlayer()->curstate.vuser1.y > 0.0f )
-		PlayerVelocity = gEngfuncs.GetLocalPlayer()->curstate.vuser1.y;
-
-	if( Threshold > PlayerVelocity * 0.01 )
-		return;
-
-	float Accum = PlayerVelocity * 0.0001 - Threshold * 0.01;
-	Accum = bound( 0, Accum, 0.2 );
-
-allow_drunk:
 	if( gHUD.DrunkLevel > 0 || drunk_amount > 0.0f )
 	{
 		drunk_amount = CL_UTIL_Approach( gHUD.DrunkLevel * 0.1f, drunk_amount, g_fFrametime );
 		Accum = drunk_amount;
 	}
+	else
+	{
+		if( !CVAR_TO_BOOL( r_blur ) )
+			return;
 
+		float PlayerVelocity = tr.viewparams.simvel.Length();
+		const int Threshold = CVAR_GET_FLOAT( "r_blur_threshold" );
+
+		// player is in car
+		if( gEngfuncs.GetLocalPlayer()->curstate.vuser1.y > 0.0f )
+			PlayerVelocity = gEngfuncs.GetLocalPlayer()->curstate.vuser1.y;
+
+		if( Threshold > PlayerVelocity * 0.01 )
+			return;
+
+		Accum = PlayerVelocity * 0.0001 - Threshold * 0.01;
+		Accum = bound( 0, Accum, 0.2 );
+	}
+
+allow_drunk:
 	Vector org;
 	R_TransformDeviceToScreen( g_vecZero, org ); // FIXME just center of the screen...
 
