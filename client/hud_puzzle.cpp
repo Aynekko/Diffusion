@@ -241,8 +241,8 @@ int CHudPuzzle::Draw( float flTime )
 	{
 		solved = true;
 		// send result to server
-		char szbuf[32];
-		sprintf_s( szbuf, "solvepuzzle %i %i\n", (int)entidx, (int)sign );
+		char szbuf[64];
+		Q_snprintf( szbuf, sizeof( szbuf ), "solvepuzzle %i %i\n", (int)entidx, (int)sign );
 		ClientCmd( szbuf );
 	}
 #ifdef PUZZLE_DEBUG_MSG

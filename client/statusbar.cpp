@@ -263,7 +263,7 @@ int CHudStatusBar :: MsgFunc_StatusValue( const char *pszName, int iSize, void *
 
 	m_iStatusValues[index] = READ_SHORT();
 
-	m_bReparseString = TRUE;
+	m_bReparseString = true;
 
 	END_READ();
 	

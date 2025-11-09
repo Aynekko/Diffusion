@@ -9,7 +9,7 @@ void CAnimatex::Init( char *Tex )
 	if( Initialized() )
 		return;
 	
-	strcpy_s( start_tex, Tex );
+	Q_strncpy( start_tex, Tex, sizeof( start_tex ));
 	fCurFrame = 0.0f;
 	xmin = 0;
 	xmax = 100;
@@ -25,14 +25,14 @@ void CAnimatex::Init( char *Tex )
 
 	// load frames
 	char tmp[MAX_PATH];
-	strcpy_s( tmp, Tex );
+	Q_strncpy( tmp, Tex, sizeof( tmp ));
 	COM_StripExtension( tmp );
 	char Path[128];
 	int i;
 
 	for( i = 0; i < MAX_ANIMATEX_FRAMES; i++ )
 	{
-		sprintf_s( Path, "%s_%i", tmp, i );
+		Q_snprintf( Path, sizeof( Path ), "%s_%i", tmp, i );
 		if( IMAGE_EXISTS( Path ) )
 			Texture[i] = LOAD_TEXTURE( Path, NULL, 0, 0 );
 		else

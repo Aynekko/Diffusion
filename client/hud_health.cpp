@@ -217,7 +217,7 @@ int CHudHealthVisual :: Draw(float flTime)
 
 	// draw numbers
 	char numbers[16];
-	sprintf_s( numbers, "%3d / %i", (int)health_val, m_iMaxHealth );
+	Q_snprintf( numbers, sizeof( numbers ), "%3d / %i", (int)health_val, m_iMaxHealth );
 	int text_pos_x = pos_x + icon_size + full_frame_w;
 	int text_pos_y = pos_y;
 	DrawString( text_pos_x, text_pos_y, numbers, 70, 169, 255 );

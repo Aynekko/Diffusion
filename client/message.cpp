@@ -452,7 +452,7 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 				g_pCustomMessage.fxtime = 0.25;
 				g_pCustomMessage.holdtime = 5;
 				g_pCustomMessage.pName = g_pCustomName;
-				strcpy_s( g_pCustomText, pName );
+				Q_strncpy( g_pCustomText, pName, sizeof( g_pCustomText ));
 				g_pCustomMessage.pMessage = g_pCustomText;
 
 				tempMessage = &g_pCustomMessage;
@@ -482,7 +482,7 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 			// replace the keybindings like #attack# etc.
 			char temp[4096];
 			pTempText[i][0] = '\0';
-			_snprintf_s( temp, sizeof( temp ), m_pMessages[i]->pMessage );
+			Q_snprintf( temp, sizeof( temp ), m_pMessages[i]->pMessage );
 			UTIL_ReplaceKeyBindings( temp, sizeof( temp ), pTempText[i] );
 
 			m_startTime[i] = time;
@@ -498,14 +498,14 @@ int CHudMessage::MsgFunc_HudText( const char *pszName, int iSize, void *pbuf )
 	char *pString = READ_STRING();
 
 	// diffusion - hack
-	if( !_stricmp(pString, "GAMESAVED") )
+	if( !Q_stricmp(pString, "GAMESAVED") )
 	{
 		gHUD.m_ScreenEffects.SaveIcon_Reset = true;
 		gHUD.m_ScreenEffects.ShouldDrawGameSaved = true;
 		END_READ();
 		return 1;
 	}
-	else if( !_stricmp( pString, "OBJ_UPDATED" ) )
+	else if( !Q_stricmp( pString, "OBJ_UPDATED" ) )
 	{
 		gHUD.m_HintObjectives.fForcedTimer = tr.time + OBJECTIVE_TIMER;
 		END_READ();

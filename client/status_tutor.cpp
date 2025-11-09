@@ -45,7 +45,7 @@ int CHudTutorial::MsgFunc_StatusIconTutor( const char *pszName, int iSize, void 
 {
 	BEGIN_READ( pszName, pbuf, iSize );
 	char pszTutorialName[128];
-	_snprintf_s( pszTutorialName, sizeof( pszTutorialName ), READ_STRING() );
+	Q_snprintf( pszTutorialName, sizeof( pszTutorialName ), READ_STRING() );
 	const char *img = READ_STRING();
 	END_READ();
 
@@ -73,12 +73,12 @@ void CHudTutorial::EnableTutorial( const char *pszTutorialName )
 
 	// copy the message from titles.txt as is
 	tutorial_text[0] = '\0';
-	_snprintf_s( tutorial_text, sizeof( tutorial_text ), tutorial->pMessage );
+	Q_snprintf( tutorial_text, sizeof( tutorial_text ), tutorial->pMessage );
 	
 	// now replace the keybindings like #attack# etc.
 	char temp[sizeof( tutorial_text )];
 	UTIL_ReplaceKeyBindings( tutorial_text, sizeof( tutorial_text ), temp );
-	_snprintf_s( tutorial_text, sizeof( tutorial_text ), temp );
+	Q_snprintf( tutorial_text, sizeof( tutorial_text ), temp );
 
 	// get tutorial window width and height (this draws text offscreen to get proper values)
 	MessageDraw( tutorial, 0, 0, true );

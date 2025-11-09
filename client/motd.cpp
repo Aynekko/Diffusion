@@ -121,7 +121,7 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 
 	int is_finished = READ_BYTE();
 	size_t roomInArray = sizeof( m_szMOTD ) - strlen( m_szMOTD ) - 1;
-	strncat_s( m_szMOTD, READ_STRING(), roomInArray >= 0 ? roomInArray : 0 );
+	Q_strncat( m_szMOTD, READ_STRING(), roomInArray >= 0 ? roomInArray : 0 );
 	m_szMOTD[sizeof( m_szMOTD ) - 1] = '\0';
 
 	if( is_finished )
@@ -130,7 +130,7 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 		
 		// diffusion - follow it to the new HUD instead
 		gHUD.m_PseudoGUI.m_szMOTD[0] = '\0';
-		strcpy_s( gHUD.m_PseudoGUI.m_szMOTD, m_szMOTD );
+		Q_strncpy( gHUD.m_PseudoGUI.m_szMOTD, m_szMOTD, sizeof( gHUD.m_PseudoGUI.m_szMOTD ));
 		gHUD.m_PseudoGUI.Enable();
 		/*
 		m_iFlags |= HUD_ACTIVE;

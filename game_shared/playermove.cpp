@@ -155,13 +155,13 @@ void PM_SwapTextures( int i, int j )
 	char chTemp;
 	char szTemp[ CBTEXTURENAMEMAX ];
 
-	strcpy_s( szTemp, grgszTextureName[ i ] );
+	Q_strncpy( szTemp, grgszTextureName[ i ], sizeof( szTemp ));
 	chTemp = grgchTextureType[ i ];
 	
-	strcpy_s( grgszTextureName[ i ], grgszTextureName[ j ] );
+	Q_strncpy( grgszTextureName[ i ], grgszTextureName[ j ], sizeof( grgszTextureName[ i ] ));
 	grgchTextureType[ i ] = grgchTextureType[ j ];
 
-	strcpy_s( grgszTextureName[ j ], szTemp );
+	Q_strncpy( grgszTextureName[ j ], szTemp, sizeof( grgszTextureName[ j ] ));
 	grgchTextureType[ j ] = chTemp;
 }
 
@@ -334,7 +334,7 @@ void PM_PlayGroupSound( const char* szValue, int irand, float fvol )
 	{
 		if (szValue[i] == '?')
 		{
-			strcpy_s(szBuf, szValue);
+			Q_strncpy(szBuf, szValue, sizeof( szBuf ));
 			switch (irand)
 			{
 			// right foot

@@ -119,8 +119,8 @@ int CHudCodeInput::Draw( float flTime )
 			r = 25;
 			g = 255;
 			b = 25;
-			char szbuf[32];
-			sprintf_s( szbuf, "code %d %d%d%d%d\n", entindex, num[0], num[1], num[2], num[3] );
+			char szbuf[256];
+			Q_snprintf( szbuf, sizeof( szbuf ), "code %d %d%d%d%d\n", entindex, num[0], num[1], num[2], num[3] );
 			ClientCmd( szbuf );
 		}
 		else
@@ -181,9 +181,9 @@ int CHudCodeInput::Draw( float flTime )
 	const char *buf;
 	char text[64];
 	if( num[0] == 255 ) // unknown code
-		_snprintf_s( text, sizeof( text ), "CODE: < unknown >" );
+		Q_snprintf( text, sizeof( text ), "CODE: < unknown >" );
 	else
-		_snprintf_s( text, sizeof( text ), "CODE: %d %d %d %d", num[0], num[1], num[2], num[3] );
+		Q_snprintf( text, sizeof( text ), "CODE: %d %d %d %d", num[0], num[1], num[2], num[3] );
 
 	// calculate width to align center...
 	buf = text;

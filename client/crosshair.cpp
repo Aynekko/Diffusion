@@ -274,7 +274,7 @@ int CHudCrosshairStatic::DrawCrosshairs( float flTime )
 				static int width = 0;
 				if( DamageDealt != TempDamageDealt )
 				{
-					_snprintf_s( dmg, sizeof( dmg ), "%d", DamageDealt );
+					Q_snprintf( dmg, sizeof( dmg ), "%d", DamageDealt );
 					// calculate width to align center...
 					const char *buf;
 					width = 0;

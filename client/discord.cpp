@@ -153,7 +153,7 @@ namespace discord_integration
 						get_map_name( map + map_len, ARRAYSIZED( map ) - map_len );
 					}
 
-					strcat_s( ServerName, szServerName );
+					Q_strncat( ServerName, szServerName, sizeof( ServerName ));
 					remove_color_characters( ServerName );
 					presence.details = ServerName;
 					presence.state = map;

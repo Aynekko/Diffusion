@@ -118,33 +118,33 @@ int CHudScoreboard :: Init( void )
 
 	tmpmsg = TextMessageGet( "SCORE_PLAYERS" );
 	if( tmpmsg )
-		sprintf_s( PlayersText, tmpmsg->pMessage );
+		Q_strncpy( PlayersText, tmpmsg->pMessage, sizeof( PlayersText ));
 	else
-		sprintf_s( PlayersText, DefaultLoc[0] );
+		Q_strncpy( PlayersText, DefaultLoc[0], sizeof( PlayersText ));
 
 	tmpmsg = TextMessageGet( "SCORE_TEAMS" );
 	if( tmpmsg )
-		sprintf_s( TeamsText, tmpmsg->pMessage );
+		Q_strncpy( TeamsText, tmpmsg->pMessage, sizeof( TeamsText ));
 	else
-		sprintf_s( TeamsText, DefaultLoc[1] );
+		Q_strncpy( TeamsText, DefaultLoc[1], sizeof( TeamsText ));
 
 	tmpmsg = TextMessageGet( "SCORE_KILLS" );
 	if( tmpmsg )
-		sprintf_s( KillsText, tmpmsg->pMessage );
+		Q_strncpy( KillsText, tmpmsg->pMessage, sizeof( KillsText ));
 	else
-		sprintf_s( KillsText, DefaultLoc[2] );
+		Q_strncpy( KillsText, DefaultLoc[2], sizeof( KillsText ));
 
 	tmpmsg = TextMessageGet( "SCORE_DEATHS" );
 	if( tmpmsg )
-		sprintf_s( DeathsText, tmpmsg->pMessage );
+		Q_strncpy( DeathsText, tmpmsg->pMessage, sizeof( DeathsText ));
 	else
-		sprintf_s( DeathsText, DefaultLoc[3] );
+		Q_strncpy( DeathsText, DefaultLoc[3], sizeof( DeathsText ));
 
 	tmpmsg = TextMessageGet( "SCORE_PING" );
 	if( tmpmsg )
-		sprintf_s( PingText, tmpmsg->pMessage );
+		Q_strncpy( PingText, tmpmsg->pMessage, sizeof( PingText ));
 	else
-		sprintf_s( PingText, DefaultLoc[4] );
+		Q_strncpy( PingText, DefaultLoc[4], sizeof( PingText ));
 
 	return 1;
 }
@@ -233,9 +233,9 @@ int CHudScoreboard :: Draw( float fTime )
 
 	char player_text[128];
 	if( !gHUD.m_Teamplay )
-		sprintf_s( player_text, "%s | (%i/%i)", PlayersText, num_players, tr.viewparams.maxclients );
+		Q_snprintf( player_text, sizeof( player_text ), "%s | (%i/%i)", PlayersText, num_players, tr.viewparams.maxclients );
 	else
-		sprintf_s( player_text, "%s | (%i/%i)", TeamsText, num_players, tr.viewparams.maxclients );
+		Q_snprintf( player_text, sizeof( player_text ), "%s | (%i/%i)", TeamsText, num_players, tr.viewparams.maxclients );
 
 	DrawString( xpos, ypos + TxtYOffset, player_text, r, g, b );
 

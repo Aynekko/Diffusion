@@ -130,7 +130,7 @@ int CHudSayText :: Draw( float flTime )
 				// it's a saytext string
 
 				//Make a copy we can freely modify
-				strncpy_s( line, g_szLineBuffer[i], sizeof( line ) - 1 );
+				Q_strncpy( line, g_szLineBuffer[i], sizeof( line ) - 1 );
 				line[sizeof( line ) - 1] = '\0';
 
 				// draw the first x characters in the player color

@@ -932,7 +932,6 @@ bool Mod_CheckLayerNameForPixel( mfaceinfo_t *land, const Vector &point, const c
 void Mod_SetOrthoBounds( const float *mins, const float *maxs );
 void R_SetRenderColor( cl_entity_t *e );
 void R_WorldSetupVisibility( void );
-void Mod_ResortFaces( void );
 void LoadMaterialSettingsForTexture( int texnum );
 
 //

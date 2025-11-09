@@ -1165,7 +1165,7 @@ int CHudAmmo::Draw( float flTime )
 				char ammo[8];
 				if( !bDrawOfflineAmmo )
 				{
-					sprintf_s( ammo, "%i", gWR.CountAmmo( pw->iAmmoType ) );
+					Q_snprintf( ammo, sizeof( ammo ), "%i", gWR.CountAmmo( pw->iAmmoType ) );
 					ammo_count_width += DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, ammo, 70, 169, 255 );
 				}
 				else

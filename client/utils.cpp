@@ -83,14 +83,14 @@ void UTIL_ReplaceKeyBindings( const char *inbuf, int inbufsizebytes, char *outbu
 			if( end && (end != inbuf) ) // make sure we handle ## in the string, which should be treated in the output as #
 			{
 				char token[64];
-				strncpy_s( token, inbuf, end - inbuf );
+				Q_strncpy( token, inbuf, end - inbuf );
 				token[end - inbuf] = 0;
 
 				inbuf += end - inbuf;
 
 				// lookup key names
 				char binding[64];
-				sprintf_s( binding, token );
+				Q_strncpy( binding, token, sizeof( binding ));
 
 				const char *key = gEngfuncs.Key_LookupBinding( binding );
 				if( !key )

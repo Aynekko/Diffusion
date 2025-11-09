@@ -36,8 +36,8 @@ int CHudSubtitle::VidInit( void )
 int CHudSubtitle::MsgFunc_Subtitle( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pszName, pbuf, iSize );
-	strncpy_s( pName, READ_STRING(), 63 );
-	strncpy_s( pText, READ_STRING(), 2047 );
+	Q_strncpy( pName, READ_STRING(), 63 );
+	Q_strncpy( pText, READ_STRING(), 2047 );
 	END_READ();
 
 	// get the name of the speaker from titles.txt
@@ -45,12 +45,12 @@ int CHudSubtitle::MsgFunc_Subtitle( const char *pszName, int iSize, void *pbuf )
 
 	TitlesMsg = TextMessageGet( pName );
 	if( TitlesMsg )
-		strncpy_s( pName, TitlesMsg->pMessage, 63 );
+		Q_strncpy( pName, TitlesMsg->pMessage, 63 );
 
 	// get his speech from there too
 	TitlesMsg = TextMessageGet( pText );
 	if( TitlesMsg )
-		strncpy_s( pText, TitlesMsg->pMessage, 2047 );
+		Q_strncpy( pText, TitlesMsg->pMessage, 2047 );
 
 	// get maximum dialogue width and height
 	const char *txt = pText;
