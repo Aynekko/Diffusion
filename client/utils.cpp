@@ -21,6 +21,9 @@ GNU General Public License for more details.
 #include <mathlib.h>
 #include "r_efx.h"
 #include <algorithm>
+#ifndef _WIN32
+#include <dlfcn.h>
+#endif // _WIN32
 
 char *V_strupr( char *start )
 {
@@ -1208,8 +1211,12 @@ bool Sys_LoadLibrary( const char* dllname, dllhandle_t* handle, const dllfunc_t 
 	if( dllname[0] == '*' ) Q_strncpy( dllpath, dllname + 1, sizeof( dllpath ));
 	else Q_snprintf( dllpath, sizeof( dllpath ), "%s/bin/%s", gEngfuncs.pfnGetGameDirectory(), dllname );
 
+#ifdef _WIN32
 	dllhandle_t dllhandle = LoadLibrary( dllpath );
-        
+#else
+	dllhandle_t dllhandle = dlopen( dllpath, RTLD_NOW );
+#endif
+
 	// No DLL found
 	if( !dllhandle ) return false;
 
@@ -1231,7 +1238,11 @@ bool Sys_LoadLibrary( const char* dllname, dllhandle_t* handle, const dllfunc_t 
 
 void *Sys_GetProcAddress( dllhandle_t handle, const char *name )
 {
+#ifdef _WIN32
 	return (void *)GetProcAddress( handle, name );
+#else
+	return dlsym( handle, name );
+#endif
 }
 
 void Sys_FreeLibrary( dllhandle_t *handle )
@@ -1239,7 +1250,11 @@ void Sys_FreeLibrary( dllhandle_t *handle )
 	if( !handle || !*handle )
 		return;
 
+#ifdef _WIN32
 	FreeLibrary( *handle );
+#else
+	dlclose( *handle );
+#endif
 	*handle = NULL;
 }
 
