@@ -2535,6 +2535,7 @@ void UTIL_Remove( CBaseEntity *pEntity, bool remove_children )
 	if( remove_children )
 		pEntity->DeleteAllChildren();
 
+	pEntity->DontThink();
 	pEntity->UpdateOnRemove();
 	pEntity->pev->flags |= FL_KILLME;
 	pEntity->pev->classname = 0; // diffusion - I think this must be cleared, because some entites might look this entity up and use it, and it will be removed next frame
@@ -2561,7 +2562,7 @@ void UTIL_PrecacheOther( const char *szClassname )
 	}
 
 	pEntity->Precache( );
-	REMOVE_ENTITY( pEntity->edict( ));
+	UTIL_Remove( pEntity );
 }
 
 int UTIL_PrecacheSound( string_t s )

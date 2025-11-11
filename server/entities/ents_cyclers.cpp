@@ -73,7 +73,7 @@ void CCycler :: GenericCyclerSpawn(char *szModel, Vector vecMin, Vector vecMax)
 	if (!szModel || !*szModel)
 	{
 		ALERT(at_error, "cycler at %.0f %.0f %0.f missing modelname", GetAbsOrigin().x, GetAbsOrigin().y, GetAbsOrigin().z );
-		REMOVE_ENTITY(ENT(pev));
+		UTIL_Remove( this );
 		return;
 	}
 

@@ -1550,7 +1550,7 @@ void CNodeEnt :: Spawn( void )
 	if ( WorldGraph.m_fGraphPresent )
 	{
 		// graph loaded from disk, so discard all these node ents as soon as they spawn
-		REMOVE_ENTITY( edict() );
+		UTIL_Remove( this );
 		return;
 	}
 
@@ -1586,7 +1586,7 @@ void CNodeEnt :: Spawn( void )
 
 	WorldGraph.m_cNodes++;
 
-	REMOVE_ENTITY( edict() );
+	UTIL_Remove( this );
 }
 
 //=========================================================

@@ -72,7 +72,7 @@ void CEnvGlobal :: Spawn( void )
 {
 	if( !m_globalstate )
 	{
-		REMOVE_ENTITY( edict() );
+		UTIL_Remove( this );
 		return;
 	}
 

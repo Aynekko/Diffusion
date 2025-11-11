@@ -44,7 +44,7 @@ void CHudSprite::Spawn(void)
 {
 	if (g_pGameRules->IsMultiplayer())
 	{
-		REMOVE_ENTITY(edict());	// only in single
+		UTIL_Remove( this ); // only in single
 		return;
 	}
 

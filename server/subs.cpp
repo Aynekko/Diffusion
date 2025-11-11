@@ -86,7 +86,6 @@ BOOL CBaseDMStart::IsTriggered( CBaseEntity *pEntity )
 // Convenient way to delay removing oneself
 void CBaseEntity :: SUB_Remove( void )
 {
-	UpdateOnRemove();
 	if (pev->health > 0)
 	{
 		// this situation can screw up monsters who can't tell their entity pointers are invalid.
@@ -94,7 +93,7 @@ void CBaseEntity :: SUB_Remove( void )
 		ALERT( at_aiconsole, "SUB_Remove called on entity with health > 0\n");
 	}
 
-	REMOVE_ENTITY(ENT(pev));
+	UTIL_Remove( this );
 }
 
 // Convenient way to explicitly do nothing (passed to functions that require a method)
@@ -160,7 +159,7 @@ LINK_ENTITY_TO_CLASS( DelayedEvent, CBaseDelay );
 void CBaseDelay :: DelayThink( void )
 {
 	SUB_UseTargets( m_hActivator, (USE_TYPE)m_iState, pev->scale, pev->netname );
-	REMOVE_ENTITY( edict( ));
+	UTIL_Remove( this );
 }
 
 void CBaseDelay :: SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, float value, string_t m_iszAltTarget )

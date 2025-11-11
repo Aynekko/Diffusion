@@ -374,7 +374,7 @@ void UTIL_PrecacheOtherWeapon( const char *szClassname )
 		memset( &II, 0, sizeof II );
 	}
 
-	REMOVE_ENTITY(pEntity->edict());
+	UTIL_Remove( pEntity );
 }
 
 //=================================================================================

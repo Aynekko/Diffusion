@@ -43,7 +43,7 @@ void CTriggerEndSection::Spawn(void)
 {
 	if (g_pGameRules->IsDeathmatch())
 	{
-		REMOVE_ENTITY(ENT(pev));
+		UTIL_Remove( this );
 		return;
 	}
 

@@ -241,8 +241,8 @@ void CBaseTurret::GibMonster( void )
 	WRITE_BYTE( BREAK_METAL );
 	MESSAGE_END();
 
-	SetThink( &CBaseEntity::SUB_Remove );
-	SetNextThink( 0 );
+	DontThink();
+	UTIL_Remove( this );
 }
 
 void CBaseTurret::KeyValue( KeyValueData *pkvd )
