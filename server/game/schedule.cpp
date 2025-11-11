@@ -1199,11 +1199,39 @@ void CBaseMonster :: StartTask ( Task_t *pTask )
 		}
 	case TASK_GET_PATH_TO_BESTSOUND:
 		{
-			CSound *pSound;
+			CSound *pSound = PBestSound();
 
-			pSound = PBestSound();
+			if( !pSound )
+			{
+				TaskFail();
+				break;
+			}
 
-			if ( pSound && MoveToLocation( m_movementActivity, 2, pSound->m_vecOrigin ) )
+			// don't move to an exact location of the sound (tripmine placed on the floor and NPC walks right into it)
+			// figure out a new position in given radius
+			Vector vSoundPos = pSound->m_vecOrigin;
+			float CustomRadius = pTask->flData;
+			if( CustomRadius > 0.0f )
+			{
+				TraceResult tr;
+				Vector test[4];
+				test[0] = vSoundPos; test[0].x -= CustomRadius;		test[0].y += CustomRadius;
+				test[1] = vSoundPos; test[1].x += CustomRadius;		test[1].y += CustomRadius;
+				test[2] = vSoundPos; test[2].x -= CustomRadius;		test[2].y -= CustomRadius;
+				test[3] = vSoundPos; test[3].x += CustomRadius;		test[3].y -= CustomRadius;
+
+				for( int i = 0; i < 4; i++ )
+				{
+					UTIL_TraceLine( vSoundPos, test[i], dont_ignore_monsters, NULL, &tr );
+					if( tr.flFraction == 1.0f )
+					{
+						vSoundPos = test[i];
+						break;
+					}
+				}
+			}
+
+			if( MoveToLocation( m_movementActivity, 2, vSoundPos ) )
 			{
 				TaskComplete();
 			}
