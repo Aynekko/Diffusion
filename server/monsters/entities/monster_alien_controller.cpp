@@ -1280,7 +1280,6 @@ class CControllerHeadBall : public CBaseMonster
 	void BounceTouch( CBaseEntity *pOther );
 	void MovetoTarget( Vector vecTarget );
 	void Crawl( void );
-	int m_iTrail;
 	int m_flNextAttack;
 	Vector m_vecIdeal;
 
@@ -1619,6 +1618,7 @@ void CAlienZapBall :: Spawn( void )
 	pev->rendercolor.x = 255;
 	pev->rendercolor.y = 255;
 	pev->rendercolor.z = 255;
+	pev->iuser3 = -674; // sparkles
 	pev->renderamt = 200;
 	pev->scale = 0.25;
 	pev->dmg = 5;
@@ -1707,6 +1707,7 @@ class CAlienZapShotgun : public CBaseMonster
 	void Precache( void );
 	void AnimateThink( void );
 	void ExplodeTouch( CBaseEntity *pOther );
+	int m_iTrail;
 
 	DECLARE_DATADESC();
 };
@@ -1730,6 +1731,7 @@ void CAlienZapShotgun :: Spawn( void )
 	pev->rendercolor.x = 200;
 	pev->rendercolor.y = 0;
 	pev->rendercolor.z = 0;
+	pev->iuser3 = -674; // sparkles
 	pev->renderamt = 255;
 	pev->scale = 1;
 
@@ -1741,6 +1743,19 @@ void CAlienZapShotgun :: Spawn( void )
 	m_hOwner = Instance( pev->owner );
 	pev->dmgtime = gpGlobals->time; // keep track of when ball spawned
 	pev->nextthink = gpGlobals->time + 0.1;
+
+	// create trail
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		WRITE_BYTE( TE_BEAMFOLLOW );
+		WRITE_SHORT( entindex() );	// entity
+		WRITE_SHORT( m_iTrail );	// model
+		WRITE_BYTE( 2 ); // life
+		WRITE_BYTE( 10 );  // width
+		WRITE_BYTE( pev->rendercolor.x );   // r
+		WRITE_BYTE( pev->rendercolor.y );   // g
+		WRITE_BYTE( pev->rendercolor.z );   // b
+		WRITE_BYTE( 15 );	// brightness
+	MESSAGE_END();
 }
 
 
@@ -1753,6 +1768,7 @@ void CAlienZapShotgun :: Precache( void )
 	PRECACHE_SOUND("weapons/alien_zap2.wav");
 	PRECACHE_SOUND("weapons/alien_zap3.wav");
 	PRECACHE_SOUND("weapons/alien_zap4.wav");
+	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
 }
 
 
@@ -1842,10 +1858,10 @@ class CAlienSuperBall : public CBaseMonster
 	void BounceTouch( CBaseEntity *pOther );
 	void MovetoTarget( Vector vecTarget );
 	void Crawl( void );
-	int m_iTrail;
 	int m_flNextAttack;
 	int m_iSoundState;
 	Vector m_vecIdeal;
+	int m_iTrail;
 
 	DECLARE_DATADESC();
 };
@@ -1864,7 +1880,6 @@ void CAlienSuperBall :: Spawn( void )
 	pev->movetype = MOVETYPE_FLY;
 	pev->solid = SOLID_BBOX;
 
-//	SET_MODEL(ENT(pev), "sprites/xspark4.spr");
 	SET_MODEL(ENT(pev), "sprites/animglow01.spr");
 	pev->rendermode = kRenderTransAdd;
 	pev->rendercolor.x = 0;
@@ -1872,6 +1887,7 @@ void CAlienSuperBall :: Spawn( void )
 	pev->rendercolor.z = 255;
 	pev->renderamt = 255;
 	pev->scale = 1.0;
+	pev->iuser3 = -674; // sparkles
 
 //	UTIL_SetSize( pev, g_vecZero, g_vecZero );
 	UTIL_SetSize( pev, Vector(-18,-18,18), Vector(18,18,18) );
@@ -1885,20 +1901,31 @@ void CAlienSuperBall :: Spawn( void )
 
 	m_hOwner = Instance( pev->owner );
 	pev->dmgtime = gpGlobals->time;
+
+	// create trail
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		WRITE_BYTE( TE_BEAMFOLLOW );
+		WRITE_SHORT( entindex() );	// entity
+		WRITE_SHORT( m_iTrail );	// model
+		WRITE_BYTE( 2 ); // life
+		WRITE_BYTE( 15 );  // width
+		WRITE_BYTE( pev->rendercolor.x );   // r
+		WRITE_BYTE( pev->rendercolor.y );   // g
+		WRITE_BYTE( pev->rendercolor.z );   // b
+		WRITE_BYTE( 15 );	// brightness
+	MESSAGE_END();
 }
 
 
 void CAlienSuperBall :: Precache( void )
 {
-//	PRECACHE_MODEL("sprites/xspark1.spr");
 	PRECACHE_MODEL("sprites/animglow01.spr");
-//	PRECACHE_SOUND("debris/zap4.wav");
-//	PRECACHE_SOUND("weapons/electro4.wav");
 	PRECACHE_SOUND("weapons/alien_zap1.wav");
 	PRECACHE_SOUND("weapons/alien_zap2.wav");
 	PRECACHE_SOUND("weapons/alien_zap3.wav");
 	PRECACHE_SOUND("weapons/alien_zap4.wav");
 	PRECACHE_SOUND("weapons/alien_superball.wav");
+	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
 }
 
 
@@ -3453,7 +3480,8 @@ void CDroneAlien :: RunTask ( Task_t *pTask )
 						AddVelocity = m_hEnemy->pev->velocity.Normalize() * 150 + m_hEnemy->pev->basevelocity;
 					pShock->pev->velocity += AddVelocity;
 					pShock->pev->nextthink = gpGlobals->time;
-					pShock->pev->dmg = 1.25;
+					pShock->pev->dmg = 1.25f;
+					pShock->pev->iuser3 = -674; // sparkles
 				}
 
 				SetBlending( 0, vecGunAngles.x );

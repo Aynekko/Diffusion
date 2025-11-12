@@ -48,6 +48,7 @@ used iuser3 "flags":
 -671 do not render 3D sky - only used in brush entities (func_portal or mirrors)
 -672 smoke (wounded turret/drone etc.), vuser1.z is used as height offset
 -673 camera attached to the car (used in view.cpp)
+-674 sparkle particle
 */
 
 #define DEFAULT_SMOOTHNESS	0.35f
@@ -415,8 +416,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				tr.ParticleTime[ParticleEntIndex] = tr.time + (1.0f / (1.0f + ent->curstate.fuser1 * 0.1f));
 			}
 		}
-
-		if( ent->curstate.iuser3 == -672 ) // turret smoke
+		else if( ent->curstate.iuser3 == -672 ) // turret smoke
 		{
 			const int ParticleEntIndex = ent->index;
 			const float height_offset = ent->curstate.vuser1.z;
@@ -426,8 +426,17 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				tr.ParticleTime[ParticleEntIndex] = tr.time + 0.25f;
 			}
 		}
-
-		if( ent->curstate.iuser3 == -665 ) // car exhaust
+		else if( ent->curstate.iuser3 == -674 ) // sparkles
+		{
+			const int ParticleEntIndex = ent->index;
+			if( tr.time > tr.ParticleTime[ParticleEntIndex] )
+			{
+				Vector color = Vector( ent->curstate.rendercolor.r, ent->curstate.rendercolor.g, ent->curstate.rendercolor.b ) / 255.0f;
+				g_pParticles.Sparkle( ParticleEntIndex, ent->curstate.origin, color );
+				tr.ParticleTime[ParticleEntIndex] = tr.time + 0.02f;
+			}
+		}
+		else if( ent->curstate.iuser3 == -665 ) // car exhaust
 		{
 			const int ParticleEntIndex = ent->index;
 			if( tr.time > tr.ParticleTime[ParticleEntIndex] )

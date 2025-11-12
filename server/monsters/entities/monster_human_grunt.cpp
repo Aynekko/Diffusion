@@ -4165,6 +4165,7 @@ void CHGruntAlien :: Shoot ( void )
 			pShock->SetAbsVelocity( (ShootAtEnemy( vecStart ) * 2500) + AddVelocity );
 			pShock->SetNextThink( 0 );
 			pShock->pev->dmg = 1.25f;
+			pShock->pev->iuser3 = -674; // sparkles
 		}
 
 		m_cAmmoLoaded--;

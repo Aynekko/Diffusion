@@ -54,6 +54,7 @@ MemBlock<CQuakePart>ParticleArray_Beamring( MAX_PARTICLES ); // TYPE_BEAMRING
 MemBlock<CQuakePart>ParticleArray_WaterDrop( MAX_PARTICLES ); // TYPE_WATERDROP
 MemBlock<CQuakePart>ParticleArray_SingleDrop( MAX_PARTICLES ); // TYPE_SINGLEDROP
 MemBlock<CQuakePart>ParticleArray_WaterFall( MAX_PARTICLES ); // TYPE_WATERFALL
+MemBlock<CQuakePart>ParticleArray_Sparkles( MAX_PARTICLES ); // TYPE_SPARKLES
 int partcounter = 0;
 
 //===============================================================================
@@ -1722,6 +1723,7 @@ void CQuakePartSystem :: Update( void )
 	DrawParticles( ParticleArray_WaterDrop );
 	DrawParticles( ParticleArray_SingleDrop );
 	DrawParticles( ParticleArray_WaterFall );
+	DrawParticles( ParticleArray_Sparkles );
 
 	// draw particles from txt-file (through glbegin-end...)
 	CQuakePart *pCur, *pNext;
@@ -1841,6 +1843,9 @@ bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )
 		break;
 	case TYPE_WATERFALL:
 		dst = ParticleArray_WaterFall.Allocate();
+		break;
+	case TYPE_SPARKLES:
+		dst = ParticleArray_Sparkles.Allocate();
 		break;
 	case TYPE_CUSTOM:
 		dst = AllocParticle();
@@ -2674,4 +2679,29 @@ void CQuakePartSystem::Waterfall( int EntIndex, const Vector &pos, const Vector 
 	src.EntIndex = EntIndex;
 
 	AddParticle( &src, m_hWaterFall, flags );
+}
+
+//=============================================================================
+// Sparkle: used on alien robo projectiles
+//=============================================================================
+void CQuakePartSystem::Sparkle( int EntIndex, const Vector &pos, const Vector &color )
+{
+	if( !g_fRenderInitialized )
+		return;
+
+	CQuakePart src = InitializeParticle();
+	src.ParticleType = TYPE_SPARKLES;
+	src.m_vecOrigin = pos + Vector( RANDOM_LONG( -5, 5 ), RANDOM_LONG( -5, 5 ), RANDOM_LONG( -5, 5 ) );
+	src.m_vecVelocity = Vector( RANDOM_LONG( -10, 10 ), RANDOM_LONG( -10, 10 ), RANDOM_LONG( -10, 10 ) );
+	src.m_flAlphaVelocity = -3.0f;
+	src.m_flRadius = RANDOM_FLOAT( 0.05f, 0.15f );
+	src.m_flRadiusVelocity = 10.0f;
+	src.m_flLength = 0.1f;
+	src.m_flLengthVelocity = 15.0f;
+	src.EntIndex = EntIndex;
+	src.m_flDistance = 1000;
+	src.m_vecColor = color * RANDOM_FLOAT( 0.8f, 1.0f );
+	int flags = FPART_NOTWATER | FPART_STRETCH | FPART_ADDITIVE;
+
+	AddParticle( &src, tr.whiteTexture, flags );
 }

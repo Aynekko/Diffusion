@@ -61,6 +61,7 @@ enum
 	TYPE_WATERDROP,
 	TYPE_SINGLEDROP,
 	TYPE_WATERFALL,
+	TYPE_SPARKLES,
 	TYPE_CUSTOM,
 };
 
@@ -209,6 +210,7 @@ public:
 	void WaterDrop( int EntIndex, const Vector &pos );
 	void WaterLandingDroplet( int EntIndex, const Vector &pos );
 	void Waterfall( int EntIndex, const Vector &pos, const Vector &PushVelocity, const Vector &PushVelocityRand, const Vector &Color, float Scale, float Alpha = 1.0f, int Distance = 666 );
+	void Sparkle( int EntIndex, const Vector &pos, const Vector &color );
 
 	int ParticleCountPerEnt[8192]; // MAX_ENTITIES?
 
