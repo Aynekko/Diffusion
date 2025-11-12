@@ -65,6 +65,7 @@ void CHandGrenade::Spawn( void )
 
 	pev->dmg = 100;
 	m_iDefaultAmmo = HANDGRENADE_DEFAULT_GIVE;
+	m_iDefaultAmmo2 = 0;
 
 	FallInit();// get ready to fall down.
 }

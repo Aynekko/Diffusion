@@ -1058,6 +1058,7 @@ void CRpg::Spawn( void )
 	{
 		m_iDefaultAmmo = RPG_DEFAULT_GIVE;
 	}
+	m_iDefaultAmmo2 = 0;
 
 	FallInit();// get ready to fall down.
 }

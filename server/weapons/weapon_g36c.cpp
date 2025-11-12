@@ -63,6 +63,7 @@ void CWeaponG36C::Spawn( void )
 	m_iId = WEAPON_G36C;
 
 	m_iDefaultAmmo = MP5_DEFAULT_GIVE; // two rounds
+	m_iDefaultAmmo2 = 0;
 
 	FallInit();// get ready to fall down.
 }

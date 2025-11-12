@@ -49,6 +49,7 @@ void CWeaponHKMP5::Spawn( void )
 	m_iId = WEAPON_HKMP5;
 
 	m_iDefaultAmmo = MP5_DEFAULT_GIVE; // two rounds
+	m_iDefaultAmmo2 = 0;
 
 	FallInit();// get ready to fall down.
 }

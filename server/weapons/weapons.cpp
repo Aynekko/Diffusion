@@ -547,6 +547,7 @@ BEGIN_DATADESC( CBasePlayerWeapon )
 	DEFINE_FIELD( m_iSecondaryAmmoType, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iClip, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iDefaultAmmo, FIELD_INTEGER ),
+	DEFINE_FIELD( m_iDefaultAmmo2, FIELD_INTEGER ),
 END_DATADESC()
 
 void CBasePlayerItem :: SetObjectCollisionBox( void )
@@ -1327,8 +1328,11 @@ int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon )
 		m_iDefaultAmmo = 0;
 	}
 
-	if ( pszAmmo2() != NULL )
-		iReturn = pWeapon->AddSecondaryAmmo( 0, (char *)pszAmmo2(), iMaxAmmo2() );
+	if( pszAmmo2() != NULL )
+	{
+		iReturn = pWeapon->AddSecondaryAmmo( m_iDefaultAmmo2, (char *)pszAmmo2(), iMaxAmmo2() );
+		m_iDefaultAmmo2 = 0;
+	}
 	
 	return iReturn;
 }
@@ -1344,6 +1348,12 @@ int CBasePlayerWeapon::ExtractClipAmmo( CBasePlayerWeapon *pWeapon )
 		iAmmo = 0;// guns with no clips always come empty if they are second-hand
 	else
 		iAmmo = m_iClip;
+
+	if( m_iDefaultAmmo2 > 0 )
+	{
+		pWeapon->m_pPlayer->GiveAmmo( m_iDefaultAmmo2, (char *)pszAmmo2(), iMaxAmmo2() );
+		m_iDefaultAmmo2 = 0;
+	}
 	
 	return pWeapon->m_pPlayer->GiveAmmo( iAmmo, (char *)pszAmmo1(), iMaxAmmo1() ); // , &m_iPrimaryAmmoType
 }

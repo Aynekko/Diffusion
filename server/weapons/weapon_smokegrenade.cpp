@@ -48,6 +48,7 @@ void CSmokeGrenade::Spawn( void )
 	SET_MODEL( ENT( pev ), "models/weapons/w_smoke.mdl" );
 
 	m_iDefaultAmmo = HANDGRENADE_DEFAULT_GIVE;
+	m_iDefaultAmmo2 = 0;
 
 	FallInit();// get ready to fall down.
 }

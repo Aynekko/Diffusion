@@ -56,6 +56,7 @@ void C_AR2::Spawn( void )
 	m_iId = WEAPON_AR2;
 
 	m_iDefaultAmmo = AR2_DEFAULT_GIVE;
+	m_iDefaultAmmo2 = 1;
 
 	FallInit();// get ready to fall down.
 }

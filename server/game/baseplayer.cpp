@@ -7928,6 +7928,13 @@ void CBasePlayer::DropPlayerItem(char* pszItemName)
 			pDrop->m_iDefaultAmmo = m_rgAmmo[iAmmoIndex];
 			m_rgAmmo[iAmmoIndex] = 0;
 		}
+		iAmmoIndex = GetAmmoIndex( pWeaponItem->pszAmmo2() );
+		if( iAmmoIndex != -1 )
+		{
+			// pack up all ammo
+			pDrop->m_iDefaultAmmo2 = m_rgAmmo[iAmmoIndex];
+			m_rgAmmo[iAmmoIndex] = 0;
+		}
 		RemoveWeapon( pWeaponItem->m_iId );
 		pWeaponItem->SetThink( &CBasePlayerItem::DestroyItem );
 		pWeaponItem->SetNextThink( 0.1 );

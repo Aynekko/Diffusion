@@ -251,6 +251,7 @@ public:
 	int	m_fInReload;			// Are we in the middle of a reload;
 
 	int	m_iDefaultAmmo;// how much ammo you get when you pick up this weapon as placed by a level designer.
+	int m_iDefaultAmmo2;
 
 	bool AskedForReload; // player pressed reload button, but we can't do it right now. So the weapon will start reloading at the first available moment
 };

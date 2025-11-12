@@ -45,6 +45,7 @@ void CShotgunXM::Spawn( void )
 	SET_MODEL( ENT( pev ), "models/weapons/w_m1014.mdl" );
 
 	m_iDefaultAmmo = SHOTGUN_DEFAULT_GIVE;
+	m_iDefaultAmmo2 = 0;
 
 	FallInit();// get ready to fall
 }

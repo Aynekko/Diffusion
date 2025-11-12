@@ -567,6 +567,7 @@ void CTripmine::Spawn( void )
 	FallInit();// get ready to fall down
 
 	m_iDefaultAmmo = TRIPMINE_DEFAULT_GIVE;
+	m_iDefaultAmmo2 = 0;
 
 	if ( !g_pGameRules->IsDeathmatch() )
 	{

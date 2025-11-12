@@ -77,6 +77,7 @@ void CDeagle::Spawn( void )
 	SET_MODEL(ENT(pev), "models/weapons/w_deagle.mdl");
 
 	m_iDefaultAmmo = DEAGLE_DEFAULT_GIVE;
+	m_iDefaultAmmo2 = 0;
 
 	FallInit();// get ready to fall down.
 }

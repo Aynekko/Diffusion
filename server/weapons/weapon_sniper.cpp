@@ -88,6 +88,7 @@ void CSniperRifle::Spawn( void )
 	m_iId = WEAPON_SNIPER;
 
 	m_iDefaultAmmo = SNIPER_DEFAULT_GIVE; // two rounds
+	m_iDefaultAmmo2 = 0;
 
 	FallInit();// get ready to fall down.
 }

@@ -60,6 +60,7 @@ void CWpnSentry::Spawn( void )
 	m_iId = WEAPON_SENTRY;
 
 	m_iDefaultAmmo = 1;
+	m_iDefaultAmmo2 = 0;
 
 	FallInit();// get ready to fall down.
 }

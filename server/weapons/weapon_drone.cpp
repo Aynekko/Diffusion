@@ -164,6 +164,7 @@ void CWpnDrone::Spawn( void )
 	m_iId = WEAPON_DRONE;
 
 	m_iDefaultAmmo = 1;
+	m_iDefaultAmmo2 = 0;
 
 	m_flTimeWeaponIdle = -1;
 

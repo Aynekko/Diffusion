@@ -52,6 +52,7 @@ void CBeretta::Spawn( )
 	SET_MODEL( edict(), "models/weapons/w_beretta.mdl" );
 
 	m_iDefaultAmmo = BERETTA_DEFAULT_GIVE;
+	m_iDefaultAmmo2 = 0;
 
 	FallInit();// get ready to fall down.
 }

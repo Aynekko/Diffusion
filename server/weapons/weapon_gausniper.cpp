@@ -101,6 +101,7 @@ void CGauss::Spawn( void )
 	SET_MODEL(ENT(pev), "models/weapons/w_gausniper.mdl");
 
 	m_iDefaultAmmo = GAUSS_DEFAULT_GIVE;
+	m_iDefaultAmmo2 = 0;
 
 	Charge = 0.0f;
 
