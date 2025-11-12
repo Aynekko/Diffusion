@@ -38,7 +38,6 @@ GNU General Public License for more details.
 
 #define MAX_FADING_ENTS 8192
 #define MAX_ANIMATIONS 64
-#define WATER_TEXTURES 29
 
 // matches engine
 #define REF_DEFAULT_TEXTURE  "*default"
@@ -359,7 +358,7 @@ typedef struct
 
 	int		spotlightTexture;
 
-	int		waterTextures[WATER_TEXTURES];
+	CUtlArray<int> waterTextures;
 
 	// framebuffers
 	gl_fbo_t		frame_buffers[MAX_FRAMEBUFFERS];

@@ -1569,15 +1569,16 @@ void EMIT_GROUPID_SUIT(edict_t *entity, int isentenceg)
 
 void EMIT_GROUPNAME_SUIT(edict_t *entity, const char *groupname)
 {
-	float fvol;
 	int pitch = PITCH_NORM;
+	float fvol = CVAR_GET_FLOAT( "suitvolume" );
+	if( fvol <= 0.0f )
+		return;
 
-	fvol = CVAR_GET_FLOAT("suitvolume");
-	if (RANDOM_LONG(0,1))
-		pitch = RANDOM_LONG(0,6) + 98;
+	if( RANDOM_LONG( 0, 1 ) )
+		pitch = RANDOM_LONG( 0, 6 ) + 98;
 
-	if (fvol > 0.05)
-		SENTENCEG_PlayRndSz(entity, groupname, fvol, ATTN_NORM, 0, pitch);
+	if( fvol > 0.05 )
+		SENTENCEG_PlayRndSz( entity, groupname, fvol, ATTN_NORM, 0, pitch );
 }
 
 #define DOOR_SENTENCEWAIT	6

@@ -2336,6 +2336,9 @@ void R_DrawLightForSurfList( plight_t *pl )
 	GL_Bind( GL_TEXTURE3, pl->shadowTexture );
 	const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
 	const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
+	const bool bUseRefractedWater = (!tr.lowmemory && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) && (tr.waterTextures.Count() > 0));
+
+	bool bGotScreencopy = false;
 
 	for( int i = 0; i < tr.num_light_surfaces; i++ )
 	{
@@ -2533,15 +2536,22 @@ void R_DrawLightForSurfList( plight_t *pl )
 					GL_Bind( GL_TEXTURE6, MT.gl_normalmap_id );
 			}
 
-			if( !tr.lowmemory && FBitSet( s->flags, SURF_WATER ) && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) )
+			if( FBitSet( s->flags, SURF_WATER ) && bUseRefractedWater )
 			{
-				GL_Bind( GL_TEXTURE6, tr.waterTextures[(int)(tr.time * 20.0f) % WATER_TEXTURES] ); // u_NormalMap
+				if( tr.waterTextures.Count() > 0 )
+				{
+					GL_Bind( GL_TEXTURE6, tr.waterTextures[(int)(tr.time * 20.0f) % tr.waterTextures.Count()] ); // u_NormalMap
 
-				// request screen depth
-				GL_Bind( GL_TEXTURE4, tr.screen_depth ); // u_DepthMap
-				pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
-				Vector2D screensizeinv = Vector2D( 1.0f / (float)glState.width, 1.0f / (float)glState.height );
-				pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, screensizeinv.x, screensizeinv.y );
+					// request screen depth
+					GL_Bind( GL_TEXTURE4, tr.screen_depth ); // u_DepthMap
+					if( !bGotScreencopy )
+					{
+						pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+						bGotScreencopy = true;
+					}
+					Vector2D screensizeinv = Vector2D( 1.0f / (float)glState.width, 1.0f / (float)glState.height );
+					pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, screensizeinv.x, screensizeinv.y );
+				}
 			}
 
 			// diffusion - interior mapping
@@ -2807,7 +2817,7 @@ void R_DrawBrushList( void )
 	int startv, endv;
 	mcubemap_t *cached_cubemap = NULL;
 
-	const bool bUseRefractedWater = (!tr.lowmemory && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction));
+	const bool bUseRefractedWater = (!tr.lowmemory && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) && ( tr.waterTextures.Count() > 0 ));
 
 	RI->currentmodel = e->model;
 	R_LoadIdentity();
@@ -3043,7 +3053,7 @@ void R_DrawBrushList( void )
 				if( !bGotScreencopy )
 					pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
-				GL_Bind( GL_TEXTURE4, tr.waterTextures[(int)(tr.time * 20.0f) % WATER_TEXTURES] ); // u_NormalMap
+				GL_Bind( GL_TEXTURE4, tr.waterTextures[(int)(tr.time * 20.0f) % tr.waterTextures.Count()] ); // u_NormalMap
 
 			//	float brushbounds = 4096.0f;// 2.0f * (e->curstate.mins - e->curstate.maxs).Length();
 			//	pglUniform1fARB( RI->currentshader->u_zFar, -brushbounds );
