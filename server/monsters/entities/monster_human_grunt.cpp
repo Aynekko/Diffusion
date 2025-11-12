@@ -1726,7 +1726,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 
 		case HGRUNT_AE_GREN_LAUNCH:
 		{
-			EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/glauncher.wav", 0.8, ATTN_NORM);
+			PlayClientSound( this, 238, 0 );
 			CGrenade::ShootContact( pev, GetGunPosition(), m_vecTossVelocity );
 			m_fThrowGrenade = FALSE;
 			if (g_iSkillLevel == SKILL_HARD)
@@ -2014,6 +2014,7 @@ void CHGrunt :: Precache()
 	PRECACHE_SOUND( "hgrunt/gr_reload_shotgun.wav" );
 
 	PRECACHE_SOUND( "weapons/glauncher.wav" );
+	PRECACHE_SOUND( "weapons/glauncher_d.wav" );
 
 	PRECACHE_SOUND( "weapons/shotgun_npc.wav" );
 	PRECACHE_SOUND( "weapons/shotgun_npc_d.wav" );
@@ -4881,7 +4882,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 
 	case HGRUNT_AE_GREN_LAUNCH:
 	{
-		EMIT_SOUND(ENT(pev), CHAN_WEAPON, "weapons/glauncher.wav", 0.8, ATTN_NORM);
+		PlayClientSound( this, 238, 0 );
 		CGrenade::ShootContact(pev, GetGunPosition(), m_vecTossVelocity);
 		m_fThrowGrenade = FALSE;
 		if (g_iSkillLevel == SKILL_HARD)
@@ -5554,6 +5555,7 @@ void CHGruntSecurity::Precache()
 	PRECACHE_SOUND("hgrunt/gr_reload_shotgun.wav");
 
 	PRECACHE_SOUND("weapons/glauncher.wav");
+	PRECACHE_SOUND( "weapons/glauncher_d.wav" );
 
 	PRECACHE_SOUND( "weapons/shotgun_npc.wav" );
 	PRECACHE_SOUND( "weapons/shotgun_npc_d.wav" );
@@ -5766,6 +5768,7 @@ void CAndrewGrunt::Precache()
 	PRECACHE_SOUND( "hgrunt/gr_reload_mp5.wav" );
 
 	PRECACHE_SOUND( "weapons/glauncher.wav" );
+	PRECACHE_SOUND( "weapons/glauncher_d.wav" );
 
 	PRECACHE_SOUND( "weapons/shotgun_npc.wav" );
 	PRECACHE_SOUND( "weapons/shotgun_npc_d.wav" );
@@ -6212,7 +6215,7 @@ void CAndrewGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 
 	case HGRUNT_AE_GREN_LAUNCH:
 	{
-		EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "weapons/glauncher.wav", 0.8, 0.5 );
+		PlayClientSound( this, 238, 0 );
 		CGrenade::ShootContact( pev, GetGunPosition(), m_vecTossVelocity );
 		m_fThrowGrenade = FALSE;
 		if( g_iSkillLevel == SKILL_HARD )

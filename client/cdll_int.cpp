@@ -308,7 +308,7 @@ int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 	if( !bUseButton )
 		bEscButton = !Q_strcmp( pszCurrentBinding, "escape" );
 	
-	if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE && bEscButton )
+	if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE && (bEscButton || bUseButton) )
 	{
 		gHUD.m_Puzzle.m_iFlags &= ~HUD_ACTIVE;
 		return 0;

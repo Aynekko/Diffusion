@@ -169,7 +169,7 @@ void CSniperRifle::PrimaryAttack()
 	if( m_iClip <= 2 )
 		LowAmmoMsg( m_pPlayer );
 
-	m_pPlayer->m_iWeaponVolume = NORMAL_GUN_VOLUME;
+	m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
 	m_pPlayer->m_iWeaponFlash = NORMAL_GUN_FLASH;
 
 	m_iClip--;

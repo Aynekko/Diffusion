@@ -379,7 +379,7 @@ bool CGauss::ReflectMirror( TraceResult &tr, CBaseEntity *e )
 
 void CGauss::Fire( Vector vecOrigSrc, Vector vecDir, float flDamage )
 {
-	m_pPlayer->m_iWeaponVolume = GAUSS_PRIMARY_FIRE_VOLUME;
+	m_pPlayer->m_iWeaponVolume = LOUD_GUN_VOLUME;
 
 	// take ammo
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] -= 1;

@@ -2364,6 +2364,7 @@ void CCar::Drive( void )
 			else if( !IsShifting )
 			{
 				float tx = TurningOverride ? 1.0f : (1.0f - AbsTurning * 0.75f);
+				tx = bound( 0.5f, tx, 1.0f );
 				CarSpeed += ActualAccelRate * tx * WaterVelocityMult * surf_CurrentMult * gpGlobals->frametime;
 			}
 

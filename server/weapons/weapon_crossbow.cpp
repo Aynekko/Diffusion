@@ -79,16 +79,29 @@ void CCrossbowBolt::Spawn( void )
 	pev->movetype = MOVETYPE_TOSS;//MOVETYPE_FLY; // diffusion - realistic bolt!!!
 	pev->solid = SOLID_BBOX;
 
-	pev->gravity = 0.35; // was 0.5 when movetype_fly
+	pev->gravity = 0.25f; // was 0.5 when movetype_fly
 
 	SET_MODEL( edict(), "models/weapons/crossbow_bolt.mdl");
 
 	UTIL_SetSize( this, Vector( -2, -2, -2 ), Vector( 2, 2, 2 ) );
 	RelinkEntity( TRUE );
 
-	SetFadeDistance(1500);
+	SetFadeDistance( 3000 );
 	fThinkTime = 0.0f;
 	SendWaterSplash = false;
+
+	// create trail
+	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		WRITE_BYTE( TE_BEAMFOLLOW );
+		WRITE_SHORT( entindex() );	// entity
+		WRITE_SHORT( m_iTrail );	// model
+		WRITE_BYTE( 3 ); // life
+		WRITE_BYTE( 1 );  // width
+		WRITE_BYTE( 50 );   // r
+		WRITE_BYTE( 50 );   // g
+		WRITE_BYTE( 50 );   // b
+		WRITE_BYTE( 125 );	// brightness
+	MESSAGE_END();
 
 	SetTouch( &CCrossbowBolt::BoltTouch );
 	SetThink(&CCrossbowBolt::BubbleThink );

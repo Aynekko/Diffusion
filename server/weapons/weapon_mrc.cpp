@@ -87,6 +87,7 @@ void CMRC::Precache( void )
 	PRECACHE_SOUND( "weapons/hks3_d.wav" );
 
 	PRECACHE_SOUND( "weapons/glauncher.wav" );
+	PRECACHE_SOUND( "weapons/glauncher_d.wav" );
 
 	PRECACHE_SOUND ("weapons/357_cock1.wav");
 }
@@ -252,16 +253,6 @@ void CMRC::SecondaryAttack( void )
 	// player "shoot" animation
 	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
-//	if ( RANDOM_LONG(0,1) )
-//	{
-//		// play this sound through BODY channel so we can hear it if player didn't stop firing MP3
-//		EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/glauncher.wav", 0.8, ATTN_NORM);
-//	}
-//	else
-//	{
-//		// play this sound through BODY channel so we can hear it if player didn't stop firing MP3
-//		EMIT_SOUND(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/glauncher2.wav", 0.8, ATTN_NORM);
-//	}
 	PlayClientSound( m_pPlayer, WEAPON_MRC, 1 );
  
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );

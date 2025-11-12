@@ -2524,6 +2524,11 @@ void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoV
 		sndname[0] = "weapons/rocketfire1.wav";
 		num = 0;
 	break;
+	case 238: // grenade launcher for npcs
+		sndname[0] = "weapons/glauncher.wav";
+		sndname_d[0] = "weapons/glauncher_d.wav";
+		num = 0;
+		break;
 	case 239: // monster_alien_drone
 		sndname[0] = "drone/aliendrone_shoot1.wav";
 		sndname[1] = "drone/aliendrone_shoot2.wav";

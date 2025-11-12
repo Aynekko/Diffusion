@@ -310,7 +310,7 @@ typedef struct
 extern MULTIDAMAGE gMultiDamage;
 
 
-#define LOUD_GUN_VOLUME		1000
+#define LOUD_GUN_VOLUME		1200
 #define NORMAL_GUN_VOLUME		600
 #define QUIET_GUN_VOLUME		200
 
