@@ -84,8 +84,8 @@ extern int PointFlag[MAX_WAYPOINTS];
 #define TRAIN_BACK_FAST	0x07
 #define TRAIN_LOCKED	0x08
 
-#define	FLASH_DRAIN_TIME	 0.6 //100 units/1.5 minutes
-#define	FLASH_CHARGE_TIME	 0.2 // 100 units/20 seconds  (seconds per unit)
+#define	FLASH_DRAIN_TIME	 1.0f //100 units/1.5 minutes
+#define	FLASH_CHARGE_TIME	 0.25f // 100 units/20 seconds  (seconds per unit)
 
 // Global Savedata for player
 BEGIN_DATADESC( CBasePlayer )
