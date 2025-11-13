@@ -38,7 +38,7 @@ struct DeathNoticeItem
 #define DEATHNOTICE_TOP		32
 #define DEATHNOTICE_RIGHT	40
 #define DEATHNOTICE_ROUNDING 7
-#define DEATHNOTICE_SPACING 50
+#define DEATHNOTICE_SPACING 60
 
 static int DEATHNOTICE_DISPLAY_TIME = 6;
 DeathNoticeItem rgDeathNoticeList[MAX_DEATHNOTICES+1];
@@ -126,6 +126,7 @@ int CHudDeathNotice :: Draw( float flTime )
 		y = rgDeathNoticeList[i].ypos_lerp;
 
 		int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
+		const float SpriteHeight = gHUD.GetSpriteRect( id ).bottom - gHUD.GetSpriteRect( id ).top;
 		x = ScreenWidth - DEATHNOTICE_RIGHT - ConsoleStringLen( rgDeathNoticeList[i].szVictim ) - ( gHUD.GetSpriteRect( id ).right - gHUD.GetSpriteRect( id ).left );
 
 		if( !rgDeathNoticeList[i].iSuicide )
@@ -135,7 +136,7 @@ int CHudDeathNotice :: Draw( float flTime )
 		if( CheckLocalPlayerName( rgDeathNoticeList[i].szVictim ) || CheckLocalPlayerName( rgDeathNoticeList[i].szKiller ) )
 		{
 			// -5 and +10 are the 5px rectangle extensions to the left and right
-			FillRoundedRGBA( x - 5, y, ScreenWidth - x - DEATHNOTICE_RIGHT + 10, 20, DEATHNOTICE_ROUNDING, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+			FillRoundedRGBA( x - 5, y - (SpriteHeight * 0.25f), ScreenWidth - x - DEATHNOTICE_RIGHT + 10, SpriteHeight + 5, DEATHNOTICE_ROUNDING, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
 		}
 
 		// and now, draw killer's name
@@ -156,7 +157,7 @@ int CHudDeathNotice :: Draw( float flTime )
 
 		// Draw death weapon
 		SPR_Set( gHUD.GetSprite( id ), r, g, b );
-		SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect( id ));
+		SPR_DrawAdditive( 0, x, y - (SpriteHeight * 0.25f), &gHUD.GetSpriteRect( id ));
 
 		x += (gHUD.GetSpriteRect( id ).right - gHUD.GetSpriteRect( id ).left );
 
