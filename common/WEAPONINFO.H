@@ -161,7 +161,7 @@ const char * const g_WpnAmmo[] =
 #define TRIPMINE_MAX_CARRY		5
 #define M203_GRENADE_MAX_CARRY	4
 #define SNIPER_MAX_CARRY		15
-#define _57_MAX_CARRY			50
+#define _57_MAX_CARRY			60
 
 // the maximum amount of ammo each weapon's clip can hold
 #define WEAPON_NOCLIP			-1
