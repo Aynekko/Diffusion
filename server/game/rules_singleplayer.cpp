@@ -243,7 +243,17 @@ void CHalfLifeRules :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, e
 	if( pTheKiller != NULL && pTheKiller->IsMonster() )
 	{
 		// send a prompt to player to use suit's abilities, if player died from an NPC
-		if( pVictim->CanDash && pVictim->BlastAbilityLVL > 0 )
+		bool bUseDronePrompt = false;
+		// show prompt about drone 30% of the time, but only if it's appropriate
+		// f.e. if the player is already using the drone, it certainly is not...
+		if( pVictim->CanUseDrone && pVictim->HasWeapon( WEAPON_DRONE ) && (pVictim->m_hDrone == NULL) && (RANDOM_LONG( 0, 100 ) > 65) )
+			bUseDronePrompt = true;
+
+		if( bUseDronePrompt )
+		{
+			UTIL_ShowMessage( "UTIL_USEDRONE", pVictim );
+		}
+		else if( pVictim->CanDash && pVictim->BlastAbilityLVL > 0 )
 		{
 			// player has both abilities
 			switch( RANDOM_LONG( 0, 2 ) )

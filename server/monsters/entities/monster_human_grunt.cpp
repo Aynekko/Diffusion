@@ -5898,7 +5898,7 @@ void CAndrewGrunt::Shoot( void )
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT( 40, 90 ) + gpGlobals->v_up * RANDOM_FLOAT( 75, 200 ) + gpGlobals->v_forward * RANDOM_FLOAT( -40, 40 );
 	EjectBrass( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_556, TE_BOUNCE_SHELL );
-	FireBullets( 1, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_10DEGREES : VECTOR_CONE_3DEGREES, 4096, BULLET_MONSTER_MP5, 1, 4 ); // 4 dmg per bullet
+	FireBullets( 1, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_10DEGREES : VECTOR_CONE_3DEGREES, 8192, BULLET_MONSTER_MP5, 1, 3.0f ); // 3 dmg per bullet
 
 	pev->effects |= EF_MUZZLEFLASH;
 
@@ -6318,14 +6318,8 @@ Schedule_t *CAndrewGrunt::GetSchedule( void )
 			if( pSound->m_iType & bits_SOUND_DANGER )
 			{
 				// dangerous sound nearby!
-
-				if( FOkToSpeak() )
-				{
-					SENTENCEG_PlayRndSz( ENT( pev ), "HG_GREN", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch );
-					JustSpoke();
-				}
-
-				return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
+				if( RANDOM_LONG( 0, 100 ) > 60 )
+					return GetScheduleOfType( SCHED_TAKE_COVER_FROM_BEST_SOUND );
 			}
 			
 			if( !HasConditions( bits_COND_SEE_ENEMY ) && (pSound->m_iType & (bits_SOUND_PLAYER | bits_SOUND_COMBAT)) )
