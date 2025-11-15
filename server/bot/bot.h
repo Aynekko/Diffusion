@@ -80,7 +80,7 @@ typedef struct  // used to respawn bot at end of round (time/frag limit)
 #define USE_TEAMPLAY_ENEMY_SND "barney/ba_raincheck.wav"
 
 
-void BotDebug( char *buffer );  // print out message to HUD for debugging
+void BotDebug( const char *buffer );  // print out message to HUD for debugging
 
 void BotLoadWaypointFile( void );
 void BotGenerateWaypointFile( int LookDistance = 600 );
