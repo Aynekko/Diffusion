@@ -10,12 +10,17 @@
 #ifndef UTLFIXEDMEMORY_H
 #define UTLFIXEDMEMORY_H
 
+#include <utility>
+
 #ifdef _WIN32
 #pragma once
-#endif
-
 #pragma warning (disable:4100)
 #pragma warning (disable:4514)
+#endif
+
+#ifndef RESTRICT
+#define RESTRICT // a1ba: not sure what this means here
+#endif // RESTRICT
 
 //-----------------------------------------------------------------------------
 // The CUtlFixedMemory class:
@@ -162,9 +167,9 @@ CUtlFixedMemory<T>::~CUtlFixedMemory()
 template< class T >
 void CUtlFixedMemory<T>::Swap( CUtlFixedMemory< T > &mem )
 {
-	swap( m_pBlocks, mem.m_pBlocks );
-	swap( m_nAllocationCount, mem.m_nAllocationCount );
-	swap( m_nGrowSize, mem.m_nGrowSize );
+	std::swap( m_pBlocks, mem.m_pBlocks );
+	std::swap( m_nAllocationCount, mem.m_nAllocationCount );
+	std::swap( m_nGrowSize, mem.m_nGrowSize );
 }
 
 
