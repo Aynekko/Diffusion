@@ -4110,7 +4110,7 @@ void CBasePlayer::CheckSuitUpdate()
 // seconds, then we won't repeat playback of this word or sentence
 // for at least that number of seconds.
 
-void CBasePlayer::SetSuitUpdate(char *name, int fgroup, int iNoRepeatTime)
+void CBasePlayer::SetSuitUpdate(const char *name, int fgroup, int iNoRepeatTime)
 {
 	int i;
 	int isentence;
@@ -5279,7 +5279,8 @@ void CBasePlayer::Spawn( void )
 		m_rgAmmoLast[i] = 0;  // client ammo values also have to be reset  (the death hud clear messages does on the client side)
 	}
 
-	m_lastx = m_lasty = 0;
+	m_lastx = 0;
+	m_lasty = 0;
 	
 	m_flNextChatTime = gpGlobals->time;
 	m_flNextChatSoundTime = gpGlobals->time;
@@ -7762,7 +7763,7 @@ void CBasePlayer :: ResetAutoaim( void )
 	{
 		SET_CROSSHAIRANGLE( edict(), 0, 0 );
 		m_vecAutoAim = g_vecZero;
-		m_lastx = m_lastx = 0;
+		m_lastx = 0;
 	}
 
 	m_fOnTarget = FALSE;
@@ -7802,7 +7803,7 @@ int CBasePlayer :: GetCustomDecalFrames( void )
 // DropPlayerItem - drop the named item, or if no name,
 // the active item. // BugFixedHL by Lev
 //=========================================================
-void CBasePlayer::DropPlayerItem(char* pszItemName)
+void CBasePlayer::DropPlayerItem(const char* pszItemName)
 {
 	if (!g_pGameRules->IsMultiplayer() || (weaponstay.value > 0))
 	{
@@ -8030,32 +8031,32 @@ void CBasePlayer::CheckTutorMessage( int m_iId )
 
 	switch( m_iId )
 	{
-		case WEAPON_KNIFE:		_snprintf_s( TempString, sizeof( TempString ), "tutor_knife" ); break;
-		case WEAPON_BERETTA:	_snprintf_s( TempString, sizeof( TempString ), "tutor_pistol"); break;
-		case WEAPON_DEAGLE:		_snprintf_s( TempString, sizeof( TempString ), "tutor_deagle"); break;
-		case WEAPON_MRC:		_snprintf_s( TempString, sizeof( TempString ), "tutor_mrc"); break;
-		case WEAPON_CROSSBOW:	_snprintf_s( TempString, sizeof( TempString ), "tutor_crossbow"); break;
-		case WEAPON_SHOTGUN:	_snprintf_s( TempString, sizeof( TempString ), "tutor_shotgun"); break;
-		case WEAPON_SHOTGUN_XM:	_snprintf_s( TempString, sizeof( TempString ), "tutor_shotgun_xm" ); break;
-		case WEAPON_RPG:		_snprintf_s( TempString, sizeof( TempString ), "tutor_rpg"); break;
-		case WEAPON_GAUSS:		_snprintf_s( TempString, sizeof( TempString ), "tutor_gausniper"); break;
-		case WEAPON_EGON:		_snprintf_s( TempString, sizeof( TempString ), "tutor_egon"); break; // not used
-		case WEAPON_HORNETGUN:	_snprintf_s( TempString, sizeof( TempString ), "tutor_hornet"); break; // not used
-		case WEAPON_HANDGRENADE: _snprintf_s( TempString, sizeof( TempString ), "tutor_grenade"); break;
-		case WEAPON_TRIPMINE:	_snprintf_s( TempString, sizeof( TempString ), "tutor_tripmine"); break;
-		case WEAPON_SATCHEL:	_snprintf_s( TempString, sizeof( TempString ), "tutor_satchel"); break;
-		case WEAPON_SNARK:		_snprintf_s( TempString, sizeof( TempString ), "tutor_snark"); break; // not used
-		case WEAPON_AR2:		_snprintf_s( TempString, sizeof( TempString ), "tutor_ar2"); break;
-		case WEAPON_DRONE:		_snprintf_s( TempString, sizeof( TempString ), "tutor_drone"); break;
-		case WEAPON_SENTRY:		_snprintf_s( TempString, sizeof( TempString ), "tutor_sentry"); break;
-		case WEAPON_HKMP5:		_snprintf_s( TempString, sizeof( TempString ), "tutor_hkmp5"); break;
-		case WEAPON_FIVESEVEN:	_snprintf_s( TempString, sizeof( TempString ), "tutor_fiveseven"); break;
-		case WEAPON_SNIPER:		_snprintf_s( TempString, sizeof( TempString ), "tutor_sniper" ); break;
-		case WEAPON_G36C:		_snprintf_s( TempString, sizeof( TempString ), "tutor_g36c" ); break;
+		case WEAPON_KNIFE:		Q_snprintf( TempString, sizeof( TempString ), "tutor_knife" ); break;
+		case WEAPON_BERETTA:	Q_snprintf( TempString, sizeof( TempString ), "tutor_pistol"); break;
+		case WEAPON_DEAGLE:		Q_snprintf( TempString, sizeof( TempString ), "tutor_deagle"); break;
+		case WEAPON_MRC:		Q_snprintf( TempString, sizeof( TempString ), "tutor_mrc"); break;
+		case WEAPON_CROSSBOW:	Q_snprintf( TempString, sizeof( TempString ), "tutor_crossbow"); break;
+		case WEAPON_SHOTGUN:	Q_snprintf( TempString, sizeof( TempString ), "tutor_shotgun"); break;
+		case WEAPON_SHOTGUN_XM:	Q_snprintf( TempString, sizeof( TempString ), "tutor_shotgun_xm" ); break;
+		case WEAPON_RPG:		Q_snprintf( TempString, sizeof( TempString ), "tutor_rpg"); break;
+		case WEAPON_GAUSS:		Q_snprintf( TempString, sizeof( TempString ), "tutor_gausniper"); break;
+		case WEAPON_EGON:		Q_snprintf( TempString, sizeof( TempString ), "tutor_egon"); break; // not used
+		case WEAPON_HORNETGUN:	Q_snprintf( TempString, sizeof( TempString ), "tutor_hornet"); break; // not used
+		case WEAPON_HANDGRENADE: Q_snprintf( TempString, sizeof( TempString ), "tutor_grenade"); break;
+		case WEAPON_TRIPMINE:	Q_snprintf( TempString, sizeof( TempString ), "tutor_tripmine"); break;
+		case WEAPON_SATCHEL:	Q_snprintf( TempString, sizeof( TempString ), "tutor_satchel"); break;
+		case WEAPON_SNARK:		Q_snprintf( TempString, sizeof( TempString ), "tutor_snark"); break; // not used
+		case WEAPON_AR2:		Q_snprintf( TempString, sizeof( TempString ), "tutor_ar2"); break;
+		case WEAPON_DRONE:		Q_snprintf( TempString, sizeof( TempString ), "tutor_drone"); break;
+		case WEAPON_SENTRY:		Q_snprintf( TempString, sizeof( TempString ), "tutor_sentry"); break;
+		case WEAPON_HKMP5:		Q_snprintf( TempString, sizeof( TempString ), "tutor_hkmp5"); break;
+		case WEAPON_FIVESEVEN:	Q_snprintf( TempString, sizeof( TempString ), "tutor_fiveseven"); break;
+		case WEAPON_SNIPER:		Q_snprintf( TempString, sizeof( TempString ), "tutor_sniper" ); break;
+		case WEAPON_G36C:		Q_snprintf( TempString, sizeof( TempString ), "tutor_g36c" ); break;
 	}
 
 	if( !FStrEq( TempString, "error" ) )
-		_snprintf_s( TempPic, sizeof( TempPic ), "textures/!tutor/%s", TempString );
+		Q_snprintf( TempPic, sizeof( TempPic ), "textures/!tutor/%s", TempString );
 
 	MESSAGE_BEGIN( MSG_ONE, gmsgStatusIconTutor, NULL, pev );
 		WRITE_STRING( TempString );

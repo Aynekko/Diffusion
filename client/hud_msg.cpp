@@ -839,7 +839,7 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 				if( *decal_tex == '{' || *decal_tex == '!' || *decal_tex == '~' || *decal_tex == ' ' )
 					decal_tex++;
 				// '}}'
-				strcpy_s( szbuffer, decal_tex );
+				Q_strncpy( szbuffer, decal_tex, sizeof( szbuffer ));
 				szbuffer[CBTEXTURENAMEMAX - 1] = 0;
 
 				// get texture type
@@ -955,7 +955,7 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		cl_entity_s *ent = GET_ENTITY( entityIndex );
 		if( !ent )
 			break;
-		sprintf_s( tr.studioevent[entityIndex].options, "50" );
+		Q_strncpy( tr.studioevent[entityIndex].options, "50", sizeof( tr.studioevent[entityIndex].options ));
 		tr.studioevent[entityIndex].event = Value;
 	}
 	break;
@@ -1054,9 +1054,9 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 		client_textmessage_t *TimerText = TextMessageGet( pText );
 		// if found, replace the message with titles.txt text; make sure it's not too long or game will freeze
 		if( TimerText && strlen( TimerText->pMessage ) < sizeof(gHUD.m_TriggerTimer.message) )
-			sprintf_s( gHUD.m_TriggerTimer.message, TimerText->pMessage );
+			Q_strncpy( gHUD.m_TriggerTimer.message, TimerText->pMessage, sizeof( gHUD.m_TriggerTimer.message ));
 		else // use as is
-			sprintf_s( gHUD.m_TriggerTimer.message, pText );
+			Q_strncpy( gHUD.m_TriggerTimer.message, pText, sizeof( gHUD.m_TriggerTimer.message ));
 		gHUD.m_TriggerTimer.timer = READ_SHORT();
 		if( gHUD.m_TriggerTimer.enabled > 1 )
 			gHUD.m_TriggerTimer.critical = true;

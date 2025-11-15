@@ -58,7 +58,13 @@ DLL export macros
 #elif defined _XBOX
 	#define NX32
 #elif defined LINUX
-        #define NX32
+
+	#ifdef __LP64__
+		#define NX64
+	#else
+		#define NX32
+	#endif
+
 #elif defined(__PPCGEKKO__)
 	#define NX32
 #else

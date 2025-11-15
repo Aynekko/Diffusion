@@ -13,7 +13,7 @@ END_DATADESC()
 
 LINK_ENTITY_TO_CLASS(func_pushable, CPushable);
 
-char* CPushable::m_soundNames[3] = { "debris/pushbox1.wav", "debris/pushbox2.wav", "debris/pushbox3.wav" };
+const char* CPushable::m_soundNames[3] = { "debris/pushbox1.wav", "debris/pushbox2.wav", "debris/pushbox3.wav" };
 
 void CPushable::Spawn(void)
 {

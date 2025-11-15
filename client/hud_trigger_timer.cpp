@@ -66,9 +66,9 @@ int CHudTriggerTimer::Draw( float flTime )
 	seconds = seconds - minutes * 60;
 	char timer_text[20];
 	if( seconds >= 10 )
-		sprintf_s( timer_text, "Time left: %i:%i", minutes, seconds );
+		Q_snprintf( timer_text, sizeof( timer_text ), "Time left: %i:%i", minutes, seconds );
 	else
-		sprintf_s( timer_text, "Time left: %i:0%i", minutes, seconds );
+		Q_snprintf( timer_text, sizeof( timer_text ), "Time left: %i:0%i", minutes, seconds );
 
 	// figure out text width using this hack
 	text_width = 0;

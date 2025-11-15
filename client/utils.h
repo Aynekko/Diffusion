@@ -25,6 +25,11 @@ GNU General Public License for more details.
 #include <stdarg.h>  // "
 #include <string> // for strncpy()
 
+#ifndef _WIN32
+#include <limits.h>
+#define MAX_PATH PATH_MAX
+#endif // _WIN32
+
 typedef unsigned char byte;
 typedef unsigned short word;
 
@@ -36,7 +41,7 @@ extern int r_currentMessageNum;
 extern float v_idlescale;
 
 extern int g_iXashEngineBuildNumber;
-extern BOOL g_fRenderInitialized;
+extern bool g_fRenderInitialized;
 
 #define SND_SPAWNING		(1<<8)		// we're spawing, used in some cases for ambients 
 #define SND_STOP			(1<<5)		// stop sound
@@ -68,7 +73,7 @@ typedef struct dllfunc_s
 
 client_sprite_t *GetSpriteList( client_sprite_t *pList, const char *psz, int iRes, int iCount );
 extern void DrawQuad( float xmin, float ymin, float xmax, float ymax );
-extern void ALERT( ALERT_TYPE level, char *szFmt, ... );
+extern void ALERT( ALERT_TYPE level, const char *szFmt, ... );
 
 struct model_s *Mod_Handle( int modelIndex );
 

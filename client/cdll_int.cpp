@@ -167,7 +167,7 @@ the hud variables.
 */
 void HUD_Init( void )
 {
-#ifdef XASH_64BIT
+#if XASH_64BIT && XASH_WIN32
 	discord_integration::initialize();
 #endif
 	
@@ -189,7 +189,7 @@ void HUD_Shutdown( void )
 	// diffusion - save achievement stats
 	gHUD.m_StatusIconsAchievement.SaveAchievementFile();
 
-#ifdef XASH_64BIT
+#if XASH_64BIT && XASH_WIN32
 	discord_integration::shutdown();
 #endif
 	
@@ -232,7 +232,7 @@ returns 1 if anything has been changed, 0 otherwise.
 */
 int HUD_UpdateClientData(client_data_t * pcldata, float flTime)
 {
-#ifdef XASH_64BIT
+#if XASH_64BIT && XASH_WIN32
 	discord_integration::on_update_client_data();
 #endif
 	
@@ -254,10 +254,11 @@ void HUD_Reset(void)
 static int *VGUI_GetRect( void )
 {
 	static int extent[4];
+#ifdef _WIN32
 	RECT wrect;
 
 	if( GetWindowRect( GetActiveWindow(), &wrect ))
-          {
+	{
 		if( !wrect.left )
 		{
 			// fullscreen
@@ -275,6 +276,12 @@ static int *VGUI_GetRect( void )
 			extent[3] = wrect.bottom - 4;
 		}
 	}
+#else
+	extent[0] = gEngfuncs.GetWindowCenterX() - ScreenWidth / 2;
+	extent[1] = gEngfuncs.GetWindowCenterY() - ScreenHeight / 2;
+	extent[2] = gEngfuncs.GetWindowCenterX() + ScreenWidth / 2;
+	extent[3] = gEngfuncs.GetWindowCenterY() + ScreenHeight / 2;
+#endif
 	return extent;	
 }
 
@@ -287,7 +294,7 @@ Called by engine every frame that client .dll is loaded
 */
 void HUD_Frame( double time )
 {
-#ifdef XASH_64BIT
+#if XASH_64BIT && XASH_WIN32
 	discord_integration::on_frame();
 #endif
 

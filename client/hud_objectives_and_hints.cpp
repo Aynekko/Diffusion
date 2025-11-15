@@ -28,9 +28,9 @@ int CHudHintObjective::Init( void )
 	pObjective[1][0] = '\0';
 	client_textmessage_t *DefaultObj = TextMessageGet( default_obj_text );
 	if( DefaultObj )
-		_snprintf_s( pObjective[0], sizeof( pObjective[0] ) - 1, DefaultObj->pMessage );
+		Q_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, DefaultObj->pMessage );
 	else
-		_snprintf_s( pObjective[0], sizeof( pObjective[0] ) - 1, default_obj_text );
+		Q_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, default_obj_text );
 	return 1;
 }
 
@@ -56,7 +56,7 @@ void CHudHintObjective::SetupHint( void )
 	if( TitlesMsg )
 	{
 		pHint[0] = '\0';
-		_snprintf_s( pHint, sizeof( pHint ) - 1, TitlesMsg->pMessage );
+		Q_snprintf( pHint, sizeof( pHint ) - 1, TitlesMsg->pMessage );
 	}
 
 	pHint[sizeof( pHint ) - 1] = '\0';
@@ -64,7 +64,7 @@ void CHudHintObjective::SetupHint( void )
 	// now replace the keybindings like #attack# etc.
 	char temp[sizeof( pHint )];
 	UTIL_ReplaceKeyBindings( pHint, sizeof( pHint ), temp );
-	_snprintf_s( pHint, sizeof( pHint ), temp );
+	Q_snprintf( pHint, sizeof( pHint ), temp );
 
 	// get maximum hint width and height
 	const char *txt = pHint;
@@ -119,12 +119,12 @@ void CHudHintObjective::SetupObjectives( void )
 		TitlesMsg = TextMessageGet( pObjective[0] );
 		pObjective[0][0] = '\0';
 		if( TitlesMsg )
-			_snprintf_s( pObjective[0], sizeof( pObjective[0] ) - 1, TitlesMsg->pMessage );
+			Q_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, TitlesMsg->pMessage );
 		else
-			_snprintf_s( pObjective[0], sizeof( pObjective[0] ) - 1, def_obj );
+			Q_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, def_obj );
 	}
 	else
-		_snprintf_s( pObjective[0], sizeof( pObjective[0] ) - 1, def_obj );
+		Q_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, def_obj );
 
 	if( pObjective[1][0] != '\0' )
 	{
@@ -132,7 +132,7 @@ void CHudHintObjective::SetupObjectives( void )
 		TitlesMsg = TextMessageGet( pObjective[1] );
 		pObjective[1][0] = '\0';
 		if( TitlesMsg )
-			_snprintf_s( pObjective[1], sizeof( pObjective[1] ) - 1, TitlesMsg->pMessage );
+			Q_snprintf( pObjective[1], sizeof( pObjective[1] ) - 1, TitlesMsg->pMessage );
 		else
 			pObjective[1][0] = '\0'; // secondary objective can be missing, just null it
 	}
@@ -214,12 +214,12 @@ int CHudHintObjective::MsgFunc_Hint( const char *pszName, int iSize, void *pbuf 
 	switch( get )
 	{
 	case 0:
-		_snprintf_s( pHint, 64, READ_STRING() );
+		Q_snprintf( pHint, 64, READ_STRING() );
 		SetupHint();
 		break;
 	case 1:
-		_snprintf_s( pObjective[0], 64, READ_STRING() );
-		_snprintf_s( pObjective[1], 64, READ_STRING() );
+		Q_snprintf( pObjective[0], 64, READ_STRING() );
+		Q_snprintf( pObjective[1], 64, READ_STRING() );
 		SetupObjectives();
 		break;
 	}

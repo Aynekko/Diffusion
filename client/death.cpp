@@ -119,7 +119,7 @@ int CHudDeathNotice :: Draw( float flTime )
 			continue;
 		}
 
-		rgDeathNoticeList[i].flDisplayTime = min( rgDeathNoticeList[i].flDisplayTime, gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME );
+		rgDeathNoticeList[i].flDisplayTime = Q_min( rgDeathNoticeList[i].flDisplayTime, gHUD.m_flTime + DEATHNOTICE_DISPLAY_TIME );
 
 		// Draw the death notice
 		rgDeathNoticeList[i].ypos_lerp = lerp( rgDeathNoticeList[i].ypos_lerp, YRES( DEATHNOTICE_TOP ) + (DEATHNOTICE_SPACING * i), 7.0f * g_fFrametime );
@@ -202,7 +202,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	gHUD.m_Scoreboard.GetAllPlayersInfo();
 
 	// Get the Killer's name
-	char *killer_name = g_PlayerInfoList[killer].name;
+	const char *killer_name = g_PlayerInfoList[killer].name;
 
 	if( !killer_name )
 	{
@@ -217,7 +217,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	}
 
 	// Get the Victim's name
-	char *victim_name = NULL;
+	const char *victim_name = NULL;
 
 	// If victim is -1, the killer killed a specific, non-player object (like a sentrygun)
 	if((( char )victim) != -1 )
@@ -238,7 +238,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	// Is it a non-player object kill?
 	if( ((char)victim) == -1 )
 	{
-		rgDeathNoticeList[i].iNonPlayerKill = TRUE;
+		rgDeathNoticeList[i].iNonPlayerKill = true;
 
 		// Store the object's name in the Victim slot (skip the d_ bit)
 		Q_strcpy( rgDeathNoticeList[i].szVictim, killedwith+2 );
@@ -246,10 +246,10 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	else
 	{
 		if( killer == victim || killer == 0 )
-			rgDeathNoticeList[i].iSuicide = TRUE;
+			rgDeathNoticeList[i].iSuicide = true;
 
 		if( !Q_strcmp( killedwith, "d_teammate" ))
-			rgDeathNoticeList[i].iTeamKill = TRUE;
+			rgDeathNoticeList[i].iTeamKill = true;
 	}
 
 	// Find the sprite in the list

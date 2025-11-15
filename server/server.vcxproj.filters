@@ -913,7 +913,7 @@
     <ClInclude Include="..\game_shared\stringlib.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="strings.h">
+    <ClInclude Include="strings_pool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="monsters\talkmonster.h">

@@ -19,7 +19,7 @@ GNU General Public License for more details.
 #include "event_api.h"
 #include "triangleapi.h"
 #include "parsemsg.h"
-#include "features.h"
+#include "enginefeatures.h"
 #include "r_weather.h"
 #include "r_local.h"
 #include "matrix.h"
@@ -85,7 +85,7 @@ void ProcessRain( void )
 
 	if(( !Rain.dripsPerSecond && g_dripsArray.IsClear( )) || rain_timedelta > 0.1f )
 	{
-		rain_timedelta = min( rain_timedelta, 0.1f );
+		rain_timedelta = Q_min( rain_timedelta, 0.1f );
 
 		// keep nextspawntime correct
 		rain_nextspawntime = rain_curtime;

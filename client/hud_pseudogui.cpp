@@ -123,7 +123,7 @@ int CPseudoGUI::VidInit( void )
 int CPseudoGUI::MsgFunc_ShowNote( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pszName, pbuf, iSize );
-	sprintf_s( Note, READ_STRING() );
+	Q_strncpy( Note, READ_STRING(), sizeof( Note ));
 	END_READ();
 
 	Enable();

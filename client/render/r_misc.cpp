@@ -881,7 +881,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 
 				// HACKHACK: get radius from head entity
 				if( ent->curstate.rendermode != kRenderNormal )
-					dl->radius = max( 0, ent->curstate.renderamt - 55 );
+					dl->radius = Q_max( 0, ent->curstate.renderamt - 55 );
 				else dl->radius = 200;
 				dl->die = tr.time;
 
@@ -1122,7 +1122,7 @@ void HUD_ProcessPlayerState( struct entity_state_s* dst, const struct entity_sta
 		g_iUser2 = src->iuser2;
 		g_iUser3 = src->iuser3;
 
-#ifdef XASH_64BIT
+#if XASH_64BIT && XASH_WIN32
 		discord_integration::set_spectating( g_iUser1 > 0 );
 #endif
 	}
@@ -2387,8 +2387,8 @@ void R_Explosion( Vector pos, int model, float scale, float framerate, int flags
 //==========================================================================================
 void R_ClientSound( Vector pos, int entindex, int sndnum, int type, int LowAmmoVolume )
 {
-	char *sndname[5] = { NULL, NULL, NULL, NULL, NULL };
-	char *sndname_d[5] = { NULL, NULL, NULL, NULL, NULL };
+	const char *sndname[5] = { NULL, NULL, NULL, NULL, NULL };
+	const char *sndname_d[5] = { NULL, NULL, NULL, NULL, NULL };
 	int num = -1;
 	const cl_entity_t *player = gEngfuncs.GetLocalPlayer();
 	int Channel = CHAN_WEAPON;

@@ -114,7 +114,7 @@ int CHudAchievement::Draw( float flTime )
 void CHudAchievement::EnableAchievement( char *pszIconName )
 {
 	char Path[128];
-	sprintf_s( Path, "textures/!ach/%s", pszIconName );
+	Q_snprintf( Path, sizeof( Path ), "textures/!ach/%s", pszIconName );
 	CurrentImage = LOAD_TEXTURE( Path, NULL, 0, 0 );
 
 	if( !CurrentImage )
@@ -125,7 +125,7 @@ void CHudAchievement::EnableAchievement( char *pszIconName )
 
 	pTitle = TextMessageGet( pszIconName ); // titles.txt
 	char txt[128];
-	sprintf_s( txt, "%s_text", pszIconName );
+	Q_snprintf( txt, sizeof( txt ), "%s_text", pszIconName );
 	pText = TextMessageGet( txt ); // titles.txt
 
 	// get text width
@@ -172,7 +172,7 @@ void CHudAchievement::LoadAchievementFile( void )
 	bAchievements = true;
 
 	char szFilename[MAX_PATH];
-	_snprintf_s( szFilename, sizeof( szFilename ), "data/achievements.bin" );
+	Q_snprintf( szFilename, sizeof( szFilename ), "data/achievements.bin" );
 
 	byte *aMemFile = LOAD_FILE( szFilename, NULL );
 
@@ -192,7 +192,11 @@ void CHudAchievement::LoadAchievementFile( void )
 	}
 
 	achievement_data_t *pData = (achievement_data_t*)aMemFile;
+#ifndef _WIN32
+	memcpy( &ach_data, pData, sizeof( ach_data ));
+#else
 	memcpy_s( &ach_data, sizeof( ach_data ), pData, sizeof( ach_data ) );
+#endif
 
 	gEngfuncs.COM_FreeFile( aMemFile );
 
@@ -206,9 +210,9 @@ void CHudAchievement::SaveAchievementFile( bool backup )
 
 	char szFilename[MAX_PATH];
 	if( !backup )
-		_snprintf_s( szFilename, sizeof( szFilename ), "data/achievements.bin" );
+		Q_snprintf( szFilename, sizeof( szFilename ), "data/achievements.bin" );
 	else
-		_snprintf_s( szFilename, sizeof( szFilename ), "data/achievements_backup.bin" );
+		Q_snprintf( szFilename, sizeof( szFilename ), "data/achievements_backup.bin" );
 
 	if( !gRenderfuncs.pfnSaveFile( szFilename, &ach_data, sizeof( ach_data ) ) )
 		Msg( "^2Achievements:^7 ^1Error:^7 SaveAchievementFile: couldn't save %s\n", szFilename );
@@ -281,7 +285,7 @@ void CHudAchievement::CreateDefaultAchievementFile(void)
 		ach_data.goal[i] = AchievementGoals[i];
 		ach_data.completion[i] = false;
 		ach_data.value[i] = 0;
-		sprintf_s( ach_data.name[i], AchievementNames[i] );
+		Q_strncpy( ach_data.name[i], AchievementNames[i], sizeof( ach_data.name[i] ));
 	}
 
 	SaveAchievementFile();

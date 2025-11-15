@@ -183,7 +183,7 @@ int CHudStatusBar :: Draw( float fTime )
 			m_pflNameColors[i] = g_ColorYellow;
 			ParseStatusString( i );
 		}
-		m_bReparseString = FALSE;
+		m_bReparseString = false;
 	}
 
 	int Y_START = ScreenHeight - YRES( 32 + 4 );
@@ -200,7 +200,7 @@ int CHudStatusBar :: Draw( float fTime )
 		// let user set status ID bar centering
 		if(( i == STATUSBAR_ID_LINE ) && CVAR_GET_FLOAT( "hud_centerid" ))
 		{
-			x = max( 0, max( 2, (ScreenWidth - TextWidth)) / 2 );
+			x = Q_max( 0, Q_max( 2, (ScreenWidth - TextWidth)) / 2 );
 			y = (ScreenHeight / 2) + (TextHeight * CVAR_GET_FLOAT( "hud_centerid" ));
 		}
 
@@ -242,7 +242,7 @@ int CHudStatusBar :: MsgFunc_StatusText( const char *pszName, int iSize, void *p
 	else
 		m_iFlags |= HUD_ACTIVE;  // we have status text, so turn on the status bar
 
-	m_bReparseString = TRUE;
+	m_bReparseString = true;
 
 	END_READ();
 
@@ -263,7 +263,7 @@ int CHudStatusBar :: MsgFunc_StatusValue( const char *pszName, int iSize, void *
 
 	m_iStatusValues[index] = READ_SHORT();
 
-	m_bReparseString = TRUE;
+	m_bReparseString = true;
 
 	END_READ();
 	

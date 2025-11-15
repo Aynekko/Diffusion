@@ -26,8 +26,12 @@
 #define DEG2RAD( x )	((float)(x) * (float)(M_PI / 180.f))
 #define Q_rint( x )		((x) < 0 ? ((int)((x)-0.5f)) : ((int)((x)+0.5f)))
 
+#ifdef _MSC_VER
 #pragma warning( disable : 4244 )	// disable 'possible loss of data converting float to int' warning message
 #pragma warning( disable : 4305 )	// disable 'truncation from 'const double' to 'float' warning message
+#else
+#define _forceinline
+#endif
 
 class NxVec3;
 class Radian;

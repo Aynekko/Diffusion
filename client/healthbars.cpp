@@ -69,7 +69,7 @@ int CHealthbars::MsgFunc_HealthbarCenter( const char *pszName, int iSize, void *
 	if( health_center == 255 )
 		MonsterName[0] = '\0';
 	else
-		sprintf_s( MonsterName, READ_STRING() );
+		Q_strncpy( MonsterName, READ_STRING(), sizeof( MonsterName ));
 
 	END_READ();
 

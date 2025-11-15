@@ -26,7 +26,7 @@ GNU General Public License for more details.
 #include "entity_types.h"
 #include "event_api.h"
 #include "r_weather.h"
-#include "features.h"
+#include "enginefeatures.h"
 #include "r_shader.h"
 #include "r_world.h"
 #include "pm_defs.h"
@@ -43,7 +43,7 @@ char r_depth_msg[2048];
 ref_instance_t	*RI = &glState.stack[0];
 float gldepthmin, gldepthmax;
 model_t *worldmodel = NULL;	// must be set at begin each frame
-BOOL g_fRenderInitialized = FALSE;
+bool g_fRenderInitialized = false;
 int r_currentMessageNum = 0;
 Vector PrevViewAngles = g_vecZero;
 Vector PrevViewOrg = g_vecZero;
@@ -71,9 +71,9 @@ static void CubeFace(const vec3_t org, int v0, int v1, int v2, int v3, float siz
 	unclamped[1] = TEXTURE_TO_TEXGAMMA(color[1]) * scale;
 	unclamped[2] = TEXTURE_TO_TEXGAMMA(color[2]) * scale;
 
-	col[0] = min((unclamped[0] >> 7), 255);
-	col[1] = min((unclamped[1] >> 7), 255);
-	col[2] = min((unclamped[2] >> 7), 255);
+	col[0] = Q_min((unclamped[0] >> 7), 255);
+	col[1] = Q_min((unclamped[1] >> 7), 255);
+	col[2] = Q_min((unclamped[2] >> 7), 255);
 
 	//	pglColor3ub( col[0], col[1], col[2] );
 	pglColor3ub(color[0], color[1], color[2]);
@@ -2253,7 +2253,7 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 	return 1;
 }
 
-BOOL HUD_SpeedsMessage( char *out, size_t size )
+int HUD_SpeedsMessage( char *out, size_t size )
 {
 	if( !g_fRenderInitialized || !CVAR_TO_BOOL( gl_renderer ))
 		return false; // let the engine use built-in counters
@@ -2317,7 +2317,7 @@ int HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_inter
 {
 	if ( !callback || !renderfuncs || version != CL_RENDER_INTERFACE_VERSION )
 	{
-		return FALSE;
+		return false;
 	}
 
 	size_t iImportSize = sizeof( render_interface_t );
@@ -2332,9 +2332,9 @@ int HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_inter
 	// get pointer to movevars
 	tr.movevars = gEngfuncs.pEventAPI->EV_GetMovevars();
 
-	g_fRenderInitialized = TRUE;
+	g_fRenderInitialized = true;
 
-	return TRUE;
+	return true;
 }
 
 //=========================================================

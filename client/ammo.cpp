@@ -25,7 +25,7 @@
 #include "pm_defs.h"
 #include "event_api.h"
 #include "r_local.h"
-#include "WEAPONINFO.H"
+#include "weaponinfo.h"
 #include "triangleapi.h"
 
 int		g_weaponselect = 0;
@@ -74,11 +74,11 @@ const char WeaponNames[TOTAL_WEAPONS][32] =
 int WeaponsResource :: HasAmmo( WEAPON *p )
 {
 	if( !p )
-		return FALSE;
+		return false;
 
 	// weapons with no max ammo can always be selected
 	if( p->iMax1 == -1 )
-		return TRUE;
+		return true;
 
 	return (p->iAmmoType == -1) || p->iClip > 0 || CountAmmo( p->iAmmoType ) 
 		|| CountAmmo( p->iAmmo2Type ) || ( p->iFlags & WEAPON_FLAGS_SELECTONEMPTY );
@@ -162,13 +162,13 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 		Q_snprintf( sz, sizeof( sz ), "sprites/%s.spr", p->szSprite );
 		pWeapon->hInactive = SPR_Load( sz );
 		pWeapon->rcInactive = p->rc;
-		gHR.iHistoryGap = max( gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top );
+		gHR.iHistoryGap = Q_max( gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top );
 	}
 	else
 	{
 		pWeapon->hInactive = gHUD.m_hHudError;
 		pWeapon->rcInactive = gHUD.GetSpriteRect( gHUD.m_HUD_error );
-		gHR.iHistoryGap = max( gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top );
+		gHR.iHistoryGap = Q_max( gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top );
 	}
 
 	p = GetSpriteList( pList, "weapon_s", iRes, i );
@@ -190,7 +190,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 		Q_snprintf( sz, sizeof( sz ), "sprites/%s.spr", p->szSprite );
 		pWeapon->hAmmo = SPR_Load( sz );
 		pWeapon->rcAmmo = p->rc;
-		gHR.iHistoryGap = max( gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top );
+		gHR.iHistoryGap = Q_max( gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top );
 	}
 	else pWeapon->hAmmo = 0;
 
@@ -200,7 +200,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 		Q_snprintf( sz, sizeof( sz ), "sprites/%s.spr", p->szSprite );
 		pWeapon->hAmmo2 = SPR_Load( sz );
 		pWeapon->rcAmmo2 = p->rc;
-		gHR.iHistoryGap = max( gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top );
+		gHR.iHistoryGap = Q_max( gHR.iHistoryGap, pWeapon->rcActive.bottom - pWeapon->rcActive.top );
 	}
 	else pWeapon->hAmmo2 = 0;
 	*/
@@ -347,7 +347,7 @@ int CHudAmmo::VidInit( void )
 	giBucketWidth = 50;// gHUD.GetSpriteRect( m_HUD_bucket0 ).right - gHUD.GetSpriteRect( m_HUD_bucket0 ).left;
 	giBucketHeight = gHUD.GetSpriteRect( m_HUD_bucket0 ).bottom - gHUD.GetSpriteRect( m_HUD_bucket0 ).top;
 
-	gHR.iHistoryGap = max( gHR.iHistoryGap, gHUD.GetSpriteRect( m_HUD_bucket0 ).bottom - gHUD.GetSpriteRect( m_HUD_bucket0 ).top );
+	gHR.iHistoryGap = Q_max( gHR.iHistoryGap, gHUD.GetSpriteRect( m_HUD_bucket0 ).bottom - gHUD.GetSpriteRect( m_HUD_bucket0 ).top );
 
 	// If we've already loaded weapons, let's get new sprites
 	gWR.LoadAllWeaponSprites();
@@ -469,7 +469,7 @@ int WeaponsResource::GetWeaponIdForAmmo( int iAmmoId, int *ammotype )
 // Menu Selection Code
 void WeaponsResource :: SelectSlot( int iSlot, int fAdvance, int iDirection )
 {
-	if( gHUD.m_Menu.m_fMenuDisplayed && ( fAdvance == FALSE ) && ( iDirection == 1 ))	
+	if( gHUD.m_Menu.m_fMenuDisplayed && ( fAdvance == false ) && ( iDirection == 1 ))	
 	{
 		// menu is overriding slot use commands
 		gHUD.m_Menu.SelectMenuItem( iSlot + 1 );  // slots are one off the key numbers
@@ -628,7 +628,7 @@ int CHudAmmo::MsgFunc_HideWeapon( const char *pszName, int iSize, void *pbuf )
 //
 int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 {	
-	int fOnTarget = FALSE;
+	int fOnTarget = false;
 
 	BEGIN_READ( pszName, pbuf, iSize );
 
@@ -638,7 +638,7 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 
 	// detect if we're also on target
 	if( iState > 1 )
-		fOnTarget = TRUE;
+		fOnTarget = true;
 
 	if( iId < 1 )
 	{
@@ -652,14 +652,14 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 		// Is player dead???
 		if ((iId == -1) && (iClip == -1))
 		{
-			gHUD.m_fPlayerDead = TRUE;
+			gHUD.m_fPlayerDead = true;
 			gpActiveSel = NULL;
 			return 1;
 		}
-		gHUD.m_fPlayerDead = FALSE;
+		gHUD.m_fPlayerDead = false;
 	}
 
-	gHUD.m_fPlayerDead = FALSE;
+	gHUD.m_fPlayerDead = false;
 
 	WEAPON *pWeapon = gWR.GetWeapon( iId );
 
@@ -753,7 +753,7 @@ void CHudAmmo::SlotInput( int iSlot )
 	if( gHUD.m_CodeInput.CodeInputScreenIsOn )
 		gHUD.m_CodeInput.EnterCode( iSlot + 1 );
 	else
-		gWR.SelectSlot( iSlot, FALSE, 1 );
+		gWR.SelectSlot( iSlot, false, 1 );
 }
 
 void CHudAmmo::UserCmd_Slot1( void )
@@ -1059,7 +1059,7 @@ int CHudAmmo::Draw( float flTime )
 
 	AmmoWidth = gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).right - gHUD.GetSpriteRect( gHUD.m_HUD_number_0 ).left;
 
-	a = (int)max( MIN_ALPHA, m_fFade );
+	a = (int)Q_max( MIN_ALPHA, m_fFade );
 
 	if( m_fFade > 0 )
 		m_fFade -= (gHUD.m_flTimeDelta * 200);
@@ -1165,7 +1165,7 @@ int CHudAmmo::Draw( float flTime )
 				char ammo[8];
 				if( !bDrawOfflineAmmo )
 				{
-					sprintf_s( ammo, "%i", gWR.CountAmmo( pw->iAmmoType ) );
+					Q_snprintf( ammo, sizeof( ammo ), "%i", gWR.CountAmmo( pw->iAmmoType ) );
 					ammo_count_width += DrawStringReverse( line_pos_x + total_cells_width, line_pos_y - 3, ammo, 70, 169, 255 );
 				}
 				else

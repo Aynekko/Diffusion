@@ -122,8 +122,8 @@ int CHudStamina :: Draw(float flTime)
 	pglDisable( GL_MULTISAMPLE_ARB );
 
 	// draw number
-	char number[5];
-	sprintf_s( number, "%3d", (int)stamina_val );
+	char number[32];
+	Q_snprintf( number, sizeof( number ), "%3d", (int)stamina_val );
 	int text_pos_x = pos_x + icon_size + full_frame_w;
 	int text_pos_y = pos_y;
 	DrawString( text_pos_x, text_pos_y, number, 70, 169, 255 );

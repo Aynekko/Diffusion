@@ -378,7 +378,7 @@ public:
 
 	bool FlashlightCap; // this monster has flashlight
 
-	CBaseEntity* DropItem ( char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
+	CBaseEntity* DropItem ( const char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
 	
 	float NextUpdateTime; // don't update the monster logic every frame
 

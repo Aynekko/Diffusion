@@ -283,7 +283,7 @@ protected:
 
 	Node_t* m_pElements;
 
-	_forceinline M const &Elements( void ) const
+	inline M const &Elements( void ) const
 	{
 		return m_Elements;
 	}
@@ -310,7 +310,7 @@ public:
 
 	bool IsValidIndex( I i ) const
 	{
-		if ( !Elements().IsIdxValid( i ) )
+		if ( !this->Elements().IsIdxValid( i ) )
 			return false;
 
 #ifdef _DEBUG // it's safe to skip this here, since the only way to get indices after m_LastAlloc is to use MaxElement()
@@ -1322,7 +1322,7 @@ int CUtlRBTree<T, I, L, M>::Depth( I node ) const
 
 	int depthright = Depth( RightChild(node) );
 	int depthleft = Depth( LeftChild(node) );
-	return max(depthright, depthleft) + 1;
+	return ( depthright > depthleft ? depthright : depthleft ) + 1;
 }
 
 

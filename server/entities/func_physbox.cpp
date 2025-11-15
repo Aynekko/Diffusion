@@ -356,7 +356,7 @@ void CPhysEntity :: DamageSound( void )
 {
 	int pitch;
 	float fvol;
-	char *rgpsz[6];
+	const char *rgpsz[6];
 	int i;
 	int material = m_Material;
 

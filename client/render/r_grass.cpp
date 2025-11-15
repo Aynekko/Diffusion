@@ -1154,7 +1154,7 @@ int R_GrassTextureForName( const char *name, byte *tex )
 	// load normalmap if present
 	grasstexs[i].gl_normalmapnum = 0;
 	char normalmap_name[256];
-	sprintf_s( normalmap_name, "%s_norm", name );
+	Q_snprintf( normalmap_name, sizeof( normalmap_name ), "%s_norm", name );
 	if( IMAGE_EXISTS( normalmap_name ) )
 		grasstexs[i].gl_normalmapnum = LOAD_TEXTURE( normalmap_name, NULL, 0, 0 );
 
@@ -1269,7 +1269,7 @@ void R_GrassInit( void )
 			{
 				// seed is optional
 				entry.seed = Q_atoi( token );
-				entry.seed = max( 1, entry.seed );
+				entry.seed = Q_max( 1, entry.seed );
 			}
 			else entry.seed = random_seed++;
 

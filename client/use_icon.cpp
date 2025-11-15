@@ -183,7 +183,7 @@ int CUseIcon::MsgFunc_UseIcon( const char *pszName, int iSize, void *pbuf )
 
 void CUseIcon::EnableIcon( int UsePressed )
 {	
-	char *pszIconName;
+	const char *pszIconName;
 	
 	switch( UsePressed )
 	{

@@ -38,7 +38,11 @@
 #include "exportdef.h"
 
 #ifndef offsetof
+#ifdef __GNUC__
+#define offsetof(s,m)	__builtin_offsetof(s,m)
+#else
 #define offsetof(s,m)	(size_t)&(((s *)0)->m)
+#endif
 #endif
 
 #include <alert.h>
@@ -276,9 +280,9 @@ typedef struct enginefuncs_s
 // Passed to pfnKeyValue
 typedef struct KeyValueData_s
 {
-	char *szClassName;	// in: entity classname
-	char *szKeyName;	// in: name of key
-	char *szValue;		// in: value of key
+	const char *szClassName;	// in: entity classname
+	const char *szKeyName;	// in: name of key
+	const char *szValue;		// in: value of key
 	int fHandled;		// out: DLL sets to true if key-value pair was understood
 } KeyValueData;
 

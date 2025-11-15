@@ -752,7 +752,8 @@ NxConvexMesh *CPhysicNovodex :: ConvexMeshFromStudio( entvars_t *pev, int modeli
 	meshDesc.flags |= NX_CF_COMPUTE_CONVEX;
 
 	m_pCooking->NxInitCooking();
-	bool status = m_pCooking->NxCookConvexMesh( meshDesc, UserStream( szHullFilename, false ));
+	auto stream = UserStream( szHullFilename, false );
+	bool status = m_pCooking->NxCookConvexMesh( meshDesc, stream );
 
 	delete [] verts;
 	delete [] m_verts;
@@ -998,7 +999,8 @@ NxTriangleMesh *CPhysicNovodex :: TriangleMeshFromStudio( entvars_t *pev, int mo
 	meshDesc.flags = 0;
 
 	m_pCooking->NxInitCooking();
-	bool status = m_pCooking->NxCookTriangleMesh( meshDesc, UserStream( szMeshFilename, false ));
+	auto stream = UserStream( szMeshFilename, false );
+	bool status = m_pCooking->NxCookTriangleMesh( meshDesc, stream );
 
 	delete [] verts;
 	delete [] indices;
@@ -1872,7 +1874,8 @@ int CPhysicNovodex :: BuildCollisionTree( char *szMapName )
 	if( m_pCooking )
 	{
 		m_pCooking->NxInitCooking();
-		bool status = m_pCooking->NxCookTriangleMesh( levelDesc, UserStream( szHullFilename, false ));
+		auto stream = UserStream( szHullFilename, false );
+		bool status = m_pCooking->NxCookTriangleMesh( levelDesc, stream );
           }
 
 	delete [] indices;

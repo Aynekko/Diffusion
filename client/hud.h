@@ -48,6 +48,10 @@
 
 typedef struct cvar_s	cvar_t;
 
+#ifndef _WIN32
+#define _cdecl
+#endif // _WIN32
+
 #define DHN_DRAWZERO 		1
 #define DHN_2DIGITS  		2
 #define DHN_3DIGITS  		4
@@ -241,7 +245,7 @@ public:
 	void InitHUDData( void );
 	int VidInit( void );
 	int Draw( float flTime );
-	float DrawPlayers( int xoffset, float listslot, int nameoffset = 0, char *team = NULL ); // returns the ypos where it finishes drawing
+	float DrawPlayers( int xoffset, float listslot, int nameoffset = 0, const char *team = NULL ); // returns the ypos where it finishes drawing
 	void UserCmd_ShowScores( void );
 	void UserCmd_HideScores( void );
 	int MsgFunc_ScoreInfo( const char *pszName, int iSize, void *pbuf );
@@ -588,8 +592,8 @@ public:
 
 	// had to make these public so CHud could access them (to enable concussion icon)
 	// could use a friend declaration instead...
-	void EnableIcon( char *pszIconName, byte red, byte green, byte blue );
-	void DisableIcon( char *pszIconName );
+	void EnableIcon( const char *pszIconName, byte red, byte green, byte blue );
+	void DisableIcon( const char *pszIconName );
 
 private:
 	typedef struct
@@ -1151,7 +1155,7 @@ public:
 	
 	void AddHudElem( CHudBase *p );
 	float GetSensitivity() { return m_flMouseSensitivity; }
-	BOOL HasWeapon( int weaponnum ) { return FBitSet( m_iWeaponBits[weaponnum >> 3], BIT( weaponnum & 7 )); }
+	bool HasWeapon( int weaponnum ) { return FBitSet( m_iWeaponBits[weaponnum >> 3], BIT( weaponnum & 7 )); }
 	void AddWeapon( int weaponnum ) { SetBits( m_iWeaponBits[weaponnum >> 3], BIT( weaponnum & 7 )); }
 
 	void DrumsInput( int Slot );

@@ -89,7 +89,7 @@ BOOL skin_used[MAX_SKINS] =
 };
 
 // store the names of the models...
-char *bot_skins[MAX_SKINS] = 
+static const char *bot_skins[MAX_SKINS] = 
 {
 	"a",
 	"b",
@@ -436,19 +436,19 @@ inline char *GET_INFOBUFFER( edict_t *e )
    return (*g_engfuncs.pfnGetInfoKeyBuffer)( e );
 }
 
-inline char *GET_INFO_KEY_VALUE( char *infobuffer, char *key )
+inline char *GET_INFO_KEY_VALUE( char *infobuffer, const char *key )
 {
    return (g_engfuncs.pfnInfoKeyValue( infobuffer, key ));
 }
 
 inline void SET_CLIENT_KEY_VALUE( int clientIndex, char *infobuffer,
-								  char *key, char *value )
+								  const char *key, const char *value )
 {
    (*g_engfuncs.pfnSetClientKeyValue)( clientIndex, infobuffer, key, value );
 }
 
 
-void BotDebug( char *buffer )
+void BotDebug( const char *buffer )
 {
 	// print out debug messages to the HUD of all players
    // this allows you to print messages from bots to your display
@@ -502,11 +502,11 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 				skin_used[i] = FALSE;
 		}
 
-		strcpy_s( c_skin, bot_skins[index] );
+		Q_strncpy( c_skin, bot_skins[index], sizeof( c_skin ));
    }
    else
    {
-		strncpy_s( c_skin, skin, BOT_SKIN_LEN);
+		Q_strncpy( c_skin, skin, BOT_SKIN_LEN);
 		c_skin[BOT_SKIN_LEN] = 0;  // make sure c_skin is null terminated
    }
 
@@ -527,12 +527,12 @@ void BotCreate(const char *skin, const char *name, const char *skill)
    {
 	  if ((name != NULL) && (*name != 0))
 	  {
-		 strncpy_s( c_name, name, BOT_NAME_LEN );
+		 Q_strncpy( c_name, name, BOT_NAME_LEN );
 		 c_name[BOT_NAME_LEN] = 0;  // make sure c_name is null terminated
 	  }
 	  else
 	  {
-		 strcpy_s( c_name, bot_names[index] );
+		 Q_strncpy( c_name, bot_names[index], sizeof( c_name ));
 	  }
    }
    else
@@ -544,16 +544,16 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 
 	  GET_GAME_DIR(dir_name);
 
-	  sprintf_s(filename, "%s\\models\\player\\%s", dir_name, c_skin);
+	  Q_snprintf(filename, sizeof( filename ), "%s\\models\\player\\%s", dir_name, c_skin);
 
 	  if (stat(filename, &stat_str) != 0)
 	  {
-		  sprintf_s( filename, "valve\\models\\player\\%s", c_skin );
+		 Q_snprintf( filename, sizeof( filename ), "valve\\models\\player\\%s", c_skin );
 		 if (stat(filename, &stat_str) != 0)
 		 {
 			char err_msg[80];
 
-			sprintf_s( err_msg, "model \"%s\" is unknown.\n", c_skin );
+			Q_snprintf( err_msg, sizeof( err_msg ), "model \"%s\" is unknown.\n", c_skin );
 			UTIL_ClientPrintAll( HUD_PRINTNOTIFY, err_msg );
 			if (IS_DEDICATED_SERVER())
 			   printf(err_msg);
@@ -571,7 +571,7 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 	  }
 
 	  // copy the name of the model to the bot's name...
-	  strncpy_s( c_name, skin, BOT_SKIN_LEN);
+	  Q_strncpy( c_name, skin, BOT_SKIN_LEN);
 	  c_name[BOT_SKIN_LEN] = 0;  // make sure c_skin is null terminated
 
 	  length = strlen( c_name );
@@ -599,7 +599,7 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 	if ((skill_level < 1) || (skill_level > 5))
 		skill_level = f_botskill;
 
-	sprintf_s( c_skill, "%d", skill_level );
+	Q_snprintf( c_skill, sizeof( c_skill ), "%d", skill_level );
 	
 	BotEnt = CREATE_FAKE_CLIENT( c_name );
 
@@ -636,8 +636,8 @@ void BotCreate(const char *skin, const char *name, const char *skill)
 		bot_respawn[index].is_used = TRUE;  // this slot is used
 
 		// don't store the name here, it might change if same as another
-		strcpy_s(bot_respawn[index].skin, c_skin);
-		strcpy_s(bot_respawn[index].skill, c_skill);
+		Q_strncpy(bot_respawn[index].skin, c_skin, sizeof( bot_respawn[index].skin ));
+		Q_strncpy(bot_respawn[index].skill, c_skill, sizeof( bot_respawn[index].skill ));
 
 		sprintf(ptr, "Creating bot \"%s\" using model %s with skill=%d\n", c_name, c_skin, skill_level);
 		UTIL_ClientPrintAll( HUD_PRINTNOTIFY, ptr);

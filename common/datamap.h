@@ -16,7 +16,11 @@
 #include "ehandle.h"
 
 // SINGLE_INHERITANCE restricts the size of CBaseEntity pointers-to-member-functions to 4 bytes
+#ifdef _MSC_VER
 class __single_inheritance CBaseEntity;
+#else
+class CBaseEntity;
+#endif
 
 //-----------------------------------------------------------------------------
 // Field sizes... 

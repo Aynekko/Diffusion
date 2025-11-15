@@ -478,8 +478,8 @@ float V_CalcBob( struct ref_params_s *pparams )
 
 	bob = sqrt( vel[0] * vel[0] + vel[1] * vel[1] ) * cl_bob->value;
 	bob = bob * 0.3 + bob * 0.7 * sin( cycle );
-	//	bob = min( bob, 4 );
-	//	bob = max( bob, -7 );
+	//	bob = Q_min( bob, 4 );
+	//	bob = Q_max( bob, -7 );
 	return bob;
 }
 
@@ -973,12 +973,13 @@ void V_CalcSpectatorRefdef( struct ref_params_s *pparams )
 
 	if( pparams->nextView == 0 )
 	{
+		Vector null_vec( 0, 0, 0 );
 		// first renderer cycle, full screen
 
 		switch( g_iUser1 )
 		{
 		case OBS_CHASE_LOCKED:
-			V_GetChasePos( g_iUser2, Vector( 0, 0, 0 ), v_origin, v_angles );
+			V_GetChasePos( g_iUser2, null_vec, v_origin, v_angles );
 			break;
 
 		case OBS_CHASE_FREE:
@@ -1056,7 +1057,7 @@ void V_CalcSpectatorRefdef( struct ref_params_s *pparams )
 int V_FindViewModelByWeaponModel( int weaponindex )
 {
 	// diffusion - FIXME need to check all the models and assignations...
-	static char *modelmap[][2] = {
+	static const char *modelmap[][2] = {
 		{ "models/p_crossbow.mdl",		"models/v_crossbow.mdl"		},
 		{ "models/p_crowbar.mdl",		"models/v_crowbar.mdl"		},
 		{ "models/p_egon.mdl",			"models/v_egon.mdl"			},
@@ -1083,7 +1084,7 @@ int V_FindViewModelByWeaponModel( int weaponindex )
 
 		while( modelmap[i] != NULL )
 		{
-			if( !_strnicmp( weaponModel->name, modelmap[i][0], len ) )
+			if( !Q_strnicmp( weaponModel->name, modelmap[i][0], len ) )
 				return gEngfuncs.pEventAPI->EV_FindModelIndex( modelmap[i][1] );
 			i++;
 		}
@@ -1958,7 +1959,7 @@ void V_LandDip( struct ref_params_s *pparams)
 	}
 	else
 	{
-		float landseconds = max(pparams->time - landtime, 0.0f);
+		float landseconds = Q_max(pparams->time - landtime, 0.0f);
 		float landFraction = SimpleSpline( landseconds / 0.25f );
 		clamp( landFraction, 0.0f, 1.0f );
 		float flDipAmount = (1 / 300) * 0.1f;  //200 = flOldFallVel
@@ -2083,7 +2084,7 @@ void V_InterpolatePos( struct ref_params_s *pparams )
 			{
 				frac = (t - ViewInterp.OriginTime[foundidx & ORIGIN_MASK]) / dt;
 				delta = ViewInterp.Origins[(foundidx + 1) & ORIGIN_MASK] - ViewInterp.Origins[foundidx & ORIGIN_MASK];
-				frac = min( 1.0, frac );
+				frac = Q_min( 1.0, frac );
 
 				neworg = ViewInterp.Origins[foundidx & ORIGIN_MASK] + delta * frac;
 

@@ -2805,7 +2805,7 @@ void CBaseMonster :: StepSound( void )
 	char chTextureType;
 	float fvol;
 	char szbuffer[64];
-	char *rgsz[8];
+	const char *rgsz[8];
 	const char *pTextureName;
 	TraceResult ptr;
 	float fattn = ATTN_NORM;
@@ -4070,7 +4070,7 @@ BOOL CBaseMonster :: GetEnemy ( void )
 //=========================================================
 // DropItem - dead monster drops named item 
 //=========================================================
-CBaseEntity* CBaseMonster :: DropItem ( char *pszItemName, const Vector &vecPos, const Vector &vecAng )
+CBaseEntity* CBaseMonster :: DropItem ( const char *pszItemName, const Vector &vecPos, const Vector &vecAng )
 {
 	if ( !pszItemName )
 	{

@@ -14,7 +14,7 @@ GNU General Public License for more details.
 */
 
 #include "NxVec3.h"
-#include "Vector.h"
+#include "vector.h"
 
 Vector :: Vector( const NxVec3& v )
 {

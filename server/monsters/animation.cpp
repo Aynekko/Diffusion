@@ -46,7 +46,7 @@ class CBaseBoneSetup : public CStudioBoneSetup
 {
 	model_t *m_pSubModel;
 public:
-	virtual void debugMsg( char *szFmt, ... )
+	virtual void debugMsg( const char *szFmt, ... )
 	{
 		char	buffer[2048];	// must support > 1k messages
 		va_list	args;

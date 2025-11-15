@@ -19,7 +19,7 @@ public:
 	void Precache( void );
 	void Spawn( void );
 	void BonusTouch( CBaseEntity *pOther );
-	void SpawnItemFor( char *szName, CBasePlayer *pPlayer );
+	void SpawnItemFor( const char *szName, CBasePlayer *pPlayer );
 	int EquipmentRandom;
 
 	DECLARE_DATADESC();
@@ -128,7 +128,7 @@ void CEnvBonus::BonusTouch( CBaseEntity *pOther )
 	UTIL_Remove( this );
 }
 
-void CEnvBonus::SpawnItemFor( char *szName, CBasePlayer *pPlayer )
+void CEnvBonus::SpawnItemFor( const char *szName, CBasePlayer *pPlayer )
 {
 	if( !pPlayer )
 		return;

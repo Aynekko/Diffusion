@@ -118,33 +118,33 @@ int CHudScoreboard :: Init( void )
 
 	tmpmsg = TextMessageGet( "SCORE_PLAYERS" );
 	if( tmpmsg )
-		sprintf_s( PlayersText, tmpmsg->pMessage );
+		Q_strncpy( PlayersText, tmpmsg->pMessage, sizeof( PlayersText ));
 	else
-		sprintf_s( PlayersText, DefaultLoc[0] );
+		Q_strncpy( PlayersText, DefaultLoc[0], sizeof( PlayersText ));
 
 	tmpmsg = TextMessageGet( "SCORE_TEAMS" );
 	if( tmpmsg )
-		sprintf_s( TeamsText, tmpmsg->pMessage );
+		Q_strncpy( TeamsText, tmpmsg->pMessage, sizeof( TeamsText ));
 	else
-		sprintf_s( TeamsText, DefaultLoc[1] );
+		Q_strncpy( TeamsText, DefaultLoc[1], sizeof( TeamsText ));
 
 	tmpmsg = TextMessageGet( "SCORE_KILLS" );
 	if( tmpmsg )
-		sprintf_s( KillsText, tmpmsg->pMessage );
+		Q_strncpy( KillsText, tmpmsg->pMessage, sizeof( KillsText ));
 	else
-		sprintf_s( KillsText, DefaultLoc[2] );
+		Q_strncpy( KillsText, DefaultLoc[2], sizeof( KillsText ));
 
 	tmpmsg = TextMessageGet( "SCORE_DEATHS" );
 	if( tmpmsg )
-		sprintf_s( DeathsText, tmpmsg->pMessage );
+		Q_strncpy( DeathsText, tmpmsg->pMessage, sizeof( DeathsText ));
 	else
-		sprintf_s( DeathsText, DefaultLoc[3] );
+		Q_strncpy( DeathsText, DefaultLoc[3], sizeof( DeathsText ));
 
 	tmpmsg = TextMessageGet( "SCORE_PING" );
 	if( tmpmsg )
-		sprintf_s( PingText, tmpmsg->pMessage );
+		Q_strncpy( PingText, tmpmsg->pMessage, sizeof( PingText ));
 	else
-		sprintf_s( PingText, DefaultLoc[4] );
+		Q_strncpy( PingText, DefaultLoc[4], sizeof( PingText ));
 
 	return 1;
 }
@@ -233,9 +233,9 @@ int CHudScoreboard :: Draw( float fTime )
 
 	char player_text[128];
 	if( !gHUD.m_Teamplay )
-		sprintf_s( player_text, "%s | (%i/%i)", PlayersText, num_players, tr.viewparams.maxclients );
+		Q_snprintf( player_text, sizeof( player_text ), "%s | (%i/%i)", PlayersText, num_players, tr.viewparams.maxclients );
 	else
-		sprintf_s( player_text, "%s | (%i/%i)", TeamsText, num_players, tr.viewparams.maxclients );
+		Q_snprintf( player_text, sizeof( player_text ), "%s | (%i/%i)", TeamsText, num_players, tr.viewparams.maxclients );
 
 	DrawString( xpos, ypos + TxtYOffset, player_text, r, g, b );
 
@@ -299,15 +299,15 @@ int CHudScoreboard :: Draw( float fTime )
 		g_TeamInfo[j].packetloss += g_PlayerInfoList[i].packetloss;
 
 		if( g_PlayerInfoList[i].thisplayer )
-			g_TeamInfo[j].ownteam = TRUE;
+			g_TeamInfo[j].ownteam = true;
 		else
-			g_TeamInfo[j].ownteam = FALSE;
+			g_TeamInfo[j].ownteam = false;
 	}
 
 	// find team ping/packetloss averages
 	for( i = 1; i <= m_iNumTeams; i++ )
 	{
-		g_TeamInfo[i].already_drawn = FALSE;
+		g_TeamInfo[i].already_drawn = false;
 
 		if( g_TeamInfo[i].players > 0 )
 		{
@@ -399,7 +399,7 @@ int CHudScoreboard :: Draw( float fTime )
 		Q_snprintf( buf, sizeof( buf ), " %d", team_info->packetloss );
 		gHUD.DrawHudString( xpos, ypos, xpos+50, buf, r, g, b );
 #endif
-		team_info->already_drawn = TRUE;  // set the already_drawn to be TRUE, so this team won't get drawn again
+		team_info->already_drawn = true;  // set the already_drawn to be true, so this team won't get drawn again
 		list_slot++;
 
 		// draw all the players that belong to this team, indented slightly
@@ -418,7 +418,7 @@ int CHudScoreboard :: Draw( float fTime )
 //==========================================================
 // returns the number of players drawn and ypos_bottom
 //==========================================================
-float CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset, char *team )
+float CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset, const char *team )
 {
 	// draw the players, in order,  and restricted to team if set
 	while( 1 )
@@ -590,7 +590,7 @@ int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *p
 		g_PlayerExtraInfo[cl].isBot = isBot;
 		g_PlayerExtraInfo[cl].isSpectator = isSpectator;
 
-#ifdef XASH_64BIT
+#if XASH_64BIT && XASH_WIN32
 		discord_integration::on_player_count_update();
 #endif
 	}
@@ -657,7 +657,7 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 					break;
 			}
 
-			m_iNumTeams = max( j, m_iNumTeams );
+			m_iNumTeams = Q_max( j, m_iNumTeams );
 			Q_strncpy( g_TeamInfo[j].name, g_PlayerExtraInfo[i].teamname, MAX_TEAM_NAME );
 			g_TeamInfo[j].players = 0;
 		}
@@ -701,7 +701,7 @@ int CHudScoreboard :: MsgFunc_TeamScore( const char *pszName, int iSize, void *p
 		return 1;
 
 	// use this new score data instead of combined player scores
-	g_TeamInfo[i].scores_overriden = TRUE;
+	g_TeamInfo[i].scores_overriden = true;
 	g_TeamInfo[i].frags = READ_SHORT();
 	g_TeamInfo[i].deaths = READ_SHORT();
 
@@ -725,12 +725,12 @@ void CHudScoreboard :: DeathMsg( int killer, int victim )
 
 void CHudScoreboard :: UserCmd_ShowScores( void )
 {
-	m_iShowscoresHeld = TRUE;
+	m_iShowscoresHeld = true;
 	gHUD.m_HintObjectives.bShowMissionObjectives = true;
 }
 
 void CHudScoreboard :: UserCmd_HideScores( void )
 {
-	m_iShowscoresHeld = FALSE;
+	m_iShowscoresHeld = false;
 	gHUD.m_HintObjectives.bShowMissionObjectives = false;
 }

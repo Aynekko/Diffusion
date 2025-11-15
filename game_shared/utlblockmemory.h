@@ -17,6 +17,23 @@
 #pragma warning (disable:4100)
 #pragma warning (disable:4514)
 
+template <typename T>
+T SmallestPowerOfTwoGreaterOrEqual( const T &value )
+{
+	T ret = 1;
+
+	while( ret < value )
+		ret <<= 1;
+
+	return ret;
+};
+
+static inline void Error( const char *errmsg )
+{
+	puts( errmsg );
+	abort();
+}
+
 //-----------------------------------------------------------------------------
 // The CUtlBlockMemory class:
 // A growable memory class that allocates non-sequential blocks, but is indexed sequentially
@@ -117,10 +134,18 @@ CUtlBlockMemory<T,I>::~CUtlBlockMemory()
 template< class T, class I >
 void CUtlBlockMemory<T,I>::Swap( CUtlBlockMemory< T, I > &mem )
 {
-	swap( m_pMemory, mem.m_pMemory );
-	swap( m_nBlocks, mem.m_nBlocks );
-	swap( m_nIndexMask, mem.m_nIndexMask );
-	swap( m_nIndexShift, mem.m_nIndexShift );
+	std::swap( m_pMemory, mem.m_pMemory );
+	std::swap( m_nBlocks, mem.m_nBlocks );
+
+	// rewrite manually because we can't take non-const reference to a bit field
+	int temp = m_nIndexMask;
+
+	m_nIndexMask = mem.m_nIndexMask;
+	mem.m_nIndexMask = temp;
+
+	temp = m_nIndexShift;
+	m_nIndexShift = mem.m_nIndexShift;
+	mem.m_nIndexShift = temp;
 }
 
 

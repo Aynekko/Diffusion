@@ -188,7 +188,7 @@ void CAmbientGeneric :: Spawn( void )
 			m_flAttenuation = ATTN_STATIC;
 	}
 	
-	char* szSoundFile = (char*) STRING(pev->message);
+	const char* szSoundFile = (const char*) STRING(pev->message);
 
 	if ( FStringNull( pev->message ) || strlen( szSoundFile ) < 1 )
 	{
@@ -231,7 +231,7 @@ void CAmbientGeneric :: Spawn( void )
 
 void CAmbientGeneric :: Precache( void )
 {
-	char* szSoundFile = (char*) STRING(pev->message);
+	const char* szSoundFile = (const char*) STRING(pev->message);
 
 	if ( !FStringNull( pev->message ) && strlen( szSoundFile ) > 1 )
 	{
@@ -266,7 +266,7 @@ void CAmbientGeneric :: Precache( void )
 
 void CAmbientGeneric::ReInitialize(void)
 {
-	char *szSoundFile = (char *)STRING( pev->message );
+	const char *szSoundFile = (const char *)STRING( pev->message );
 	UTIL_EmitAmbientSound( edict(), GetAbsOrigin(), szSoundFile, (m_dpv.vol * 0.01), m_flAttenuation, SND_SPAWNING, m_dpv.pitch );
 	SetThink( &CAmbientGeneric::RampThink );
 	SetNextThink( 0 );
@@ -274,7 +274,7 @@ void CAmbientGeneric::ReInitialize(void)
 
 void CAmbientGeneric :: StartDynamicSound( void )
 {
-	char* szSoundFile = (char*) STRING(pev->message);
+	const char* szSoundFile = (const char*) STRING(pev->message);
 
 	if( m_fSpawning )
 		EMIT_SOUND_DYN( edict(), CHAN_ITEM, szSoundFile,	(m_dpv.vol * 0.01), m_flAttenuation, SND_SPAWNING, m_dpv.pitch);
@@ -295,7 +295,7 @@ void CAmbientGeneric::ClearEffects(void)
 
 void CAmbientGeneric :: RampThink( void )
 {
-	char* szSoundFile = (char*) STRING(pev->message);
+	const char* szSoundFile = (const char*) STRING(pev->message);
 	int pitch = m_dpv.pitch; 
 	int vol = m_dpv.vol;
 	int flags = 0;
@@ -585,7 +585,7 @@ void CAmbientGeneric :: InitModulationParms(void)
 //
 void CAmbientGeneric :: ToggleUse ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	char* szSoundFile = (char*) STRING(pev->message);
+	const char* szSoundFile = (const char*) STRING(pev->message);
 	float fraction;
 
 	if ( useType != USE_TOGGLE )
@@ -1858,7 +1858,7 @@ float TEXTURETYPE_PlaySound(TraceResult *ptr,  Vector vecSrc, Vector vecEnd, int
 	const char *pTextureName;
 	float rgfl1[3];
 	float rgfl2[3];
-	char *rgsz[4];
+	const char *rgsz[4];
 	int cnt;
 	float fattn = ATTN_NORM;
 	bool DoRicochet = true;
@@ -2142,7 +2142,7 @@ END_DATADESC()
 //
 void CSpeaker :: Spawn( void )
 {
-	char* szSoundFile = (char*) STRING(pev->message);
+	const char* szSoundFile = (const char*) STRING(pev->message);
 
 	if ( !m_preset && (FStringNull( pev->message ) || strlen( szSoundFile ) < 1 ))
 	{
@@ -2177,7 +2177,7 @@ void CSpeaker :: Precache( void )
 }
 void CSpeaker :: SpeakerThink( void )
 {
-	char* szSoundFile;
+	const char* szSoundFile;
 	float flvolume = pev->health * 0.1;
 	float flattenuation = 0.3;
 	int flags = 0;

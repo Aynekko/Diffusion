@@ -26,7 +26,7 @@ GNU General Public License for more details.
 #include "triangleapi.h"
 #include "r_sprite.h"
 #include "pm_movevars.h"
-#include "WEAPONINFO.H"
+#include "weaponinfo.h"
 #include "r_shader.h"
 
 CQuakePartSystem g_pParticles;
@@ -213,7 +213,9 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			curRadius = curParticle->m_flRadius * DistanceToParticle * 10 * FOVfactor;
 			curRadius = bound( curParticle->m_flMinScale, curRadius, curParticle->m_flMaxScale );
 		}
-		
+
+		int contents = CONTENTS_SOLID; // bruh, goto might skip initializing this variable below, so use solid
+
 		if( FBitSet( curParticle->m_iFlags, FPART_FADEIN ) )
 		{
 			curAlpha = curParticle->m_flStartAlpha - curParticle->m_flAlphaVelocity * time;
@@ -273,7 +275,7 @@ void CQuakePartSystem::DrawParticles( MemBlock<CQuakePart> &ParticleArray )
 			}
 		}
 
-		int contents = POINT_CONTENTS( org );
+		contents = POINT_CONTENTS( org );
 
 		if( FBitSet( curParticle->m_iFlags, FPART_NOTINSOLID ) && contents == CONTENTS_SOLID )
 		{

@@ -1,0 +1,37 @@
+#! /usr/bin/env python
+# encoding: utf-8
+# a1batross, mittorn, 2018
+
+from waflib import Utils
+import os
+import xml.etree.ElementTree as ET
+
+def options(opt):
+	pass
+
+def configure(conf):
+	pass
+
+def build(bld):
+	sources = []
+	ns = {'vs': 'http://schemas.microsoft.com/developer/msbuild/2003'}
+	root = ET.parse(bld.path.find_node('client.vcxproj').abspath())
+	cl_compiles = []
+	for i in root.findall('vs:ItemGroup', ns):
+		cl_compiles += i.findall('vs:ClCompile', ns)
+
+	for i in cl_compiles:
+		srcfile = i.attrib['Include']
+		sources += [srcfile.replace('\\', '/')]
+
+	bld.shlib(
+		source   = sources,
+		target   = 'client' + bld.env.POSTFIX,
+		name     = 'client',
+		features = 'c cxx',
+		includes = '. ../engine ../common ../game_shared render ../3rd-party',
+		defines  = 'CLIENT_DLL',
+		install_path = os.path.join(bld.env.GAMEDIR, bld.env.CLIENT_INSTALL_DIR),
+		idx = bld.get_taskgen_count()
+	)
+

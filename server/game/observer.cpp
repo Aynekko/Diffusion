@@ -244,7 +244,7 @@ void CBasePlayer::Observer_FindNextPlayer( bool bReverse )
 void CBasePlayer::Observer_FindNextSpot(bool bReverse)
 {
 	const int classesCount = 4;
-	char* classes[] = { "info_intermission", "info_player_coop", "info_player_start", "info_player_deathmatch" };
+	const char* classes[] = { "info_intermission", "info_player_coop", "info_player_start", "info_player_deathmatch" };
 	vec_t offsets[] = { 0, VEC_VIEW.z, VEC_VIEW.z, VEC_VIEW.z };	// View offset for spots (will looks like we spawn)
 
 	int iStartClass = 0;

@@ -17,7 +17,7 @@ GNU General Public License for more details.
 #include "utils.h"
 #include "r_local.h"
 #include "pm_movevars.h"
-#include "features.h"
+#include "enginefeatures.h"
 #include "event_api.h"
 #include "mathlib.h"
 #include "r_shader.h"
@@ -99,7 +99,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 	
 	char AddPath[10] = "textures/";
 	char Path[100] = "";
-	sprintf_s( Path, "%s%s.txt", AddPath, tr.materials[texnum].name );
+	Q_snprintf( Path, sizeof( Path ), "%s%s.txt", AddPath, tr.materials[texnum].name );
 
 	char *pfile = (char *)gEngfuncs.COM_LoadFile( (char *)Path, 5, NULL );
 	char *afile = pfile;
@@ -298,7 +298,7 @@ void LoadMaterialSettingsForTexture( int texnum )
 					tr.materials[texnum].gl_normalmap_id = LOAD_TEXTURE( token, NULL, 0, TF_NORMALMAP );
 					if( tr.materials[texnum].gl_normalmap_id > 0 )
 					{					
-						strcpy_s( tr.materials[texnum].normalmap_name, token );
+						Q_strncpy( tr.materials[texnum].normalmap_name, token, sizeof( tr.materials[texnum].normalmap_name ));
 					}
 					else
 						ConPrintf( "^1Error:^7 NormalMap for texture \"%s\" couldn't be loaded.\n", tr.materials[texnum].name );
@@ -2484,7 +2484,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 						GL_Bind( GL_TEXTURE6, land->terrain->layermap.gl_normalmap_id );
 					
 					float ScaledDynLightBrightness[MAX_LANDSCAPE_LAYERS];
-					memcpy_s( ScaledDynLightBrightness, MAX_LANDSCAPE_LAYERS, land->terrain->layermap.DynlightScale, MAX_LANDSCAPE_LAYERS );
+					memcpy( ScaledDynLightBrightness, land->terrain->layermap.DynlightScale, MAX_LANDSCAPE_LAYERS * sizeof( float ));
 
 					for( int sc = 0; sc < land->terrain->numLayers; sc++ )
 						ScaledDynLightBrightness[sc] *= pl->brightness;
