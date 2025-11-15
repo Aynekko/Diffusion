@@ -14,8 +14,6 @@ GNU General Public License for more details.
 #ifndef SHADOW_OMNI_H
 #define SHADOW_OMNI_H
 
-#extension GL_EXT_gpu_shader4 : require
-
 #define NUM_SAMPLES		4.0
 
 uniform samplerCubeShadow	u_ShadowMap;

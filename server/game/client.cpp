@@ -876,7 +876,7 @@ void ClientCommand( edict_t *pEntity )
 				}
 
 				if( DeleteCount == 0 )
-					ALERT( at_console, "Nothing to delete." );
+					ALERT( at_console, "Nothing to delete.\n" );
 				else
 					ALERT( at_console, "%3d entities deleted.\n", DeleteCount );
 			}
@@ -916,7 +916,7 @@ void ClientCommand( edict_t *pEntity )
 				}
 
 				if( DeleteCount == 0 )
-					ALERT( at_console, "Nothing to delete." );
+					ALERT( at_console, "Nothing to delete.\n" );
 				else
 					ALERT( at_console, "%3d entities deleted.\n", DeleteCount );
 			}
