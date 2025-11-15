@@ -1,0 +1,9 @@
+#!/bin/bash
+
+if [ "$XASH3D_BASEDIR" = "" ]; then
+	export XASH3D_BASEDIR="$PWD"
+fi
+echo "Xash3D FWGS installed as AppImage."
+echo "Base directory is $XASH3D_BASEDIR. Set XASH3D_BASEDIR environment variable to override this."
+
+exec $DEBUGGER "${APPDIR}/diffusion_run" "$@"

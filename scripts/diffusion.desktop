@@ -1,0 +1,11 @@
+[Desktop Entry]
+Categories=Game;Shooter;
+Comment=Diffusion Half-Life mod
+Exec=diffusion_run
+Icon=diffusion
+Keywords=first;person;shooter;multiplayer;half-life;halflife;singleplayer;diffusion
+Name=Diffusion
+# Doesn't pass validation with old desktop-file-utils
+#PrefersNonDefaultGPU=true
+Terminal=false
+Type=Application
