@@ -4152,7 +4152,7 @@ void CAlienShip :: RunTask ( Task_t *pTask )
 						if( GetTargetname()[0] != '\0' )
 						{
 							char newname[64];
-							sprintf_s( newname, "%s_drone", GetTargetname() );
+							Q_snprintf( newname, sizeof( newname ), "%s_drone", GetTargetname() );
 							pDrone->pev->targetname = MAKE_STRING( newname );
 						}
 					}

@@ -30,7 +30,7 @@
 #endif
 
 #include "datamap.h"
-#include "strings.h"
+#include "strings_pool.h"
 
 #include "com_model.h"
 #include "sprite.h"
@@ -378,7 +378,7 @@ typedef enum { ignore_monsters=1, dont_ignore_monsters=0, missile=2 } IGNORE_MON
 typedef enum { ignore_glass=1, dont_ignore_glass=0 } IGNORE_GLASS;
 extern void		UTIL_TraceLine( const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, edict_t *pentIgnore, TraceResult *ptr);
 extern void		UTIL_TraceLine( const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, IGNORE_GLASS ignoreGlass, edict_t *pentIgnore, TraceResult *ptr);
-typedef enum { point_hull=0, human_hull=1, large_hull=2, head_hull=3 };
+enum { point_hull=0, human_hull=1, large_hull=2, head_hull=3 };
 extern void		UTIL_TraceHull( const Vector &vecStart, const Vector &vecEnd, IGNORE_MONSTERS igmon, int hullNumber, edict_t *pentIgnore, TraceResult *ptr);
 extern TraceResult		UTIL_GetGlobalTrace( void );
 extern void		UTIL_CopyTraceToGlobal( TraceResult *trace );
@@ -411,7 +411,7 @@ extern float		UTIL_ApproachAngle( float target, float value, float speed, bool l
 extern float		UTIL_AngleDistance( float next, float cur );
 extern CBaseEntity*		UTIL_FindClientInPVS( edict_t *pEdict );
 
-extern char		*UTIL_VarArgs( char *format, ... );
+extern char		*UTIL_VarArgs( const char *format, ... );
 extern BOOL		UTIL_IsValidEntity( edict_t *pent );
 extern BOOL		UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 );
 extern BOOL		UTIL_IsFacing( entvars_t *pevTest, const Vector &reference ); //LRC
@@ -477,7 +477,7 @@ extern char *UTIL_dtos3( int d );
 extern char *UTIL_dtos4( int d );
 
 // Writes message to console with timestamp and FragLog header.
-extern void			UTIL_LogPrintf( char *fmt, ... );
+extern void			UTIL_LogPrintf( const char *fmt, ... );
 
 // Sorta like FInViewCone, but for nonmonsters. 
 extern float UTIL_DotPoints ( const Vector &vecSrc, const Vector &vecCheck, const Vector &vecDir );

@@ -1175,8 +1175,8 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 	int killer_index = 0;
 	
 	// Hack to fix name change
-	char *tau = "tau_cannon";
-	char *gluon = "gluon gun";
+	const char *tau = "tau_cannon";
+	const char *gluon = "gluon gun";
 
 	if ( (pKiller->flags & FL_CLIENT) || (pKiller->flags & FL_FAKECLIENT) ) // diffusion - don't forget a bot :)
 	{
@@ -2014,7 +2014,7 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 	if ( minplayers || maxplayers )
 		ALERT( at_console, "PLAYER COUNT:  min %i max %i current %i\n", minplayers, maxplayers, curplayers );
 
-	if( szRules != '\0' )
+	if( szRules[0] != '\0' )
 		ALERT( at_console, "RULES:  %s\n", szRules );
 	
 	CHANGE_LEVEL( szNextMap, NULL );

@@ -194,7 +194,7 @@ void CFuncMonitor::ChangeCamera( string_t newcamera )
 void CFuncMonitor :: SetCameraVisibility( bool fEnable )
 {
 	// set camera PVS
-	if( pev->aiment > 0 )
+	if( pev->aiment != nullptr )
 	{
 		CBaseEntity *pTarget = CBaseEntity::Instance( pev->aiment );
 

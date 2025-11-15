@@ -192,7 +192,7 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD( ScaleDifficultyTime, FIELD_TIME ),
 END_DATADESC()
 
-IMPLEMENT_SAVERESTORE(CHGrunt, CSquadMonster);
+// IMPLEMENT_SAVERESTORE(CHGrunt, CSquadMonster);
 
 //=========================================================
 // AI Schedules Specific to this monster
@@ -1681,7 +1681,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 							if( GetTargetname()[0] != '\0' )
 							{
 								char newname[64];
-								sprintf_s( newname, "%s_drone", GetTargetname() );
+								Q_snprintf( newname, sizeof( newname ), "%s_drone", GetTargetname() );
 								pDrone->pev->targetname = MAKE_STRING( newname );
 							}
 						}
@@ -1838,6 +1838,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			}
 
 		}
+		// fallthrough
 
 		default:
 			CSquadMonster::HandleAnimEvent( pEvent );
@@ -2900,10 +2901,10 @@ public:
 	void KeyValue( KeyValueData *pkvd );
 
 	int m_iPose;// which sequence to display	-- temporary, don't need to save
-	static char *m_szPoses[3];
+	static const char *m_szPoses[3];
 };
 
-char *CDeadHGrunt::m_szPoses[] = { "deadstomach", "deadside", "deadsitting" };
+const char *CDeadHGrunt::m_szPoses[] = { "deadstomach", "deadside", "deadsitting" };
 
 void CDeadHGrunt::KeyValue( KeyValueData *pkvd )
 {
@@ -4109,6 +4110,7 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			}
 
 		}
+		// fallthrough
 
 		default:
 			CSquadMonster::HandleAnimEvent( pEvent );
@@ -4855,7 +4857,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 					if( GetTargetname()[0] != '\0' )
 					{
 						char newname[64];
-						sprintf_s( newname, "%s_drone", GetTargetname() );
+						Q_snprintf( newname, sizeof( newname ), "%s_drone", GetTargetname() );
 						pDrone->pev->targetname = MAKE_STRING( newname );
 					}
 				}
@@ -4954,6 +4956,7 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 		}
 
 	}
+	// fallthrough
 
 	default:
 		CSquadMonster::HandleAnimEvent(pEvent);
@@ -6269,6 +6272,7 @@ void CAndrewGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 			JustSpoke();
 		}
 	}
+	// fallthrough
 
 	default:
 		CSquadMonster::HandleAnimEvent( pEvent );

@@ -123,7 +123,7 @@ public:
 
 	DECLARE_DATADESC();
 
-	static char* m_soundNames[3];
+	static const char* m_soundNames[3];
 	int	m_lastSound;	// no need to save/restore, just keeps the same sound from playing twice in a row
 	float	m_maxSpeed;
 	float	m_soundTime;

@@ -1292,6 +1292,7 @@ Schedule_t* CBaseMonster :: GetScheduleOfType ( int Type )
 			{
 			case 0: return &slInvestigateSound[ 0 ]; break;
 			case 1: return &slInvestigateSoundRUN[ 0 ]; break;
+			default: return &slInvestigateSoundRUN[ 0 ]; break; // never gonna execute, just help compiler to not freak out
 			}
 		}
 	case SCHED_DIE:
@@ -1314,6 +1315,7 @@ Schedule_t* CBaseMonster :: GetScheduleOfType ( int Type )
 			{
 			case 0: return slMoveToEnemyLKP; break;
 			case 1: return slMoveToEnemyLKPRUN; break;
+			default: return slMoveToEnemyLKPRUN; break; // never gonna execute, just help compiler to not freak out
 			}
 		}
 	case SCHED_MOVE_TO_ENEMY_LKPRUN:

@@ -612,7 +612,9 @@ CBaseEntity *CBaseTurret::AcquireTarget(void)
 						}
 
 						// it's an enemy turret
-						if( FInViewCone( &pTurret->EyePosition() ) && FVisible( pTurret->EyePosition() ) )
+						auto eye_position = pTurret->EyePosition();
+
+						if( FInViewCone( &eye_position ) && FVisible( eye_position ) )
 						{
 							float turret_distance = (pTurret->GetAbsOrigin() - GetAbsOrigin()).Length();
 							// this turret is farther then current enemy player

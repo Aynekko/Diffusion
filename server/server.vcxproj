@@ -644,7 +644,7 @@
     <ClInclude Include="entities\CRopeSegment.h" />
     <ClInclude Include="game\skill.h" />
     <ClInclude Include="game\spectator.h" />
-    <ClInclude Include="strings.h" />
+    <ClInclude Include="strings_pool.h" />
     <ClInclude Include="game\teamplay_gamerules.h" />
     <ClInclude Include="entities\trains.h" />
     <ClInclude Include="entities\triggers.h" />

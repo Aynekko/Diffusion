@@ -18,7 +18,11 @@ GNU General Public License for more details.
 #include "Nxf.h"
 #include "NxSimpleTypes.h"
 #include "NxUserStream.h"
+#ifdef _WIN32
 #include <direct.h>
+#else
+#include <sys/stat.h>
+#endif
 
 // user stream. constructor
 UserStream :: UserStream( const char* filename, bool load ) : fp(NULL)
@@ -78,7 +82,11 @@ void UserStream :: CreatePath( char *path )
 			// create the directory
 			save = *ofs;
 			*ofs = 0;
+#ifdef _WIN32
 			_mkdir( path );
+#else
+			mkdir( path, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH );
+#endif
 			*ofs = save;
 		}
 	}
@@ -139,14 +147,20 @@ void UserStream :: readBuffer( void *outbuf, NxU32 size ) const
 	if( m_iOffset + size <= m_iLength )
 	{
 		memcpy( outbuf, buffer + m_iOffset, size );
-		(size_t)m_iOffset += size;
+
+		// a1ba: do not do this stuff at all, but old novodex api has this method as const for some reason
+		// but we still have to store offset SOMEWHERE
+		//
+		// also Diffusion doesn't use physics but still compiles it for some reason
+		// so I guess this code is dead
+		((UserStream *)this)->m_iOffset += size;
 		read_size = size;
 	}
 	else
 	{
 		size_t reduced_size = m_iLength - m_iOffset;
 		memcpy( outbuf, buffer + m_iOffset, reduced_size );
-		(size_t)m_iOffset += reduced_size;
+		((UserStream *)this)->m_iOffset += reduced_size;
 		read_size = reduced_size;
 		ALERT( at_warning, "readBuffer: buffer is overrun\n" );
 	}

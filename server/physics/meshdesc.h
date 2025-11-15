@@ -73,11 +73,11 @@ public:
 	// AABB tree contsruction
 	areanode_t *CreateAreaNode( int depth, const Vector &mins, const Vector &maxs );
 	void RelinkFacet( mfacet_t *facet );
-	_inline areanode_t *GetHeadNode( void ) { return (has_tree) ? &areanodes[0] : NULL; }
+	inline areanode_t *GetHeadNode( void ) { return (has_tree) ? &areanodes[0] : NULL; }
 
 	// check for cache
 	mmesh_t *CheckMesh( const Vector &origin, const Vector &angles );
-	_inline mmesh_t *GetMesh() { return &m_mesh; }
+	inline mmesh_t *GetMesh() { return &m_mesh; }
 };
 
 #endif//MESHDESC_H
