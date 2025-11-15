@@ -40,20 +40,19 @@ echo "Repackaged artifacts:"
 ls -R
 popd || exit 1
 
-echo "Generated notes:"
-rm release-notes && touch release-notes
-if [ -n "$BASE_BUILDNUM_DATE" ]; then
-	LAST_COMMIT_DATE=$(git log -1 --format=%ci)
-	BUILDNUM=$(( ( $(date -d "$LAST_COMMIT_DATE" +%s ) - $(date -d "$BASE_BUILDNUM_DATE" +%s) ) / 86400 ))
-	echo "buildnum $BUILDNUM" | tee -a release-notes
-fi
+#echo "Generated notes:"
+#rm release-notes && touch release-notes
+#if [ -n "$BASE_BUILDNUM_DATE" ]; then
+#	LAST_COMMIT_DATE=$(git log -1 --format=%ci)
+#	BUILDNUM=$(( ( $(date -d "$LAST_COMMIT_DATE" +%s ) - $(date -d "$BASE_BUILDNUM_DATE" +%s) ) / 86400 ))
+#	echo "buildnum $BUILDNUM" | tee -a release-notes
+#fi
 
-sleep 20s
+sleep 10s
 gh release create "$RELEASE_TAG" artifacts/* \
 	--title "$RELEASE_NAME Continuous $BRANCH_NAME Build" \
-	--notes-file release-notes \
 	--target "$GITHUB_SHA" \
 	--repo "$GITHUB_REPOSITORY" \
 	--prerelease
 
-rm release-notes
+#rm release-notes
