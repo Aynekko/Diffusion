@@ -362,3 +362,9 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
+
+# Python/Waf crap
+*.pyc
+build/
+.lock*
+.waf*
