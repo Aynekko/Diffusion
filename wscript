@@ -36,7 +36,7 @@ def options(opt):
 	grp.add_option('--disable-werror', action = 'store_true', dest = 'DISABLE_WERROR', default = False,
 		help = 'disable compilation abort on warning')
 
-	opt.add_subproject('client server 3rd-party/mainui_cpp')
+	opt.add_subproject('client server 3rd-party/mainui_cpp 3rd-party/game_launch')
 
 def configure(conf):
 	conf.env.EXPORT_DEFINES_LIST = []
@@ -181,7 +181,7 @@ def configure(conf):
 		conf.env.cxxshlib_PATTERN = conf.env.cxxshlib_PATTERN[3:]
 
 	conf.load('library_naming')
-	conf.add_subproject('client server 3rd-party/mainui_cpp')
+	conf.add_subproject('client server 3rd-party/mainui_cpp 3rd-party/game_launch')
 
 def build(bld):
 	if bld.is_install and not bld.options.destdir:
@@ -192,4 +192,4 @@ def build(bld):
 		excl='*.user configuration.py .lock* *conf_check_*/** config.log %s/*' % Build.CACHE_DIR,
 		quiet=True, generator=True)
 
-	bld.add_subproject('client server 3rd-party/mainui_cpp')
+	bld.add_subproject('client server 3rd-party/mainui_cpp 3rd-party/game_launch')

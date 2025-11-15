@@ -12,12 +12,34 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v4
-    - name: Fetch mainui
-      run: git clone https://github.com/Aynekko/Diffusion-MainUI 3rd-party/mainui_cpp
+    - name: Fetch dependencies
+      run: |
+        git clone https://github.com/Aynekko/Diffusion-MainUI 3rd-party/mainui_cpp
+        git clone https://github.com/Aynekko/Diffusion-executable 3rd-party/game_launch
+        wget https://github.com/FWGS/xash3d-fwgs/releases/download/continuous/xash3d-fwgs-amd64.AppImage
+        wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+        chmod +x *.AppImage
     - name: Build for Linux
       run: |
-        ./waf configure -T release install --destdir=diffusion
-        zip -r diffusion-linux-amd64.zip diffusion
+        ./waf configure -T release install --destdir=out
+        pushd out
+        zip -r ../diffusion-linux-amd64.zip diffusion
+        popd
+    # wow this is much more horrible than I expected
+    - name: Repackage engine
+      run: |
+        ./xash3d-fwgs-amd64.AppImage --appimage-extract
+        pushd squashfs-root
+        rm -rf libav* libsw* libref_soft.so libmenu* xash3d
+        rm -rf mdldec activities.txt
+        rm -rf xash3d-fwgs.desktop xash3d-fwgs.png .DirIcon valve
+        cp ../out/diffusion_run .
+        cp ../scripts/diffusion.desktop .
+        cp ../scripts/AppRun .
+        cp ../3rd-party/game_launch/game_icon.png diffusion.png
+        popd
+        ./appimagetool-x86_64.AppImage squashfs-root/
+        zip -u diffusion-linux-amd64.zip Diffusion-x86_64.AppImage
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
       with:
