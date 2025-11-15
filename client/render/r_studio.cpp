@@ -3784,10 +3784,12 @@ void CStudioModelRenderer::StudioGetAttachment( const cl_entity_t *ent, int iAtt
 	SET_CURRENT_ENTITY( NULL );
 	RI->currententity = NULL;
 	RI->currentmodel = NULL;
-	m_fDrawViewModel = false;
 
 	if( ent->modelhandle == INVALID_HANDLE )
+	{
+		m_fDrawViewModel = false;
 		return; // too early ?
+	}
 
 	ModelInstance_t *inst = &m_ModelInstances[ent->modelhandle];
 
@@ -3812,6 +3814,11 @@ void CStudioModelRenderer::StudioGetAttachment( const cl_entity_t *ent, int iAtt
 			if( angles ) *angles = ent->angles;
 		}
 	}
+
+	if( m_fDrawViewModel && origin )
+		StudioFormatAttachment( *origin );
+
+	m_fDrawViewModel = false;
 }
 
 /*
