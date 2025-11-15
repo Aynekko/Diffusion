@@ -1,0 +1,38 @@
+#! /usr/bin/env python
+# encoding: utf-8
+# a1batross, mittorn, 2018
+
+from waflib import Utils
+import os
+import xml.etree.ElementTree as ET
+
+def options(opt):
+	return
+
+def configure(conf):
+	if conf.env.COMPILER_CC == 'msvc':
+		conf.fatal('for msvc use VS project')
+
+def build(bld):
+	sources = []
+	ns = {'vs': 'http://schemas.microsoft.com/developer/msbuild/2003'}
+	root = ET.parse(bld.path.find_node('server.vcxproj').abspath())
+	cl_compiles = []
+	for i in root.findall('vs:ItemGroup', ns):
+		cl_compiles += i.findall('vs:ClCompile', ns)
+
+	for i in cl_compiles:
+		srcfile = i.attrib['Include']
+		sources += [srcfile.replace('\\', '/')]
+
+	bld.shlib(
+		source   = sources,
+		target   = bld.env.SERVER_LIBRARY_NAME + bld.env.POSTFIX,
+		name     = 'server',
+		features = 'c cxx',
+		includes = '. ../common ../engine ../phys_shared ../game_shared monsters physics',
+		defines  = '',
+		install_path = os.path.join(bld.env.GAMEDIR, bld.env.SERVER_INSTALL_DIR),
+		idx = bld.get_taskgen_count()
+	)
+

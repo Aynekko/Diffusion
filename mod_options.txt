@@ -1,0 +1,6 @@
+GAMEDIR=diffusion # Gamedir path
+
+# keys below must match liblist.gam/gameinfo.txt
+SERVER_INSTALL_DIR=bin # Where to put server dll
+CLIENT_INSTALL_DIR=bin # Where to put client or menu dll
+SERVER_LIBRARY_NAME=server # Default server dll name
