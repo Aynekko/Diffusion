@@ -590,7 +590,7 @@ int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *p
 		g_PlayerExtraInfo[cl].isBot = isBot;
 		g_PlayerExtraInfo[cl].isSpectator = isSpectator;
 
-#if XASH_64BIT && XASH_WiN32
+#if XASH_64BIT && XASH_WIN32
 		discord_integration::on_player_count_update();
 #endif
 	}
