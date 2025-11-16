@@ -366,19 +366,21 @@ void CBaseAnimating::DispatchAnimEvents( float flInterval )
 	}
 
 	// FIXME: I have to do this or some events get missed, and this is probably causing the problem below
-	// diffusion - not needed because monsters are thinking every frame
-//	flInterval = 0.1;
-	// UPD Oct 2025: this seems to work well, how'd I never think of that?
-	flInterval = gpGlobals->frametime;
+//	flInterval = 0.1; // diffusion - commented out, not needed because monsters are thinking every frame
 
-	// FIX: this still sometimes hits events twice
+	// UPD Oct 2025: this seems to work well, how'd I never think of that? Also this fixes saverestore during sequence
+	flInterval = gpGlobals->frametime;
+	// UPD Nov 2025: also changed 256.0f to 255.0f in GetAnimationEvent, and it seems to have fixed double event activation!
+	// (example - big robo rockets at precisely 75 FPS fired twice, no longer)
+
+	// FIX: this still sometimes hits events twice - Nov 2025: fixed?
 	float flStart = pev->frame + (m_flLastEventCheck - pev->animtime) * m_flFrameRate * pev->framerate;
 	float flEnd = pev->frame + flInterval * m_flFrameRate * pev->framerate;
-
+	
 	m_flLastEventCheck = pev->animtime + flInterval;
 
 	m_fSequenceFinished = FALSE;
-	if( flEnd >= 256 || flEnd <= 0.0 )
+	if( flEnd >= 256.0f || flEnd <= 0.0f )
 		m_fSequenceFinished = TRUE;
 
 	int index = 0;

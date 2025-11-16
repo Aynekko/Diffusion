@@ -493,8 +493,8 @@ int GetAnimationEvent( void *pmodel, int sequence, MonsterEvent_t *pMonsterEvent
 
 	if( pseqdesc->numframes > 1 )
 	{
-		flStart *= (pseqdesc->numframes - 1) / 256.0f;
-		flEnd *= (pseqdesc->numframes - 1) / 256.0f;
+		flStart *= (pseqdesc->numframes - 1) / 255.0f;
+		flEnd *= (pseqdesc->numframes - 1) / 255.0f;
 	}
 	else
 	{
