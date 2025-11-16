@@ -64,6 +64,7 @@ public:
 	virtual void SpeakSentence(void);
 	void ClearEffects(void);
 	bool bCanInvestigate;
+	int iForceInvestigate; // not saved, used in KeyValue
 
 	float AttackStartTime; // once the enemy is in sight, grunt began range attack, but he needs to wait, so...
 	float CombatWaitTime; // ...grunt waits for # seconds before shooting.

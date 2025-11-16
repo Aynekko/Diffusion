@@ -896,6 +896,11 @@ void CHGrunt::KeyValue( KeyValueData *pkvd )
 		ForceEMPGrenade = (Q_atoi( pkvd->szValue ) > 0);
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "caninvestigate" ) )
+	{
+		iForceInvestigate = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		CBaseMonster::KeyValue(pkvd);
 }
@@ -1956,10 +1961,20 @@ void CHGrunt::Spawn(void)
 		pev->skin = 1; // always dark skin
 	}
 
-	if( RANDOM_LONG( 0, 2 ) == 0 )
-		bCanInvestigate = true;
+	if( iForceInvestigate > 0 )
+	{
+		if( iForceInvestigate == 1 )
+			bCanInvestigate = false;
+		else if( iForceInvestigate == 2 )
+			bCanInvestigate = true;
+	}
 	else
-		bCanInvestigate = false;
+	{
+		if( RANDOM_LONG( 0, 2 ) == 0 )
+			bCanInvestigate = true;
+		else
+			bCanInvestigate = false;
+	}
 
 	CanSpawnDrone = false; // army guys don't have pocket drones
 
@@ -3179,10 +3194,20 @@ void CHGruntAlien :: Spawn()
 
 	CanSpawnDrone = false; // alien guys don't have pocket drones, they are separate npcs
 
-	if( RANDOM_LONG( 0, 2 ) == 0 )
-		bCanInvestigate = true;
+	if( iForceInvestigate > 0 )
+	{
+		if( iForceInvestigate == 1 )
+			bCanInvestigate = false;
+		else if( iForceInvestigate == 2 )
+			bCanInvestigate = true;
+	}
 	else
-		bCanInvestigate = false;
+	{
+		if( RANDOM_LONG( 0, 2 ) == 0 )
+			bCanInvestigate = true;
+		else
+			bCanInvestigate = false;
+	}
 
 	CombatWaitTime = g_AlienCombatWaitTime[g_iSkillLevel];
 
@@ -5514,10 +5539,20 @@ void CHGruntSecurity::Spawn()
 
 	DroneSpawned = false;
 
-	if( RANDOM_LONG( 0, 2 ) == 0 )
-		bCanInvestigate = true;
+	if( iForceInvestigate > 0 )
+	{
+		if( iForceInvestigate == 1 )
+			bCanInvestigate = false;
+		else if( iForceInvestigate == 2 )
+			bCanInvestigate = true;
+	}
 	else
-		bCanInvestigate = false;
+	{
+		if( RANDOM_LONG( 0, 2 ) == 0 )
+			bCanInvestigate = true;
+		else
+			bCanInvestigate = false;
+	}
 
 	CTalkMonster::g_talkWaitTime = 0;
 
