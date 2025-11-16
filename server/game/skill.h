@@ -141,9 +141,9 @@ const int g_SecurityGuyHealth[] =
 const int g_SecurityGeneralHealth[] =
 {
 	0,
-	500,
-	666,
-	800
+	700,
+	900,
+	1200
 };
 
 const int g_AndrewHealth[] =
