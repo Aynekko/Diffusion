@@ -2943,6 +2943,13 @@ void CCar::Camera(void)
 	if( !LastPlayerAngles )
 		LastPlayerAngles = hDriver->pev->v_angle;
 
+	if( !pCamera2 )
+		SecondaryCamera = false;
+
+	float MouseWaitON = CAR_CAMERA_MOUSE_WAIT_ON;
+	if( SecondaryCamera )
+		MouseWaitON += 0.2f; // mouse less sensitive to change if in first-person
+
 	const float AbsCarSpeed = fabs( CarSpeed );
 	const float ChassisAngleX = pChassis->GetAbsAngles().x;
 	const float ChassisAngleY = pChassis->GetAbsAngles().y;
@@ -2952,10 +2959,10 @@ void CCar::Camera(void)
 
 	if( hDriver->pev->v_angle != LastPlayerAngles )
 	{
-		if( fMouseTouchedON < CAR_CAMERA_MOUSE_WAIT_ON )
+		if( fMouseTouchedON < MouseWaitON )
 			fMouseTouchedON += gpGlobals->frametime;
 		
-		if( fMouseTouchedON >= CAR_CAMERA_MOUSE_WAIT_ON )
+		if( fMouseTouchedON >= MouseWaitON )
 		{
 			fMouseTouchedOFF = 0.0f;
 			CamUnlocked = true;
@@ -3060,9 +3067,6 @@ void CCar::Camera(void)
 	}
 	else
 	{
-		if( !pCamera2 )
-			SecondaryCamera = false;
-
 		Vector CamOrg;
 		float BackSway = CarSpeed * 0.01;
 

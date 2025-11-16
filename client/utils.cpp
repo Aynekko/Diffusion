@@ -46,12 +46,12 @@ char *UTIL_LocalizeKey( const char *key )
 {
 	client_textmessage_t *title = NULL; // titles.txt
 
-	if( !strcmp( key, "MOUSE1" ) )
+	if( !Q_strcmp( key, "MOUSE1" ) )
 	{
 		title = TextMessageGet( "KEY_MOUSE1" );
 		return title ? (char*)title->pMessage : NULL;
 	}
-	else if( !strcmp( key, "MOUSE2" ) )
+	else if( !Q_strcmp( key, "MOUSE2" ) )
 	{
 		title = TextMessageGet( "KEY_MOUSE2" );
 		return title ? (char *)title->pMessage : NULL;
@@ -85,9 +85,11 @@ void UTIL_ReplaceKeyBindings( const char *inbuf, int inbufsizebytes, char *outbu
 			const char *end = strchr( inbuf, '#' );
 			if( end && (end != inbuf) ) // make sure we handle ## in the string, which should be treated in the output as #
 			{
+				end++; // I'm not sure if this is correct, but without it '#lastinv#' becomes 'lastin' etc. (last letter missing)
 				char token[64];
 				Q_strncpy( token, inbuf, end - inbuf );
 				token[end - inbuf] = 0;
+				end--; // and this
 
 				inbuf += end - inbuf;
 

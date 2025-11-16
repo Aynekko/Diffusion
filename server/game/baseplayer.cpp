@@ -2867,6 +2867,10 @@ void CBasePlayer::PreThink( void )
 	if( DrunkLevel > 0 )
 		pev->friction = 1.0f - (DrunkLevel * 0.1f);
 
+	// do not interfere with player angles because they are used to catch mouse movement
+	if( pCar )
+		pev->punchangle = g_vecZero;
+
 	int buttonsChanged = (m_afButtonLast ^ pev->button);	// These buttons have changed this frame
 
 	// Debounced button codes for pressed/released
