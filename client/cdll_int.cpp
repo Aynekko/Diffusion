@@ -313,7 +313,7 @@ int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 	bool bUseButton = !Q_strcmp( pszCurrentBinding, "+use" );
 	bool bEscButton = false;
 	if( !bUseButton )
-		bEscButton = !Q_strcmp( pszCurrentBinding, "escape" );
+		bEscButton = (keynum == K_ESCAPE || !Q_strcmp( pszCurrentBinding, "escape" ));
 	
 	if( gHUD.m_Puzzle.m_iFlags & HUD_ACTIVE && (bEscButton || bUseButton) )
 	{
@@ -324,6 +324,20 @@ int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 	{
 		gHUD.m_CodeInput.DisableCodeScreen();
 		return 0;
+	}
+
+	if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
+	{
+		if( keynum == K_MWHEELDOWN )
+		{
+			gHUD.m_PseudoGUI.scrolled_lines++; // scroll down
+			return 0;
+		}
+		else if( keynum == K_MWHEELUP )
+		{
+			gHUD.m_PseudoGUI.scrolled_lines--; // scroll up
+			return 0;
+		}
 	}
 
 	if( (gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) && (keynum == K_ENTER || keynum == K_MOUSE1 || bUseButton || !Q_strcmp(pszCurrentBinding, "+attack")) )
