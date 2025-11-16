@@ -2818,7 +2818,6 @@ void CStudioModelRenderer::StudioInterpolateControllers( cl_entity_t *e, float d
 			}
 
 			m_pModelInstance->m_controller[i] = bound( 0, Q_rint( value ), 255 );
-			e->latched.prevcontroller[i] = e->curstate.controller[i];
 		}
 	}
 }
