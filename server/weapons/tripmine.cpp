@@ -178,18 +178,19 @@ void CTripmineGrenade :: Precache( void )
 
 void CTripmineGrenade::DisarmUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
-	pPlayer->EnableControl( FALSE );
 	int ObjectCaps = 0;
 	EMIT_SOUND( ENT(pev), CHAN_BODY, "weapons/mine_disarm.wav", 0.75, ATTN_NORM );
 	SetUse( NULL );
 	SetFlag(F_ENTITY_BUSY); // indicate to show BUSY on the screen
 	DisarmStartTime = gpGlobals->time;
 	SetThink(&CTripmineGrenade::DisarmThink );
+	SetNextThink( 0 );
 }
 
 void CTripmineGrenade::DisarmThink(void)
 {
+	CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex( 1 );
+
 	if( gpGlobals->time > DisarmStartTime + 2 )
 	{
 		RemoveFlag(F_ENTITY_BUSY);
@@ -197,26 +198,31 @@ void CTripmineGrenade::DisarmThink(void)
 		ClearEffects();
 	//	SetTouch(&CTripmineGrenade::BreakTouch );
 		Disarmed = true;
-		SetThink( NULL );
-		CBasePlayer *pPlayer = NULL;
-		while ( ((pPlayer = (CBasePlayer*)UTIL_FindEntityByClassname( pPlayer, "player" )) != NULL) && (!FNullEnt(pPlayer->edict())) )
-		{
-			pPlayer->EnableControl( TRUE );
+		
+		if( pPlayer )
 			pPlayer->SendAchievementStatToClient( ACH_DISARMEDMINES, 1, ACHVAL_ADD );
-		}
+
 		pev->dmg *= 0.5; // do half damage when disarmed
+		SetThink( NULL );
+		DontThink();
 	}
 	else
 	{
 		if( m_pBeam )
 		{
-			if( m_pBeam->pev->renderamt > 2 )
-				m_pBeam->pev->renderamt -= 1;
+			m_pBeam->pev->renderamt = lerp( 0.0f, 20.0f, ((DisarmStartTime + 2) - gpGlobals->time) * 0.5f );
 		}
 		if( m_pSprite )
-			m_pSprite->pev->renderamt *= 0.9;
-		SetThink(&CTripmineGrenade::DisarmThink );
-		SetNextThink( 0.1 );
+			m_pSprite->pev->renderamt = lerp( 0.0f, 100.0f, ((DisarmStartTime + 2) - gpGlobals->time) * 0.5f );
+		if( pPlayer )
+		{
+			Vector vel = pPlayer->GetAbsVelocity();
+			vel.x = 0;
+			vel.y = 0;
+			pPlayer->SetAbsVelocity( vel );
+		}
+
+		SetNextThink( 0 );
 	}
 }
 
