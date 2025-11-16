@@ -964,7 +964,7 @@ int CApache :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 		return 0;
 
 	if (bitsDamageType & DMG_BLAST)
-		flDamage *= 2;
+		flDamage *= 1.5f;
 
 	/*
 	if ( (bitsDamageType & DMG_BULLET) && flDamage > 50)
