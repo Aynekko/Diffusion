@@ -412,7 +412,7 @@ void CTripmineGrenade :: MakeBeam( void )
 
 void CTripmineGrenade :: BeamBreakThink( void  )
 {
-	BOOL bBlowup = 0;
+	bool bBlowup = false;
 
 	// respawn detect. 
 	if( !m_pBeam )
@@ -449,11 +449,11 @@ void CTripmineGrenade :: BeamBreakThink( void  )
 	UTIL_TraceLine( GetAbsOrigin(), m_vecEnd, dont_ignore_monsters, ENT( pev ), &tr );
 
 	if( fabs( m_flBeamLength - tr.flFraction ) > 0.001 )
-		bBlowup = 1;
+		bBlowup = true;
 	else
 	{
 		if (m_hOwner == NULL)
-			bBlowup = 1;
+			bBlowup = true;
 	}
 
 	if (bBlowup)
@@ -495,6 +495,7 @@ int CTripmineGrenade :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttac
 void CTripmineGrenade::Killed( entvars_t *pevAttacker, int iGib )
 {
 	pev->takedamage = DAMAGE_NO;
+	SetUse( NULL );
 	
 	if ( pevAttacker && ( pevAttacker->flags & FL_CLIENT ) )
 	{
