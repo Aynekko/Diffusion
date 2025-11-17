@@ -262,7 +262,9 @@ void CHalfLifeRules :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, e
 				UTIL_ShowMessage( "UTIL_USEDASH", pVictim );
 				break;
 			case 1:
-				UTIL_ShowMessage( "UTIL_USEBLAST", pVictim );
+				// only show if player was fully equipped (means never used the feature)
+				if( pVictim->BlastChargesReady == pVictim->BlastAbilityLVL )
+					UTIL_ShowMessage( "UTIL_USEBLAST", pVictim );
 				break;
 			case 2:
 				UTIL_ShowMessage( "UTIL_USEBOTH", pVictim );
@@ -275,7 +277,9 @@ void CHalfLifeRules :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, e
 		}
 		else if( pVictim->BlastAbilityLVL > 0 )
 		{
-			UTIL_ShowMessage( "UTIL_USEBLAST", pVictim );
+			// only show if player was fully equipped (means never used the feature)
+			if( pVictim->BlastChargesReady == pVictim->BlastAbilityLVL )
+				UTIL_ShowMessage( "UTIL_USEBLAST", pVictim );
 		}
 	}
 }
