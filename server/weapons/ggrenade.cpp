@@ -334,7 +334,7 @@ void CGrenade::DangerSoundThink( void )
 	int sndentindex = 0;
 	if( pev->owner )
 		sndentindex = ENTINDEX( pev->owner );
-	CSoundEnt::InsertSound( bits_SOUND_DANGER, GetAbsOrigin() + GetAbsVelocity() * 0.5, GetAbsVelocity().Length( ), 0.2, sndentindex );
+	CSoundEnt::InsertSound( bits_SOUND_DANGER, GetAbsOrigin() + GetAbsVelocity() * 0.5f, GetAbsVelocity().Length() * 0.5f, 0.2, sndentindex );
 
 	if( !DoWaterCheck )
 	{
