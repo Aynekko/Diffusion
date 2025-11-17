@@ -122,6 +122,13 @@ void CTriggerHealth::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 			// bump max health if new health are bigger
 			if( pEntity->pev->max_health < pEntity->pev->health )
 				pEntity->pev->max_health = pEntity->pev->health;
+
+			// force update HUD
+			if( pEntity->IsPlayer() )
+			{
+				CBasePlayer *PL = (CBasePlayer *)pEntity;
+				PL->m_iClientHealth = -1;
+			}
 		}
 	}
 }
