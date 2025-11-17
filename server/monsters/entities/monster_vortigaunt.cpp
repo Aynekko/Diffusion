@@ -591,6 +591,9 @@ int CISlave :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	if ((bitsDamageType & DMG_SLASH) && pevAttacker && IRelationship( Instance(pevAttacker) ) < R_DL)
 		return 0;
 
+	if( bitsDamageType & DMG_SHOCK )
+		return 0;
+
 	//LRC - if my player reaction has been overridden, leave this alone
 	if (m_iPlayerReact == 0)
 		m_afMemory |= bits_MEMORY_PROVOKED;
