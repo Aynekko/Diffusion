@@ -448,6 +448,9 @@ void V_VidInit( void )
 
 float V_CalcBob( struct ref_params_s *pparams )
 {
+	if( cl_bob->value <= 0.0f )
+		return 0.0f;
+
 	static	double	bobtime;
 	static float	bob;
 	float	cycle;
@@ -476,7 +479,7 @@ float V_CalcBob( struct ref_params_s *pparams )
 	vel = pparams->simvel;
 	vel[2] = 0;
 
-	bob = sqrt( vel[0] * vel[0] + vel[1] * vel[1] ) * cl_bob->value;
+	bob = sqrt( vel[0] * vel[0] + vel[1] * vel[1] ) * bound( 0.0f, cl_bob->value, 0.1f );
 	bob = bob * 0.3 + bob * 0.7 * sin( cycle );
 	//	bob = Q_min( bob, 4 );
 	//	bob = Q_max( bob, -7 );
