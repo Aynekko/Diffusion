@@ -1248,11 +1248,21 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 		{
 			if( CanSpawnDrone && !DroneSpawned )
 			{
+				// this soldier can't throw grenades until he spawns a drone
+				TraceResult tracer;
+				Vector vecStart = GetAbsOrigin();
+				// drone spawns at 120. check up to 300, and 180 is acceptable
+				Vector vecEnd = vecStart;
+				vecEnd.z += 500;
+				UTIL_TraceLine( vecStart, vecEnd, dont_ignore_monsters, dont_ignore_glass, edict(), &tracer );
+				if( tracer.flFraction < 1.0f ) // not enough space.
+					return FALSE;
+
 				m_vecTossVelocity = vecToss;
 				// throw a drone
 				m_fThrowGrenade = TRUE;
 				// don't check again for a while.
-				m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
+				m_flNextGrenadeCheck = gpGlobals->time + 2.0f; // 1/3 second.
 			}
 			else
 			{
@@ -1640,61 +1650,39 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			{
 				if( !DroneSpawned ) // I didn't spawn any of them yet, so check if I'm able to
 				{
-					TraceResult tracer;
-					Vector vecStart, vecEnd;
-					vecStart = vecEnd = GetAbsOrigin();
-					// drone spawns at 120. check up to 300, and 180 is acceptable
-					vecEnd.z += 500;
-					UTIL_TraceLine(vecStart, vecEnd, dont_ignore_monsters, dont_ignore_glass, edict(), &tracer);
-					if( (vecStart - tracer.vecEndPos).Length() < 180 ) // not enough space. throw a grenade instead
+					Vector vecStart = GetAbsOrigin();
+					vecStart.z += 120;  // drone spawns right above grunt's head, there's a possibility that it could stuck though...
+					CBaseMonster *pDrone = (CBaseMonster*)Create( "monster_security_drone", vecStart, GetAbsAngles(), edict() );
+					if( pDrone )
 					{
-						UTIL_MakeVectors( GetAbsAngles() );
-						CBaseEntity *pGrenade = CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5 );
-						if( pGrenade )
+						pDrone->m_iClass = m_iClass; // do not shoot at the owner!!!
+						// make the drone aware of the enemy which grunt was angry at
+						// even if the drone didn't see him at the moment of spawn.
+
+						if( m_hEnemy != NULL )
 						{
-							SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
-							pGrenade->pev->body = 1; // change to body without pin
-						}
-						EMIT_SOUND( ENT(pev), CHAN_WEAPON, "weapons/soldier_throw.wav", 1, ATTN_NORM );
-						m_fThrowGrenade = FALSE;
-						m_flNextGrenadeCheck = gpGlobals->time + RANDOM_FLOAT(6,12);// wait few seconds for the next try
-					}
-					else // spawn a drone
-					{
-						Vector vecStart = GetAbsOrigin();
-						vecStart.z += 120;  // drone spawns right above grunt's head, there's a possibility that it could stuck though...
-						CBaseMonster *pDrone = (CBaseMonster*)Create( "monster_security_drone", vecStart, GetAbsAngles(), edict() );
-						if( pDrone )
-						{
-							pDrone->m_iClass = m_iClass; // do not shoot at the owner!!!
-							// make the drone aware of the enemy which grunt was angry at
-							// even if the drone didn't see him at the moment of spawn.
-
-							if( m_hEnemy != NULL )
-							{
-								pDrone->SetEnemy( m_hEnemy );
-								pDrone->SetConditions( bits_COND_NEW_ENEMY );
-								pDrone->m_IdealMonsterState = m_IdealMonsterState; // do not strip the enemy after spawn
-							}
-
-							// copy these parameters too to act similarly
-							pDrone->m_flDistLook = m_flDistLook;
-							pDrone->m_flDistTooClose = m_flDistTooClose;
-							pDrone->m_flDistTooFar = m_flDistTooFar;
-
-							// add targetname too
-							if( GetTargetname()[0] != '\0' )
-							{
-								char newname[64];
-								Q_snprintf( newname, sizeof( newname ), "%s_drone", GetTargetname() );
-								pDrone->pev->targetname = MAKE_STRING( newname );
-							}
+							pDrone->SetEnemy( m_hEnemy );
+							pDrone->SetConditions( bits_COND_NEW_ENEMY );
+							pDrone->m_IdealMonsterState = m_IdealMonsterState; // do not strip the enemy after spawn
 						}
 
-						DroneSpawned = true; // the drone is now spawned, grunt can't spawn any more drones and will use the grenade
-						m_fThrowGrenade = FALSE;
-						m_flNextGrenadeCheck = gpGlobals->time + 3;
+						// copy these parameters too to act similarly
+						pDrone->m_flDistLook = m_flDistLook;
+						pDrone->m_flDistTooClose = m_flDistTooClose;
+						pDrone->m_flDistTooFar = m_flDistTooFar;
+
+						// add targetname too
+						if( GetTargetname()[0] != '\0' )
+						{
+							char newname[64];
+							Q_snprintf( newname, sizeof( newname ), "%s_drone", GetTargetname() );
+							pDrone->pev->targetname = MAKE_STRING( newname );
+						}
 					}
+
+					DroneSpawned = true; // the drone is now spawned, grunt can't spawn any more drones and will use the grenade
+					m_fThrowGrenade = FALSE;
+					m_flNextGrenadeCheck = gpGlobals->time + 3;
 				}
 				else
 				{
