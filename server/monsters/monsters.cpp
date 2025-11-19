@@ -1982,7 +1982,7 @@ void CBaseMonster :: Move ( float flInterval )
 		if (pBlocker)
 			DispatchBlocked( edict(), pBlocker->edict() );
 
-		if ( pBlocker && m_moveWaitTime > 0 && pBlocker->IsMoving() && !pBlocker->IsPlayer() && (gpGlobals->time-m_flMoveWaitFinished) > 3.0 )
+		if ( pBlocker && m_moveWaitTime > 0 && pBlocker->IsMoving() && !pBlocker->IsPlayer() && !pBlocker->IsMonster() && (gpGlobals->time-m_flMoveWaitFinished) > 3.0 )
 		{
 			// Can we still move toward our target?
 			if ( flDist < m_flGroundSpeed )
@@ -2000,6 +2000,37 @@ void CBaseMonster :: Move ( float flInterval )
 			{
 				InsertWaypoint( vecApex, bits_MF_TO_DETOUR );
 				RouteSimplify( pTargetEnt );
+
+				// notify the other monster to wait while we go around it - wait for 1 to 3 seconds
+				if( pBlocker && pBlocker->IsMonster() )
+				{
+					CBaseMonster *pNPC = (CBaseMonster *)pBlocker;
+					if( pNPC )
+					{
+						pNPC->Stop();
+						// Only do this once until your route is cleared
+						if( pNPC->m_moveWaitTime > 0 && !(pNPC->m_afMemory & bits_MEMORY_MOVE_FAILED) )
+						{
+							pNPC->FRefreshRoute();
+							if( pNPC->FRouteClear() )
+								pNPC->TaskFail();
+							else
+							{
+								// Don't get stuck
+								if( (gpGlobals->time - pNPC->m_flMoveWaitFinished) < 0.2 )
+									pNPC->Remember( bits_MEMORY_MOVE_FAILED );
+
+								// if I walk, the other guy waits longer
+								float flWaitTime = (m_movementActivity == ACT_WALK) ? 3.0f : 1.0f;
+								pNPC->m_flMoveWaitFinished = gpGlobals->time + flWaitTime;
+							}
+						}
+						else
+						{
+							pNPC->TaskFail();
+						}
+					}
+				}
 			}
 			else
 			{
