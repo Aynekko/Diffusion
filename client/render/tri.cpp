@@ -115,20 +115,22 @@ void HUD_DrawTransparentTriangles( void )
 			RI->currentmodel = RI->currententity->model;
 			SET_CURRENT_ENTITY( RI->currententity );
 
-			// FIXME culling is not performed if this entity was parented (moving)
+			Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
+			Vector absmax = RI->currententity->origin + RI->currententity->curstate.maxs;
+
+			// FIXME frustum culling is not performed if this entity was parented (moving)
+			// it's using default 512 box just to test PVS visibility
 			if( RI->currententity->curstate.mins.x != -256.0f && RI->currententity->curstate.maxs != 256.0f )
 			{
-				Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
-				Vector absmax = RI->currententity->origin + RI->currententity->curstate.maxs;
-
 				if( R_CullModel( RI->currententity, absmin, absmax ) )
 					continue;
-				if( !Mod_CheckBoxVisible( absmin, absmax ) )
-					continue;
-
-				if( r_drawentities->value == 7 )
-					DBG_DrawBBox( absmin, absmax );
 			}
+
+			if( !Mod_CheckBoxVisible( absmin, absmax ) )
+				continue;
+
+			if( r_drawentities->value == 7 )
+				DBG_DrawBBox( absmin, absmax );
 
 			R_SetupVolumetricLight( RI->currententity );
 		}

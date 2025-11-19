@@ -1473,7 +1473,7 @@ int CBaseEntity::Restore( CRestore &restore )
 
 	if( restore.IsGlobalMode() )
 	{
-		// restore our chian here
+		// restore our chain here
 		m_hParent = hParent;
 		m_hChild = hChild;
 		m_hNextChild = hNextChild;

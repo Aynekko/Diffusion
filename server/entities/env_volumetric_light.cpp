@@ -96,7 +96,7 @@ void CEnvVolumetricLight::Spawn( void )
 	}
 
 	SetNullModel();
-	UTIL_SetSize( pev, Vector( -256, -256, -256 ), Vector( 256, 256, 256 ) ); // FIXME this is a default size if entity is parented - such volumetrics are not culled!
+	UTIL_SetSize( pev, Vector( -256, -256, -256 ), Vector( 256, 256, 256 ) ); // FIXME this is a default size if entity is parented - such volumetrics are not frustum-culled!
 
 	// make sure it gets to transparent entity list on client
 	pev->rendermode = kRenderTransAdd;
