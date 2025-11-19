@@ -220,12 +220,12 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 					// RGB 70 169 255
 					// draw frame and amount
 					float scale = ((rgAmmoHistory[i].DisplayTime - flTime) * 80);
-					FillRoundedRGBA( xpos - text_width - 60, ypos_new - 10, text_width + 80, gHUD.m_scrinfo.iCharHeight + 20, 10, Vector4D( 0.25f, 0.25f, 0.25f, 0.002f * scale ) ); // grey frame background
-					FillRoundedRGBA( xpos - text_width - 10, ypos_new - 5, text_width + 25, gHUD.m_scrinfo.iCharHeight + 10, 10, Vector4D( 0.275f, 0.663f, 1.0f, 0.002f * scale ) ); // blue frame for text
+					FillRoundedRGBA( xpos - text_width - (60 * gHUD.fScale), ypos_new - 10, text_width + (80 * gHUD.fScale), gHUD.m_scrinfo.iCharHeight + 20, 10, Vector4D( 0.25f, 0.25f, 0.25f, 0.002f * scale ) ); // grey frame background
+					FillRoundedRGBA( xpos - text_width - (10 * gHUD.fScale), ypos_new - 5, text_width + (25 * gHUD.fScale), gHUD.m_scrinfo.iCharHeight + 10, 10, Vector4D( 0.275f, 0.663f, 1.0f, 0.002f * scale ) ); // blue frame for text
 					int r, g, b;
 					UnpackRGB( r, g, b, gHUD.m_iHUDColor );
 					ScaleColors( r, g, b, Q_min( scale, 255 ) );
-					gHUD.DrawHudNumberString( xpos - text_width - 30, ypos_new, xpos - text_width - 100, rgAmmoHistory[i].iCount, r, g, b );
+					gHUD.DrawHudNumberString( xpos - text_width - (30 * gHUD.fScale), ypos_new, xpos - text_width - (100 * gHUD.fScale), rgAmmoHistory[i].iCount, r, g, b );
 					// draw text
 					pText = pMsg ? pMsg->pMessage : ammoname;
 					int textpos_x = xpos - text_width;
