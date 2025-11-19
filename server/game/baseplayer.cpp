@@ -2906,10 +2906,21 @@ void CBasePlayer::PreThink( void )
 //	ALERT( at_console, "server fov %f\n", m_flFOV );
 
 	// diffusion - clamped
-	if( pev->health > 200 )
-		pev->health = 200;
-	if( pev->max_health > 200 )
-		pev->max_health = 200;
+	if( gpGlobals->maxClients > 1 ) // multiplayer
+	{
+		if( pev->health > 400 )
+			pev->health = 400;
+
+		if( pev->max_health > 300 )
+			pev->max_health = 300;
+	}
+	else // singleplayer
+	{
+		if( pev->health > 200 )
+			pev->health = 200;
+		if( pev->max_health > 200 )
+			pev->max_health = 200;
+	}
 
 	if( ShieldOn )
 	{
