@@ -2316,6 +2316,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 	float cached_glosssmoothness = -1.0f;
 	float cached_embossscale = -1.0f;
 	int cached_landscape = -1;
+	float cached_texofs[2] = { -1.0f, -1.0f };
 
 	GL_BlendFunc( GL_ONE, GL_ONE );
 	startv = MAX_MAP_ELEMS;
@@ -2425,6 +2426,8 @@ void R_DrawLightForSurfList( plight_t *pl )
 			cached_glosssmoothness = -1.0f;
 			cached_embossscale = -1.0f;
 			cached_landscape = -1;
+			cached_texofs[0] = -1.0f;
+			cached_texofs[1] = -1.0f;
 		}
 
 		if( cached_texture != iTexnum || cached_landscape != bLandscape )
@@ -2580,6 +2583,13 @@ void R_DrawLightForSurfList( plight_t *pl )
 
 			cached_texture = iTexnum;
 			cached_landscape = FBitSet( s->flags, SURF_LANDSCAPE ) ? 1 : 0;
+		}
+
+		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
+		{
+			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
+			cached_texofs[0] = es->texofs[0];
+			cached_texofs[1] = es->texofs[1];
 		}
 
 		if( es->firstvertex < startv )
@@ -2870,9 +2880,6 @@ void R_DrawBrushList( void )
 		if( cached_texture != iTexnum )
 			flush_buffer = true;
 
-		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
-			flush_buffer = true;
-
 		const int bLandscape = FBitSet( s->flags, SURF_LANDSCAPE ) ? 1 : 0;
 
 		if( RI->currentshader && RI->currentshader->status & SHADER_USE_CUBEMAPS )
@@ -3098,8 +3105,6 @@ void R_DrawBrushList( void )
 
 			cached_mirror = es->subtexture[glState.stack_position];
 			cached_texture = iTexnum;
-			cached_texofs[0] = -1.0f;
-			cached_texofs[1] = -1.0f;
 			cached_landscape = FBitSet( s->flags, SURF_LANDSCAPE ) ? 1 : 0;
 		}
 
