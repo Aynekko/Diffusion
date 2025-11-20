@@ -33,6 +33,7 @@ int CZoom::MsgFunc_Zoom( const char *pszName, int iSize, void *pbuf )
 	else
 	{
 		gHUD.IsZoomed = false;
+		gHUD.IsZooming = false;
 	//	gHUD.m_flFOV = 0.0f;
 	}
 	
