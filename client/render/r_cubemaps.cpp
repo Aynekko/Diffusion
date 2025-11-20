@@ -398,15 +398,17 @@ void CL_FindNearestCubeMapBox( const Vector &pos, mcubemap_t **result )
 	if( !result ) return;
 
 	float maxBoxsize = 99999.0f;
+	float maxDist = 999999.0f;
 	*result = NULL;
 
 	for( int i = 0; i < world->num_cubemaps; i++ )
 	{
 		mcubemap_t *check = &world->cubemaps[i];
-		float dist = VectorDistance( check->origin, pos );
+		float dist = (check->origin - pos).Length();
 		float boxsize = (check->mins - check->maxs).Length();
 
-		if( PointInBounds( pos, check->mins, check->maxs ) && (boxsize < maxBoxsize) )
+		if( PointInBounds( pos, check->mins, check->maxs )
+			&& ((boxsize < maxBoxsize) || (boxsize == maxBoxsize && dist < maxDist)) )
 		{
 			*result = check;
 			maxBoxsize = boxsize;
@@ -461,7 +463,8 @@ void CL_FindNearestCubeMapBoxForSurface( const Vector &pos, const msurface_t *su
 {
 	if( !result ) return;
 
-	float maxBoxsize = 99999.0f;
+	float maxBoxsize = 999999.0f;
+	float maxDist = 999999.0f;
 	mplane_t plane;
 	*result = NULL;
 
@@ -476,13 +479,15 @@ void CL_FindNearestCubeMapBoxForSurface( const Vector &pos, const msurface_t *su
 	for( int i = 0; i < world->num_cubemaps; i++ )
 	{
 		mcubemap_t *check = &world->cubemaps[i];
-		float dist = VectorDistance( check->origin, pos );
+		float dist = (check->origin - pos).Length();
 		float boxsize = (check->mins - check->maxs).Length();
 
-		if( PointInBounds( surf->info->origin, check->mins, check->maxs) && (boxsize < maxBoxsize) )
+		if( PointInBounds( pos, check->mins, check->maxs) 
+			&& ((boxsize < maxBoxsize) || (boxsize == maxBoxsize && dist < maxDist)) )
 		{
 			*result = check;
 			maxBoxsize = boxsize;
+			maxDist = dist;
 		}
 	}
 
