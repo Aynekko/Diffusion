@@ -719,7 +719,19 @@ int CGargantua::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 		// diffusion - big robot can be damaged with everything
 		if( bitsDamageType & DMG_BLAST )
 		{
-			flDamage *= 3;
+			flDamage *= 3.0f;
+			SetConditions( bits_COND_LIGHT_DAMAGE );
+		}
+
+		if( bitsDamageType & DMG_BULLET )
+		{
+			flDamage *= 0.5f;
+			SetConditions( bits_COND_LIGHT_DAMAGE );
+		}
+
+		if( bitsDamageType & DMG_SHOCK )
+		{
+			flDamage *= 2.0f;
 			SetConditions( bits_COND_LIGHT_DAMAGE );
 		}
 
