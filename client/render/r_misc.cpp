@@ -1371,9 +1371,9 @@ void R_MuzzleFlash( const cl_entity_t *e, int Attachment, int type )
 	{
 		if( type == -1 ) // this is a secondary attack, skip it... (specified in qc)
 			return;
-		
+
 		modelIndex = (type % 10) % MAX_MUZZLEFLASH;
-		scale = (type / 10) * 0.05f;
+		scale = (type / 10.0f) * 0.05f;
 		switch( modelIndex )
 		{
 		default:

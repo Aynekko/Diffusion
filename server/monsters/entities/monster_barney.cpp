@@ -1251,7 +1251,7 @@ void CAlice :: Spawn( void )
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= DONT_BLEED;
-	if( !pev->health ) pev->health = 500;
+	if( !pev->health ) pev->health = 250;
 	pev->max_health = pev->health;
 	pev->view_ofs		= Vector ( 0, 0, 48 );// position of the eyes relative to monster's origin.
 	m_flFieldOfView		= VIEW_FIELD_WIDE;
@@ -1564,7 +1564,7 @@ void CAlice :: RunAI(void) // health regeneration
 	{
 		if( gpGlobals->time > AliceLastHurt + 3 )
 		{
-			TakeHealth( 5.0f * gpGlobals->frametime, DMG_GENERIC );
+			TakeHealth( 3.0f * gpGlobals->frametime, DMG_GENERIC );
 		}
 	}
 

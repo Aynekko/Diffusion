@@ -1256,7 +1256,11 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 				vecEnd.z += 500;
 				UTIL_TraceLine( vecStart, vecEnd, dont_ignore_monsters, dont_ignore_glass, edict(), &tracer );
 				if( tracer.flFraction < 1.0f ) // not enough space.
+				{
+					m_fThrowGrenade = FALSE;
+					m_flNextGrenadeCheck = gpGlobals->time + 1.0f;
 					return FALSE;
+				}
 
 				m_vecTossVelocity = vecToss;
 				// throw a drone
@@ -5474,12 +5478,7 @@ void CHGruntSecurity::Spawn()
 		case 0:
 			AddWeapon(HGRUNT_9MMAR);
 			AddWeapon( HGRUNT_HANDGRENADE );
-			switch( RANDOM_LONG( 0, 2 ) ) // diffusion - 60% chance that a grunt with handgrenade also has a drone
-			{
-			case 0:	CanSpawnDrone = true; break;
-			case 1:	CanSpawnDrone = true; break;
-			case 2:	CanSpawnDrone = false; break;
-			}
+			CanSpawnDrone = (RANDOM_LONG( 0, 2 ) < 2); // diffusion - 60% chance that a grunt with handgrenade also has a drone
 			break;
 		case 1:
 			AddWeapon(HGRUNT_SHOTGUN);
@@ -5491,12 +5490,7 @@ void CHGruntSecurity::Spawn()
 		case 3:
 			AddWeapon(HGRUNT_SHOTGUN);
 			AddWeapon( HGRUNT_HANDGRENADE );
-			switch( RANDOM_LONG( 0, 2 ) ) // diffusion - 60% chance that a grunt with handgrenade also has a drone
-			{
-			case 0:	CanSpawnDrone = true; break;
-			case 1:	CanSpawnDrone = true; break;
-			case 2:	CanSpawnDrone = false; break;
-			}
+			CanSpawnDrone = (RANDOM_LONG( 0, 2 ) < 2); // diffusion - 60% chance that a grunt with handgrenade also has a drone
 			break;
 		}
 	}
