@@ -2252,6 +2252,9 @@ void CStudioBoneSetup :: CalcBoneAdj( Vector pos[], Vector4D q[], const byte con
 	
 	for( j = 0; j < m_pStudioHeader->numbonecontrollers; j++ )
 	{
+		if( j == MAXSTUDIOCONTROLLERS )
+			break;
+
 		pbonecontroller = (mstudiobonecontroller_t *)((byte *)m_pStudioHeader + m_pStudioHeader->bonecontrollerindex) + j;
 		k = pbonecontroller->bone;
 
@@ -2303,9 +2306,12 @@ void CStudioBoneSetup :: CalcBoneAdj( float adj[], const byte controllers[], byt
 	Vector			p0;
 	Radian			a0;
 	Vector4D			q0;
-	
+
 	for( j = 0; j < m_pStudioHeader->numbonecontrollers; j++ )
 	{
+		if( j == MAXSTUDIOCONTROLLERS )
+			break;
+
 		pbonecontroller = (mstudiobonecontroller_t *)((byte *)m_pStudioHeader + m_pStudioHeader->bonecontrollerindex) + j;
 		k = pbonecontroller->bone;
 
