@@ -2908,11 +2908,11 @@ void CBasePlayer::PreThink( void )
 	// diffusion - clamped
 	if( gpGlobals->maxClients > 1 ) // multiplayer
 	{
-		if( pev->health > 400 )
-			pev->health = 400;
+		if( pev->health > 250 )
+			pev->health = 250;
 
-		if( pev->max_health > 300 )
-			pev->max_health = 300;
+		if( pev->max_health > 250 )
+			pev->max_health = 250;
 	}
 	else // singleplayer
 	{
