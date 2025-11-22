@@ -5370,17 +5370,19 @@ void CBasePlayer::Spawn( void )
 	SetFlag(F_NOBACKCULL);
 
 	// diffusion - name your player model starting with "robo" and you'll get those metal effects
-	char model_name[20];
+	char model_name[32];
 	if( g_pGameRules->IsTeamplay() )
-		strcpy( model_name, g_pGameRules->GetTeamID( this ) );
+		Q_strncpy( model_name, g_pGameRules->GetTeamID( this ), sizeof( model_name ) );
 	else
-		strcpy( model_name, g_engfuncs.pfnInfoKeyValue( g_engfuncs.pfnGetInfoKeyBuffer( edict() ), "model" ) );
+		Q_strncpy( model_name, g_engfuncs.pfnInfoKeyValue( g_engfuncs.pfnGetInfoKeyBuffer( edict() ), "model" ), sizeof( model_name ) );
 
-	if( !strncmp( model_name, "robo", 4 ) )
+	if( !Q_strncmp( model_name, "robo", 4 ) )
 	{
 		SetFlag( F_METAL_MONSTER );
 		m_bloodColor = DONT_BLEED;
 	}
+	else
+		RemoveFlag( F_METAL_MONSTER );
 
 	RefreshScore();
 
