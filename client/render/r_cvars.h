@@ -29,6 +29,7 @@ extern cvar_t *cl_hitsound;
 extern cvar_t *cl_muzzlelight;
 extern cvar_t *cl_localweaponanims;
 extern cvar_t *cl_achievement_notify;
+extern cvar_t *cl_subtitles;
 extern cvar_t	*r_dynamic;
 extern cvar_t	*r_novis;
 extern cvar_t	*r_nocull;

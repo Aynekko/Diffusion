@@ -133,6 +133,7 @@ cvar_t *cl_hitsound;
 cvar_t *cl_muzzlelight;
 cvar_t *cl_localweaponanims;
 cvar_t *cl_achievement_notify;
+cvar_t *cl_subtitles;
 cvar_t *cl_showmsgs;
 cvar_t *cl_viewmodelblend;
 cvar_t *cl_viewmodel_extras;
@@ -324,6 +325,7 @@ void V_Init( void )
 	cl_achievement_notify = CVAR_REGISTER( "cl_achievement_notify", "1", FCVAR_ARCHIVE );
 	cl_showhealthbars = CVAR_REGISTER( "cl_showhealthbars", "1", FCVAR_ARCHIVE );
 	cl_localweaponanims = CVAR_REGISTER( "cl_localweaponanims", "0", FCVAR_ARCHIVE );
+	cl_subtitles = CVAR_REGISTER( "cl_subtitles", "1", FCVAR_ARCHIVE );
 	cl_muzzlelight = CVAR_REGISTER( "cl_muzzlelight", "1", FCVAR_ARCHIVE );
 	cl_showmsgs = CVAR_REGISTER( "cl_showmsgs", "0", FCVAR_ARCHIVE );
 	cl_viewmodelblend = CVAR_REGISTER( "cl_viewmodelblend", "0", FCVAR_ARCHIVE );

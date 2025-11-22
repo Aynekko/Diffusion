@@ -40,6 +40,12 @@ int CHudSubtitle::MsgFunc_Subtitle( const char *pszName, int iSize, void *pbuf )
 	Q_strncpy( pText, READ_STRING(), 2047 );
 	END_READ();
 
+	if( cl_subtitles->value <= 0 )
+	{
+		draw_time = tr.time; // let it fade out
+		return 1; // read but don't accept it if disabled
+	}
+
 	// get the name of the speaker from titles.txt
 	client_textmessage_t *TitlesMsg;
 
