@@ -290,12 +290,9 @@ void CGameRules::ManageBonuses(void)
 //=========================================================================
 void CGameRules::ManageMessages(void)
 {
-	if( (mp_server_notify.value > 0) && (MessagesLoaded > 0) )
-		ServerHasMessages = true;
-	else
-		ServerHasMessages = false;
+	ServerHasMessages = ((mp_server_notify.value > 0) && (MessagesLoaded > 0));
 
-	if( ServerHasMessages == true )
+	if( ServerHasMessages )
 	{
 		if( gpGlobals->time > m_flLastTimeServerMsgShown )
 		{
@@ -500,13 +497,13 @@ void CGameRules::InitServerMessages(void)
 	int iMessageNum = 0;
 	int TooLong = 0;
 
+	MessagesLoaded = 0;
+
 	if (!File)
 	{
 		ALERT(at_warning, "server/messages.txt couldn't be loaded.\n");
 		return;
 	}
-
-	MessagesLoaded = 0;
 
 	while( ((pMsgFile = COM_ParseFile(pMsgFile, line)) != NULL) && (MessagesLoaded < MAX_SERVER_MESSAGES) )
 	{	
