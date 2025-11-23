@@ -320,10 +320,35 @@ int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 		gHUD.m_Puzzle.m_iFlags &= ~HUD_ACTIVE;
 		return 0;
 	}
-	else if( gHUD.m_CodeInput.m_iFlags & HUD_ACTIVE && bEscButton )
+	else if( gHUD.m_CodeInput.m_iFlags & HUD_ACTIVE )
 	{
-		gHUD.m_CodeInput.DisableCodeScreen();
-		return 0;
+		if( bEscButton )
+		{
+			gHUD.m_CodeInput.DisableCodeScreen();
+			return 0;
+		}
+
+		if( keynum >= K_NUM0 && keynum <= K_NUM9 )
+		{
+			// if it's a number key, but not a slot command, fallback to typing the number anyway
+			if( Q_strncmp( pszCurrentBinding, "slot", 4 ) )
+			{
+				gHUD.DrumsInput( keynum - K_NUM0 );
+				return 1;
+			}
+		}
+	}
+	else if( gHUD.PlayingDrums )
+	{
+		if( keynum >= K_NUM0 && keynum <= K_NUM9 )
+		{
+			// if it's a number key, but not a slot command, fallback to typing the number anyway
+			if( Q_strncmp( pszCurrentBinding, "slot", 4 ) )
+			{
+				gHUD.m_CodeInput.EnterCode( keynum - K_NUM0 );
+				return 1;
+			}
+		}
 	}
 
 	if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )

@@ -24,6 +24,17 @@
 #define K_ESCAPE	27
 #define K_SPACE		32
 #define K_SCROLLOCK	70
+#define K_NUM0		48
+#define K_NUM1		49
+#define K_NUM2		50
+#define K_NUM3		51
+#define K_NUM4		52
+#define K_NUM5		53
+#define K_NUM6		54
+#define K_NUM7		55
+#define K_NUM8		56
+#define K_NUM9		57
+
 
 // normal keys should be passed as lowercased ascii
 
