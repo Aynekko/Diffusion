@@ -179,7 +179,7 @@ void CCrossbowBolt::PlayTouchSound( CBaseEntity *pOther )
 	if( !pOther->pev->takedamage || FClassnameIs(pOther->pev, "monster_alice") || FClassnameIs(pOther->pev, "_playerdrone") || FClassnameIs( pOther->pev, "_playersentry" ) )
 		return;
 
-	if ( pOther->HasFlag(F_NOT_A_MONSTER) || pOther->HasFlag(F_METAL_MONSTER) )
+	if ( pOther->HasFlag(F_NOT_A_MONSTER) || pOther->HasFlag(F_METAL_MONSTER) || FClassnameIs( pOther->pev, "env_model" ) )
 	{
 		EMIT_SOUND(ENT(pev), CHAN_BODY, "weapons/xbow_hitmetal.wav", 1, ATTN_NORM);
 		return;
