@@ -794,7 +794,7 @@ int CL_ButtonBits( int bResetState )
 	}
 
 	// dead or in intermission? Show scoreboard, too
-	if( CL_IsDead() || gHUD.m_iIntermission )
+	if( gHUD.m_Scoreboard.IsVisible() )
 	{
 		if( gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE )
 			gHUD.m_PseudoGUI.m_iFlags = 0;

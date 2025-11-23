@@ -182,6 +182,11 @@ void CHudScoreboard :: InitHUDData( void )
 	memset( g_TeamInfo, 0, sizeof g_TeamInfo );
 }
 
+bool CHudScoreboard::IsVisible() const
+{
+	return (m_iShowscoresHeld || gHUD.m_iIntermission);
+}
+
 int CHudScoreboard :: Draw( float fTime )
 {
 	if( tr.time == tr.oldtime ) // paused
@@ -190,7 +195,7 @@ int CHudScoreboard :: Draw( float fTime )
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
 	
-	if( !m_iShowscoresHeld && !gHUD.m_iIntermission )
+	if( !IsVisible() )
 	{
 		if( boardlerper > 0.0f )
 			boardlerper -= 7.0f * g_fFrametime;
