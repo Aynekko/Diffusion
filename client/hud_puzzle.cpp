@@ -105,7 +105,7 @@ void CHudPuzzle::Start( void )
 	correct_block_id.y = RANDOM_LONG( 0, field_size - 1 );
 	// prevent infinite loops
 	int tries = 0;
-	while( abs( correct_block_id.x - active_block_id.x ) < int( field_size * 0.5 ) && tries < 20 )
+	while( abs( correct_block_id.x - active_block_id.x ) < int( field_size * 0.4 ) && tries < 20 )
 	{
 		#ifdef PUZZLE_DEBUG_MSG
 		Msg( "correct is too close...shuffling\n" );
@@ -114,7 +114,7 @@ void CHudPuzzle::Start( void )
 		tries++;
 	}
 	tries = 0;
-	while( abs( correct_block_id.y - active_block_id.y ) < int( field_size * 0.5 ) && tries < 20 )
+	while( abs( correct_block_id.y - active_block_id.y ) < int( field_size * 0.4 ) && tries < 20 )
 	{
 		#ifdef PUZZLE_DEBUG_MSG
 		Msg( "correct is too close...shuffling\n" );
@@ -252,10 +252,10 @@ int CHudPuzzle::Draw( float flTime )
 
 	// draw bar
 	// background
-	float bar_h = borderB * 0.5f;
+	float bar_h = borderB * 0.65f;
 	float bar_w = blocks_dimension;
 	float bar_pos_x = background_start_coord.x + borderLR;
-	float bar_pos_y = background_start_coord.y + square_dimension - borderB * 0.75f;
+	float bar_pos_y = background_start_coord.y + square_dimension - borderB * 0.8f;
 	FillRoundedRGBA( bar_pos_x, bar_pos_y, bar_w, bar_h, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
 	// filled
 	float total_length = (max_coord - min_coord).Length();
