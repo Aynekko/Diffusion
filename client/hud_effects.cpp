@@ -228,6 +228,9 @@ void CScreenEffects::DrawCinematicBorder( void )
 //===============================================
 void CScreenEffects::DrawVignette( void )
 {
+	if( !Vignette )
+		return;
+
 	if( (gEngfuncs.pEventAPI->EV_LocalPlayerDucking() && tr.viewparams.onground) || (tr.time == tr.oldtime) )
 	{
 		if( VignetteAlpha < 1 )
