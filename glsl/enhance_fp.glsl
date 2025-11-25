@@ -8,7 +8,7 @@ uniform vec2        u_ScreenSizeInv;
 varying vec2        var_TexCoord;
 
 #define SATURATE
-#define SHARPEN
+//#define SHARPEN
 
 void main( void )
 {
