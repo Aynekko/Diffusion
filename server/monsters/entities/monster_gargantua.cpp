@@ -330,7 +330,8 @@ void CGargantua :: Spawn()
 	else
 		SET_MODEL(ENT(pev), "models/npc/cobra.mdl");
 
-	UTIL_SetSize( pev, Vector( -20, -20, 0 ), Vector( 20, 20, 160 ) );
+//	UTIL_SetSize( pev, Vector( -20, -20, 0 ), Vector( 20, 20, 160 ) );
+	UTIL_SetSize( pev, Vector( -32, -32, 0 ), Vector( 32, 32, 160 ) );
 
 	pev->solid			= SOLID_SLIDEBOX;
 	pev->movetype		= MOVETYPE_STEP;

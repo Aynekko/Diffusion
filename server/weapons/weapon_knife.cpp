@@ -22,6 +22,9 @@
 #include "player.h"
 #include "game/gamerules.h"
 
+static const int iCheckDist = 85;
+static const int iFireDist = 130;
+
 class CKnife : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CKnife, CBasePlayerWeapon );
@@ -100,12 +103,12 @@ void CKnife::PrimaryAttack( void )
 	m_pPlayer->pev->punchangle.x = RANDOM_FLOAT( 1, 2 );
 	m_pPlayer->pev->punchangle.y = RANDOM_FLOAT( -2, -1 );
 
-	// NOTENOTE we are checking the length of 75, but "firing bullets" at 90
+	// NOTENOTE we are checking the length of 85, but "firing bullets" at 130
 	// because there are situations where the traceline makes a hit (flFraction > 0.992) but bullets still can't reach the surface
 	// and we have a silent swoosh, with visible punchangle and no hit!
 	// update: increased "bullet fire" more to make an easier hit.
 	TraceResult trCenter;
-	Vector tracevec = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 75;
+	Vector tracevec = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * iCheckDist;
 	UTIL_TraceLine( m_pPlayer->GetGunPosition( ), tracevec, dont_ignore_monsters, ENT( m_pPlayer->pev ), &trCenter );
 	
 	if( trCenter.flFraction >= 1 )
@@ -121,7 +124,7 @@ void CKnife::PrimaryAttack( void )
 	else
 	{
 		UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
-		m_pPlayer->FireBullets( 1, m_pPlayer->GetGunPosition( ), gpGlobals->v_forward, g_vecZero, 130, BULLET_PLAYER_CROWBAR, 0, DMG_WPN_KNIFE );
+		m_pPlayer->FireBullets( 1, m_pPlayer->GetGunPosition( ), gpGlobals->v_forward, g_vecZero, iFireDist, BULLET_PLAYER_CROWBAR, 0, DMG_WPN_KNIFE );
 	}
 
 	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;
@@ -136,7 +139,7 @@ void CKnife::SecondaryAttack( void )
 	m_pPlayer->pev->punchangle.y = RANDOM_FLOAT( -3, -2 );
 
 	TraceResult tr;
-	Vector tracevec = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * 75;
+	Vector tracevec = m_pPlayer->GetGunPosition() + gpGlobals->v_forward * iCheckDist;
 	UTIL_TraceLine( m_pPlayer->GetGunPosition( ), tracevec, dont_ignore_monsters, ENT( m_pPlayer->pev ), &tr );
 	if( tr.flFraction >= 1 )
 	{
@@ -151,7 +154,7 @@ void CKnife::SecondaryAttack( void )
 	else
 	{
 		UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
-		m_pPlayer->FireBullets( 1, m_pPlayer->GetGunPosition( ), gpGlobals->v_forward, g_vecZero, 130, BULLET_PLAYER_CROWBAR, 0, DMG_WPN_KNIFE * 2 );
+		m_pPlayer->FireBullets( 1, m_pPlayer->GetGunPosition( ), gpGlobals->v_forward, g_vecZero, iFireDist, BULLET_PLAYER_CROWBAR, 0, DMG_WPN_KNIFE * 2 );
 	}
 
 	m_pPlayer->m_iWeaponVolume = QUIET_GUN_VOLUME;

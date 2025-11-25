@@ -930,9 +930,22 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 		}
 	}
 
+	// npc has no enemy and is being attacked by the player...
+	if( (pevAttacker->flags & FL_CLIENT) && IsMonster() && m_hEnemy == NULL )
+	{
+		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pevAttacker );
+		if( pPlayer )
+		{
+			// ... with a knife, do a triple damage
+			// hack! we can identify the knife using the damage type
+			if( bitsDamageType & (DMG_SLASH | DMG_NEVERGIB) )
+				flTake *= 3.0f;
+		}
+	}
+
 	// do the damage
 	pev->health -= flTake;
-	if( (pev->health < 1) && (pev->health > 0) )
+	if( (pev->health < 1.0f) && (pev->health > 0.0f) )
 		pev->health = 0; // diffusion - float issue, since I switched to it instead of int (this is mostly for the players and client stuff)
 
 	// diffusion

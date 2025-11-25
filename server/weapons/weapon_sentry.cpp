@@ -237,16 +237,8 @@ void CWpnSentry::PrimaryAttack()
 		pSentry->m_iClass = CLASS_PLAYER_ALLY;
 		pSentry->pev->targetname = MAKE_STRING( "_playersentry" ); // in case we want to delete them from the map or else
 		pSentry->m_flDistLook = 2000; // increased look distance
-		if( g_pGameRules->IsMultiplayer() )
-		{
-			pSentry->pev->health = 300;
-			pSentry->pev->max_health = pSentry->pev->health;
-		}
-		else
-		{
-			pSentry->pev->health = 200;
-			pSentry->pev->max_health = pSentry->pev->health;
-		}
+		pSentry->pev->health = g_pGameRules->IsMultiplayer() ? 150 : 200;
+		pSentry->pev->max_health = pSentry->pev->health;
 	}
 
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
