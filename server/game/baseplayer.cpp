@@ -2867,6 +2867,9 @@ void CBasePlayer::PreThink( void )
 	if( DrunkLevel > 0 )
 		pev->friction = 1.0f - (DrunkLevel * 0.1f);
 
+	if( Dashed )
+		pev->friction = 0.0f;
+
 	// do not interfere with player angles because they are used to catch mouse movement
 	if( pCar )
 		pev->punchangle = g_vecZero;
@@ -3130,7 +3133,7 @@ void CBasePlayer::PreThink( void )
 
 	if (m_pHoldableItem != NULL)
 		UpdateHoldableItem ();
-
+#if 0
 	if ( !g_pGameRules->IsMultiplayer() && (m_flStaminaValue > 20) && !pCar ) //DiffusionSprint
 	{
 		if ( m_afButtonPressed & IN_JUMP && (pev->flags & FL_ONGROUND ) && !DroneControl )
@@ -3138,7 +3141,7 @@ void CBasePlayer::PreThink( void )
 		else if ( m_afButtonReleased & IN_JUMP )
 			return;
 	}
-
+#endif
 	// diffusion - USE icon
 	CBaseEntity *pUseObject = NULL;
 
@@ -3744,13 +3747,24 @@ void CBasePlayer::ManageElectroBlast( void )
 			MESSAGE_END();
 
 			BlastDMGOverride = true; // don't hit yourself with your own blast
-			RadiusDamage( pev, pev, 150, 666, CLASS_PLAYER_ALLY, DMG_SHOCK );
+
+			float flDmg = 150.0f;
+			if( m_flStaminaValue >= 50.0f )
+			{
+				m_flStaminaValue -= 50.0f;
+			}
+			else
+			{
+				flDmg *= m_flStaminaValue / 50.0f;
+				m_flStaminaValue = 0.0f;
+			}
+
+			RadiusDamage( pev, pev, flDmg, 666.0f, CLASS_PLAYER_ALLY, DMG_SHOCK );
 
 			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "player/electroblast.wav", 1.0, 0.3, 0, RANDOM_LONG( 95, 105 ) );
 
 			BlastChargesReady--;
 
-			m_flStaminaValue = 1.0f;
 			m_flStaminaWait = gpGlobals->time + 5.0f;
 
 			MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, pev->origin );
@@ -4851,7 +4865,7 @@ void CBasePlayer::ManageStamina(void)
 	}
 
 	// +: waiting time before recharge (this was tricky lol)
-	if ((m_afButtonReleased & IN_RUN) || (m_afButtonPressed & IN_JUMP))
+	if ((m_afButtonReleased & IN_RUN) /*|| (m_afButtonPressed & IN_JUMP)*/)
 	{
 		// mother of god...
 		if (!(pev->button & IN_MOVELEFT) || !(pev->button & IN_MOVERIGHT) || !(pev->button & IN_BACK) && (pev->flags & FL_ONGROUND) && !(pev->flags & FL_DUCKING))
@@ -4877,8 +4891,7 @@ void CBasePlayer::ManageStamina(void)
 		}
 	}
 
-	if( m_flStaminaValue < 0 )
-		m_flStaminaValue = 0;
+	m_flStaminaValue = bound( 0.0f, m_flStaminaValue, 100.0f );
 }
 
 //=================================================================
@@ -4951,6 +4964,7 @@ void CBasePlayer::Dash(void)
 		if( gpGlobals->time - LastDashTime > 0.15 )
 		{
 			SetAbsVelocity( DashRememberVelocity );
+			pev->friction = 1.0f;
 			DashRememberVelocity = g_vecZero;
 			SendAchievementStatToClient( ACH_DASH, 1, ACHVAL_ADD );
 			Dashed = false;
@@ -4993,7 +5007,7 @@ void CBasePlayer::Dash(void)
 			Dash_OnGround						&&
 			!Dash_IsDucking						&&
 			(!Dashed)							&&
-			(m_flStaminaValue > 30)				&&
+			(m_flStaminaValue >= 5.0f)			&&
 			(pev->velocity.Length2D() > 100)	&&
 			(gpGlobals->time > LastDashTime + 1)&&
 			( (pev->button & IN_MOVELEFT) || (pev->button & IN_MOVERIGHT) || (pev->button & IN_BACK) || (pev->button & IN_FORWARD) )
@@ -5002,29 +5016,32 @@ void CBasePlayer::Dash(void)
 		DashRememberVelocity = GetAbsVelocity();
 		DashRememberVelocity.z *= 0.2; // don't throw player into the floor after dash, if he was falling (MP only)
 
-		pev->velocity.x *= 10;
-		pev->velocity.y *= 10;
-
-		if( pev->flags & FL_ONGROUND )
+		float dash_spd_mult = 10.0f;
+		if( m_flStaminaValue > 30.0f )
 		{
-			// add extra if touching floor
-			pev->velocity.x *= 1.35f;
-			pev->velocity.y *= 1.35f;
+			m_flStaminaValue -= 30.0f;
+		}
+		else
+		{
+			dash_spd_mult *= m_flStaminaValue / 30.0f;
+			m_flStaminaValue = 0.0f;
 		}
 
-		m_flStaminaValue -= 30;
-		UTIL_ScreenShakeLocal( this, GetAbsOrigin(), 2.0, 1000.0, 0.5, 100, true );
+		pev->velocity.x *= dash_spd_mult;
+		pev->velocity.y *= dash_spd_mult;
+
+		UTIL_ScreenShakeLocal( this, GetAbsOrigin(), 2.0f * dash_spd_mult * 0.1f, 1000.0, 0.5, 100, true );
 		if( pev->waterlevel == 3 )
 		{
-			EMIT_SOUND( ENT( pev ), CHAN_STATIC, "player/dash_underwater.wav", 1, 1.5f );
+			EMIT_SOUND( ENT( pev ), CHAN_STATIC, "player/dash_underwater.wav", dash_spd_mult * 0.1f, 1.5f );
 			UTIL_Bubbles( GetAbsOrigin() - Vector( 64, 64, 64 ), GetAbsOrigin() + Vector( 64, 64, 64 ), 50 );
 		}
 		else
-			EMIT_SOUND(ENT(pev), CHAN_STATIC, "player/dash.wav", 1, 1.5f );
+			EMIT_SOUND(ENT(pev), CHAN_STATIC, "player/dash.wav", dash_spd_mult * 0.1f, 1.5f );
 		LastDashTime = gpGlobals->time;
 		Dashed = true;
 		
-		m_flStaminaWait = gpGlobals->time + (50 / (m_flStaminaValue * 0.75));
+		m_flStaminaWait = gpGlobals->time + (50.0f / (m_flStaminaValue * 0.75f));
 
 		if( m_flStaminaWait > gpGlobals->time + 3 )
 			m_flStaminaWait = gpGlobals->time + 3;
