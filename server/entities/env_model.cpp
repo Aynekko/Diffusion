@@ -166,7 +166,7 @@ void CEnvModel::AutoSetSize(void)
 
 void CEnvModel::Think(void)
 {
-	StudioFrameAdvance(); // set m_fSequenceFinished if necessary
+	StudioFrameAdvance( 0.1f ); // set m_fSequenceFinished if necessary
 
 	if (m_fSequenceFinished && !m_fSequenceLoops)
 	{
