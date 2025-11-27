@@ -938,7 +938,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 		{
 			// ... with a knife, do a triple damage
 			// hack! we can identify the knife using the damage type
-			if( bitsDamageType & (DMG_SLASH | DMG_NEVERGIB) )
+			if( (bitsDamageType & DMG_SLASH) && (bitsDamageType & DMG_NEVERGIB) )
 				flTake *= 3.0f;
 		}
 	}
