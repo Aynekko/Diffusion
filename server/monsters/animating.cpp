@@ -53,15 +53,16 @@ void *CBaseAnimating :: GetModelPtr( int modelindex )
 //=========================================================
 float CBaseAnimating::StudioFrameAdvance( float flInterval )
 {
+	/* // diffusion - this causes monsters to stall above 1000 fps, disable
 	if( flInterval == 0.0f )
 	{
 		flInterval = gpGlobals->time - pev->animtime;
-		if( flInterval <= 0.001f )
+		if( 0 )//flInterval <= 0.001f )
 		{
 			pev->animtime = gpGlobals->time;
 			return 0.0f;
 		}
-	}
+	}*/
 
 	if( !pev->animtime )
 		flInterval = 0.0f;
