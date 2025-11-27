@@ -31,7 +31,7 @@ int grgLogoFrame[MAX_LOGO_FRAMES] =
 //===================================================================
 // diffusion - handle the "offline" HUD thingy
 //===================================================================
-#define SUIT_OFFLINE_TIME 40
+#define SUIT_OFFLINE_TIME 60 // do not spam offline from shock damage
 static void SuitIsOffline(void)
 {	
 	if( gHUD.m_Health.m_bitsDamage & 256 ) // got DMG_SHOCK
@@ -45,6 +45,10 @@ static void SuitIsOffline(void)
 
 	if( gHUD.IsDrawingOfflineHUD )
 	{
+		// possible changelevel issues? try this
+		if( gHUD.NextDrawingOfflineHUDTime > gHUD.m_flTime + SUIT_OFFLINE_TIME + 5 )
+			gHUD.NextDrawingOfflineHUDTime = gHUD.m_flTime + SUIT_OFFLINE_TIME + 5;
+
 		if( gHUD.m_flTime > gHUD.NextDrawingOfflineHUDTime - SUIT_OFFLINE_TIME - 3 )
 			gHUD.IsDrawingOfflineHUD = false;
 	}
