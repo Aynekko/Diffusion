@@ -1378,7 +1378,7 @@ void CCar::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Col
 		}
 		else if( hit_carblocker )
 		{
-			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
 			*ColPoint = trCol.vecEndPos;
 		}
 		hit_carblocker = false;
@@ -1395,7 +1395,7 @@ void CCar::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Col
 		}
 		else if( hit_carblocker )
 		{
-			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
 			*ColPoint = trCol.vecEndPos;
 		}
 		hit_carblocker = false;
@@ -1412,7 +1412,7 @@ void CCar::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Col
 		}
 		else if( hit_carblocker )
 		{
-			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
 			*ColPoint = trCol.vecEndPos;
 		}
 		hit_carblocker = false;

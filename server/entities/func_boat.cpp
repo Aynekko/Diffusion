@@ -544,7 +544,7 @@ void CBoat::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Co
 		}
 		else if( hit_carblocker )
 		{
-			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
 			*ColPoint = ColPointWRR;
 		}
 		hit_carblocker = false;
@@ -562,7 +562,7 @@ void CBoat::GetCollision( const float AbsCarSpeed, const int Forward, Vector *Co
 		}
 		else if( hit_carblocker )
 		{
-			*Collision += gpGlobals->v_forward * AbsCarSpeed * Forward;
+			*Collision += -gpGlobals->v_forward * AbsCarSpeed * Forward;
 			*ColPoint = ColPointWRL;
 		}
 		hit_carblocker = false;
