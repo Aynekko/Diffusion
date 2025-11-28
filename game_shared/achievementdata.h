@@ -49,7 +49,7 @@ const int AchievementGoals[TOTAL_ACHIEVEMENTS]
 	10000,	// ACH_BULLETSFIRED = 0,	// 0 fire # bullets
 	1000,	// ACH_JUMPS,				// 1 jump # times
 	100,	// ACH_AMMOCRATES,			// 2 find # ammo crates
-	5,		// ACH_DISARMEDMINES,		// 3 disarm # enemy mines (disarming your own doesn't count)
+	15,		// ACH_DISARMEDMINES,		// 3 disarm # enemy mines (disarming your own doesn't count)
 	666,	// ACH_KILLENEMIES,			// 4 kill # enemies
 	100000,	// ACH_INFLICTDAMAGE,		// 5 inflict a total of # damage
 	30,		// ACH_KILLENEMIESSNIPER,	// 6 kill # enemies with weapon_sniper
