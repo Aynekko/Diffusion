@@ -91,7 +91,7 @@ void CHud::GL_HUD_StartConstantSize( bool aligned_right )
 	if( fScale == 1.0f )
 		return;
 
-	int width = 1920; // for 2K and 4K
+	const int width = 2560; // for 2K and 4K
 
 	const int new_scale = ScaleWidth( width );
 
