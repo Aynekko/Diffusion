@@ -945,7 +945,10 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
 			NewCameraAngleY = CameraAngles.y;
 			NewCameraAngleX = 0;
-			AccelAddX = BrakeAddX = 0;
+			Camera2RotationX = 0;
+			Camera2RotationY = 0;
+			AccelAddX = 0;
+			BrakeAddX = 0;
 			EnteringShake = 2.0f;
 			if( pExhaust1 )
 			{
@@ -2658,10 +2661,14 @@ void CCar::Drive( void )
 			// turret moves almost freely because we use it as a camera
 			TowerAngles = hDriver->pev->v_angle;
 			TowerAngles.x *= 0.35f; // let's not get carried away...
+			Camera2RotationX = 0;
+			Camera2RotationY = 0;
 		}
 		else
 		{
 			TowerAngles.y += TankTowerRotationOffset;
+			TowerAngles.y += Camera2RotationY;
+			TowerAngles.x += Camera2RotationX;
 		}
 		
 		if( bAimingView || CamUnlocked )
@@ -2681,7 +2688,11 @@ void CCar::Drive( void )
 				RocketAng = TowerAbsAngles; // just forward
 			
 			if( !CamUnlocked )
-				RocketAng.x = RocketAng.z = 0;
+			{
+				RocketAng.z = 0;
+				if( !SecondaryCamera )
+					RocketAng.x = 0;
+			}
 
 			RocketAng.x -= 5.0f; // aim higher
 			CBaseEntity *pRocket = CBaseEntity::Create( "apc_projectile", RocketOrg, RocketAng, hDriver->edict() );
@@ -2947,8 +2958,12 @@ void CCar::Camera(void)
 		SecondaryCamera = false;
 
 	float MouseWaitON = CAR_CAMERA_MOUSE_WAIT_ON;
+	float MouseWaitOFF = CAR_CAMERA_MOUSE_WAIT_OFF;
 	if( SecondaryCamera )
-		MouseWaitON += 0.2f; // mouse less sensitive to change if in first-person
+	{
+		MouseWaitON = 0.0f;
+	//	MouseWaitOFF = 3.0f;
+	}
 
 	const float AbsCarSpeed = fabs( CarSpeed );
 	const float ChassisAngleX = pChassis->GetAbsAngles().x;
@@ -2961,26 +2976,71 @@ void CCar::Camera(void)
 	{
 		if( fMouseTouchedON < MouseWaitON )
 			fMouseTouchedON += gpGlobals->frametime;
-		
+
 		if( fMouseTouchedON >= MouseWaitON )
 		{
 			fMouseTouchedOFF = 0.0f;
-			CamUnlocked = true;
+			if( !SecondaryCamera )
+				CamUnlocked = true;
 		}
 	}
 	else
 	{
-		if( fMouseTouchedOFF < CAR_CAMERA_MOUSE_WAIT_OFF )
+		if( fMouseTouchedOFF < MouseWaitOFF )
 			fMouseTouchedOFF += gpGlobals->frametime;
 
-		if( fMouseTouchedOFF >= CAR_CAMERA_MOUSE_WAIT_OFF )
+		if( fMouseTouchedOFF >= MouseWaitOFF )
 		{
 			if( AbsCarSpeed > 200.0f )
 			{
 				fMouseTouchedON = 0.0f;
 				CamUnlocked = false;
+				Camera2RotationY = lerp( Camera2RotationY, 0.0f, 3.0f * gpGlobals->frametime );
+				Camera2RotationX = lerp( Camera2RotationX, 0.0f, 3.0f * gpGlobals->frametime );
 			}
 		}
+	}
+
+	if( SecondaryCamera ) // first person or else
+	{
+		if( hDriver->pev->v_angle != LastPlayerAngles )
+		{
+			// get player's turn angle, see if it's changed
+			float CurY = hDriver->pev->v_angle.y;
+			float LastY = LastPlayerAngles.y;
+			float CurX = hDriver->pev->v_angle.x;
+			float LastX = LastPlayerAngles.x;
+			// check the direction of the camera movement
+			bool MoveRight = (CurY > LastY);
+			bool MoveUp = (CurX > LastX);
+			float add = 0.0f;
+			if( MoveRight )
+			{
+				add = fabs( CurY - LastY ); // sometimes it equals to 359 so the check is needed
+				if( add < 180 )
+					Camera2RotationY += add;
+			}
+			else
+			{
+				add = fabs( CurY - LastY );
+				if( add < 180 )
+					Camera2RotationY -= add;
+			}
+			if( MoveUp )
+			{
+				add = fabs( CurX - LastX );
+				if( add < 180 )
+					Camera2RotationX += add;
+			}
+			else
+			{
+				add = fabs( CurX - LastX );
+				if( add < 180 )
+					Camera2RotationX -= add;
+			}
+		}
+		Camera2RotationY = bound( -100, Camera2RotationY, 100 );
+		Camera2RotationX = bound( -60, Camera2RotationX, 25 );
 	}
 
 	if( CamUnlocked )
@@ -3078,7 +3138,7 @@ void CCar::Camera(void)
 			CamOrg.x = Camera2LocalOrigin.x - BackSway;
 			CamOrg.y = Camera2LocalOrigin.y + CameraMoving;
 			pCamera2->SetLocalOrigin( CamOrg );
-			pCamera2->SetLocalAngles( Camera2LocalAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );
+			pCamera2->SetLocalAngles( Camera2LocalAngles + Vector( CameraBrakeOffsetX + Camera2RotationX, Camera2RotationY, 0 ) );
 		}
 		else if( pCamera1 )
 		{

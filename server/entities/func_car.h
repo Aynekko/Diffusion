@@ -128,6 +128,8 @@ public:
 	Vector Camera2LocalOrigin;
 	Vector Camera2LocalAngles;
 	Vector CameraAngles;
+	float Camera2RotationY; // not saved
+	float Camera2RotationX; // not saved
 	float CameraBrakeOffsetX; // not saved
 	int MaxCamera2Sway;
 	bool SecondaryCamera; // 2nd camera is active

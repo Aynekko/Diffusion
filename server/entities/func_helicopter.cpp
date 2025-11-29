@@ -1011,6 +1011,9 @@ void CHelicopter::Drive( void )
 	const bool bAimingView = (hDriver->pev->button & IN_ATTACK2);
 	if( pTankTower && bAimingView )
 	{
+		Camera2RotationX = 0;
+		Camera2RotationY = 0;
+
 		// rotate tower
 		Vector TowerAngles = ChassisAng;
 		if( pChassisMdl )
@@ -1044,6 +1047,8 @@ void CHelicopter::Drive( void )
 	{
 		Vector RocketOrg = GetAbsOrigin() + gpGlobals->v_forward * 200 - gpGlobals->v_up * 30;
 		Vector RocketAng = pChassis->GetAbsAngles();
+		RocketAng.x += Camera2RotationX;
+		RocketAng.y += Camera2RotationY;
 		CBaseEntity *pRocket = CBaseEntity::Create( "hvr_rocket", RocketOrg, RocketAng, hDriver->edict() );
 
 		if( pRocket )
