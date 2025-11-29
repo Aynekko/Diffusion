@@ -55,18 +55,18 @@ vec3 normalmap2DArray( sampler2DArray tex, const vec2 uv, const float layer )
 #if defined( NORMAL_AG_PARABOLOID )
 	N.x = 2.0 * (normalmap.a - 0.5);
 	N.y = 2.0 * (normalmap.g - 0.5);
-	N.z = 1.0 - saturate( dot( N.xy, N.xy ) );
+	N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
 #elif defined( NORMAL_RG_PARABOLOID )
 	N.x = 2.0 * (normalmap.g - 0.5);
 	N.y = 2.0 * (normalmap.r - 0.5);
-	N.z = 1.0 - saturate( dot( N.xy, N.xy ) );
+	N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
 #elif defined( NORMAL_3DC_PARABOLOID )
 	N.x = -2.0 * (normalmap.g - 0.5);
 	N.y = -2.0 * (normalmap.r - 0.5);
-	N.z = 1.0 - saturate( dot( N.xy, N.xy ) );
+	N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
 #else
 	// uncompressed normals
-	N = (2.0 * (normalmap.xyz - 0.5));
+	N = (normalmap.xyz * 255.0) / 127.0 - 1.0;
 #endif
 	N.y = -N.y; // !!!
 	N = normalize( N );
