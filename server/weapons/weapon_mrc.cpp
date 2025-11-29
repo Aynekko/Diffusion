@@ -43,7 +43,7 @@ public:
 
 LINK_ENTITY_TO_CLASS( weapon_mrc, CMRC );
 LINK_ENTITY_TO_CLASS( weapon_9mmAR, CMRC );
-
+LINK_ENTITY_TO_CLASS( weapon_mrc_locked, CMRC );
 
 //=========================================================
 //=========================================================
@@ -54,6 +54,12 @@ int CMRC::SecondaryAmmoIndex( void )
 
 void CMRC::Spawn( void )
 {
+	if( FClassnameIs( this, "weapon_mrc_locked" ) )
+	{
+		SetFlag( F_WEAPON_LOCKED );
+		SetFlag( F_BUTTON_SECRET );
+	}
+	
 	pev->classname = MAKE_STRING("weapon_9mmAR"); // hack to allow for old names
 	Precache( );
 	SET_MODEL(ENT(pev), "models/weapons/w_mrc.mdl");
@@ -97,7 +103,7 @@ int CMRC::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = g_WpnAmmo[WEAPON_MRC];
-	p->iMaxAmmo1 = _9MM_MAX_CARRY;
+	p->iMaxAmmo1 = MRC_MAX_CARRY;
 	p->pszAmmo2 = "ARgrenades";
 	p->iMaxAmmo2 = M203_GRENADE_MAX_CARRY;
 	p->iMaxClip = MRC_MAX_CLIP;
@@ -324,7 +330,7 @@ class CMRCAmmoClip : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
-		int bResult = (pOther->GiveAmmo( AMMO_MRCCLIP_GIVE, g_WpnAmmo[WEAPON_MRC], _9MM_MAX_CARRY) != -1);
+		int bResult = (pOther->GiveAmmo( AMMO_MRCCLIP_GIVE, g_WpnAmmo[WEAPON_MRC], MRC_MAX_CARRY ) != -1);
 		if (bResult)
 		{
 		//	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
@@ -355,7 +361,7 @@ class CMRCChainammo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
-		int bResult = (pOther->GiveAmmo( AMMO_CHAINBOX_GIVE, g_WpnAmmo[WEAPON_MRC], _9MM_MAX_CARRY) != -1);
+		int bResult = (pOther->GiveAmmo( AMMO_CHAINBOX_GIVE, g_WpnAmmo[WEAPON_MRC], MRC_MAX_CARRY ) != -1);
 
 		if (bResult)
 		//	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);

@@ -51,6 +51,7 @@ public:
 };
 
 LINK_ENTITY_TO_CLASS( weapon_shotgun, CShotgun );
+LINK_ENTITY_TO_CLASS( weapon_shotgun_locked, CShotgun );
 
 BEGIN_DATADESC( CShotgun )
 	DEFINE_FIELD( m_flNextReload, FIELD_TIME ),
@@ -62,6 +63,13 @@ END_DATADESC()
 void CShotgun::Spawn( void )
 {
 	Precache( );
+
+	if( FClassnameIs( this, "weapon_shotgun_locked" ) )
+	{
+		SetFlag( F_WEAPON_LOCKED );
+		SetFlag( F_BUTTON_SECRET );
+	}
+
 	m_iId = WEAPON_SHOTGUN;
 	SET_MODEL(ENT(pev), "models/weapons/w_shotgun.mdl");
 

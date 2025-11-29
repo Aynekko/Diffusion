@@ -1627,10 +1627,20 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 					SetBodygroup( GUN_GROUP, GUN_NONE );
 
 					// now spawn a gun.
-					if (HasWeapon( HGRUNT_SHOTGUN ))
-						 DropItem( "weapon_shotgun", vecGunPos, vecGunAngles );
+					if( !HasSpawnFlags( SF_MONSTER_WEAPON_LOCKED ) )
+					{
+						if( HasWeapon( HGRUNT_SHOTGUN ) )
+							DropItem( "weapon_shotgun", vecGunPos, vecGunAngles );
+						else
+							DropItem( "weapon_mrc", vecGunPos, vecGunAngles );
+					}
 					else
-						 DropItem( "weapon_9mmAR", vecGunPos, vecGunAngles );
+					{
+						if( HasWeapon( HGRUNT_SHOTGUN ) )
+							DropItem( "weapon_shotgun_locked", vecGunPos, vecGunAngles );
+						else
+							DropItem( "weapon_mrc_locked", vecGunPos, vecGunAngles );
+					}
 
 					if (HasWeapon( HGRUNT_GRENADELAUNCHER ))
 						DropItem( "ammo_ARgrenades", BodyTarget( GetAbsOrigin() ), vecGunAngles );

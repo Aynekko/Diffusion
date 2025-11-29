@@ -143,7 +143,8 @@ public:
 	virtual int GetItemInfo(ItemInfo *p) { return 0; };	// returns 0 if struct not filled out
 	virtual BOOL CanDeploy( void ) { return TRUE; };
 	virtual BOOL Deploy( ) { return TRUE; };		// returns is deploy was successful
-		 
+	void UnauthorizedUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	int ObjectCaps( void );
 
 	virtual BOOL CanHolster( void ) { return TRUE; };		// can this weapon be put away right now?
 	virtual void Holster( void );

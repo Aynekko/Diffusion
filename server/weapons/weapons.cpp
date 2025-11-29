@@ -537,6 +537,7 @@ BEGIN_DATADESC( CBasePlayerItem )
 	DEFINE_FUNCTION( Materialize ),
 	DEFINE_FUNCTION( AttemptToMaterialize ),
 	DEFINE_FUNCTION( Kill ),
+	DEFINE_FUNCTION( UnauthorizedUse ),
 END_DATADESC()
 
 BEGIN_DATADESC( CBasePlayerWeapon )
@@ -567,13 +568,38 @@ void CBasePlayerItem :: FallInit( void )
 
 	UTIL_SetSize(pev, g_vecZero, g_vecZero );//pointsize until it lands on the ground.
 	
-	SetTouch( &CBasePlayerItem::DefaultTouch );
-	SetThink(&CBasePlayerItem::FallThink );
+	if( HasFlag( F_WEAPON_LOCKED ) )
+	{
+		SetUse( &CBasePlayerItem::UnauthorizedUse );
+		ObjectCaps();
+		pev->solid = SOLID_TRIGGER;
+		UTIL_SetSize( pev, Vector( -4, -4, 0 ), Vector( 4, 4, 4 ) );
+	}
+	else
+		SetTouch( &CBasePlayerItem::DefaultTouch );
+
+	SetThink( &CBasePlayerItem::FallThink );
 
 	if( !pev->iuser4 || pev->iuser4 <= 0 )
 		SetFadeDistance( 1000 ); // diffusion - UNDONE should be a cvar?
 
 	SetNextThink( 0 );
+}
+
+void CBasePlayerItem::UnauthorizedUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+{
+	if( !pActivator || !pActivator->IsPlayer() || !pActivator->IsAlive() )
+		return;
+
+	pActivator->TakeDamage( pev, pev, 25.0f, DMG_SHOCK );
+	UTIL_ShowMessage( "UTIL_UNAUTH", pActivator );
+	UTIL_DoSpark( pev, GetAbsOrigin() );
+	// add glitch effect
+	MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pActivator->pev );
+		WRITE_BYTE( TE_PLAYER_GLITCH );
+		WRITE_BYTE( 5 ); // x0.1
+		WRITE_BYTE( 1 ); // hold 1 second
+	MESSAGE_END();
 }
 
 //=========================================================
@@ -637,6 +663,14 @@ void CBasePlayerItem::FallThink ( void )
 	}
 }
 
+int CBasePlayerItem::ObjectCaps( void )
+{
+	if( HasFlag( F_WEAPON_LOCKED ) )
+		return FCAP_IMPULSE_USE;
+
+	return 0;
+}
+
 //=========================================================
 // Materialize - make a CBasePlayerItem visible and tangible
 //=========================================================
@@ -650,10 +684,13 @@ void CBasePlayerItem::Materialize( void )
 		pev->effects |= EF_MUZZLEFLASH;
 	}
 
-	pev->solid = SOLID_TRIGGER;
+	if( !HasFlag( F_WEAPON_LOCKED ) )
+	{
+		pev->solid = SOLID_TRIGGER;
+		SetTouch( &CBasePlayerItem::DefaultTouch );
+	}
 
 	RelinkEntity( TRUE ); // link into world.
-	SetTouch (&CBasePlayerItem::DefaultTouch);
 	SetThink (NULL);
 
 	if( HasFlag( F_WEAPON_DESPAWN ) )

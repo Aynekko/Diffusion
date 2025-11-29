@@ -80,6 +80,7 @@
 #define F_PLAYER_DRONE			BIT(21) // it's a _playerdrone
 #define F_MONSTER_CAN_SEE_THROUGH BIT(22) // monsters can now see through transparent brushes, this is a workaround for mapper's purposes
 #define F_PLAYER_CONTROL BIT(23) // this entity is controlled by player (i.e. drone)
+#define F_WEAPON_LOCKED BIT(24) // unathorized weapon which zaps the grabber on use
 
 // Goes into globalvars_t.trace_flags
 #define FTRACE_SIMPLEBOX		(1<<0)	// Traceline with a simple box

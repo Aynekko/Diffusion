@@ -318,7 +318,7 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 				Ratio[WEAPON_DEAGLE] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_DEAGLE] ) ) / DEAGLE_MAX_CARRY;
 				break;
 			case WEAPON_MRC:
-				Ratio[WEAPON_MRC] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_MRC] ) ) / _9MM_MAX_CARRY;
+				Ratio[WEAPON_MRC] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_MRC] ) ) / MRC_MAX_CARRY;
 				break;
 			case WEAPON_CROSSBOW:
 				Ratio[WEAPON_CROSSBOW] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_CROSSBOW] ) ) / BOLT_MAX_CARRY;
@@ -353,7 +353,7 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 				Ratio[WEAPON_SNIPER] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_SNIPER] ) ) / SNIPER_MAX_CARRY;
 				break;
 			case WEAPON_G36C:
-				Ratio[WEAPON_G36C] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_G36C] ) ) / _9MM_MAX_CARRY;
+				Ratio[WEAPON_G36C] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_G36C] ) ) / G36C_MAX_CARRY;
 				break;
 		//	case WEAPON_RPG:
 		//		Ratio[WEAPON_RPG] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_RPG] ) ) / ROCKET_MAX_CARRY;
@@ -411,7 +411,15 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 		}
 	}
 
-	GiveDynamicAmmo( pPlayer, LowestAmmoId2, RatioAmmoId2 * 0.8f );
+	// add ratio of the first given ammo, to the next ratio, so it won't give too much
+	float newratio = (RatioAmmoId1 * 3.0f) + (RatioAmmoId2 * 0.8f);
+	if( newratio >= 0.99f )
+	{
+		PlayPickupSound( pPlayer );
+		return;
+	}
+
+	GiveDynamicAmmo( pPlayer, LowestAmmoId2, newratio );
 	if( !HasSpawnFlags( SF_DYNAMIC_RESUPPLY ) )
 	{
 		m_iCounter--;
@@ -422,7 +430,14 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 		}
 	}
 
-	GiveDynamicAmmo( pPlayer, LowestAmmoId3, RatioAmmoId3 * 0.65f );
+	newratio = (newratio * 3.0f) + (RatioAmmoId3 * 0.65f);
+	if( newratio >= 0.99f )
+	{
+		PlayPickupSound( pPlayer );
+		return;
+	}
+
+	GiveDynamicAmmo( pPlayer, LowestAmmoId3, newratio );
 	PlayPickupSound( pPlayer );
 }
 
@@ -462,9 +477,9 @@ void CAmmoCrate::GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float Curr
 		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_DEAGLE] ) ), g_WpnAmmo[WEAPON_DEAGLE], DEAGLE_MAX_CARRY, iGive );
 		break;
 	case WEAPON_MRC:
-		iGive = CalcGive( _9MM_MAX_CARRY, CurrentRatio );
-		pPlayer->GiveAmmo( iGive, g_WpnAmmo[WEAPON_MRC], _9MM_MAX_CARRY );
-		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_MRC] ) ), g_WpnAmmo[WEAPON_MRC], _9MM_MAX_CARRY, iGive );
+		iGive = CalcGive( MRC_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, g_WpnAmmo[WEAPON_MRC], MRC_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_MRC] ) ), g_WpnAmmo[WEAPON_MRC], MRC_MAX_CARRY, iGive );
 		break;
 	case WEAPON_CROSSBOW:
 		iGive = CalcGive( BOLT_MAX_CARRY, CurrentRatio );
@@ -507,9 +522,9 @@ void CAmmoCrate::GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float Curr
 		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_SHOTGUN_XM] ) ), g_WpnAmmo[WEAPON_SHOTGUN_XM], BUCKSHOT_MAX_CARRY, iGive );
 		break;
 	case WEAPON_G36C:
-		iGive = CalcGive( _9MM_MAX_CARRY, CurrentRatio );
-		pPlayer->GiveAmmo( iGive, g_WpnAmmo[WEAPON_G36C], _9MM_MAX_CARRY );
-		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_G36C] ) ), g_WpnAmmo[WEAPON_G36C], _9MM_MAX_CARRY, iGive );
+		iGive = CalcGive( G36C_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, g_WpnAmmo[WEAPON_G36C], G36C_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_G36C] ) ), g_WpnAmmo[WEAPON_G36C], G36C_MAX_CARRY, iGive );
 		break;
 	case WEAPON_RPG:
 		iGive = CalcGive( ROCKET_MAX_CARRY, CurrentRatio );

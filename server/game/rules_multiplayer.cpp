@@ -954,12 +954,12 @@ void CHalfLifeMultiplay :: PlayerSpawn( CBasePlayer *pPlayer )
 		break;
 		case 4:
 			pPlayer->GiveNamedItem("weapon_9mmAR");
-			pPlayer->GiveAmmo(MRC_DEFAULT_GIVE, g_WpnAmmo[WEAPON_MRC], _9MM_MAX_CARRY);
+			pPlayer->GiveAmmo(MRC_DEFAULT_GIVE, g_WpnAmmo[WEAPON_MRC], MRC_MAX_CARRY );
 			pPlayer->m_iBonusWeaponID = WEAPON_MRC;
 		break;
 		case 5:
 			pPlayer->GiveNamedItem( "weapon_g36c" );
-			pPlayer->GiveAmmo( G36C_DEFAULT_GIVE, g_WpnAmmo[WEAPON_G36C], _9MM_MAX_CARRY );
+			pPlayer->GiveAmmo( G36C_DEFAULT_GIVE, g_WpnAmmo[WEAPON_G36C], G36C_MAX_CARRY );
 			pPlayer->m_iBonusWeaponID = WEAPON_G36C;
 		break;
 		case 6:
