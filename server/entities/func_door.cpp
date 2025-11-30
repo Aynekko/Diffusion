@@ -991,7 +991,9 @@ void CBaseDoor::Blocked( CBaseEntity *pOther )
 
 	// if a door has a negative wait, it would never come back if blocked,
 	// so let it just squash the object to death real fast
-	if( m_flWait >= 0 )
+	// diffusion - allow special case for my rotating doors...
+	const bool bSpecialCase = (FClassnameIs( this, "func_door_rotating" ) && HasSpawnFlags( SF_DOOR_NO_AUTO_RETURN ));
+	if( m_flWait >= 0 || bSpecialCase )
 	{
 		if( !HasSpawnFlags( SF_DOOR_SILENT ))
 			STOP_SOUND( edict(), CHAN_STATIC, STRING( pev->noise1 ));
