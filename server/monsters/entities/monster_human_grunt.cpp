@@ -180,6 +180,7 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD( AndrewLastHurt, FIELD_TIME ),
 	DEFINE_FIELD( AndrewDash, FIELD_BOOLEAN ),
 	DEFINE_FIELD( AndrewDashTime, FIELD_TIME ),
+	DEFINE_FIELD( AndrewRechargeTime, FIELD_TIME ),
 	DEFINE_ARRAY( AndrewRespawnPoint, FIELD_VECTOR, MAX_ANDREW_SPAWNS ),
 	DEFINE_FIELD( AndrewSpecialMode, FIELD_BOOLEAN ),
 	DEFINE_FIELD( AndrewEscapeTime, FIELD_TIME ),
@@ -5769,7 +5770,9 @@ void CAndrewGrunt::Spawn()
 	CTalkMonster::g_talkWaitTime = 0;
 
 	CanSpawnDrone = false; // no drones
-	AndrewEscapeTime = AndrewDashTime = gpGlobals->time;
+	AndrewEscapeTime = gpGlobals->time;
+	AndrewRechargeTime = gpGlobals->time;
+	AndrewDashTime = gpGlobals->time;
 
 	CombatWaitTime = g_AndrewCombatWaitTime[g_iSkillLevel];
 
@@ -6013,6 +6016,9 @@ void CAndrewGrunt::WarpEffect( void )
 
 void CAndrewGrunt::RunAI( void )
 {
+	// force default unless overridden in special mode
+	pev->rendercolor = Vector( 255, 255, 255 );
+
 	if( !HasMemory( bits_MEMORY_KILLED ) ) // fully alive, not dying
 	{
 		float RegenRate; // added health per second
@@ -6055,7 +6061,7 @@ void CAndrewGrunt::RunAI( void )
 			if( DifficultyScaler > 0.1f )
 				DifficultyScaler -= 0.1f;
 
-			ScaleDifficultyTime = gpGlobals->time + 30;
+			ScaleDifficultyTime = gpGlobals->time + 30.0f;
 		}
 
 		if( AndrewSpecialMode )
@@ -6067,6 +6073,8 @@ void CAndrewGrunt::RunAI( void )
 			case SKILL_MEDIUM: RegenRate = 50 * DifficultyScaler; break;
 			case SKILL_HARD: RegenRate = 60 * DifficultyScaler; break;
 			}
+			if( RegenRate < 25.0f )
+				RegenRate = 25.0f;
 		}
 		else
 		{
@@ -6092,9 +6100,10 @@ void CAndrewGrunt::RunAI( void )
 			pev->sequence = 16; // loop crouching_idle
 			pev->framerate = 0.5;
 			pev->renderfx = kRenderFxGlowShell;
+			pev->rendercolor = Vector( 255, 25, 25 );
 
 			// fire the rockets
-			if( FireRocketTime > 0 && gpGlobals->time > FireRocketTime )
+			if( FireRocketTime > 0.0f && gpGlobals->time > FireRocketTime )
 			{
 				Vector vecTarget = m_hEnemy->GetAbsOrigin() + m_hEnemy->pev->velocity + m_hEnemy->pev->basevelocity;
 				// make sure player is not too close
@@ -6128,14 +6137,14 @@ void CAndrewGrunt::RunAI( void )
 						FireRocketTime = gpGlobals->time + 0.5f;
 
 						if( RocketCount >= 5 )
-							FireRocketTime = 0; // max 5 rockets
+							FireRocketTime = 0.0f; // max 5 rockets
 					}
 				}
 			}
 
 			// restored to full health, back to fight! (wth is player doing?)
 			// (or the shield is broken)
-			if( SpecialModeHealth <= 0 || pev->health >= pev->max_health )
+			if( SpecialModeHealth <= 0 || pev->health >= pev->max_health || gpGlobals->time > AndrewRechargeTime )
 				Andrew_Respawn();
 
 			return;
@@ -6269,7 +6278,7 @@ void CAndrewGrunt::HandleAnimEvent( MonsterEvent_t *pEvent )
 	{
 		Shoot();
 
-		PlayClientSound( this, 252, 0, (m_cAmmoLoaded <= 15 ? m_cAmmoLoaded : 0), Center() );
+		PlayClientSound( this, 245, 0, (m_cAmmoLoaded <= 15 ? m_cAmmoLoaded : 0), Center() );
 
 		CSoundEnt::InsertSound( bits_SOUND_COMBAT, GetAbsOrigin(), 1024, 0.3, ENTINDEX(edict()) );
 	}
@@ -6743,6 +6752,7 @@ ChooseAnEscapePoint:
 	RocketCount = 0;
 	AccumulatedDamage = 0;
 	pev->renderfx = kRenderFxGlowShell;
+	AndrewRechargeTime = gpGlobals->time + 21.0f - ((float)g_iSkillLevel * 1.5f);
 }
 
 //=================================================================================
@@ -6805,6 +6815,7 @@ ChooseAPoint:
 	FireRocketTime = 0;
 	SpecialModeHealth = 0;
 	AccumulatedDamage = 0;
+	AndrewRechargeTime = 0;
 
 	pev->rendermode = kRenderNormal;
 	pev->renderfx = 0;

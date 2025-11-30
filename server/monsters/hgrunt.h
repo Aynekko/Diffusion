@@ -119,6 +119,7 @@ public:
 	float AndrewLastHurt;
 	bool AndrewDash;
 	float AndrewDashTime;
+	float AndrewRechargeTime;
 	Vector AndrewRespawnPoint[MAX_ANDREW_SPAWNS]; // an array of origins of spawn points (collected on spawn)
 	int RespawnPoints; // total number of escape points found
 	bool AndrewSpecialMode; // in recharging mode
