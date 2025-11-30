@@ -2867,7 +2867,7 @@ void CBasePlayer::PreThink( void )
 	if( DrunkLevel > 0 )
 		pev->friction = 1.0f - (DrunkLevel * 0.1f);
 
-	if( Dashed )
+	if( Dashed && pev->flags & FL_ONGROUND )
 		pev->friction = 0.0f;
 
 	// do not interfere with player angles because they are used to catch mouse movement
