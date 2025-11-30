@@ -2680,7 +2680,7 @@ void UpdateClientData ( const struct edict_s *ent, int sendweapons, struct clien
 	cd->flSwimTime		= ent->v.flSwimTime;
 	cd->waterjumptime	= ent->v.teleport_time;
 
-	strcpy( cd->physinfo, ENGINE_GETPHYSINFO( ent ) );
+	Q_strncpy( cd->physinfo, ENGINE_GETPHYSINFO( ent ), sizeof( cd->physinfo ) );
 
 	cd->maxspeed		= ent->v.maxspeed;
 	cd->fov				= ent->v.fov;

@@ -1729,7 +1729,7 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 			if( szToken[0] == '\0' )
 				break;
 
-			strcpy( szMap, szToken );
+			Q_strncpy( szMap, szToken, sizeof( szMap ) );
 
 			// Any more tokens on this line?
 			if ( COM_TokenWaiting( pFileList ) )
@@ -1931,7 +1931,7 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 	// Has the map cycle filename changed?
 	if ( stricmp( mapcfile, szPreviousMapCycleFile ) )
 	{
-		strcpy( szPreviousMapCycleFile, mapcfile );
+		Q_strncpy( szPreviousMapCycleFile, mapcfile, sizeof( szPreviousMapCycleFile ) );
 
 		DestroyMapCycle( &mapcycle );
 

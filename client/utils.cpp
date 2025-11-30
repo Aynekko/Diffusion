@@ -1100,7 +1100,7 @@ char *ParseHudSprite( char *pfile, char *psz, client_sprite_t *result )
 			if( !Q_stricmp( token, "file" )) 
 			{                                          
 				pfile = COM_ParseFile( pfile, token );
-				Q_strcpy( tempSprite.szSprite, token );
+				Q_strncpy( tempSprite.szSprite, token, sizeof( tempSprite.szSprite ) );
 				void *testSprite;
 
 				if(( testSprite = gEngfuncs.COM_LoadFile( tempSprite.szSprite, 5, NULL )) != NULL )
@@ -1122,7 +1122,7 @@ char *ParseHudSprite( char *pfile, char *psz, client_sprite_t *result )
 			else if( !Q_stricmp( token, "name" )) 
 			{                                          
 				pfile = COM_ParseFile( pfile, token );
-				Q_strcpy( tempSprite.szName, token );
+				Q_strncpy( tempSprite.szName, token, sizeof( tempSprite.szName ) );
 			}
 			else if( !Q_stricmp( token, "x" )) 
 			{                                          

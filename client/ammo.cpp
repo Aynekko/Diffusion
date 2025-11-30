@@ -712,7 +712,7 @@ int CHudAmmo::MsgFunc_WeaponList( const char *pszName, int iSize, void *pbuf )
 	
 	WEAPON Weapon;
 
-	Q_strcpy( Weapon.szName, READ_STRING() );
+	Q_strncpy( Weapon.szName, READ_STRING(), sizeof( Weapon.szName ) );
 	Weapon.iAmmoType = (int)READ_CHAR();	
 	
 	Weapon.iMax1 = READ_BYTE();

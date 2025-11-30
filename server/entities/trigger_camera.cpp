@@ -234,7 +234,7 @@ void CTriggerCamera::Use(CBaseEntity* pActivator, CBaseEntity* pCaller, USE_TYPE
 	// now copy the name to player who's using us
 	if( pev->targetname != NULL )
 	{
-		Q_strcpy( ((CBasePlayer *)((CBaseEntity *)m_hPlayer))->CameraEntity, GetTargetname() );
+		Q_strncpy( ((CBasePlayer *)((CBaseEntity *)m_hPlayer))->CameraEntity, GetTargetname(), 128 );
 		if(HasSpawnFlags(SF_CAMERA_CINEMATICBORDER))
 			m_hPlayer->pev->effects |= EF_PLAYERUSINGCAMERA;
 	}

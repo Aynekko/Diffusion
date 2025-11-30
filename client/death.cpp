@@ -180,7 +180,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 	char killedwith[32];
 
-	Q_strcpy( killedwith, "d_" );
+	Q_strncpy( killedwith, "d_", 32 );
 	Q_strncat( killedwith, READ_STRING(), 32 );
 
 	gHUD.m_Scoreboard.DeathMsg( killer, victim );
@@ -241,7 +241,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 		rgDeathNoticeList[i].iNonPlayerKill = true;
 
 		// Store the object's name in the Victim slot (skip the d_ bit)
-		Q_strcpy( rgDeathNoticeList[i].szVictim, killedwith+2 );
+		Q_strncpy( rgDeathNoticeList[i].szVictim, killedwith+2, sizeof( rgDeathNoticeList[i].szVictim ) );
 	}
 	else
 	{
@@ -302,9 +302,9 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 
 			// replace the code names with the 'real' names
 			if( !Q_strcmp( killedwith+2, "egon" ))
-				Q_strcpy( killedwith, "d_gluon gun" );
+				Q_strncpy( killedwith, "d_gluon gun", sizeof( killedwith ) );
 			if( !Q_strcmp( killedwith+2, "gauss" ))
-				Q_strcpy( killedwith, "d_tau cannon" );
+				Q_strncpy( killedwith, "d_tau cannon", sizeof( killedwith ) );
 
 			ConsolePrint( killedwith+2 ); // skip over the "d_" part
 		}

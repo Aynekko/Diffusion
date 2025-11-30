@@ -2401,8 +2401,8 @@ void CBasePlayer::UpdateStatusBar()
 	char TmpText[32];
 
 	memset( newSBarState, 0, sizeof(newSBarState) );
-	strcpy( sbuf0, m_SbarString0 );
-	strcpy( sbuf1, m_SbarString1 );
+	Q_strncpy( sbuf0, m_SbarString0, SBAR_STRING_SIZE );
+	Q_strncpy( sbuf1, m_SbarString1, SBAR_STRING_SIZE );
 
 	// Find an ID Target
 	TraceResult tr;
@@ -2521,7 +2521,7 @@ void CBasePlayer::UpdateStatusBar()
 					if( pEntity->Classify() == CLASS_PLAYER )
 					{
 						newSBarState[SBAR_ID_TARGETNAME] = ENTINDEX( pEntity->edict() );
-						strcpy( sbuf1, "1 %p1\n2 Health: %i2%%\n3 Armor: %i3%%" );
+						Q_strncpy( sbuf1, "1 %p1\n2 Health: %i2%%\n3 Armor: %i3%%", SBAR_STRING_SIZE );
 
 						// allies and medics get to see the targets health
 						if( g_pGameRules->PlayerRelationship( this, pEntity ) == GR_TEAMMATE )
@@ -2568,7 +2568,7 @@ void CBasePlayer::UpdateStatusBar()
 			WRITE_STRING( sbuf0 );
 		MESSAGE_END();
 
-		strcpy( m_SbarString0, sbuf0 );
+		Q_strncpy( m_SbarString0, sbuf0, SBAR_STRING_SIZE );
 
 		// make sure everything's resent
 		bForceResend = TRUE;
@@ -2581,7 +2581,7 @@ void CBasePlayer::UpdateStatusBar()
 			WRITE_STRING( sbuf1 );
 		MESSAGE_END();
 
-		strcpy( m_SbarString1, sbuf1 );
+		Q_strncpy( m_SbarString1, sbuf1, SBAR_STRING_SIZE );
 
 		// make sure everything's resent
 		bForceResend = TRUE;

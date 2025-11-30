@@ -1530,7 +1530,7 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 		const char *pTextureName = TRACE_TEXTURE( pWorld, Tex_vecStart, Tex_vecEnd );
 		if( pTextureName )
 		{
-			strcpy( szBuffer, pTextureName );
+			Q_strncpy( szBuffer, pTextureName, sizeof( szBuffer ) );
 			chTextureType = TEXTURETYPE_Find( szBuffer );
 			switch( chTextureType )
 			{

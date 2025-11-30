@@ -1969,7 +1969,7 @@ void CStudioModelRenderer::LoadStudioMaterials( void )
 		if( anim_id >= 0 )
 		{
 			pmaterial->anim_framerate = tr.animation[anim_id].framerate;
-			Q_strcpy( pmaterial->anim_starttex, tr.animation[anim_id].start_tex );
+			Q_strncpy( pmaterial->anim_starttex, tr.animation[anim_id].start_tex, sizeof( pmaterial->anim_starttex ) );
 		}
 
 		// precache as many shaders as possible

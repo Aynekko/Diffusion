@@ -476,7 +476,7 @@ void ParseRainFile( void )
 	char token[64];
 	char *afile, *pfile;
 
-	Q_strcpy( mapname, gEngfuncs.pfnGetLevelName( ));
+	Q_strncpy( mapname, gEngfuncs.pfnGetLevelName(), sizeof( mapname ) );
 	if( !Q_strlen( mapname ))
 	{
 		ALERT( at_error, "rain: unable to read map name\n");

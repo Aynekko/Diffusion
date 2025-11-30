@@ -280,7 +280,7 @@ void PM_InitTextureTypes()
 		// null-terminate name and save in sentences array
 		j = min (j, CBTEXTURENAMEMAX - 1 + i);
 		buffer[j] = 0;
-		Q_strcpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]));
+		Q_strcpy( &(grgszTextureName[gcTextures++][0]), &(buffer[i]) );
 //		pmove->Con_Printf( "%c %s\n", grgchTextureType[gcTextures-1], grgszTextureName[gcTextures-1] );
 	}
 	
@@ -816,7 +816,7 @@ CategorizeContinue:
 		pTextureName++;
 	// '}}'
 	
-	Q_strcpy( pmove->sztexturename, pTextureName);
+	Q_strncpy( pmove->sztexturename, pTextureName, sizeof( pmove->sztexturename ) );
 	pmove->sztexturename[ CBTEXTURENAMEMAX - 1 ] = 0;
 		
 	// get texture type

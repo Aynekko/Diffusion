@@ -1182,7 +1182,7 @@ BOOL CBasePlayerWeapon :: DefaultDeploy( const char *szViewModel, const char *sz
 	m_pPlayer->pev->viewmodel = MAKE_STRING(szViewModel);
 	m_pPlayer->pev->weaponmodel = MAKE_STRING(szWeaponModel);
 	if( szAnimExt ) // diffusion - this could cause crash
-		strcpy( m_pPlayer->m_szAnimExtention, szAnimExt );
+		Q_strncpy( m_pPlayer->m_szAnimExtention, szAnimExt, sizeof( m_pPlayer->m_szAnimExtention ) );
 	else
 		ALERT(at_warning, "DefaultDeploy: Got 0 at m_szAnimExtention for \"%s\"!\n", szViewModel);
 

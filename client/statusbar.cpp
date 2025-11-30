@@ -147,7 +147,7 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 							}
 							else
 							{
-								Q_strcpy( szRepString, "******" );
+								Q_strncpy( szRepString, "******", sizeof( szRepString ) );
 							}
 							break;
 						case 'i': 

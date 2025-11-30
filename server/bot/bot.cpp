@@ -711,7 +711,7 @@ void CBot::Spawn( )
 	bot_respawn[respawn_index].pBot = (CBasePlayer *)this;
 
 	// get the bot's name and save it in respawn array...
-	strcpy(bot_respawn[respawn_index].name, STRING(pev->netname));
+	Q_strncpy(bot_respawn[respawn_index].name, STRING(pev->netname), sizeof( bot_respawn[respawn_index].name ) );
 
 	bot_respawn[respawn_index].state = BOT_IDLE;
 
@@ -861,11 +861,11 @@ int CBot::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker,
 			f_pain_time = gpGlobals->time + 5.0;
 
 			if (bot_model == MODEL_HGRUNT)
-			   strcpy( sound, hgrunt_sounds[RANDOM_LONG(0,4)] );
+			   Q_strncpy( sound, hgrunt_sounds[RANDOM_LONG(0,4)], sizeof( sound ) );
 			else if (bot_model == MODEL_BARNEY)
-			   strcpy( sound, barney_sounds[RANDOM_LONG(0,4)] );
+			   Q_strncpy( sound, barney_sounds[RANDOM_LONG(0,4)], sizeof( sound ) );
 			else if (bot_model == MODEL_SCIENTIST)
-			   strcpy( sound, scientist_sounds[RANDOM_LONG(0,4)] );
+			   Q_strncpy( sound, scientist_sounds[RANDOM_LONG(0,4)], sizeof( sound ) );
 
 			EMIT_SOUND(ENT(pevAttacker), CHAN_VOICE, sound,
 					   RANDOM_FLOAT(0.9, 1.0), ATTN_NORM);
@@ -1165,7 +1165,7 @@ void CBot::BotFindItem( void )
    {
 	  can_pickup = FALSE;  // assume can't use it until known otherwise
 
-	  strcpy(item_name, STRING(pEntity->pev->classname));
+	  Q_strncpy(item_name, STRING(pEntity->pev->classname), sizeof( item_name ) );
 
 	  // see if this is a "func_" type of entity (func_button, etc.)...
 	  if (strncmp("func_", item_name, 5) == 0)

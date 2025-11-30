@@ -199,5 +199,5 @@ void CUseIcon::EnableIcon( int UsePressed )
 	if( !m_UseIcon.spr )
 		return;
 	m_UseIcon.rc = gHUD.GetSpriteRect( UseIconSprite );
-	Q_strcpy( m_UseIcon.szSpriteName, pszIconName );
+	Q_strncpy( m_UseIcon.szSpriteName, pszIconName, sizeof( m_UseIcon.szSpriteName ) );
 }

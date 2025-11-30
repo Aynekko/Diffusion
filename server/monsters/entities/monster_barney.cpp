@@ -760,7 +760,7 @@ int CBarney :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 					if (m_iszSpeakAs)
 					{
 						char szBuf[32];
-						strcpy(szBuf,STRING(m_iszSpeakAs));
+						Q_strncpy(szBuf,STRING(m_iszSpeakAs), sizeof( szBuf ));
 						strcat(szBuf,"_MAD");
 						PlaySentence( szBuf, 4, VOL_NORM, ATTN_NORM );
 					}
@@ -779,7 +779,7 @@ int CBarney :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 					if (m_iszSpeakAs)
 					{
 						char szBuf[32];
-						strcpy(szBuf,STRING(m_iszSpeakAs));
+						Q_strncpy(szBuf,STRING(m_iszSpeakAs), sizeof( szBuf ) );
 						strcat(szBuf,"_SHOT");
 						PlaySentence( szBuf, 4, VOL_NORM, ATTN_NORM );
 					}
@@ -796,7 +796,7 @@ int CBarney :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 				if (m_iszSpeakAs)
 				{
 					char szBuf[32];
-					strcpy(szBuf,STRING(m_iszSpeakAs));
+					Q_strncpy(szBuf,STRING(m_iszSpeakAs), sizeof( szBuf ) );
 					strcat(szBuf,"_SHOT");
 					PlaySentence( szBuf, 4, VOL_NORM, ATTN_NORM );
 				}
@@ -1604,7 +1604,7 @@ Schedule_t *CAlice :: GetSchedule ( void )
 		if (m_iszSpeakAs)
 		{
 			char szBuf[32];
-			strcpy(szBuf,STRING(m_iszSpeakAs));
+			Q_strncpy(szBuf,STRING(m_iszSpeakAs), sizeof( szBuf ) );
 			strcat(szBuf,"_KILL");
 			PlaySentence( szBuf, 4, VOL_NORM, ATTN_NORM );
 		}
