@@ -668,7 +668,7 @@ int CBasePlayerItem::ObjectCaps( void )
 	if( HasFlag( F_WEAPON_LOCKED ) )
 		return FCAP_IMPULSE_USE;
 
-	return 0;
+	return FCAP_ACROSS_TRANSITION;
 }
 
 //=========================================================
