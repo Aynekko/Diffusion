@@ -923,6 +923,7 @@ public:
 	int hptex;
 	int hptex2;
 	bool bCentered;
+	bool bForced;
 	void DrawCentralBar( void );
 	char MonsterName[256]; // for central bar only
 	int health_center; // for center bar

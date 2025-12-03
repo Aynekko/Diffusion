@@ -772,6 +772,7 @@ public:
 
 	bool EnableHealthBar; // monsters set this to "true" but you can also set it to breakables
 	int HealthBarType;
+	bool bForceHealthbar;
 
 	bool PlayerCarDmgOverride; // diffusion - reject all damage when in car but accept it from the car
 

@@ -132,6 +132,11 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 		}
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "forcehealthbar" ) )
+	{
+		bForceHealthbar = (Q_atoi( pkvd->szValue ) > 0);
+		pkvd->fHandled = TRUE;
+	}
 	else if( FStrEq( pkvd->szKeyName, "FireOnRespawn" ) )
 	{
 		m_iszFireOnRespawn = ALLOC_STRING( pkvd->szValue );

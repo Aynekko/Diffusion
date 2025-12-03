@@ -644,7 +644,7 @@ public:
 	bool InCar; // true if driving car
 	void ManageCar( void ); // post-think function managing the active car
 
-	int healthbarscache[3];
+	int healthbarscache[4];
 
 	bool LoudWeaponsRestricted;
 	void FireLoudWeaponRestrictionEntity( void );

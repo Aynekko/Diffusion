@@ -47,6 +47,7 @@ int CHealthbars::MsgFunc_Healthbars( const char *pszName, int iSize, void *pbuf 
 	health = READ_BYTE(); // % - bounded at 200 on server
 	barsize = READ_BYTE();
 	entindex = READ_SHORT();
+	bForced = (READ_BYTE() > 0);
 
 	END_READ();
 
@@ -57,6 +58,9 @@ int CHealthbars::MsgFunc_Healthbars( const char *pszName, int iSize, void *pbuf 
 	}
 	else
 		bCentered = false;
+
+	if( entindex == 0 )
+		bForced = false;
 
 	return 1;
 }
@@ -150,10 +154,7 @@ int CHealthbars::Draw( float flTime )
 
 	DrawCentralBar(); // it is drawn regardless of healthbars cvar
 	
-	if( !cl_showhealthbars->value )
-		return 1;
-	
-	if( entindex == 0 )
+	if( !cl_showhealthbars->value && !bForced )
 		return 1;
 
 	if( CVAR_TO_BOOL( ui_is_active ) )
@@ -162,10 +163,12 @@ int CHealthbars::Draw( float flTime )
 	if( CL_IsDead() )
 	{
 		entindex = 0;
+		bForced = false;
 		return 1;
 	}
 
-	Vector screen;
+	if( entindex == 0 )
+		return 1;
 
 	cl_entity_t *ent = GET_ENTITY( entindex );
 	if( !ent )
@@ -188,6 +191,7 @@ int CHealthbars::Draw( float flTime )
 			return 1;
 	}
 
+	Vector screen;
 	R_WorldToScreen( org, screen );
 	const int x = XPROJECT( screen[0] );
 	const int y = YPROJECT( screen[1] );

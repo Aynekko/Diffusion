@@ -61,6 +61,7 @@ public:
 	bool m_iEnemy; // diffusion - make them aware about the player and hunt him
 	int m_HealthBar;
 	int m_HealthBarType;
+	int m_bForceHealthbar;
 	bool m_bWakeUp; // start monster AI
 	int m_iLightLerp; // enable or disable light lerp on model
 };
@@ -89,6 +90,7 @@ BEGIN_DATADESC(CEnvCustomize)
 	DEFINE_KEYFIELD(m_iEnemy, FIELD_BOOLEAN, "m_iEnemy"),
 	DEFINE_KEYFIELD(m_HealthBar, FIELD_INTEGER, "m_HealthBar" ),
 	DEFINE_KEYFIELD( m_HealthBarType, FIELD_INTEGER, "m_HealthBarType" ),
+	DEFINE_KEYFIELD( m_bForceHealthbar, FIELD_INTEGER, "m_bForceHealthbar" ),
 	DEFINE_KEYFIELD( m_bWakeUp, FIELD_BOOLEAN, "m_bWakeUp" ),
 	DEFINE_KEYFIELD( m_iLightLerp, FIELD_INTEGER, "m_iLightLerp" ),
 	DEFINE_KEYFIELD( m_iNoDamage, FIELD_INTEGER, "m_iNoDamage" ),
@@ -204,6 +206,11 @@ void CEnvCustomize::KeyValue(KeyValueData* pkvd)
 	else if( FStrEq( pkvd->szKeyName, "m_HealthBarType" ) )
 	{
 		m_HealthBarType = Q_atoi( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "m_bForceHealthbar" ) )
+	{
+		m_bForceHealthbar = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "m_bWakeUp" ) )
@@ -413,6 +420,12 @@ void CEnvCustomize::Affect(CBaseEntity* pTarget, USE_TYPE useType)
 
 		if( pev->spawnflags & SF_CUSTOM_DEBUG )
 			ALERT( at_console, " HealthBarType=%d", m_HealthBarType );
+	}
+	if( m_bForceHealthbar > 0 )
+	{
+		pMonster->bForceHealthbar = (m_bForceHealthbar == 1) ? true : false;
+		if( HasSpawnFlags( SF_CUSTOM_DEBUG ) )
+			ALERT( at_console, " Force healthbar=%d", (int)pMonster->bForceHealthbar );
 	}
 	if (m_voicePitch > 0)
 	{

@@ -2412,7 +2412,7 @@ void CBasePlayer::UpdateStatusBar()
 	if( currentfov == 0.0f )
 		currentfov = 80;
 
-	float fov_mult = 80 / currentfov;
+	float fov_mult = 80.0f / currentfov;
 
 	UTIL_MakeVectors( pev->v_angle + pev->punchangle );
 	Vector vecSrc = EyePosition();
@@ -2420,7 +2420,7 @@ void CBasePlayer::UpdateStatusBar()
 
 	UTIL_TraceLine( vecSrc, vecEnd, dont_ignore_monsters, edict(), &tr);
 
-	int healthbarsnewvalues[3];
+	int healthbarsnewvalues[4];
 	memset( healthbarsnewvalues, 0, sizeof( healthbarsnewvalues ) );
 
 	if( sv_allowhealthbars.value > 0 )
@@ -2443,6 +2443,7 @@ void CBasePlayer::UpdateStatusBar()
 							healthbarsnewvalues[0] = 100 * (pMonster->pev->health / pMonster->pev->max_health);
 							healthbarsnewvalues[1] = pMonster->HealthBarType;
 							healthbarsnewvalues[2] = pMonster->entindex();
+							healthbarsnewvalues[3] = pMonster->bForceHealthbar;
 						}
 						else
 							memset( healthbarsnewvalues, 0, sizeof( healthbarsnewvalues ) );
@@ -2455,6 +2456,7 @@ void CBasePlayer::UpdateStatusBar()
 							healthbarsnewvalues[0] = 100 * (pEntity->pev->health / pEntity->pev->max_health);
 							healthbarsnewvalues[1] = pEntity->HealthBarType;
 							healthbarsnewvalues[2] = pEntity->entindex();
+							healthbarsnewvalues[3] = pEntity->bForceHealthbar;
 						}
 						else
 							memset( healthbarsnewvalues, 0, sizeof( healthbarsnewvalues ) );
@@ -2466,6 +2468,7 @@ void CBasePlayer::UpdateStatusBar()
 							healthbarsnewvalues[0] = 100 * (pEntity->pev->health / pEntity->pev->max_health);
 							healthbarsnewvalues[1] = pEntity->HealthBarType;
 							healthbarsnewvalues[2] = pEntity->entindex();
+							healthbarsnewvalues[3] = pEntity->bForceHealthbar;
 						}
 						else
 							memset( healthbarsnewvalues, 0, sizeof( healthbarsnewvalues ) );
@@ -2478,21 +2481,15 @@ void CBasePlayer::UpdateStatusBar()
 				healthbarsnewvalues[0] = healthbarscache[0];
 				healthbarsnewvalues[1] = healthbarscache[1];
 				healthbarsnewvalues[2] = healthbarscache[2];
+				healthbarsnewvalues[3] = healthbarscache[3];
 			}
 		}
 	}
 
 	// Check values and send if they don't match
 	bool ResendHealthbar = false;
-
-	for( int n = 0; n < 3; n++ )
-	{
-		if( healthbarsnewvalues[n] != healthbarscache[n] )
-		{
-			ResendHealthbar = true;
-			break;
-		}
-	}
+	if( memcmp( healthbarsnewvalues, healthbarscache, 4 ) )
+		ResendHealthbar = true;
 
 	if( ResendHealthbar )
 	{
@@ -2500,11 +2497,13 @@ void CBasePlayer::UpdateStatusBar()
 			WRITE_BYTE( bound( 0, healthbarsnewvalues[0], 200) ); // hp in percents
 			WRITE_BYTE( healthbarsnewvalues[1] ); // bar size (0-2)
 			WRITE_SHORT( healthbarsnewvalues[2] ); // entindex
+			WRITE_BYTE( healthbarsnewvalues[3] ); // force healthbar?
 		MESSAGE_END();
 
 		healthbarscache[0] = healthbarsnewvalues[0];
 		healthbarscache[1] = healthbarsnewvalues[1];
 		healthbarscache[2] = healthbarsnewvalues[2];
+		healthbarscache[3] = healthbarsnewvalues[3];
 	}
 
 	// original hl stuff
