@@ -323,7 +323,7 @@ void V_Init( void )
 	cl_weaponlag = CVAR_REGISTER( "cl_weaponlag", "0.3", FCVAR_ARCHIVE );
 	cl_hitsound = CVAR_REGISTER( "cl_hitsound", "0", FCVAR_ARCHIVE );
 	cl_achievement_notify = CVAR_REGISTER( "cl_achievement_notify", "1", FCVAR_ARCHIVE );
-	cl_showhealthbars = CVAR_REGISTER( "cl_showhealthbars", "1", FCVAR_ARCHIVE );
+	cl_showhealthbars = CVAR_REGISTER( "cl_showhealthbars", "0", FCVAR_ARCHIVE );
 	cl_localweaponanims = CVAR_REGISTER( "cl_localweaponanims", "0", FCVAR_ARCHIVE );
 	cl_subtitles = CVAR_REGISTER( "cl_subtitles", "1", FCVAR_ARCHIVE );
 	cl_muzzlelight = CVAR_REGISTER( "cl_muzzlelight", "1", FCVAR_ARCHIVE );
