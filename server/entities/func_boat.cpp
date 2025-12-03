@@ -321,6 +321,8 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
 			NewCameraAngleY = CameraAngles.y;
 			NewCameraAngleX = 0;
+			CameraModeAddDist_Free = 100.0f;
+			CameraModeAddDist_Main = 50.0f;
 
 			MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, hDriver->pev );
 				WRITE_BYTE( TE_CARPARAMS );

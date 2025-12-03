@@ -323,6 +323,8 @@ void CHelicopter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
 			NewCameraAngleY = CameraAngles.y;
 			NewCameraAngleX = 0;
+			CameraModeAddDist_Free = 100.0f;
+			CameraModeAddDist_Main = 50.0f;
 
 			SetNextThink( 0 );
 		}

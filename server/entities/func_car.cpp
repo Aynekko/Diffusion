@@ -950,6 +950,8 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			AccelAddX = 0;
 			BrakeAddX = 0;
 			EnteringShake = 2.0f;
+			CameraModeAddDist_Free = 100.0f;
+			CameraModeAddDist_Main = 50.0f;
 			if( pExhaust1 )
 			{
 				pExhaust1->pev->iuser3 = -665;
