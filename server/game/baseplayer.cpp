@@ -6328,7 +6328,20 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 	if( g_flWeaponCheat == 0.0 )
 		return;
 	else
+	{
+		if( !bCheatsWereUsed )
+		{
+			if( !g_pGameRules->IsMultiplayer() && (int)CVAR_GET_FLOAT( "developer" ) < 2 )
+			{
+				MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, edict() );
+				WRITE_BYTE( 0 );
+				WRITE_STRING( "HINT_CHEATS" );
+				MESSAGE_END();
+			}
+		}
+
 		bCheatsWereUsed = true;
+	}
 
 	CBaseEntity *pEntity;
 	TraceResult tr;
