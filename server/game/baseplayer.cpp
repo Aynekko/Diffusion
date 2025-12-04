@@ -7153,13 +7153,13 @@ void CBasePlayer :: UpdateClientData( void )
 			if ( pEntity )
 				damageOrigin = pEntity->Center();
 		}
-
+		
 		// only send down damage type that have hud art
 		int visibleDamageBits = m_bitsDamageType & DMG_SHOWNHUD;
 
 		// diffusion - I think we need bounds for this, cause write_byte?
-		int dmgTake = bound( 0, pev->dmg_take, 255 );
-		int dmgSave = bound( 0, pev->dmg_save, 255 );
+		int dmgTake = bound( 1, pev->dmg_take, 255 );
+		int dmgSave = bound( 1, pev->dmg_save, 255 );
 
 		// Send this player's damage to all his specators
 		CBasePlayer* plr;
