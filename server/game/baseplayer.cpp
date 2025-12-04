@@ -821,6 +821,9 @@ skip_shield:
 	else if( bitsDamage & DMG_DROWN )
 	{
 		// instead of punchangle, player will get a blue screenfade
+		// and disable gibbing from drowning
+		bitsDamage &= ~DMG_ALWAYSGIB;
+		bitsDamage |= DMG_NEVERGIB;
 	}
 	else
 	{
