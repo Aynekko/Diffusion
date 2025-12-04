@@ -7157,9 +7157,14 @@ void CBasePlayer :: UpdateClientData( void )
 		// only send down damage type that have hud art
 		int visibleDamageBits = m_bitsDamageType & DMG_SHOWNHUD;
 
+		// byte issues, can't send damage less than 1
+		if( pev->dmg_take > 0.0f && pev->dmg_take < 1.0f )
+			pev->dmg_take = 1.0f;
+		if( pev->dmg_save > 0.0f && pev->dmg_save < 1.0f )
+			pev->dmg_save = 1.0f;
 		// diffusion - I think we need bounds for this, cause write_byte?
-		int dmgTake = bound( 1, pev->dmg_take, 255 );
-		int dmgSave = bound( 1, pev->dmg_save, 255 );
+		int dmgTake = bound( 0, pev->dmg_take, 255 );
+		int dmgSave = bound( 0, pev->dmg_save, 255 );
 
 		// Send this player's damage to all his specators
 		CBasePlayer* plr;
@@ -7187,7 +7192,7 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_COORD( damageOrigin.y );
 			WRITE_COORD( damageOrigin.z );
 		MESSAGE_END();
-	
+		ALERT( at_console, "pev->dmg_take %.2f pev->dmg_save %.2f\n", pev->dmg_take, pev->dmg_save );
 		pev->dmg_take = 0;
 		pev->dmg_save = 0;
 		m_bitsHUDDamage = m_bitsDamageType;
