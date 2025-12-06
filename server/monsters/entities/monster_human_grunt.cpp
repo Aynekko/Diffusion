@@ -2473,7 +2473,9 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 							return GetScheduleOfType( SCHED_RANGE_ATTACK2 );
 					}
 
-					if( m_hEnemy 
+					bool ChooseRun = (RANDOM_LONG( 0, 100 ) > 65);
+					if( m_hEnemy
+						&& ChooseRun
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
 						&& !HasConditions( bits_COND_LOW_HEALTH )
 						&& !HasConditions( bits_COND_ENEMY_TOOCLOSE )
@@ -2594,7 +2596,9 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 						//JustSpoke();
 					}
 
+					bool ChooseRun = (RANDOM_LONG( 0, 100 ) > 65);
 					if( m_hEnemy
+						&& ChooseRun
 						&& pev->health > HGRUNT_LIMP_HEALTH
 						&& !HasConditions( bits_COND_LOW_HEALTH )
 						&& !HasConditions( bits_COND_ENEMY_TOOCLOSE )
@@ -3625,7 +3629,9 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 							return GetScheduleOfType( SCHED_RANGE_ATTACK2 );
 					}
 
+					bool ChooseRun = (RANDOM_LONG( 0, 100 ) > 65);
 					if( m_hEnemy
+						&& ChooseRun
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
 						&& !HasConditions( bits_COND_LOW_HEALTH )
 						&& !HasConditions( bits_COND_ENEMY_TOOCLOSE )
@@ -3742,7 +3748,9 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 						//JustSpoke();
 					}
 					
+					bool ChooseRun = (RANDOM_LONG( 0, 100 ) > 65);
 					if( m_hEnemy
+						&& ChooseRun
 						&& pev->health > HGRUNT_LIMP_HEALTH
 						&& !HasConditions( bits_COND_LOW_HEALTH )
 						&& !HasConditions( bits_COND_ENEMY_TOOCLOSE )

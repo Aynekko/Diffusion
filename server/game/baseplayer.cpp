@@ -7192,7 +7192,7 @@ void CBasePlayer :: UpdateClientData( void )
 			WRITE_COORD( damageOrigin.y );
 			WRITE_COORD( damageOrigin.z );
 		MESSAGE_END();
-		ALERT( at_console, "pev->dmg_take %.2f pev->dmg_save %.2f\n", pev->dmg_take, pev->dmg_save );
+
 		pev->dmg_take = 0;
 		pev->dmg_save = 0;
 		m_bitsHUDDamage = m_bitsDamageType;
