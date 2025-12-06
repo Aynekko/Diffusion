@@ -44,6 +44,7 @@ public:
 	void MakerThink ( void );
 	void DeathNotice ( entvars_t *pevChild );// monster maker children use this to tell the monster maker that they have died.
 	void MakeMonster( void );
+	float GetMakerDelay( void );
 
 	DECLARE_DATADESC();
 	
@@ -55,11 +56,18 @@ public:
 	float	m_flGround; // z coord of the ground under me, used to make sure no monsters are under the maker when it drops a new child
 	BOOL	m_fActive;
 	BOOL	m_fFadeChildren;// should we make the children fadeout?
+
+	float m_flDelayEasy;
+	float m_flDelayMedium;
+	float m_flDelayHard;
 };
 
 LINK_ENTITY_TO_CLASS( monstermaker, CMonsterMaker );
 
 BEGIN_DATADESC( CMonsterMaker )
+	DEFINE_KEYFIELD( m_flDelayEasy, FIELD_FLOAT, "delayeasy" ),
+	DEFINE_KEYFIELD( m_flDelayMedium, FIELD_FLOAT, "delaymedium" ),
+	DEFINE_KEYFIELD( m_flDelayHard, FIELD_FLOAT, "delayhard" ),
 	DEFINE_KEYFIELD( m_iszMonsterClassname, FIELD_STRING, "monstertype" ),
 	DEFINE_KEYFIELD( m_cNumMonsters, FIELD_INTEGER, "monstercount" ),
 	DEFINE_FIELD( m_cLiveChildren, FIELD_INTEGER ),
@@ -74,7 +82,6 @@ END_DATADESC()
 
 void CMonsterMaker :: KeyValue( KeyValueData *pkvd )
 {
-	
 	if ( FStrEq(pkvd->szKeyName, "monstercount") )
 	{
 		m_cNumMonsters = Q_atoi(pkvd->szValue);
@@ -90,10 +97,50 @@ void CMonsterMaker :: KeyValue( KeyValueData *pkvd )
 		m_iszMonsterClassname = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
+	else if( FStrEq( pkvd->szKeyName, "delayeasy" ) )
+	{
+		m_flDelayEasy = Q_atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "delaymedium" ) )
+	{
+		m_flDelayMedium = Q_atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
+	else if( FStrEq( pkvd->szKeyName, "delayhard" ) )
+	{
+		m_flDelayHard = Q_atof( pkvd->szValue );
+		pkvd->fHandled = TRUE;
+	}
 	else
 		BaseClass::KeyValue( pkvd );
 }
 
+//=============================================================================
+// GetDelay: custom delay support for different skill levels
+//=============================================================================
+float CMonsterMaker::GetMakerDelay( void )
+{
+	float delay = m_flDelay;
+
+	switch( g_iSkillLevel )
+	{
+	case SKILL_EASY:
+		if( m_flDelayEasy > 0.0f )
+			delay = m_flDelayEasy;
+		break;
+	case SKILL_MEDIUM:
+		if( m_flDelayMedium > 0.0f )
+			delay = m_flDelayMedium;
+		break;
+	case SKILL_HARD:
+		if( m_flDelayHard > 0.0f )
+			delay = m_flDelayHard;
+		break;
+	}
+
+	return delay;
+}
 
 void CMonsterMaker :: Spawn( )
 {
@@ -140,7 +187,7 @@ void CMonsterMaker :: Spawn( )
 
 	m_flGround = 0;
 
-	SetNextThink( m_flDelay );
+	SetNextThink( GetMakerDelay() );
 }
 
 void CMonsterMaker :: Precache( void )
@@ -278,7 +325,7 @@ void CMonsterMaker :: ToggleUse ( CBaseEntity *pActivator, CBaseEntity *pCaller,
 //=========================================================
 void CMonsterMaker :: MakerThink ( void )
 {
-	SetNextThink(m_flDelay);
+	SetNextThink( GetMakerDelay() );
 
 	MakeMonster();
 }
@@ -297,7 +344,7 @@ void CMonsterMaker :: DeathNotice ( entvars_t *pevChild )
 	}
 
 	if( m_iMaxLiveChildren == 1 )
-		SetNextThink( m_flDelay );
+		SetNextThink( GetMakerDelay() );
 }
 
 

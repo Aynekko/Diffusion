@@ -5009,7 +5009,7 @@ void CBasePlayer::Dash(void)
 			Dash_OnGround						&&
 			!Dash_IsDucking						&&
 			(!Dashed)							&&
-			(m_flStaminaValue >= 5.0f)			&&
+			(m_flStaminaValue >= 1.0f)			&&
 			(pev->velocity.Length2D() > 100)	&&
 			(gpGlobals->time > LastDashTime + 1)&&
 			( (pev->button & IN_MOVELEFT) || (pev->button & IN_MOVERIGHT) || (pev->button & IN_BACK) || (pev->button & IN_FORWARD) )

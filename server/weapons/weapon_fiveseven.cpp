@@ -47,7 +47,7 @@ void CWpnFiveSeven::Spawn( )
 	m_iId = WEAPON_FIVESEVEN;
 	SET_MODEL( edict(), "models/weapons/w_fiveseven.mdl" );
 
-	m_iDefaultAmmo = FIVESEVEN_MAX_CLIP * 2; // 2 rounds
+	m_iDefaultAmmo = FIVESEVEN_DEFAULT_GIVE;
 	m_iDefaultAmmo2 = 0;
 
 	FallInit();// get ready to fall down.
