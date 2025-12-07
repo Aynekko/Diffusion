@@ -2473,7 +2473,7 @@ Schedule_t *CHGrunt :: GetSchedule( void )
 							return GetScheduleOfType( SCHED_RANGE_ATTACK2 );
 					}
 
-					bool ChooseRun = (RANDOM_LONG( 0, 100 ) > 65);
+					bool ChooseRun = (RANDOM_LONG( 0, 100 ) > 80);
 					if( m_hEnemy
 						&& ChooseRun
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
@@ -3629,7 +3629,7 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 							return GetScheduleOfType( SCHED_RANGE_ATTACK2 );
 					}
 
-					bool ChooseRun = (RANDOM_LONG( 0, 100 ) > 65);
+					bool ChooseRun = (RANDOM_LONG( 0, 100 ) > 80);
 					if( m_hEnemy
 						&& ChooseRun
 						&& (m_hEnemy->pev->movetype != MOVETYPE_FLY)
