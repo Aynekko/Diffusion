@@ -155,7 +155,7 @@ int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion )
 		return FALSE;
 	}
 
-	if( !CVAR_GET_POINTER( "host_gameloaded" ) || g_iXashEngineBuildNumber < 4140 )
+	if( !CVAR_GET_POINTER( "host_gameloaded" ) )
 	{
 		// Tell engine what version we had, so it can figure out who is out of date.
 		*interfaceVersion = INTERFACE_VERSION;
