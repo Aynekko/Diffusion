@@ -18,60 +18,51 @@ vec4 colormap2DArray( sampler2DArray tex, vec2 uv, float layer )
 }
 #endif
 
-// get support for various normalmap encode
 vec3 normalmap2D( sampler2D tex, const vec2 uv )
 {
-	vec4 normalmap = texture2D( tex, uv );
-	vec3 N;
+    vec4 normalmap = texture2D( tex, uv );
+    vec3 N;
 
 #if defined( NORMAL_AG_PARABOLOID )
-	N.x = 2.0 * (normalmap.a - 0.5);
-	N.y = 2.0 * (normalmap.g - 0.5);
-	N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
+    N.xy = normalmap.ag * 2.0 - vec2(1.0);
+    N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
 #elif defined( NORMAL_RG_PARABOLOID )
-	N.x = 2.0 * (normalmap.g - 0.5);
-	N.y = 2.0 * (normalmap.r - 0.5);
-	N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
+    N.xy = normalmap.rg * 2.0 - vec2(1.0);
+    N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
 #elif defined( NORMAL_3DC_PARABOLOID )
-	N.x = -2.0 * (normalmap.g - 0.5);
-	N.y = -2.0 * (normalmap.r - 0.5);
-	N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
+    N.xy = normalmap.ra * 2.0 - vec2(1.0);
+    N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
 #else
-	// uncompressed normals
-	N = (normalmap.xyz * 255.0) / 127.0 - 1.0;
+    // uncompressed normals
+    N = normalmap.xyz * 2.0 - vec3(1.0);
 #endif
-	N.y = -N.y; // !!!
-	N = normalize( N );
+    N = normalize( N );
 
-	return N;
+    return N;
 }
 
 #if defined( GLSL_ALLOW_TEXTURE_ARRAY )
 vec3 normalmap2DArray( sampler2DArray tex, const vec2 uv, const float layer )
 {
-	vec4 normalmap = texture2DArray( tex, vec3( uv, layer ) );
-	vec3 N;
+    vec4 normalmap = texture2DArray( tex, vec3( uv, layer ) );
+    vec3 N;
 
 #if defined( NORMAL_AG_PARABOLOID )
-	N.x = 2.0 * (normalmap.a - 0.5);
-	N.y = 2.0 * (normalmap.g - 0.5);
-	N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
+    N.xy = normalmap.ag * 2.0 - vec2(1.0);
+    N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
 #elif defined( NORMAL_RG_PARABOLOID )
-	N.x = 2.0 * (normalmap.g - 0.5);
-	N.y = 2.0 * (normalmap.r - 0.5);
-	N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
+    N.xy = normalmap.rg * 2.0 - vec2(1.0);
+    N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
 #elif defined( NORMAL_3DC_PARABOLOID )
-	N.x = -2.0 * (normalmap.g - 0.5);
-	N.y = -2.0 * (normalmap.r - 0.5);
-	N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
+    N.xy = normalmap.ra * 2.0 - vec2(1.0);
+    N.z = sqrt( 1.0 - saturate( dot( N.xy, N.xy ) ) );
 #else
-	// uncompressed normals
-	N = (normalmap.xyz * 255.0) / 127.0 - 1.0;
+    // uncompressed normals
+    N = normalmap.xyz * 2.0 - vec3(1.0);
 #endif
-	N.y = -N.y; // !!!
-	N = normalize( N );
+    N = normalize( N );
 
-	return N;
+    return N;
 }
 #endif
 
