@@ -184,6 +184,16 @@ void CShock::Touch(CBaseEntity *pOther)
 
 	UTIL_Sparks( vecOrg );
 
+	// do radius damage first
+	entvars_t *pevOwner;
+	if( pev->owner )
+		pevOwner = VARS( pev->owner );
+	else
+		pevOwner = NULL;
+
+	//	pev->owner = NULL; // can't traceline attack owner if this is set
+	RadiusDamage( GetAbsOrigin(), pev, pevOwner, 3, 150, m_iClass, DMG_SHOCK );
+
 	CBaseMonster* pMonster = pOther->MyMonsterPointer();
 
 	if (pOther->pev->takedamage )
@@ -216,15 +226,6 @@ void CShock::Touch(CBaseEntity *pOther)
 		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/shock_impact_heavy.wav", VOL_NORM, ATTN_NORM, 0, RANDOM_LONG(75,100));
 	else
 		EMIT_SOUND_DYN(ENT(pev), CHAN_WEAPON, "weapons/shock_impact_light.wav", 0.5, ATTN_NORM, 0, RANDOM_LONG(95,115));
-
-	entvars_t *pevOwner;
-	if ( pev->owner )
-		pevOwner = VARS( pev->owner );
-	else
-		pevOwner = NULL;
-
-//	pev->owner = NULL; // can't traceline attack owner if this is set
-	RadiusDamage( GetAbsOrigin(), pev, pevOwner, 3, 150, m_iClass, DMG_SHOCK );
 
 	pev->modelindex = 0;
 	pev->solid = SOLID_NOT;
