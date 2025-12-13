@@ -5523,7 +5523,7 @@ void CBasePlayer::RenewItems(void)
 
 void CBasePlayer::UpdateHoldableItem( void )
 {
-	if (m_pHoldableItem == NULL )
+	if( m_pHoldableItem == NULL )
 		return;
 
 	// diffusion - without this, it is possible to "prop-fly" on a holdable item, standing on top of it and jumping
@@ -5564,6 +5564,13 @@ void CBasePlayer::UpdateHoldableItem( void )
 	Vector newOrigin = tr.vecEndPos;
 
 	UTIL_SetOrigin( m_pHoldableItem, newOrigin );
+
+	if( m_pHoldableItem == NULL )
+	{
+		// LOOK INTO THIS! Must check entity pointer after SetOrigin?
+		// otherwise game crashes if holdable turret dies via trigger_hurt
+		return;
+	}
 
 	// diffusion - need to check if we can actually see the item, otherwise it will go through walls
 	TraceResult trCheckSight;
@@ -5706,12 +5713,12 @@ void CBasePlayer::DropHoldableItem( int Velocity )
 	if( Velocity < 0 )
 		Velocity = 0;
 	
-	CBaseEntity *pObject = m_pHoldableItem;
-	m_pHoldableItem = NULL;
+	if( !m_pHoldableItem )
+		return;
 
-	pObject->RestoreMoveType();
-	pObject->ClearGroundEntity ();
-	pObject->m_fPicked = FALSE;
+	m_pHoldableItem->RestoreMoveType();
+	m_pHoldableItem->ClearGroundEntity ();
+	m_pHoldableItem->m_fPicked = FALSE;
 
 	m_iHideHUD &= ~HIDEHUD_WPNS_HOLDABLEITEM;
 	HideWeapons( FALSE );
@@ -5721,20 +5728,22 @@ void CBasePlayer::DropHoldableItem( int Velocity )
 		Vector angThrow = pev->v_angle;
 		UTIL_MakeVectors( angThrow );
 		Vector vecThrow = gpGlobals->v_forward * Velocity + GetAbsVelocity();
-		pObject->SetAbsVelocity( vecThrow );
+		m_pHoldableItem->SetAbsVelocity( vecThrow );
 	}
 
-	pObject->SetBaseVelocity( GetBaseVelocity() );	// in case player is standing on the conveyor belt
+	m_pHoldableItem->SetBaseVelocity( GetBaseVelocity() );	// in case player is standing on the conveyor belt
 
-	if( pObject->m_iActorType == ACTOR_DYNAMIC )
+	if( m_pHoldableItem->m_iActorType == ACTOR_DYNAMIC )
 	{
-		WorldPhysic->MakeKinematic( pObject, FALSE );
-		WorldPhysic->AddForce( pObject, GetAbsVelocity() * 3000.0f );
+		WorldPhysic->MakeKinematic( m_pHoldableItem, FALSE );
+		WorldPhysic->AddForce( m_pHoldableItem, GetAbsVelocity() * 3000.0f );
 	}
 
 	RemoveFlag( F_PLAYER_HASITEM );
 
-	pObject->OnDropObject();
+	m_pHoldableItem->OnDropObject();
+
+	m_pHoldableItem = NULL;
 }
 
 int CBasePlayer::Restore( CRestore &restore )
