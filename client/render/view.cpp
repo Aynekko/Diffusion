@@ -142,7 +142,6 @@ cvar_t *cl_viewmodel_offset_y;
 cvar_t *cl_viewmodel_offset_z;
 cvar_t *cl_tutor;
 cvar_t *cl_showhealthbars;
-cvar_t *cl_showdamage;
 cvar_t *cl_largehud;
 cvar_t *cl_centerhud;
 cvar_t *gl_sunshafts;
@@ -338,7 +337,6 @@ void V_Init( void )
 	r_show_tbn = CVAR_REGISTER( "r_show_tbn", "0", 0 );
 	cl_crosshair = CVAR_REGISTER( "cl_crosshair", "1", FCVAR_ARCHIVE );
 	cl_useicon = CVAR_REGISTER( "cl_useicon", "1", FCVAR_ARCHIVE );
-	cl_showdamage = CVAR_REGISTER( "cl_showdamage", "1", FCVAR_ARCHIVE );
 	cl_oldammohud = CVAR_REGISTER( "cl_oldammohud", "0", FCVAR_ARCHIVE ); // Camblu request
 	cl_largehud = CVAR_REGISTER( "cl_largehud", "2", FCVAR_ARCHIVE );
 	cl_centerhud = CVAR_REGISTER( "cl_centerhud", "0", FCVAR_ARCHIVE );

@@ -272,7 +272,7 @@ int CHudCrosshairStatic::DrawCrosshairs( float flTime )
 			}
 
 			// also draw the amount of damage
-			if( DamageDealt > 0 && cl_showdamage->value > 0 )
+			if( DamageDealt > 0 )
 			{
 				static int width = 0;
 				if( DamageDealt != TempDamageDealt )
