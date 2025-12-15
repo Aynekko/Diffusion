@@ -1297,8 +1297,8 @@ Schedule_t* CBaseMonster :: GetScheduleOfType ( int Type )
 		}
 	case SCHED_DIE:
 		{
-		//	UTIL_SetSize(pev, g_vecZero, g_vecZero ); // diffusion - by Ku2zoff
-			pev->solid = SOLID_NOT; // this works for now...
+			UTIL_SetSize(pev, g_vecZero, g_vecZero ); // diffusion - by Ku2zoff
+		//	pev->solid = SOLID_NOT; // this works for now...
 			return &slDie[ 0 ];
 		}
 	case SCHED_TAKE_COVER_FROM_ORIGIN:
