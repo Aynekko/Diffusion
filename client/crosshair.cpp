@@ -180,10 +180,13 @@ int CHudCrosshairStatic::MsgFunc_CrosshairStatic( const char *pszName, int iSize
 		m_iFlags |= HUD_ACTIVE;
 		if( ConfirmedHit > 0 )
 		{
-			EnableHitMarker = true;
-			HMTransparency = 255;
+			if( cl_hitmarker->value > 0 )
+			{
+				EnableHitMarker = true;
+				HMTransparency = 255;
+			}
 			// play hitmarker sound, if set
-			if( CVAR_TO_BOOL(cl_hitsound) )
+			if( cl_hitmarker->value > 1 )
 			{
 				switch( ConfirmedHit )
 				{

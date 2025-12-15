@@ -129,7 +129,7 @@ cvar_t *r_show_cubemaps;
 cvar_t *r_bloom_sprites;
 cvar_t *r_bloom;
 cvar_t *thirdperson;
-cvar_t *cl_hitsound;
+cvar_t *cl_hitmarker;
 cvar_t *cl_muzzlelight;
 cvar_t *cl_localweaponanims;
 cvar_t *cl_achievement_notify;
@@ -321,7 +321,7 @@ void V_Init( void )
 	cl_waterdist = CVAR_REGISTER( "cl_waterdist", "4", 0 );
 	cl_chasedist = CVAR_REGISTER( "cl_chasedist", "112", 0 );
 	cl_weaponlag = CVAR_REGISTER( "cl_weaponlag", "0.3", FCVAR_ARCHIVE );
-	cl_hitsound = CVAR_REGISTER( "cl_hitsound", "0", FCVAR_ARCHIVE );
+	cl_hitmarker = CVAR_REGISTER( "cl_hitmarker", "1", FCVAR_ARCHIVE );
 	cl_achievement_notify = CVAR_REGISTER( "cl_achievement_notify", "1", FCVAR_ARCHIVE );
 	cl_showhealthbars = CVAR_REGISTER( "cl_showhealthbars", "0", FCVAR_ARCHIVE );
 	cl_localweaponanims = CVAR_REGISTER( "cl_localweaponanims", "0", FCVAR_ARCHIVE );
