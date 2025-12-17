@@ -2760,7 +2760,7 @@ Schedule_t* CHGrunt :: GetScheduleOfType ( int Type )
 		}
 	case SCHED_GRUNT_SUPPRESS:
 		{
-			if ( m_hEnemy->IsPlayer() && m_fFirstEncounter )
+			if( 0 )// ( m_hEnemy->IsPlayer() && m_fFirstEncounter )
 			{
 				m_fFirstEncounter = FALSE;// after first encounter, leader won't issue handsigns anymore when he has a new enemy
 				if( SquadCount() <= 1 ) // the grunt is alone
@@ -3906,7 +3906,7 @@ Schedule_t* CHGruntAlien :: GetScheduleOfType ( int Type )
 		}
 	case SCHED_GRUNT_SUPPRESS:
 		{
-			if ( m_hEnemy->IsPlayer() && m_fFirstEncounter )
+			if( 0 )// ( m_hEnemy->IsPlayer() && m_fFirstEncounter )
 			{
 				m_fFirstEncounter = FALSE;// after first encounter, leader won't issue handsigns anymore when he has a new enemy
 				if( SquadCount() <= 1 ) // the grunt is alone
@@ -5346,7 +5346,7 @@ Schedule_t* CHGruntSecurityGeneral::GetScheduleOfType(int Type)
 	}
 	case SCHED_GRUNT_SUPPRESS:
 	{
-		if (m_hEnemy->IsPlayer() && m_fFirstEncounter)
+		if( 0 )// (m_hEnemy->IsPlayer() && m_fFirstEncounter)
 		{
 			m_fFirstEncounter = FALSE;// after first encounter, leader won't issue handsigns anymore when he has a new enemy
 			if( SquadCount() <= 1 ) // the grunt is alone
@@ -6641,7 +6641,7 @@ Schedule_t *CAndrewGrunt::GetScheduleOfType( int Type )
 	}
 	case SCHED_GRUNT_SUPPRESS:
 	{
-		if( m_hEnemy->IsPlayer() && m_fFirstEncounter )
+		if( 0 )//m_hEnemy->IsPlayer() && m_fFirstEncounter )
 		{
 			m_fFirstEncounter = FALSE;// after first encounter, leader won't issue handsigns anymore when he has a new enemy
 			if( SquadCount() <= 1 ) // the grunt is alone
