@@ -359,7 +359,6 @@ void KeyUp( kbutton_t *b )
 	if( !( b->state & BUTTON_DOWN )) return;// still up (this should not happen)
 
 	b->state &= ~BUTTON_DOWN;	// now up
-	b->state &= ~IMPULSE_DOWN;	// diffusion - fix: the button was still down for 3 more frames, now it's up for sure
 	b->state |= IMPULSE_UP;	// impulse up
 }
 
@@ -666,7 +665,7 @@ int CL_ButtonBits( int bResetState )
 	{
 		bits |= IN_DUCK;
 	}
- 
+
 	if( (in_jump.state & (BUTTON_DOWN|IMPULSE_DOWN)) )
 	{
 		if( !(gHUD.m_PseudoGUI.m_iFlags & HUD_ACTIVE) && gHUD.CanJump ) // make sure we are not viewing a note
