@@ -906,7 +906,7 @@ void CStudioModelRenderer::UploadBufferBase( vbomesh_t *pOut, svert_t *arrayxver
 	pglVertexAttribPointerARB( ATTR_INDEX_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v0_t ), (void *)offsetof( svert_v0_t, vertex ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION );
 
-	pglVertexAttribPointerARB( ATTR_INDEX_TEXCOORD0, 2, GL_HALF_FLOAT_ARB, GL_FALSE, sizeof( svert_v0_t ), (void *)offsetof( svert_v0_t, stcoord ) );
+	pglVertexAttribPointerARB( ATTR_INDEX_TEXCOORD0, 2, GL_FLOAT, GL_FALSE, sizeof( svert_v0_t ), (void *)offsetof( svert_v0_t, stcoord ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_TEXCOORD0 );
 
 	pglVertexAttribPointerARB( ATTR_INDEX_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v0_t ), (void *)offsetof( svert_v0_t, normal ) );
@@ -965,7 +965,7 @@ void CStudioModelRenderer::UploadBufferVLight( vbomesh_t *pOut, svert_t *arrayxv
 	pglVertexAttribPointerARB( ATTR_INDEX_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v1_t ), (void *)offsetof( svert_v1_t, vertex ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION );
 
-	pglVertexAttribPointerARB( ATTR_INDEX_TEXCOORD0, 2, GL_HALF_FLOAT_ARB, GL_FALSE, sizeof( svert_v1_t ), (void *)offsetof( svert_v1_t, stcoord ) );
+	pglVertexAttribPointerARB( ATTR_INDEX_TEXCOORD0, 2, GL_FLOAT, GL_FALSE, sizeof( svert_v1_t ), (void *)offsetof( svert_v1_t, stcoord ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_TEXCOORD0 );
 
 	pglVertexAttribPointerARB( ATTR_INDEX_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v1_t ), (void *)offsetof( svert_v1_t, normal ) );
@@ -1027,7 +1027,7 @@ void CStudioModelRenderer::UploadBufferWeight( vbomesh_t *pOut, svert_t *arrayxv
 	pglVertexAttribPointerARB( ATTR_INDEX_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v2_t ), (void *)offsetof( svert_v2_t, vertex ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION );
 
-	pglVertexAttribPointerARB( ATTR_INDEX_TEXCOORD0, 2, GL_HALF_FLOAT_ARB, GL_FALSE, sizeof( svert_v2_t ), (void *)offsetof( svert_v2_t, stcoord ) );
+	pglVertexAttribPointerARB( ATTR_INDEX_TEXCOORD0, 2, GL_FLOAT, GL_FALSE, sizeof( svert_v2_t ), (void *)offsetof( svert_v2_t, stcoord ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_TEXCOORD0 );
 
 	pglVertexAttribPointerARB( ATTR_INDEX_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v2_t ), (void *)offsetof( svert_v2_t, normal ) );
@@ -1086,10 +1086,17 @@ void CStudioModelRenderer::UploadBufferGeneric( vbomesh_t *pOut, svert_t *arrayx
 		arraysvert[i].weight[1] = arrayxvert[i].weight[1];
 		arraysvert[i].weight[2] = arrayxvert[i].weight[2];
 		arraysvert[i].weight[3] = arrayxvert[i].weight[3];
-		arraysvert[i].light[0] = arrayxvert[i].light[0];
-		arraysvert[i].light[1] = arrayxvert[i].light[1];
-		arraysvert[i].light[2] = arrayxvert[i].light[2];
-		arraysvert[i].light[3] = arrayxvert[i].light[3];
+		if( vertex_light )
+		{
+			arraysvert[i].light[0] = arrayxvert[i].light[0];
+			arraysvert[i].light[1] = arrayxvert[i].light[1];
+			arraysvert[i].light[2] = arrayxvert[i].light[2];
+			arraysvert[i].light[3] = arrayxvert[i].light[3];
+			arraysvert[i].deluxe[0] = arrayxvert[i].deluxe[0];
+			arraysvert[i].deluxe[1] = arrayxvert[i].deluxe[1];
+			arraysvert[i].deluxe[2] = arrayxvert[i].deluxe[2];
+			arraysvert[i].deluxe[3] = arrayxvert[i].deluxe[3];
+		}
 	}
 
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, pOut->vbo );
@@ -1098,7 +1105,7 @@ void CStudioModelRenderer::UploadBufferGeneric( vbomesh_t *pOut, svert_t *arrayx
 	pglVertexAttribPointerARB( ATTR_INDEX_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v3_t ), (void *)offsetof( svert_v3_t, vertex ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_POSITION );
 
-	pglVertexAttribPointerARB( ATTR_INDEX_TEXCOORD0, 2, GL_HALF_FLOAT_ARB, GL_FALSE, sizeof( svert_v3_t ), (void *)offsetof( svert_v3_t, stcoord ) );
+	pglVertexAttribPointerARB( ATTR_INDEX_TEXCOORD0, 2, GL_FLOAT, GL_FALSE, sizeof( svert_v3_t ), (void *)offsetof( svert_v3_t, stcoord ) );
 	pglEnableVertexAttribArrayARB( ATTR_INDEX_TEXCOORD0 );
 
 	pglVertexAttribPointerARB( ATTR_INDEX_NORMAL, 3, GL_FLOAT, GL_FALSE, sizeof( svert_v3_t ), (void *)offsetof( svert_v3_t, normal ) );
@@ -1120,6 +1127,9 @@ void CStudioModelRenderer::UploadBufferGeneric( vbomesh_t *pOut, svert_t *arrayx
 	{
 		pglVertexAttribPointerARB( ATTR_INDEX_LIGHT_COLOR, 4, GL_FLOAT, GL_FALSE, sizeof( svert_v3_t ), (void *)offsetof( svert_v3_t, light ) );
 		pglEnableVertexAttribArrayARB( ATTR_INDEX_LIGHT_COLOR );
+
+		pglVertexAttribPointerARB( ATTR_INDEX_LIGHT_VECS, 4, GL_FLOAT, GL_FALSE, sizeof( svert_v3_t ), (void *)offsetof( svert_v3_t, deluxe ) );
+		pglEnableVertexAttribArrayARB( ATTR_INDEX_LIGHT_VECS );
 	}
 
 	pOut->cacheSize = pOut->numVerts * sizeof( svert_v3_t );
@@ -1277,18 +1287,18 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 			if( FBitSet( ptexture->flags, STUDIO_NF_CHROME ) )
 			{
 				// probably always equal 64 (see studiomdl.c for details)
-				m_arrayxvert[m_nNumArrayVerts].stcoord[0] = FloatToHalf( s );
-				m_arrayxvert[m_nNumArrayVerts].stcoord[1] = FloatToHalf( t );
+				m_arrayxvert[m_nNumArrayVerts].stcoord[0] = float( s );
+				m_arrayxvert[m_nNumArrayVerts].stcoord[1] = float( t );
 			}
 			else if( FBitSet( ptexture->flags, STUDIO_NF_UV_COORDS ) )
 			{
-				m_arrayxvert[m_nNumArrayVerts].stcoord[0] = ptricmds[2];
-				m_arrayxvert[m_nNumArrayVerts].stcoord[1] = ptricmds[3];
+				m_arrayxvert[m_nNumArrayVerts].stcoord[0] = HalfToFloat( ptricmds[2] );
+				m_arrayxvert[m_nNumArrayVerts].stcoord[1] = HalfToFloat( ptricmds[3] );
 			}
 			else
 			{
-				m_arrayxvert[m_nNumArrayVerts].stcoord[0] = FloatToHalf( ptricmds[2] * s );
-				m_arrayxvert[m_nNumArrayVerts].stcoord[1] = FloatToHalf( ptricmds[3] * t );
+				m_arrayxvert[m_nNumArrayVerts].stcoord[0] = float( ptricmds[2] * s );
+				m_arrayxvert[m_nNumArrayVerts].stcoord[1] = float( ptricmds[3] * t );
 			}
 
 			if( m_pRenderModel->poseToBone != NULL && has_boneweights )

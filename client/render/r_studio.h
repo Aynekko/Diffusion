@@ -146,7 +146,7 @@ typedef struct
 	Vector		normal;			// normal
 	Vector		tangent;			// tangent
 	Vector		binormal;			// binormal
-	short		stcoord[2];		// ST texture coords
+	float		stcoord[2];		// ST texture coords
 	char		boneid[4];		// control bones
 } svert_v0_t;
 
@@ -157,7 +157,7 @@ typedef struct
 	Vector		normal;			// normal
 	Vector		tangent;			// tangent
 	Vector		binormal;			// binormal
-	short		stcoord[2];		// ST texture coords
+	float		stcoord[2];		// ST texture coords
 	float		light[MAXLIGHTMAPS];	// packed color
 	float		deluxe[MAXLIGHTMAPS];	// packed color
 } svert_v1_t;
@@ -169,7 +169,7 @@ typedef struct
 	Vector		normal;			// normal
 	Vector		tangent;			// tangent
 	Vector		binormal;			// binormal
-	short		stcoord[2];		// ST texture coords
+	float		stcoord[2];		// ST texture coords
 	char		boneid[4];		// control bones
 	byte		weight[4];		// boneweights
 } svert_v2_t;
@@ -181,10 +181,11 @@ typedef struct
 	Vector		normal;			// normal
 	Vector		tangent;			// tangent
 	Vector		binormal;			// binormal
-	short		stcoord[2];		// ST texture coords
+	float		stcoord[2];		// ST texture coords
 	char		boneid[4];		// control bones		
 	byte		weight[4];		// boneweights
 	float		light[MAXLIGHTMAPS];	// packed color
+	float		deluxe[MAXLIGHTMAPS];	// packed color
 } svert_v3_t;
 #pragma pack()
 
