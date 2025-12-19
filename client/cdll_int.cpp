@@ -333,7 +333,7 @@ int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 			// if it's a number key, but not a slot command, fallback to typing the number anyway
 			if( Q_strncmp( pszCurrentBinding, "slot", 4 ) )
 			{
-				gHUD.DrumsInput( keynum - K_NUM0 );
+				gHUD.m_CodeInput.EnterCode( keynum - K_NUM0 );
 				return 1;
 			}
 		}
@@ -345,7 +345,7 @@ int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 			// if it's a number key, but not a slot command, fallback to typing the number anyway
 			if( Q_strncmp( pszCurrentBinding, "slot", 4 ) )
 			{
-				gHUD.m_CodeInput.EnterCode( keynum - K_NUM0 );
+				gHUD.DrumsInput( keynum - K_NUM0 );
 				return 1;
 			}
 		}
