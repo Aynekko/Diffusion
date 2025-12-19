@@ -651,9 +651,14 @@ skip_shield:
 
 	if( flDamage > 15 ) // diffusion
 	{
-		if( !(bitsDamageType & DMG_EMP) )
-			UTIL_ScreenFade( this, Vector( 128, 0, 0 ), 2, 0, 150, FFADE_IN );
-		// also monochrome effect is applied on client
+		if( gpGlobals->time > m_flNextRedScreenFromDamage )
+		{
+			if( !(bitsDamageType & DMG_EMP) )
+			{
+				UTIL_ScreenFade( this, Vector( 128, 0, 0 ), 2, 0, 150, FFADE_IN );
+				m_flNextRedScreenFromDamage = gpGlobals->time + 5.0f;
+			}
+		}
 	}
 
 	// keep track of amount of damage last sustained
@@ -5511,6 +5516,8 @@ void CBasePlayer :: Precache( void )
 		m_fInitHUD = TRUE;
 
 	BhopEnabled = false;
+
+	m_flNextRedScreenFromDamage = 0.0f;
 }
 
 //

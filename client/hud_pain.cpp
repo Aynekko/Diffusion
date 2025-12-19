@@ -136,9 +136,6 @@ int CHudHealth:: MsgFunc_Damage(const char *pszName,  int iSize, void *pbuf )
 	{
 		if( damageTaken > 25 )
 			ApplyGaussBlur = true;
-
-		if( !(bitsDamage & DMG_EMP) && damageTaken > 15 )
-			ApplyDamageMonochrome = true;
 	}
 
 	return 1;

@@ -660,6 +660,8 @@ public:
 
 	EHANDLE m_hKiller;
 	float fLerpToKiller;
+
+	float m_flNextRedScreenFromDamage; // not saved
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

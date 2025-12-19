@@ -61,7 +61,6 @@ void AngleMatrix( const Vector &angles, matrix3x4 &matrix )
 #define TARGET_SIZE512	512
 
 bool ApplyGaussBlur = false;
-bool ApplyDamageMonochrome = false;
 static int ScreenWaterTexture = 0;
 static int ScreenAO = 0;
 static int LuminanceTex = 0;
@@ -814,38 +813,10 @@ void Monochrome( void )
 {
 	const float MonochromeState = gEngfuncs.GetLocalPlayer()->curstate.vuser1.z;
 
-	static float DmgMonochrome = 0.0f;
-	static float DmgMonochromeTime = 0.0f;
 	float CurrentMonochrome = 0.0f;
 
-	if( ApplyDamageMonochrome )
-	{
-		DmgMonochrome = 1.0f;
-		DmgMonochromeTime = tr.time;
-		ApplyDamageMonochrome = false;
-	}
-
-	if( DmgMonochromeTime > tr.time )
-	{
-		DmgMonochromeTime = 0;
-		DmgMonochrome = 0;
-	}
-
 	if( MonochromeState > 0.0f ) // user plays in monochrome, so only use this
-	{
 		CurrentMonochrome = MonochromeState;
-		DmgMonochromeTime = 0;
-		DmgMonochrome = 0;
-	}
-	else // no permanent monochrome. so only enable it when player was damaged
-	{
-		if( DmgMonochrome > 0.0f && DmgMonochrome <= 1.0f )
-		{
-			if( tr.time > DmgMonochromeTime + 1.5 )
-				DmgMonochrome -= 0.5 * g_fFrametime;
-			CurrentMonochrome = DmgMonochrome;
-		}
-	}
 	
 	// apply monochrome anyway if near death, but only when not in camera, and only if has suit
 	if( gHUD.HasWeapon( WEAPON_SUIT ) 
