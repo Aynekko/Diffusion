@@ -272,48 +272,17 @@ bool CFrustum :: CullBox( const Vector &mins, const Vector &maxs, int userClipFl
 
 	for( int i = 0; i < FRUSTUM_PLANES; i++ )
 	{
-		if( !FBitSet( iClipFlags, BIT( i )))
+		if( !(iClipFlags & BIT( i )) )
 			continue;
 
 		const mplane_t *p = &planes[i];
 
-		switch( p->signbits )
-		{
-		case 0:
-			if( p->normal.x * maxs.x + p->normal.y * maxs.y + p->normal.z * maxs.z < p->dist )
-				return true;
-			break;
-		case 1:
-			if( p->normal.x * mins.x + p->normal.y * maxs.y + p->normal.z * maxs.z < p->dist )
-				return true;
-			break;
-		case 2:
-			if( p->normal.x * maxs.x + p->normal.y * mins.y + p->normal.z * maxs.z < p->dist )
-				return true;
-			break;
-		case 3:
-			if( p->normal.x * mins.x + p->normal.y * mins.y + p->normal.z * maxs.z < p->dist )
-				return true;
-			break;
-		case 4:
-			if( p->normal.x * maxs.x + p->normal.y * maxs.y + p->normal.z * mins.z < p->dist )
-				return true;
-			break;
-		case 5:
-			if( p->normal.x * mins.x + p->normal.y * maxs.y + p->normal.z * mins.z < p->dist )
-				return true;
-			break;
-		case 6:
-			if( p->normal.x * maxs.x + p->normal.y * mins.y + p->normal.z * mins.z < p->dist)
-				return true;
-			break;
-		case 7:
-			if( p->normal.x * mins.x + p->normal.y * mins.y + p->normal.z * mins.z < p->dist )
-				return true;
-			break;
-		default:
-			return false;
-		}
+		float x = (p->signbits & 1) ? mins.x : maxs.x;
+		float y = (p->signbits & 2) ? mins.y : maxs.y;
+		float z = (p->signbits & 4) ? mins.z : maxs.z;
+
+		if( p->normal.x * x + p->normal.y * y + p->normal.z * z < p->dist )
+			return true;
 	}
 
 	return false;
