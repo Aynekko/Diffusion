@@ -3531,18 +3531,20 @@ void R_MarkLeaves( void )
 	RI->visframecount++;
 
 	const int stack = glState.stack_position;
+	const byte *visbytes = RI->visbytes;
+	const int framecount = RI->visframecount;
 
 	// skip leaf 0 (outside leaf)
 	for( int i = 1; i < world->numleafs - 1; i++ )
 	{
-		if( CHECKVISBIT( RI->visbytes, i ) )
+		if( visbytes[i >> 3] & (1 << (i & 7)) )
 		{
-			node = (mworldnode_t *)&world->leafs[i + 1];
+			node = (mworldnode_t *)&world->leafs[i];
 			do
 			{
-				if( node->visframe[stack] == RI->visframecount )
+				if( node->visframe[stack] == framecount )
 					break;
-				node->visframe[stack] = RI->visframecount;
+				node->visframe[stack] = framecount;
 				node = node->parent;
 			} while( node );
 		}
