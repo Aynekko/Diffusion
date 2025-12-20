@@ -1335,10 +1335,10 @@ void SV_CheckWaterTransition( CBaseEntity *pEntity )
 
 	if( cont > CONTENTS_WATER || cont <= CONTENTS_TRANSLUCENT )
 	{
-		if( pEntity->pev->watertype != CONTENTS_EMPTY )
-		{
-			EMIT_SOUND( pEntity->edict(), CHAN_BODY, "footsteps/wade2.wav", 1.0f, ATTN_NORM );
-		}
+	//	if( pEntity->pev->watertype != CONTENTS_EMPTY )
+	//	{
+	//		EMIT_SOUND( pEntity->edict(), CHAN_BODY, "footsteps/wade2.wav", 1.0f, ATTN_NORM );
+	//	}
 
 		pEntity->pev->watertype = CONTENTS_EMPTY;
 		pEntity->pev->waterlevel = 0;
@@ -1347,7 +1347,7 @@ void SV_CheckWaterTransition( CBaseEntity *pEntity )
 
 	if( pEntity->pev->watertype == CONTENTS_EMPTY )
 	{
-		EMIT_SOUND( pEntity->edict(), CHAN_BODY, "footsteps/wade1.wav", 1.0f, ATTN_NORM );
+	//	EMIT_SOUND( pEntity->edict(), CHAN_BODY, "footsteps/wade1.wav", 1.0f, ATTN_NORM );
 		Vector vecAbsVelocity = pEntity->GetAbsVelocity();
 		vecAbsVelocity.z *= 0.5f; // cut speed for floatables
 		pEntity->SetAbsVelocity( vecAbsVelocity );
