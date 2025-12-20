@@ -5417,6 +5417,27 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	Vector cubemap_params[3];
 	Vector4D studio_params[3];
 	Vector4D studio_lighting[2];
+	Vector meshparams[3];
+
+	// constants
+	// view origin + realtime
+	studio_params[0] = Vector4D( tr.modelorg.x, tr.modelorg.y, tr.modelorg.z, tr.time );
+	// view right
+	studio_params[1] = Vector4D( right.x, right.y, right.z, 0.0f );
+	// fog params
+	if( m_pCurrentEntity->curstate.rendermode == kRenderTransAdd )
+		studio_params[2] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f ); // disable fog
+	else
+		studio_params[2] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+
+	float scale = m_pCurrentEntity->curstate.scale;
+	if( scale <= 0.0f ) scale = 1.0f;
+	meshparams[0] = m_pCurrentEntity->origin;
+	meshparams[1] = m_pCurrentEntity->angles;
+	meshparams[2] = Vector( scale, m_pCurrentEntity->curstate.fuser2, 0.0f ); // fuser2 is the dirt on the car body/wheels
+
+	const mstudiolight_t *light = &m_pModelInstance->lighting;
+	const int num_bones = Q_min( m_pStudioHeader->numbones, glConfig.max_skinning_bones );
 
 	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
 	//	R_LoadIdentity();
@@ -5459,26 +5480,11 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			ASSERT( RI->currentshader != NULL );
 
 			// write constants
-			// view origin + realtime
-			studio_params[0] = Vector4D( tr.modelorg.x, tr.modelorg.y, tr.modelorg.z, tr.time );
-			// view right
-			studio_params[1] = Vector4D( right.x, right.y, right.z, 0.0f );
-			// fog params
-			if( m_pCurrentEntity->curstate.rendermode == kRenderTransAdd )
-				studio_params[2] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f ); // disable fog
-			else
-				studio_params[2] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 			pglUniform4fvARB( RI->currentshader->u_StudioParams, 3, &studio_params[0][0] );
 
 			if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) )
 				pglUniform4fvARB( RI->currentshader->u_GammaTable, 64, &tr.gamma_table[0][0] );
 
-			float scale = m_pCurrentEntity->curstate.scale;
-			if( scale <= 0.0f ) scale = 1.0f;
-			Vector meshparams[3];
-			meshparams[0] = m_pCurrentEntity->origin;
-			meshparams[1] = m_pCurrentEntity->angles;
-			meshparams[2] = Vector( scale, m_pCurrentEntity->curstate.fuser2, 0.0f ); // fuser2 is the dirt on the car body/wheels
 			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
 
 			// reset cache
@@ -5510,8 +5516,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 		if( cached_entity != m_pCurrentEntity || (cached_model != m_pRenderModel) )
 		{
 			// update bones array
-			mstudiolight_t *light = &m_pModelInstance->lighting;
-			int num_bones = Q_min( m_pStudioHeader->numbones, glConfig.max_skinning_bones );
 			Vector4D lightstyles;
 
 			for( int map = 0; map < MAXLIGHTMAPS; map++ )
