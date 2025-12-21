@@ -5903,13 +5903,13 @@ void CBasePlayer::SelectLastItem( void )
 	{
 		if( pCar )
 		{
-			if( pCar->CamUnlocked )
-			{
+		//	if( pCar->CamUnlocked )
+		//	{
 				pCar->fMouseTouchedOFF = CAR_CAMERA_MOUSE_WAIT_OFF;
 				pCar->fMouseTouchedON = 0.0f;
 				pCar->CamUnlocked = false;
-			}
-			else
+		//	}
+		//	else
 				pCar->SecondaryCamera = !pCar->SecondaryCamera;
 		}
 

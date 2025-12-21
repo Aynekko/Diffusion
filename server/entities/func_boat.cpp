@@ -323,6 +323,9 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 			NewCameraAngleX = 0;
 			CameraModeAddDist_Free = 100.0f;
 			CameraModeAddDist_Main = 50.0f;
+			LastPlayerAngles = hDriver->pev->v_angle;
+			Camera2RotationX = 0;
+			Camera2RotationY = 0;
 
 			MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, hDriver->pev );
 				WRITE_BYTE( TE_CARPARAMS );

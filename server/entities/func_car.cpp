@@ -947,6 +947,7 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			NewCameraAngleX = 0;
 			Camera2RotationX = 0;
 			Camera2RotationY = 0;
+			LastPlayerAngles = hDriver->pev->v_angle;
 			AccelAddX = 0;
 			BrakeAddX = 0;
 			EnteringShake = 2.0f;
