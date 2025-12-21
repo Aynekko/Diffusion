@@ -2330,13 +2330,28 @@ void R_DrawLightForSurfList( plight_t *pl )
 	pl->lightviewProjMatrix.CopyToArray( gl_lightViewProjMatrix );
 	const Vector lightdir = pl->frustum.GetPlane( FRUSTUM_FAR )->normal;
 
+	const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
+	const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
+
 	Vector4D light_params[6];
-	float waveHeight = 0.0f;
+	// light dir
+	light_params[0] = Vector4D( lightdir.x, lightdir.y, lightdir.z, pl->fov );
+	// light diffuse
+	light_params[1] = Vector4D( pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
+	// shadow parameters
+	light_params[2] = Vector4D( shadowWidth, shadowHeight, -pl->projectionMatrix[2][2], pl->projectionMatrix[3][2] );
+	// light origin
+	light_params[3] = Vector4D( pl->origin.x, pl->origin.y, pl->origin.z, (1.0f / pl->radius) );
+	// view origin + waveheight
+	light_params[4] = Vector4D( RI->vieworg.x, RI->vieworg.y, RI->vieworg.z, 0.0f );
+	// fog params
+	if( e->curstate.rendermode == kRenderTransAdd )
+		light_params[5] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f );
+	else
+		light_params[5] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 
 	GL_Bind( GL_TEXTURE2, pl->projectionTexture );
 	GL_Bind( GL_TEXTURE3, pl->shadowTexture );
-	const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
-	const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
 	const bool bUseRefractedWater = (!tr.lowmemory && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) && (tr.waterTextures.Count() > 0));
 
 	bool bGotScreencopy = false;
@@ -2384,6 +2399,8 @@ void R_DrawLightForSurfList( plight_t *pl )
 			// write constants
 			pglUniformMatrix4fvARB( RI->currentshader->u_LightViewProjectionMatrix, 1, GL_FALSE, &gl_lightViewProjMatrix[0] );
 
+			float waveHeight = 0.0f;
+
 			// set the current waveheight
 			if( FBitSet( s->flags, SURF_WATER ) )
 			{
@@ -2392,24 +2409,9 @@ void R_DrawLightForSurfList( plight_t *pl )
 				else
 					waveHeight = RI->currententity->curstate.scale;
 			}
-			else
-				waveHeight = 0.0f;
 
-			// light dir
-			light_params[0] = Vector4D( lightdir.x, lightdir.y, lightdir.z, pl->fov );
-			// light diffuse
-			light_params[1] = Vector4D( pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
-			// shadow parameters
-			light_params[2] = Vector4D( shadowWidth, shadowHeight, -pl->projectionMatrix[2][2], pl->projectionMatrix[3][2] );
-			// light origin
-			light_params[3] = Vector4D( pl->origin.x, pl->origin.y, pl->origin.z, (1.0f / pl->radius) );
-			// view origin + waveheight
-			light_params[4] = Vector4D( RI->vieworg.x, RI->vieworg.y, RI->vieworg.z, waveHeight );
-			// fog params
-			if( e->curstate.rendermode == kRenderTransAdd )
-				light_params[5] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f );
-			else
-				light_params[5] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+			light_params[4].w = waveHeight;
+
 			// send through one call
 			pglUniform4fvARB( RI->currentshader->u_LightParams, 6, &light_params[0][0] );
 
