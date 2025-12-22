@@ -122,6 +122,13 @@ void CWpnSentry::Holster(void)
 {
 	if( m_hTestModel != NULL )
 		m_hTestModel->pev->effects |= EF_NODRAW;
+
+	if( m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0 )
+	{
+		m_pPlayer->RemoveWeapon( WEAPON_SENTRY );
+		SetThink( &CBasePlayerItem::DestroyItem );
+		SetNextThink( 0.1 );
+	}
 	
 	BaseClass::Holster();
 }
