@@ -5948,7 +5948,7 @@ void CAndrewGrunt::Shoot( void )
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT( 40, 90 ) + gpGlobals->v_up * RANDOM_FLOAT( 75, 200 ) + gpGlobals->v_forward * RANDOM_FLOAT( -40, 40 );
 	EjectBrass( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_556, TE_BOUNCE_SHELL );
-	FireBullets( 1, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_10DEGREES : VECTOR_CONE_3DEGREES, 8192, BULLET_MONSTER_MP5, 1, 3.0f ); // 3 dmg per bullet
+	FireBullets( 1, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_10DEGREES : VECTOR_CONE_3DEGREES, 8192, BULLET_MONSTER_MP5, 1, 2.0f ); // 2 dmg per bullet
 
 	pev->effects |= EF_MUZZLEFLASH;
 
@@ -6035,7 +6035,7 @@ void CAndrewGrunt::RunAI( void )
 		{
 			// enable difficulty scaler only once in combat
 			if( ScaleDifficultyTime == 0 )
-				ScaleDifficultyTime = gpGlobals->time + 30;
+				ScaleDifficultyTime = gpGlobals->time + 20.0f;
 
 			if( !AndrewHealthbar )
 			{
@@ -6064,12 +6064,12 @@ void CAndrewGrunt::RunAI( void )
 		}
 
 		// every half a minute, decrease the regeneration rate, to prevent endless fights
-		if( ScaleDifficultyTime > 0 && gpGlobals->time > ScaleDifficultyTime )
+		if( ScaleDifficultyTime > 0.0f && gpGlobals->time > ScaleDifficultyTime )
 		{
 			if( DifficultyScaler > 0.1f )
 				DifficultyScaler -= 0.1f;
 
-			ScaleDifficultyTime = gpGlobals->time + 30.0f;
+			ScaleDifficultyTime = gpGlobals->time + 20.0f;
 		}
 
 		if( AndrewSpecialMode )
@@ -6078,8 +6078,8 @@ void CAndrewGrunt::RunAI( void )
 			{
 			default:
 			case SKILL_EASY: RegenRate = 40 * DifficultyScaler; break;
-			case SKILL_MEDIUM: RegenRate = 50 * DifficultyScaler; break;
-			case SKILL_HARD: RegenRate = 60 * DifficultyScaler; break;
+			case SKILL_MEDIUM: RegenRate = 45 * DifficultyScaler; break;
+			case SKILL_HARD: RegenRate = 50 * DifficultyScaler; break;
 			}
 			if( RegenRate < 25.0f )
 				RegenRate = 25.0f;
@@ -6090,8 +6090,8 @@ void CAndrewGrunt::RunAI( void )
 			{
 			default:
 			case SKILL_EASY: RegenRate = 20 * DifficultyScaler; break;
-			case SKILL_MEDIUM: RegenRate = 25 * DifficultyScaler; break;
-			case SKILL_HARD: RegenRate = 30 * DifficultyScaler; break;
+			case SKILL_MEDIUM: RegenRate = 22 * DifficultyScaler; break;
+			case SKILL_HARD: RegenRate = 25 * DifficultyScaler; break;
 			}
 		}
 
