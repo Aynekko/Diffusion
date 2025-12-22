@@ -374,7 +374,7 @@ Task_t	tlGruntCombatFace1[] =
 	{ TASK_SET_ACTIVITY,			(float)ACT_IDLE				},
 	{ TASK_FACE_ENEMY,				(float)0					},
 	{ TASK_WAIT,					(float)0.4					},  // 1.5 AIFIX
-//	{ TASK_SET_SCHEDULE,			(float)SCHED_GRUNT_SWEEP	},  // no more stupid turns
+	{ TASK_SET_SCHEDULE,			(float)SCHED_GRUNT_SWEEP	},
 };
 
 Schedule_t	slGruntCombatFace[] =
@@ -639,9 +639,9 @@ Schedule_t slGruntHideReload[] =
 Task_t	tlGruntSweep[] =
 {
 	{ TASK_TURN_LEFT,			(float)179	},
-	{ TASK_WAIT,				(float)1	},
+	{ TASK_WAIT,				(float)0.5	},
 	{ TASK_TURN_LEFT,			(float)179	},
-	{ TASK_WAIT,				(float)1	},
+//	{ TASK_WAIT,				(float)1	},
 };
 
 Schedule_t	slGruntSweep[] =
@@ -2699,7 +2699,7 @@ Schedule_t* CHGrunt :: GetScheduleOfType ( int Type )
 		//	else
 			if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 				return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
-			return GetScheduleOfType( SCHED_MOVE_TO_ENEMY_LKPRUN ); // can't see enemy. try to reposition
+			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ORIGIN ); // can't see enemy. try to reposition
 		}
 		break;
 	case SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE:
