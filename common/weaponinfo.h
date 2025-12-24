@@ -246,7 +246,7 @@ const char * const g_WpnAmmo[] =
 
 #define WPN_POS_KNIFE			0
 // slot 1 -----------------------------------
-#define WPN_SLOT_BERETTA			1
+#define WPN_SLOT_BERETTA		1
 #define WPN_SLOT_DEAGLE			1
 #define WPN_SLOT_57				1
 
@@ -261,12 +261,12 @@ const char * const g_WpnAmmo[] =
 #define WPN_SLOT_SHOTGUN		2
 #define WPN_SLOT_SHOTGUN_XM		2
 
-#define WPN_POS_MRC				0
-#define WPN_POS_HKMP5			1
-#define WPN_POS_SHOTGUN_XM		2
+#define WPN_POS_HKMP5			0
+#define WPN_POS_MRC				1
+#define WPN_POS_G36C			2
+#define WPN_POS_SHOTGUN_XM		3
 #define WPN_POS_SHOTGUN			4
 #define WPN_POS_AR2				5
-#define WPN_POS_G36C			6
 // slot 3 -----------------------------------
 #define WPN_SLOT_GAUSS			3
 #define WPN_SLOT_RPG			3
