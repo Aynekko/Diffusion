@@ -1345,7 +1345,7 @@ void R_DrawParticles( qboolean trans )
 		SetBits( rvp.flags, RF_DRAW_CUBEMAP );
 	if( FBitSet( RI->params, RP_OVERVIEW ))
 		SetBits( rvp.flags, RF_DRAW_OVERVIEW );
-//	R_RestoreGLState(); // diffusion - comment out
+	R_RestoreGLState();
 
 	DRAW_PARTICLES( &rvp, trans, tr.frametime );
 }
