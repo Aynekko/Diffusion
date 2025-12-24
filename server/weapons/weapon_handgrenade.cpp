@@ -228,10 +228,10 @@ void CHandGrenade::WeaponIdle( void )
 			angThrow.x = angThrow.x * 1.111f - 10; // ((90 + 10) / 90.0)
 
 		float flVelScale = gpGlobals->time - m_flStartThrow + 1.0f; // diffusion - by XaeroX, slightly edited for my needs
-		float flVel = fabs(( 90.0f - angThrow.x ) * flVelScale * 2);
+		float flVel = fabs( (90.0f - angThrow.x) * flVelScale * 2.0f );
 
-		if ( flVel > 500.0f )
-			flVel = 500.0f;
+		if ( flVel > 1000.0f )
+			flVel = 1000.0f;
 
 		UTIL_MakeVectors( angThrow );
 
