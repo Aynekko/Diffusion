@@ -2699,7 +2699,7 @@ Schedule_t* CHGrunt :: GetScheduleOfType ( int Type )
 		//	else
 			if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 				return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
-			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ORIGIN ); // can't see enemy. try to reposition
+			return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY ); // can't see enemy. try to reposition
 		}
 		break;
 	case SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE:

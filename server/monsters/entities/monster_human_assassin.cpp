@@ -787,7 +787,7 @@ void CHAssassin :: Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= BLOOD_COLOR_RED;
 	pev->effects		= 0;
-	if (!pev->health) pev->health = 80;
+	if (!pev->health) pev->health = 65;
 	pev->max_health = pev->health;
 	m_flFieldOfView		= VIEW_FIELD_WIDE; // indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
@@ -1389,7 +1389,7 @@ void SecAss :: Spawn()
 	pev->movetype		= MOVETYPE_STEP;
 	m_bloodColor		= BLOOD_COLOR_RED;
 	pev->effects		= 0;
-	if (!pev->health) pev->health = 95;
+	if (!pev->health) pev->health = 75;
 	pev->max_health = pev->health;
 	m_flFieldOfView		= VIEW_FIELD_WIDE; // indicates the width of this monster's forward view cone ( as a dotproduct result )
 	m_MonsterState		= MONSTERSTATE_NONE;
