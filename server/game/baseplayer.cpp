@@ -4832,7 +4832,7 @@ void CBasePlayer::ManageStamina(void)
 	// +: "on ground" - stamina not draining while in air, or while ducking and pressing "sprint"
 	if( (pev->button & IN_RUN) && (pev->button & IN_FORWARD) && (m_flStaminaValue > 0) && (pev->flags & FL_ONGROUND) && !(pev->flags & FL_DUCKING) && !DroneControl )
 	{
-		m_flStaminaValue -= 17.5f * gpGlobals->frametime; // scale by frametime, so fps won't affect the speed
+		m_flStaminaValue -= 12.5f * gpGlobals->frametime; // scale by frametime, so fps won't affect the speed
 	}
 	else if( !ShieldOn && m_flStaminaValue < 100 ) // RECHARGE!
 	{
@@ -4909,22 +4909,22 @@ void CBasePlayer::RegenerateHealth(void)
 	if ( CanRegenerateHealth && HasWeapon(WEAPON_SUIT) && (sv_regeneration.value == 1) ) // player_customize can control CanRegenerateHealth value
 	{
 		// regeneration speeds depend on skill level
-		RegenRate = 300 / pev->health;
+		RegenRate = 300.0f / pev->health;
 
 		if (g_iSkillLevel == SKILL_EASY)
 		{
 			RegenWaitTime = 3;
-			RegenRate = bound(5, RegenRate, 10);
+			RegenRate = bound(5.0f, RegenRate, 15.0f);
 		}
 		else if (g_iSkillLevel == SKILL_MEDIUM)
 		{
 			RegenWaitTime = 4;
-			RegenRate = bound(4, RegenRate, 8);
+			RegenRate = bound(5.0f, RegenRate, 12.5f);
 		}
 		else if (g_iSkillLevel == SKILL_HARD)
 		{
 			RegenWaitTime = 5;
-			RegenRate = bound(3, RegenRate, 6);
+			RegenRate = bound(5.0f, RegenRate, 10.0f);
 		}
 
 		if( pev->health > 100 )
