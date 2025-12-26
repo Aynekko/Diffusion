@@ -68,6 +68,7 @@ static int exposure_storage_texture[2];
 static uint exposure_storage_fbo[2];
 static int noise_texture = 0;
 static int noise_texture_random = 0;
+static int downscale_texture = 0;
 
 void InitAutoExposure(void)
 {
@@ -203,7 +204,16 @@ void InitPostTextures( void )
 	if( !tr.screen_color )
 		tr.screen_color = CREATE_TEXTURE( "*screencolor", glState.width, glState.height, NULL, TF_COLORBUFFER );
 
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	if( downscale_texture )
+	{
+		FREE_TEXTURE( downscale_texture );
+		downscale_texture = 0;
+	}
+
+	if( !downscale_texture )
+		downscale_texture = CREATE_TEXTURE( "*downscale_texture", glState.width, glState.height, NULL, TF_COLORBUFFER );
+
+	GL_Bind( GL_TEXTURE0, downscale_texture );
 	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); // this is useful for rendering scale below 1.0
 	GL_Bind( GL_TEXTURE0, 0 );
 
@@ -1180,7 +1190,7 @@ void DownScale( void )
 	const float h = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 );
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	GL_Bind( GL_TEXTURE0, downscale_texture );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 	pglViewport( 0, 0, w, h );
