@@ -4830,9 +4830,9 @@ void CBasePlayer::ConsecutiveKillSounds( void )
 void CBasePlayer::ManageStamina(void)
 {
 	// +: "on ground" - stamina not draining while in air, or while ducking and pressing "sprint"
-	if( (pev->button & IN_RUN) && (pev->button & IN_FORWARD) && (m_flStaminaValue > 0) && (pev->flags & FL_ONGROUND) && !(pev->flags & FL_DUCKING) && !DroneControl )
+	if( (pev->button & IN_RUN) && (pev->button & IN_FORWARD) && (m_flStaminaValue > 0) /*&& (pev->flags & FL_ONGROUND)*/ && !(pev->flags & FL_DUCKING) && !DroneControl )
 	{
-		m_flStaminaValue -= 12.5f * gpGlobals->frametime; // scale by frametime, so fps won't affect the speed
+		m_flStaminaValue -= 13.5f * gpGlobals->frametime; // scale by frametime, so fps won't affect the speed
 	}
 	else if( !ShieldOn && m_flStaminaValue < 100 ) // RECHARGE!
 	{

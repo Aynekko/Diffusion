@@ -1416,7 +1416,7 @@ void PM_WalkMove( void )
 
 // DiffusionSprint by Ku2zoff
 	bool bIsSprint;
-	const float iSprintFactor = 1.35f;
+	const float iSprintFactor = 1.5f;
 	if ( (pmove->cmd.buttons & IN_RUN) && (pmove->cmd.buttons & IN_FORWARD) && !(pmove->flags & FL_DUCKING) )
 	{
 		pmove->oldbuttons |= IN_RUN;
@@ -1442,7 +1442,7 @@ void PM_WalkMove( void )
 
 	// Determine x and y parts of velocity
 	if( bIsSprint && (!(pmove->flags & FL_DUCKING)) )
-		wishvel = pmove->forward * (fmove * iSprintFactor) + pmove->right * (smove * iSprintFactor * 0.75f);
+		wishvel = pmove->forward * (fmove * iSprintFactor) + pmove->right * (smove * iSprintFactor * 0.85f);
 	else
 		wishvel = pmove->forward * fmove + pmove->right * smove;
 	
