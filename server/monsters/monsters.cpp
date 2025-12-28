@@ -1982,7 +1982,7 @@ void CBaseMonster :: Move ( float flInterval )
 		if (pBlocker)
 			DispatchBlocked( edict(), pBlocker->edict() );
 
-		if ( pBlocker && m_moveWaitTime > 0 && pBlocker->IsMoving() && !pBlocker->IsPlayer() && !pBlocker->IsMonster() && (gpGlobals->time-m_flMoveWaitFinished) > 3.0 )
+		if( pBlocker && m_moveWaitTime > 0 && pBlocker->IsMoving() && !pBlocker->IsPlayer() && (gpGlobals->time - m_flMoveWaitFinished) > 3.0 )
 		{
 			// Can we still move toward our target?
 			if ( flDist < m_flGroundSpeed )
@@ -2001,6 +2001,7 @@ void CBaseMonster :: Move ( float flInterval )
 				InsertWaypoint( vecApex, bits_MF_TO_DETOUR );
 				RouteSimplify( pTargetEnt );
 
+#if 0
 				// notify the other monster to wait while we go around it - wait for 1 to 3 seconds
 				if( pBlocker && pBlocker->IsMonster() )
 				{
@@ -2031,6 +2032,7 @@ void CBaseMonster :: Move ( float flInterval )
 						}
 					}
 				}
+#endif
 			}
 			else
 			{
