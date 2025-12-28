@@ -4830,7 +4830,7 @@ void CBasePlayer::ConsecutiveKillSounds( void )
 void CBasePlayer::ManageStamina(void)
 {
 	// +: "on ground" - stamina not draining while in air, or while ducking and pressing "sprint"
-	if( (pev->button & IN_RUN) && (pev->button & IN_FORWARD) && (m_flStaminaValue > 0) /*&& (pev->flags & FL_ONGROUND)*/ && !(pev->flags & FL_DUCKING) && !DroneControl )
+	if( (pev->button & IN_RUN) && (pev->button & IN_FORWARD) && (m_flStaminaValue > 0) /*&& (pev->flags & FL_ONGROUND)*/ && !(pev->flags & FL_DUCKING) && !DroneControl && (pev->movetype != MOVETYPE_NOCLIP) )
 	{
 		m_flStaminaValue -= 13.5f * gpGlobals->frametime; // scale by frametime, so fps won't affect the speed
 	}
@@ -4852,8 +4852,8 @@ void CBasePlayer::ManageStamina(void)
 	}
 	
 	// +: to disable stamina drain when stationary (vel. less than 15)
-	if ((pev->velocity.Length2D() < 15) && (pev->button & IN_RUN) && (pev->movetype != MOVETYPE_NOCLIP))
-		CLIENT_COMMAND(ENT(pev), "-sprint\n");
+//	if ((pev->velocity.Length2D() < 15) && (pev->button & IN_RUN) && !(pev->button & IN_FORWARD) && (pev->movetype != MOVETYPE_NOCLIP))
+//		CLIENT_COMMAND(ENT(pev), "-sprint\n");
 
 	// +: no sprinting/stamina drain when strafing/going backwards
 	if( (pev->button & IN_RUN) && (pev->button & IN_BACK || pev->button & IN_DUCK))
@@ -4865,14 +4865,14 @@ void CBasePlayer::ManageStamina(void)
 	// +: stamina drain when jumping :)
 		// MOVED TO PRE-THINK
 
-	if ((m_flStaminaValue < 1) && (pev->button & IN_RUN))
+	if ((m_flStaminaValue < 1.0f) && (pev->button & IN_RUN))
 	{
 		CLIENT_COMMAND(ENT(pev), "-sprint\n");
 		//ALERT(at_console, "low stamina!\n");
 	}
 
 	// +: waiting time before recharge (this was tricky lol)
-	if ((m_afButtonReleased & IN_RUN) /*|| (m_afButtonPressed & IN_JUMP)*/)
+	if ((m_afButtonReleased & IN_RUN) || (m_afButtonReleased & IN_FORWARD)/*|| (m_afButtonPressed & IN_JUMP)*/)
 	{
 		// mother of god...
 		if (!(pev->button & IN_MOVELEFT) || !(pev->button & IN_MOVERIGHT) || !(pev->button & IN_BACK) && (pev->flags & FL_ONGROUND) && !(pev->flags & FL_DUCKING))
@@ -4884,17 +4884,17 @@ void CBasePlayer::ManageStamina(void)
 			15 stamina: 50/15 = 3.33 sec (will be limited to 3 sec)
 			*/
 
-			m_flStaminaWait = gpGlobals->time + (50 / (1 + m_flStaminaValue));
+			m_flStaminaWait = gpGlobals->time + (50.0f / (1.0f + m_flStaminaValue));
 
-			if (m_afButtonPressed & IN_JUMP) // faster recover from jumps
-				m_flStaminaWait -= 0.5;
+		//	if (m_afButtonPressed & IN_JUMP) // faster recover from jumps
+		//		m_flStaminaWait -= 0.5;
 
 			if( pev->health > 100 ) // special mode? less wait
-				m_flStaminaWait -= 0.5;
+				m_flStaminaWait -= 0.5f;
 
 			m_flStaminaWait = bound( 0, m_flStaminaWait, gpGlobals->time + 3 );
 
-			//ALERT(at_console, "%.2f\n", m_flStaminaWait - gpGlobals->time);
+			ALERT(at_console, "%.2f\n", m_flStaminaWait - gpGlobals->time);
 		}
 	}
 

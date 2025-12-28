@@ -1442,7 +1442,7 @@ void PM_WalkMove( void )
 
 	// Determine x and y parts of velocity
 	if( bIsSprint && (!(pmove->flags & FL_DUCKING)) )
-		wishvel = pmove->forward * (fmove * iSprintFactor) + pmove->right * (smove * iSprintFactor * 0.85f);
+		wishvel = pmove->forward * (fmove * iSprintFactor) + pmove->right * (smove * iSprintFactor * 0.9f);
 	else
 		wishvel = pmove->forward * fmove + pmove->right * smove;
 	
