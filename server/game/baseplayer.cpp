@@ -2872,7 +2872,7 @@ void CBasePlayer::PreThink( void )
 
 	// drunk? edit friction
 	if( DrunkLevel > 0 )
-		pev->friction = 1.0f - (DrunkLevel * 0.1f);
+		pev->friction = 1.0f - (DrunkLevel * 0.15f);
 
 	if( Dashed && pev->flags & FL_ONGROUND )
 		pev->friction = 0.0f;
@@ -4894,7 +4894,7 @@ void CBasePlayer::ManageStamina(void)
 
 			m_flStaminaWait = bound( 0, m_flStaminaWait, gpGlobals->time + 3 );
 
-			ALERT(at_console, "%.2f\n", m_flStaminaWait - gpGlobals->time);
+		//	ALERT(at_console, "%.2f\n", m_flStaminaWait - gpGlobals->time);
 		}
 	}
 
