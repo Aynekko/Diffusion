@@ -295,7 +295,7 @@ void main( void )
 	light = u_LightDiffuse.rgb * DLIGHT_SCALE;	// light color
 
 	// texture or procedural spotlight
-	light *= 2 * Brightness * RenderModeModifier * tex_projection.rgb;
+	light *= Brightness * RenderModeModifier * tex_projection.rgb;
 #elif defined( BMODEL_LIGHT_OMNIDIRECTIONAL )
 	light = u_LightDiffuse.rgb * DLIGHT_SCALE;
 

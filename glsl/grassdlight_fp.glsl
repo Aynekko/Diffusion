@@ -106,7 +106,7 @@ void main( void )
 		if( shadow <= 0.0 ) discard; // fast reject
 	#endif
 
-	light = u_LightDiffuse.rgb;	// light color
+	light = u_LightDiffuse.rgb * DLIGHT_SCALE * 0.5;	// light color (special scale because it's still too bright)
 
 	// texture or procedural spotlight
 	light *= Brightness * tex_projection.rgb;
@@ -115,7 +115,7 @@ void main( void )
 		shadow = ShadowOmni( -var_LightVec, u_ShadowParams );
 		if( shadow <= 0.0 ) discard; // fast reject
 	#endif
-	light = u_LightDiffuse.rgb;
+	light = u_LightDiffuse.rgb * DLIGHT_SCALE * 0.5; // (special scale because it's still too bright)
 	light *= Brightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 #endif
 
@@ -128,7 +128,7 @@ void main( void )
 
 	// do modified hemisperical lighting
 	float NdotL = clamp( dot( N, L ), 0.4, 1.0 ); // make light slightly visible on the opposite side
-	diffuse.rgb *= light.rgb * NdotL * atten * DLIGHT_SCALE;
+	diffuse.rgb *= light.rgb * NdotL * atten;
 
 	// compute final color
 	gl_FragColor = diffuse * shadow;

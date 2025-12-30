@@ -19,7 +19,7 @@ GNU General Public License for more details.
 #define NORMAL_FLATSHADE		0.7		// same as Valve 'flatshade'
 #define SHADE_LAMBERT		1.495		// src_main\engine\client\gl_local.h
 #define LIGHTMAP_SHIFT		(1.0 / 128.0)	// same as >> 7 in Quake
-#define DLIGHT_SCALE		0.5		// dynamic light global multiplier
+#define DLIGHT_SCALE		1.0		// dynamic light global multiplier
 #define Z_NEAR			4.0		// Quake const
 #define SHADOW_BIAS			0.001		// emperically determined
 #define DETAIL_SCALE		2.0		// ( src + dst ) * 2.0

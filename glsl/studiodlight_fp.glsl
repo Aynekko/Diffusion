@@ -178,10 +178,10 @@ void main( void )
 #if defined( STUDIO_LIGHT_PROJECTION )
 	light = u_LightDiffuse.rgb * DLIGHT_SCALE;	// light color
 	// texture or procedural spotlight
-	light *= 2.0 * u_DynLightBrightness * tex_projection.rgb;
+	light *= u_DynLightBrightness * tex_projection.rgb;
 #elif defined( STUDIO_LIGHT_OMNIDIRECTIONAL )
 	light = u_LightDiffuse.rgb * DLIGHT_SCALE;
-	light *= 2 * u_DynLightBrightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
+	light *= u_DynLightBrightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 #endif
 
 	// do modified hemisperical lighting
