@@ -1033,7 +1033,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			}
 
 			// achievement for both
-			if( pPlayer->m_pActiveItem && pPlayer->m_pActiveItem->m_iId == WEAPON_SNIPER )
+			if( (pevInflictor->flags & FL_CLIENT) && pPlayer->m_pActiveItem && pPlayer->m_pActiveItem->m_iId == WEAPON_SNIPER )
 				pPlayer->SendAchievementStatToClient( ACH_KILLENEMIESSNIPER, 1, ACHVAL_ADD );
 
 			if( FClassnameIs( pevInflictor, "func_car" ) )
