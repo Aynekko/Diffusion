@@ -297,7 +297,7 @@ void main( void )
 	// texture or procedural spotlight
 	light *= 2 * Brightness * RenderModeModifier * tex_projection.rgb;
 #elif defined( BMODEL_LIGHT_OMNIDIRECTIONAL )
-	light = u_LightDiffuse.rgb;
+	light = u_LightDiffuse.rgb * DLIGHT_SCALE;
 
 	light *= Brightness * RenderModeModifier * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 #endif
