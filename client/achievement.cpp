@@ -43,7 +43,10 @@ int CHudAchievement::VidInit( void )
 	AchStartTime = 0;
 	IsAchDrawing = false;
 	AchievementCheckTime = tr.time + ACHIEVEMENT_CHECK_TIME;
-	
+
+	// save achievement data on map change, in case of a crash
+	SaveAchievementFile();
+
 	return 1;
 }
 
@@ -254,6 +257,7 @@ void CHudAchievement::CheckAchievement(void)
 			}
 
 			Msg( "^2Achievements:^7 unlocked \"%s\"!\n", ach_data.name[i] );
+			SaveAchievementFile(); // save the file too
 			break;
 		}
 	}
