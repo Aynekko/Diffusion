@@ -272,6 +272,9 @@ bool CAmmoPrinter::InvalidWeapon( CBasePlayerItem *m_pActiveItem )
 
 	if( m_pActiveItem->m_iId == WEAPON_HANDGRENADE )
 		return true;
+
+	if( m_pActiveItem->m_iId == WEAPON_TRIPMINE )
+		return true;
 	
 	return false;
 }
