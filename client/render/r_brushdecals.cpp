@@ -81,6 +81,47 @@ static void R_CreateDecalsVAO()
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 }
 
+// legacy code for decal lightpass. Needs to be rewritten.
+void DrawSingleDecalLightPass( decal_t *decal )
+{
+	int	numVerts = 0;
+	float *v, s, t;
+	Vector4D lmcoord0, lmcoord1;
+
+	// check for valid
+	if( !decal->psurface )
+		return; // bad decal?
+
+	cl_entity_t *e = GET_ENTITY( decal->entityIndex );
+	v = DECAL_SETUP_VERTS( decal, decal->psurface, decal->texture, &numVerts );
+
+	if( numVerts > 32 ) // engine limit > renderer limit
+		numVerts = 32;
+
+	GL_Bind( GL_TEXTURE0, decal->texture );
+
+	pglBegin( GL_POLYGON );
+	for( int i = 0; i < numVerts; i++, v += VERTEXSIZE )
+	{
+		Vector av = RI->objectMatrix.VectorTransform( Vector( v ) );
+		pglTexCoord2f( v[3], v[4] );
+		pglVertex3fv( av );
+	}
+	pglEnd();
+}
+
+void DrawSurfaceDecalsLightPass( msurface_t *surf )
+{
+	if( !surf->pdecals ) return;
+
+	decal_t *p;
+
+	for( p = surf->pdecals; p; p = p->pnext )
+	{
+		DrawSingleDecalLightPass( p );
+	}
+}
+
 int SortDecals( const decal_t *a, const decal_t *b )
 {	
 	// sort priority
@@ -338,7 +379,8 @@ void DrawDecalsBatch( void )
 	pglBindVertexArray( 0 );
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 
-	/*
+	// legacy code for decal lightpass. Needs to be rewritten.
+	// ------------------------------
 	if (R_CountPlights())
 	{
 		RI->objectMatrix = matrix4x4(e->origin, e->angles);	// FIXME
@@ -354,11 +396,12 @@ void DrawDecalsBatch( void )
 				continue;
 
 			for (int k = 0; k < tr.num_draw_decals; k++)
-				PrepareSurfaceDecals(tr.draw_decals[k], false, true);
+				DrawSurfaceDecalsLightPass( tr.draw_decals[k] );
 
 			R_EndDrawProjectionGLSL();
 		}
-	}*/
+	}
+	// ------------------------------
 
 	GL_DepthMask(GL_TRUE);
 	GL_Blend( GL_FALSE );
