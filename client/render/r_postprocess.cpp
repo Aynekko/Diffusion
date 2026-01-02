@@ -89,7 +89,7 @@ void InitAutoExposure(void)
 	GL_Bind( GL_TEXTURE0, 0 );
 
 	// mips
-	for( int i = 0; i < mipmap_count; ++i )
+	for( int i = 0; i < mipmap_count; i++ )
 	{
 		if( tr.avg_luminance_fbo_mip[i] == 0 )
 			pglGenFramebuffers( 1, &tr.avg_luminance_fbo_mip[i] );
@@ -1108,7 +1108,7 @@ void ToneMap(void)
 	pglUniform4fARB( RI->currentshader->u_TexCoordClamp, 0.0f, 0.0f, 1.0f, 1.0f );
 	pglUniform1fARB( RI->currentshader->u_BloomFirstPass, 0.0f );
 
-	for( int i = 1; i <= mipmap_count; i++ )
+	for( int i = 1; i < mipmap_count; i++ )
 	{
 		mip_width /= 2;
 		mip_height /= 2;
