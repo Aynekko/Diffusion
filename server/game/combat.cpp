@@ -931,7 +931,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	}
 
 	// npc has no enemy and is being attacked by the player...
-	if( (pevAttacker->flags & FL_CLIENT) && IsMonster() && m_hEnemy == NULL )
+	if( (pevAttacker->flags & FL_CLIENT) && IsMonster() && (m_hEnemy == NULL || m_MonsterState != MONSTERSTATE_COMBAT) )
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pevAttacker );
 		if( pPlayer )
