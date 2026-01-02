@@ -1608,7 +1608,7 @@ void CHGrunt :: Shotgun ( void )
 
 	Vector	vecShellVelocity = gpGlobals->v_right * RANDOM_FLOAT(40,90) + gpGlobals->v_up * RANDOM_FLOAT(75,200) + gpGlobals->v_forward * RANDOM_FLOAT(-40, 40);
 	EjectBrass ( vecShootOrigin - vecShootDir * 10, vecShellVelocity, GetAbsAngles().y, SHELL_12GAUGE, TE_BOUNCE_SHOTSHELL); 
-	FireBullets( 4, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_15DEGREES : VECTOR_CONE_7DEGREES, 4096, BULLET_PLAYER_BUCKSHOT, 0, g_GruntShotgunDamage[g_iSkillLevel] ); // shoot +-7.5 degrees // diffusion 4096, was 2048
+	FireBullets( 4, vecShootOrigin, vecShootDir, RunningShooting ? VECTOR_CONE_20DEGREES : VECTOR_CONE_15DEGREES, 4096, BULLET_PLAYER_BUCKSHOT, 0, g_GruntShotgunDamage[g_iSkillLevel] ); // shoot +-7.5 degrees // diffusion 4096, was 2048
 
 	pev->effects |= EF_MUZZLEFLASH;
 	
