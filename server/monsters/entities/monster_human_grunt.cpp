@@ -574,7 +574,7 @@ Task_t	tlGruntTossGrenadeCover1[] =
 {
 	{ TASK_FACE_ENEMY,						(float)0							},
 	{ TASK_RANGE_ATTACK2, 					(float)0							},
-	{ TASK_SET_SCHEDULE,					(float)SCHED_TAKE_COVER_FROM_ORIGIN	},//	{ TASK_SET_SCHEDULE,					(float)SCHED_TAKE_COVER_FROM_ENEMY	},
+	{ TASK_SET_SCHEDULE,					(float)SCHED_TAKE_COVER_FROM_ENEMY	},
 };
 
 Schedule_t	slGruntTossGrenadeCover[] =
