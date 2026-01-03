@@ -4833,8 +4833,9 @@ void CBasePlayer::ManageStamina(void)
 	if( (pev->button & IN_RUN) && (pev->button & IN_FORWARD) && (m_flStaminaValue > 0) /*&& (pev->flags & FL_ONGROUND)*/ && !(pev->flags & FL_DUCKING) && !DroneControl && (pev->movetype != MOVETYPE_NOCLIP) )
 	{
 		m_flStaminaValue -= 13.5f * gpGlobals->frametime; // scale by frametime, so fps won't affect the speed
+		m_flStaminaWait = 0.0f;
 	}
-	else if( !ShieldOn && m_flStaminaValue < 100 ) // RECHARGE!
+	else if( !ShieldOn && m_flStaminaValue < 100 && m_flStaminaWait != 0.0f ) // RECHARGE!
 	{
 		float RechargeBonus = 1.0f;
 		if( pev->health > 100 ) // special mode? faster recharge
@@ -4872,7 +4873,7 @@ void CBasePlayer::ManageStamina(void)
 	}
 
 	// +: waiting time before recharge (this was tricky lol)
-	if ((m_afButtonReleased & IN_RUN) || (m_afButtonReleased & IN_FORWARD)/*|| (m_afButtonPressed & IN_JUMP)*/)
+	if( ((m_afButtonReleased & IN_RUN) || (m_afButtonReleased & IN_FORWARD)) && m_flStaminaWait == 0.0f )
 	{
 		// mother of god...
 		if (!(pev->button & IN_MOVELEFT) || !(pev->button & IN_MOVERIGHT) || !(pev->button & IN_BACK) && (pev->flags & FL_ONGROUND) && !(pev->flags & FL_DUCKING))
