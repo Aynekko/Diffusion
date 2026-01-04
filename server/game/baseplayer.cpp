@@ -7986,7 +7986,8 @@ void CBasePlayer::DropPlayerItem(const char* pszItemName)
 		
 		pDrop->SetAbsAngles( Vector( pev->angles.x, RANDOM_LONG( 0, 359 ), pev->angles.z ) );
 		pDrop->pev->velocity = gpGlobals->v_forward * 300 + gpGlobals->v_forward * 100;
-		pDrop->pev->renderfx = kRenderFxGlowShell;
+		if( g_pGameRules->IsMultiplayer() )
+			pDrop->pev->renderfx = kRenderFxGlowShell; // only apply in deathmatch so the weapon is visible
 		pDrop->pev->spawnflags |= SF_NORESPAWN;// never respawn
 		pDrop->SetFadeDistance( 700 );
 		pDrop->SetFlag( F_WEAPON_DESPAWN );
