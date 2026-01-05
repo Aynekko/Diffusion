@@ -118,5 +118,6 @@ extern cvar_t *ui_forcenoblur;
 extern cvar_t *cl_background;
 extern cvar_t *hud_fontscale;
 extern cvar_t *r_pvs_radius;
+extern cvar_t *r_decals_ext;
 
 #endif//R_CVARS_H

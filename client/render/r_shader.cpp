@@ -2031,6 +2031,18 @@ word GL_UberShaderForBmodelDecal( decal_t *decal )
 	if( decal->shaderNum && decal->glsl_sequence == tr.glsl_valid_sequence )
 		return decal->shaderNum; // valid
 
+	if( r_decals_ext->value > 0 )
+	{
+		// NOTE: this code executes when decal is placed.
+		// this must be remade, so external textures would only load at startup (but how?)
+		char diffuse[128];
+		Q_snprintf( diffuse, sizeof( diffuse ), "textures/!decals/%s.dds", GET_TEXTURE_NAME( decal->texture ) );
+		if( FILE_EXISTS( diffuse ) )
+		{
+			decal->texture = LOAD_TEXTURE( diffuse, NULL, 0, 0 );
+		}
+	}
+
 	Q_strncpy( glname, "BmodelDecal", sizeof( glname ));
 	memset( options, 0, sizeof( options ));
 

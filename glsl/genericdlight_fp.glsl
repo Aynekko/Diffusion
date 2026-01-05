@@ -57,8 +57,6 @@ void main( void )
 	if( atten <= 0.0 ) discard; // fast reject
 	vec3 L = vec3( 0.0 );
 
-	float Brightness = u_DynLightBrightness;
-
 #if defined( GENERIC_LIGHT_PROJECTION )
 	L = normalize( u_LightDir.xyz );
 	
@@ -67,6 +65,12 @@ void main( void )
 	float fov = ( u_LightDir.w * FOV_MULT * ( M_PI / 180.0 ));
 	float spotCos = cos( fov + fov );
 	if( spotDot < spotCos ) discard;
+
+	vec4 tex_projection = texture2DProj( u_ProjectMap, var_ProjCoord );
+
+	// ignore black pixels of the flashlight/projection texture
+	if( length( tex_projection.rgb ) == 0.0 )
+		discard;
 #elif defined( GENERIC_LIGHT_OMNIDIRECTIONAL )
 	L = normalize( var_LightVec );
 #endif
@@ -77,30 +81,38 @@ void main( void )
 	float shadow = 1.0;
 
 #if defined( GENERIC_LIGHT_PROJECTION )
-	light = u_LightDiffuse.rgb;	// light color
+	light = u_LightDiffuse.rgb * DLIGHT_SCALE;	// light color
 
 	// texture or procedural spotlight
-	light *= 3 * Brightness * texture2DProj( u_ProjectMap, var_ProjCoord ).rgb;
+	light *= u_DynLightBrightness * tex_projection.rgb;
 //	atten *= smoothstep( spotCos, spotCos + 0.1, spotDot ) * 0.5;
-#if defined( GENERIC_HAS_SHADOWS )
-	shadow = ShadowProj( var_ShadowCoord, u_ShadowParams.xy, NORMAL_FLATSHADE );
-	if( shadow <= 0.0 ) discard; // fast reject
-#endif
+	#if defined( GENERIC_HAS_SHADOWS )
+		shadow = ShadowProj( var_ShadowCoord, u_ShadowParams.xy, NORMAL_FLATSHADE );
+		if( shadow <= 0.0 ) discard; // fast reject
+	#endif
 #elif defined( GENERIC_LIGHT_OMNIDIRECTIONAL )
-	light = u_LightDiffuse.rgb;
+	light = u_LightDiffuse.rgb * DLIGHT_SCALE;
 
-	light *= 3 * Brightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
+	light *= u_DynLightBrightness * textureCube( u_ProjectMap, -var_LightVec ).rgb;
 	#if defined( GENERIC_HAS_SHADOWS )
 		shadow = ShadowOmni( -var_LightVec, u_ShadowParams );
 		if( shadow <= 0.0 ) discard; // fast reject
 	#endif
 #endif
+
+	diffuse.rgb *= light * NORMAL_FLATSHADE * atten * u_LightScale;
+
+	// !!! remove this if HDR is implemented
+	// this is a hack to remove overbright on brighter textures
+	float hack = 1.0 - (0.5 * length( diffuse.rgb ));
+	if( hack < 0.5 ) hack = 0.5;
+	diffuse.rgb *= hack;
+
 	if( u_FogParams.w > 0.0 )
 	{
 		float fogFactor = saturate( exp2( -u_FogParams.w * ( gl_FragCoord.z / gl_FragCoord.w )));
 		atten = mix( 0.0, atten, fogFactor );
 	}
-	diffuse.rgb *= light * NORMAL_FLATSHADE * atten * DLIGHT_SCALE * u_LightScale;
 
 	// compute final color
 	gl_FragColor = diffuse * shadow;

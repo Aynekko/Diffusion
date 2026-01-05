@@ -178,6 +178,7 @@ cvar_t *r_mirrorquality;
 cvar_t *r_testdlight;
 cvar_t *hud_fontscale;
 cvar_t *r_pvs_radius;
+cvar_t *r_decals_ext;
 
 cvar_t	v_iyaw_cycle = { "v_iyaw_cycle", "2", 0, 2 };
 cvar_t	v_iroll_cycle = { "v_iroll_cycle", "0.5", 0, 0.5 };
@@ -423,6 +424,7 @@ void V_Init( void )
 	gl_heateffect_force = CVAR_REGISTER( "gl_heateffect_force", "0", FCVAR_CHEAT );
 	gl_renderscale = CVAR_REGISTER( "gl_renderscale", "1.0", FCVAR_ARCHIVE );
 	room_type_auto = CVAR_REGISTER( "room_type_auto", "0", FCVAR_ARCHIVE );
+	r_decals_ext = CVAR_REGISTER( "r_decals_ext", "0", FCVAR_ARCHIVE );
 
 	// cubemaps
 	gEngfuncs.pfnAddCommand( "buildcubemaps", CL_BuildCubemaps_f );
