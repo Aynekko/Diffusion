@@ -50,6 +50,7 @@ BEGIN_DATADESC( CGrenade )
 	DEFINE_FIELD( LastBounceSoundTime, FIELD_TIME ),
 	DEFINE_FIELD( SendWaterSplash, FIELD_BOOLEAN ),
 	DEFINE_FIELD( IsEMPGrenade, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_hSprite, FIELD_EHANDLE ),
 END_DATADESC()
 
 //
@@ -270,6 +271,12 @@ void CGrenade::ClearEffects( void )
 {
 	// clear sound channel (alien grunt throws beeping grenade)
 	EMIT_SOUND( ENT( pev ), CHAN_WEAPON, "common/null.wav", 0.2, 3.0 );
+
+	if( m_hSprite != NULL )
+	{
+		UTIL_Remove( m_hSprite );
+		m_hSprite = NULL;
+	}
 }
 
 
@@ -525,6 +532,62 @@ void CGrenade :: TumbleThink( void )
 	{
 		if( SendWaterSplash )
 			SendWaterSplash = false;
+	}
+
+	// blink sprite while flying
+	if( !m_hSprite )
+	{
+		m_hSprite = CSprite::SpriteCreate( "sprites/glow01.spr", GetAbsOrigin(), FALSE );
+		if( m_hSprite )
+		{
+			CSprite *pSprite = (CSprite*)(CBaseEntity*)m_hSprite;
+			pSprite->SetParent( this );
+			if( IsEMPGrenade )
+				pSprite->SetTransparency( kRenderConstantGlow, 0, 140, 255, 255, 0 );
+			else
+				pSprite->SetTransparency( kRenderConstantGlow, 255, 50, 50, 255, 0 );
+			pSprite->SetScale( 0.1f );
+			pSprite->pev->effects |= EF_NODRAW;
+		}
+	}
+
+	if( m_hSprite )
+	{
+		if( gpGlobals->time > sprite_change_time )
+		{
+			if( m_hSprite->pev->effects & EF_NODRAW )
+			{
+				m_hSprite->pev->effects &= ~EF_NODRAW;
+				const Vector LightOrg = GetAbsOrigin();
+				MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, LightOrg );
+				WRITE_BYTE( TE_DLIGHT );
+					WRITE_COORD( LightOrg.x );		// origin
+					WRITE_COORD( LightOrg.y );
+					WRITE_COORD( LightOrg.z + 10.0f );
+					WRITE_BYTE( 15 );	// radius
+					if( IsEMPGrenade )
+					{
+						WRITE_BYTE( 0 );	// R
+						WRITE_BYTE( 140 );	// G
+						WRITE_BYTE( 255 );	// B
+					}
+					else
+					{
+						WRITE_BYTE( 255 );	// R
+						WRITE_BYTE( 50 );	// G
+						WRITE_BYTE( 50 );	// B
+					}
+					WRITE_BYTE( 20 );	// life * 10
+					WRITE_BYTE( 20 ); // decay
+					WRITE_BYTE( 255 ); // brightness
+					WRITE_BYTE( 0 ); // shadows off
+				MESSAGE_END();
+			}
+			else
+				m_hSprite->pev->effects |= EF_NODRAW;
+
+			sprite_change_time = gpGlobals->time + 0.25f;
+		}
 	}
 }
 

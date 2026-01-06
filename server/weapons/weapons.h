@@ -73,6 +73,9 @@ public:
 	bool DoWaterCheck; // not saved
 
 	bool IsEMPGrenade;
+
+	float sprite_change_time; // not saved
+	EHANDLE m_hSprite;
 };
 
 // bullet types
