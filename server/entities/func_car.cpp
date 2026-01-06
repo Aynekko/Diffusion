@@ -3944,7 +3944,7 @@ void CFuncCarSelfdrive::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	if( IsLockedByMaster() )
 		return;
 
-	CCar *pCar = (CCar*)(CBaseEntity*)pCar;
+	CCar *pCar = (CCar*)(CBaseEntity*)hCar;
 
 	if( m_iState == STATE_OFF )
 	{
@@ -4005,7 +4005,7 @@ void CFuncCarSelfdrive::DriveThink( void )
 		return;
 	}
 
-	CCar *pCar = (CCar*)(CBaseEntity*)pCar;
+	CCar *pCar = (CCar*)(CBaseEntity*)hCar;
 
 	if( b_set_car_params )
 	{

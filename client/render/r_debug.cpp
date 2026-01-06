@@ -125,7 +125,6 @@ void R_DrawNormals( void )
 	{
 		msurface_t *surf = tr.draw_surfaces[i].surface;
 		mextrasurf_t *es = surf->info;
-		bvert_t *v;
 
 		if( FBitSet( surf->flags, SURF_WATER | SURF_DRAWSKY ) )
 			continue;
@@ -169,7 +168,6 @@ void R_DrawTangentSpaces( void )
 	{
 		msurface_t *surf = tr.draw_surfaces[i].surface;
 		mextrasurf_t *es = surf->info;
-		bvert_t *v;
 
 		if( FBitSet( surf->flags, SURF_WATER | SURF_DRAWSKY ) )
 			continue;

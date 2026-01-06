@@ -495,7 +495,6 @@ void MotionBlur(void)
 		Accum = bound( 0, Accum, 0.2 );
 	}
 
-allow_drunk:
 	Vector org;
 	R_TransformDeviceToScreen( g_vecZero, org ); // FIXME just center of the screen...
 

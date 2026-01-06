@@ -85,7 +85,7 @@ static void R_CreateDecalsVAO()
 void DrawSingleDecalLightPass( decal_t *decal )
 {
 	int	numVerts = 0;
-	float *v, s, t;
+	float *v;
 	Vector4D lmcoord0, lmcoord1;
 
 	// check for valid
@@ -282,7 +282,7 @@ void DrawDecalsBatch( void )
 	cached_shader = -1;
 	num_render_decals = 0;
 
-	unsigned int i;
+	int i;
 	const cl_entity_t *e = RI->currententity;
 	ASSERT(e != NULL);
 
