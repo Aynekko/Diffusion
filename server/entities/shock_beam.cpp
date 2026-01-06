@@ -31,10 +31,10 @@
 LINK_ENTITY_TO_CLASS(shock_beam, CShock)
 
 BEGIN_DATADESC( CShock )
-//	DEFINE_FIELD(m_pBeam, FIELD_CLASSPTR), shockbeamdisable
-//	DEFINE_FIELD(m_pNoise, FIELD_CLASSPTR),
+//	DEFINE_FIELD(m_hBeam, FIELD_EHANDLE), shockbeamdisable
+//	DEFINE_FIELD(m_hNoise, FIELD_EHANDLE),
 	DEFINE_FIELD( SetSpriteModel, FIELD_BOOLEAN ),
-	DEFINE_FIELD(m_pSprite2, FIELD_CLASSPTR),
+	DEFINE_FIELD(m_hSprite2, FIELD_EHANDLE ),
 	DEFINE_FUNCTION( Touch ),
 	DEFINE_FUNCTION( FlyThink ),
 	DEFINE_FUNCTION( CreateEffects ),
@@ -125,8 +125,8 @@ void CShock::FlyThink()
 		pev->frame++;
 	}
 
-	if( m_pSprite2 )
-		m_pSprite2->pev->origin = pev->origin;
+	if( m_hSprite2 )
+		m_hSprite2->pev->origin = pev->origin;
 	
 	if (pev->waterlevel == 3)
 	{
@@ -267,21 +267,22 @@ void CShock::CreateEffects(void)
 		}
 	}
 
-	if( !m_pSprite2 )
-		m_pSprite2 = CSprite::SpriteCreate( "sprites/shockbeam.spr", GetAbsOrigin(), FALSE );
+	if( !m_hSprite2 )
+		m_hSprite2 = CSprite::SpriteCreate( "sprites/shockbeam.spr", GetAbsOrigin(), FALSE );
 		
-	if( m_pSprite2 )
+	if( m_hSprite2 )
 	{
-		m_pSprite2->SetAttachment( edict(), 0 );
+		CSprite *pSprite2 = (CSprite *)(CBaseEntity *)m_hSprite2;
+		pSprite2->SetAttachment( edict(), 0 );
 		if( HasSpawnFlags( SHOCK_ALIENSHIP ) )
 		{
-			m_pSprite2->pev->scale = 0.6;
-			m_pSprite2->SetTransparency( kRenderGlow, 255, 0, 50, 200, 0 );
+			pSprite2->pev->scale = 0.6;
+			pSprite2->SetTransparency( kRenderGlow, 255, 0, 50, 200, 0 );
 		}
 		else
 		{
-			m_pSprite2->pev->scale = 0.2;
-			m_pSprite2->SetTransparency( kRenderGlow, 80, 160, 255, 200, 0 );
+			pSprite2->pev->scale = 0.2;
+			pSprite2->SetTransparency( kRenderGlow, 80, 160, 255, 200, 0 );
 		}
 	}
 
@@ -344,9 +345,9 @@ void CShock::ClearEffects()
 		m_pNoise = NULL;
 	}*/
 
-	if (m_pSprite2)
+	if (m_hSprite2)
 	{
-		UTIL_Remove( m_pSprite2 );
-		m_pSprite2 = NULL;
+		UTIL_Remove( m_hSprite2 );
+		m_hSprite2 = NULL;
 	}
 }

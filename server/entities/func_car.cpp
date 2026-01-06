@@ -67,22 +67,22 @@ BEGIN_DATADESC( CCar )
 	DEFINE_FUNCTION( Setup ),
 	DEFINE_FUNCTION( Drive ),
 	DEFINE_FUNCTION( Idle ),
-	DEFINE_FIELD( pWheel1, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pWheel2, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pWheel3, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pWheel4, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pChassis, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pWheel1, FIELD_EHANDLE ),
+	DEFINE_FIELD( pWheel2, FIELD_EHANDLE ),
+	DEFINE_FIELD( pWheel3, FIELD_EHANDLE ),
+	DEFINE_FIELD( pWheel4, FIELD_EHANDLE ),
+	DEFINE_FIELD( pChassis, FIELD_EHANDLE ),
 	DEFINE_FIELD( pCamera1, FIELD_EHANDLE ),
-	DEFINE_FIELD( pCamera2, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pCamera2, FIELD_EHANDLE ),
 	DEFINE_FIELD( pFreeCam, FIELD_EHANDLE ),
-	DEFINE_FIELD( pCarHurt, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pDriverMdl, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pChassisMdl, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pTankTower, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pDoorHandle1, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pDoorHandle2, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pExhaust1, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pExhaust2, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pCarHurt, FIELD_EHANDLE ),
+	DEFINE_FIELD( pDriverMdl, FIELD_EHANDLE ),
+	DEFINE_FIELD( pChassisMdl, FIELD_EHANDLE ),
+	DEFINE_FIELD( pTankTower, FIELD_EHANDLE ),
+	DEFINE_FIELD( pDoorHandle1, FIELD_EHANDLE ),
+	DEFINE_FIELD( pDoorHandle2, FIELD_EHANDLE ),
+	DEFINE_FIELD( pExhaust1, FIELD_EHANDLE ),
+	DEFINE_FIELD( pExhaust2, FIELD_EHANDLE ),
 	DEFINE_KEYFIELD( m_iszEngineSnd, FIELD_STRING, "enginesnd" ),
 	DEFINE_KEYFIELD( m_iszIdleSnd, FIELD_STRING, "idlesnd" ),
 	DEFINE_FIELD( AllowCamera, FIELD_BOOLEAN ),
@@ -1089,25 +1089,25 @@ void CCar::Setup( void )
 
 	if( pWheel1 )
 	{
-		pWheel1->SetParent( pChassis );
+		pWheel1->SetParent( (CBaseEntity*)pChassis );
 		pWheel1->pev->iuser2 = FrontWheelRadius;
 		pWheel1->pev->owner = edict();
 	}
 	if( pWheel2 )
 	{
-		pWheel2->SetParent( pChassis );
+		pWheel2->SetParent( (CBaseEntity *)pChassis );
 		pWheel2->pev->iuser2 = FrontWheelRadius;
 		pWheel2->pev->owner = edict();
 	}
 	if( pWheel3 )
 	{
-		pWheel3->SetParent( pChassis );
+		pWheel3->SetParent( (CBaseEntity *)pChassis );
 		pWheel3->pev->iuser2 = RearWheelRadius;
 		pWheel3->pev->owner = edict();
 	}
 	if( pWheel4 )
 	{
-		pWheel4->SetParent( pChassis );
+		pWheel4->SetParent( (CBaseEntity *)pChassis );
 		pWheel4->pev->iuser2 = RearWheelRadius;
 		pWheel4->pev->owner = edict();
 	}
@@ -1165,7 +1165,7 @@ void CCar::Setup( void )
 	if( pDriverMdl )
 	{
 		if( pChassis )
-			pDriverMdl->SetParent( pChassis );
+			pDriverMdl->SetParent( (CBaseEntity *)pChassis );
 		else
 			pDriverMdl->SetParent( this );
 		pDriverMdl->pev->effects |= EF_NODRAW;
@@ -1174,9 +1174,9 @@ void CCar::Setup( void )
 	if( pTankTower )
 	{
 		if( pChassisMdl )
-			pTankTower->SetParent( pChassisMdl );
+			pTankTower->SetParent( (CBaseEntity *)pChassisMdl );
 		else if( pChassis )
-			pTankTower->SetParent( pChassis );
+			pTankTower->SetParent( (CBaseEntity *)pChassis );
 		else
 			pTankTower->SetParent( this );
 	}
@@ -1208,7 +1208,7 @@ void CCar::Setup( void )
 		// reset USE flag, car can be USE-pressed through handle only
 		ObjectCaps();
 		if( pChassisMdl )
-			pDoorHandle1->SetParent( pChassisMdl );
+			pDoorHandle1->SetParent( (CBaseEntity *)pChassisMdl );
 		else
 			pDoorHandle1->SetParent( this );
 
@@ -1217,7 +1217,7 @@ void CCar::Setup( void )
 		if( pDoorHandle2 )
 		{
 			if( pChassisMdl )
-				pDoorHandle2->SetParent( pChassisMdl );
+				pDoorHandle2->SetParent( (CBaseEntity *)pChassisMdl );
 			else
 				pDoorHandle2->SetParent( this );
 
@@ -1235,7 +1235,7 @@ void CCar::Setup( void )
 		pExhaust1->pev->framerate = 10;
 		pExhaust1->pev->iuser1 = 5; // parallel oriented sprite
 		if( pChassisMdl )
-			pExhaust1->SetParent( pChassisMdl );
+			pExhaust1->SetParent( (CBaseEntity *)pChassisMdl );
 		else
 			pExhaust1->SetParent( this );
 		num_exhausts++;
@@ -1248,7 +1248,7 @@ void CCar::Setup( void )
 			pExhaust2->pev->framerate = 10;
 			pExhaust2->pev->iuser1 = 5; // parallel oriented sprite
 			if( pChassisMdl )
-				pExhaust2->SetParent( pChassisMdl );
+				pExhaust2->SetParent( (CBaseEntity *)pChassisMdl );
 			else
 				pExhaust2->SetParent( this );
 			num_exhausts++;
@@ -2583,14 +2583,15 @@ void CCar::Drive( void )
 	{
 		int f = 1;
 		if( CarSpeed < -10 ) f = -1; // ¯\_(ツ)_/¯
-		pDriverMdl->SetBlending( 0, (f * -FrontWheelAng.y * 2) + AddTurnWheelShake);
+		CBaseAnimating *DriverMdl = (CBaseAnimating *)(CBaseEntity *)pDriverMdl;
+		DriverMdl->SetBlending( 0, (f * -FrontWheelAng.y * 2) + AddTurnWheelShake);
 		
 		bool SpecialAnim = false;
 
 		if( CarSpeed >= 0 || HeatingTires )
-			DriverMdlSequence = pDriverMdl->LookupSequence( "idle" );
+			DriverMdlSequence = DriverMdl->LookupSequence( "idle" );
 		else if( CarSpeed < 25 && bBack() )
-			DriverMdlSequence = pDriverMdl->LookupSequence( "lookback" );
+			DriverMdlSequence = DriverMdl->LookupSequence( "lookback" );
 
 		// special anims, reserve a second
 		if( (ColPoint.Length() > 0) && (AbsCarSpeed > 100) )
@@ -2598,22 +2599,22 @@ void CCar::Drive( void )
 			SpecialAnim = true;
 
 			if( CarSpeed > 0 )
-				DriverMdlSequence = pDriverMdl->LookupSequence( "damage_small" );
+				DriverMdlSequence = DriverMdl->LookupSequence( "damage_small" );
 			else if( CarSpeed < 0 )
-				DriverMdlSequence = pDriverMdl->LookupSequence( "damage_small_back" );
+				DriverMdlSequence = DriverMdl->LookupSequence( "damage_small_back" );
 		}
 
 		if( TookDamage )
 		{
-			DriverMdlSequence = pDriverMdl->LookupSequence( "damage" );
+			DriverMdlSequence = DriverMdl->LookupSequence( "damage" );
 			SpecialAnim = true;
 		}
 
-		if( pDriverMdl->pev->sequence != DriverMdlSequence && driveranimtime < gpGlobals->time )
+		if( DriverMdl->pev->sequence != DriverMdlSequence && driveranimtime < gpGlobals->time )
 		{
-			pDriverMdl->pev->sequence = DriverMdlSequence;
-			pDriverMdl->pev->frame = 0;
-			pDriverMdl->ResetSequenceInfo();
+			DriverMdl->pev->sequence = DriverMdlSequence;
+			DriverMdl->pev->frame = 0;
+			DriverMdl->ResetSequenceInfo();
 			if( SpecialAnim )
 				driveranimtime = gpGlobals->time + 0.5;
 		}
@@ -2643,7 +2644,8 @@ void CCar::Drive( void )
 		if( pChassisMdl->pev->sequence != 0 )
 			pChassisMdl->pev->sequence = 0;
 
-		pChassisMdl->SetBlending( 0, (-FrontWheelAng.y * 2) + AddTurnWheelShake );
+		CBaseAnimating *ChassisMdl = (CBaseAnimating *)(CBaseEntity *)pChassisMdl;
+		ChassisMdl->SetBlending( 0, (-FrontWheelAng.y * 2) + AddTurnWheelShake );
 	}
 	
 	SetLocalAngles( CarAng ); // car direction is now set
@@ -3850,9 +3852,9 @@ public:
 
 	void FindCar( void );
 
-	CCar *pCar;
-	CBaseEntity *pRouteTarget;
-	CBaseEntity *pRouteNextTarget;
+	EHANDLE hCar;
+	EHANDLE hRouteTarget;
+	EHANDLE hRouteNextTarget;
 	int speed_limit;
 
 	// cache for saverestore
@@ -3869,9 +3871,9 @@ public:
 LINK_ENTITY_TO_CLASS( trigger_car_selfdrive, CFuncCarSelfdrive );
 
 BEGIN_DATADESC( CFuncCarSelfdrive )
-	DEFINE_FIELD( pCar, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pRouteTarget, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pRouteNextTarget, FIELD_CLASSPTR ),
+	DEFINE_FIELD( hCar, FIELD_EHANDLE ),
+	DEFINE_FIELD( hRouteTarget, FIELD_EHANDLE ),
+	DEFINE_FIELD( hRouteNextTarget, FIELD_EHANDLE ),
 	DEFINE_FIELD( car_speed, FIELD_FLOAT ),
 	DEFINE_FIELD( speed_limit, FIELD_INTEGER ),
 	DEFINE_FUNCTION( FindCar ),
@@ -3893,7 +3895,7 @@ void CFuncCarSelfdrive::Spawn( void )
 	Precache();
 #endif
 	m_iState = STATE_OFF;
-	pRouteTarget = NULL;
+	hRouteTarget = NULL;
 	speed_limit = 0;
 	if( pev->frags > 0 )
 		speed_limit = pev->frags * 15; // km/h to units
@@ -3911,16 +3913,16 @@ void CFuncCarSelfdrive::Spawn( void )
 
 void CFuncCarSelfdrive::FindCar( void )
 {
-	pCar = (CCar *)UTIL_FindEntityByTargetname( NULL, STRING( pev->target ) );
+	hCar = (CCar *)UTIL_FindEntityByTargetname( NULL, STRING( pev->target ) );
 
-	if( !pCar )
+	if( !hCar )
 	{
 		ALERT( at_error, "trigger_car_selfdrive \"%s\" can't find specified vehicle! Removed.\n", STRING( pev->targetname ) );
 		UTIL_Remove( this );
 		return;
 	}
 
-	if( !FClassnameIs( pCar, "func_car" ) )
+	if( !FClassnameIs( hCar, "func_car" ) )
 	{
 		ALERT( at_error, "trigger_car_selfdrive \"%s\": target entity is not a func_car. Removed.\n", STRING( pev->targetname ) );
 		UTIL_Remove( this );
@@ -3936,25 +3938,27 @@ void CFuncCarSelfdrive::FindCar( void )
 
 void CFuncCarSelfdrive::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if( pCar == NULL )
+	if( hCar == NULL )
 		return;
 
 	if( IsLockedByMaster() )
 		return;
 
+	CCar *pCar = (CCar*)(CBaseEntity*)pCar;
+
 	if( m_iState == STATE_OFF )
 	{
-		pRouteTarget = UTIL_FindEntityByTargetname( NULL, STRING( pev->netname ) );
-		if( !pRouteTarget )
+		hRouteTarget = UTIL_FindEntityByTargetname( NULL, STRING( pev->netname ) );
+		if( !hRouteTarget )
 		{
 			ALERT( at_error, "trigger_car_selfdrive \"%s\" can't find route target \"%s\".\n", STRING( pev->targetname ), STRING( pev->netname ) );
 			return;
 		}
 
 		// find the target afterwards, to be used later
-		pRouteNextTarget = NULL;
-		if( !FStringNull( pRouteTarget->pev->netname ) )
-			pRouteNextTarget = UTIL_FindEntityByTargetname( NULL, STRING( pRouteTarget->pev->netname ) );
+		hRouteNextTarget = NULL;
+		if( !FStringNull( hRouteTarget->pev->netname ) )
+			hRouteNextTarget = UTIL_FindEntityByTargetname( NULL, STRING( hRouteTarget->pev->netname ) );
 
 		if( pCar->hDriver != NULL && pCar->hDriver->IsPlayer() )
 		{
@@ -3993,13 +3997,15 @@ void CFuncCarSelfdrive::DriveThink( void )
 {
 	pev->button = 0;
 
-	if( !pCar )
+	if( !hCar )
 	{
 		m_iState = STATE_OFF;
 		SetThink( NULL );
 		DontThink();
 		return;
 	}
+
+	CCar *pCar = (CCar*)(CBaseEntity*)pCar;
 
 	if( b_set_car_params )
 	{
@@ -4021,7 +4027,7 @@ void CFuncCarSelfdrive::DriveThink( void )
 	// find first target (in 2D space)
 	Vector vCarOrg = pCar->GetAbsOrigin();
 	vCarOrg.z = 0;
-	Vector vTargetOrg = pRouteTarget->GetAbsOrigin();
+	Vector vTargetOrg = hRouteTarget->GetAbsOrigin();
 	vTargetOrg.z = 0;
 
 	const float cur_dist_to_t = (vTargetOrg - vCarOrg).Length2D();
@@ -4119,9 +4125,9 @@ void CFuncCarSelfdrive::DriveThink( void )
 	if( cur_dist_to_t < speed )
 	{
 		// get vector to next target ahead of schedule
-		if( pRouteNextTarget )
+		if( hRouteNextTarget )
 		{
-			Vector vNextTargetOrg = pRouteNextTarget->GetAbsOrigin();
+			Vector vNextTargetOrg = hRouteNextTarget->GetAbsOrigin();
 			vNextTargetOrg.z = 0;
 			Vector vec_to_next_target = vNextTargetOrg - vCarOrg;
 			Vector ang_to_next_target = UTIL_VecToAngles( vec_to_next_target );
@@ -4150,20 +4156,20 @@ void CFuncCarSelfdrive::DriveThink( void )
 	}
 
 	int precision = 250;
-	if( pRouteTarget->pev->sequence > 0 )
-		precision = pRouteTarget->pev->sequence;
+	if( hRouteTarget->pev->sequence > 0 )
+		precision = hRouteTarget->pev->sequence;
 
 	if( cur_dist_to_t < precision ) // find next target
 	{
-		if( !FStringNull( pRouteTarget->pev->target ) )
-			UTIL_FireTargets( pRouteTarget->pev->target, this, this, USE_TOGGLE, 0 );
+		if( !FStringNull( hRouteTarget->pev->target ) )
+			UTIL_FireTargets( hRouteTarget->pev->target, this, this, USE_TOGGLE, 0 );
 
-		if( pRouteTarget->pev->frags > 0 )
-			speed_limit = pRouteTarget->pev->frags * 15; // km/h to units
+		if( hRouteTarget->pev->frags > 0 )
+			speed_limit = hRouteTarget->pev->frags * 15; // km/h to units
 		else
 			speed_limit = 0;
 
-		if( FStringNull( pRouteTarget->pev->netname ) )
+		if( FStringNull( hRouteTarget->pev->netname ) )
 		{
 			// don't turn off the car - only using trigger
 			// (if you need to turn it off on last path, just specify it in the target field of the path)
@@ -4174,8 +4180,8 @@ void CFuncCarSelfdrive::DriveThink( void )
 		}
 		else
 		{
-			pRouteTarget = UTIL_FindEntityByTargetname( NULL, STRING( pRouteTarget->pev->netname ) );
-			if( !pRouteTarget )
+			hRouteTarget = UTIL_FindEntityByTargetname( NULL, STRING( hRouteTarget->pev->netname ) );
+			if( !hRouteTarget )
 			{
 				pev->button = 0;
 				SetThink( NULL );
@@ -4185,9 +4191,9 @@ void CFuncCarSelfdrive::DriveThink( void )
 			else
 			{
 				// find the target afterwards, to be used later
-				pRouteNextTarget = NULL;
-				if( !FStringNull( pRouteTarget->pev->netname ) )
-					pRouteNextTarget = UTIL_FindEntityByTargetname( NULL, STRING( pRouteTarget->pev->netname ) );
+				hRouteNextTarget = NULL;
+				if( !FStringNull( hRouteTarget->pev->netname ) )
+					hRouteNextTarget = UTIL_FindEntityByTargetname( NULL, STRING( hRouteTarget->pev->netname ) );
 			}
 		}
 	}

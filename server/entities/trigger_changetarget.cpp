@@ -137,7 +137,7 @@ void CTriggerChangeTarget::ChangeTarget( string_t TargetEnt, string_t NewTarget,
 
 		CBaseMonster *pMonster = pTarget->MyMonsterPointer();
 		if( pMonster )
-			pMonster->m_pGoalEnt = NULL;
+			pMonster->m_hGoalEnt = NULL;
 
 		if( pTarget->IsFuncScreen() )
 			pTarget->Activate(); // HACKHACK update portal camera

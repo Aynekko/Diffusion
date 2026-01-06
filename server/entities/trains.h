@@ -337,7 +337,7 @@ public:
 	int		m_iMoveSnd;	// sound a door makes while moving
 	int		m_iStopSnd;	// sound a door makes when it stops
 
-	CFuncTrackTrain	*m_pTrain;	// my train pointer
+	EHANDLE m_hTrain;	// my train pointer (CFuncTrackTrain)
 	Vector		m_vecOldAngles;
 
 	TRAINDOOR_STATE	door_state;

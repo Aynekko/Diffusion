@@ -169,7 +169,7 @@ public:
 	virtual ~CBaseEntity() {}
 
 	// path corners
-	CBaseEntity	*m_pGoalEnt;	// path corner we are heading towards
+	EHANDLE	m_hGoalEnt;	// path corner we are heading towards
 	CBaseEntity	*m_pLink;		// used for temporary link-list operations. 
 
 	int		m_iOldSolid;	// for temporare change solidity

@@ -19,7 +19,6 @@ public:
 	void Spawn(void);
 	void Activate(void);
 	void Touch(CBaseEntity* pOther);
-	void UnderwaterPushThink(CBaseEntity* pOther); // diffusion - HACKHACK
 	Vector m_vecPushDir;
 };
 LINK_ENTITY_TO_CLASS(trigger_push, CTriggerPush);
@@ -30,7 +29,7 @@ void CTriggerPush::Activate(void)
 		return;	// already initialized
 
 	ClearBits(pev->spawnflags, SF_TRIG_PUSH_SETUP);
-	m_pGoalEnt = GetNextTarget();
+	m_hGoalEnt = GetNextTarget();
 }
 
 /*QUAKED trigger_push (.5 .5 .5) ? TRIG_PUSH_ONCE
@@ -96,7 +95,7 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 	if (pOther->m_hParent != NULL)
 		return;
 
-	if (!FNullEnt(m_pGoalEnt))
+	if( m_hGoalEnt )
 	{
 		if (pev->dmgtime >= gpGlobals->time)
 			return;
@@ -110,7 +109,7 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 		origin = Center();
 
 		// assume m_pGoalEnt is valid
-		time = sqrt((m_pGoalEnt->pev->origin.z - origin.z) / (0.5f * CVAR_GET_FLOAT("sv_gravity")));
+		time = sqrt((m_hGoalEnt->pev->origin.z - origin.z) / (0.5f * CVAR_GET_FLOAT("sv_gravity")));
 
 		if (!time)
 		{
@@ -118,7 +117,7 @@ void CTriggerPush::Touch(CBaseEntity* pOther)
 			return;
 		}
 
-		velocity = m_pGoalEnt->GetAbsOrigin() - origin;
+		velocity = m_hGoalEnt->GetAbsOrigin() - origin;
 		velocity.z = 0.0f;
 		dist = velocity.Length();
 		velocity = velocity.Normalize();

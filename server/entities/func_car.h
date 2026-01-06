@@ -73,22 +73,22 @@ public:
 	Vector pWheel2Org;
 	Vector pWheel3Org;
 	Vector pWheel4Org;
-	CBaseEntity *pWheel1;
-	CBaseEntity *pWheel2;
-	CBaseEntity *pWheel3;
-	CBaseEntity *pWheel4;
-	CBaseEntity *pChassis;
+	EHANDLE pWheel1;
+	EHANDLE pWheel2;
+	EHANDLE pWheel3;
+	EHANDLE pWheel4;
+	EHANDLE pChassis;
 	EHANDLE pCamera1;
-	CBaseEntity *pCamera2;
+	EHANDLE pCamera2;
 	EHANDLE pFreeCam;
-	CBaseEntity *pCarHurt;
-	CBaseAnimating *pDriverMdl;
-	CBaseAnimating *pChassisMdl;
-	CBaseEntity *pTankTower;
-	CBaseEntity *pDoorHandle1;
-	CBaseEntity *pDoorHandle2;
-	CBaseEntity *pExhaust1;
-	CBaseEntity *pExhaust2;
+	EHANDLE pCarHurt;
+	EHANDLE pDriverMdl;
+	EHANDLE pChassisMdl;
+	EHANDLE pTankTower;
+	EHANDLE pDoorHandle1;
+	EHANDLE pDoorHandle2;
+	EHANDLE pExhaust1;
+	EHANDLE pExhaust2;
 
 	int m_iszEngineSnd;
 	static const char *pTireSounds[];
@@ -269,9 +269,9 @@ public:
 	float VerticalVelocity;
 	float BladeSpeed;
 
-	CBaseEntity *pBlade;
+	EHANDLE pBlade;
 	string_t blade;
-	CBaseEntity *pBlade2; // vertical small blade on the tail
+	EHANDLE pBlade2; // vertical small blade on the tail
 	string_t blade2;
 	float BladeAddVel; // not saved
 

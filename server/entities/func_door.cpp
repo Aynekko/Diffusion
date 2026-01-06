@@ -1447,7 +1447,7 @@ BEGIN_DATADESC( CBaseTrainDoor )
 	DEFINE_KEYFIELD( m_iStopSnd, FIELD_STRING, "stopsnd" ),
 	DEFINE_FIELD( m_vecOldAngles, FIELD_VECTOR ),
 	DEFINE_FIELD( door_state, FIELD_CHARACTER ),
-	DEFINE_FIELD( m_pTrain, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hTrain, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_vecPosition1, FIELD_VECTOR ), // all traindoor positions are local
 	DEFINE_FIELD( m_vecPosition2, FIELD_VECTOR ),
 	DEFINE_FIELD( m_vecPosition3, FIELD_VECTOR ),
@@ -1524,8 +1524,9 @@ void CBaseTrainDoor :: FindTrain( void )
 		// found the tracktrain
 		if( FClassnameIs( pEntity->pev, "func_tracktrain" ) )
 		{
-			m_pTrain = (CFuncTrackTrain *)pEntity;
-			m_pTrain->SetTrainDoor( this ); // tell train about door
+			m_hTrain = pEntity;
+			CFuncTrackTrain *pTrain = (CFuncTrackTrain *)(CBaseEntity *)m_hTrain;
+			pTrain->SetTrainDoor( this ); // tell train about door
 			break;
 		}
 	}
@@ -1626,9 +1627,9 @@ void CBaseTrainDoor :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 	if( IsLockedByMaster( ))
 		return;
 
-	if( m_pTrain )
+	if( m_hTrain )
 	{
-		if( m_pTrain->GetLocalVelocity() != g_vecZero || m_pTrain->GetLocalAvelocity() != g_vecZero )
+		if( m_hTrain->GetLocalVelocity() != g_vecZero || m_hTrain->GetLocalAvelocity() != g_vecZero )
 		{	
 			if( !HasSpawnFlags( SF_TRAINDOOR_OPEN_IN_MOVING ))
 			{
@@ -1704,10 +1705,11 @@ void CBaseTrainDoor :: ActivateTrain( void )
 	switch( pev->impulse )
 	{
 	case 1:	// activate train
-		if( m_pTrain )
+		if( m_hTrain )
 		{
-			m_pTrain->pev->speed = m_pTrain->GetMaxSpeed();
-			m_pTrain->Next();
+			CFuncTrackTrain *pTrain = (CFuncTrackTrain *)(CBaseEntity *)m_hTrain;
+			pTrain->pev->speed = pTrain->GetMaxSpeed();
+			pTrain->Next();
 		}
 		break;
 	case 2:	// activate trackchange
@@ -1806,8 +1808,8 @@ void CBaseTrainDoor :: DoorHitTop( void )
 		switch( pev->impulse )
 		{
 		case 1:	// deactivate train
-			if( m_pTrain )
-				m_pTrain->pev->speed = 0;
+			if( m_hTrain )
+				m_hTrain->pev->speed = 0;
 			break;
 		case 2:	// cancel trackchange
 			m_hActivator = NULL;

@@ -18,18 +18,14 @@ public:
 	void EXPORT FlyThink();
 	virtual BOOL IsProjectile( void ) { return TRUE; }
 
-//	virtual int		Save(CSave &save);
-//	virtual int		Restore(CRestore &restore);
-//	static	TYPEDESCRIPTION m_SaveData[];
-
 	void CreateEffects();
 	void ClearEffects();
 	void UpdateOnRemove();
 
-	CBeam *m_pBeam;
-	CBeam *m_pNoise;
+	EHANDLE m_hBeam;
+	EHANDLE m_hNoise;
 	bool SetSpriteModel;
-	CSprite *m_pSprite2;
+	EHANDLE m_hSprite2;
 
 	int EffectsCreated;
 	int BeamsRelinked; // relink beams on saverestore.

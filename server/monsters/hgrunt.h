@@ -73,10 +73,10 @@ public:
 	bool CanSpawnDrone;
 	bool DroneSpawned;
 	int m_iFlashlightCap;
-	CSprite *FlashlightSpr;
+	EHANDLE FlashlightSpr;
 	//monster_alien_soldier:
 	int AlternateShoot;
-	CSprite *AlienEye;
+	EHANDLE AlienEye;
 
 //	int	Save(CSave &save);
 //	int Restore(CRestore &restore);

@@ -110,7 +110,7 @@ public:
 	BOOL StartControl( CBasePlayer* pController, CFuncTankControls* pControls );
 	void StopControl( CBasePlayer *pController, CFuncTankControls* pControls );
 
-	CFuncTankControls	*m_pControls;	// tankcontrols is used as a go-between.
+	EHANDLE m_hControls;	// tankcontrols is used as a go-between.
 
 	virtual BOOL IsTank( void ) { return TRUE; }
 
@@ -159,7 +159,7 @@ protected:
 	int		m_iTankClass;	// Behave As
 
 	// diffusion additions
-	CBeam	*m_pBeam; // laser guide
+	EHANDLE m_hBeam; // laser guide
 
 	bool ReloadingFunction; // this tank can reload - TRUE if TankClipSize > 0
 	int TankClipSize;
@@ -205,7 +205,7 @@ public:
 
 	BOOL OnControls( CBaseEntity *pTest );
 
-	CBasePlayer	*m_pController;
+	EHANDLE m_hController; // player pointer
 	Vector		m_vecControllerUsePos; // where was the player standing when he used me?
 	int		m_iTankName[MAX_CONTROLLED_TANKS]; // list if indexes into global string array
 	int		m_cTanks; // the total number of targets in this manager's fire list.
@@ -250,11 +250,11 @@ BEGIN_DATADESC( CBaseTank )
 	DEFINE_FIELD( m_pitchCenter, FIELD_FLOAT ),
 	DEFINE_FIELD( m_fireLast, FIELD_TIME ),
 	DEFINE_FIELD( m_lastSightTime, FIELD_TIME ),
-	DEFINE_FIELD( m_pControls, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hControls, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_flNextAttack, FIELD_TIME ),
 	DEFINE_FIELD( m_sightOrigin, FIELD_VECTOR ),
 	DEFINE_FIELD( m_barrelPos, FIELD_VECTOR ),
-	DEFINE_FIELD( m_pBeam, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hBeam, FIELD_EHANDLE ),
 	DEFINE_FIELD( ReloadingFunction, FIELD_BOOLEAN ),
 	DEFINE_FIELD( ReloadStartTime, FIELD_TIME ),
 	DEFINE_FIELD( TankClipSize, FIELD_INTEGER ),
@@ -541,7 +541,7 @@ void CBaseTank :: KeyValue( KeyValueData *pkvd )
 
 BOOL CBaseTank :: StartControl( CBasePlayer *pController, CFuncTankControls *pControls )
 {
-	if ( m_pControls != NULL )
+	if ( m_hControls != NULL )
 		return FALSE;
 
 	if( MonsterIsControlling )
@@ -561,12 +561,12 @@ BOOL CBaseTank :: StartControl( CBasePlayer *pController, CFuncTankControls *pCo
 	// otherwise it's controlled by reloading state
 	if( ReloadingFunction == false )
 	{
-		if( m_pBeam )
-			m_pBeam->SetBrightness( LASER_BRIGHTNESS );
+		if( m_hBeam )
+			m_hBeam->pev->renderamt = LASER_BRIGHTNESS;
 	}
 
 	m_iState = STATE_ON;
-	m_pControls = pControls;
+	m_hControls = pControls;
 
 	if( HasSpawnFlags( SF_TANK_ZOOM ) )
 	{
@@ -581,7 +581,7 @@ BOOL CBaseTank :: StartControl( CBasePlayer *pController, CFuncTankControls *pCo
 
 void CBaseTank :: StopControl( CBasePlayer *pController, CFuncTankControls *pControls )
 {
-	if( !m_pControls || m_pControls != pControls )
+	if( !m_hControls || m_hControls != pControls )
 		return;
 
 	ALERT( at_aiconsole, "leave TANK!\n");
@@ -592,8 +592,8 @@ void CBaseTank :: StopControl( CBasePlayer *pController, CFuncTankControls *pCon
 
 	if( HasSpawnFlags(SF_TANK_LASERGUIDE) )
 	{
-		if( m_pBeam )
-			m_pBeam->SetBrightness( 0 );
+		if( m_hBeam )
+			m_hBeam->pev->renderamt = 0;
 	}
 
     m_iState = STATE_OFF;
@@ -601,7 +601,7 @@ void CBaseTank :: StopControl( CBasePlayer *pController, CFuncTankControls *pCon
 
 	DontThink();
 	SetLocalAvelocity( g_vecZero );
-	m_pControls = NULL;
+	m_hControls = NULL;
 
 	pController->m_flFOV = 0;
 	ZoomState = 0;
@@ -623,14 +623,14 @@ void CBaseTank :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 		if( IsActive() )
 		{
 			TankDeactivate();
-			if(m_pBeam)
-				m_pBeam->SetBrightness( 0 );
+			if( m_hBeam )
+				m_hBeam->pev->renderamt = 0;
 		}
 		else
 		{
 			TankActivate();
-			if(m_pBeam)
-				m_pBeam->SetBrightness( LASER_BRIGHTNESS );
+			if( m_hBeam )
+				m_hBeam->pev->renderamt = LASER_BRIGHTNESS;
 		}
 //	}
 }
@@ -853,8 +853,8 @@ void CBaseTank::CheckMonster(void)
 				MonsterIsControlling = false;
 				MonsterName = NULL; // no monster, no more checking for him
 				TankDeactivate();
-				if( m_pBeam )
-					m_pBeam->SetBrightness( 0 );
+				if( m_hBeam )
+					m_hBeam->pev->renderamt = 0;
 			}
 		}
 		else
@@ -865,11 +865,11 @@ void CBaseTank::CheckMonster(void)
 				MonsterIsControlling = false;
 				MonsterName = NULL; // no monster, no more checking for him
 				m_hMonster = NULL;
-				if( !m_pControls ) // in case the check was performed when player took controls
+				if( !m_hControls ) // in case the check was performed when player took controls
 				{
 					TankDeactivate();
-					if( m_pBeam )
-						m_pBeam->SetBrightness( 0 );
+					if( m_hBeam )
+						m_hBeam->pev->renderamt = 0;
 				}
 			}
 			else
@@ -901,9 +901,12 @@ void CBaseTank::LaserGuide(void)
 				if( !m_hLaserPoint->pev->model )
 					m_hLaserPoint->SetNullModel(); // force to client :)
 				
-				m_pBeam = CBeam::BeamCreate( g_pModelNameLaser, 10 );
-				if( m_pBeam )
-					m_pBeam->PointEntInit( m_hLaserPoint->GetAbsOrigin(), m_hLaserPoint->entindex() );
+				m_hBeam = CBeam::BeamCreate( g_pModelNameLaser, 10 );
+				if( m_hBeam )
+				{
+					CBeam *pBeam = (CBeam *)(CBaseEntity *)m_hBeam;
+					pBeam->PointEntInit( m_hLaserPoint->GetAbsOrigin(), m_hLaserPoint->entindex() );
+				}
 			}
 			else
 			{
@@ -914,31 +917,38 @@ void CBaseTank::LaserGuide(void)
 		else // no laser point specified - use tank's origin
 		{
 			m_hLaserPoint = this;	
-			m_pBeam = CBeam::BeamCreate( g_pModelNameLaser, 10 );
-			if( m_pBeam )
-				m_pBeam->PointEntInit( m_hLaserPoint->GetAbsOrigin() + gpGlobals->v_forward * 2, m_hLaserPoint->entindex() );
+			m_hBeam = CBeam::BeamCreate( g_pModelNameLaser, 10 );
+			if( m_hBeam )
+			{
+				CBeam *pBeam = (CBeam *)(CBaseEntity *)m_hBeam;
+				pBeam->PointEntInit( m_hLaserPoint->GetAbsOrigin() + gpGlobals->v_forward * 2, m_hLaserPoint->entindex() );
+			}
 		}
 
-		if( m_pBeam )
+		if( m_hBeam )
 		{
-			m_pBeam->SetColor( 255, 0, 0 );
-			m_pBeam->SetScrollRate( 255 );
+			CBeam *pBeam = (CBeam *)(CBaseEntity *)m_hBeam;
+			pBeam->SetColor( 255, 0, 0 );
+			pBeam->SetScrollRate( 255 );
 			if( IsActive() )
-				m_pBeam->SetBrightness( LASER_BRIGHTNESS );
+				pBeam->SetBrightness( LASER_BRIGHTNESS );
 			else
-				m_pBeam->SetBrightness( 0 );
-			m_pBeam->SetWidth( 2 );
+				pBeam->SetBrightness( 0 );
+			pBeam->SetWidth( 2 );
 		}
 	}
 	
-	if( m_pBeam )
+	if( m_hBeam )
 	{
 		TraceResult tracer;
 		Vector vecCurrentAim = GetAbsAngles();
 		UTIL_MakeVectors( vecCurrentAim );
 		Vector vecStart = m_hLaserPoint->GetAbsOrigin();
 		Vector vecEnd = vecStart + (gpGlobals->v_forward * 5000);
-		if( m_pControls && m_pControls->m_pController )
+		CFuncTankControls *pControls = NULL;
+		if( m_hControls )
+			pControls = (CFuncTankControls *)(CBaseEntity *)m_hControls;
+		if( pControls && pControls->m_hController )
 		{
 			vecEnd.x += sin( gpGlobals->time * 0.2 ) * 4;   // moving speed * amplitude
 			vecEnd.y += sin( gpGlobals->time * 0.5 ) * 4;
@@ -953,7 +963,8 @@ void CBaseTank::LaserGuide(void)
 
 		UTIL_TraceLine( vecStart, vecEnd, dont_ignore_monsters, dont_ignore_glass, edict(), &tracer );
 
-		m_pBeam->SetStartPos( tracer.vecEndPos );
+		CBeam *pBeam = (CBeam *)(CBaseEntity *)m_hBeam;
+		pBeam->SetStartPos( tracer.vecEndPos );
 	}
 }
 
@@ -1001,10 +1012,13 @@ void CBaseTank :: TrackTarget( void )
 	CBaseEntity *pTarget;
 
 	// Get a position to aim for
-	if( m_pControls && m_pControls->m_pController )
+	CFuncTankControls *pControls = NULL;
+	if( m_hControls )
+		pControls = (CFuncTankControls *)(CBaseEntity *)m_hControls;
+	if( pControls && pControls->m_hController )
 	{
 		// Tanks attempt to mirror the player's angles
-		pController = m_pControls->m_pController;
+		pController = (CBasePlayer*)(CBaseEntity*)pControls->m_hController;
 		pController->pev->viewmodel = 0;
 		SetNextThink( 0 ); // diffusion - was 0.05
 
@@ -1218,8 +1232,8 @@ void CBaseTank :: TrackTarget( void )
 			{
 				ReloadStartTime = gpGlobals->time + ReloadingTime;
 				EMIT_SOUND( edict(), CHAN_VOICE, STRING(m_iszReloadSound), 1, 1.4 );
-				if( m_pBeam )
-					m_pBeam->SetBrightness( 0 );
+				if( m_hBeam )
+					m_hBeam->pev->renderamt = 0;
 				BulletsFired = 0;
 			}
 		}
@@ -1330,8 +1344,8 @@ void CBaseTank :: TrackTarget( void )
 	{
 		if( (TankClipSize > 0) && (gpGlobals->time > ReloadStartTime + 1) ) // FIXME somehow it turns on way too early, gotta add a second
 		{
-			if( m_pBeam )
-				m_pBeam->SetBrightness( LASER_BRIGHTNESS );
+			if( m_hBeam )
+				m_hBeam->pev->renderamt = LASER_BRIGHTNESS;
 		}
 	}
 
@@ -1409,14 +1423,14 @@ void CBaseTank :: Fire( const Vector &barrelEnd, const Vector &forward, entvars_
 			{
 				ReloadStartTime = gpGlobals->time + ReloadingTime;
 				EMIT_SOUND( edict(), CHAN_VOICE, STRING(m_iszReloadSound), 1, 1.4 );
-				if( m_pBeam )
-					m_pBeam->SetBrightness( 0 );
+				if( m_hBeam )
+					m_hBeam->pev->renderamt = 0;
 				BulletsFired = 0;
 			}
 			else
 			{
-				if( m_pBeam )
-					m_pBeam->SetBrightness( LASER_BRIGHTNESS );
+				if( m_hBeam )
+					m_hBeam->pev->renderamt = LASER_BRIGHTNESS;
 			}
 		}
 	}
@@ -1458,10 +1472,10 @@ void CBaseTank :: StopRotSound( void )
 
 void CBaseTank :: ClearEffects(void)
 {
-	if (m_pBeam)
+	if (m_hBeam)
 	{
-		UTIL_Remove( m_pBeam );
-		m_pBeam = NULL;
+		UTIL_Remove( m_hBeam );
+		m_hBeam = NULL;
 	}
 }
 
@@ -1536,19 +1550,19 @@ public:
 	void	KeyValue( KeyValueData *pkvd );
 	void	Fire( const Vector &barrelEnd, const Vector &forward, entvars_t *pevAttacker );
 	void	Think( void );
-	CLaser	*GetLaser( void );
+	EHANDLE GetLaser( void );
 	virtual void StopFire( void );
 
 	DECLARE_DATADESC();
 private:
-	CLaser	*m_pLaser;
+	EHANDLE m_hLaser;
 	float	m_laserTime;
 };
 
 LINK_ENTITY_TO_CLASS( func_tanklaser, CFuncTankLaser );
 
 BEGIN_DATADESC( CFuncTankLaser )
-	DEFINE_FIELD( m_pLaser, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hLaser, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_laserTime, FIELD_TIME ),
 END_DATADESC()
 
@@ -1562,7 +1576,8 @@ void CFuncTankLaser :: Activate( void )
 	}
 	else
 	{
-		m_pLaser->TurnOff();
+		CLaser *pLaser = (CLaser *)(CBaseEntity *)m_hLaser;
+		pLaser->TurnOff();
 	}
 
 	m_bulletType = TANK_BULLET_OTHER;
@@ -1583,10 +1598,10 @@ void CFuncTankLaser :: KeyValue( KeyValueData *pkvd )
 	}
 }
 
-CLaser *CFuncTankLaser :: GetLaser( void )
+EHANDLE CFuncTankLaser :: GetLaser( void )
 {
-	if( m_pLaser )
-		return m_pLaser;
+	if( m_hLaser )
+		return m_hLaser;
 
 	CBaseEntity *pEntity;
 
@@ -1597,7 +1612,7 @@ CLaser *CFuncTankLaser :: GetLaser( void )
 		// Found the laser
 		if( FClassnameIs( pEntity->pev, "env_laser" ))
 		{
-			m_pLaser = (CLaser *)pEntity;
+			m_hLaser = pEntity;
 			break;
 		}
 		else
@@ -1605,13 +1620,16 @@ CLaser *CFuncTankLaser :: GetLaser( void )
 			pEntity = UTIL_FindEntityByTargetname( pEntity, STRING( pev->message ));
 		}
 	}
-	return m_pLaser;
+	return m_hLaser;
 }
 
 void CFuncTankLaser :: Think( void )
 {
-	if( m_pLaser && ( gpGlobals->time > m_laserTime + 0.1 )) // diffusion - I added 0.1 because the laser is now thinking every frame
-		m_pLaser->TurnOff();
+	if( m_hLaser && (gpGlobals->time > m_laserTime + 0.1) ) // diffusion - I added 0.1 because the laser is now thinking every frame
+	{
+		CLaser *pLaser = (CLaser *)(CBaseEntity *)m_hLaser;
+		pLaser->TurnOff();
+	}
 
 	CBaseTank::Think();
 }
@@ -1620,7 +1638,9 @@ void CFuncTankLaser :: Fire( const Vector &barrelEnd, const Vector &forward, ent
 {
 	TraceResult tr;
 
-	if( m_fireLast != 0 && GetLaser() )
+	CLaser *pLaser = (CLaser *)(CBaseEntity *)GetLaser();
+
+	if( m_fireLast != 0 && pLaser )
 	{
 		// TankTrace needs gpGlobals->v_up, etc.
 		UTIL_MakeAimVectors( GetAbsAngles( ));
@@ -1630,15 +1650,15 @@ void CFuncTankLaser :: Fire( const Vector &barrelEnd, const Vector &forward, ent
 		{
 			for( int i = 0; i < bulletCount; i++ )
 			{
-				m_pLaser->SetAbsOrigin( barrelEnd );
+				pLaser->SetAbsOrigin( barrelEnd );
 				TankTrace( barrelEnd, forward, gTankSpread[m_spread], tr );
 				
 				m_laserTime = gpGlobals->time;
-				m_pLaser->TurnOn();
-				m_pLaser->pev->dmgtime = gpGlobals->time - 1.0f;
-				m_pLaser->FireAtPoint( barrelEnd, tr );
-			//	m_pLaser->SetNextThink( 0 ); // diffusion - this was a mistake from XashXT...
-				m_pLaser->DontThink();
+				pLaser->TurnOn();
+				pLaser->pev->dmgtime = gpGlobals->time - 1.0f;
+				pLaser->FireAtPoint( barrelEnd, tr );
+			//	pLaser->SetNextThink( 0 ); // diffusion - this was a mistake from XashXT...
+				pLaser->DontThink();
 			}
 
 			BaseClass::Fire( barrelEnd, forward, pev );
@@ -1652,8 +1672,11 @@ void CFuncTankLaser :: Fire( const Vector &barrelEnd, const Vector &forward, ent
 
 void CFuncTankLaser::StopFire( void )
 {
-	if( m_pLaser )
-		m_pLaser->TurnOff();
+	if( m_hLaser )
+	{
+		CLaser *pLaser = (CLaser *)(CBaseEntity *)m_hLaser;
+		pLaser->TurnOff();
+	}
 }
 
 
@@ -1687,9 +1710,10 @@ void CFuncTankRocket :: Fire( const Vector &barrelEnd, const Vector &forward, en
 		{
 			for( int i = 0; i < bulletCount; i++ )
 			{
-				if( m_pControls )
+				if( m_hControls )
 				{
-					CBaseEntity *pRocket = CBaseEntity::Create( "robo_rocket", barrelEnd, GetAbsAngles(), m_pControls->m_pController->edict() );
+					CFuncTankControls *pControls = (CFuncTankControls *)(CBaseEntity *)m_hControls;
+					CBaseEntity *pRocket = CBaseEntity::Create( "robo_rocket", barrelEnd, GetAbsAngles(), pControls->m_hController->edict() );
 					if( m_iBulletDamage && pRocket )
 						pRocket->pev->dmg = m_iBulletDamage;
 				}
@@ -1739,9 +1763,10 @@ void CFuncTankBall :: Fire( const Vector &barrelEnd, const Vector &forward, entv
 		{
 			for( int i = 0; i < bulletCount; i++ )
 			{
-				if( m_pControls )
+				if( m_hControls )
 				{
-					CBaseEntity *pRocket = CBaseEntity::Create( "shootball", barrelEnd, GetAbsAngles(), m_pControls->m_pController->edict() );
+					CFuncTankControls *pControls = (CFuncTankControls *)(CBaseEntity *)m_hControls;
+					CBaseEntity *pRocket = CBaseEntity::Create( "shootball", barrelEnd, GetAbsAngles(), pControls->m_hController->edict() );
 					pRocket->SetAbsVelocity( forward * 1000 );
 				}
 				else
@@ -1823,7 +1848,7 @@ void CFuncTankMortar::Fire( const Vector &barrelEnd, const Vector &forward, entv
 LINK_ENTITY_TO_CLASS( func_tankcontrols, CFuncTankControls );
 
 BEGIN_DATADESC( CFuncTankControls )
-	DEFINE_FIELD( m_pController, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hController, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_vecControllerUsePos, FIELD_VECTOR ),
 	DEFINE_ARRAY( m_iTankName, FIELD_STRING, MAX_CONTROLLED_TANKS ),
 	DEFINE_FIELD( m_cTanks, FIELD_INTEGER ),
@@ -1914,7 +1939,7 @@ void CFuncTankControls :: HandleTank ( CBaseEntity *pActivator, CBaseEntity *m_p
 
 void CFuncTankControls :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 { 
-	if( !m_pController && useType != USE_OFF )
+	if( !m_hController && useType != USE_OFF )
 	{
 		if( !pActivator || !( pActivator->IsPlayer( )))
 			return;
@@ -1938,19 +1963,20 @@ void CFuncTankControls :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 		if( m_iState == STATE_ON )
 		{
 			// we found at least one tank to use, so holster player's weapon
-			m_pController = (CBasePlayer *)pActivator;
-			m_pController->m_pTank = this;
+			m_hController = pActivator;
+			CBasePlayer *pController = (CBasePlayer *)(CBaseEntity *)m_hController;
+			pController->m_pTank = this;
 
-			m_pController->HideWeapons( TRUE );
+			pController->HideWeapons( TRUE );
 
 			// remember where the player's standing, so we can tell when he walks away
 			if( m_hParent != NULL && FClassnameIs( m_hParent->pev, "func_tracktrain" ))
 			{
 				// transform controller pos into local space because parent can be moving
-				m_vecControllerUsePos = m_pController->EntityToWorldTransform().VectorITransform( m_pController->GetAbsOrigin() );
+				m_vecControllerUsePos = pController->EntityToWorldTransform().VectorITransform( pController->GetAbsOrigin() );
 			}
 			else
-				m_vecControllerUsePos = m_pController->GetAbsOrigin();
+				m_vecControllerUsePos = pController->GetAbsOrigin();
 
 			SetFlag(F_ENTITY_UNUSEABLE); // do not draw USE icon on the screen
 
@@ -1959,7 +1985,7 @@ void CFuncTankControls :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 				UTIL_FireTargets( TargetActivate, pActivator, pCaller, useType, value );
 		}
 	}
-	else if( m_pController && useType != USE_ON )
+	else if( m_hController && useType != USE_ON )
 	{
 		// find all specified tanks
 		for( int i = 0; i < m_cTanks; i++ )
@@ -1975,10 +2001,11 @@ void CFuncTankControls :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 		}
 		
 		// bring back player's weapons
-		m_pController->HideWeapons( FALSE );
+		CBasePlayer *pController = (CBasePlayer *)(CBaseEntity *)m_hController;
+		pController->HideWeapons( FALSE );
+		pController->m_pTank = NULL;
+		pController = NULL;
 
-		m_pController->m_pTank = NULL;
-		m_pController = NULL;
 		m_iState = STATE_OFF;
 
 		RemoveFlag(F_ENTITY_UNUSEABLE);

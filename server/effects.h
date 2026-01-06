@@ -234,11 +234,11 @@ public:
 	int	m_iProjection;
 	int	m_iStoppedBy;
 
-	CSprite	*m_pSprite;
+	EHANDLE m_hSprite;
 	string_t	m_iszSpriteName;
 	Vector	m_firePosition;
 protected:
-	CBeam	*m_pReflectedBeams[MAX_REFLECTED_BEAMS];
+	EHANDLE m_hReflectedBeams[MAX_REFLECTED_BEAMS];
 };
 
 

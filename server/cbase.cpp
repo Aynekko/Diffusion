@@ -1373,7 +1373,7 @@ void CBaseEntity :: Teleport( const Vector *newPosition, const Vector *newAngles
 }
 
 BEGIN_DATADESC_NO_BASE( CBaseEntity )
-	DEFINE_FIELD( m_pGoalEnt, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hGoalEnt, FIELD_EHANDLE ),
 
 	DEFINE_KEYFIELD( m_iParent, FIELD_STRING, "parent" ),
 	DEFINE_FIELD( m_hParent, FIELD_EHANDLE ),

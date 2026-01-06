@@ -376,7 +376,7 @@ public:
 	void FollowerUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void CheckFire(void);
 
-	bool FlashlightCap; // this monster has flashlight
+	bool bFlashlightCap; // this monster has flashlight
 
 	CBaseEntity* DropItem ( const char *pszItemName, const Vector &vecPos, const Vector &vecAng );// drop an item.
 	

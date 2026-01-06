@@ -37,7 +37,7 @@ void CBaseSpectator::SpectatorConnect(void)
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NOCLIP;
 	
-	m_pGoalEnt = NULL;
+	m_hGoalEnt = NULL;
 }
 
 /*
@@ -143,5 +143,5 @@ void CBaseSpectator::Spawn()
 	pev->solid = SOLID_NOT;
 	pev->movetype = MOVETYPE_NOCLIP;
 	
-	m_pGoalEnt = NULL;
+	m_hGoalEnt = NULL;
 }

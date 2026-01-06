@@ -635,9 +635,9 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 	m_IdealMonsterState = MONSTERSTATE_DEAD;
 
 	// clear monster's flashlight
-	if (FlashlightCap && (pev->effects & EF_MONSTERFLASHLIGHT) )
+	if (bFlashlightCap && (pev->effects & EF_MONSTERFLASHLIGHT) )
 	{
-		FlashlightCap = false;
+		bFlashlightCap = false;
 		pev->effects &= ~EF_MONSTERFLASHLIGHT;
 	}
 }

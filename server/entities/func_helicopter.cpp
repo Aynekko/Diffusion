@@ -36,18 +36,18 @@ BEGIN_DATADESC( CHelicopter )
 	DEFINE_FUNCTION( Setup ),
 	DEFINE_FUNCTION( Drive ),
 	DEFINE_FUNCTION( Idle ),
-	DEFINE_FIELD( pChassis, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pBlade, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pBlade2, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pChassis, FIELD_EHANDLE ),
+	DEFINE_FIELD( pBlade, FIELD_EHANDLE ),
+	DEFINE_FIELD( pBlade2, FIELD_EHANDLE ),
 	DEFINE_FIELD( pCamera1, FIELD_EHANDLE ),
-	DEFINE_FIELD( pCamera2, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pCamera2, FIELD_EHANDLE ),
 	DEFINE_FIELD( pFreeCam, FIELD_EHANDLE ),
-	DEFINE_FIELD( pCarHurt, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pDriverMdl, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pChassisMdl, FIELD_CLASSPTR ),
-	DEFINE_FIELD( pTankTower, FIELD_CLASSPTR ), // I honestly still don't get it - why do I have to put this here again if it's already defined in the saverestore table in the base class, where this variable is taken from?
+	DEFINE_FIELD( pCarHurt, FIELD_EHANDLE ),
+	DEFINE_FIELD( pDriverMdl, FIELD_EHANDLE ),
+	DEFINE_FIELD( pChassisMdl, FIELD_EHANDLE ),
+	DEFINE_FIELD( pTankTower, FIELD_EHANDLE ), // I honestly still don't get it - why do I have to put this here again if it's already defined in the saverestore table in the base class, where this variable is taken from?
 	DEFINE_KEYFIELD( TankTowerRotationOffset, FIELD_INTEGER, "tank_tower_rotation" ),
-	DEFINE_FIELD( pDoorHandle1, FIELD_CLASSPTR ),
+	DEFINE_FIELD( pDoorHandle1, FIELD_EHANDLE ),
 	DEFINE_KEYFIELD( m_iszEngineSnd, FIELD_STRING, "enginesnd" ),
 	DEFINE_KEYFIELD( m_iszIdleSnd, FIELD_STRING, "idlesnd" ),
 	DEFINE_FIELD( AllowCamera, FIELD_BOOLEAN ),
@@ -415,7 +415,7 @@ void CHelicopter::Setup( void )
 	if( pBlade )
 	{
 		if( pChassis )
-			pBlade->SetParent( pChassis );
+			pBlade->SetParent( (CBaseEntity *)pChassis );
 		else
 			pBlade->SetParent( this );
 		pBlade->pev->movetype = MOVETYPE_NOCLIP;
@@ -428,7 +428,7 @@ void CHelicopter::Setup( void )
 	if( pBlade2 )
 	{
 		if( pChassis )
-			pBlade2->SetParent( pChassis );
+			pBlade2->SetParent( (CBaseEntity *)pChassis );
 		else
 			pBlade2->SetParent( this );
 		pBlade2->pev->movetype = MOVETYPE_NOCLIP;
@@ -444,7 +444,7 @@ void CHelicopter::Setup( void )
 	if( pDriverMdl )
 	{
 		if( pChassis )
-			pDriverMdl->SetParent( pChassis );
+			pDriverMdl->SetParent( (CBaseEntity *)pChassis );
 		else
 			pDriverMdl->SetParent( this );
 		pDriverMdl->pev->effects |= EF_NODRAW;
@@ -477,7 +477,7 @@ void CHelicopter::Setup( void )
 		// reset USE flag, car can be USE-pressed through handle only
 		ObjectCaps();
 		if( pChassisMdl )
-			pDoorHandle1->SetParent( pChassisMdl );
+			pDoorHandle1->SetParent( (CBaseEntity *)pChassisMdl );
 		else
 			pDoorHandle1->SetParent( this );
 
@@ -486,7 +486,7 @@ void CHelicopter::Setup( void )
 		if( pDoorHandle2 )
 		{
 			if( pChassisMdl )
-				pDoorHandle2->SetParent( pChassisMdl );
+				pDoorHandle2->SetParent( (CBaseEntity *)pChassisMdl );
 			else
 				pDoorHandle2->SetParent( this );
 
@@ -497,9 +497,9 @@ void CHelicopter::Setup( void )
 	if( pTankTower )
 	{
 		if( pChassisMdl )
-			pTankTower->SetParent( pChassisMdl );
+			pTankTower->SetParent( (CBaseEntity *)pChassisMdl );
 		else if( pChassis )
-			pTankTower->SetParent( pChassis );
+			pTankTower->SetParent( (CBaseEntity *)pChassis );
 		else
 			pTankTower->SetParent( this );
 	}
@@ -975,16 +975,17 @@ void CHelicopter::Drive( void )
 	{
 		int f = Forward;
 		if( f == 0 ) f = 1; // ¯\_(ツ)_/¯
-		pDriverMdl->SetBlending( 0, -f * 100 * Turning );
+		CBaseAnimating *DriverMdl = (CBaseAnimating *)(CBaseEntity *)pDriverMdl;
+		DriverMdl->SetBlending( 0, -f * 100 * Turning );
 
 		bool SpecialAnim = false;
 
 		if( (CarSpeed < 25) && (bBack()) && !(pev->flags & FL_ONGROUND) )
-			DriverMdlSequence = pDriverMdl->LookupSequence( "lookback" );
+			DriverMdlSequence = DriverMdl->LookupSequence( "lookback" );
 		else if( InAir && !(pev->flags & FL_ONGROUND) )
-			DriverMdlSequence = pDriverMdl->LookupSequence( "Tpamplin" );
+			DriverMdlSequence = DriverMdl->LookupSequence( "Tpamplin" );
 		else if( CarSpeed >= 0 )
-			DriverMdlSequence = pDriverMdl->LookupSequence( "idle" );
+			DriverMdlSequence = DriverMdl->LookupSequence( "idle" );
 
 		// special anims, reserve a second
 		if( (ColPoint.Length() > 0) && (AbsCarSpeed > 200) )
@@ -992,22 +993,22 @@ void CHelicopter::Drive( void )
 			SpecialAnim = true;
 
 			if( CarSpeed > 0 )
-				DriverMdlSequence = pDriverMdl->LookupSequence( "damag" );
+				DriverMdlSequence = DriverMdl->LookupSequence( "damag" );
 			else if( CarSpeed < -0 )
-				DriverMdlSequence = pDriverMdl->LookupSequence( "damagback" );
+				DriverMdlSequence = DriverMdl->LookupSequence( "damagback" );
 		}
 
 		if( TookDamage )
 		{
-			DriverMdlSequence = pDriverMdl->LookupSequence( "damag" );
+			DriverMdlSequence = DriverMdl->LookupSequence( "damag" );
 			SpecialAnim = true;
 		}
 
-		if( pDriverMdl->pev->sequence != DriverMdlSequence && driveranimtime < gpGlobals->time )
+		if( DriverMdl->pev->sequence != DriverMdlSequence && driveranimtime < gpGlobals->time )
 		{
-			pDriverMdl->pev->sequence = DriverMdlSequence;
-			pDriverMdl->pev->frame = 0;
-			pDriverMdl->ResetSequenceInfo();
+			DriverMdl->pev->sequence = DriverMdlSequence;
+			DriverMdl->pev->frame = 0;
+			DriverMdl->ResetSequenceInfo();
 			if( SpecialAnim )
 				driveranimtime = gpGlobals->time + 0.5;
 		}
@@ -1088,7 +1089,8 @@ void CHelicopter::Drive( void )
 
 		int k = Forward;
 		if( k == 0 ) k = 1;
-		pChassisMdl->SetBlending( 0, -k * Turning * 100 );
+		CBaseAnimating *ChassisMdl = (CBaseAnimating *)(CBaseEntity *)pChassisMdl;
+		ChassisMdl->SetBlending( 0, -k * Turning * 100 );
 	}
 
 	SetLocalAngles( HeliAng ); // car direction is now set
@@ -1399,7 +1401,8 @@ void CHelicopter::Idle( void )
 
 		int k = Forward;
 		if( k == 0 ) k = 1;
-		pChassisMdl->SetBlending( 0, -k * Turning * 100 );
+		CBaseAnimating *ChassisMdl = (CBaseAnimating *)(CBaseEntity *)pChassisMdl;
+		ChassisMdl->SetBlending( 0, -k * Turning * 100 );
 	}
 
 	SetLocalAngles( HeliAng ); // car direction is now set

@@ -35,7 +35,7 @@ void CTriggerFlashlight::FireOnEntry(CBaseEntity* pOther)
 	
 	CBaseMonster* pMonster = (CBaseMonster*)pOther;
 
-	if( pMonster->FlashlightCap && !(pMonster->pev->effects & EF_MONSTERFLASHLIGHT) )
+	if( pMonster->bFlashlightCap && !(pMonster->pev->effects & EF_MONSTERFLASHLIGHT) )
 		pMonster->pev->effects |= EF_MONSTERFLASHLIGHT;
 }
 
@@ -48,6 +48,6 @@ void CTriggerFlashlight::FireOnLeaving(CBaseEntity* pOther)
 
 	CBaseMonster* pMonster = (CBaseMonster*)pOther;
 
-	if( pMonster->FlashlightCap && (pMonster->pev->effects & EF_MONSTERFLASHLIGHT) )
+	if( pMonster->bFlashlightCap && (pMonster->pev->effects & EF_MONSTERFLASHLIGHT) )
 		pMonster->pev->effects &= ~EF_MONSTERFLASHLIGHT;
 }

@@ -50,7 +50,7 @@ public:
 
 	DECLARE_DATADESC();
 
-	CBasePlayer *m_pController;	// player pointer
+	EHANDLE m_hController;	// player pointer
 	Vector m_vecControllerUsePos; // where was the player standing when he used me?
 	float m_flDisableTime;	// portal disable time
 };
@@ -58,7 +58,7 @@ public:
 LINK_ENTITY_TO_CLASS( func_monitor, CFuncMonitor );
 
 BEGIN_DATADESC( CFuncMonitor )
-	DEFINE_FIELD( m_pController, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hController, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_vecControllerUsePos, FIELD_VECTOR ),
 	DEFINE_FIELD( m_flDisableTime, FIELD_TIME ),
 	DEFINE_FIELD( m_hCachedCamera, FIELD_EHANDLE ),
@@ -310,18 +310,19 @@ void CFuncMonitor :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 				if( m_iState == STATE_ON )
 				{
 					UTIL_SetView( pActivator, pev->target );
-					m_pController = (CBasePlayer *)pActivator;
+					m_hController = pActivator;
+					CBasePlayer *pController = (CBasePlayer *)(CBaseEntity*)m_hController;
 					if( HasSpawnFlags(SF_MONITOR_HIDEHUD) )
-						m_pController->m_iHideHUD |= HIDEHUD_ALL;
-					m_pController->m_pMonitor = this;
+						pController->m_iHideHUD |= HIDEHUD_ALL;
+					pController->m_pMonitor = this;
 
 					// remember where the player's standing, so we can tell when he walks away
 					if( m_hParent != NULL && FClassnameIs( m_hParent->pev, "func_tracktrain" ))
 					{
 						// transform controller pos into local space because parent can be moving
-						m_vecControllerUsePos = m_pController->EntityToWorldTransform().VectorITransform( m_pController->GetAbsOrigin() );
+						m_vecControllerUsePos = pController->EntityToWorldTransform().VectorITransform( pController->GetAbsOrigin() );
 					}
-					else m_vecControllerUsePos = m_pController->GetAbsOrigin();
+					else m_vecControllerUsePos = pController->GetAbsOrigin();
 				}
 			}
 			else if( useType == USE_RESET )

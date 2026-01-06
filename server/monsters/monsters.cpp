@@ -102,7 +102,7 @@ BEGIN_DATADESC( CBaseMonster )
 	DEFINE_FIELD( m_flLastTimeObservedEnemy, FIELD_TIME ), // freeslave
 
 	DEFINE_FIELD( m_flOcclusionTime, FIELD_TIME ), // diffusion
-	DEFINE_FIELD( FlashlightCap, FIELD_BOOLEAN ),
+	DEFINE_FIELD( bFlashlightCap, FIELD_BOOLEAN ),
 	DEFINE_KEYFIELD( m_voicePitch, FIELD_INTEGER, "voicepitch" ),
 	DEFINE_FIELD( m_flTalkTime, FIELD_TIME ),
 	DEFINE_FIELD( m_hTalkTarget, FIELD_EHANDLE ),
@@ -136,9 +136,9 @@ void CBaseMonster::ClearEffects(void)
 	// diffusion - add this to your entity to clear sounds/beams/sprites etc. when the entity is killed through "killtarget"
 
 	// clear monster flashlight
-	if (FlashlightCap && (pev->effects & EF_MONSTERFLASHLIGHT) )
+	if (bFlashlightCap && (pev->effects & EF_MONSTERFLASHLIGHT) )
 	{
-		FlashlightCap = false;
+		bFlashlightCap = false;
 		pev->effects &= ~EF_MONSTERFLASHLIGHT;
 	}
 }
@@ -706,7 +706,7 @@ BOOL CBaseMonster :: FRefreshRoute ( void )
 		case MOVEGOAL_PATHCORNER:
 			{
 				// monster is on a path_corner loop
-				pPathCorner = m_pGoalEnt;
+				pPathCorner = m_hGoalEnt;
 				i = 0;
 
 				while ( pPathCorner && i < ROUTE_SIZE )
@@ -1550,7 +1550,7 @@ void CBaseMonster :: AdvanceRoute ( float distance )
 		{
 			// If we've just passed a path_corner, advance m_pGoalEnt
 			if ( (m_Route[ m_iRouteIndex ].iType & ~bits_MF_NOT_TO_MASK) == bits_MF_TO_PATHCORNER )
-				m_pGoalEnt = m_pGoalEnt->GetNextTarget();
+				m_hGoalEnt = m_hGoalEnt->GetNextTarget();
 
 			// IF both waypoints are nodes, then check for a link for a door and operate it.
 			//
@@ -2215,9 +2215,9 @@ void CBaseMonster :: MonsterInitThink ( void )
 
 void CBaseMonster :: StartPatrol ( CBaseEntity* path )
 {
-	m_pGoalEnt = path;
+	m_hGoalEnt = path;
 
-	if ( !m_pGoalEnt )
+	if ( !m_hGoalEnt )
 	{
 		ALERT(at_error, "ReadyMonster()--%s couldn't find target \"%s\"\n", STRING(pev->classname), STRING(pev->target));
 	}

@@ -64,9 +64,9 @@ void CSprite::Activate(void)
 	{
 		m_activated = TRUE;
 
-		m_pGoalEnt = GetNextTarget();
-		if (m_pGoalEnt)
-			UTIL_SetOrigin(this, m_pGoalEnt->GetLocalOrigin());
+		m_hGoalEnt = GetNextTarget();
+		if (m_hGoalEnt)
+			UTIL_SetOrigin(this, m_hGoalEnt->GetLocalOrigin());
 	}
 }
 
@@ -174,9 +174,9 @@ void CSprite::Animate(float frames)
 
 void CSprite::UpdateTrainPath(void)
 {
-	if (!m_pGoalEnt) return;
+	if (!m_hGoalEnt) return;
 
-	Vector delta = m_pGoalEnt->GetLocalOrigin() - GetLocalOrigin();
+	Vector delta = m_hGoalEnt->GetLocalOrigin() - GetLocalOrigin();
 	pev->frags = delta.Length();
 	pev->movedir = delta.Normalize();
 }
@@ -184,7 +184,7 @@ void CSprite::UpdateTrainPath(void)
 void CSprite::SpriteMove(void)
 {
 	// Not moving on a path, return
-	if (!m_pGoalEnt)
+	if (!m_hGoalEnt)
 	{
 		TurnOff();
 		return;
@@ -209,20 +209,20 @@ void CSprite::SpriteMove(void)
 	if (pev->frags <= 0)
 	{
 	teleport_sprite:
-		if (m_pGoalEnt->pev->speed != 0)
-			pev->speed = m_pGoalEnt->pev->speed;
+		if (m_hGoalEnt->pev->speed != 0)
+			pev->speed = m_hGoalEnt->pev->speed;
 
 		// Fire the passtarget if there is one
-		if (m_pGoalEnt->pev->message)
+		if ( m_hGoalEnt->pev->message)
 		{
-			UTIL_FireTargets(STRING(m_pGoalEnt->pev->message), this, this, USE_TOGGLE, 0);
-			if (m_pGoalEnt->HasSpawnFlags(SF_CORNER_FIREONCE))
-				m_pGoalEnt->pev->message = NULL_STRING;
+			UTIL_FireTargets(STRING( m_hGoalEnt->pev->message), this, this, USE_TOGGLE, 0);
+			if ( m_hGoalEnt->HasSpawnFlags(SF_CORNER_FIREONCE))
+				m_hGoalEnt->pev->message = NULL_STRING;
 		}
 
-		if (m_pGoalEnt->HasSpawnFlags(SF_CORNER_WAITFORTRIG))
+		if ( m_hGoalEnt->HasSpawnFlags(SF_CORNER_WAITFORTRIG))
 		{
-			m_pGoalEnt = m_pGoalEnt->GetNextTarget();
+			m_hGoalEnt = m_hGoalEnt->GetNextTarget();
 			UpdateTrainPath();
 
 			SetThink(&CSprite::AnimateThink);
@@ -232,11 +232,11 @@ void CSprite::SpriteMove(void)
 			return;
 		}
 
-		float flDelay = m_pGoalEnt->GetDelay();
+		float flDelay = m_hGoalEnt->GetDelay();
 
 		if (flDelay != 0.0f)
 		{
-			m_pGoalEnt = m_pGoalEnt->GetNextTarget();
+			m_hGoalEnt = m_hGoalEnt->GetNextTarget();
 			UpdateTrainPath();
 
 			SetLocalVelocity(g_vecZero);
@@ -245,21 +245,21 @@ void CSprite::SpriteMove(void)
 			return;
 		}
 
-		if (m_pGoalEnt->HasSpawnFlags(SF_CORNER_TELEPORT))
+		if ( m_hGoalEnt->HasSpawnFlags(SF_CORNER_TELEPORT))
 		{
-			m_pGoalEnt = m_pGoalEnt->GetNextTarget();
+			m_hGoalEnt = m_hGoalEnt->GetNextTarget();
 
-			if (m_pGoalEnt)
-				UTIL_SetOrigin(this, m_pGoalEnt->GetLocalOrigin());
+			if ( m_hGoalEnt )
+				UTIL_SetOrigin(this, m_hGoalEnt->GetLocalOrigin());
 
 			goto teleport_sprite;
 		}
 
 		// Time to go to the next target
-		m_pGoalEnt = m_pGoalEnt->GetNextTarget();
+		m_hGoalEnt = m_hGoalEnt->GetNextTarget();
 
 		// Set up next corner
-		if (!m_pGoalEnt)
+		if (!m_hGoalEnt )
 		{
 			SetLocalVelocity(g_vecZero);
 		}

@@ -912,12 +912,12 @@ void CLightning::BeamUpdateVars( void )
 LINK_ENTITY_TO_CLASS( env_laser, CLaser );
 
 BEGIN_DATADESC( CLaser )
-	DEFINE_FIELD( m_pSprite, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hSprite, FIELD_EHANDLE ),
 	DEFINE_KEYFIELD( m_iStoppedBy, FIELD_INTEGER, "m_iStoppedBy" ),
 	DEFINE_KEYFIELD( m_iProjection, FIELD_INTEGER, "m_iProjection" ),
 	DEFINE_KEYFIELD( m_iszSpriteName, FIELD_STRING, "EndSprite" ),
 	DEFINE_FIELD( m_firePosition, FIELD_POSITION_VECTOR ),
-	DEFINE_ARRAY( m_pReflectedBeams, FIELD_CLASSPTR, MAX_REFLECTED_BEAMS ),
+	DEFINE_ARRAY( m_hReflectedBeams, FIELD_EHANDLE, MAX_REFLECTED_BEAMS ),
 	DEFINE_FUNCTION( StrikeThink ),
 END_DATADESC()
 
@@ -1021,24 +1021,27 @@ void CLaser :: Activate( void )
 
 		if( pTemp == NULL )
 		{
-			m_pSprite = CSprite::SpriteCreate( STRING(m_iszSpriteName), GetLocalOrigin(), TRUE );
-			if (m_pSprite)
-				m_pSprite->SetTransparency( kRenderGlow, pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z, pev->renderamt, pev->renderfx );
+			m_hSprite = CSprite::SpriteCreate( STRING(m_iszSpriteName), GetLocalOrigin(), TRUE );
+			if( m_hSprite )
+			{
+				CSprite *pSprite = (CSprite*)(CBaseEntity*)m_hSprite;
+				pSprite->SetTransparency( kRenderGlow, pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z, pev->renderamt, pev->renderfx );
+			}
 		}
 		else if( !FClassnameIs( pTemp->pev, "env_sprite" ))
 		{
 			ALERT(at_error, "env_laser \"%s\" found endsprite %s, but can't use: not an env_sprite\n", GetTargetname(), STRING(m_iszSpriteName));
-			m_pSprite = NULL;
+			m_hSprite = NULL;
 		}
 		else
 		{
 			// use an env_sprite defined by the mapper
-			m_pSprite = (CSprite *)pTemp;
-			m_pSprite->pev->movetype = MOVETYPE_NOCLIP;
+			m_hSprite = pTemp;
+			m_hSprite->pev->movetype = MOVETYPE_NOCLIP;
 		}
 	}
 	else
-		m_pSprite = NULL;
+		m_hSprite = NULL;
 
 	if ( pev->targetname && !(pev->spawnflags & SF_BEAM_STARTON) )
 		TurnOff();
@@ -1051,16 +1054,19 @@ void CLaser::TurnOff( void )
 	pev->effects |= EF_NODRAW;
 	pev->nextthink = 0;
 
-	if ( m_pSprite )
-		m_pSprite->TurnOff();
+	if( m_hSprite )
+	{
+		CSprite *pSprite = (CSprite *)(CBaseEntity *)m_hSprite;
+		pSprite->TurnOff();
+	}
 
 	// remove all unused beams
 	for( int i = 0; i < MAX_REFLECTED_BEAMS; i++ )
 	{
-		if( m_pReflectedBeams[i] )
+		if( m_hReflectedBeams[i] )
 		{
-			UTIL_Remove( m_pReflectedBeams[i] );
-			m_pReflectedBeams[i] = NULL;
+			UTIL_Remove( m_hReflectedBeams[i] );
+			m_hReflectedBeams[i] = NULL;
 		}
 	}
 }
@@ -1069,8 +1075,11 @@ void CLaser::TurnOn( void )
 {
 	pev->effects &= ~EF_NODRAW;
 
-	if ( m_pSprite )
-		m_pSprite->TurnOn();
+	if( m_hSprite )
+	{
+		CSprite *pSprite = (CSprite *)(CBaseEntity *)m_hSprite;
+		pSprite->TurnOn();
+	}
 
 	if( pev->spawnflags & SF_BEAM_SHADEIN )
 		SetFlags( BEAM_FSHADEIN );
@@ -1130,8 +1139,8 @@ void CLaser::FireAtPoint( const Vector &startpos, TraceResult &tr )
 {
 	SetAbsEndPos( tr.vecEndPos );
 
-	if ( m_pSprite )
-		UTIL_SetOrigin( m_pSprite, tr.vecEndPos );
+	if ( m_hSprite )
+		UTIL_SetOrigin( m_hSprite, tr.vecEndPos );
 	
 	if(( pev->nextthink != 0.0f ) || ( gpGlobals->time >= ( pev->dmgtime + 0.1f )))
 	{
@@ -1173,11 +1182,11 @@ void CLaser::FireAtPoint( const Vector &startpos, TraceResult &tr )
 			vecSrc = tRef.vecEndPos + vecDir;
 			vecDest = vecSrc + vecDir * 65000;
 
-			if( !m_pReflectedBeams[i] ) // allocate new reflected beam
+			if( !m_hReflectedBeams[i] ) // allocate new reflected beam
 			{
-				m_pReflectedBeams[i] = BeamCreate( GetModel(), pev->scale );
-				m_pReflectedBeams[i]->pev->dmgtime = gpGlobals->time;
-				m_pReflectedBeams[i]->pev->dmg = pev->dmg;
+				m_hReflectedBeams[i] = BeamCreate( GetModel(), pev->scale );
+				m_hReflectedBeams[i]->pev->dmgtime = gpGlobals->time;
+				m_hReflectedBeams[i]->pev->dmg = pev->dmg;
 			}
 
 			UTIL_TraceLine( vecSrc, vecDest, iIgnoreMonsters, iIgnoreGlass, pentIgnore, &tRef );
@@ -1192,22 +1201,24 @@ void CLaser::FireAtPoint( const Vector &startpos, TraceResult &tr )
 				UTIL_TraceModel( vecSrc, vecDest, point_hull, tRef.pHit, &tRef );
 			}
 
-			m_pReflectedBeams[i]->SetStartPos( vecSrc );
-			m_pReflectedBeams[i]->SetEndPos( tRef.vecEndPos );
+			CBeam *pReflectedBeam = (CBeam*)(CBaseEntity*)m_hReflectedBeams[i];
+
+			pReflectedBeam->SetStartPos( vecSrc );
+			pReflectedBeam->SetEndPos( tRef.vecEndPos );
 
 			// all other settings come from primary beam
-			m_pReflectedBeams[i]->SetFlags( GetFlags());
-			m_pReflectedBeams[i]->SetWidth( GetWidth());
-			m_pReflectedBeams[i]->SetNoise( GetNoise());
-			m_pReflectedBeams[i]->SetBrightness( GetBrightness());
-			m_pReflectedBeams[i]->SetFrame( GetFrame());
-			m_pReflectedBeams[i]->SetScrollRate( GetScrollRate());
-			m_pReflectedBeams[i]->SetColor( pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z );
+			pReflectedBeam->SetFlags( GetFlags());
+			pReflectedBeam->SetWidth( GetWidth());
+			pReflectedBeam->SetNoise( GetNoise());
+			pReflectedBeam->SetBrightness( GetBrightness());
+			pReflectedBeam->SetFrame( GetFrame());
+			pReflectedBeam->SetScrollRate( GetScrollRate());
+			pReflectedBeam->SetColor( pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z );
 
-			if(( pev->nextthink != 0.0f ) || ( gpGlobals->time >= ( m_pReflectedBeams[i]->pev->dmgtime + 0.1f )))
+			if(( pev->nextthink != 0.0f ) || ( gpGlobals->time >= (pReflectedBeam->pev->dmgtime + 0.1f )))
 			{
-				m_pReflectedBeams[i]->BeamDamage( &tRef );
-				m_pReflectedBeams[i]->DoSparks( vecSrc, tRef.vecEndPos );
+				pReflectedBeam->BeamDamage( &tRef );
+				pReflectedBeam->DoSparks( vecSrc, tRef.vecEndPos );
 			}
 		}
 
@@ -1216,10 +1227,10 @@ void CLaser::FireAtPoint( const Vector &startpos, TraceResult &tr )
 		// remove all unused beams
 		for( ; i < MAX_REFLECTED_BEAMS; i++ )
 		{
-			if( m_pReflectedBeams[i] )
+			if( m_hReflectedBeams[i] )
 			{
-				UTIL_Remove( m_pReflectedBeams[i] );
-				m_pReflectedBeams[i] = NULL;
+				UTIL_Remove( m_hReflectedBeams[i] );
+				m_hReflectedBeams[i] = NULL;
 			}
 		}
 	}

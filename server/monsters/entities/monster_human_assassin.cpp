@@ -1644,7 +1644,7 @@ public:
 	int TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType);
 	void Killed( entvars_t *pevAttacker, int iGib );
 
-	CSprite *SecAssAlienEye;
+	EHANDLE SecAssAlienEye;
 	int m_iTrail;
 	float LastSwooshTime;
 
@@ -1663,7 +1663,7 @@ BEGIN_DATADESC( SecAssAlien )
 	DEFINE_FIELD( m_fThrowGrenade, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_iTargetRanderamt, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iFrustration, FIELD_INTEGER ),
-	DEFINE_FIELD( SecAssAlienEye, FIELD_CLASSPTR ),
+	DEFINE_FIELD( SecAssAlienEye, FIELD_EHANDLE ),
 	DEFINE_FIELD( LastSwooshTime, FIELD_TIME ),
 //	DEFINE_FIELD( m_iClipSize, FIELD_INTEGER ),
 //	DEFINE_FIELD( IdleTime, FIELD_TIME ),
@@ -1737,10 +1737,11 @@ void SecAssAlien :: Spawn()
 	SecAssAlienEye = CSprite::SpriteCreate( SECASS_ALIEN_EYE, GetAbsOrigin(), TRUE );
 	if( SecAssAlienEye )
 	{
-		SecAssAlienEye->SetAttachment( edict(), 4 );
-		SecAssAlienEye->SetScale( 0.1 );
-		SecAssAlienEye->SetTransparency( kRenderGlow, 0, 255, 25, 25, kRenderFxNoDissipation );
-		SecAssAlienEye->SetFadeDistance( pev->iuser4 );
+		CSprite *pEye = (CSprite *)(CBaseEntity *)SecAssAlienEye;
+		pEye->SetAttachment( edict(), 4 );
+		pEye->SetScale( 0.1 );
+		pEye->SetTransparency( kRenderGlow, 0, 255, 25, 25, kRenderFxNoDissipation );
+		pEye->SetFadeDistance( pev->iuser4 );
 	}
 
 	LastSwooshTime = gpGlobals->time;

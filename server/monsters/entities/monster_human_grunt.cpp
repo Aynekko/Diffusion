@@ -177,12 +177,12 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD(bCanInvestigate, FIELD_BOOLEAN ),
 	DEFINE_FIELD(AttackStartTime, FIELD_TIME),
 	DEFINE_FIELD(CombatWaitTime, FIELD_TIME),
-	DEFINE_FIELD(FlashlightSpr, FIELD_CLASSPTR),
+	DEFINE_FIELD(FlashlightSpr, FIELD_EHANDLE),
 	DEFINE_KEYFIELD( ForceEMPGrenade, FIELD_BOOLEAN, "forceemp"),
 
 	// monster_alien_soldier:
 	DEFINE_FIELD(AlternateShoot, FIELD_INTEGER),
-	DEFINE_FIELD(AlienEye, FIELD_CLASSPTR),
+	DEFINE_FIELD(AlienEye, FIELD_EHANDLE ),
 
 	// monster_andrew_grunt:
 	DEFINE_FIELD( AndrewLastHurt, FIELD_TIME ),
@@ -1352,12 +1352,12 @@ void CHGrunt :: RunAI( void )
 	if( AlienEye ) // diffusion - !!! the origin is not being updated, have to do this, otherwise distance culling issues
 		AlienEye->pev->origin = pev->origin;
 
-	if( FlashlightCap && FlashlightSpr )
+	if( bFlashlightCap && FlashlightSpr )
 	{
 		if( pev->effects & EF_MONSTERFLASHLIGHT )
-			FlashlightSpr->SetBrightness( 200 );
+			FlashlightSpr->pev->renderamt = 200;
 		else
-			FlashlightSpr->SetBrightness( 0 );
+			FlashlightSpr->pev->renderamt = 0;
 	}
 
 	if( m_hEnemy && ( pev->sequence == LookupSequence( "runshootmp5" ) || pev->sequence == LookupSequence( "runshootshotgun" ) ) && BodyTurn( m_hEnemy->GetAbsOrigin() ) )
@@ -2002,14 +2002,15 @@ void CHGrunt::Spawn(void)
 
 	if( m_iFlashlightCap > 0 )
 	{
-		FlashlightCap = true;
+		bFlashlightCap = true;
 
 		FlashlightSpr = CSprite::SpriteCreate( HGRUNT_FLASHLIGHT_SPR, GetAbsOrigin(), TRUE );
 		if( FlashlightSpr )
 		{
-			FlashlightSpr->SetAttachment( edict(), 1 );
-			FlashlightSpr->SetScale( 0.3 );
-			FlashlightSpr->SetTransparency( kRenderTransAdd, 255, 255, 255, 200, 0 );
+			CSprite *pFlashlightSpr = (CSprite *)(CBaseEntity *)FlashlightSpr;
+			pFlashlightSpr->SetAttachment( edict(), 1 );
+			pFlashlightSpr->SetScale( 0.3 );
+			pFlashlightSpr->SetTransparency( kRenderTransAdd, 255, 255, 255, 200, 0 );
 		}
 
 		if( m_iFlashlightCap == 2 )
@@ -3180,8 +3181,9 @@ void CHGruntAlien :: Spawn()
 	AlienEye = CSprite::SpriteCreate( ALIEN_EYE, GetAbsOrigin(), TRUE );
 	if( AlienEye )
 	{
-		AlienEye->SetAttachment( edict(), 4 );
-		AlienEye->SetScale( 0.1 );
+		CSprite *pAlienEye = (CSprite *)(CBaseEntity *)AlienEye;
+		pAlienEye->SetAttachment( edict(), 4 );
+		pAlienEye->SetScale( 0.1 );
 	}
 
 	if (HasWeapon( HGRUNT_SHOTGUN ))
@@ -3190,7 +3192,10 @@ void CHGruntAlien :: Spawn()
 		m_cClipSize		= 8;
 		pev->skin = 2; // red skin and eye
 		if( AlienEye )
-			AlienEye->SetTransparency( kRenderTransAdd, 255, 0, 0, 150, 0 );
+		{
+			CSprite *pAlienEye = (CSprite *)(CBaseEntity *)AlienEye;
+			pAlienEye->SetTransparency( kRenderTransAdd, 255, 0, 0, 150, 0 );
+		}
 	}
 	else
 	{
@@ -3202,14 +3207,20 @@ void CHGruntAlien :: Spawn()
 			SetBodygroup( GUN_GROUP, GUN_ALTERNATE );
 			pev->skin = 0; // blue skin and eye
 			if( AlienEye )
-				AlienEye->SetTransparency( kRenderTransAdd, 0, 120, 250, 150, 0 );
+			{
+				CSprite *pAlienEye = (CSprite *)(CBaseEntity *)AlienEye;
+				pAlienEye->SetTransparency( kRenderTransAdd, 0, 120, 250, 150, 0 );
+			}
 		}
 		else
 		{
 			SetBodygroup( GUN_GROUP, GUN_MP5 );
 			pev->skin = 1; // black skin, orange eye
 			if( AlienEye )
-				AlienEye->SetTransparency( kRenderTransAdd, 255, 100, 0, 150, 0 );
+			{
+				CSprite *pAlienEye = (CSprite *)(CBaseEntity *)AlienEye;
+				pAlienEye->SetTransparency( kRenderTransAdd, 255, 100, 0, 150, 0 );
+			}
 		}
 	}
 
@@ -5579,14 +5590,15 @@ void CHGruntSecurity::Spawn()
 
 	if( m_iFlashlightCap > 0 )
 	{
-		FlashlightCap = true;
+		bFlashlightCap = true;
 
 		FlashlightSpr = CSprite::SpriteCreate( HGRUNT_FLASHLIGHT_SPR, GetAbsOrigin(), TRUE );
 		if( FlashlightSpr )
 		{
-			FlashlightSpr->SetAttachment( edict(), 1 );
-			FlashlightSpr->SetScale( 0.3 );
-			FlashlightSpr->SetTransparency( kRenderTransAdd, 255, 255, 255, 200, 0 );
+			CSprite *pFlashlightSpr = (CSprite *)(CBaseEntity *)FlashlightSpr;
+			pFlashlightSpr->SetAttachment( edict(), 1 );
+			pFlashlightSpr->SetScale( 0.3 );
+			pFlashlightSpr->SetTransparency( kRenderTransAdd, 255, 255, 255, 200, 0 );
 		}
 
 		if( m_iFlashlightCap == 2 )

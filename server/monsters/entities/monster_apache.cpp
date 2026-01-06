@@ -468,13 +468,13 @@ void CApache :: HuntThink( void )
 
 	ShowDamage( );
 
-	if ( m_pGoalEnt == NULL && !FStringNull(pev->target) )// this monster has a target
+	if ( m_hGoalEnt == NULL && !FStringNull(pev->target) )// this monster has a target
 	{
-		m_pGoalEnt = UTIL_FindEntityByTargetname( NULL, STRING( pev->target ) );
-		if (m_pGoalEnt)
+		m_hGoalEnt = UTIL_FindEntityByTargetname( NULL, STRING( pev->target ) );
+		if ( m_hGoalEnt )
 		{
-			m_posDesired = m_pGoalEnt->GetAbsOrigin();
-			UTIL_MakeVectors( m_pGoalEnt->GetAbsAngles() );
+			m_posDesired = m_hGoalEnt->GetAbsOrigin();
+			UTIL_MakeVectors( m_hGoalEnt->GetAbsAngles() );
 			m_vecGoal = gpGlobals->v_forward;
 		}
 	}
@@ -529,17 +529,17 @@ void CApache :: HuntThink( void )
 
 	float flLength = (GetAbsOrigin() - m_posDesired).Length();
 
-	if (m_pGoalEnt)
+	if ( m_hGoalEnt )
 	{
 		// ALERT( at_console, "%.0f\n", flLength );
 
 		if (flLength < 128)
 		{
-			m_pGoalEnt = UTIL_FindEntityByTargetname( NULL, STRING( m_pGoalEnt->pev->target ) );
-			if (m_pGoalEnt)
+			m_hGoalEnt = UTIL_FindEntityByTargetname( NULL, STRING( m_hGoalEnt->pev->target ) );
+			if ( m_hGoalEnt )
 			{
-				m_posDesired = m_pGoalEnt->GetAbsOrigin();
-				UTIL_MakeVectors( m_pGoalEnt->GetAbsAngles() );
+				m_posDesired = m_hGoalEnt->GetAbsOrigin();
+				UTIL_MakeVectors( m_hGoalEnt->GetAbsAngles() );
 				m_vecGoal = gpGlobals->v_forward;
 				flLength = (GetAbsOrigin() - m_posDesired).Length();
 			}

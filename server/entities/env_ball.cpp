@@ -30,8 +30,6 @@ public:
 	void Spawn( void );
 	void Wait( void );
 
-	CBaseEntity *pBall;
-
 	int InitialVelocity; // initial velocity of the ball
 
 	int MaxBalls; // total number of balls that can be fired
@@ -46,7 +44,6 @@ BEGIN_DATADESC( CEnvBall )
 	DEFINE_KEYFIELD( InitialVelocity, FIELD_INTEGER, "startvelocity" ),
 	DEFINE_KEYFIELD( MaxBalls, FIELD_INTEGER, "maxballs" ),
 	DEFINE_KEYFIELD( ActiveBalls, FIELD_INTEGER, "maxactiveballs" ),
-	DEFINE_FIELD( pBall, FIELD_CLASSPTR ),
 	DEFINE_FIELD( SpawnedBalls, FIELD_INTEGER ),
 	DEFINE_FUNCTION( Wait ),
 END_DATADESC();

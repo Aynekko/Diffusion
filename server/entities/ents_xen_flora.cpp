@@ -68,13 +68,13 @@ public:
 
 	DECLARE_DATADESC();
 private:
-	CSprite		*m_pGlow;
+	EHANDLE m_hGlow;
 };
 
 LINK_ENTITY_TO_CLASS( xen_plantlight, CXenPLight );
 
 BEGIN_DATADESC( CXenPLight )
-	DEFINE_FIELD( m_pGlow, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hGlow, FIELD_EHANDLE ),
 END_DATADESC()
 
 void CXenPLight :: Spawn( void )
@@ -90,10 +90,11 @@ void CXenPLight :: Spawn( void )
 	pev->nextthink = gpGlobals->time + 0.1;
 	pev->frame = RANDOM_FLOAT(0,255);
 
-	m_pGlow = CSprite::SpriteCreate( XEN_PLANT_GLOW_SPRITE, GetAbsOrigin() + Vector(0 ,0 , (pev->mins.z + pev->maxs.z ) * 0.5 ), FALSE );
-	m_pGlow->SetTransparency( kRenderGlow, pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z, pev->renderamt, pev->renderfx );
-	m_pGlow->SetAttachment( edict(), 1 );
-	m_pGlow->pev->effects |= pev->effects;
+	m_hGlow = CSprite::SpriteCreate( XEN_PLANT_GLOW_SPRITE, GetAbsOrigin() + Vector(0 ,0 , (pev->mins.z + pev->maxs.z ) * 0.5 ), FALSE );
+	CSprite *pGlow = (CSprite*)(CBaseEntity*)m_hGlow;
+	pGlow->SetTransparency( kRenderGlow, pev->rendercolor.x, pev->rendercolor.y, pev->rendercolor.z, pev->renderamt, pev->renderfx );
+	pGlow->SetAttachment( edict(), 1 );
+	pGlow->pev->effects |= pev->effects;
 }
 
 void CXenPLight :: Precache( void )
@@ -153,16 +154,16 @@ void CXenPLight :: Touch( CBaseEntity *pOther )
 void CXenPLight :: LightOn( void )
 {
 	SUB_UseTargets( this, USE_ON, 0 );
-	if ( m_pGlow )
-		m_pGlow->pev->effects &= ~EF_NODRAW;
+	if ( m_hGlow )
+		m_hGlow->pev->effects &= ~EF_NODRAW;
 }
 
 
 void CXenPLight :: LightOff( void )
 {
 	SUB_UseTargets( this, USE_OFF, 0 );
-	if ( m_pGlow )
-		m_pGlow->pev->effects |= EF_NODRAW;
+	if ( m_hGlow )
+		m_hGlow->pev->effects |= EF_NODRAW;
 }
 
 
@@ -262,13 +263,13 @@ public:
 	static const char	*pAttackMissSounds[];
 
 private:
-	CXenTreeTrigger	*m_pTrigger;
+	EHANDLE m_hTrigger;
 };
 
 LINK_ENTITY_TO_CLASS( xen_tree, CXenTree );
 
 BEGIN_DATADESC( CXenTree )
-	DEFINE_FIELD( m_pTrigger, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hTrigger, FIELD_EHANDLE ),
 END_DATADESC()
 
 void CXenTree :: Spawn( void )
@@ -291,8 +292,8 @@ void CXenTree :: Spawn( void )
 	UTIL_MakeVectorsPrivate( GetAbsAngles(), triggerPosition, NULL, NULL );
 	triggerPosition = GetAbsOrigin() + (triggerPosition * 64);
 	// Create the trigger
-	m_pTrigger = CXenTreeTrigger::TriggerCreate( edict(), triggerPosition );
-	UTIL_SetSize( m_pTrigger->pev, Vector( -24, -24, 0 ), Vector( 24, 24, 128 ) );
+	m_hTrigger = CXenTreeTrigger::TriggerCreate( edict(), triggerPosition );
+	UTIL_SetSize( m_hTrigger->pev, Vector( -24, -24, 0 ), Vector( 24, 24, 128 ) );
 }
 
 const char *CXenTree::pAttackHitSounds[] = 
@@ -342,7 +343,7 @@ void CXenTree :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		{
 			CBaseEntity *pList[8];
 			BOOL sound = FALSE;
-			int count = UTIL_EntitiesInBox( pList, 8, m_pTrigger->pev->absmin, m_pTrigger->pev->absmax, FL_MONSTER|FL_CLIENT );
+			int count = UTIL_EntitiesInBox( pList, 8, m_hTrigger->pev->absmin, m_hTrigger->pev->absmax, FL_MONSTER|FL_CLIENT );
 			Vector forward;
 
 			UTIL_MakeVectorsPrivate( GetAbsAngles(), forward, NULL, NULL );

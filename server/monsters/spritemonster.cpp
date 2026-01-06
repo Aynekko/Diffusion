@@ -372,7 +372,7 @@ void CSpriteMonster :: AttackFinished( float flFinishTime )
 
 void CSpriteMonster :: HuntTarget ( void )
 {
-	m_pGoalEnt = CBaseEntity::Instance(pev->enemy);
+	m_hGoalEnt = CBaseEntity::Instance(pev->enemy);
 	m_iAIState = STATE_RUN;
 
 	pev->ideal_yaw = UTIL_VecToYaw (pev->enemy->v.origin - GetAbsOrigin());

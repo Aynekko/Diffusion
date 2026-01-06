@@ -122,7 +122,7 @@ public:
 	void GibMonster( void );
 	void ClearEffects(void);
 
-	CSprite *m_pBall[2];	// hand balls
+	EHANDLE m_hBall[2];	// hand balls
 	int m_iBall[2];			// how bright it should be
 	float m_iBallTime[2];	// when it should be that color
 	int m_iBallCurrent[2];	// current brightness
@@ -135,20 +135,20 @@ public:
 	int m_iSoundState;
 
 	bool bCanInvestigate;
-	CSprite *AlienEye;
+	EHANDLE AlienEye;
 	float AlertSoundTime;
 };
 
 LINK_ENTITY_TO_CLASS( monster_alien_controller, CController );
 
 BEGIN_DATADESC( CController )
-	DEFINE_ARRAY( m_pBall, FIELD_CLASSPTR, 2 ),
+	DEFINE_ARRAY( m_hBall, FIELD_EHANDLE, 2 ),
 	DEFINE_ARRAY( m_iBall, FIELD_INTEGER, 2 ),
 	DEFINE_ARRAY( m_iBallTime, FIELD_TIME, 2 ),
 	DEFINE_ARRAY( m_iBallCurrent, FIELD_INTEGER, 2 ),
 	DEFINE_FIELD( m_vecEstVelocity, FIELD_VECTOR ),
 	DEFINE_FIELD( bCanInvestigate, FIELD_BOOLEAN ),
-	DEFINE_FIELD( AlienEye, FIELD_CLASSPTR ),
+	DEFINE_FIELD( AlienEye, FIELD_EHANDLE ),
 	DEFINE_FIELD( AlertSoundTime, FIELD_TIME ),
 END_DATADESC()
 
@@ -264,15 +264,15 @@ void CController::Killed( entvars_t *pevAttacker, int iGib )
 void CController::ClearEffects(void)
 {
 	// fade balls
-	if (m_pBall[0])
+	if (m_hBall[0])
 	{
-		m_pBall[0]->SUB_StartFadeOut();
-		m_pBall[0] = NULL;
+		m_hBall[0]->SUB_StartFadeOut();
+		m_hBall[0] = NULL;
 	}
-	if (m_pBall[1])
+	if (m_hBall[1])
 	{
-		m_pBall[1]->SUB_StartFadeOut();
-		m_pBall[1] = NULL;
+		m_hBall[1]->SUB_StartFadeOut();
+		m_hBall[1] = NULL;
 	}
 }
 
@@ -280,15 +280,15 @@ void CController::ClearEffects(void)
 void CController::GibMonster( void )
 {
 	// delete balls
-	if (m_pBall[0])
+	if (m_hBall[0])
 	{
-		UTIL_Remove( m_pBall[0] );
-		m_pBall[0] = NULL;
+		UTIL_Remove( m_hBall[0] );
+		m_hBall[0] = NULL;
 	}
-	if (m_pBall[1])
+	if (m_hBall[1])
 	{
-		UTIL_Remove( m_pBall[1] );
-		m_pBall[1] = NULL;
+		UTIL_Remove( m_hBall[1] );
+		m_hBall[1] = NULL;
 	}
 	CSquadMonster::GibMonster( );
 }
@@ -964,12 +964,13 @@ void CController :: RunAI( void )
 
 	for (int i = 0; i < 2; i++)
 	{
-		if (m_pBall[i] == NULL)
+		if (m_hBall[i] == NULL)
 		{
-			m_pBall[i] = CSprite::SpriteCreate( "sprites/xspark4.spr", GetAbsOrigin(), TRUE );
-			m_pBall[i]->SetTransparency( kRenderTransAdd, 255, 255, 255, 255, 0 );
-			m_pBall[i]->SetAttachment( edict(), (i + 3) );
-			m_pBall[i]->SetScale( 1.0 );
+			m_hBall[i] = CSprite::SpriteCreate( "sprites/xspark4.spr", GetAbsOrigin(), TRUE );
+			CSprite *pSpr = (CSprite *)(CBaseEntity *)m_hBall[i];
+			pSpr->SetTransparency( kRenderTransAdd, 255, 255, 255, 255, 0 );
+			pSpr->SetAttachment( edict(), (i + 3) );
+			pSpr->SetScale( 1.0 );
 		}
 
 		float t = m_iBallTime[i] - gpGlobals->time;
@@ -980,10 +981,10 @@ void CController :: RunAI( void )
 
 		m_iBallCurrent[i] += (m_iBall[i] - m_iBallCurrent[i]) * t;
 
-		m_pBall[i]->SetBrightness( m_iBallCurrent[i] );
+		m_hBall[i]->pev->renderamt = m_iBallCurrent[i];
 
 		GetAttachment( i + 2, vecStart, angleGun );
-		UTIL_SetOrigin( m_pBall[i], vecStart );
+		UTIL_SetOrigin( m_hBall[i], vecStart );
 		
 		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_ELIGHT );

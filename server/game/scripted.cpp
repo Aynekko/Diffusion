@@ -345,7 +345,7 @@ void CCineMonster :: PossessEntity( void )
 		if( pTarget->HasSpawnFlags( SF_MONSTER_ASLEEP ) ) // diffusion - wake up monster's AI if we are using him in a script
 			pTarget->pev->spawnflags &= ~SF_MONSTER_ASLEEP;
 
-		pTarget->m_pGoalEnt = this;
+		pTarget->m_hGoalEnt = this;
 		pTarget->m_pCine = this;
 		pTarget->m_hTargetEnt = this;
 
@@ -433,7 +433,7 @@ void CCineAI :: PossessEntity( void )
 			return;
 		}
 
-		pTarget->m_pGoalEnt = this;
+		pTarget->m_hGoalEnt = this;
 		pTarget->m_pCine = this;
 		pTarget->m_hTargetEnt = this;
 
@@ -887,7 +887,7 @@ BOOL CBaseMonster :: CineCleanup( void )
 
 	m_pCine = NULL;
 	m_hTargetEnt = NULL;
-	m_pGoalEnt = NULL;
+	m_hGoalEnt = NULL;
 
 	if (pev->deadflag == DEAD_DYING)
 	{

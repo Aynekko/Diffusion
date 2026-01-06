@@ -48,7 +48,7 @@ public:
 	void UpdateSpot( void );
 	BOOL ShouldWeaponIdle( void ) { return TRUE; };	// laser spot give updates from WeaponIdle
 
-	CLaserSpot *m_pSpot;
+	EHANDLE m_hSpot;
 	int m_cActiveRockets;// how many missiles in flight from this launcher right now?
 	bool m_bSpotActive;
 };
@@ -87,7 +87,7 @@ public:
 
 	int m_iTrail;
 	float m_flIgniteTime;
-	CRpg *m_pLauncher;// pointer back to the launcher that fired me. 
+	EHANDLE m_hLauncher;// pointer back to the launcher that fired me. 
 
 	// diffusion - some hl2 functionality
 	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
@@ -101,7 +101,7 @@ LINK_ENTITY_TO_CLASS( rpg_rocket, CRpgRocket );
 
 BEGIN_DATADESC( CRpgRocket )
 	DEFINE_FIELD( m_flIgniteTime, FIELD_TIME ),
-	DEFINE_FIELD( m_pLauncher, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hLauncher, FIELD_EHANDLE ),
 	DEFINE_FUNCTION( FollowThink ),
 	DEFINE_FUNCTION( IgniteThink ),
 	DEFINE_FUNCTION( RocketTouch ),
@@ -123,11 +123,12 @@ CRpgRocket *CRpgRocket::CreateRpgRocket( Vector vecOrigin, Vector vecAngles, CBa
 		pRocket->pev->effects |= EF_UPSIDEDOWN;
 	pRocket->Spawn();
 	pRocket->SetTouch( &CRpgRocket::RocketTouch );
-	pRocket->m_pLauncher = pLauncher;// remember what RPG fired me. 
+	pRocket->m_hLauncher = pLauncher;// remember what RPG fired me. 
 	// diffusion - safety check...
-	if( pRocket->m_pLauncher->m_cActiveRockets < 0 )
-		pRocket->m_pLauncher->m_cActiveRockets = 0;
-	pRocket->m_pLauncher->m_cActiveRockets++;// register this missile as active for the launcher
+	CRpg *MyLauncher = (CRpg*)(CBaseEntity*)pRocket->m_hLauncher;
+	if( MyLauncher->m_cActiveRockets < 0 )
+		MyLauncher->m_cActiveRockets = 0;
+	MyLauncher->m_cActiveRockets++;// register this missile as active for the launcher
 
 	return pRocket;
 }
@@ -214,8 +215,11 @@ void CRpgRocket::ShotDown( void )
 
 	// Let the RPG start reloading immediately
 	// diffusion - FIXME sometimes m_cActiveRockets can become -1, likely because of this. So I put the check > 0 to m_cActiveRockets in needed places.
-	if( m_pLauncher )
-		m_pLauncher->m_cActiveRockets--;
+	if( m_hLauncher )
+	{
+		CRpg *pLauncher = (CRpg *)(CBaseEntity *)m_hLauncher;
+		pLauncher->m_cActiveRockets--;
+	}
 
 	m_hOwner = NULL;
 
@@ -266,10 +270,11 @@ void CRpgRocket::AugerThink( void )
 //=========================================================
 void CRpgRocket::RocketTouch ( CBaseEntity *pOther )
 {
-	if ( m_pLauncher )
+	if( m_hLauncher )
 	{
 		// my launcher is still around, tell it I'm dead.
-		m_pLauncher->m_cActiveRockets--;
+		CRpg *pLauncher = (CRpg *)(CBaseEntity *)m_hLauncher;
+		pLauncher->m_cActiveRockets--;
 	}
 
 	STOP_SOUND( edict(), CHAN_VOICE, "weapons/rocket1.wav" );
@@ -394,10 +399,11 @@ void CRpgRocket :: FollowThink( void  )
 
 		if( pev->waterlevel == 0 && GetLocalVelocity().Length() < 1500 )
 		{
-			if (m_pLauncher) // diffusion - fix by Lev
+			if( m_hLauncher ) // diffusion - fix by Lev
 			{
 				// my launcher is still around, tell it I'm dead.
-				m_pLauncher->m_cActiveRockets--;
+				CRpg *pLauncher = (CRpg *)(CBaseEntity *)m_hLauncher;
+				pLauncher->m_cActiveRockets--;
 			}
 
 			if( pev->effects & EF_LIGHT )
@@ -1137,10 +1143,10 @@ void CRpg::Holster( void )
 	m_pPlayer->m_flNextAttack = gpGlobals->time + 0.5;
 	// m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT ( 10, 15 );
 	SendWeaponAnim( RPG_HOLSTER1 );
-	if (m_pSpot)
+	if( m_hSpot )
 	{
-		m_pSpot->Killed( NULL, GIB_NEVER );
-		m_pSpot = NULL;
+		m_hSpot->Killed( NULL, GIB_NEVER );
+		m_hSpot = NULL;
 	}
 
 	BaseClass::Holster();
@@ -1203,10 +1209,10 @@ void CRpg::SecondaryAttack()
 {
 	m_bSpotActive = !m_bSpotActive;
 
-	if( !m_bSpotActive && m_pSpot )
+	if( !m_bSpotActive && m_hSpot )
 	{
-		m_pSpot->Killed( NULL, GIB_NORMAL );
-		m_pSpot = NULL;
+		m_hSpot->Killed( NULL, GIB_NORMAL );
+		m_hSpot = NULL;
 	}
 
 	m_flNextSecondaryAttack = gpGlobals->time + 0.2;
@@ -1242,9 +1248,10 @@ void CRpg::Reload( void )
 
 	m_flNextPrimaryAttack = gpGlobals->time + RPG_RELOAD_TIME;
 
-	if( m_pSpot && m_bSpotActive )
+	if( m_hSpot && m_bSpotActive )
 	{
-		m_pSpot->Suspend( RPG_RELOAD_TIME );
+		CLaserSpot *pSpot = (CLaserSpot *)(CBaseEntity *)m_hSpot;
+		pSpot->Suspend( RPG_RELOAD_TIME );
 		m_flNextSecondaryAttack = gpGlobals->time + RPG_RELOAD_TIME;
 	}
 
@@ -1303,12 +1310,12 @@ void CRpg::UpdateSpot( void )
 {
 	if( m_bSpotActive )
 	{
-		if (!m_pSpot)
+		if( !m_hSpot )
 		{
-			m_pSpot = CLaserSpot::CreateSpot();
+			m_hSpot = CLaserSpot::CreateSpot();
 
-			if(m_pSpot) // diffusion - I need this to filter the spot in Addtofullpack
-				m_pSpot->pev->owner = m_pPlayer->edict();
+			if( m_hSpot ) // diffusion - I need this to filter the spot in Addtofullpack
+				m_hSpot->pev->owner = m_pPlayer->edict();
 		}
 
 		UTIL_MakeVectors( m_pPlayer->pev->v_angle );
@@ -1317,7 +1324,7 @@ void CRpg::UpdateSpot( void )
 
 		TraceResult tr;
 		UTIL_TraceLine ( vecSrc, vecSrc + vecAiming * 8192, dont_ignore_monsters, ENT(m_pPlayer->pev), &tr );
-		UTIL_SetOrigin( m_pSpot, tr.vecEndPos );
+		UTIL_SetOrigin( m_hSpot, tr.vecEndPos );
 	}
 }
 
