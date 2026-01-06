@@ -68,10 +68,10 @@ class CTripmineGrenade : public CGrenade
 	Vector	m_vecEnd;
 	float	m_flBeamLength;
 
-	CBeam	*m_pBeam;
+	EHANDLE	m_hBeam;
 	edict_t	*m_pRealOwner; // tracelines don't hit pev->owner, which means a player couldn't detonate his own trip mine, so we store the owner here.
 
-	CSprite *m_pSprite; // diffusion - glow sprite at the end of laser
+	EHANDLE m_hSprite; // diffusion - glow sprite at the end of laser
 
 	float skin_change_time; // not saved
 	bool IsTripped; // do not the beam!
@@ -82,7 +82,7 @@ LINK_ENTITY_TO_CLASS( monster_tripmine, CTripmineGrenade );
 
 BEGIN_DATADESC( CTripmineGrenade )
 	DEFINE_FIELD( m_flPowerUp, FIELD_TIME ),
-	DEFINE_FIELD( m_pBeam, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hBeam, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_pRealOwner, FIELD_EDICT ),
 	DEFINE_FIELD( m_vecDir, FIELD_VECTOR ),
 	DEFINE_FIELD( m_vecEnd, FIELD_POSITION_VECTOR ),
@@ -96,7 +96,7 @@ BEGIN_DATADESC( CTripmineGrenade )
 	DEFINE_FUNCTION( BreakTouch ),
 	DEFINE_FIELD( DisarmStartTime, FIELD_TIME ),
 	DEFINE_FIELD( Disarmed, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_pSprite, FIELD_CLASSPTR ),
+	DEFINE_FIELD( m_hSprite, FIELD_EHANDLE ),
 	DEFINE_FIELD( PrevOrigin, FIELD_VECTOR ),
 END_DATADESC()
 
@@ -208,12 +208,12 @@ void CTripmineGrenade::DisarmThink(void)
 	}
 	else
 	{
-		if( m_pBeam )
+		if( m_hBeam )
 		{
-			m_pBeam->pev->renderamt = lerp( 0.0f, 20.0f, ((DisarmStartTime + 2) - gpGlobals->time) * 0.5f );
+			m_hBeam->pev->renderamt = lerp( 0.0f, 20.0f, ((DisarmStartTime + 2) - gpGlobals->time) * 0.5f );
 		}
-		if( m_pSprite )
-			m_pSprite->pev->renderamt = lerp( 0.0f, 100.0f, ((DisarmStartTime + 2) - gpGlobals->time) * 0.5f );
+		if( m_hSprite )
+			m_hSprite->pev->renderamt = lerp( 0.0f, 100.0f, ((DisarmStartTime + 2) - gpGlobals->time) * 0.5f );
 		if( pPlayer )
 		{
 			Vector vel = pPlayer->GetAbsVelocity();
@@ -306,7 +306,7 @@ void CTripmineGrenade :: TransferReset( void )
 	SetBits( pev->effects, EF_NOINTERP );
 
 	// create new beam on a next level
-	if ( !m_pBeam )
+	if ( !m_hBeam )
 		MakeBeam( );
 }
 
@@ -332,16 +332,16 @@ void CTripmineGrenade :: PowerupThink( void  )
 
 void CTripmineGrenade::ClearEffects(void)
 {
-	if ( m_pBeam )
+	if ( m_hBeam )
 	{
-		UTIL_Remove( m_pBeam );
-		m_pBeam = NULL;
+		UTIL_Remove( m_hBeam );
+		m_hBeam = NULL;
 	}
 
-	if( m_pSprite )
+	if( m_hSprite )
 	{
-		UTIL_Remove( m_pSprite );
-		m_pSprite = NULL;
+		UTIL_Remove( m_hSprite );
+		m_hSprite = NULL;
 	}
 }
 
@@ -361,28 +361,30 @@ void CTripmineGrenade :: MakeBeam( void )
 	Vector vecTmpEnd = GetAbsOrigin() + m_vecDir * 2048 * m_flBeamLength;
 	Vector vecStart = GetAbsOrigin() - m_vecDir * 7;
 
-	m_pBeam = CBeam::BeamCreate( g_pModelNameLaser, 10 );
+	m_hBeam = CBeam::BeamCreate( g_pModelNameLaser, 10 );
 
-	if( m_pBeam )
+	if( m_hBeam )
 	{
-		m_pBeam->PointsInit( vecStart, vecTmpEnd ); //m_pBeam->PointEntInit( vecTmpEnd, entindex() );
-		m_pBeam->SetColor( 255, 255, 255 ); //  0, 214, 198
-		m_pBeam->SetScrollRate( 255 );
-		m_pBeam->SetBrightness( 20 ); // 64
-	//	m_pBeam->SetParent( this ); // this doesn't work with BEAM_POINTS beam!!!
-		m_pBeam->SetWidth( 2 );
+		CBeam *pBeam = (CBeam *)(CBaseEntity*)m_hBeam;
+		pBeam->PointsInit( vecStart, vecTmpEnd ); //m_pBeam->PointEntInit( vecTmpEnd, entindex() );
+		pBeam->SetColor( 255, 255, 255 ); //  0, 214, 198
+		pBeam->SetScrollRate( 255 );
+		pBeam->SetBrightness( 20 ); // 64
+	//	pBeam->SetParent( this ); // this doesn't work with BEAM_POINTS beam!!!
+		pBeam->SetWidth( 2 );
 		PrevOrigin = vecStart;
 	}
 
 	
-	if( !m_pSprite )
-		m_pSprite = CSprite::SpriteCreate( "sprites/glow01.spr", vecTmpEnd, FALSE );
+	if( !m_hSprite )
+		m_hSprite = CSprite::SpriteCreate( "sprites/glow01.spr", vecTmpEnd, FALSE );
 
-	if( m_pSprite )
+	if( m_hSprite )
 	{
-		m_pSprite->SetTransparency( kRenderConstantGlow, 255, 255, 255, 100, 0 );
-		m_pSprite->SetScale( 0.15 );
-		m_pSprite->SetFadeDistance( 500 );
+		CSprite *pSprite = (CSprite*)(CBaseEntity*)m_hSprite;
+		pSprite->SetTransparency( kRenderConstantGlow, 255, 255, 255, 100, 0 );
+		pSprite->SetScale( 0.15 );
+		pSprite->SetFadeDistance( 500 );
 	}
 
 	// setting use function here, only after the beam is fully created
@@ -415,7 +417,7 @@ void CTripmineGrenade :: BeamBreakThink( void  )
 	bool bBlowup = false;
 
 	// respawn detect. 
-	if( !m_pBeam )
+	if( !m_hBeam )
 	{
 		MakeBeam();
 		if( m_hParent )
@@ -429,8 +431,10 @@ void CTripmineGrenade :: BeamBreakThink( void  )
 	if( vecStart != PrevOrigin )
 	{
 		Vector vecTmpEnd = GetAbsOrigin() + m_vecDir * 2048 * m_flBeamLength;
-		m_pBeam->PointsInit( vecStart, vecTmpEnd );
-		m_pSprite->SetAbsOrigin( vecTmpEnd );
+		CBeam *pBeam = (CBeam *)(CBaseEntity *)m_hBeam;
+		if( pBeam )
+			pBeam->PointsInit( vecStart, vecTmpEnd );
+		m_hSprite->SetAbsOrigin( vecTmpEnd );
 	}
 	PrevOrigin = vecStart;
 
