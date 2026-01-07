@@ -6143,6 +6143,9 @@ void CAndrewGrunt::RunAI( void )
 			// fire the rockets
 			if( FireRocketTime > 0.0f && gpGlobals->time > FireRocketTime )
 			{
+				if( m_hEnemy == NULL || !m_hEnemy->IsPlayer() ) // to avoid the crash - player's drone dies and it crashes when Andrew attempts to fire rockets at it
+					m_hEnemy = UTIL_PlayerByIndex( 1 );
+
 				Vector vecTarget = m_hEnemy->GetAbsOrigin() + m_hEnemy->pev->velocity + m_hEnemy->pev->basevelocity;
 				// make sure player is not too close
 				float dist = (m_hEnemy->GetAbsOrigin() - GetAbsOrigin()).Length();
