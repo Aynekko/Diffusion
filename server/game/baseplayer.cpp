@@ -3728,6 +3728,9 @@ void CBasePlayer::ManageElectroBlast( void )
 				goto skip_blast;
 			}
 
+			if( pev->flags & FL_FROZEN )
+				goto skip_blast;
+
 			// do blast
 			UTIL_ScreenShakeLocal( this, GetAbsOrigin(), 10.0, 150.0, 1.0, 400, true );
 
