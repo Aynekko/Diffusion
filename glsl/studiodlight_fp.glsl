@@ -93,6 +93,9 @@ varying mat3	        var_MatrixTBN;
 void main( void )
 {
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+#if defined( STUDIO_SPECULAR )
+	vec3 glossmap = diffuse.rgb;
+#endif
 
 #if !defined( STUDIO_INTERIOR )
 	if( diffuse.a == 0.0 ) discard;
@@ -204,7 +207,7 @@ void main( void )
 
 	// apply specular lighting
 #if defined( STUDIO_SPECULAR )
-	vec3 glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
+	glossmap = DiffuseToGlossmap( glossmap );
 	vec3 gloss = ComputeSpecular( N, V, L, glossmap, u_GlossSmoothness, u_GlossScale ) * ( light * 0.5 ) * NdotL * atten * shadow;
 	#if defined( STUDIO_EMBOSS )
 		gloss *= emboss;

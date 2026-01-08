@@ -1,10 +1,9 @@
 #ifndef SPECULAR_H
 #define SPECULAR_H
 
-vec3 DiffuseToGlossmap( sampler2D ColorMap, vec2 texcoord )
+vec3 DiffuseToGlossmap( vec3 rgb )
 {
-	vec3 res = texture2D( ColorMap, texcoord ).rgb;
-	vec3 glossmap = vec3( clamp( dot( res, vec3( 0.33 ) ), 0.0, 1.0 ) );
+	vec3 glossmap = vec3( clamp( dot( rgb, vec3( 0.33 ) ), 0.0, 1.0 ) );
 
 	return glossmap * glossmap;
 }

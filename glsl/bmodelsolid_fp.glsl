@@ -111,6 +111,9 @@ void main( void )
 #if defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR ) || defined( BMODEL_PORTAL )
 	#if defined( BMODEL_WATER_PLANAR )
 		diffuse = texture2D( u_WaterTex, var_TexDiffuse * 0.25 );
+		#if defined( BMODEL_SPECULAR )
+			glossmap = diffuse.rgb;
+		#endif
 	#elif defined( BMODEL_PORTAL )
 		diffuse = texture2DProj( u_ColorMap, var_TexMirror );
 	#else
@@ -127,6 +130,9 @@ void main( void )
 		diffuse = texture2D( u_ColorMap, var_TexDiffuse * 0.25 );
 	#else
 		diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+	#endif
+	#if defined( BMODEL_SPECULAR )
+		glossmap = diffuse.rgb;
 	#endif
 #endif
 
@@ -230,7 +236,7 @@ void main( void )
 		#if defined( BMODEL_WATER )
 			glossmap = vec3( 0.0 );
 		#else
-			glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
+			glossmap = DiffuseToGlossmap( glossmap );
 		#endif
 	#endif
 	#if defined( BMODEL_EMBOSS )

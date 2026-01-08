@@ -83,6 +83,9 @@ uniform float		u_Fresnel;
 void main( void )
 {		
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
+#if defined( STUDIO_SPECULAR )
+	vec3 glossmap = diffuse.rgb;
+#endif
 
 #if defined( STUDIO_ADDITIVE )
 	// ignore black pixels of the texture
@@ -143,7 +146,7 @@ void main( void )
 	vec3 light_diffuse_sum = vec3(0.0);
 	vec3 gloss_sum = vec3(0.0);
 	#if defined( STUDIO_SPECULAR )
-		vec3 glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
+		glossmap = DiffuseToGlossmap( glossmap );
 	#endif
 
 	// apply lightstyles
@@ -260,7 +263,7 @@ void main( void )
 	#else
 		L = var_LightVec;
 		float NdotLGloss = saturate( dot( N, L ));
-		vec3 glossmap = DiffuseToGlossmap( u_ColorMap, var_TexDiffuse );
+		glossmap = DiffuseToGlossmap( glossmap );
 		vec3 gloss = ComputeSpecular( N, V, L, glossmap, u_GlossSmoothness, u_GlossScale ) * NdotLGloss;
 		diffuse.rgb *= saturate( 1.0 - GetLuminance( gloss ));
 		#if defined( STUDIO_EMBOSS )
