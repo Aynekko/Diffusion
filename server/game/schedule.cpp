@@ -490,7 +490,7 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 				SetThink ( NULL );
 				StopAnimation();
 
-				SetThink(&CBaseMonster :: CorpseFallThink ); // diffusion - by Ku2zoff
+			//	SetThink(&CBaseMonster :: CorpseFallThink ); // diffusion - by Ku2zoff
 /*				if ( !BBoxFlat() )
 				{
 					// a bit of a hack. If a corpses' bbox is positioned such that being left solid so that it can be attacked will

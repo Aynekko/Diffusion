@@ -1297,8 +1297,8 @@ Schedule_t* CBaseMonster :: GetScheduleOfType ( int Type )
 		}
 	case SCHED_DIE:
 		{
-			UTIL_SetSize(pev, g_vecZero, g_vecZero ); // diffusion - by Ku2zoff
-		//	pev->solid = SOLID_NOT; // this works for now...
+		//	UTIL_SetSize(pev, g_vecZero, g_vecZero ); // diffusion - by Ku2zoff
+			pev->solid = SOLID_NOT; // this works for now... // NOTE: use this, otherwise NPCs can't walk properly on slopes if the corpse is on the way. Related to CBaseMonster :: RunTask, case TASK_DIE
 			return &slDie[ 0 ];
 		}
 	case SCHED_TAKE_COVER_FROM_ORIGIN:
