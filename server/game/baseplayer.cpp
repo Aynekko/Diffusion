@@ -7013,6 +7013,12 @@ void CBasePlayer :: UpdateClientData( void )
 		CanShoot_CL = CanShoot;
 		DrunkLevel_CL = DrunkLevel;
 		CanUseDrone_CL = CanUseDrone;
+
+		if( !CanShoot )
+		{
+			if( m_pActiveItem && ZoomState > 0 )
+				m_pActiveItem->ResetZoom();
+		}
 	}
 
 	edict_t *pWorld = INDEXENT( 0 );

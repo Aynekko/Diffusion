@@ -148,6 +148,7 @@ public:
 	virtual BOOL Deploy( ) { return TRUE; };		// returns is deploy was successful
 	void UnauthorizedUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	int ObjectCaps( void );
+	virtual void ResetZoom( void ) { return; };
 
 	virtual BOOL CanHolster( void ) { return TRUE; };		// can this weapon be put away right now?
 	virtual void Holster( void );
@@ -232,6 +233,7 @@ public:
 	virtual void RetireWeapon( void );
 	virtual BOOL ShouldWeaponIdle( void ) {return FALSE; };
 	virtual void Holster( void );
+	virtual void ResetZoom( void ) { return; };
 	virtual BOOL UseDecrement( void ) { return FALSE; };
 	virtual void LowAmmoMsg(CBasePlayer* pPlayer);
 	
