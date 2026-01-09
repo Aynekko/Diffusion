@@ -1720,7 +1720,8 @@ int CBaseEntity :: DamageDecal( int bitsDamageType )
 	if ( pev->rendermode != kRenderNormal )
 		return DECAL_BPROOF1;
 
-	return DECAL_GUNSHOT1 + RANDOM_LONG(0,3);
+	// use 1 decal for optimization purposes - these decals all look alike anyway
+	return DECAL_GUNSHOT1;// +RANDOM_LONG( 0, 3 );
 }
 
 // NOTE: szName must be a pointer to constant memory, e.g. "monster_class" because the entity
