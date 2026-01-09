@@ -230,7 +230,7 @@ void AddDecalToBatch( decal_t *decal )
 
 		if( !CVAR_TO_BOOL( r_polyoffset ) )
 			DecalBatch[B].decal_verts[i].position = Vector( v ) + normal * 0.05;
-		else DecalBatch[B].decal_verts[i].position = v;
+		else DecalBatch[B].decal_verts[i].position = Vector( v ) + normal * 0.1f;
 	}
 
 	DecalBatch[B].total_verts += numVerts;
@@ -322,8 +322,7 @@ void DrawDecalsBatch( void )
 	for( i = 0; i < num_render_decals; i++ )
 		AddDecalToBatch( decal_list[i] );
 
-	GL_AlphaTest( GL_TRUE );
-	GL_AlphaFunc( GL_GREATER, DEFAULT_ALPHATEST );
+	GL_AlphaTest( GL_FALSE );
 	GL_Blend( GL_TRUE );
 	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 	GL_DepthMask( GL_FALSE );
@@ -344,18 +343,20 @@ void DrawDecalsBatch( void )
 	cached_brush_texture = -1;
 	cached_decal_texture = -1;
 	cached_lightmap = -1;
+
+	gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
+	Vector4D fogParams[2];
+	fogParams[0] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+	fogParams[1] = Vector4D( RI->vieworg.x, RI->vieworg.y, RI->vieworg.z, 0.0f );
+
 	for( i = 0; i <= num_batches; i++ )
 	{
 		if( cached_shader != DecalBatch[i].shader )
 		{
 			GL_BindShader( &glsl_programs[DecalBatch[i].shader] );
-			// update transformation matrix
-			gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
+			// update transformation matrix	
 			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 			pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
-			Vector4D fogParams[2];
-			fogParams[0] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
-			fogParams[1] = Vector4D( RI->vieworg.x, RI->vieworg.y, RI->vieworg.z, 0.0f );
 			pglUniform4fvARB( RI->currentshader->u_FogParams, 2, &fogParams[0][0] );
 			cached_shader = DecalBatch[i].shader;
 		}
@@ -377,7 +378,7 @@ void DrawDecalsBatch( void )
 			GL_Bind( GL_TEXTURE2, DecalBatch[i].lightmap_texnum );
 			cached_lightmap = DecalBatch[i].lightmap_texnum;
 		}
-		
+
 		pglBufferDataARB( GL_ARRAY_BUFFER_ARB, sizeof( DecalBatch[i].decal_verts[0] ) * DecalBatch[i].total_verts, DecalBatch[i].decal_verts, GL_DYNAMIC_DRAW_ARB );
 		pglMultiDrawArrays( GL_POLYGON, DecalBatch[i].arrayfirsts, DecalBatch[i].numverts, DecalBatch[i].numdecals );
 		r_stats.c_decals += DecalBatch[i].numdecals;
@@ -422,7 +423,6 @@ void DrawDecalsBatch( void )
 
 	GL_DepthMask(GL_TRUE);
 	GL_Blend( GL_FALSE );
-	GL_AlphaTest( GL_FALSE );
 
 	if (CVAR_TO_BOOL(r_polyoffset))
 		pglDisable(GL_POLYGON_OFFSET_FILL);
