@@ -201,7 +201,7 @@ void CBaseDelay :: SUB_UseTargets( CBaseEntity *pActivator, USE_TYPE useType, fl
 		CBaseEntity *pKillTarget = NULL;
 
 		ALERT( at_aiconsole, "KillTarget: %s\n", STRING( m_iszKillTarget ));
-		pKillTarget = UTIL_FindEntityByTargetname( NULL, STRING( m_iszKillTarget ));
+		pKillTarget = UTIL_FindEntityByTargetname( NULL, STRING( m_iszKillTarget ), pActivator);
 
 		while( !FNullEnt( pKillTarget ))
 		{

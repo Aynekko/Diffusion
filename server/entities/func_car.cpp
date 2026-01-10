@@ -3405,6 +3405,7 @@ void CCar::Idle( void )
 		CBaseEntity *pPlayer = CBaseEntity::Instance( INDEXENT( 1 ) );
 		if( (GetAbsOrigin() - pPlayer->GetAbsOrigin()).Length() > 2000 )
 			thinktime = 0.5;
+		UTIL_SetOrigin( this, GetAbsOrigin() ); // HACK: I need this so whatever car left near the 1st tower will be deleted by the trigger
 	}
 
 	if( HasSpawnFlags( SF_CAR_DOIDLEUNSTICK ) )
