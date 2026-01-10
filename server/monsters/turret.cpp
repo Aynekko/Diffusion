@@ -1386,7 +1386,7 @@ public:
 
 	float SpawnTime; // diffusion - hackhack: invincible for 1.5 seconds, to initialize all the needed stuff after spawn
 
-	Vector EyePosition() { return GetAbsOrigin() + Vector( 0, 0, 15 ); };
+//	Vector EyePosition() { return GetAbsOrigin() + Vector( 0, 0, 15 ); };
 
 	DECLARE_DATADESC();
 };
@@ -1480,7 +1480,9 @@ void CSentry::Spawn()
 
 void CSentry::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
 {
-	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, m_flDistLook, BULLET_MONSTER_MP5, 1, 0, VARS( pev->owner ) );
+	const bool bPlayerSentry = FClassnameIs( pev, "_playersentry" );
+
+	FireBullets( 1, vecSrc, vecDirToEnemy, TURRET_SPREAD, m_flDistLook, BULLET_MONSTER_MP5, 1, bPlayerSentry ? 5.0f : 2.5f, VARS( pev->owner ) );
 	CSoundEnt::InsertSound ( bits_SOUND_COMBAT, GetAbsOrigin(), 768, 0.3, ENTINDEX(edict()) );
 
 //	ALERT(at_console, "SentryAmmoClip %3d\n", SentryAmmoClip);
@@ -1495,7 +1497,7 @@ void CSentry::Shoot(Vector &vecSrc, Vector &vecDirToEnemy)
 	pev->effects |= EF_MUZZLEFLASH;
 
 	// it's a loud weapon
-	if( FClassnameIs( pev, "_playersentry" ) )
+	if( bPlayerSentry )
 	{
 		if( pev->owner )
 		{
