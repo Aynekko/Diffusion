@@ -206,8 +206,8 @@ void CHudMessage::MessageScanStart( void )
 
 	case 1:
 	case 0:	// Fade-in / out with flicker
-		// m_parms.fadeTime = m_parms.pMessage->fadein + m_parms.pMessage->holdtime;
-		m_parms.fadeTime = m_parms.pMessage->holdtime; // diffusion
+		 m_parms.fadeTime = m_parms.pMessage->fadein + m_parms.pMessage->holdtime;
+	//	m_parms.fadeTime = m_parms.pMessage->holdtime; // diffusion
 
 		if( m_parms.time < m_parms.pMessage->fadein )
 		{
@@ -230,8 +230,8 @@ void CHudMessage::MessageScanStart( void )
 		break;
 
 	case 2:
-//		m_parms.fadeTime = (m_parms.pMessage->fadein * m_parms.length) + m_parms.pMessage->holdtime;
-		m_parms.fadeTime = m_parms.pMessage->holdtime; // diffusion
+		m_parms.fadeTime = (m_parms.pMessage->fadein * m_parms.length) + m_parms.pMessage->holdtime;
+//		m_parms.fadeTime = m_parms.pMessage->holdtime; // diffusion
 		
 		if( m_parms.time > m_parms.fadeTime && m_parms.pMessage->fadeout > 0 )
 			m_parms.fadeBlend = (((m_parms.time - m_parms.fadeTime) / m_parms.pMessage->fadeout) * 255);
