@@ -499,6 +499,18 @@ void CBaseMonster::BecomeDead( void )
 
 	// make the corpse fly away from the attack vector
 	pev->movetype = MOVETYPE_TOSS;
+
+	TraceResult tr;
+	const int num_decals = RANDOM_LONG( 5, 8 );
+	UTIL_MakeVectors( GetAbsAngles() );
+	for( int i = 0; i < num_decals; i++ )
+	{
+		Vector org = GetAbsOrigin();
+		org.x += RANDOM_LONG( -28, 28 );
+		org.y += RANDOM_LONG( -28, 28 );
+		UTIL_TraceLine( org, org + Vector( 0, 0, -24 ), ignore_monsters, edict(), &tr );
+		UTIL_BloodDecalTrace( &tr, m_bloodColor );
+	}
 }
 
 

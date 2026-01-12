@@ -2064,7 +2064,7 @@ void UTIL_DecalTrace( TraceResult *pTrace, int decalNumber )
 			index -= 256;
 		}
 	}
-	
+
 	MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 		WRITE_BYTE( message );
 		WRITE_COORD( pTrace->vecEndPos.x );
@@ -2073,7 +2073,7 @@ void UTIL_DecalTrace( TraceResult *pTrace, int decalNumber )
 		WRITE_BYTE( index );
 		if ( entityIndex )
 			WRITE_SHORT( entityIndex );
-		WRITE_BYTE(100); // scale 1.0
+//		WRITE_BYTE((byte)(scale * 100)); // scale 1.0
 	MESSAGE_END();
 }
 
