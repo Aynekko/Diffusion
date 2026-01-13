@@ -895,7 +895,9 @@ static void GL_InitTextures( void )
 		{
 			char path[256];
 			Q_snprintf( path, sizeof( path ), "gfx/water/water_normal_%i", i );
-			int water_texture = LOAD_TEXTURE( path, NULL, 0, TF_NORMALMAP );
+			int water_texture = 0;
+			if( IMAGE_EXISTS( path ) ) 
+				water_texture = LOAD_TEXTURE( path, NULL, 0, TF_NORMALMAP );
 			if( water_texture > 0 )
 				tr.waterTextures.AddToTail( water_texture );
 			else break;
