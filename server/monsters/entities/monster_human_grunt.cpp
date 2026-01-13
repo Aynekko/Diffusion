@@ -2034,10 +2034,6 @@ void CHGrunt :: Precache()
 
 	PRECACHE_SOUND( "hgrunt/gr_mgun1.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_mgun2.wav" );
-	
-	PRECACHE_SOUND( "hgrunt/hg_die1.wav" );
-	PRECACHE_SOUND( "hgrunt/hg_die2.wav" );
-	PRECACHE_SOUND( "hgrunt/hg_die3.wav" );
 
 	PRECACHE_SOUND( "hgrunt/gr_pain1.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_pain2.wav" );
@@ -2235,6 +2231,8 @@ void CHGrunt :: PainSound ( void )
 		case 4:
 			EMIT_SOUND( ENT(pev), CHAN_VOICE, "hgrunt/gr_pain2.wav", 1, ATTN_NORM );	
 			break;
+		default:
+			break;
 		}
 
 		m_flNextPainTime = gpGlobals->time + 1;
@@ -2246,12 +2244,8 @@ void CHGrunt :: PainSound ( void )
 //=========================================================
 void CHGrunt :: DeathSound ( void )
 {
-	switch ( RANDOM_LONG(0,2) )
-	{
-	case 0:	EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "hgrunt/hg_die1.wav", 1, ATTN_IDLE, 0, RANDOM_LONG( 95,100) );	break;
-	case 1: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "hgrunt/hg_die2.wav", 1, ATTN_IDLE, 0, RANDOM_LONG( 95, 100 ) );	break;
-	case 2: EMIT_SOUND_DYN( ENT(pev), CHAN_VOICE, "hgrunt/hg_die3.wav", 1, ATTN_IDLE, 0, RANDOM_LONG( 95, 100 ) );	break;
-	}
+	const bool bCTGrunt = (FClassnameIs( this, "monster_security_soldier" ) || FClassnameIs( this, "monster_security_general" ));
+	SENTENCEG_PlayRndSz( ENT( pev ), bCTGrunt ? "CTG_DIE" : "HG_DIE", 0.6, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ) );
 }
 
 //=========================================================
@@ -4511,10 +4505,6 @@ void CHGruntSecurityGeneral::Precache()
 	PRECACHE_SOUND( "hgrunt/general_mgun.wav" );
 	PRECACHE_SOUND( "hgrunt/general_mgun_d.wav" );
 
-	PRECACHE_SOUND("hgrunt/hg_die1.wav");
-	PRECACHE_SOUND("hgrunt/hg_die2.wav");
-	PRECACHE_SOUND("hgrunt/hg_die3.wav");
-
 	PRECACHE_SOUND("hgrunt/gr_pain1.wav");
 	PRECACHE_SOUND("hgrunt/gr_pain2.wav");
 	PRECACHE_SOUND("hgrunt/gr_pain3.wav");
@@ -5620,10 +5610,6 @@ void CHGruntSecurity::Precache()
 	PRECACHE_SOUND("hgrunt/gr_mgun1.wav");
 	PRECACHE_SOUND("hgrunt/gr_mgun2.wav");
 
-	PRECACHE_SOUND("hgrunt/hg_die1.wav");
-	PRECACHE_SOUND("hgrunt/hg_die2.wav");
-	PRECACHE_SOUND("hgrunt/hg_die3.wav");
-
 	PRECACHE_SOUND("hgrunt/gr_pain1.wav");
 	PRECACHE_SOUND("hgrunt/gr_pain2.wav");
 	PRECACHE_SOUND("hgrunt/gr_pain3.wav");
@@ -5835,10 +5821,6 @@ void CAndrewGrunt::Precache()
 
 	PRECACHE_SOUND( "hgrunt/gr_mgun1.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_mgun2.wav" );
-
-	PRECACHE_SOUND( "hgrunt/hg_die1.wav" );
-	PRECACHE_SOUND( "hgrunt/hg_die2.wav" );
-	PRECACHE_SOUND( "hgrunt/hg_die3.wav" );
 
 	PRECACHE_SOUND( "hgrunt/gr_pain1.wav" );
 	PRECACHE_SOUND( "hgrunt/gr_pain2.wav" );
