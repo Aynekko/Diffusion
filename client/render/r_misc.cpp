@@ -286,7 +286,7 @@ Return 0 to filter entity from visible list for rendering
 ========================
 */
 
-int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
+extern "C" __declspec(dllexport) int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 {		
 	if( g_fRenderInitialized )
 	{
@@ -1040,7 +1040,7 @@ playerstate update in entity_state_t.  In order for these overrides to eventuall
 structure, we need to copy them into the state structure at this point.
 =========================
 */
-void HUD_TxferLocalOverrides( struct entity_state_s* state, const struct clientdata_s* client )
+extern "C" __declspec(dllexport) void HUD_TxferLocalOverrides( struct entity_state_s* state, const struct clientdata_s* client )
 {
 	state->origin = client->origin;
 	state->velocity = client->velocity;
@@ -1067,7 +1067,7 @@ We have received entity_state_t for this player over the network.  We need to co
 playerstate structure
 =========================
 */
-void HUD_ProcessPlayerState( struct entity_state_s* dst, const struct entity_state_s* src )
+extern "C" __declspec(dllexport) void HUD_ProcessPlayerState( struct entity_state_s* dst, const struct entity_state_s* src )
 {
 	// Copy in network data
 	dst->origin = src->origin;
@@ -1138,7 +1138,7 @@ Because we can predict an arbitrary number of frames before the server responds 
  update is occupying.
 =========================
 */
-void HUD_TxferPredictionData( entity_state_t* ps, const entity_state_t* pps, clientdata_t* pcd, const clientdata_t* ppcd, weapon_data_t* wd, const weapon_data_t* pwd )
+extern "C" __declspec(dllexport) void HUD_TxferPredictionData( entity_state_t* ps, const entity_state_t* pps, clientdata_t* pcd, const clientdata_t* ppcd, weapon_data_t* wd, const weapon_data_t* pwd )
 {
 	ps->oldbuttons = pps->oldbuttons;
 	ps->flFallVelocity = pps->flFallVelocity;
@@ -1196,7 +1196,7 @@ HUD_CreateEntities
 Gives us a chance to add additional entities to the render this frame
 =========================
 */
-void HUD_CreateEntities( void )
+extern "C" __declspec(dllexport) void HUD_CreateEntities( void )
 {
 	// e.g., create a persistent cl_entity_t somewhere.
 	// Load an appropriate model into it ( gEngfuncs.CL_LoadModel )
@@ -1418,7 +1418,7 @@ The entity's studio model description indicated an event was
 fired during this frame, handle the event by it's tag ( e.g., muzzleflash, sound )
 =========================
 */
-void HUD_StudioEvent( const struct mstudioevent_s* event, const struct cl_entity_s* entity )
+extern "C" __declspec(dllexport) void HUD_StudioEvent( const struct mstudioevent_s* event, const struct cl_entity_s* entity )
 {
 	Vector velocity = entity->curstate.velocity;
 	int WeaponID = 0;

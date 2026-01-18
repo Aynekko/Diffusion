@@ -30,27 +30,27 @@ void IN_Move( float frametime, usercmd_t *cmd )
 	currentInput->IN_Move( frametime, cmd );
 }
 
-void DLLEXPORT IN_MouseEvent( int mstate )
+extern "C" __declspec(dllexport)void DLLEXPORT IN_MouseEvent( int mstate )
 {
 	currentInput->IN_MouseEvent( mstate );
 }
 
-void DLLEXPORT IN_ClearStates( void )
+extern "C" __declspec(dllexport)void DLLEXPORT IN_ClearStates( void )
 {
 	currentInput->IN_ClearStates();
 }
 
-void DLLEXPORT IN_ActivateMouse( void )
+extern "C" __declspec(dllexport) void DLLEXPORT IN_ActivateMouse( void )
 {
 	currentInput->IN_ActivateMouse();
 }
 
-void DLLEXPORT IN_DeactivateMouse( void )
+extern "C" __declspec(dllexport) void DLLEXPORT IN_DeactivateMouse( void )
 {
 	currentInput->IN_DeactivateMouse();
 }
 
-void DLLEXPORT IN_Accumulate( void )
+extern "C" __declspec(dllexport)void DLLEXPORT IN_Accumulate( void )
 {
 	currentInput->IN_Accumulate();
 }

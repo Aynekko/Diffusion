@@ -36,7 +36,7 @@ byte VolumetricColorArray[MAX_VOLUMETRIC_VERTS][4];
 Vector2D VolumetricTexCoordsArray[MAX_VOLUMETRIC_VERTS];
 int volumetric_numverts;
 
-void HUD_DrawNormalTriangles( void )
+extern "C" __declspec(dllexport) void HUD_DrawNormalTriangles( void )
 {
 	// prepare the cable arrays
 	cable_numverts = 0;
@@ -69,7 +69,7 @@ void HUD_DrawNormalTriangles( void )
 	g_pParticles.Update();
 }
 
-void HUD_DrawTransparentTriangles( void )
+extern "C" __declspec(dllexport) void HUD_DrawTransparentTriangles( void )
 {
 	if( !g_fRenderInitialized )
 	{

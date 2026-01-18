@@ -155,7 +155,7 @@
       <OutputFile>.\..\temp\client\!release\client.dll</OutputFile>
       <ImportLibrary>.\..\temp\client\!release\client.lib</ImportLibrary>
       <AdditionalLibraryDirectories>..\common\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>shlwapi.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <StackReserveSize>
       </StackReserveSize>
       <StackCommitSize>

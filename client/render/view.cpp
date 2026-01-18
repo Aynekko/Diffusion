@@ -19,16 +19,16 @@
 #include "cdll_exp.h"
 
 // thirdperson camera
-void CAM_Think( void ) {}
+extern "C" __declspec(dllexport)void CAM_Think( void ) {}
 
 Vector weapon_move_angles = g_vecZero;
 
-void CL_CameraOffset( float *ofs )
+extern "C" __declspec(dllexport)void CL_CameraOffset( float *ofs )
 {
 	g_vecZero.CopyToArray( ofs );
 }
 
-int CL_IsThirdPerson( void )
+extern "C" __declspec(dllexport) int CL_IsThirdPerson( void )
 {
 	if( gHUD.m_iCameraMode == 1 )
 		return 1;
@@ -2405,7 +2405,7 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 //==========================
 // V_CalcRefdef
 //==========================
-void V_CalcRefdef( struct ref_params_s *pparams )
+extern "C" __declspec(dllexport) void V_CalcRefdef( struct ref_params_s *pparams )
 {
 	// store a local copy in case we need to calc firstperson later
 	memcpy( &tr.viewparams, pparams, sizeof( ref_params_t ) );

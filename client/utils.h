@@ -213,13 +213,13 @@ void R_SplitPolygon( int numPoints, Vector *points, const struct mplane_s *plane
 bool UTIL_IsPlayer( int idx );
 bool UTIL_IsLocal( int idx );
 
-extern int HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname );
-extern void HUD_CreateEntities( void );
-extern void HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
-extern void HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client );
-extern void HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src );
-extern void HUD_TxferPredictionData( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd );
-extern void HUD_TempEntUpdate( double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int (*Callback_AddVisibleEntity)(struct cl_entity_s *pEntity), void (*Callback_TempEntPlaySound)(struct tempent_s *pTemp, float damp) );
+extern "C" __declspec(dllexport) int HUD_AddEntity( int type, struct cl_entity_s *ent, const char *modelname );
+extern "C" __declspec(dllexport) void HUD_CreateEntities( void );
+extern "C" __declspec(dllexport) void HUD_StudioEvent( const struct mstudioevent_s *event, const struct cl_entity_s *entity );
+extern "C" __declspec(dllexport) void HUD_TxferLocalOverrides( struct entity_state_s *state, const struct clientdata_s *client );
+extern "C" __declspec(dllexport) void HUD_ProcessPlayerState( struct entity_state_s *dst, const struct entity_state_s *src );
+extern "C" __declspec(dllexport) void HUD_TxferPredictionData( struct entity_state_s *ps, const struct entity_state_s *pps, struct clientdata_s *pcd, const struct clientdata_s *ppcd, struct weapon_data_s *wd, const struct weapon_data_s *pwd );
+extern "C" __declspec(dllexport) void HUD_TempEntUpdate( double frametime, double client_time, double cl_gravity, struct tempent_s **ppTempEntFree, struct tempent_s **ppTempEntActive, int (*Callback_AddVisibleEntity)(struct cl_entity_s *pEntity), void (*Callback_TempEntPlaySound)(struct tempent_s *pTemp, float damp) );
 
 extern int HUD_GetRenderInterface( int version, render_api_t *renderfuncs, render_interface_t *callback );
 extern int HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppinterface, struct engine_studio_api_s *pstudio );
@@ -233,30 +233,30 @@ extern void IN_Init( void );
 extern void IN_Move( float frametime, struct usercmd_s *cmd );
 extern void IN_Shutdown( void );
 
-extern void IN_ActivateMouse( void );
-extern void IN_DeactivateMouse( void );
-extern void IN_MouseEvent( int mstate );
-extern void IN_Accumulate( void );
-extern void IN_ClearStates( void );
-extern void *KB_Find( const char *name );
-extern void CL_CreateMove( float frametime, struct usercmd_s *cmd, int active );
-extern int CL_IsDead( void );
+extern "C" __declspec(dllexport) void IN_ActivateMouse( void );
+extern "C" __declspec(dllexport) void IN_DeactivateMouse( void );
+extern "C" __declspec(dllexport) void IN_MouseEvent( int mstate );
+extern "C" __declspec(dllexport) void IN_Accumulate( void );
+extern "C" __declspec(dllexport) void IN_ClearStates( void );
+extern "C" __declspec(dllexport) void *KB_Find( const char *name );
+extern "C" __declspec(dllexport) void CL_CreateMove( float frametime, struct usercmd_s *cmd, int active );
+extern "C" __declspec(dllexport) int CL_IsDead( void );
 
-extern void HUD_DrawNormalTriangles( void );
-extern void HUD_DrawTransparentTriangles( void );
+extern "C" __declspec(dllexport) void HUD_DrawNormalTriangles( void );
+extern "C" __declspec(dllexport) void HUD_DrawTransparentTriangles( void );
 
 extern void PM_Init( struct playermove_s *ppmove );
 extern void PM_Move( struct playermove_s *ppmove, int server );
 extern char PM_FindTextureType( const char *name );
-extern void V_CalcRefdef( struct ref_params_s *pparams );
+extern "C" __declspec(dllexport) void V_CalcRefdef( struct ref_params_s *pparams );
 
 void UTIL_CreateAurora( cl_entity_t *ent, const char *file, int attachment, float lifetime = 0.0f );
 void UTIL_RemoveAurora( cl_entity_t *ent );
 extern int PM_GetPhysEntInfo( int ent );
 
-extern void CAM_Think( void );
-extern void CL_CameraOffset( float *ofs );
-extern int CL_IsThirdPerson( void );
+extern "C" __declspec(dllexport) void CAM_Think( void );
+extern "C" __declspec(dllexport) void CL_CameraOffset( float *ofs );
+extern "C" __declspec(dllexport) int CL_IsThirdPerson( void );
 
 // xxx need client dll function to get and clear impuse
 extern cvar_t *in_joystick;

@@ -196,7 +196,7 @@ KB_Find
 Allows the engine to get a kbutton_t directly ( so it can check +mlook state, etc ) for saving out to .cfg files
 ============
 */
-void *KB_Find( const char *name )
+extern "C" __declspec(dllexport) void *KB_Find( const char *name )
 {
 	kblist_t *p;
 	p = g_kbkeys;
@@ -539,7 +539,7 @@ CL_IsDead
 Returns 1 if health is <= 0
 ============
 */
-int CL_IsDead( void )
+extern "C" __declspec(dllexport) int CL_IsDead( void )
 {
 	return ( gHUD.m_HealthVisual.m_iHealth <= 0 ) ? 1 : 0;
 }
@@ -553,7 +553,7 @@ if active == 1 then we are 1) not playing back demos ( where our commands are ig
 2 ) we have finished signing on to server
 ================
 */
-void CL_CreateMove( float frametime, usercmd_t *cmd, int active )
+extern "C" __declspec(dllexport)void CL_CreateMove( float frametime, usercmd_t *cmd, int active )
 {	
 	float spd;
 	Vector viewangles, forward;

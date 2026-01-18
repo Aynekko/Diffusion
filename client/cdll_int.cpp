@@ -18,6 +18,9 @@
 // this implementation handles the linking of the engine to the DLL
 //
 
+#include <windows.h>
+#include <shlwapi.h>     // for PathRemoveFileSpecA
+
 #include "hud.h"
 #include "utils.h"
 #include "r_local.h"
@@ -31,6 +34,8 @@
 #include "keydefs.h"
 #include "buildtime.h"
 
+
+
 int developer_level;
 int g_iXashEngineBuildNumber;
 cl_enginefunc_t gEngfuncs;
@@ -40,7 +45,7 @@ CHud gHUD;
 //==========================================================
 // Initialize: called when the DLL is first loaded.
 //==========================================================
-int Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
+extern "C" __declspec(dllexport) int Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 {
 	gEngfuncs = *pEnginefuncs;
 
@@ -74,7 +79,7 @@ HUD_GetHullBounds
 Engine calls this to enumerate player collision hulls, for prediction.  Return 0 if the hullnumber doesn't exist.
 ================================
 */
-int HUD_GetHullBounds( int hullnumber, float *mins, float *maxs )
+extern "C" __declspec(dllexport)  int HUD_GetHullBounds( int hullnumber, float *mins, float *maxs )
 {
 	int iret = 0;
 
@@ -107,7 +112,7 @@ Return 1 if the packet is valid.  Set response_buffer_size if you want to send a
 Incoming, it holds the max size of the response_buffer, so you must zero it out if you choose not to respond.
 ================================
 */
-int HUD_ConnectionlessPacket( const struct netadr_s *, const char *, char *, int *response_buffer_size )
+extern "C" __declspec(dllexport)  int HUD_ConnectionlessPacket( const struct netadr_s *, const char *, char *, int *response_buffer_size )
 {
 	// Parse stuff from args
 	int max_buffer_size = *response_buffer_size;
@@ -121,17 +126,17 @@ int HUD_ConnectionlessPacket( const struct netadr_s *, const char *, char *, int
 	return 0;
 }
 
-void HUD_PlayerMoveInit( struct playermove_s *ppmove )
+extern "C" __declspec(dllexport)  void HUD_PlayerMoveInit( struct playermove_s *ppmove )
 {
 	PM_Init( ppmove );
 }
 
-char HUD_PlayerMoveTexture( char *name )
+extern "C" __declspec(dllexport)  char HUD_PlayerMoveTexture( char *name )
 {
 	return PM_FindTextureType( name );
 }
 
-void HUD_PlayerMove( struct playermove_s *ppmove, int server )
+extern "C" __declspec(dllexport)  void HUD_PlayerMove( struct playermove_s *ppmove, int server )
 {
 	PM_Move( ppmove, server );
 }
@@ -145,7 +150,7 @@ and whenever the vid_mode is changed
 so the HUD can reinitialize itself.
 ==========================
 */
-int HUD_VidInit(void)
+extern "C" __declspec(dllexport) int HUD_VidInit(void)
 {	
 	gHUD.VidInit();
 
@@ -165,8 +170,53 @@ to a server.  Reinitializes all
 the hud variables.
 ==========================
 */
-void HUD_Init( void )
+
+extern "C" __declspec(dllexport) void HUD_Init( void )
 {
+	// get mod path
+	static char modDir[256] = { 0 };
+	
+	const char *gameDir = gEngfuncs.pfnGetGameDirectory(); 
+	if( gameDir && *gameDir )
+	{
+		strncpy( modDir, gameDir, sizeof( modDir ) - 1 );
+		modDir[sizeof( modDir ) - 1] = '\0';
+	}
+
+	// ïet full path to hl.exe
+	char exePath[MAX_PATH] = { 0 };
+	GetModuleFileNameA( NULL, exePath, MAX_PATH );
+
+	// remove the filename part leaves the directory (e.g. "C:\Steam\steamapps\common\Half-Life\")
+	PathRemoveFileSpecA( exePath );
+
+	// Build path to xash3d.exe in the same folder
+	char xashPath[MAX_PATH] = { 0 };
+	snprintf( xashPath, sizeof( xashPath ), "%s\\%s\\xash3d.exe", exePath, gameDir );
+
+	// prepare path to Xash3D (hardcode or load from config)
+	static char args[256] = { 0 };
+	snprintf( args, sizeof( args ), "-game %s", gameDir );
+
+	STARTUPINFO si = { sizeof( si ) };
+	PROCESS_INFORMATION pi;
+
+	char cmdLine[512];
+	snprintf( cmdLine, sizeof( cmdLine ), "\"%s\" %s", xashPath, args );
+
+	if( CreateProcessA( NULL, cmdLine, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi ) ) {
+		// Optional: Wait briefly or signal via file/IPC if transferring state
+		CloseHandle( pi.hProcess );
+		CloseHandle( pi.hThread );
+
+		// Exit current process (hl.exe)
+		ExitProcess( 0 );
+	}
+	else {
+		// Handle error, e.g., MessageBox
+	}
+
+	return; // we don't need anything else, this is a stub 32-bit dll
 #if XASH_64BIT && XASH_WIN32
 	discord_integration::initialize();
 #endif
@@ -184,7 +234,7 @@ void HUD_Init( void )
 	gHUD.m_StatusIconsAchievement.LoadAchievementFile();
 }
 
-void HUD_Shutdown( void )
+extern "C" __declspec(dllexport)  void HUD_Shutdown( void )
 {
 	// diffusion - save achievement stats
 	gHUD.m_StatusIconsAchievement.SaveAchievementFile();
@@ -213,7 +263,7 @@ called every screen frame to
 redraw the HUD.
 ===========================
 */
-int HUD_Redraw(float time, int intermission)
+extern "C" __declspec(dllexport)  int HUD_Redraw(float time, int intermission)
 {
 	return gHUD.Redraw( time, intermission );
 }
@@ -230,7 +280,7 @@ to modify the data.
 returns 1 if anything has been changed, 0 otherwise.
 ==========================
 */
-int HUD_UpdateClientData(client_data_t * pcldata, float flTime)
+extern "C" __declspec(dllexport)  int HUD_UpdateClientData(client_data_t * pcldata, float flTime)
 {
 #if XASH_64BIT && XASH_WIN32
 	discord_integration::on_update_client_data();
@@ -246,7 +296,7 @@ int HUD_UpdateClientData(client_data_t * pcldata, float flTime)
 Called at start and end of demos to restore to "non"HUD state.
 ==========================
 */
-void HUD_Reset(void)
+extern "C" __declspec(dllexport)  void HUD_Reset(void)
 {
 	gHUD.VidInit();
 }
@@ -292,7 +342,7 @@ HUD_Frame
 Called by engine every frame that client .dll is loaded
 ==========================
 */
-void HUD_Frame( double time )
+extern "C" __declspec(dllexport)  void HUD_Frame( double time )
 {
 #if XASH_64BIT && XASH_WIN32
 	discord_integration::on_frame();
@@ -308,7 +358,7 @@ void HUD_Frame( double time )
 	}
 }
 
-int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
+extern "C" __declspec(dllexport) int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 {
 	bool bUseButton = !Q_strcmp( pszCurrentBinding, "+use" );
 	bool bEscButton = false;
@@ -393,11 +443,11 @@ int HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding )
 	return 1;
 }
 
-void HUD_PostRunCmd(struct local_state_s*, local_state_s*, struct usercmd_s*, int, double, unsigned int)
+extern "C" __declspec(dllexport)  void HUD_PostRunCmd(struct local_state_s*, local_state_s*, struct usercmd_s*, int, double, unsigned int)
 {
 }
 
-void HUD_VoiceStatus( int entindex, qboolean bTalking )
+extern "C" __declspec(dllexport)  void HUD_VoiceStatus( int entindex, qboolean bTalking )
 {
 	if( entindex == -1 )
 		gHUD.m_ScreenEffects.ShouldDrawVoiceIcon = bTalking;
@@ -410,15 +460,15 @@ void HUD_VoiceStatus( int entindex, qboolean bTalking )
 	}
 }
 
-void HUD_DirectorMessage( int iSize, void *pbuf )
+extern "C" __declspec(dllexport)  void HUD_DirectorMessage( int iSize, void *pbuf )
 {
 }
 
-void Demo_ReadBuffer( int size, unsigned char *buffer )
+extern "C" __declspec(dllexport) void Demo_ReadBuffer( int size, unsigned char *buffer )
 {
 }
 
-cl_entity_t *HUD_GetUserEntity( int index )
+extern "C" __declspec(dllexport) cl_entity_t *HUD_GetUserEntity( int index )
 {
 	return NULL;
 }
