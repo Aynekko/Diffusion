@@ -502,7 +502,6 @@ void CBaseMonster::BecomeDead( void )
 
 	TraceResult tr;
 	const int num_decals = RANDOM_LONG( 5, 8 );
-	UTIL_MakeVectors( GetAbsAngles() );
 	for( int i = 0; i < num_decals; i++ )
 	{
 		Vector org = GetAbsOrigin();

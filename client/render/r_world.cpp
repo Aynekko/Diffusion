@@ -2447,7 +2447,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 				GL_Bind( GL_TEXTURE0, tr.cinTextures[es->cintexturenum - 1] );
 				GL_LoadIdentityTexMatrix();
 			}
-			else if( FBitSet( s->flags, SURF_LANDSCAPE ) )
+			else if( bLandscape )
 			{
 				if( land && land->terrain && land->terrain->indexmap.gl_diffuse_id > 0 )
 					GL_Bind( GL_TEXTURE0, land->terrain->indexmap.gl_diffuse_id );
@@ -2466,7 +2466,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 			else
 			{
-				if( FBitSet( s->flags, SURF_LANDSCAPE ) )
+				if( bLandscape )
 					GL_Bind( GL_TEXTURE0, iTexnum );
 				else if( MT.gl_fallbacktex_id > 0 )
 					GL_Bind( GL_TEXTURE0, MT.gl_fallbacktex_id );
@@ -2480,7 +2480,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 				GL_LoadIdentityTexMatrix();
 			}
 
-			if( FBitSet( s->flags, SURF_LANDSCAPE ) )
+			if( bLandscape )
 			{
 				if( land && land->terrain )
 				{
@@ -2584,7 +2584,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 				GL_Cull( GL_FRONT );
 
 			cached_texture = iTexnum;
-			cached_landscape = FBitSet( s->flags, SURF_LANDSCAPE ) ? 1 : 0;
+			cached_landscape = bLandscape;
 		}
 
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
@@ -2702,7 +2702,7 @@ void R_DrawShadowBrushList( void )
 	numTempElems = 0;
 	endv = 0;
 	pglBindVertexArray( world->vertex_array_object );
-
+	const gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
 	int curtex;
 
 	for( int i = 0; i < tr.num_draw_surfaces; i++ )
@@ -2746,8 +2746,6 @@ void R_DrawShadowBrushList( void )
 			GL_BindShader( &glsl_programs[entry->hProgram] );
 
 			ASSERT( RI->currentshader != NULL );
-
-			const gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
 
 			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 			pglUniform2fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1] );
@@ -2847,9 +2845,20 @@ void R_DrawBrushList( void )
 	int cached_landscape = -1;
 	Vector2D cached_reflectscale = { -1.0f, 0.0f };
 	Vector cubemap_params[3];
-	Vector4D brush_params[3];
 	Vector2D screensizeinv = Vector2D( 1.0f / (float)glState.width, 1.0f / (float)glState.height );
 	float waveHeight = 0.0f;
+	gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
+
+	Vector4D brush_params[3];
+	// fog params
+	if( e->curstate.rendermode == kRenderTransAdd )
+		brush_params[0] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f ); // disable fog
+	else
+		brush_params[0] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+	// view origin + waveheight
+	brush_params[1] = Vector4D( RI->vieworg.x, RI->vieworg.y, RI->vieworg.z, waveHeight );
+	// waterlevel
+	brush_params[2] = Vector4D( tr.viewparams.waterlevel == 3 ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f );
 
 	int i;
 
@@ -2911,8 +2920,6 @@ void R_DrawBrushList( void )
 
 			ASSERT( RI->currentshader != NULL );
 
-			gl_state_t *glm = &tr.cached_state[e->hCachedMatrix];
-
 			// set the current waveheight
 			if( FBitSet( s->flags, SURF_WATER ) )
 			{
@@ -2927,15 +2934,6 @@ void R_DrawBrushList( void )
 			// write constants
 			pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
 			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
-			// fog params
-			if( e->curstate.rendermode == kRenderTransAdd )
-				brush_params[0] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f ); // disable fog
-			else
-				brush_params[0] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
-			// view origin + waveheight
-			brush_params[1] = Vector4D( RI->vieworg.x, RI->vieworg.y, RI->vieworg.z, waveHeight );
-			// waterlevel
-			brush_params[2] = Vector4D( tr.viewparams.waterlevel == 3 ? 1.0f : 0.0f, 0.0f, 0.0f, 0.0f );
 			pglUniform4fvARB( RI->currentshader->u_BrushParams, 3, &brush_params[0][0] );
 
 			// reset cache

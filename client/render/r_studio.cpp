@@ -1909,7 +1909,6 @@ void CStudioModelRenderer::LoadStudioMaterials( void )
 	m_pRenderModel->materials = (mstudiomaterial_t *)Mem_Alloc( sizeof( mstudiomaterial_t ) * m_pStudioHeader->numtextures );
 
 	mstudiotexture_t *ptexture = (mstudiotexture_t *)((byte *)m_pStudioHeader + m_pStudioHeader->textureindex);
-	bool bone_weights = FBitSet( m_pStudioHeader->flags, STUDIO_HAS_BONEWEIGHTS ) ? true : false;
 	mstudiomaterial_t *pmaterial = (mstudiomaterial_t *)m_pRenderModel->materials;
 	char diffuse[64], texname[64], mdlname[64];
 	int i;
@@ -1983,7 +1982,7 @@ void CStudioModelRenderer::LoadStudioMaterials( void )
 		}
 
 		// precache as many shaders as possible
-		GL_UberShaderForSolidStudio( pmaterial, false, bone_weights, false, m_pStudioHeader->numbones );
+		GL_UberShaderForSolidStudio( pmaterial, false, FBitSet( m_pStudioHeader->flags, STUDIO_HAS_BONEWEIGHTS ) ? true : false, false, m_pStudioHeader->numbones );
 		// diffusion - precache lights too to minimize stutters
 	//	GL_UberShaderForDlightStudio( &tr.defSpotlight, pmaterial, bone_weights, m_pStudioHeader->numbones );
 	//	GL_UberShaderForDlightStudio( &tr.defOmnilight, pmaterial, bone_weights, m_pStudioHeader->numbones );
@@ -2032,7 +2031,7 @@ void CStudioModelRenderer::FreeStudioMaterials( void )
 {
 	if( !m_pRenderModel->materials ) return;
 
-	mstudiomaterial_t *pmaterial = (mstudiomaterial_t *)m_pRenderModel->materials;
+	const mstudiomaterial_t *pmaterial = (mstudiomaterial_t *)m_pRenderModel->materials;
 
 	// release textures for current model
 	for( int i = 0; i < m_pStudioHeader->numtextures; i++, pmaterial++ )
@@ -5132,12 +5131,36 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 	const matrix4x4 projectionView = pl->projectionMatrix.Concat( lightView );
 	projectionView.CopyToArray( gl_lightViewProjMatrix );
 
-	Vector4D light_params[7];
-
 	GL_Bind( GL_TEXTURE1, pl->projectionTexture );
 	GL_Bind( GL_TEXTURE2, pl->shadowTexture );
 	const float shadowWidth = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, pl->shadowTexture );
 	const float shadowHeight = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_HEIGHT, pl->shadowTexture );
+
+	Vector4D light_params[7];
+	// light dir
+	light_params[0] = Vector4D( lightdir.x, lightdir.y, lightdir.z, pl->fov );
+	// light diffuse
+	light_params[1] = Vector4D( pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
+	// shadow parameters
+	light_params[2] = Vector4D( shadowWidth, shadowHeight, -pl->projectionMatrix[2][2], pl->projectionMatrix[3][2] );
+	// light origin
+	light_params[3] = Vector4D( lightorg.x, lightorg.y, lightorg.z, (1.0f / pl->radius) );
+	// view origin
+	light_params[4] = Vector4D( tr.modelorg.x, tr.modelorg.y, tr.modelorg.z, 0.0f );
+	// view right
+	light_params[5] = Vector4D( right.x, right.y, right.z, 0.0f );
+	// fog params
+	if( m_pCurrentEntity->curstate.rendermode == kRenderTransAdd )
+		light_params[6] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f ); // disable fog
+	else
+		light_params[6] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
+
+	float scale = m_pCurrentEntity->curstate.scale;
+	if( scale <= 0.0f ) scale = 1.0f;
+	Vector meshparams[3];
+	meshparams[0] = m_pCurrentEntity->curstate.origin;
+	meshparams[1] = m_pCurrentEntity->angles;
+	meshparams[2] = Vector( scale, m_pCurrentEntity->curstate.fuser2, 0.0f ); // fuser2 is the dirt on the car body/wheels
 
 	// sorting list to reduce shader switches
 	for( int i = 0; i < m_nNumLightMeshes; i++ )
@@ -5147,7 +5170,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 		m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata( m_pRenderModel );
 		const int m_skinnum = bound( 0, m_pCurrentEntity->curstate.skin, m_pStudioHeader->numskinfamilies - 1 );
 		const vbomesh_t *pMesh = entry->mesh;
-		const Vector ang = m_pCurrentEntity->angles;
+		
 
 		short *pskinref = (short *)((byte *)m_pStudioHeader + m_pStudioHeader->skinindex);
 		pskinref += (m_skinnum * m_pStudioHeader->numskinref);
@@ -5170,36 +5193,12 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 
 			// depth scale and bias and shadowmap resolution
 		//	R_SetRenderColor( m_pCurrentEntity );
-			// light dir
-			light_params[0] = Vector4D( lightdir.x, lightdir.y, lightdir.z, pl->fov );
-			// light diffuse
-			light_params[1] = Vector4D( pl->color.r / 255.0f, pl->color.g / 255.0f, pl->color.b / 255.0f, pl->lightFalloff );
-			// shadow parameters
-			light_params[2] = Vector4D( shadowWidth, shadowHeight, -pl->projectionMatrix[2][2], pl->projectionMatrix[3][2] );
-			// light origin
-			light_params[3] = Vector4D( lightorg.x, lightorg.y, lightorg.z, (1.0f / pl->radius) );
-			// view origin
-			light_params[4] = Vector4D( tr.modelorg.x, tr.modelorg.y, tr.modelorg.z, 0.0f );
-			// view right
-			light_params[5] = Vector4D( right.x, right.y, right.z, 0.0f );
-			// fog params
-			if( m_pCurrentEntity->curstate.rendermode == kRenderTransAdd )
-				light_params[6] = Vector4D( 0.0f, 0.0f, 0.0f, 0.0f ); // disable fog
-			else
-				light_params[6] = Vector4D( tr.fogColor[0], tr.fogColor[1], tr.fogColor[2], tr.fogDensity );
 			// send through one call
 			pglUniform4fvARB( RI->currentshader->u_LightParams, 7, &light_params[0][0] );
 
 			num_bones = Q_min( m_pStudioHeader->numbones, glConfig.max_skinning_bones );
 			pglUniform4fvARB( RI->currentshader->u_BoneQuaternion, num_bones, &m_pModelInstance->m_studioquat[0][0] );
 			pglUniform3fvARB( RI->currentshader->u_BonePosition, num_bones, &m_pModelInstance->m_studiopos[0][0] );
-
-			float scale = m_pCurrentEntity->curstate.scale;
-			if( scale <= 0.0f ) scale = 1.0f;
-			Vector meshparams[3];
-			meshparams[0] = m_pCurrentEntity->curstate.origin;
-			meshparams[1] = ang;
-			meshparams[2] = Vector( scale, m_pCurrentEntity->curstate.fuser2, 0.0f ); // fuser2 is the dirt on the car body/wheels
 			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
 
 			if( tr.materials[iTexnum].FoliageSwayHeight != 0 )
@@ -5412,7 +5411,7 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 	m_pModelInstance = &m_ModelInstances[m_pCurrentEntity->modelhandle];
 	tr.modelorg = m_pModelInstance->m_plightmatrix.VectorITransform( RI->vieworg );
-	Vector right = m_pModelInstance->m_plightmatrix.VectorIRotate( RI->vright );
+	const Vector right = m_pModelInstance->m_plightmatrix.VectorIRotate( RI->vright );
 
 	Vector cubemap_params[3];
 	Vector4D studio_params[3];
@@ -5438,6 +5437,27 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 	const mstudiolight_t *light = &m_pModelInstance->lighting;
 	const int num_bones = Q_min( m_pStudioHeader->numbones, glConfig.max_skinning_bones );
+
+	Vector4D lightstyles;
+	for( int map = 0; map < MAXLIGHTMAPS; map++ )
+	{
+		if( m_pModelInstance->styles[map] != 255 )
+			lightstyles[map] = tr.lightstyles[m_pModelInstance->styles[map]];
+		else lightstyles[map] = 0.0f;
+	}
+
+	if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) )
+	{
+		studio_lighting[0] = Vector4D( lightstyles.x, lightstyles.y, lightstyles.z, lightstyles.w );
+		studio_lighting[1] = Vector4D( light->plightvec[0], light->plightvec[1], light->plightvec[2], 0.0f );
+	}
+	else
+	{
+		// light color + ambientlight
+		studio_lighting[0] = Vector4D( light->color.x, light->color.y, light->color.z, light->ambientlight );
+		// light dir + shadelight
+		studio_lighting[1] = Vector4D( light->plightvec[0], light->plightvec[1], light->plightvec[2], light->shadelight );
+	}
 
 	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
 	//	R_LoadIdentity();
@@ -5516,15 +5536,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 		if( cached_entity != m_pCurrentEntity || (cached_model != m_pRenderModel) )
 		{
 			// update bones array
-			Vector4D lightstyles;
-
-			for( int map = 0; map < MAXLIGHTMAPS; map++ )
-			{
-				if( m_pModelInstance->styles[map] != 255 )
-					lightstyles[map] = tr.lightstyles[m_pModelInstance->styles[map]];
-				else lightstyles[map] = 0.0f;
-			}
-
 			if( m_pRenderModel == IEngineStudio.GetModelByIndex( m_pCurrentEntity->curstate.weaponmodel ) )
 			{
 				pglUniform4fvARB( RI->currentshader->u_BoneQuaternion, num_bones, &m_pModelInstance->m_weaponquat[0][0] );
@@ -5534,19 +5545,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			{
 				pglUniform4fvARB( RI->currentshader->u_BoneQuaternion, num_bones, &m_pModelInstance->m_studioquat[0][0] );
 				pglUniform3fvARB( RI->currentshader->u_BonePosition, num_bones, &m_pModelInstance->m_studiopos[0][0] );
-			}
-
-			if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ) )
-			{
-				studio_lighting[0] = Vector4D( lightstyles.x, lightstyles.y, lightstyles.z, lightstyles.w );
-				studio_lighting[1] = Vector4D( light->plightvec[0], light->plightvec[1], light->plightvec[2], 0.0f );
-			}
-			else
-			{
-				// light color + ambientlight
-				studio_lighting[0] = Vector4D( light->color.x, light->color.y, light->color.z, light->ambientlight );
-				// light dir + shadelight
-				studio_lighting[1] = Vector4D( light->plightvec[0], light->plightvec[1], light->plightvec[2], light->shadelight );
 			}
 
 			pglUniform4fvARB( RI->currentshader->u_StudioLighting, 2, &studio_lighting[0][0] );
@@ -5748,8 +5746,8 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 		const gl_studiomesh_t *entry = &m_DrawMeshes[i];
 		RI->currentmodel = m_pRenderModel = entry->model;
 		m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata( m_pRenderModel );
-		int m_skinnum = bound( 0, m_pCurrentEntity->curstate.skin, m_pStudioHeader->numskinfamilies - 1 );
-		bool bone_weighting = (m_pRenderModel->poseToBone != NULL) ? true : false;
+		const int m_skinnum = bound( 0, m_pCurrentEntity->curstate.skin, m_pStudioHeader->numskinfamilies - 1 );
+		const bool bone_weighting = (m_pRenderModel->poseToBone != NULL) ? true : false;
 		vbomesh_t *pMesh = entry->mesh;
 
 		short *pskinref = (short *)((byte *)m_pStudioHeader + m_pStudioHeader->skinindex);

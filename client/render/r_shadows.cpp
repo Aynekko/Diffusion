@@ -22,7 +22,7 @@ GNU General Public License for more details.
 #include "r_studio.h"
 #include "r_sprite.h"
 
-static Vector light_sides[] =
+static const Vector light_sides[] =
 {
 Vector( 0.0f,   0.0f,  90.0f ),		// GL_TEXTURE_CUBE_MAP_POSITIVE_X_ARB 
 Vector( 0.0f, 180.0f, -90.0f ),		// GL_TEXTURE_CUBE_MAP_NEGATIVE_X_ARB 
