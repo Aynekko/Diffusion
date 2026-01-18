@@ -20,6 +20,8 @@
 
 #include <windows.h>
 #include <shlwapi.h>     // for PathRemoveFileSpecA
+#include <vector>
+#include <sstream>
 
 #include "hud.h"
 #include "utils.h"
@@ -171,8 +173,98 @@ the hud variables.
 ==========================
 */
 
+std::string GetArgsAfterGame()
+{
+	const char *fullCmd = GetCommandLineA();
+	if( !fullCmd || !*fullCmd )
+		return "";
+
+	std::string cmd( fullCmd );
+
+	// Step 1: Skip the executable path (quoted or not)
+	size_t pos = 0;
+	if( cmd[pos] == '"' )
+	{
+		// Quoted exe path
+		size_t endQuote = cmd.find( '"', 1 );
+		if( endQuote != std::string::npos )
+			pos = endQuote + 1;
+		else
+			pos = cmd.size(); // malformed
+	}
+	else
+	{
+		// Unquoted exe path - skip until first space
+		pos = cmd.find( ' ' );
+		if( pos == std::string::npos )
+			return ""; // no args at all
+	}
+
+	// Now pos is after exe name - skip leading whitespace
+	while( pos < cmd.size() && std::isspace( static_cast<unsigned char>( cmd[pos] ) ) )
+		++pos;
+
+	// Step 2: Look for -game and skip it + its value
+	while( pos < cmd.size() )
+	{
+		// Skip whitespace between tokens
+		while( pos < cmd.size() && std::isspace( static_cast<unsigned char>( cmd[pos] ) ) )
+			++pos;
+
+		if( pos >= cmd.size() )
+			break;
+
+		// Check if current token is -game (case-insensitive usually, but HL uses lowercase)
+		if( cmd.compare( pos, 5, "-game", 0, 5 ) == 0 ||
+			cmd.compare( pos, 6, "-game ", 0, 6 ) == 0 ) // sometimes space follows immediately
+		{
+			pos += 5; // skip "-game"
+
+			// Skip whitespace after -game
+			while( pos < cmd.size() && std::isspace( static_cast<unsigned char>( cmd[pos] ) ) )
+				++pos;
+
+			// Now skip the game/mod name (quoted or unquoted word)
+			if( pos < cmd.size() && cmd[pos] == '"' )
+			{
+				// Quoted mod name
+				++pos; // skip opening "
+				size_t endQuote = cmd.find( '"', pos );
+				if( endQuote != std::string::npos )
+					pos = endQuote + 1;
+				else
+					pos = cmd.size(); // malformed - take rest as-is
+			}
+			else
+			{
+				// Unquoted mod name (single word, no spaces)
+				while( pos < cmd.size() && !std::isspace( static_cast<unsigned char>( cmd[pos] ) ) )
+					++pos;
+			}
+
+			// Skip any whitespace after the mod value
+			while( pos < cmd.size() && std::isspace( static_cast<unsigned char>( cmd[pos] ) ) )
+				++pos;
+
+			// Everything from here is what we want: -console, +map, etc.
+			return cmd.substr( pos );
+		}
+
+		// Not -game - skip this entire token
+		while( pos < cmd.size() && !std::isspace( static_cast<unsigned char>( cmd[pos] ) ) )
+			++pos;
+	}
+
+	// If no -game found or nothing after it
+	return "";
+}
+
 extern "C" __declspec(dllexport) void HUD_Init( void )
 {
+	// get all arguments after steam launch (-steam -game modname)
+	std::string tailArgs = GetArgsAfterGame();
+	const char *launch_args = tailArgs.c_str();
+
 	// get mod path
 	static char modDir[256] = { 0 };
 	
@@ -196,7 +288,7 @@ extern "C" __declspec(dllexport) void HUD_Init( void )
 
 	// prepare path to Xash3D (hardcode or load from config)
 	static char args[256] = { 0 };
-	snprintf( args, sizeof( args ), "-game %s", gameDir );
+	snprintf( args, sizeof( args ), "-game %s %s", gameDir, launch_args );
 
 	STARTUPINFO si = { sizeof( si ) };
 	PROCESS_INFORMATION pi;
