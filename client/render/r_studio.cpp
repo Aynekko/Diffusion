@@ -3428,7 +3428,7 @@ void CStudioModelRenderer::StudioSetupBones( void )
 	mposetobone_t *m = m_pModelInstance->m_pModel->poseToBone;
 
 	// convert bones into compacted GLSL array
-	if( m != NULL )
+	if( FBitSet( m_pStudioHeader->flags, STUDIO_HAS_BONEWEIGHTS ) && m != NULL )
 	{
 		for( int i = 0; i < m_pStudioHeader->numbones; i++ )
 		{
