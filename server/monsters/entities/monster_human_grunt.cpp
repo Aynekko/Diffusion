@@ -5698,6 +5698,7 @@ public:
 	void Andrew_Respawn( void );
 	void Andrew_Escape( void );
 	void WarpEffect( void );
+	void PainSound( void );
 
 	float AndrewLastHurt;
 };
@@ -5745,6 +5746,11 @@ void CAndrewGrunt::SetYawSpeed( void )
 	}
 
 	pev->yaw_speed = ys;
+}
+
+void CAndrewGrunt::PainSound( void )
+{
+	// nothing here, he plays sentences during the fight
 }
 
 void CAndrewGrunt::Spawn()
