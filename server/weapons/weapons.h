@@ -395,4 +395,47 @@ public:
 	static CLaserSpot *CreateSpot( void );
 };
 
+class CSatchel : public CBasePlayerWeapon
+{
+	DECLARE_CLASS( CSatchel, CBasePlayerWeapon );
+public:
+	DECLARE_DATADESC();
+
+	void Spawn( void );
+	void Precache( void );
+	int iItemSlot( void ) { return WPN_SLOT_SATCHEL + 1; }
+	int GetItemInfo( ItemInfo *p );
+	int AddToPlayer( CBasePlayer *pPlayer );
+	void PrimaryAttack( void );
+	void SecondaryAttack( void );
+	int AddDuplicate( CBasePlayerItem *pOriginal );
+	BOOL CanDeploy( void );
+	BOOL Deploy( void );
+	BOOL IsUseable( void );
+
+	void Holster( void );
+	void WeaponIdle( void );
+	void Throw( void );
+	int m_chargeReady;
+};
+
+class CSatchelCharge : public CGrenade
+{
+	DECLARE_CLASS( CSatchelCharge, CGrenade );
+
+	Vector m_lastBounceOrigin; // BugFixedHL - Used to fix a bug in engine: when object isn't moving, but its speed isn't 0 and on ground isn't set
+
+	void Spawn( void );
+	void Precache( void );
+	void BounceSound( void );
+	int ObjectCaps( void );
+	void SatchelSlide( CBaseEntity *pOther );
+	void SatchelThink( void );
+public:
+	DECLARE_DATADESC();
+
+	void Deactivate( void );
+	float LastBounceSoundTime; // diffusion - don't play sound too often
+};
+
 #endif // WEAPONS_H

@@ -24,25 +24,6 @@
 #include "game/game.h"
 #include "entities/soundent.h"
 
-class CSatchelCharge : public CGrenade
-{
-	DECLARE_CLASS( CSatchelCharge, CGrenade );
-
-	Vector m_lastBounceOrigin; // BugFixedHL - Used to fix a bug in engine: when object isn't moving, but its speed isn't 0 and on ground isn't set
-
-	void Spawn( void );
-	void Precache( void );
-	void BounceSound( void );
-
-	void SatchelSlide( CBaseEntity *pOther );
-	void SatchelThink( void );
-public:
-	DECLARE_DATADESC();
-
-	void Deactivate( void );
-	float LastBounceSoundTime; // diffusion - don't play sound too often
-};
-
 LINK_ENTITY_TO_CLASS( monster_satchel, CSatchelCharge );
 
 BEGIN_DATADESC( CSatchelCharge )
@@ -87,7 +68,7 @@ void CSatchelCharge :: Spawn( void )
 
 void CSatchelCharge::SatchelSlide( CBaseEntity *pOther )
 {
-	entvars_t	*pevOther = pOther->pev;
+	entvars_t *pevOther = pOther->pev;
 
 	// don't hit the guy that launched this grenade
 	if ( pOther->edict() == pev->owner )
@@ -162,6 +143,7 @@ void CSatchelCharge :: SatchelThink( void )
 			pev->solid = SOLID_NOT;
 			pev->movetype = MOVETYPE_NONE;
 			pev->gravity = 0;
+			ObjectCaps(); // make satchel pickable
 		}
 	}
 	else
@@ -199,29 +181,15 @@ void CSatchelCharge :: BounceSound( void )
 	}
 }
 
-class CSatchel : public CBasePlayerWeapon
+int CSatchelCharge::ObjectCaps( void )
 {
-	DECLARE_CLASS( CSatchel, CBasePlayerWeapon );
-public:
-	DECLARE_DATADESC();
+	int flags = BaseClass::ObjectCaps();
 
-	void Spawn( void );
-	void Precache( void );
-	int iItemSlot( void ) { return WPN_SLOT_SATCHEL + 1; }
-	int GetItemInfo(ItemInfo *p);
-	int AddToPlayer( CBasePlayer *pPlayer );
-	void PrimaryAttack( void );
-	void SecondaryAttack( void );
-	int AddDuplicate( CBasePlayerItem *pOriginal );
-	BOOL CanDeploy( void );
-	BOOL Deploy( void );
-	BOOL IsUseable( void );
-	
-	void Holster( void );
-	void WeaponIdle( void );
-	void Throw( void );
-	int m_chargeReady;	
-};
+	if( pev->owner && pev->flags & FL_ONGROUND )
+		flags |= FCAP_IMPULSE_USE;
+
+	return flags;
+}
 
 LINK_ENTITY_TO_CLASS( weapon_satchel, CSatchel );
 

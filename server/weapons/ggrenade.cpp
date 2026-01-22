@@ -283,8 +283,68 @@ void CGrenade::ClearEffects( void )
 // Timed grenade, this think is called when time runs out.
 void CGrenade::DetonateUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	SetThink(&CGrenade::Detonate );
-	SetNextThink( value );
+	if( FClassnameIs( this, "monster_satchel" ) )
+	{
+		if( useType == USE_ON ) // pressed the button
+		{
+			SetThink( &CGrenade::Detonate );
+			SetNextThink( value );
+		}
+		else // picked it back up
+		{
+			if( !pActivator || !pActivator->IsPlayer() )
+				return;
+
+			if( pActivator->edict() != pev->owner )
+				return; // not my satchel
+
+			// remove this satchel and give player one
+			CSatchelCharge *pCharge = (CSatchelCharge*)this;
+			pCharge->Deactivate();
+			CBasePlayer *pPlayer = (CBasePlayer*)pActivator;
+			if( pPlayer->GiveAmmo( 1, g_WpnAmmo[WEAPON_SATCHEL], SATCHEL_MAX_CARRY ) > 0 )
+				PlayPickupSound( pPlayer );
+
+			// now perform search for our satchels. If we find at least one, don't hide the radio button
+			CBaseEntity *pSatchel = NULL;
+			bool bSatchelFound = false;
+			while( (pSatchel = UTIL_FindEntityByClassname( pSatchel, "monster_satchel" )) != NULL )
+			{
+				if( pSatchel->pev->owner == pPlayer->edict() )
+				{
+					bSatchelFound = true;
+					break;
+				}
+			}
+			if( !bSatchelFound )
+			{
+				if( pPlayer->HasWeapon( WEAPON_SATCHEL ) )
+				{
+					CBasePlayerItem *pWeapon = pPlayer->m_rgpPlayerItems[WPN_SLOT_SATCHEL + 1];
+					while( pWeapon )
+					{
+						if( pWeapon->m_iId == WEAPON_SATCHEL )
+						{
+							CSatchel *pSatchelWeapon = (CSatchel *)pWeapon;
+							pSatchelWeapon->m_chargeReady = 2;
+							pSatchelWeapon->m_flNextPrimaryAttack = gpGlobals->time + 0.5;
+							pSatchelWeapon->m_flNextSecondaryAttack = gpGlobals->time + 0.5;
+							pSatchelWeapon->m_flTimeWeaponIdle = gpGlobals->time;
+							break;
+						}
+
+						pWeapon = pWeapon->m_pNext;
+					}
+				}
+
+			}
+		}
+	}
+	else
+	{
+		SetThink( &CGrenade::Detonate );
+		SetNextThink( value );
+	}
 }
 
 void CGrenade::PreDetonate( void )
