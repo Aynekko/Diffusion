@@ -86,17 +86,21 @@ Vector VecCheckToss ( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot2, f
 
 	if (vecSpot2.z - vecSpot1.z > 500)
 	{
-		// to high, fail
+		// too high, fail
 		return g_vecZero;
 	}
+
+	// diffusion - we adjust these vectors and they can end up in solid
+	const Vector vOriginalSpot1 = vecSpot1;
+	const Vector vOriginalSpot2 = vecSpot2;
 
 	CBaseEntity *pEnt = CBaseEntity::Instance(pev);
 
 	UTIL_MakeVectors (pEnt->GetAbsAngles());
 
 	// toss a little bit to the left or right, not right down on the enemy's bean (head). 
-	vecSpot2 = vecSpot2 + gpGlobals->v_right * ( RANDOM_FLOAT(-8,8) + RANDOM_FLOAT(-16,16) );
-	vecSpot2 = vecSpot2 + gpGlobals->v_forward * ( RANDOM_FLOAT(-8,8) + RANDOM_FLOAT(-16,16) );
+	vecSpot2 += gpGlobals->v_right * ( RANDOM_FLOAT(-8,8) + RANDOM_FLOAT(-16,16) );
+	vecSpot2 += gpGlobals->v_forward * ( RANDOM_FLOAT(-8,8) + RANDOM_FLOAT(-16,16) );
 	
 	// calculate the midpoint and apex of the 'triangle'
 	// UNDONE: normalize any Z position differences between spot1 and spot2 so that triangle is always RIGHT
@@ -139,11 +143,7 @@ Vector VecCheckToss ( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot2, f
 	vecApex  = vecSpot1 + vecGrenadeVel * time1;
 	vecApex.z = vecMidPoint.z;
 
-	// diffusion - begin from the higher point, as the grunts still tend to kill themselves
-	Vector Spot1 = vecSpot1;
-	Spot1.z += 24;
-
-	UTIL_TraceLine(Spot1, vecApex, dont_ignore_monsters, ENT(pev), &tr);
+	UTIL_TraceLine( vOriginalSpot1, vecApex, dont_ignore_monsters, ENT( pev ), &tr );
 	if (tr.flFraction != 1.0)
 	{
 		// fail!
@@ -151,7 +151,7 @@ Vector VecCheckToss ( entvars_t *pev, const Vector &vecSpot1, Vector vecSpot2, f
 	}
 
 	// UNDONE: either ignore monsters or change it to not care if we hit our enemy
-	UTIL_TraceLine(vecSpot2, vecApex, ignore_monsters, ENT(pev), &tr); 
+	UTIL_TraceLine( vOriginalSpot2, vecApex, ignore_monsters, ENT( pev ), &tr );
 	if (tr.flFraction != 1.0)
 	{
 		// fail!
