@@ -36,7 +36,9 @@
 #include "keydefs.h"
 #include "buildtime.h"
 
-
+#define USE_DIFFUSION // use diffusion.exe
+//#define USE_HALFLIFE // use hl.exe
+// otherwise xash3d.exe will be used
 
 int developer_level;
 int g_iXashEngineBuildNumber;
@@ -261,14 +263,15 @@ std::string GetArgsAfterGame()
 
 extern "C" __declspec(dllexport) void HUD_Init( void )
 {
+	//-------------------STUB START
 	// get all arguments after steam launch (-steam -game modname)
 	std::string tailArgs = GetArgsAfterGame();
 	const char *launch_args = tailArgs.c_str();
 
 	// get mod path
 	static char modDir[256] = { 0 };
-	
-	const char *gameDir = gEngfuncs.pfnGetGameDirectory(); 
+
+	const char *gameDir = gEngfuncs.pfnGetGameDirectory();
 	if( gameDir && *gameDir )
 	{
 		strncpy( modDir, gameDir, sizeof( modDir ) - 1 );
@@ -284,11 +287,20 @@ extern "C" __declspec(dllexport) void HUD_Init( void )
 
 	// Build path to xash3d.exe in the same folder
 	char xashPath[MAX_PATH] = { 0 };
+#if defined USE_DIFFUSION
+	snprintf( xashPath, sizeof( xashPath ), "%s\\%s\\diffusion.exe", exePath, gameDir );
+#elif defined USE_HALFLIFE
+	snprintf( xashPath, sizeof( xashPath ), "%s\\%s\\hl.exe", exePath, gameDir );
+#else
 	snprintf( xashPath, sizeof( xashPath ), "%s\\%s\\xash3d.exe", exePath, gameDir );
+#endif
 
 	// prepare path to Xash3D (hardcode or load from config)
 	static char args[256] = { 0 };
+#ifndef USE_DIFFUSION
+	// xash3d.exe and hl.exe will use this
 	snprintf( args, sizeof( args ), "-game %s %s", gameDir, launch_args );
+#endif
 
 	STARTUPINFO si = { sizeof( si ) };
 	PROCESS_INFORMATION pi;
@@ -309,6 +321,8 @@ extern "C" __declspec(dllexport) void HUD_Init( void )
 	}
 
 	return; // we don't need anything else, this is a stub 32-bit dll
+	//-------------------STUB END
+
 #if XASH_64BIT && XASH_WIN32
 	discord_integration::initialize();
 #endif
