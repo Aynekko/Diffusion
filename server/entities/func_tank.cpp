@@ -2004,7 +2004,7 @@ void CFuncTankControls :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 		CBasePlayer *pController = (CBasePlayer *)(CBaseEntity *)m_hController;
 		pController->HideWeapons( FALSE );
 		pController->m_pTank = NULL;
-		pController = NULL;
+		m_hController = NULL;
 
 		m_iState = STATE_OFF;
 
