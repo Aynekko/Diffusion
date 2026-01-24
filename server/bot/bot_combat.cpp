@@ -122,12 +122,12 @@ static const float secondary_fire_delay[WEAPON_G36C +1][5][2] = {
 	};   
 
 ammo_check_t ammo_check[] = {
-   {"ammo_glockclip", g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY},
-   {"ammo_9mmclip", g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY},
+   {"ammo_glockclip", g_WpnAmmo[WEAPON_BERETTA], BERETTA_MAX_CARRY},
+   {"ammo_9mmclip", g_WpnAmmo[WEAPON_BERETTA], BERETTA_MAX_CARRY},
    {"ammo_9mmAR", g_WpnAmmo[WEAPON_MRC], MRC_MAX_CARRY},
-   {"ammo_9mmbox", g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY},
+   {"ammo_9mmbox", g_WpnAmmo[WEAPON_BERETTA], BERETTA_MAX_CARRY},
    {"ammo_mp5clip", g_WpnAmmo[WEAPON_MRC], MRC_MAX_CARRY},
-   {"ammo_chainboxclip", g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY},
+   {"ammo_chainboxclip", g_WpnAmmo[WEAPON_BERETTA], BERETTA_MAX_CARRY},
    {"ammo_mp5grenades", "ARgrenades", M203_GRENADE_MAX_CARRY},
    {"ammo_ARgrenades", "ARgrenades", M203_GRENADE_MAX_CARRY},
    {"ammo_buckshot", g_WpnAmmo[WEAPON_SHOTGUN], BUCKSHOT_MAX_CARRY},
@@ -141,7 +141,7 @@ ammo_check_t ammo_check[] = {
    {"ammo_ar2ball", "ar2ball", M203_GRENADE_MAX_CARRY},
    {"ammo_fiveseven", g_WpnAmmo[WEAPON_FIVESEVEN], _57_MAX_CARRY },
    {"ammo_g36c", g_WpnAmmo[WEAPON_G36C], G36C_MAX_CARRY},
-   {"ammo_hkmp5", g_WpnAmmo[WEAPON_HKMP5], _9MM_MAX_CARRY },
+   {"ammo_hkmp5", g_WpnAmmo[WEAPON_HKMP5], HKMP5_MAX_CARRY },
 	{"ammo_sniper", g_WpnAmmo[WEAPON_SNIPER], SNIPER_MAX_CARRY},
    {"", 0, 0}};
 

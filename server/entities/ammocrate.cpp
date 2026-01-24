@@ -312,7 +312,7 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 			switch( i )
 			{
 			case WEAPON_BERETTA:
-				Ratio[WEAPON_BERETTA] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_BERETTA] ) ) / _9MM_MAX_CARRY;
+				Ratio[WEAPON_BERETTA] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_BERETTA] ) ) / BERETTA_MAX_CARRY;
 				break;
 			case WEAPON_DEAGLE:
 				Ratio[WEAPON_DEAGLE] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_DEAGLE] ) ) / DEAGLE_MAX_CARRY;
@@ -344,7 +344,7 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 		//		Ratio[WEAPON_AR2] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_AR2] ) ) / AR2_MAX_CARRY;
 		//		break;
 			case WEAPON_HKMP5:
-				Ratio[WEAPON_HKMP5] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_HKMP5] ) ) / _9MM_MAX_CARRY;
+				Ratio[WEAPON_HKMP5] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_HKMP5] ) ) / HKMP5_MAX_CARRY;
 				break;
 			case WEAPON_FIVESEVEN:
 				Ratio[WEAPON_FIVESEVEN] = (float)pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_FIVESEVEN] ) ) / _57_MAX_CARRY;
@@ -467,9 +467,9 @@ void CAmmoCrate::GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float Curr
 	switch( WeaponID )
 	{
 	case WEAPON_BERETTA:
-		iGive = CalcGive( _9MM_MAX_CARRY, CurrentRatio );
-		pPlayer->GiveAmmo( iGive, g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY );
-		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_BERETTA] ) ), g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY, iGive );
+		iGive = CalcGive( BERETTA_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, g_WpnAmmo[WEAPON_BERETTA], BERETTA_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_BERETTA] ) ), g_WpnAmmo[WEAPON_BERETTA], BERETTA_MAX_CARRY, iGive );
 		break;
 	case WEAPON_DEAGLE:
 		iGive = CalcGive( DEAGLE_MAX_CARRY, CurrentRatio );
@@ -502,9 +502,9 @@ void CAmmoCrate::GiveDynamicAmmo( CBasePlayer *pPlayer, int WeaponID, float Curr
 		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_AR2] ) ), g_WpnAmmo[WEAPON_AR2], AR2_MAX_CARRY, iGive );
 		break;
 	case WEAPON_HKMP5:
-		iGive = CalcGive( _9MM_MAX_CARRY, CurrentRatio );
-		pPlayer->GiveAmmo( iGive, g_WpnAmmo[WEAPON_HKMP5], _9MM_MAX_CARRY );
-		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_HKMP5] ) ), g_WpnAmmo[WEAPON_HKMP5], _9MM_MAX_CARRY, iGive );
+		iGive = CalcGive( HKMP5_MAX_CARRY, CurrentRatio );
+		pPlayer->GiveAmmo( iGive, g_WpnAmmo[WEAPON_HKMP5], HKMP5_MAX_CARRY );
+		DbgPrint( pPlayer->AmmoInventory( pPlayer->GetAmmoIndex( g_WpnAmmo[WEAPON_HKMP5] ) ), g_WpnAmmo[WEAPON_HKMP5], HKMP5_MAX_CARRY, iGive );
 		break;
 	case WEAPON_FIVESEVEN:
 		iGive = CalcGive( _57_MAX_CARRY, CurrentRatio );

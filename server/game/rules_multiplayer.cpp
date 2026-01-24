@@ -943,13 +943,13 @@ void CHalfLifeMultiplay :: PlayerSpawn( CBasePlayer *pPlayer )
 	{
 		pPlayer->GiveNamedItem( "weapon_knife" );
 		pPlayer->GiveNamedItem( "weapon_9mmhandgun" );
-		pPlayer->GiveAmmo( 68, g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY ); // 4 full reloads
+		pPlayer->GiveAmmo( BERETTA_MAX_CLIP * 3, g_WpnAmmo[WEAPON_BERETTA], BERETTA_MAX_CARRY ); // 3 full reloads
 
 		switch (pPlayer->m_iBonusWeaponLevel)
 		{
 		case 3:
 			pPlayer->GiveNamedItem("weapon_hkmp5");
-			pPlayer->GiveAmmo(MP5_DEFAULT_GIVE, g_WpnAmmo[WEAPON_HKMP5], _9MM_MAX_CARRY);
+			pPlayer->GiveAmmo(MP5_DEFAULT_GIVE, g_WpnAmmo[WEAPON_HKMP5], HKMP5_MAX_CARRY);
 			pPlayer->m_iBonusWeaponID = WEAPON_HKMP5;
 		break;
 		case 4:
@@ -964,7 +964,7 @@ void CHalfLifeMultiplay :: PlayerSpawn( CBasePlayer *pPlayer )
 		break;
 		case 6:
 			pPlayer->GiveNamedItem("weapon_9mmAR");
-			pPlayer->GiveAmmo(MRC_DEFAULT_GIVE, g_WpnAmmo[WEAPON_MRC], _9MM_MAX_CARRY);
+			pPlayer->GiveAmmo(MRC_DEFAULT_GIVE, g_WpnAmmo[WEAPON_MRC], MRC_MAX_CARRY);
 			pPlayer->GiveAmmo(AMMO_M203BOX_GIVE, "ARgrenades", M203_GRENADE_MAX_CARRY);
 			pPlayer->m_iBonusWeaponID = WEAPON_MRC;
 		break;

@@ -81,7 +81,7 @@ int CBeretta::GetItemInfo(ItemInfo *p)
 {
 	p->pszName = STRING(pev->classname);
 	p->pszAmmo1 = g_WpnAmmo[WEAPON_BERETTA];
-	p->iMaxAmmo1 = _9MM_MAX_CARRY;
+	p->iMaxAmmo1 = BERETTA_MAX_CARRY;
 	p->pszAmmo2 = NULL;
 	p->iMaxAmmo2 = -1;
 	p->iMaxClip = BERETTA_MAX_CLIP;
@@ -308,7 +308,7 @@ class CBerettaAmmo : public CBasePlayerAmmo
 	}
 	BOOL AddAmmo( CBaseEntity *pOther ) 
 	{ 
-		if (pOther->GiveAmmo( AMMO_BERETTACLIP_GIVE, g_WpnAmmo[WEAPON_BERETTA], _9MM_MAX_CARRY ) != -1)
+		if (pOther->GiveAmmo( AMMO_BERETTACLIP_GIVE, g_WpnAmmo[WEAPON_BERETTA], BERETTA_MAX_CARRY ) != -1)
 		{
 		//	EMIT_SOUND(ENT(pev), CHAN_ITEM, "items/9mmclip1.wav", 1, ATTN_NORM);
 			PlayPickupSound( pOther );

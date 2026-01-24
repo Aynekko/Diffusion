@@ -152,10 +152,11 @@ const char * const g_WpnAmmo[] =
 #define AR2_MAX_CARRY			200
 #define G36C_MAX_CARRY			120
 #define MRC_MAX_CARRY			150
-#define	_9MM_MAX_CARRY			90
+#define	BERETTA_MAX_CARRY		60
+#define HKMP5_MAX_CARRY			90
 #define DEAGLE_MAX_CARRY		21
 #define BUCKSHOT_MAX_CARRY		40
-#define BOLT_MAX_CARRY			15
+#define BOLT_MAX_CARRY			10
 #define ROCKET_MAX_CARRY		5
 #define HANDGRENADE_MAX_CARRY	5
 #define SMOKEGRENADE_MAX_CARRY	3
