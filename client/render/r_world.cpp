@@ -1051,8 +1051,14 @@ static void Mod_PrecacheShaders( void )
 		{
 			GL_UberShaderForSolidBmodel( surf );
 			// diffusion - precache lights too to minimize stutters
-		//	GL_UberShaderForBmodelDlight( &tr.defSpotlight, surf );
-		//	GL_UberShaderForBmodelDlight( &tr.defOmnilight, surf );
+			tr.defSpotlight.flags |= CF_NOSHADOWS;
+			GL_UberShaderForBmodelDlight( &tr.defSpotlight, surf );
+			tr.defSpotlight.flags = 0;
+			GL_UberShaderForBmodelDlight( &tr.defSpotlight, surf );
+			tr.defOmnilight.flags |= CF_NOSHADOWS;
+			GL_UberShaderForBmodelDlight( &tr.defOmnilight, surf );
+			tr.defOmnilight.flags = 0;
+			GL_UberShaderForBmodelDlight( &tr.defOmnilight, surf );
 		}
 	}
 
@@ -1978,12 +1984,6 @@ static void Mod_LoadWorld( model_t *mod, const byte *buf )
 			SetBits( surf->flags, SURF_CHROME );
 		}
 	}
-
-	// init default lights - helpers to precache shaders
-	memset( &tr.defSpotlight, 0, sizeof( tr.defSpotlight ) );
-	memset( &tr.defOmnilight, 0, sizeof( tr.defOmnilight ) );
-	tr.defSpotlight.pointlight = false;
-	tr.defOmnilight.pointlight = true;
 
 	Mod_FinalizeWorld();
 

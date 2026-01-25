@@ -1538,12 +1538,21 @@ mvbocache_t *CStudioModelRenderer::CreateMeshCache( dmodellight_t *dml )
 		LoadStudioMaterials();
 	else // precache studio shaders
 	{
-		bool bone_weights = FBitSet( m_pStudioHeader->flags, STUDIO_HAS_BONEWEIGHTS ) != 0;
+		const bool bone_weights = FBitSet( m_pStudioHeader->flags, STUDIO_HAS_BONEWEIGHTS );
 		mstudiomaterial_t *pmaterial = (mstudiomaterial_t *)m_pRenderModel->materials;
 
 		for( int i = 0; i < m_pStudioHeader->numtextures; i++, pmaterial++ )
 		{
 			GL_UberShaderForSolidStudio( pmaterial, false, bone_weights, false, m_pStudioHeader->numbones );
+			// diffusion - precache lights too to minimize stutters
+			tr.defSpotlight.flags |= CF_NOSHADOWS;
+			GL_UberShaderForDlightStudio( &tr.defSpotlight, pmaterial, bone_weights, m_pStudioHeader->numbones );
+			tr.defSpotlight.flags = 0;
+			GL_UberShaderForDlightStudio( &tr.defSpotlight, pmaterial, bone_weights, m_pStudioHeader->numbones );
+			tr.defOmnilight.flags |= CF_NOSHADOWS;
+			GL_UberShaderForDlightStudio( &tr.defOmnilight, pmaterial, bone_weights, m_pStudioHeader->numbones );
+			tr.defOmnilight.flags = 0;
+			GL_UberShaderForDlightStudio( &tr.defOmnilight, pmaterial, bone_weights, m_pStudioHeader->numbones );
 		}
 	}
 
@@ -1984,8 +1993,14 @@ void CStudioModelRenderer::LoadStudioMaterials( void )
 		// precache as many shaders as possible
 		GL_UberShaderForSolidStudio( pmaterial, false, FBitSet( m_pStudioHeader->flags, STUDIO_HAS_BONEWEIGHTS ) ? true : false, false, m_pStudioHeader->numbones );
 		// diffusion - precache lights too to minimize stutters
-	//	GL_UberShaderForDlightStudio( &tr.defSpotlight, pmaterial, bone_weights, m_pStudioHeader->numbones );
-	//	GL_UberShaderForDlightStudio( &tr.defOmnilight, pmaterial, bone_weights, m_pStudioHeader->numbones );
+		tr.defSpotlight.flags |= CF_NOSHADOWS;
+		GL_UberShaderForDlightStudio( &tr.defSpotlight, pmaterial, FBitSet( m_pStudioHeader->flags, STUDIO_HAS_BONEWEIGHTS ) ? true : false, m_pStudioHeader->numbones );
+		tr.defSpotlight.flags = 0;
+		GL_UberShaderForDlightStudio( &tr.defSpotlight, pmaterial, FBitSet( m_pStudioHeader->flags, STUDIO_HAS_BONEWEIGHTS ) ? true : false, m_pStudioHeader->numbones );
+		tr.defOmnilight.flags |= CF_NOSHADOWS;
+		GL_UberShaderForDlightStudio( &tr.defOmnilight, pmaterial, FBitSet( m_pStudioHeader->flags, STUDIO_HAS_BONEWEIGHTS ) ? true : false, m_pStudioHeader->numbones );
+		tr.defOmnilight.flags = 0;
+		GL_UberShaderForDlightStudio( &tr.defOmnilight, pmaterial, FBitSet( m_pStudioHeader->flags, STUDIO_HAS_BONEWEIGHTS ) ? true : false, m_pStudioHeader->numbones );
 	}
 }
 

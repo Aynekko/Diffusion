@@ -942,6 +942,12 @@ bool R_Init( void )
 	
 	pglPointSize( 10.0f );
 
+	// init default lights - helpers to precache shaders
+	memset( &tr.defSpotlight, 0, sizeof( tr.defSpotlight ) );
+	memset( &tr.defOmnilight, 0, sizeof( tr.defOmnilight ) );
+	tr.defSpotlight.pointlight = false;
+	tr.defOmnilight.pointlight = true;
+
 	return true;
 }
 

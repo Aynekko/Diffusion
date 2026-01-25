@@ -2564,10 +2564,14 @@ void GL_InitGPUShaders( void )
 	GL_InitGenericFogUniforms( shader );
 
 	// HACKHACK: precache generic light shaders
+	pl.flags = 0;
 	GL_UberShaderForDlightGeneric( &pl );
-//	SetBits( pl.flags, CF_NOSHADOWS );
-//	GL_UberShaderForDlightGeneric( &pl );
+	pl.flags |= CF_NOSHADOWS;
+	GL_UberShaderForDlightGeneric( &pl );
 	pl.pointlight = true;
+	pl.flags = 0;
+	GL_UberShaderForDlightGeneric( &pl );
+	pl.flags |= CF_NOSHADOWS;
 	GL_UberShaderForDlightGeneric( &pl );
 }
 
