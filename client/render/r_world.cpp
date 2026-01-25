@@ -3320,6 +3320,9 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 
 	tr.num_draw_surfaces = 0;
 
+	tr.num_draw_decals = 0;
+	memset( tr.draw_decals, NULL, sizeof( tr.draw_decals ) ); // make sure to empty the list
+
 	if( e->angles != g_vecZero )
 		tr.modelorg = glm->transform.VectorITransform( RI->vieworg );
 	else
@@ -3428,6 +3431,9 @@ void R_DrawBrushModelShadow( cl_entity_t *e )
 		return;
 
 	tr.num_draw_surfaces = 0;
+
+	tr.num_draw_decals = 0;
+	memset( tr.draw_decals, NULL, sizeof( tr.draw_decals ) ); // make sure to empty the list
 
 	if( e->angles != g_vecZero )
 		tr.modelorg = glm->transform.VectorITransform( RI->vieworg );
@@ -3783,6 +3789,9 @@ void R_DrawWorld( void )
 	R_LoadIdentity();
 
 	R_ClearSkyBox();
+
+	tr.num_draw_decals = 0;
+	memset( tr.draw_decals, NULL, sizeof( tr.draw_decals ) ); // make sure to empty the list
 
 	start = Sys_DoubleTime();
 

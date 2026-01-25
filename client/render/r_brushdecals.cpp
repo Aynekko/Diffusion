@@ -291,13 +291,6 @@ void DrawDecalsBatch( void )
 	
 	for( i = 0; i < tr.num_draw_decals; i++ )
 	{
-		if( tr.draw_decals[i] == NULL )
-		{
-			// possible crash here, needs investigation
-			Msg( "^1Error:^7 Invalid surface at DrawDecalsBatch: num_draw_decals = %i, Surf ID = %i\n", tr.num_draw_decals, i );
-			continue;
-		}
-
 		PrepareSurfaceDecals( tr.draw_decals[i], false );
 	}
 
@@ -407,12 +400,6 @@ void DrawDecalsBatch( void )
 
 			for( int k = 0; k < tr.num_draw_decals; k++ )
 			{
-				if( tr.draw_decals[k] == NULL )
-				{
-					// possible crash here, needs investigation
-					Msg( "^1Error:^7 Invalid surface at DrawDecals (lightpass): num_draw_decals = %i, Surf ID = %i\n", tr.num_draw_decals, k );
-					continue;
-				}
 				DrawSurfaceDecalsLightPass( tr.draw_decals[k] );
 			}
 
@@ -433,7 +420,4 @@ void DrawDecalsBatch( void )
 	GL_SelectTexture(glConfig.max_texture_units - 1); // force to cleanup all the units
 	GL_CleanUpTextureUnits(0);
 	GL_BindShader(NULL);
-	
-	tr.num_draw_decals = 0;
-	memset( tr.draw_decals, NULL, sizeof( tr.draw_decals ) ); // make sure to empty the list
 }

@@ -2188,6 +2188,9 @@ void R_VidInit( void )
 //	R_InitBloomTextures();
 
 	g_StudioRenderer.VidInit();
+
+	tr.num_draw_decals = 0;
+	memset( tr.draw_decals, NULL, sizeof( tr.draw_decals ) ); // make sure to empty the decal render list
 }
 
 void R_Sprite_Smoke( TEMPENTITY *pTemp, float scale, int mode )
