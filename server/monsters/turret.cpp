@@ -640,14 +640,6 @@ void CBaseTurret::ActiveThink(void)
 	int fAttack = 0;
 	Vector vecDirToEnemy;
 
-	if( m_hEnemy == NULL )
-	{
-		m_flLastSight = gpGlobals->time + m_flMaxWait;
-		SetNextThink( 0.1 );
-		SetThink( &CBaseTurret::SearchThink );
-		return;
-	}
-
 	SetNextThink(0.1);
 	StudioFrameAdvance();
 
@@ -685,7 +677,7 @@ void CBaseTurret::ActiveThink(void)
 	vecDirToEnemy = vecMidEnemy - vecMid;	// calculate dir and dist to enemy
 	float flDistToEnemy = vecDirToEnemy.Length();
 
-	// Current enmey is not visible.
+	// Current enemy is not visible.
 	if( !fEnemyVisible || ( flDistToEnemy > m_flDistLook ))
 	{
 		if( !m_flLastSight )
@@ -1729,7 +1721,7 @@ void CSentry::Retire(void)
 
 			if( SentryAmmoClip <= 0 )
 			{
-				m_iClass = CLASS_NONE;
+				m_iClass = CLASS_INSECT; // yep. Can't use CLASS_NONE because of (!m_iClass) checks.
 				DontThink();
 				SetTouch(NULL);
 			}
