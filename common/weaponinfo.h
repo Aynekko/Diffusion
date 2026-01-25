@@ -155,7 +155,7 @@ const char * const g_WpnAmmo[] =
 #define	BERETTA_MAX_CARRY		60
 #define HKMP5_MAX_CARRY			90
 #define DEAGLE_MAX_CARRY		21
-#define BUCKSHOT_MAX_CARRY		40
+#define BUCKSHOT_MAX_CARRY		32
 #define BOLT_MAX_CARRY			10
 #define ROCKET_MAX_CARRY		5
 #define HANDGRENADE_MAX_CARRY	5
@@ -163,7 +163,7 @@ const char * const g_WpnAmmo[] =
 #define SATCHEL_MAX_CARRY		3
 #define TRIPMINE_MAX_CARRY		5
 #define M203_GRENADE_MAX_CARRY	4
-#define SNIPER_MAX_CARRY		15
+#define SNIPER_MAX_CARRY		10
 #define _57_MAX_CARRY			60
 
 // the maximum amount of ammo each weapon's clip can hold
@@ -203,7 +203,7 @@ const char * const g_WpnAmmo[] =
 #define SATCHEL_DEFAULT_GIVE		1
 #define TRIPMINE_DEFAULT_GIVE		1
 #define AR2_DEFAULT_GIVE			50
-#define SNIPER_DEFAULT_GIVE			10
+#define SNIPER_DEFAULT_GIVE			SNIPER_MAX_CLIP
 #define G36C_DEFAULT_GIVE			G36C_MAX_CLIP
 #define FIVESEVEN_DEFAULT_GIVE		FIVESEVEN_MAX_CLIP
 
