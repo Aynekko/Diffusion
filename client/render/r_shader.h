@@ -18,7 +18,7 @@ GNU General Public License for more details.
 #define GL_SHADER_H
 
 #define MAX_OPTIONS_LENGTH		512
-#define MAX_GLSL_PROGRAMS		512
+#define MAX_GLSL_PROGRAMS		1024
 
 #define SHADER_VERTEX_COMPILED		BIT( 0 )
 #define SHADER_FRAGMENT_COMPILED	BIT( 1 )

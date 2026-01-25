@@ -2069,7 +2069,7 @@ void R_NewMap( void )
 	CL_ClearPlights();
 
 	// don't flush shaders for each map - save time to recompile
-	if( num_glsl_programs >= (MAX_GLSL_PROGRAMS * 0.75f) )
+	if( num_glsl_programs >= (MAX_GLSL_PROGRAMS * 0.9f) )
 		GL_FreeUberShaders();
 
 	tr.realframecount = 0;
