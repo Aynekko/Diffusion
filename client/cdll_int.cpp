@@ -297,7 +297,9 @@ extern "C" __declspec(dllexport) void HUD_Init( void )
 
 	// prepare path to Xash3D (hardcode or load from config)
 	static char args[256] = { 0 };
-#ifndef USE_DIFFUSION
+#ifdef USE_DIFFUSION
+	snprintf(args, sizeof(args), "%s", launch_args);
+#else
 	// xash3d.exe and hl.exe will use this
 	snprintf( args, sizeof( args ), "-game %s %s", gameDir, launch_args );
 #endif
