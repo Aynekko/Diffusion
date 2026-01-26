@@ -1558,7 +1558,6 @@ void R_DrawEntitiesOnList( void )
 	if( RP_NORMALPASS() )
 	{
 		GL_Setup2D();
-		RequestDepthTexture();
 		SSAO();
 		GL_Setup3D();
 	}
@@ -1854,7 +1853,6 @@ void R_RenderScene( void )
 void R_DrawPostEffects(void)
 {
 	GL_Setup2D();
-	RequestDepthTexture();
 
 	if( RP_NORMALPASS() )
 	{

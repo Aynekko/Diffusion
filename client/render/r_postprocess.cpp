@@ -130,15 +130,6 @@ void InitPostEffects( void )
 	
 }
 
-//=======================================================================================
-// RequestDepthTexture: a single copy for all post-effects to save a bit of performance
-//=======================================================================================
-void RequestDepthTexture( void )
-{
-	GL_Bind( GL_TEXTURE0, tr.screen_depth );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
-}
-
 void InitSSAO( void )
 {	
 	if( ScreenAO )
@@ -407,7 +398,7 @@ void RenderSunShafts( void )
 
 	// request screen depth
 	GL_Bind( GL_TEXTURE0, tr.screen_depth );
-//	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 	// set target viewport
 	pglViewport( 0, 0, TargetSize, TargetSize );
@@ -875,7 +866,7 @@ void SSAO( void )
 
 	// request screen depth
 	GL_Bind( GL_TEXTURE0, tr.screen_depth );
-//	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 	// set target viewport
 	const int width = glState.width * 0.75;
@@ -964,7 +955,7 @@ void SSAO( void )
 
 	// request screen depth
 	GL_Bind( GL_TEXTURE2, tr.screen_depth );
-//	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 	RenderFSQ( glState.width, glState.height );
 
 	// unbind shader
@@ -1409,7 +1400,7 @@ void HeatDistortionShader( void )
 
 	// request screen depth
 	GL_Bind( GL_TEXTURE1, tr.screen_depth );
-//	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
