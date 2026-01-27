@@ -332,6 +332,7 @@ build_mesh:
 	out->texture = entry->texture;
 	out->vbo.numVerts = m_iNumVertex;
 	out->vbo.numElems = m_iNumIndex;
+	out->wind_anim = entry->wind_anim;
 	R_CreateSurfaceVBO( out );
 
 	return true;
@@ -496,6 +497,8 @@ void R_DrawGrassMesh( grass_t *grass, int tex, word &hLastShader, word &hCachedM
 		hCachedMatrix = grass->hCachedMatrix;
 	}
 
+	pglUniform1fARB( RI->currentshader->u_GrassWind, (float)grass->wind_anim );
+
 	// render grass meshes
 	R_DrawGrassMeshFromBuffer( grass );
 }
@@ -517,6 +520,8 @@ void R_DrawGrassShadowMesh( grass_t *grass, int tex, word &hCachedMatrix )
 		pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 		hCachedMatrix = grass->hCachedMatrix;
 	}
+
+	pglUniform1fARB( RI->currentshader->u_GrassWind, (float)grass->wind_anim );
 
 	// render grass meshes
 	R_DrawGrassMeshFromBuffer( grass );
@@ -627,6 +632,8 @@ void R_DrawLightForGrassMesh( plight_t *pl, grass_t *grass, int tex, word &hLast
 		pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 		hCachedMatrix = grass->hCachedMatrix;
 	}
+
+	pglUniform1fARB( RI->currentshader->u_GrassWind, (float)grass->wind_anim );
 
 	// render light for grass meshes
 	R_DrawGrassMeshFromBuffer( grass );
@@ -1263,6 +1270,15 @@ void R_GrassInit( void )
 			entry.maxtall = Q_atof( token );
 			entry.maxtall = bound( entry.mintall, entry.maxtall, 100.0f );
 			if( entry.mintall > entry.maxtall ) entry.mintall = entry.maxtall;
+
+			pfile = COM_ParseLine( pfile, token );
+			if( !pfile )
+			{
+				ALERT( at_error, "R_GrassInit: missed grass animation style at line %i\n", parse_line );
+				parse_line++;
+				continue;
+			}
+			entry.wind_anim = (Q_atoi( token ) > 0);
 
 			pfile = COM_ParseLine( pfile, token );
 			if( pfile )

@@ -35,6 +35,7 @@ typedef struct grassentry_s
 	float max;		// max grass scale
 	float mintall; // min height scale
 	float maxtall; // max height scale
+	bool wind_anim; // use new animation (skybox trees using simpler one)
 	int seed;		// seed for predictable random (auto-filled)
 } grassentry_t;
 
@@ -104,6 +105,7 @@ typedef struct grass_s
 	unsigned short hCachedMatrix;	// HACKHACK: get matrices
 
 	unsigned int cacheSize;	// debug info: uploaded cache size for this buffer
+	bool wind_anim; // use new animation (skybox trees using simpler one)
 } grass_t;
 
 typedef struct grasstex_s

@@ -1042,6 +1042,7 @@ static void GL_InitGrassSolidUniforms( glsl_program_t *shader )
 	shader->u_GammaTable = pglGetUniformLocationARB( shader->handle, "u_GammaTable" );
 	shader->u_GrassParams = pglGetUniformLocationARB( shader->handle, "u_GrassParams" );
 	shader->u_GenericCondition = pglGetUniformLocationARB( shader->handle, "u_GenericCondition" );
+	shader->u_GrassWind = pglGetUniformLocationARB( shader->handle, "u_GrassWind" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
@@ -1065,6 +1066,7 @@ static void GL_InitGrassDlightUniforms( glsl_program_t *shader )
 	shader->u_ModelMatrix = pglGetUniformLocationARB( shader->handle, "u_ModelMatrix" );
 	shader->u_LightParams = pglGetUniformLocationARB( shader->handle, "u_LightParams" );
 	shader->u_GenericCondition = pglGetUniformLocationARB( shader->handle, "u_GenericCondition" );
+	shader->u_GrassWind = pglGetUniformLocationARB( shader->handle, "u_GrassWind" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );

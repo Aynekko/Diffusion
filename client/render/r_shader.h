@@ -162,6 +162,7 @@ typedef struct glsl_prog_s
 	GLint u_BloomFirstPass;
 	GLint u_HDRExposure;
 	GLint u_HBAOParams;
+	GLint u_GrassWind;
 } glsl_program_t;
 
 typedef struct

@@ -15,6 +15,7 @@ GNU General Public License for more details.
 
 #include "const.h"
 #include "mathlib.h"
+#include "grass.h"
 
 attribute vec4		attr_Position;	// gl_VertexID emulation (already preserved by & 15)
 attribute vec4		attr_Normal;
@@ -40,8 +41,7 @@ void main( void )
 
 	if( bool( dist < GRASS_ANIM_DIST ) && bool( vertexID == 1 || vertexID == 2 ))
 	{
-		position.x += sin( position.z + u_RealTime * 0.5 );
-		position.y += cos( position.z + u_RealTime * 0.5 );
+		position = GrassAnimate( position, u_RealTime );
 	}
 
 	vec4 worldpos = u_ModelMatrix * position;
