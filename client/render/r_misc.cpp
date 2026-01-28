@@ -915,16 +915,22 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 	
 	plight_t *dl = CL_AllocPlight( MUZZLEFLASH_LIGHT_KEY );
 
+	const bool bGausniper = (WeaponID == WEAPON_GAUSS);
+
 	if( e == GET_VIEWMODEL() )
 	{
+		// replace origin
+		origin = gEngfuncs.GetLocalPlayer()->curstate.origin;
+		const bool bRightHanded = (g_StudioRenderer.m_pCvarHand->value == 0.0f);
+
 		dl->pointlight = false; // use projector like L4D
 		dl->projectionTexture = tr.spotlightTexture;
 		if( tr.lowmemory )
 			dl->flags |= CF_NOSHADOWS;
-		Vector v_angles, Forward;
+		Vector v_angles, Forward, Right;
 		gEngfuncs.GetViewAngles( v_angles );
-		gEngfuncs.pfnAngleVectors( v_angles, Forward, NULL, NULL );
-		origin -= Forward * 15;
+		gEngfuncs.pfnAngleVectors( v_angles, Forward, Right, NULL );
+		origin += Right * 25.0f * (bRightHanded ? 1.0f : -1.0f);
 		origin.x += RANDOM_FLOAT( -2.5f, 2.5f );
 		origin.y += RANDOM_FLOAT( -2.5f, 2.5f );
 		origin.z += RANDOM_LONG( -5, 5 );
@@ -936,8 +942,16 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 		dl->flags |= CF_NOSHADOWS;
 	}
 
-	dl->die = tr.time + 0.075f;
-	dl->decaybrightness = 16.0f;
+	if( !bGausniper )
+	{
+		dl->die = tr.time + 0.075f;
+		dl->decaybrightness = 16.0f;
+	}
+	else
+	{
+		dl->die = tr.time + 1.5f;
+		dl->decaybrightness = 4.0f;
+	}
 	
 	// default parameters - monsters (and other players...?)
 	int R = 255;
@@ -952,6 +966,7 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 		R = 70;
 		G = 169;
 		B = 255;
+		Brightness = 2.0f;
 	break;
 	case WEAPON_AR2:
 		R = 70;

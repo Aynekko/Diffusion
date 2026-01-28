@@ -603,7 +603,9 @@ private:
 	// Cvars that studio model code needs to reference
 //	cvar_t			*m_pCvarHiModels;	// Use high quality models?	
 	cvar_t			*m_pCvarDrawViewModel;
+public:
 	cvar_t			*m_pCvarHand;	// handness
+private:
 	cvar_t			*m_pCvarViewmodelFov;
 	cvar_t			*m_pCvarGlowShellFreq;
 	cvar_t			*m_pCvarCompatible;
