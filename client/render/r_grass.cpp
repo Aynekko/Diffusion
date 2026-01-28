@@ -197,9 +197,9 @@ static bool R_CreateSingleBush( msurface_t *surf, mextrasurf_t *es, grasshdr_t *
 	return true;
 }
 
-static void R_CreateSurfaceVBO( grass_t *out )
+static bool R_CreateSurfaceVBO( grass_t *out )
 {
-	if( !m_iNumVertex ) return; // empty mesh?
+	if( !m_iNumVertex ) return false; // empty mesh?
 
 	// create GPU static buffer
 	pglGenBuffersARB( 1, &out->vbo.vbo );
@@ -244,6 +244,8 @@ static void R_CreateSurfaceVBO( grass_t *out )
 
 	// update stats
 	tr.total_vbo_memory += sizeof( gvert_t ) * m_iNumVertex;
+
+	return true;
 }
 
 void R_DeleteSurfaceVBO( grass_t *out )
@@ -333,8 +335,20 @@ build_mesh:
 	out->vbo.numVerts = m_iNumVertex;
 	out->vbo.numElems = m_iNumIndex;
 	out->wind_anim = entry->wind_anim;
-	R_CreateSurfaceVBO( out );
+	if( !R_CreateSurfaceVBO( out ) )
+		return false;
 
+	// precache shaders
+	GL_UberShaderForGrassSolid( surf, out );
+	tr.defSpotlight.flags |= CF_NOSHADOWS;
+	GL_UberShaderForGrassDlight( &tr.defSpotlight, out );
+	tr.defSpotlight.flags = 0;
+	GL_UberShaderForGrassDlight( &tr.defSpotlight, out );
+	tr.defOmnilight.flags |= CF_NOSHADOWS;
+	GL_UberShaderForGrassDlight( &tr.defOmnilight, out );
+	tr.defOmnilight.flags = 0;
+	GL_UberShaderForGrassDlight( &tr.defOmnilight, out );
+	
 	return true;
 }
 
