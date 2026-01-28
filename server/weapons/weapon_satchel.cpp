@@ -362,6 +362,7 @@ void CSatchel::PrimaryAttack( void )
 		Throw();
 		m_flNextPrimaryAttack = gpGlobals->time + 0.3;
 		m_flNextSecondaryAttack = gpGlobals->time + 1.0;
+		CLIENT_COMMAND( m_pPlayer->edict(), "-attack\n" ); // don't blow yourself up when holding a button
 	}
 	break;
 	case 1:
@@ -448,7 +449,7 @@ void CSatchel::Throw( void )
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
 		m_chargeReady = 1;
-		
+
 		m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 	}
 }
