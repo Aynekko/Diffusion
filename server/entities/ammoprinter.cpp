@@ -190,7 +190,7 @@ void CAmmoPrinter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	if( HasSpawnFlags( SF_AMMOPRINT_ONLYPRIMARYAMMO ) )
 		Ammo2 = -1; // secondary ammo not allowed
 	else
-		Ammo2 = pPlayer->GiveAmmo( (int)(pPlayer->m_pActiveItem->iMaxAmmo2() * 0.6), (char *)pPlayer->m_pActiveItem->pszAmmo2(), pPlayer->m_pActiveItem->iMaxAmmo2() );
+		Ammo2 = pPlayer->GiveAmmo( 1, (char *)pPlayer->m_pActiveItem->pszAmmo2(), pPlayer->m_pActiveItem->iMaxAmmo2() );
 
 	if( Ammo1 == -1 && Ammo2 == -1 )
 	{
