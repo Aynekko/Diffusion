@@ -78,6 +78,52 @@ public:
 	EHANDLE m_hSprite;
 };
 
+class CTripmineGrenade : public CGrenade
+{
+public:
+	DECLARE_CLASS( CTripmineGrenade, CGrenade );
+
+	void Spawn( void );
+	void Precache( void );
+
+	DECLARE_DATADESC();
+
+	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
+
+	void PowerupThink( void );
+	void BeamBreakThink( void );
+	void DelayDeathThink( void );
+	void Killed( entvars_t *pevAttacker, int iGib );
+	void TransferReset( void );
+	void OnChangeLevel( void );
+
+	void MakeBeam( void );
+
+	void ClearEffects( void );
+
+	virtual int ObjectCaps( void );
+	
+	void DisarmUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
+	void DisarmThink( void );
+	void BreakTouch( CBaseEntity *pOther );
+	float DisarmStartTime;
+	bool Disarmed;
+
+	float	m_flPowerUp;
+	Vector	m_vecDir;
+	Vector	m_vecEnd;
+	float	m_flBeamLength;
+
+	EHANDLE	m_hBeam;
+	edict_t *m_pRealOwner; // tracelines don't hit pev->owner, which means a player couldn't detonate his own trip mine, so we store the owner here.
+
+	EHANDLE m_hSprite; // diffusion - glow sprite at the end of laser
+
+	float skin_change_time; // not saved
+	bool IsTripped; // do not the beam!
+	Vector PrevOrigin;
+};
+
 // bullet types
 typedef	enum
 {

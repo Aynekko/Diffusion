@@ -159,6 +159,21 @@ void ClientDisconnect( edict_t *pEdict )
 		if( pTurret->pev->owner == pEdict )
 			UTIL_Remove( pTurret );
 	}
+
+	// remove player's tripmines
+	CBaseEntity *pTripmine = NULL;
+	while( (pTripmine = UTIL_FindEntityByClassname( pTripmine, "monster_tripmine" )) != NULL )
+	{
+		// not sure but just in case - a turret already marked for deletion
+		if( pTripmine->pev->flags & FL_KILLME )
+			continue;
+
+		CTripmineGrenade *pEnt = (CTripmineGrenade *)pTripmine;
+
+		if( pEnt->m_pRealOwner == pEdict )
+			UTIL_Remove( pEnt );
+	}
+
 }
 
 

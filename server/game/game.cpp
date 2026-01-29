@@ -78,6 +78,7 @@ cvar_t	mp_explodesatchels = { "mp_explodesatchels", "1", FCVAR_SERVER };
 cvar_t mp_allow_bonuses = { "mp_allow_bonuses", "1", FCVAR_SERVER };
 cvar_t sv_train_debug = { "sv_train_debug", "0", FCVAR_SPONLY };
 cvar_t mp_maxturrets = { "mp_maxturrets", "3", FCVAR_SERVER }; // how many turrets a player can spawn
+cvar_t mp_maxtripmines = { "mp_maxtripmines", "5", FCVAR_SERVER }; // how many tripmines a player can spawn
 cvar_t sv_startfromui = { "sv_startfromui", "0", FCVAR_SERVER | FCVAR_UNLOGGED };
 
 // sv_fade_props: 0 - disable all server culling, 1 - enable distance culling, 2 and more - also enable back-culling, where number means distance in units (i.e. sv_fade_props 500)
@@ -204,6 +205,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &mp_allow_bonuses );
 	CVAR_REGISTER( &sv_train_debug );
 	CVAR_REGISTER( &mp_maxturrets );
+	CVAR_REGISTER( &mp_maxtripmines );
 	CVAR_REGISTER( &sv_startfromui );
 	CVAR_REGISTER( &sv_enablebunnyhopping );
 

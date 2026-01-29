@@ -21,62 +21,12 @@
 #include "player.h"
 #include "effects.h"
 #include "game/gamerules.h"
+#include "game/game.h"
 #include "entities/soundent.h"
 
 #define TRIPMINE_PRIMARY_VOLUME	450
 
 #define SF_TRIPMINE_INSTANT_ON	BIT(0)
-
-class CTripmineGrenade : public CGrenade
-{
-	DECLARE_CLASS( CTripmineGrenade, CGrenade );
-
-	void Spawn( void );
-	void Precache( void );
-
-	DECLARE_DATADESC();
-
-	int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
-	
-	void PowerupThink( void );
-	void BeamBreakThink( void );
-	void DelayDeathThink( void );
-	void Killed( entvars_t *pevAttacker, int iGib );
-	void TransferReset( void );
-	void OnChangeLevel( void );
-
-	void MakeBeam( void );
-
-	void ClearEffects(void);
-
-	virtual int ObjectCaps( void )
-	{
-		int flags = 0;
-		if( !g_pGameRules->IsMultiplayer() )
-			flags = FCAP_IMPULSE_USE;
-
-		return BaseClass :: ObjectCaps() | flags;
-	}
-	void DisarmUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	void DisarmThink(void);
-	void BreakTouch( CBaseEntity *pOther );
-	float DisarmStartTime;
-	bool Disarmed;
-
-	float	m_flPowerUp;
-	Vector	m_vecDir;
-	Vector	m_vecEnd;
-	float	m_flBeamLength;
-
-	EHANDLE	m_hBeam;
-	edict_t	*m_pRealOwner; // tracelines don't hit pev->owner, which means a player couldn't detonate his own trip mine, so we store the owner here.
-
-	EHANDLE m_hSprite; // diffusion - glow sprite at the end of laser
-
-	float skin_change_time; // not saved
-	bool IsTripped; // do not the beam!
-	Vector PrevOrigin;
-};
 
 LINK_ENTITY_TO_CLASS( monster_tripmine, CTripmineGrenade );
 
@@ -99,6 +49,15 @@ BEGIN_DATADESC( CTripmineGrenade )
 	DEFINE_FIELD( m_hSprite, FIELD_EHANDLE ),
 	DEFINE_FIELD( PrevOrigin, FIELD_VECTOR ),
 END_DATADESC()
+
+int CTripmineGrenade::ObjectCaps( void )
+{
+	int flags = 0;
+	if( !g_pGameRules->IsMultiplayer() )
+		flags = FCAP_IMPULSE_USE;
+
+	return BaseClass::ObjectCaps() | flags;
+}
 
 void CTripmineGrenade :: Spawn( void )
 {
@@ -641,6 +600,40 @@ void CTripmine::PrimaryAttack( void )
 	if (m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		return;
 
+	bool bAllowSpawnInMP = true;
+
+	if( gpGlobals->maxClients > 1 )
+	{
+		// count spawned turrets by this player
+		CBaseEntity *pTripmine = NULL;
+		int tripmine_count = 0;
+		const int tripmine_max = mp_maxtripmines.value;
+		while( (pTripmine = UTIL_FindEntityByClassname( pTripmine, "monster_tripmine" )) != NULL )
+		{
+			// not sure but just in case - a tripmine already marked for deletion
+			if( pTripmine->pev->flags & FL_KILLME )
+				continue;
+
+			CTripmineGrenade *pEnt = (CTripmineGrenade *)pTripmine;
+
+			if( pEnt->m_pRealOwner == m_pPlayer->edict() )
+				tripmine_count++;
+
+			if( tripmine_count >= tripmine_max )
+			{
+				bAllowSpawnInMP = false;
+				break;
+			}
+		}
+	}
+
+	if( !bAllowSpawnInMP )
+	{
+		UTIL_ShowMessage( "UTIL_TOOMANY", m_pPlayer );
+		m_flNextPrimaryAttack = gpGlobals->time + 0.2;
+		return;
+	}
+
 	UTIL_MakeVectors( m_pPlayer->pev->v_angle + m_pPlayer->pev->punchangle );
 	Vector vecSrc = m_pPlayer->GetGunPosition( );
 	Vector vecAiming = gpGlobals->v_forward;
@@ -688,10 +681,6 @@ void CTripmine::PrimaryAttack( void )
 		{
 			// ALERT( at_console, "no deploy\n" );
 		}
-	}
-	else
-	{
-
 	}
 
 	m_flNextPrimaryAttack = gpGlobals->time + 0.3;
