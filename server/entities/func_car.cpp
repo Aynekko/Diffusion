@@ -1702,7 +1702,7 @@ void CCar::Drive( void )
 	// CAR STUCK???
 	if( StuckTime > gpGlobals->time )
 		StuckTime = gpGlobals->time;
-	if( (hDriver->pev->button & IN_RELOAD) && (gpGlobals->time > StuckTime + 5) )
+	if( (hDriver->pev->button & IN_RELOAD) && (gpGlobals->time > StuckTime + 2.0f) )
 	{
 		ALERT( at_aiconsole, "CCar::TryUnstick by user\n" );
 		TryUnstick();
@@ -2172,6 +2172,7 @@ void CCar::Drive( void )
 	float ColDotProduct;
 	Vector ColPoint;
 	GetCollision( AbsCarSpeed, Forward, &Collision, &ColDotProduct, &ColPoint );
+	Collision.z = 0; // operate in 2D space because car can't roll anyway.
 	if( Collision.IsNull() && (FrontWheelsInAir + RearWheelsInAir == 0) )
 		SafeCarPos = GetAbsOrigin();
 
