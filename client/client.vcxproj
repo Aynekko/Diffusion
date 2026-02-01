@@ -351,6 +351,7 @@
     <ClCompile Include="..\game_shared\playermove.cpp" />
     <ClCompile Include="..\game_shared\procbones.cpp" />
     <ClCompile Include="..\game_shared\stringlib.cpp" />
+    <ClCompile Include="..\public\crclib.cpp" />
     <ClCompile Include="ammo.cpp" />
     <ClCompile Include="ammohistory.cpp" />
     <ClCompile Include="ammo_secondary.cpp" />

@@ -272,6 +272,9 @@
     <ClCompile Include="hud_objectives_and_hints.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\public\crclib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ammo.h">
