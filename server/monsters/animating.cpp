@@ -56,11 +56,11 @@ float CBaseAnimating::StudioFrameAdvance( float flInterval )
 	if( flInterval == 0.0f )
 	{
 		flInterval = gpGlobals->time - pev->animtime;
-	/*	if( flInterval <= 0.001f ) // diffusion - this causes monsters to stall above 1000 fps, disable
+		if( flInterval <= 0.00001f ) // diffusion - this causes monsters to stall above 1000 fps, disable // EDIT: just make the value so much lower, player animation breaks on dedicated servers (???)
 		{
 			pev->animtime = gpGlobals->time;
 			return 0.0f;
-		}*/
+		}
 	}
 
 	if( !pev->animtime )
