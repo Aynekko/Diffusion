@@ -402,6 +402,15 @@ static dllfunc_t occlusionfunc[] =
 { NULL, NULL }
 };
 
+static dllfunc_t binaryshaderfuncs[] =
+{
+{ "glProgramBinary"              , (void **)&pglProgramBinaryARB },
+{ "glGetProgramBinary"           , (void **)&pglGetProgramBinaryARB },
+{ "glProgramParameteri"          , (void **)&pglGetProgramivARB },
+{ "glProgramParameteriARB"		 , (void **)&pglProgramParameteriARB },
+{ NULL, NULL }
+};
+
 #ifndef CALLBACK
 #define CALLBACK
 #endif // CALLBACK
@@ -753,6 +762,8 @@ static void GL_InitExtensions( void )
 
 	// Paranoia OpenGL32.dll may be eliminate shadows. Run special check for it
 	GL_CheckExtension( "PARANOIA_HACKS_V1", NULL, NULL, R_PARANOIA_EXT );
+
+	GL_CheckExtension( "GL_ARB_get_program_binary", binaryshaderfuncs, "gl_binaryshader", R_BINARY_SHADER_EXT );
 
 	// check for hardware skinning
 	pglGetIntegerv( GL_MAX_VERTEX_UNIFORM_COMPONENTS_ARB, &glConfig.max_vertex_uniforms );

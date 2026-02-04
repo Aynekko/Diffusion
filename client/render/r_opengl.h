@@ -418,6 +418,8 @@ typedef char GLchar;
 #define GL_OBJECT_ACTIVE_UNIFORMS_ARB		0x8B86
 #define GL_OBJECT_ACTIVE_UNIFORM_MAX_LENGTH_ARB	0x8B87
 #define GL_OBJECT_SHADER_SOURCE_LENGTH_ARB	0x8B88
+#define GL_PROGRAM_BINARY_LENGTH 0x8741
+#define GL_PROGRAM_BINARY_RETRIEVABLE_HINT	0x8257
 #define GL_SHADER_OBJECT_ARB			0x8B48
 #define GL_FLOAT_VEC2_ARB			0x8B50
 #define GL_FLOAT_VEC3_ARB			0x8B51
@@ -1164,6 +1166,9 @@ EXTERN void ( APIENTRY *pglProgramStringARB)(GLenum target, GLenum format, GLsiz
 EXTERN void ( APIENTRY *pglProgramEnvParameter4fARB)(GLenum target, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
 EXTERN void ( APIENTRY *pglProgramLocalParameter4fARB)(GLenum target, GLuint index, GLfloat x, GLfloat y, GLfloat z, GLfloat w);
 EXTERN void ( APIENTRY *pglGetProgramivARB)( GLenum target, GLenum pname, GLint *params );
+EXTERN void ( APIENTRY *pglProgramParameteriARB)(GLuint program, GLenum pname, GLint value);
+EXTERN void ( APIENTRY *pglProgramBinaryARB)(GLhandleARB program, GLenum binaryFormat, const GLvoid *binary, GLint length);
+EXTERN void ( APIENTRY *pglGetProgramBinaryARB)(GLhandleARB program, GLsizei bufSize, GLsizei *length, GLenum *binaryFormat, GLvoid *binary);
 EXTERN void ( APIENTRY *pglUniform1fARB)(GLint location, GLfloat v0);
 EXTERN void ( APIENTRY *pglUniform2fARB)(GLint location, GLfloat v0, GLfloat v1);
 EXTERN void ( APIENTRY *pglUniform3fARB)(GLint location, GLfloat v0, GLfloat v1, GLfloat v2);

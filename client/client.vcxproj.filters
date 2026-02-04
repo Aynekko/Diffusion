@@ -382,5 +382,8 @@
     <ClInclude Include="buildtime.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="render\r_shaderlist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

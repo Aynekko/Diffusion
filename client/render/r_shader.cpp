@@ -24,6 +24,10 @@ GNU General Public License for more details.
 #include "virtualfs.h"
 #include "r_particle.h"
 #include "r_world.h"
+#include "crclib.h"
+#include "r_shaderlist.h"
+
+static bool bPrecompiled = false;
 
 #define SHADERS_HASH_SIZE	(MAX_GLSL_PROGRAMS >> 2)
 #define MAX_FILE_STACK	64
@@ -34,6 +38,34 @@ glsl_program_t	*glsl_programsHashTable[SHADERS_HASH_SIZE];
 unsigned int	num_glsl_programs;
 static int	file_stack_pos;
 ref_shaders_t	glsl;
+
+static const char *GL_GetDriverString( void )
+{
+	static char driver[256] = { 0 };
+	if( driver[0] ) return driver;
+
+	const char *vendor = (const char *)pglGetString( GL_VENDOR );
+	const char *renderer = (const char *)pglGetString( GL_RENDERER );
+	const char *version = (const char *)pglGetString( GL_VERSION );
+
+	Q_snprintf( driver, sizeof( driver ), "%s_%s_%s", vendor ? vendor : "", renderer ? renderer : "", version ? version : "" );
+	return driver;
+}
+
+static char *GL_GetShaderCacheFilename( const char *glname, const char *options, char *filename, size_t size )
+{
+	const char *driver = GL_GetDriverString();
+	char unique_key[512];
+	Q_snprintf( unique_key, sizeof( unique_key ), "%s%s%s", glname, options, driver );
+
+	unsigned int crc = 0;
+	CRC32_Init( &crc );
+	CRC32_ProcessBuffer( &crc, unique_key, Q_strlen( unique_key ) );
+	crc = CRC32_Final( crc );
+
+	Q_snprintf( filename, size, ".shadercache/%08x.bin", crc );
+	return filename;
+}
 
 void GL_EncodeNormal( char *options, int texturenum )
 {
@@ -504,18 +536,80 @@ static glsl_program_t *GL_InitGPUShader( const char *glname, const char *vpname,
 
 	// alloc new shader
 	glsl_program_t *shader = &glsl_programs[i];
-	num_glsl_programs++;
+	memset( shader, 0, sizeof( *shader ) );
+
+	if( i == num_glsl_programs )
+		num_glsl_programs++;
 
 	Q_strncpy( shader->name, glname, sizeof( shader->name ));
 	Q_strncpy( shader->options, defines, sizeof( shader->options ));
 	shader->handle = pglCreateProgramObjectARB();
 
-	if( vpname ) GL_LoadGPUShader( shader, vpname, GL_VERTEX_SHADER_ARB, false, defines );
-	else shader->status |= SHADER_VERTEX_COMPILED;
-	if( fpname ) GL_LoadGPUShader( shader, fpname, GL_FRAGMENT_SHADER_ARB, false, defines );
-	else shader->status |= SHADER_FRAGMENT_COMPILED;
+	if( !shader->handle )
+	{
+		ALERT( at_error, "GL_InitGPUShader: ^1failed to create program object for %s^7\n", glname );
+		memset( shader, 0, sizeof( *shader ) );
+		if( i == num_glsl_programs - 1 ) num_glsl_programs--;
+		return NULL;
+	}
 
-	if( vpname && FBitSet( shader->status, SHADER_VERTEX_COMPILED ))
+	const bool bSupportBinaryShader = GL_Support( R_BINARY_SHADER_EXT );
+
+	// try load from file
+	if( bSupportBinaryShader )
+	{
+		pglProgramParameteriARB( shader->handle, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE );
+
+		char filename[256];
+		GL_GetShaderCacheFilename( glname, defines ? defines : "", filename, sizeof( filename ) );
+
+		int filesize;
+		byte *data = (byte *)gEngfuncs.COM_LoadFile( filename, 5, &filesize );
+
+		if( data && filesize > (int)sizeof( GLuint ) )
+		{
+			GLuint format = *(GLuint *)data;
+			byte *binary = data + sizeof( GLuint );
+			int bin_size = filesize - sizeof( GLuint );
+
+			pglProgramBinaryARB( shader->handle, format, binary, bin_size );
+
+			GLint linked = 0;
+			pglGetObjectParameterivARB( shader->handle, GL_OBJECT_LINK_STATUS_ARB, &linked );
+
+			if( linked )
+			{
+				shader->status = SHADER_VERTEX_COMPILED | SHADER_FRAGMENT_COMPILED | SHADER_PROGRAM_LINKED;
+				shader->nextHash = NULL;
+
+				ALERT( at_aiconsole, "\n^2Loaded shader binary:^7 %s\n", filename );
+
+				gEngfuncs.COM_FreeFile( data );
+
+				shader->nextHash = glsl_programsHashTable[hash];
+				glsl_programsHashTable[hash] = shader;
+				return shader;
+			}
+			else
+			{
+				ALERT( at_warning, "^1Cached binary %s FAILED to link:^7 %s\n", filename, GL_PrintInfoLog( shader->handle ) );
+				pglDeleteObjectARB( shader->handle );
+				shader->handle = pglCreateProgramObjectARB();  // Recreate
+				pglProgramParameteriARB( shader->handle, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE );
+			}
+
+			gEngfuncs.COM_FreeFile( data );
+		}
+	}
+
+	// Fallback: compile from source
+	if( vpname )
+		GL_LoadGPUShader( shader, vpname, GL_VERTEX_SHADER_ARB, false, defines );
+
+	if( fpname )
+		GL_LoadGPUShader( shader, fpname, GL_FRAGMENT_SHADER_ARB, false, defines );
+
+	if( vpname && FBitSet( shader->status, SHADER_VERTEX_COMPILED ) )
 	{
 		pglBindAttribLocationARB( shader->handle, ATTR_INDEX_POSITION, "attr_Position" );
 		pglBindAttribLocationARB( shader->handle, ATTR_INDEX_TEXCOORD0, "attr_TexCoord0" );
@@ -533,12 +627,56 @@ static glsl_program_t *GL_InitGPUShader( const char *glname, const char *vpname,
 
 	GL_LinkProgram( shader );
 
-	if( shader != NULL )
+	if( !FBitSet( shader->status, SHADER_PROGRAM_LINKED ) )
 	{
-		// add to hash table
-		shader->nextHash = glsl_programsHashTable[hash];
-		glsl_programsHashTable[hash] = shader;
+		if( shader->handle ) pglDeleteObjectARB( shader->handle );
+		memset( shader, 0, sizeof( *shader ) );
+		if( i == num_glsl_programs - 1 ) num_glsl_programs--;
+		return NULL;
 	}
+
+	// Cache binary if supported
+	if( bSupportBinaryShader )
+	{
+		char filename[256];
+		GL_GetShaderCacheFilename( glname, defines ? defines : "", filename, sizeof( filename ) );
+
+		GLint bin_length = 0;
+		pglGetProgramiv( shader->handle, GL_PROGRAM_BINARY_LENGTH, &bin_length );
+		if( bin_length <= 0 )
+		{
+			// Fallback for drivers that only accept old name
+			pglGetObjectParameterivARB( shader->handle, GL_PROGRAM_BINARY_LENGTH, &bin_length );
+		}
+
+		ALERT( at_aiconsole, "Program binary length for %s: %d bytes\n", glname, bin_length );
+
+		if( bin_length > 0 )
+		{
+			byte *buffer = (byte *)Mem_Alloc( bin_length + sizeof( GLuint ) );
+			GLuint format = 0;
+			GLint ret_len = 0;
+
+			pglGetProgramBinaryARB( shader->handle, bin_length, &ret_len, &format, buffer + sizeof( GLuint ) );
+
+			if( ret_len == bin_length )
+			{
+				*(GLuint *)buffer = format;
+				gRenderfuncs.pfnSaveFile( filename, buffer, bin_length + sizeof( GLuint ) );
+				ALERT( at_aiconsole, "^2Saved shader cache to:^7 %s (%d bytes)\n", filename, bin_length );
+			}
+			else
+			{
+				ALERT( at_warning, "^1Failed to retrieve program binary for %s^7\n", glname );
+			}
+
+			Mem_Free( buffer );
+		}
+	}
+
+	// add to hash table
+	shader->nextHash = glsl_programsHashTable[hash];
+	glsl_programsHashTable[hash] = shader;
 
 	return shader;
 }
@@ -560,15 +698,15 @@ static void GL_FreeGPUShader( glsl_program_t *shader )
 
 		while( 1 )
 		{
-			cur = *prev;
-			if( !cur ) break;
+				cur = *prev;
+				if( !cur ) break;
 
-			if( cur == shader )
+				if( cur == shader )
 			{
-				*prev = cur->nextHash;
+					*prev = cur->nextHash;
 				break;
 			}
-			prev = &cur->nextHash;
+				prev = &cur->nextHash;
 		}
 
 		pglDeleteObjectARB( shader->handle );
@@ -589,6 +727,82 @@ static glsl_program_t *GL_CreateUberShader( GLuint slot, const char *glname, con
 
 	// alloc new shader
 	glsl_program_t *shader = &glsl_programs[slot];
+	memset( shader, 0, sizeof( *shader ) );
+
+	const bool bSupportBinaryShader = GL_Support( R_BINARY_SHADER_EXT );
+
+	if( bSupportBinaryShader )
+	{
+		char filename[256];
+		GL_GetShaderCacheFilename( glname, options, filename, sizeof( filename ) );
+
+		int filesize;
+		byte *data = (byte *)gEngfuncs.COM_LoadFile( filename, 5, &filesize );
+
+		if( data && filesize > sizeof( GLuint ) )
+		{
+			GLuint format = *(GLuint *)data;
+			byte *binary = data + sizeof( GLuint );
+			int bin_size = filesize - sizeof( GLuint );
+
+			shader->handle = pglCreateProgramObjectARB();
+			pglProgramBinaryARB( shader->handle, format, binary, bin_size );
+			pglProgramParameteriARB( shader->handle, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE );
+
+			if( FBitSet( shader->status, SHADER_VERTEX_COMPILED ) )
+			{
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_POSITION, "attr_Position" );
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_TEXCOORD0, "attr_TexCoord0" );
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_TEXCOORD1, "attr_TexCoord1" );
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_TEXCOORD2, "attr_TexCoord2" );
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_NORMAL, "attr_Normal" );
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_BONE_INDEXES, "attr_BoneIndexes" );
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_BONE_WEIGHTS, "attr_BoneWeights" );
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_LIGHT_STYLES, "attr_LightStyles" );
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_LIGHT_COLOR, "attr_LightColor" );
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_LIGHT_VECS, "attr_LightVecs" );
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_TANGENT, "attr_Tangent" );
+				pglBindAttribLocationARB( shader->handle, ATTR_INDEX_BINORMAL, "attr_Binormal" );
+			}
+
+			GLint linked = 0;
+			pglGetObjectParameterivARB( shader->handle, GL_OBJECT_LINK_STATUS_ARB, &linked );
+
+			if( linked )
+			{
+				shader->status = SHADER_VERTEX_COMPILED | SHADER_FRAGMENT_COMPILED | SHADER_PROGRAM_LINKED | SHADER_UBERSHADER;
+				Q_strncpy( shader->name, glname, sizeof( shader->name ) );
+				Q_strncpy( shader->options, options, sizeof( shader->options ) );
+
+				if( pfnInitUniforms ) pfnInitUniforms( shader );
+				GL_ShowProgramUniforms( shader );  // If dev mode
+
+				gEngfuncs.COM_FreeFile( data );
+				ALERT( at_aiconsole, "\n^2Loaded cached shader binary:^7 %s\n", filename );
+
+				if( slot == num_glsl_programs )
+				{
+					if( num_glsl_programs == MAX_GLSL_PROGRAMS )
+					{
+						ALERT( at_error, "^1GL_CreateUberShader: GLSL shaders limit exceeded (%i max)^7\n", MAX_GLSL_PROGRAMS );
+						GL_FreeGPUShader( shader );
+						return NULL;
+					}
+					num_glsl_programs++;
+				}
+
+				return shader;
+			}
+			else
+			{
+				ALERT( at_warning, "^1Failed to load shader binary %s:^7 %s\n", filename, GL_PrintInfoLog( shader->handle ) );
+				pglDeleteObjectARB( shader->handle );
+				shader->handle = 0;
+			}
+
+			gEngfuncs.COM_FreeFile( data );
+		}
+	}
 
 	shader->handle = pglCreateProgramObjectARB();
 	if( !shader->handle ) return NULL; // some bad happens
@@ -622,7 +836,51 @@ static glsl_program_t *GL_CreateUberShader( GLuint slot, const char *glname, con
 
 	shader->status |= SHADER_UBERSHADER; // it's UberShader!
 
-	ALERT( at_aiconsole, "CompileUberShader #%i: %s\n%s\n", slot, glname, options );
+	ALERT( at_aiconsole, "^2CompileUberShader #%i:^7 %s\n%s\n", slot, glname, options );
+
+	if( developer_level && bPrecompiled )
+	{
+		// development aid - log shaders here if they were compiled/loaded long after the initialization stage
+		char log_filename[256] = "shaders_unlisted.log";
+		FILE *log_file = fopen( log_filename, "a" );  // Append mode
+		if( log_file )
+		{
+			fprintf( log_file, "%s | %s\n", glname, options ? options : "" );  // Format: glname | defines
+			fclose( log_file );
+		}
+	}
+
+	if( bSupportBinaryShader )
+	{
+		char filename[256];
+		GL_GetShaderCacheFilename( glname, options, filename, sizeof( filename ) );
+
+		GLint bin_length = 0;
+		pglGetProgramiv( shader->handle, GL_PROGRAM_BINARY_LENGTH, &bin_length );
+		if( bin_length <= 0 )
+		{
+			// Fallback for drivers that only accept old name
+			pglGetObjectParameterivARB( shader->handle, GL_PROGRAM_BINARY_LENGTH, &bin_length );
+		}
+
+		if( bin_length > 0 )
+		{
+			byte *buffer = (byte *)Mem_Alloc( bin_length + sizeof( GLuint ) );
+			GLuint format;
+			GLint ret_len = 0;
+
+			pglGetProgramBinaryARB( shader->handle, bin_length, &ret_len, &format, buffer + sizeof( GLuint ) );
+
+			if( ret_len == bin_length )
+			{
+				*(GLuint *)buffer = format;
+				gRenderfuncs.pfnSaveFile( filename, buffer, bin_length + sizeof( GLuint ) );
+				ALERT( at_aiconsole, "^2Cached shader binary:^7 %s\n", filename );
+			}
+
+			Mem_Free( buffer );
+		}
+	}
 
 	if( slot == num_glsl_programs )
 	{
@@ -2440,6 +2698,50 @@ void GL_ListGPUShaders( void )
 	Msg( "total %i shaders\n", count );
 }
 
+void GL_PrecompileUberShaders( void )
+{
+	ALERT( at_aiconsole, "^2Preloading shaders...^7\n" );
+
+	int count = 0;
+	int failed = 0;
+	bPrecompiled = false;
+
+	for( shaderlist_t *list = shaders; list->glname; list++ )
+	{
+		glsl_program_t *shader = GL_InitGPUShader( list->glname, list->glname, list->glname, list->defines );
+		if( shader )
+		{
+			if( !Q_stricmp( list->glname, "bmodeldecal" ) )
+				GL_InitBmodelDecalUniforms( shader );
+			else if( !Q_stricmp( list->glname, "bmodeldlight" ) )
+				GL_InitBmodelDlightUniforms( shader );
+			else if( !Q_stricmp( list->glname, "bmodelsolid" ) )
+				GL_InitSolidBmodelUniforms( shader );
+			else if( !Q_stricmp( list->glname, "studiodlight" ) )
+				GL_InitStudioDlightUniforms( shader );
+			else if( !Q_stricmp( list->glname, "studiosolid" ) )
+				GL_InitSolidStudioUniforms( shader );
+			else if( !Q_stricmp( list->glname, "grassdlight" ) )
+				GL_InitGrassDlightUniforms( shader );
+			else if( !Q_stricmp( list->glname, "grasssolid" ) )
+				GL_InitGrassSolidUniforms( shader );
+			else
+				ALERT( at_aiconsole, "^1GL_PrecompileUberShaders: unhandled uniforms for shader %s!^7\n", list->glname );
+
+			count++;
+		}
+		else
+			failed++;
+	}
+
+	if( failed == 0 )
+		ALERT( at_aiconsole, "^2Preloaded %d shaders.^7\n", count );
+	else
+		ALERT( at_aiconsole, "^2Preloaded %d shaders,^7 ^1failed to preload %d^7\n", count, failed );
+
+	bPrecompiled = true;
+}
+
 void GL_InitGPUShaders( void )
 {
 	plight_t pl;
@@ -2447,6 +2749,7 @@ void GL_InitGPUShaders( void )
 	memset( &glsl_programs, 0, sizeof( glsl_programs ));
 	memset( &glsl, 0, sizeof( glsl ));
 	memset( &pl, 0, sizeof( pl ));
+	memset( glsl_programsHashTable, 0, sizeof( glsl_programsHashTable ) );
 	tr.glsl_valid_sequence = 1;
 	num_glsl_programs = 1; // entry #0 isn't used
 
@@ -2575,6 +2878,8 @@ void GL_InitGPUShaders( void )
 	GL_UberShaderForDlightGeneric( &pl );
 	pl.flags |= CF_NOSHADOWS;
 	GL_UberShaderForDlightGeneric( &pl );
+
+	GL_PrecompileUberShaders();
 }
 
 void GL_FreeUberShaders( void )
@@ -2588,6 +2893,8 @@ void GL_FreeUberShaders( void )
 			GL_FreeGPUShader( &glsl_programs[i] );
 	}
 
+	memset( glsl_programsHashTable, 0, sizeof( glsl_programsHashTable ) );
+
 	GL_BindShader( GL_NONE );
 }
 
@@ -2598,6 +2905,8 @@ void GL_FreeGPUShaders( void )
 
 	for( unsigned int i = 1; i < num_glsl_programs; i++ )
 		GL_FreeGPUShader( &glsl_programs[i] );
+
+	memset( glsl_programsHashTable, 0, sizeof( glsl_programsHashTable ) );
 
 	GL_BindShader( GL_NONE );
 }

@@ -459,6 +459,7 @@
     <ClInclude Include="render\r_particle.h" />
     <ClInclude Include="render\r_quakeparticle.h" />
     <ClInclude Include="render\r_shader.h" />
+    <ClInclude Include="render\r_shaderlist.h" />
     <ClInclude Include="render\r_studio.h" />
     <ClInclude Include="render\r_view.h" />
     <ClInclude Include="render\r_weather.h" />
