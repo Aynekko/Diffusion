@@ -836,8 +836,7 @@ static glsl_program_t *GL_CreateUberShader( GLuint slot, const char *glname, con
 				{
 					ALERT( at_warning, "^1GL_CreateUberShader: Failed to load shader binary %s:^7 %s\n", filename, GL_PrintInfoLog( shader->handle ) );
 					pglDeleteObjectARB( shader->handle );
-					shader->handle = pglCreateProgramObjectARB();  // Recreate
-					pglProgramParameteriARB( shader->handle, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE );
+					shader->handle = 0;
 				}
 			}
 			else
@@ -847,6 +846,7 @@ static glsl_program_t *GL_CreateUberShader( GLuint slot, const char *glname, con
 		}
 	}
 
+	shader->handle = pglCreateProgramObjectARB();
 	if( !shader->handle )
 		return NULL; // some bad happens
 
