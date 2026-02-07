@@ -920,7 +920,7 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 	if( e == GET_VIEWMODEL() )
 	{
 		// replace origin
-		origin = gEngfuncs.GetLocalPlayer()->curstate.origin;
+		origin = tr.viewparams.vieworg;
 		const bool bRightHanded = (g_StudioRenderer.m_pCvarHand->value == 0.0f);
 
 		dl->pointlight = false; // use projector like L4D
@@ -930,7 +930,7 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 		Vector v_angles, Forward, Right;
 		gEngfuncs.GetViewAngles( v_angles );
 		gEngfuncs.pfnAngleVectors( v_angles, Forward, Right, NULL );
-		origin += Right * 25.0f * (bRightHanded ? 1.0f : -1.0f);
+		origin += Right * 5.0f * (bRightHanded ? 1.0f : -1.0f);
 		origin.x += RANDOM_FLOAT( -2.5f, 2.5f );
 		origin.y += RANDOM_FLOAT( -2.5f, 2.5f );
 		origin.z += RANDOM_LONG( -5, 5 );
