@@ -61,7 +61,8 @@ void AngleMatrix( const Vector &angles, matrix3x4 &matrix )
 
 bool ApplyGaussBlur = false;
 static int ScreenWaterTexture = 0;
-static int ScreenAO = 0;
+static int ScreenAO1 = 0;
+static int ScreenAO2 = 0;
 static int LuminanceTex = 0;
 static int exposure_storage_texture[2];
 static GLuint exposure_storage_fbo[2];
@@ -75,6 +76,7 @@ static int SMAA_BlendTex = 0;
 static GLuint albedo_fbo;
 static GLuint edge_fbo;
 static GLuint blend_fbo;
+static GLuint SSAOfbo;
 
 static void InitAutoExposure(void)
 {
@@ -139,14 +141,28 @@ void InitPostEffects( void )
 
 static void InitSSAO( void )
 {	
-	if( ScreenAO )
+	if( ScreenAO1 )
 	{
-		FREE_TEXTURE( ScreenAO );
-		ScreenAO = 0;
+		FREE_TEXTURE( ScreenAO1 );
+		ScreenAO1 = 0;
 	}
 
-	if( !ScreenAO )
-		ScreenAO = CREATE_TEXTURE( "*screenao", glState.width * 0.75, glState.height * 0.75, NULL, TF_SCREEN );
+	if( !ScreenAO1 )
+		ScreenAO1 = CREATE_TEXTURE( "*screenao1", glState.width * 0.75, glState.height * 0.75, NULL, TF_SCREEN );
+
+	if( ScreenAO2 )
+	{
+		FREE_TEXTURE( ScreenAO2 );
+		ScreenAO2 = 0;
+	}
+
+	if( !ScreenAO2 )
+		ScreenAO2 = CREATE_TEXTURE( "*screenao2", glState.width * 0.75, glState.height * 0.75, NULL, TF_SCREEN );
+
+	pglGenFramebuffers( 1, &SSAOfbo );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, SSAOfbo );
+	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
+	ValidateFBO();
 }
 
 static void InitSMAA( void )
@@ -950,9 +966,6 @@ void SSAO( void )
 	if( (!CVAR_TO_BOOL( gl_ssao ) && !CVAR_TO_BOOL( gl_hbao )) || tr.lowmemory )
 		return;
 
-	if( !ScreenAO )
-		InitSSAO();
-
 	const bool Debug = CVAR_TO_BOOL( gl_ssao_debug );
 	const bool UseHBAO = (gl_hbao->value > 0);
 
@@ -971,6 +984,8 @@ void SSAO( void )
 	const int height = glState.height * 0.75;
 
 	pglViewport( 0, 0, width, height );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, SSAOfbo );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, ScreenAO1 ), 0 );
 
 	if( !UseHBAO ) // SSAO
 	{
@@ -982,7 +997,7 @@ void SSAO( void )
 	}
 	else // HBAO
 	{
-		// generate SSAO
+		// generate HBAO
 		GL_BindShader( glsl.genHBAO );
 		ASSERT( RI->currentshader != NULL );
 
@@ -1015,9 +1030,8 @@ void SSAO( void )
 
 	RenderFSQ( glState.width, glState.height );
 
-	// RequestScreenAO
-	GL_Bind( GL_TEXTURE0, ScreenAO );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
+	GL_Bind( GL_TEXTURE0, ScreenAO1 );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, ScreenAO2 ), 0 );
 
 	// blur AO pass X
 	GL_BindShader( glsl.BilateralBlur );
@@ -1026,17 +1040,15 @@ void SSAO( void )
 	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / glState.width, 0.0f ); // screen size inv
 	RenderFSQ( glState.width, glState.height );
 	
-	// RequestScreenAO
-	GL_Bind( GL_TEXTURE0, ScreenAO );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
+	GL_Bind( GL_TEXTURE0, ScreenAO2 );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, ScreenAO1 ), 0 );
 
 	// blur AO pass Y
 	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 0.0f, 1.0f / glState.height ); // screen size inv
 	RenderFSQ( glState.width, glState.height );
 
-	// RequestScreenAO
-	GL_Bind( GL_TEXTURE1, ScreenAO );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height );
+	// back to base FBO
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
 	
 	// do final pass
 	pglViewport( 0, 0, glState.width, glState.height );
@@ -1049,11 +1061,11 @@ void SSAO( void )
 		pglUniform4fARB( RI->currentshader->u_FogParams, 0.0f, 0.0f, 0.0f, 0.0f );
 	pglUniform1fARB( RI->currentshader->u_GenericCondition, Debug );
 	pglUniform1fARB( RI->currentshader->u_zFar, zFar );
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
 
-	// request screen depth
+	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	GL_Bind( GL_TEXTURE1, ScreenAO1 );
 	GL_Bind( GL_TEXTURE2, tr.screen_depth );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+
 	RenderFSQ( glState.width, glState.height );
 
 	// unbind shader
