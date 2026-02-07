@@ -161,7 +161,8 @@ static void InitSSAO( void )
 	if( !ScreenAO2 )
 		ScreenAO2 = CREATE_TEXTURE( "*screenao2", glState.width * 0.75, glState.height * 0.75, NULL, TF_SCREEN );
 
-	pglGenFramebuffers( 1, &SSAOfbo );
+	if( !SSAOfbo )
+		pglGenFramebuffers( 1, &SSAOfbo );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, SSAOfbo );
 	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
 	ValidateFBO();
@@ -247,21 +248,24 @@ static void InitSMAA( void )
 		GL_Bind( GL_TEXTURE0, 0 );
 	}
 
-	pglGenFramebuffers( 1, &albedo_fbo );
+	if( !albedo_fbo )
+		pglGenFramebuffers( 1, &albedo_fbo );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, albedo_fbo );
 	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
 	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_AlbedoTex ), 0 );
 
 	ValidateFBO();
 
-	pglGenFramebuffers( 1, &edge_fbo );
+	if( !edge_fbo )
+		pglGenFramebuffers( 1, &edge_fbo );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, edge_fbo );
 	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
 	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_EdgeTex ), 0 );
 
 	ValidateFBO();
 
-	pglGenFramebuffers( 1, &blend_fbo );
+	if( !blend_fbo )
+		pglGenFramebuffers( 1, &blend_fbo );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, blend_fbo );
 	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
 	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_BlendTex ), 0 );
@@ -356,7 +360,8 @@ void InitPostTextures( void )
 			target_rgb[1] = CREATE_TEXTURE( "*target1", TARGET_SIZE512, TARGET_SIZE512, NULL, TF_SCREEN );
 	}
 
-	pglGenFramebuffers( 1, &sunshafts_fbo );
+	if( !sunshafts_fbo )
+		pglGenFramebuffers( 1, &sunshafts_fbo );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, sunshafts_fbo );
 	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
 	ValidateFBO();
