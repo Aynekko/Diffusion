@@ -1272,9 +1272,6 @@ void SMAA( void )
 	pglViewport( 0, 0, glState.width, glState.height );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, edge_fbo );
 
-	pglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
-	pglClear( GL_COLOR_BUFFER_BIT );
-
 	GL_BindShader( glsl.SMAAEdgeDetect );
 	ASSERT( RI->currentshader != NULL );
 

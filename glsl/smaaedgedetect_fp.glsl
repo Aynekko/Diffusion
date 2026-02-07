@@ -32,7 +32,10 @@ void main( void )
 
 	// Then discard if there is no edge:
 	if( dot( edges, vec2( 1.0, 1.0 ) ) == 0.0 )
-		discard;
+	{
+		gl_FragColor = vec4( 0.0 );
+		return;
+	}
 
 	// Calculate right and bottom deltas:
 	float Lright = dot( texture2D( u_ColorMap, var_Offset[1].xy ).rgb, weights );
