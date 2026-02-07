@@ -1664,6 +1664,57 @@ static void GL_InitEnhanceUniforms( glsl_program_t *shader )
 	GL_ShowProgramUniforms( shader );
 }
 
+static void GL_InitSMAAEdgeDetectUniforms( glsl_program_t *shader )
+{
+	ASSERT( shader != NULL );
+
+	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
+	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
+
+	GL_BindShader( shader );
+	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
+	GL_BindShader( GL_NONE );
+
+	GL_ValidateProgram( shader );
+	GL_ShowProgramUniforms( shader );
+}
+
+static void GL_InitSMAABlendWeightUniforms( glsl_program_t *shader )
+{
+	ASSERT( shader != NULL );
+
+	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
+	shader->u_SearchTex = pglGetUniformLocationARB( shader->handle, "u_SearchTex" );
+	shader->u_AreaTex = pglGetUniformLocationARB( shader->handle, "u_AreaTex" );
+	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
+
+	GL_BindShader( shader );
+	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
+	pglUniform1iARB( shader->u_SearchTex, GL_TEXTURE1 );
+	pglUniform1iARB( shader->u_AreaTex, GL_TEXTURE2 );
+	GL_BindShader( GL_NONE );
+
+	GL_ValidateProgram( shader );
+	GL_ShowProgramUniforms( shader );
+}
+
+static void GL_InitSMAANeighborBlendUniforms( glsl_program_t *shader )
+{
+	ASSERT( shader != NULL );
+
+	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
+	shader->u_BlendTexture = pglGetUniformLocationARB( shader->handle, "u_BlendTexture" );
+	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
+
+	GL_BindShader( shader );
+	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
+	pglUniform1iARB( shader->u_BlendTexture, GL_TEXTURE1 );
+	GL_BindShader( GL_NONE );
+
+	GL_ValidateProgram( shader );
+	GL_ShowProgramUniforms( shader );
+}
+
 static void GL_InitBloomUniforms( glsl_program_t *shader )
 {
 	ASSERT( shader != NULL );
@@ -2844,6 +2895,13 @@ void GL_InitGPUShaders( void )
 	// various screen effects - sharpen, saturation...
 	glsl.Enhance = shader = GL_InitGPUShader( "Enhance", "generic", "enhance" );
 	GL_InitEnhanceUniforms( shader );
+
+	glsl.SMAAEdgeDetect = shader = GL_InitGPUShader( "SMAAEdgeDetect", "smaaedgedetect", "smaaedgedetect" );
+	GL_InitSMAAEdgeDetectUniforms( shader );
+	glsl.SMAABlendWeight = shader = GL_InitGPUShader( "SMAABlendWeight", "smaablendweight", "smaablendweight" );
+	GL_InitSMAABlendWeightUniforms( shader );
+	glsl.SMAANeighborBlend = shader = GL_InitGPUShader( "SMAANeighborBlend", "smaaneighborblend", "smaaneighborblend" );
+	GL_InitSMAANeighborBlendUniforms( shader );
 
 	// screen water
 	glsl.ScreenWater = shader = GL_InitGPUShader( "ScreenWater", "generic", "screenwater" );

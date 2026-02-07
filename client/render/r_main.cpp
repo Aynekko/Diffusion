@@ -2226,6 +2226,8 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 	// draw main view
 	R_RenderScene();
 
+	SMAA();
+
 	DownScale();
 
 	R_RestoreGLState();

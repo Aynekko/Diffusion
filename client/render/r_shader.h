@@ -77,6 +77,8 @@ typedef struct glsl_prog_s
 	GLint u_WaterTex;
 	GLint u_ColorMask; // texture mask to apply color - implemented for studio models only
 	GLint u_BlendTexture; // second texture which can be blended with diffuse using a float
+	GLint u_AreaTex; // SMAA
+	GLint u_SearchTex; // SMAA
 
 	// parallax interiors
 	GLint u_InteriorMap;
@@ -198,6 +200,9 @@ typedef struct
 	glsl_program_t *HeatDistortion;
 	glsl_program_t *BilateralBlur;
 	glsl_program_t *LensFlare;
+	glsl_program_t *SMAAEdgeDetect;
+	glsl_program_t *SMAABlendWeight;
+	glsl_program_t *SMAANeighborBlend;
 } ref_shaders_t;
 
 void GL_AddShaderDirective( char *options, const char *directive );

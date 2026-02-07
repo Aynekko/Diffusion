@@ -198,6 +198,7 @@ typedef char GLchar;
 #define GL_DITHER				0x0BD0
 #define GL_RGB				0x1907
 #define GL_RGBA				0x1908
+#define GL_RG8				0x822B
 #define GL_BGR				0x80E0
 #define GL_BGRA				0x80E1
 #define GL_ALPHA4                         	0x803B

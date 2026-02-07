@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 18
-VisualStudioVersion = 18.2.11415.280 d18.0
+VisualStudioVersion = 18.2.11415.280
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "client", "client\client.vcxproj", "{CDA7A4B9-EE49-4476-98D1-FC596AC58084}"
 EndProject
@@ -59,6 +59,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "glsl", "glsl", "{76F81493-9
 		glsl\shadow_proj.h = glsl\shadow_proj.h
 		glsl\skinning.h = glsl\skinning.h
 		glsl\skybox_fp.glsl = glsl\skybox_fp.glsl
+		glsl\smaa.h = glsl\smaa.h
+		glsl\smaablendweight_fp.glsl = glsl\smaablendweight_fp.glsl
+		glsl\smaablendweight_vp.glsl = glsl\smaablendweight_vp.glsl
+		glsl\smaaedgedetect_fp.glsl = glsl\smaaedgedetect_fp.glsl
+		glsl\smaaedgedetect_vp.glsl = glsl\smaaedgedetect_vp.glsl
+		glsl\smaaneighborblend_fp.glsl = glsl\smaaneighborblend_fp.glsl
+		glsl\smaaneighborblend_vp.glsl = glsl\smaaneighborblend_vp.glsl
 		glsl\specular.h = glsl\specular.h
 		glsl\studiodecal_fp.glsl = glsl\studiodecal_fp.glsl
 		glsl\studiodecal_vp.glsl = glsl\studiodecal_vp.glsl

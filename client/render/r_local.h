@@ -845,6 +845,7 @@ void SSAO( void );
 void ToneMap( void );
 void Bloom( void );
 void Enhance( void );
+void SMAA( void );
 void WaterDrops( void );
 void DroneScreenShader( void );
 void HeatDistortionShader( void );

@@ -80,6 +80,7 @@ extern cvar_t *gl_renderscale;
 extern cvar_t *gl_ssao;
 extern cvar_t *gl_hbao;
 extern cvar_t *gl_ssao_debug;
+extern cvar_t *gl_smaa;
 extern cvar_t *gl_tonemap;
 extern cvar_t	*thirdperson;
 extern cvar_t *cl_showmsgs;

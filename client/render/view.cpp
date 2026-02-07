@@ -152,6 +152,7 @@ cvar_t *gl_renderscale;
 cvar_t *gl_ssao;
 cvar_t *gl_hbao;
 cvar_t *gl_ssao_debug;
+cvar_t *gl_smaa;
 cvar_t *gl_tonemap;
 cvar_t *gl_lensflare;
 cvar_t *gl_water_refraction;
@@ -409,6 +410,7 @@ void V_Init( void )
 	gl_ssao = CVAR_REGISTER( "gl_ssao", "0", FCVAR_ARCHIVE );
 	gl_hbao = CVAR_REGISTER( "gl_hbao", "0", FCVAR_ARCHIVE );
 	gl_ssao_debug = CVAR_REGISTER( "gl_ssao_debug", "0", FCVAR_CHEAT );
+	gl_smaa = CVAR_REGISTER( "gl_smaa", "0", FCVAR_ARCHIVE );
 	gl_tonemap = CVAR_REGISTER( "gl_tonemap", "0", FCVAR_ARCHIVE );
 	r_shadowquality = CVAR_REGISTER( "r_shadowquality", "2", FCVAR_ARCHIVE );
 	r_mirrorquality = CVAR_REGISTER( "r_mirrorquality", "3", FCVAR_ARCHIVE );

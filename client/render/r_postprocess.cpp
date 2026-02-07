@@ -20,7 +20,6 @@ GNU General Public License for more details.
 #include "r_shader.h"
 #include "pm_defs.h"
 #include "event_api.h"
-#include "r_view.h"
 #include "r_cvars.h"
 #include "r_world.h"
 #include "triangleapi.h"
@@ -65,11 +64,19 @@ static int ScreenWaterTexture = 0;
 static int ScreenAO = 0;
 static int LuminanceTex = 0;
 static int exposure_storage_texture[2];
-static uint exposure_storage_fbo[2];
+static GLuint exposure_storage_fbo[2];
 static int noise_texture = 0;
 static int noise_texture_random = 0;
+static int SMAA_AreaTex = 0;
+static int SMAA_SearchTex = 0;
+static int SMAA_AlbedoTex = 0;
+static int SMAA_EdgeTex = 0;
+static int SMAA_BlendTex = 0;
+static GLuint albedo_fbo;
+static GLuint edge_fbo;
+static GLuint blend_fbo;
 
-void InitAutoExposure(void)
+static void InitAutoExposure(void)
 {
 	// init average luminance
 	const int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
@@ -130,7 +137,7 @@ void InitPostEffects( void )
 	
 }
 
-void InitSSAO( void )
+static void InitSSAO( void )
 {	
 	if( ScreenAO )
 	{
@@ -142,7 +149,111 @@ void InitSSAO( void )
 		ScreenAO = CREATE_TEXTURE( "*screenao", glState.width * 0.75, glState.height * 0.75, NULL, TF_SCREEN );
 }
 
-void InitBloom( void )
+static void InitSMAA( void )
+{
+	SMAA_AreaTex = LOAD_TEXTURE( "gfx/SMAA_AreaTex", NULL, 0, 0 );
+	if( SMAA_AreaTex )
+	{
+		GL_Bind( GL_TEXTURE0, SMAA_AreaTex );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0 );
+		GL_Bind( GL_TEXTURE0, 0 );
+	}
+
+	SMAA_SearchTex = LOAD_TEXTURE( "gfx/SMAA_SearchTex", NULL, 0, 0 );
+	if( SMAA_SearchTex )
+	{
+		GL_Bind( GL_TEXTURE0, SMAA_SearchTex );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAX_LEVEL, 0 );
+		GL_Bind( GL_TEXTURE0, 0 );
+	}
+
+	if( SMAA_AlbedoTex )
+	{
+		FREE_TEXTURE( SMAA_AlbedoTex );
+		SMAA_AlbedoTex = 0;
+	}
+
+	if( !SMAA_AlbedoTex )
+	{
+		SMAA_AlbedoTex = CREATE_TEXTURE( "*SMAA_AlbedoTex", glState.width, glState.height, NULL, 0 );
+		GL_Bind( GL_TEXTURE0, SMAA_AlbedoTex );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		pglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, glState.width, glState.height, 0, GL_RGBA, GL_FLOAT, 0 );
+		GL_Bind( GL_TEXTURE0, 0 );
+	}
+
+	if( SMAA_EdgeTex )
+	{
+		FREE_TEXTURE( SMAA_EdgeTex );
+		SMAA_EdgeTex = 0;
+	}
+
+	if( !SMAA_EdgeTex )
+	{
+		SMAA_EdgeTex = CREATE_TEXTURE( "*SMAA_EdgeTex", glState.width, glState.height, NULL, 0 );
+		GL_Bind( GL_TEXTURE0, SMAA_EdgeTex );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		pglTexImage2D( GL_TEXTURE_2D, 0, GL_RG8, glState.width, glState.height, 0, GL_RGBA, GL_FLOAT, 0 );
+		GL_Bind( GL_TEXTURE0, 0 );
+	}
+
+	if( SMAA_BlendTex )
+	{
+		FREE_TEXTURE( SMAA_BlendTex );
+		SMAA_BlendTex = 0;
+	}
+
+	if( !SMAA_BlendTex )
+	{
+		SMAA_BlendTex = CREATE_TEXTURE( "*SMAA_BlendTex", glState.width, glState.height, NULL, 0 );
+		GL_Bind( GL_TEXTURE0, SMAA_BlendTex );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+		pglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, glState.width, glState.height, 0, GL_RGBA, GL_FLOAT, 0 );
+		GL_Bind( GL_TEXTURE0, 0 );
+	}
+
+	pglGenFramebuffers( 1, &albedo_fbo );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, albedo_fbo );
+	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_AlbedoTex ), 0 );
+
+	ValidateFBO();
+
+	pglGenFramebuffers( 1, &edge_fbo );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, edge_fbo );
+	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_EdgeTex ), 0 );
+
+	ValidateFBO();
+
+	pglGenFramebuffers( 1, &blend_fbo );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, blend_fbo );
+	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_BlendTex ), 0 );
+
+	ValidateFBO();
+
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+}
+
+static void InitBloom( void )
 {
 	if( tr.screen_fbo_texture_color )
 	{
@@ -227,23 +338,10 @@ void InitPostTextures( void )
 
 	InitAutoExposure();
 
-	if( noise_texture )
-	{
-		FREE_TEXTURE( noise_texture );
-		noise_texture = 0;
-	}
+	InitSMAA();
 
-	if( !noise_texture )
-		noise_texture = LOAD_TEXTURE( "gfx/noise.dds", NULL, 0, 0 );
-
-	if( noise_texture_random )
-	{
-		FREE_TEXTURE( noise_texture_random );
-		noise_texture_random = 0;
-	}
-
-	if( !noise_texture_random )
-		noise_texture_random = LOAD_TEXTURE( "gfx/noise_random.dds", NULL, 0, 0 );
+	noise_texture = LOAD_TEXTURE( "gfx/noise.dds", NULL, 0, 0 );
+	noise_texture_random = LOAD_TEXTURE( "gfx/noise_random.dds", NULL, 0, 0 );
 }
 
 void RenderFSQ( int wide, int tall )
@@ -1159,6 +1257,69 @@ void Enhance( void )
 	GL_CleanUpTextureUnits( 0 );
 }
 
+void SMAA( void )
+{
+	if( gl_smaa->value <= 0 )
+		return;
+
+	GL_Setup2D();
+
+	// 1: edge detection
+
+	GL_Bind( GL_TEXTURE0, SMAA_AlbedoTex );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+
+	pglViewport( 0, 0, glState.width, glState.height );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, edge_fbo );
+
+	pglClearColor( 0.0f, 0.0f, 0.0f, 0.0f );
+	pglClear( GL_COLOR_BUFFER_BIT );
+
+	GL_BindShader( glsl.SMAAEdgeDetect );
+	ASSERT( RI->currentshader != NULL );
+
+	GL_Bind( GL_TEXTURE0, SMAA_AlbedoTex );
+
+	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height), (float)(glState.width), (float)(glState.height) );
+	RenderFSQ( glState.width, glState.height );
+
+	// 2: blending weights
+
+	pglViewport( 0, 0, glState.width, glState.height );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, blend_fbo );
+
+	GL_BindShader( glsl.SMAABlendWeight );
+	ASSERT( RI->currentshader != NULL );
+
+	GL_Bind( GL_TEXTURE0, SMAA_EdgeTex );
+	GL_Bind( GL_TEXTURE1, SMAA_SearchTex );
+	GL_Bind( GL_TEXTURE2, SMAA_AreaTex );
+
+	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height), (float)(glState.width), (float)(glState.height) );
+	RenderFSQ( glState.width, glState.height );
+
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+
+	// 3: neighbor blending
+
+	pglViewport( 0, 0, glState.width, glState.height );
+	GL_BindShader( glsl.SMAANeighborBlend );
+	ASSERT( RI->currentshader != NULL );
+
+	GL_Bind( GL_TEXTURE0, SMAA_AlbedoTex );
+	GL_Bind( GL_TEXTURE1, SMAA_BlendTex );
+
+	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height), (float)(glState.width), (float)(glState.height) );
+	RenderFSQ( glState.width, glState.height );
+
+	// debug
+//	GL_Bind( GL_TEXTURE0, SMAA_BlendTex );
+//	RenderFSQ( glState.width, glState.height );
+
+	GL_BindShader( NULL );
+	GL_CleanupAllTextureUnits();
+}
+
 void DownScale( void )
 {
 	if( gl_renderscale->value >= 1.0f )
@@ -1174,6 +1335,8 @@ void DownScale( void )
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 	pglViewport( 0, 0, w, h );
+	pglClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+	pglClear( GL_COLOR_BUFFER_BIT );
 
 	RenderFSQ( glState.width, glState.height );
 
