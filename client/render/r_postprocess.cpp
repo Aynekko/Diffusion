@@ -63,6 +63,7 @@ bool ApplyGaussBlur = false;
 static int ScreenWaterTexture = 0;
 static int ScreenAO1 = 0;
 static int ScreenAO2 = 0;
+static int target_rgb[2];
 static int LuminanceTex = 0;
 static int exposure_storage_texture[2];
 static GLuint exposure_storage_fbo[2];
@@ -77,6 +78,7 @@ static GLuint albedo_fbo;
 static GLuint edge_fbo;
 static GLuint blend_fbo;
 static GLuint SSAOfbo;
+static GLuint sunshafts_fbo;
 
 static void InitAutoExposure(void)
 {
@@ -325,19 +327,39 @@ void InitPostTextures( void )
 	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); // this is useful for rendering scale below 1.0
 	GL_Bind( GL_TEXTURE0, 0 );
 
-	if( tr.target_rgb[0] )
+	// sunshafts shader
+	if( target_rgb[0] )
 	{
-		FREE_TEXTURE( tr.target_rgb[0] );
-		tr.target_rgb[0] = 0;
+		FREE_TEXTURE( target_rgb[0] );
+		target_rgb[0] = 0;
 	}
 	
-	if( !tr.target_rgb[0] )
+	if( !target_rgb[0] )
 	{
 		if( tr.lowmemory )
-			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE, TARGET_SIZE, NULL, TF_SCREEN ); // 128
+			target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE, TARGET_SIZE, NULL, TF_SCREEN ); // 128
 		else
-			tr.target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE512, TARGET_SIZE512, NULL, TF_SCREEN );
+			target_rgb[0] = CREATE_TEXTURE( "*target0", TARGET_SIZE512, TARGET_SIZE512, NULL, TF_SCREEN );
 	}
+
+	if( target_rgb[1] )
+	{
+		FREE_TEXTURE( target_rgb[1] );
+		target_rgb[1] = 0;
+	}
+
+	if( !target_rgb[1] )
+	{
+		if( tr.lowmemory )
+			target_rgb[1] = CREATE_TEXTURE( "*target1", TARGET_SIZE, TARGET_SIZE, NULL, TF_SCREEN ); // 128
+		else
+			target_rgb[1] = CREATE_TEXTURE( "*target1", TARGET_SIZE512, TARGET_SIZE512, NULL, TF_SCREEN );
+	}
+
+	pglGenFramebuffers( 1, &sunshafts_fbo );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, sunshafts_fbo );
+	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
+	ValidateFBO();
 
 	if( ScreenWaterTexture )
 	{
@@ -379,7 +401,7 @@ void RenderFSQ( int wide, int tall )
 
 void RenderSunShafts( void )
 {
-	if( !CVAR_TO_BOOL( gl_sunshafts ) || !tr.screen_depth || !tr.screen_color || !tr.target_rgb[0] )
+	if( !CVAR_TO_BOOL( gl_sunshafts ) || !tr.screen_depth || !tr.screen_color || !target_rgb[0] )
 		return;
 
 	if( !CheckShader( glsl.genSunShafts ) || !CheckShader( glsl.drawSunShafts ) || !CheckShader( glsl.blurShader ) )
@@ -517,6 +539,9 @@ void RenderSunShafts( void )
 	// set target viewport
 	pglViewport( 0, 0, TargetSize, TargetSize );
 
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, sunshafts_fbo );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, target_rgb[0] ), 0 );
+
 	// generate shafts
 	GL_BindShader( glsl.genSunShafts );
 	ASSERT( RI->currentshader != NULL );
@@ -525,12 +550,11 @@ void RenderSunShafts( void )
 
 	RenderFSQ( glState.width, glState.height );
 
-	// request target copy
-	GL_Bind( GL_TEXTURE0, tr.target_rgb[0] );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, TargetSize, TargetSize );
 #if 1
-	pglViewport( 0, 0, TargetSize, TargetSize );
-	
+	// request target copy
+	GL_Bind( GL_TEXTURE0, target_rgb[0] );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, target_rgb[1] ), 0 );
+
 	// combine normal and blurred scenes
 	GL_BindShader( glsl.blurShader );
 	ASSERT( RI->currentshader != NULL );
@@ -539,16 +563,14 @@ void RenderSunShafts( void )
 	RenderFSQ( glState.width, glState.height );
 	
 	// request target copy
-	GL_Bind( GL_TEXTURE0, tr.target_rgb[0] );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, TargetSize, TargetSize );
+	GL_Bind( GL_TEXTURE0, target_rgb[1] );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, target_rgb[0] ), 0 );
 
 	pglUniform3fARB( RI->currentshader->u_BlurFactor, 0.0f, blur, 0.0f );	// set blur factor Y
 	RenderFSQ( glState.width, glState.height );
-	
-	// request target copy
-	GL_Bind( GL_TEXTURE0, tr.target_rgb[0] );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, TargetSize, TargetSize );
 #endif
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+
 	pglViewport( 0, 0, glState.width, glState.height );
 
 	GL_BindShader( glsl.drawSunShafts );
@@ -562,7 +584,7 @@ void RenderSunShafts( void )
 	pglUniform4fvARB( RI->currentshader->u_Sunshafts, 2, &sunshafts_params[0][0] );
 
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	GL_Bind( GL_TEXTURE1, tr.target_rgb[0] );
+	GL_Bind( GL_TEXTURE1, target_rgb[0] );
 	RenderFSQ( glState.width, glState.height );
 
 	GL_BindShader( NULL );

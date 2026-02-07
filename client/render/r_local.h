@@ -354,7 +354,6 @@ typedef struct
 
 	int		screen_depth;
 	int		screen_color;
-	int		target_rgb[2];
 
 	int		spotlightTexture;
 
