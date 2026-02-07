@@ -74,9 +74,7 @@ static int SMAA_SearchTex = 0;
 static int SMAA_AlbedoTex = 0;
 static int SMAA_EdgeTex = 0;
 static int SMAA_BlendTex = 0;
-static GLuint albedo_fbo;
-static GLuint edge_fbo;
-static GLuint blend_fbo;
+static GLuint SMAA_fbo;
 static GLuint SSAOfbo;
 static GLuint sunshafts_fbo;
 
@@ -248,28 +246,10 @@ static void InitSMAA( void )
 		GL_Bind( GL_TEXTURE0, 0 );
 	}
 
-	if( !albedo_fbo )
-		pglGenFramebuffers( 1, &albedo_fbo );
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, albedo_fbo );
+	if( !SMAA_fbo )
+		pglGenFramebuffers( 1, &SMAA_fbo );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, SMAA_fbo );
 	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
-	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_AlbedoTex ), 0 );
-
-	ValidateFBO();
-
-	if( !edge_fbo )
-		pglGenFramebuffers( 1, &edge_fbo );
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, edge_fbo );
-	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
-	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_EdgeTex ), 0 );
-
-	ValidateFBO();
-
-	if( !blend_fbo )
-		pglGenFramebuffers( 1, &blend_fbo );
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, blend_fbo );
-	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
-	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_BlendTex ), 0 );
-
 	ValidateFBO();
 
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
@@ -1309,20 +1289,18 @@ void SMAA( void )
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 	pglViewport( 0, 0, glState.width, glState.height );
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, edge_fbo );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, SMAA_fbo );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_EdgeTex ), 0 );
 
 	GL_BindShader( glsl.SMAAEdgeDetect );
 	ASSERT( RI->currentshader != NULL );
-
-	GL_Bind( GL_TEXTURE0, SMAA_AlbedoTex );
 
 	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height), (float)(glState.width), (float)(glState.height) );
 	RenderFSQ( glState.width, glState.height );
 
 	// 2: blending weights
 
-	pglViewport( 0, 0, glState.width, glState.height );
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, blend_fbo );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_BlendTex ), 0 );
 
 	GL_BindShader( glsl.SMAABlendWeight );
 	ASSERT( RI->currentshader != NULL );
@@ -1333,12 +1311,12 @@ void SMAA( void )
 
 	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height), (float)(glState.width), (float)(glState.height) );
 	RenderFSQ( glState.width, glState.height );
-
+	
+	// back to base FBO
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
 
 	// 3: neighbor blending
 
-	pglViewport( 0, 0, glState.width, glState.height );
 	GL_BindShader( glsl.SMAANeighborBlend );
 	ASSERT( RI->currentshader != NULL );
 
