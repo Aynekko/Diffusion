@@ -236,7 +236,7 @@ void PlayWallSlideSound( ref_params_t *pparams )
 {
 	bool SoundDisabled = false;
 
-	if( (pparams->waterlevel > 1) || g_iUser1 || pparams->intermission || (pparams->health <= 0) )
+	if( (pparams->waterlevel > 1) || gHUD.InCar || g_iUser1 || pparams->intermission || (pparams->health <= 0) )
 		SoundDisabled = true;
 
 	if( SoundDisabled )
@@ -290,7 +290,7 @@ void PlayFlingWhooshSound( ref_params_t *pparams )
 
 	float fWooshVolume = pparams->simvel.Length() - min_fling_speed;
 
-	if( gHUD.bUsingBhop || CL_IsDead() || pparams->waterlevel == 3 )
+	if( gHUD.bUsingBhop || CL_IsDead() || pparams->waterlevel == 3 || gHUD.InCar )
 		fWooshVolume = 0.0f;
 
 	if( fWooshVolume <= 0.0f && woosh_vol <= 0.0f )
