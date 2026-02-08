@@ -2519,24 +2519,36 @@ Schedule_t *CHGrunt::GetSchedule( void )
 		{
 			switch( RANDOM_LONG( 0, 3 ) )
 			{
-			case 0: return GetScheduleOfType( SCHED_SMALL_FLINCH ); break;
+			case 0:
+				return GetScheduleOfType( SCHED_SMALL_FLINCH );
+				break;
 			case 3:
-			{
-				if( pev->health < pev->max_health * 0.2f )
 				{
-					if( FOkToSpeak() ) // && RANDOM_LONG(0,1))
+					if( pev->health < pev->max_health * 0.2f )
 					{
-						//SENTENCEG_PlayRndSz( ENT(pev), "HG_COVER", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
-						m_iSentence = HGRUNT_SENT_COVER;
-						//JustSpoke();
+						if( FOkToSpeak() ) // && RANDOM_LONG(0,1))
+						{
+							//SENTENCEG_PlayRndSz( ENT(pev), "HG_COVER", HGRUNT_SENTENCE_VOLUME, GRUNT_ATTN, 0, m_voicePitch);
+							m_iSentence = HGRUNT_SENT_COVER;
+							//JustSpoke();
+						}
+						return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
 					}
-					return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+					else
+					{
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						return GetScheduleOfType( SCHED_SMALL_FLINCH );
+					}
 				}
-				else
-					return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
-			}
-			break;
-			default: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
+				break;
+			default:
+				{
+					if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+						return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+					return GetScheduleOfType( SCHED_SMALL_FLINCH );
+				}
+				break;
 			}
 		}
 		// can kick
@@ -3704,10 +3716,20 @@ Schedule_t *CHGruntAlien :: GetSchedule( void )
 						return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
 					}
 					else
-						return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+					{
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						return GetScheduleOfType( SCHED_SMALL_FLINCH );
+					}
 				}
 				break;
-				default: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
+				default:
+					{
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						return GetScheduleOfType( SCHED_SMALL_FLINCH );
+					}
+					break;
 				}
 			}
 // can kick
@@ -5135,7 +5157,7 @@ Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 			if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 				return GetScheduleOfType( SCHED_GRUNT_SUPPRESS );
 			else
-				return CBaseMonster::GetSchedule(); //return GetScheduleOfType ( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
+				return GetScheduleOfType ( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 		}
 		// no ammo
 		else if( HasConditions( bits_COND_NO_AMMO_LOADED ) )
@@ -5154,7 +5176,13 @@ Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 				switch( RANDOM_LONG( 0, 1 ) )
 				{
 				case 0: return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY ); break;
-				case 1: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
+				case 1:
+					{
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+					}
+					break;
 				}
 			}
 			else if( pev->health < pev->max_health * 0.25f ) // the general now has 1/4 of his HP. 30% chance of flinch
@@ -5162,11 +5190,27 @@ Schedule_t* CHGruntSecurityGeneral::GetSchedule(void)
 				switch( RANDOM_LONG( 0, 2 ) )
 				{
 				case 0: return GetScheduleOfType( SCHED_SMALL_FLINCH ); break;
-				case 1: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
-				case 2: return GetScheduleOfType( SCHED_GRUNT_SUPPRESS ); break;
+				case 1: 
+					{
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+					}
+					break;
+				case 2: 
+					{
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+							return GetScheduleOfType( SCHED_GRUNT_SUPPRESS );
+						return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+					}
+					break;
 				}
 			}
-			return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+
+			if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+				return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+			else
+				return GetScheduleOfType( SCHED_SMALL_FLINCH );
 		}
 		// can kick
 		else if( HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
@@ -6447,7 +6491,7 @@ Schedule_t *CAndrewGrunt::GetSchedule( void )
 			if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
 				return GetScheduleOfType( SCHED_GRUNT_SUPPRESS );
 			else
-				return CBaseMonster::GetSchedule(); //return GetScheduleOfType ( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
+				return GetScheduleOfType ( SCHED_GRUNT_ESTABLISH_LINE_OF_FIRE );
 		}
 		// no ammo
 		else if( HasConditions( bits_COND_NO_AMMO_LOADED ) )
@@ -6466,7 +6510,13 @@ Schedule_t *CAndrewGrunt::GetSchedule( void )
 				switch( RANDOM_LONG( 0, 1 ) )
 				{
 				case 0: return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY ); break;
-				case 1: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
+				case 1: 
+					{
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						return GetScheduleOfType( SCHED_TAKE_COVER_FROM_ENEMY );
+					}
+					break;
 				}
 			}
 			else if( pev->health < pev->max_health * 0.25f ) // Andrew now has 1/4 of his HP. 30% chance of flinch
@@ -6474,11 +6524,26 @@ Schedule_t *CAndrewGrunt::GetSchedule( void )
 				switch( RANDOM_LONG( 0, 2 ) )
 				{
 				case 0: return GetScheduleOfType( SCHED_SMALL_FLINCH ); break;
-				case 1: return GetScheduleOfType( SCHED_RANGE_ATTACK1 ); break;
-				case 2: return GetScheduleOfType( SCHED_GRUNT_SUPPRESS ); break;
+				case 1: 
+					{
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+							return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+						return GetScheduleOfType( SCHED_SMALL_FLINCH );
+					}
+					break;
+				case 2:
+					{
+						if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+							return GetScheduleOfType( SCHED_GRUNT_SUPPRESS );
+						return GetScheduleOfType( SCHED_SMALL_FLINCH );
+					}
+					break;
 				}
 			}
-			return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+
+			if( HasConditions( bits_COND_CAN_RANGE_ATTACK1 ) )
+				return GetScheduleOfType( SCHED_RANGE_ATTACK1 );
+			return GetScheduleOfType( SCHED_SMALL_FLINCH );
 		}
 		// can kick
 		else if( HasConditions( bits_COND_CAN_MELEE_ATTACK1 ) )
