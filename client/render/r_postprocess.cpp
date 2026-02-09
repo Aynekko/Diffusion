@@ -163,6 +163,7 @@ static void InitSSAO( void )
 		pglGenFramebuffers( 1, &SSAOfbo );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, SSAOfbo );
 	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, ScreenAO1 ), 0 ); // stub for init
 	ValidateFBO();
 }
 
@@ -250,6 +251,7 @@ static void InitSMAA( void )
 		pglGenFramebuffers( 1, &SMAA_fbo );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, SMAA_fbo );
 	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_BlendTex ), 0 ); // stub for init
 	ValidateFBO();
 
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
@@ -344,6 +346,7 @@ void InitPostTextures( void )
 		pglGenFramebuffers( 1, &sunshafts_fbo );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, sunshafts_fbo );
 	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, target_rgb[0] ), 0 ); // stub for init
 	ValidateFBO();
 
 	if( ScreenWaterTexture )
