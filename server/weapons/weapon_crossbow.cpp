@@ -79,7 +79,7 @@ void CCrossbowBolt::Spawn( void )
 	pev->movetype = MOVETYPE_TOSS;//MOVETYPE_FLY; // diffusion - realistic bolt!!!
 	pev->solid = SOLID_BBOX;
 
-	pev->gravity = 0.25f; // was 0.5 when movetype_fly
+	pev->gravity = 0.35f; // was 0.5 when movetype_fly
 
 	SET_MODEL( edict(), "models/weapons/crossbow_bolt.mdl");
 

@@ -13,7 +13,6 @@
 #include "r_cvars.h"
 #include "event_api.h"
 #include "r_local.h"
-#include "r_quakeparticle.h"
 
 DECLARE_MESSAGE( m_CrosshairStatic, CrosshairStatic );
 DECLARE_MESSAGE( m_CrosshairStatic, GaussHUD );
@@ -361,6 +360,33 @@ int CHudCrosshairStatic::DrawCrosshairs( float flTime )
 
 		// draw blackness to the right
 		gEngfuncs.pfnFillRGBABlend( x2, 0, x1, ScreenHeight, 0, 0, 0, 255 );
+
+		if( WeaponID == WEAPON_CROSSBOW )
+		{
+			// draw distance
+			pmtrace_t ptr;
+			Vector forward;
+			AngleVectors( tr.viewparams.viewangles, forward, NULL, NULL );
+			Vector VecEnd = tr.viewparams.vieworg + forward * 12000;
+			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+			gEngfuncs.pEventAPI->EV_PlayerTrace( tr.viewparams.vieworg, VecEnd, 0, -1, &ptr );
+			float dist = fUnitsToMeters( (ptr.endpos - tr.viewparams.vieworg).Length() );
+			static char c_distance[64];
+			if( dist > 200.999f )
+				Q_snprintf( c_distance, sizeof( c_distance ), "--- m" );
+			else
+				Q_snprintf( c_distance, sizeof( c_distance ), "%i m", (int)dist );
+			// calculate width to align center...
+			const char *buf;
+			float width = 0;
+			buf = c_distance;
+			while( *buf )
+			{
+				width += gHUD.m_scrinfo.charWidths[*buf];
+				buf++;
+			}
+			DrawString( (ScreenWidth - width) * 0.5f, ScreenHeight * 0.45f, c_distance, 70, 169, 255 );
+		}
 	}
 	else // draw normal crosshairs
 	{
