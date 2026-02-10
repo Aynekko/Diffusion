@@ -682,7 +682,15 @@ void CCrossbow::FireBolt( void )
 	bNeedPump = true;
 
 	if( !m_iClip )
-		m_flNextPrimaryAttack = gpGlobals->time + CROSSBOW_NEXT_PA_TIME; // this will delay reloading to let shooting animation play
+	{
+		if( m_fInZoom )
+		{
+			m_flTimeWeaponIdle = gpGlobals->time + 1.5f;
+			m_flNextPrimaryAttack = gpGlobals->time + 1.5f;
+		}
+		else
+			m_flNextPrimaryAttack = gpGlobals->time + CROSSBOW_NEXT_PA_TIME; // this will delay reloading to let shooting animation play
+	}
 
 	if( m_pPlayer->ZoomState > 0 )
 		m_pPlayer->pev->punchangle.x -= 2;
