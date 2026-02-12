@@ -2214,6 +2214,8 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 		return 0;
 	}
 
+	gHUD.bShadersCompiled = GL_PrecompileUberShaders( gHUD.shaders_processed, gHUD.shaders_total );
+
 	memset( tr.visbytes, 0, tr.pvssize );
 
 	GL_LoadAndRebuildCubemaps( RI->params );  // diffusioncubemaps

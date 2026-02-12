@@ -1162,6 +1162,11 @@ public:
 
 	void DrumsInput( int Slot );
 
+	bool bShadersCompiled;
+	int shaders_processed;
+	int shaders_total;
+	void DrawShaderCompilation( void );
+
 	bool emptyclipspawned[TOTAL_WEAPONS];
 
 	char m_szServerName[96];

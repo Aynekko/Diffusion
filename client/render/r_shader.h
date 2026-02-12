@@ -17,7 +17,7 @@ GNU General Public License for more details.
 #ifndef GL_SHADER_H
 #define GL_SHADER_H
 
-#define MAX_OPTIONS_LENGTH		512
+#define MAX_OPTIONS_LENGTH		1024
 #define MAX_GLSL_PROGRAMS		2048
 
 #define SHADER_VERTEX_COMPILED		BIT( 0 )
@@ -30,6 +30,8 @@ GNU General Public License for more details.
 #define SHADER_USE_BUMP				BIT( 7 )
 #define SHADER_USE_INTERIOR			BIT( 8 )
 #define SHADER_USE_EMBOSS			BIT( 9 )
+#define SHADER_STATUS_HASHED		BIT( 10 )
+#define SHADER_STATUS_FROMBINARY	BIT( 11 )
 
 #define SHADER_STATUS_OK		( SHADER_PROGRAM_LINKED|SHADER_VERTEX_COMPILED|SHADER_FRAGMENT_COMPILED )
 #define CheckShader( shader )		( shader && shader->status == SHADER_STATUS_OK )

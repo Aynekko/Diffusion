@@ -849,5 +849,8 @@ static shaderlist_t shaders[] = {
 	{ "BmodelDlight", "#define BMODEL_LIGHT_PROJECTION\n#define TERRAIN_NUM_LAYERS 4\n#define BMODEL_MULTI_LAYERS\n#define BMODEL_SPECULAR\n#define BMODEL_BUMP\n#define BMODEL_HAS_SHADOWS\n" },
 	{ "BmodelDlight", "#define BMODEL_LIGHT_OMNIDIRECTIONAL\n#define TERRAIN_NUM_LAYERS 4\n#define BMODEL_MULTI_LAYERS\n#define BMODEL_SPECULAR\n#define BMODEL_BUMP\n" },
 	{ "BmodelDlight", "#define BMODEL_LIGHT_OMNIDIRECTIONAL\n#define TERRAIN_NUM_LAYERS 4\n#define BMODEL_MULTI_LAYERS\n#define BMODEL_SPECULAR\n#define BMODEL_BUMP\n#define BMODEL_HAS_SHADOWS\n" },
+	{ "BmodelSolid", "#define BMODEL_SPECULAR\n#define BMODEL_BUMP\n#define BMODEL_INTERIOR\n" },
 	{NULL, NULL}  // Sentinel
 };
+
+const int iTotalShaders = SIZEOFARRAY( shaders );

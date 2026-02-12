@@ -182,6 +182,56 @@ void CHud::Think( void )
 	}
 }
 
+void CHud::DrawShaderCompilation( void )
+{
+	if( bShadersCompiled )
+		return;
+
+	const char *buf = NULL;
+	static float shadermessage_width = 0.0f;
+	const char *pTitlesMsg = "UTIL_SHADERS";
+	static char shadermessage[256];
+
+	if( shadermessage_width == 0.0f )
+	{
+		client_textmessage_t *msg = TextMessageGet( pTitlesMsg );
+		if( msg )
+			Q_snprintf( shadermessage, sizeof( shadermessage ), "%s\n", msg->pMessage );
+		else
+			Q_snprintf( shadermessage, sizeof( shadermessage ), "%s\n", pTitlesMsg );
+		// calculate width to align center...
+		buf = shadermessage;
+		while( *buf && *buf != '\n' )
+		{
+			unsigned char c = *buf; // note: this is important! always use this, don't just put *buf into TextMessageDrawChar, it won't get width correctly!
+			shadermessage_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+			buf++;
+		}
+	}
+
+	float ypos = ScreenHeight * 0.8f;
+
+	float txtpos = (ScreenWidth - shadermessage_width) * 0.5f;
+	FillRoundedRGBA( txtpos - 100.0f, ypos - 10.0f, shadermessage_width + 200.0f, 20.0f + (gHUD.m_scrinfo.iCharHeight * 1.5f) + gHUD.m_scrinfo.iCharHeight, 10.0f, Vector4D( 0.2f, 0.2f, 0.2f, 0.8f ) );
+
+	DrawString( (ScreenWidth - shadermessage_width) * 0.5f, ypos, shadermessage, 70, 169, 255 );
+
+	static char counter[256];
+	Q_snprintf( counter, sizeof( counter ), "%i / %i\n", shaders_processed, shaders_total );
+	// calculate width to align center...
+	float counter_width = 0.0f;
+	buf = counter;
+	while( *buf && *buf != '\n' )
+	{
+		unsigned char c = *buf;
+		counter_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+		buf++;
+	}
+
+	ypos += gHUD.m_scrinfo.iCharHeight * 1.5f;
+	DrawString( (ScreenWidth - counter_width) * 0.5f, ypos, counter, 70, 169, 255 );
+}
+
 int CHud :: Redraw( float flTime, int intermission )
 {
 	GL_AlphaTest( GL_FALSE );
@@ -248,6 +298,8 @@ int CHud :: Redraw( float flTime, int intermission )
 
 		SPR_DrawAdditive( i, x, y, NULL );
 	}
+
+	DrawShaderCompilation();
 
  	return 1;
 }

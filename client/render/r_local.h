@@ -887,6 +887,7 @@ word GL_UberShaderForDlightGeneric( const plight_t *pl );
 word GL_UberShaderForSolidStudio( struct mstudiomat_s *mat, bool vertex_lighting, bool bone_weighting, bool fullbright, int numbones = 0 );
 word GL_UberShaderForDlightStudio( const plight_t *dl, struct mstudiomat_s *mat, bool bone_weighting, int numbones = 0 );
 word GL_UberShaderForStudioDecal( struct mstudiomat_s *mat );
+bool GL_PrecompileUberShaders( int &processed, int &total );
 
 //
 // r_util.cpp

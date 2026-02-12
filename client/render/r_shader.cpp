@@ -28,7 +28,11 @@ GNU General Public License for more details.
 #include "r_shaderlist.h"
 
 static bool bPrecompiled = false;
-static int iPrecompiledOutdated = 0;
+static bool bCompilingShaders = false;
+static int compiled_outdated_total = 0;
+static int shaders_processed_total = 0;
+static int compiled_count_total = 0;
+static int compiled_failed_total = 0;
 
 #define SHADERS_HASH_SIZE	(MAX_GLSL_PROGRAMS >> 2)
 #define MAX_FILE_STACK	64
@@ -548,8 +552,11 @@ static glsl_program_t *GL_InitGPUShader( const char *glname, const char *vpname,
 	// check for coexist
 	for( prog = glsl_programsHashTable[hash]; prog != NULL; prog = prog->nextHash )
 	{
-		if( !Q_strcmp( prog->name, glname ) && !Q_strcmp( prog->options, defines ))
+		if( !Q_strcmp( prog->name, glname ) && !Q_strcmp( prog->options, defines ) )
+		{
+			prog->status |= SHADER_STATUS_HASHED;
 			return prog;
+		}
 	}
 
 	// find free spot
@@ -610,13 +617,14 @@ static glsl_program_t *GL_InitGPUShader( const char *glname, const char *vpname,
 
 				if( linked )
 				{
-					shader->status = SHADER_VERTEX_COMPILED | SHADER_FRAGMENT_COMPILED | SHADER_PROGRAM_LINKED;
+					shader->status = SHADER_VERTEX_COMPILED | SHADER_FRAGMENT_COMPILED | SHADER_PROGRAM_LINKED | SHADER_STATUS_FROMBINARY;
 					shader->nextHash = NULL;
 
 					ALERT( at_aiconsole, "\n^2Loaded shader binary:^7 %s\n", filename );
 
 					gEngfuncs.COM_FreeFile( data );
 
+					// add to hash table
 					shader->nextHash = glsl_programsHashTable[hash];
 					glsl_programsHashTable[hash] = shader;
 					return shader;
@@ -632,7 +640,7 @@ static glsl_program_t *GL_InitGPUShader( const char *glname, const char *vpname,
 			else
 			{
 				ALERT( at_aiconsole, "^3Shader binary for %s is outdated and will be recompiled.^7\n", glname );
-				iPrecompiledOutdated++;
+				compiled_outdated_total++;
 			}
 
 			gEngfuncs.COM_FreeFile( data );
@@ -809,7 +817,7 @@ static glsl_program_t *GL_CreateUberShader( GLuint slot, const char *glname, con
 
 				if( linked )
 				{
-					shader->status = SHADER_VERTEX_COMPILED | SHADER_FRAGMENT_COMPILED | SHADER_PROGRAM_LINKED | SHADER_UBERSHADER;
+					shader->status = SHADER_VERTEX_COMPILED | SHADER_FRAGMENT_COMPILED | SHADER_PROGRAM_LINKED | SHADER_UBERSHADER | SHADER_STATUS_FROMBINARY;
 					Q_strncpy( shader->name, glname, sizeof( shader->name ) );
 					Q_strncpy( shader->options, defines, sizeof( shader->options ) );
 
@@ -958,8 +966,11 @@ static glsl_program_t *GL_FindUberShader( const char *glname, const char *option
 	// check for coexist
 	for( prog = glsl_programsHashTable[hash]; prog != NULL; prog = prog->nextHash )
 	{
-		if( !Q_strcmp( prog->name, glname ) && !Q_strcmp( prog->options, options ))
+		if( !Q_strcmp( prog->name, glname ) && !Q_strcmp( prog->options, options ) )
+		{
+			prog->status |= SHADER_STATUS_HASHED;
 			return prog;
+		}
 	}
 
 	// find free spot
@@ -2792,53 +2803,129 @@ void GL_ListGPUShaders( void )
 	Msg( "total %i shaders\n", count );
 }
 
-void GL_PrecompileUberShaders( void )
+bool GL_PrecompileUberShaders( int &processed, int &total )
 {
-	ALERT( at_aiconsole, "^2Preloading shaders...^7\n" );
+	if( bPrecompiled )
+		return true;
 
-	int count = 0;
-	int failed = 0;
-	bPrecompiled = false;
+	processed = shaders_processed_total;
+	total = iTotalShaders;
 
-	for( shaderlist_t *list = shaders; list->glname; list++ )
+	if( shaders_processed_total == iTotalShaders - 1 )
 	{
-		glsl_program_t *shader = GL_InitGPUShader( list->glname, list->glname, list->glname, list->defines );
-		if( shader )
-		{
-			if( !Q_stricmp( list->glname, "bmodeldecal" ) )
-				GL_InitBmodelDecalUniforms( shader );
-			else if( !Q_stricmp( list->glname, "bmodeldlight" ) )
-				GL_InitBmodelDlightUniforms( shader );
-			else if( !Q_stricmp( list->glname, "bmodelsolid" ) )
-				GL_InitSolidBmodelUniforms( shader );
-			else if( !Q_stricmp( list->glname, "studiodlight" ) )
-				GL_InitStudioDlightUniforms( shader );
-			else if( !Q_stricmp( list->glname, "studiosolid" ) )
-				GL_InitSolidStudioUniforms( shader );
-			else if( !Q_stricmp( list->glname, "grassdlight" ) )
-				GL_InitGrassDlightUniforms( shader );
-			else if( !Q_stricmp( list->glname, "grasssolid" ) )
-				GL_InitGrassSolidUniforms( shader );
-			else
-				ALERT( at_aiconsole, "^1GL_PrecompileUberShaders: unhandled uniforms for shader %s!^7\n", list->glname );
-
-			count++;
-		}
+		if( compiled_failed_total == 0 && compiled_outdated_total > 0 )
+			Msg( "^2Loaded %d shaders:^7 ^3%d were recompiled.^7\n", compiled_count_total, compiled_outdated_total );
+		else if( compiled_failed_total > 0 && compiled_outdated_total == 0 )
+			Msg( "^2Loaded %d shaders:^7 ^1%d failed to preload.^7\n", compiled_count_total, compiled_failed_total );
+		else if( compiled_failed_total > 0 && compiled_outdated_total > 0 )
+			Msg( "^2Loaded %d shaders:^7 ^3%d were recompiled,^7 ^1%d failed to load.^7\n", compiled_count_total, compiled_outdated_total, compiled_failed_total );
 		else
-			failed++;
+			Msg( "^2Loaded %d shaders.^7\n", compiled_count_total );
+
+		bPrecompiled = true;
+		compiled_outdated_total = 0;
+		return true;
 	}
 
-	if( failed == 0 && iPrecompiledOutdated > 0 )
-		Msg( "^2Preloaded %d shaders:^7 ^3%d were recompiled.^7\n", count, iPrecompiledOutdated );
-	else if( failed > 0 && iPrecompiledOutdated == 0 )
-		Msg( "^2Preloaded %d shaders:^7 ^1%d failed to preload.^7\n", count, failed );
-	else if( failed > 0 && iPrecompiledOutdated > 0 )
-		Msg( "^2Preloaded %d shaders:^7 ^3%d were recompiled,^7 ^1%d failed to preload.^7\n", count, iPrecompiledOutdated, failed );
-	else
-		Msg( "^2Preloaded %d shaders.^7\n", count );
+	if( !bCompilingShaders )
+	{
+		Msg( "^2Loading shaders...^7\n" );
+		shaders_processed_total = 0;
+		bCompilingShaders = true;
+		compiled_count_total = 0;
+		compiled_failed_total = 0;
+	}
 
-	bPrecompiled = true;
-	iPrecompiledOutdated = 0;
+	bPrecompiled = false;
+
+	shaderlist_t curshader = shaders[shaders_processed_total];
+
+	int compiled_shader_counter = 0; // allow to load up to 10 shaders at once if they are loaded from disk cache or from hash
+	int compiled_shader_max = 10;
+
+	glsl_program_t *shader;
+	while( compiled_shader_counter < compiled_shader_max )
+	{
+		if( curshader.glname == NULL )
+			break; // end of the list - finalize next frame
+
+		shader = GL_InitGPUShader( curshader.glname, curshader.glname, curshader.glname, curshader.defines );
+
+		if( !shader )
+		{
+			// invalid shader
+			compiled_shader_counter++;
+			compiled_failed_total++;
+			// advance shader
+			shaders_processed_total++;
+			curshader = shaders[shaders_processed_total];
+		}
+		else if( shader->status & SHADER_STATUS_HASHED )
+		{
+			// this shader has already been precached during map loading - skip it
+			compiled_shader_counter++;
+			compiled_count_total++;
+			// advance shader
+			shaders_processed_total++;
+			curshader = shaders[shaders_processed_total];
+		}
+		else if( shader->status & SHADER_STATUS_FROMBINARY )
+		{
+			// this shader was loaded from disk - apply uniforms and load some more
+			if( !Q_stricmp( curshader.glname, "bmodeldecal" ) )
+				GL_InitBmodelDecalUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "bmodeldlight" ) )
+				GL_InitBmodelDlightUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "bmodelsolid" ) )
+				GL_InitSolidBmodelUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "studiodlight" ) )
+				GL_InitStudioDlightUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "studiosolid" ) )
+				GL_InitSolidStudioUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "grassdlight" ) )
+				GL_InitGrassDlightUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "grasssolid" ) )
+				GL_InitGrassSolidUniforms( shader );
+			else
+				ALERT( at_aiconsole, "^1GL_PrecompileUberShaders: unhandled uniforms for shader %s!^7\n", curshader.glname );
+
+			compiled_shader_counter++;
+			compiled_count_total++;
+			// advance shader
+			shaders_processed_total++;
+			curshader = shaders[shaders_processed_total];
+		}
+		else
+		{
+			// uncompiled shader
+			if( !Q_stricmp( curshader.glname, "bmodeldecal" ) )
+				GL_InitBmodelDecalUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "bmodeldlight" ) )
+				GL_InitBmodelDlightUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "bmodelsolid" ) )
+				GL_InitSolidBmodelUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "studiodlight" ) )
+				GL_InitStudioDlightUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "studiosolid" ) )
+				GL_InitSolidStudioUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "grassdlight" ) )
+				GL_InitGrassDlightUniforms( shader );
+			else if( !Q_stricmp( curshader.glname, "grasssolid" ) )
+				GL_InitGrassSolidUniforms( shader );
+			else
+				ALERT( at_aiconsole, "^1GL_PrecompileUberShaders: unhandled uniforms for shader %s!^7\n", curshader.glname );
+
+			compiled_shader_counter++;
+			compiled_shader_max -= 4; // decrease workload
+			compiled_count_total++;
+			// advance shader
+			shaders_processed_total++;
+			curshader = shaders[shaders_processed_total];
+		}
+	}
+
+//	Msg( "This frame loaded shaders: %i\n", compiled_shader_counter );
+	return false;
 }
 
 void GL_InitGPUShaders( void )
@@ -2851,7 +2938,7 @@ void GL_InitGPUShaders( void )
 	memset( glsl_programsHashTable, 0, sizeof( glsl_programsHashTable ) );
 	tr.glsl_valid_sequence = 1;
 	num_glsl_programs = 1; // entry #0 isn't used
-	iPrecompiledOutdated = 0; // this adds up in GL_InitGPUShader
+	compiled_outdated_total = 0; // this adds up in GL_InitGPUShader
 
 	if( !GL_Support( R_SHADER_GLSL100_EXT ))
 		return;
@@ -2985,8 +3072,6 @@ void GL_InitGPUShaders( void )
 	GL_UberShaderForDlightGeneric( &pl );
 	pl.flags |= CF_NOSHADOWS;
 	GL_UberShaderForDlightGeneric( &pl );
-
-	GL_PrecompileUberShaders();
 }
 
 void GL_FreeUberShaders( void )
