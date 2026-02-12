@@ -385,7 +385,10 @@ int CHudCrosshairStatic::DrawCrosshairs( float flTime )
 				width += gHUD.m_scrinfo.charWidths[*buf];
 				buf++;
 			}
-			DrawString( (ScreenWidth - width) * 0.5f, ScreenHeight * 0.45f, c_distance, 70, 169, 255 );
+			float posx = (ScreenWidth - width) * 0.5f;
+			float posy = ScreenHeight * 0.45f;
+			FillRoundedRGBA( posx - 5, posy - 5, width + 10, gHUD.m_scrinfo.iCharHeight + 10, 5, Vector4D( 0.25f, 0.25f, 0.25f, 0.25f ) );
+			DrawString( posx, posy, c_distance, 70, 169, 255 );
 		}
 	}
 	else // draw normal crosshairs
