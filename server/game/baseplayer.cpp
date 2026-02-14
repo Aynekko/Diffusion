@@ -5342,8 +5342,6 @@ void CBasePlayer::Spawn( void )
 	
 	m_flNextChatTime = gpGlobals->time;
 	m_flNextChatSoundTime = gpGlobals->time;
-	
-	g_pGameRules->PlayerSpawn( this );
 
 	// create a cinematic collision box
 	m_pUserData = WorldPhysic->CreateBoxFromEntity( this );
@@ -5438,6 +5436,8 @@ void CBasePlayer::Spawn( void )
 
 	m_hKiller = NULL;
 	fLerpToKiller = 0.0f;
+
+	g_pGameRules->PlayerSpawn( this );
 }
 
 void CBasePlayer::SetHUDTexts(void)

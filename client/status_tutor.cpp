@@ -101,6 +101,9 @@ int CHudTutorial::Draw( float flTime )
 	if( !IsTutorDrawing )
 		return 0;
 
+	if( TutorStartTime > gHUD.m_flTime + 1.0f )
+		TutorStartTime = gHUD.m_flTime;
+
 	// set the coordinates
 	// offset to the right if the drone bars are visible
 	const float drone_x_offset = (gHUD.m_DroneBars.CanUseDrone ? 80.0f : 0.0f);
