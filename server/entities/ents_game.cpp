@@ -847,6 +847,9 @@ void CGamePlayerEquip::EquipPlayer( CBaseEntity *pEntity )
 			}
 		}
 	}
+
+	if( pev->target )
+		UTIL_FireTargets( pev->target, pPlayer, this, USE_TOGGLE, 0 );
 }
 
 void CGamePlayerEquip::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
