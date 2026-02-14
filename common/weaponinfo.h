@@ -33,6 +33,13 @@
 
 #define TRACER_FREQ				0//4			// Tracers fire every fourth bullet
 
+#define CROSSBOW_MAX_ZOOM		20
+#define SNIPER_MID_ZOOM			30
+#define SNIPER_MAX_ZOOM			10
+#define GAUSS_MID_ZOOM			SNIPER_MID_ZOOM
+#define GAUSS_MAX_ZOOM			SNIPER_MAX_ZOOM
+#define G36C_MAX_ZOOM			45
+
 // Info about weapons player might have in his/her possession
 typedef struct weapon_data_s
 {

@@ -18,14 +18,11 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons/weapons.h"
-#include "nodes.h"
 #include "player.h"
-#include "game/gamerules.h"
 #include "entities/soundent.h"
 
 #define BOLT_AIR_VELOCITY	3500
 #define BOLT_WATER_VELOCITY	1500
-#define CROSSBOW_MAX_ZOOM 20
 
 class CCrossbowBolt : public CBaseEntity
 {
@@ -398,6 +395,7 @@ public:
 	void Reload( void );
 	void WeaponIdle( void );
 	void ResetZoom(void);
+	void SetWeaponZoom( int iZoom );
 
 	int m_fInZoom;
 	int m_fZoomInUse;
@@ -424,6 +422,7 @@ void CCrossbow::Spawn( void )
 	FallInit();// get ready to fall down.
 
 	bNeedPump = false;
+	m_iSavedZoomState = 1;
 }
 
 int CCrossbow::AddToPlayer( CBasePlayer *pPlayer )
@@ -698,6 +697,26 @@ void CCrossbow::FireBolt( void )
 		m_pPlayer->pev->punchangle.x -= 5;
 }
 
+void CCrossbow::SetWeaponZoom( int iZoom )
+{
+	if( iZoom == 0 ) // unzoom
+	{
+		ResetZoom();
+	}
+	else // iZoom == 1
+	{
+		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
+		m_fInZoom = 1;
+		m_pPlayer->ZoomState = 1; // zooming in
+		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
+		WRITE_BYTE( m_pPlayer->ZoomState );
+		WRITE_BYTE( WEAPON_CROSSBOW );
+		MESSAGE_END();
+		m_pPlayer->m_flFOV = CROSSBOW_MAX_ZOOM;
+		SendWeaponAnim( CROSSBOW_IDLE1 );
+	}
+}
+
 void CCrossbow::SecondaryAttack( void )
 {
 	CLIENT_COMMAND(m_pPlayer->edict(), "-attack2\n");
@@ -719,29 +738,12 @@ void CCrossbow::SecondaryAttack( void )
 
 	if( m_fInZoom )
 	{
-		EMIT_SOUND( ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
-		m_fInZoom = 0;
-		m_pPlayer->ZoomState = 2; // zooming out
-		MESSAGE_BEGIN(MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev);
-			WRITE_BYTE( m_pPlayer->ZoomState );
-			WRITE_BYTE( WEAPON_CROSSBOW );
-		MESSAGE_END();
-		m_pPlayer->m_flFOV = 0;
-		m_pPlayer->ZoomState = 0; // zoomed out. reset the state
-		UTIL_ScreenFade( m_pPlayer, g_vecZero, 0.5, 0, 255, 0x0000 );
+		ResetZoom();
 	}
 	else
 	{
+		SetWeaponZoom( 1 );
 		UTIL_ScreenFade( m_pPlayer, g_vecZero, 0.25, 0, 255, 0x0000 );
-		EMIT_SOUND( ENT(m_pPlayer->pev), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
-		m_fInZoom = 1;
-		m_pPlayer->ZoomState = 1; // zooming in
-		MESSAGE_BEGIN(MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev);
-			WRITE_BYTE( m_pPlayer->ZoomState );
-			WRITE_BYTE( WEAPON_CROSSBOW );
-		MESSAGE_END();
-		m_pPlayer->m_flFOV = CROSSBOW_MAX_ZOOM;
-		SendWeaponAnim( CROSSBOW_IDLE1 );
 	}
 
 	m_flNextSecondaryAttack = gpGlobals->time + 0.2;

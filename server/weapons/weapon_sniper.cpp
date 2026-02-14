@@ -18,13 +18,7 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons/weapons.h"
-#include "nodes.h"
 #include "player.h"
-#include "entities/soundent.h"
-#include "game/gamerules.h"
-
-#define SNIPER_MID_ZOOM 30
-#define SNIPER_MAX_ZOOM 10
 
 class CSniperRifle : public CBasePlayerWeapon
 {
@@ -44,6 +38,8 @@ public:
 	void Reload( void );
 	void WeaponIdle( void );
 	void ResetZoom( void );
+	void CycleWeaponZoom( void );
+	void SetWeaponZoom( int iZoom );
 };
 
 LINK_ENTITY_TO_CLASS( weapon_sniper, CSniperRifle );
@@ -87,8 +83,9 @@ void CSniperRifle::Spawn( void )
 	SET_MODEL( ENT( pev ), "models/weapons/w_sniper.mdl" );
 	m_iId = WEAPON_SNIPER;
 
-	m_iDefaultAmmo = SNIPER_DEFAULT_GIVE; // two rounds
+	m_iDefaultAmmo = SNIPER_DEFAULT_GIVE;
 	m_iDefaultAmmo2 = 0;
+	m_iSavedZoomState = 1;
 
 	FallInit();// get ready to fall down.
 }
@@ -240,6 +237,43 @@ void CSniperRifle::PrimaryAttack()
 	m_flTimeWeaponIdle = gpGlobals->time + RANDOM_FLOAT( 10, 15 );
 }
 
+void CSniperRifle::SetWeaponZoom( int iZoom )
+{
+	if( iZoom == 0 ) // unzoom
+	{
+		ResetZoom();
+	}
+	else if( iZoom == 1 ) // not zoomed, zoom to first level (fov 30)
+	{
+		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
+		m_pPlayer->ZoomState = 1; // zooming in, first step
+		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
+		WRITE_BYTE( m_pPlayer->ZoomState );
+		WRITE_BYTE( WEAPON_SNIPER );
+		MESSAGE_END();
+		m_pPlayer->m_flFOV = SNIPER_MID_ZOOM;
+	}
+	else if( iZoom == 2 ) // zoom to max level (fov 10)
+	{
+		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
+		m_pPlayer->ZoomState = 2; // zooming in, second step
+		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
+		WRITE_BYTE( m_pPlayer->ZoomState );
+		WRITE_BYTE( WEAPON_SNIPER );
+		MESSAGE_END();
+		m_pPlayer->m_flFOV = SNIPER_MAX_ZOOM;
+	}
+}
+
+void CSniperRifle::CycleWeaponZoom( void )
+{
+	m_iSavedZoomState++;
+	if( m_iSavedZoomState > 2 )
+		m_iSavedZoomState = 1;
+
+	SetWeaponZoom( m_iSavedZoomState );
+}
+
 void CSniperRifle::SecondaryAttack( void )
 {
 	CLIENT_COMMAND( m_pPlayer->edict(), "-attack2\n" );
@@ -255,40 +289,21 @@ void CSniperRifle::SecondaryAttack( void )
 
 	if( m_pPlayer->ZoomState == 0 ) // not zoomed, zoom to first level (fov 30)
 	{
+		SetWeaponZoom( m_iSavedZoomState );
 		UTIL_ScreenFade( m_pPlayer, g_vecZero, 0.25, 0, 255, 0x0000 );
-		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
-		m_pPlayer->ZoomState = 1; // zooming in, first step
-		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
-			WRITE_BYTE( m_pPlayer->ZoomState );
-			WRITE_BYTE( WEAPON_SNIPER );
-		MESSAGE_END();
-		m_pPlayer->m_flFOV = SNIPER_MID_ZOOM;
+		if( !m_pPlayer->bShowZoomHint )
+		{
+			MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, edict() );
+			WRITE_BYTE( 0 );
+			WRITE_STRING( "HINT_ZOOMING" );
+			MESSAGE_END();
+			m_pPlayer->bShowZoomHint = true;
+		}
 	}
-	else if( m_pPlayer->ZoomState == 1 ) // zoom to max level (fov 10)
-	{
-		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
-		m_pPlayer->ZoomState = 2; // zooming in, second step
-		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
-			WRITE_BYTE( m_pPlayer->ZoomState );
-			WRITE_BYTE( WEAPON_SNIPER );
-		MESSAGE_END();
-		m_pPlayer->m_flFOV = SNIPER_MAX_ZOOM;
-	}
-	else if( m_pPlayer->ZoomState == 2 ) // fully zoomed, unzoom fast
-	{
-		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
-		m_pPlayer->ZoomState = 3; // zooming out
-		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
-			WRITE_BYTE( m_pPlayer->ZoomState );
-			WRITE_BYTE( WEAPON_SNIPER );
-		MESSAGE_END();
-		m_pPlayer->ZoomState = 0; // hopefully we zoomed out by now. reset to default state
-		m_pPlayer->m_flFOV = 0;
-		UTIL_ScreenFade( m_pPlayer, g_vecZero, 0.5, 0, 255, 0x0000 );
-	}
+	else
+		ResetZoom();
 	
 	m_flNextSecondaryAttack = gpGlobals->time + 0.2;
-//	m_flNextPrimaryAttack = gpGlobals->time + 0.5;
 	m_flTimeWeaponIdle = gpGlobals->time + 5.0;
 }
 

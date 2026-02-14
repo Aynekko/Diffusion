@@ -661,6 +661,8 @@ public:
 	EHANDLE m_hKiller;
 	float fLerpToKiller;
 
+	bool bShowZoomHint;
+
 	float m_flNextRedScreenFromDamage; // not saved
 };
 

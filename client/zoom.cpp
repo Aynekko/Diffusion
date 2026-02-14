@@ -44,12 +44,13 @@ void CZoom::Think( void )
 {
 	float FOV = gHUD.m_flFOV;
 
-	if (ZoomMode == 0)
+	if( ZoomMode == 0 )
 	{
 		FOV = 0;
-		m_iFlags &= ~HUD_ACTIVE;
 		gHUD.IsZooming = false;
 		gHUD.IsZoomed = false;
+		gHUD.SetFOV( 0 );
+		m_iFlags &= ~HUD_ACTIVE;
 		return;
 	}
 	
@@ -60,25 +61,17 @@ void CZoom::Think( void )
 	{
 		if( ZoomMode == 1 ) // zooming in
 		{
-			FOV -= 165 * g_fFrametime;
+			FOV = CL_UTIL_Approach( CROSSBOW_MAX_ZOOM, FOV, 200 * g_fFrametime );
 			gHUD.m_flFOV = (int)FOV;
 
-			if( FOV <= 20 )
+			if( FOV == CROSSBOW_MAX_ZOOM )
 			{
 				gHUD.IsZooming = false;
 				gHUD.IsZoomed = true;
-				gHUD.SetFOV( 20 );
+				gHUD.SetFOV( CROSSBOW_MAX_ZOOM );
 				m_iFlags &= ~HUD_ACTIVE;
 				return;
 			}
-		}
-		else if( ZoomMode == 2 ) // zooming out (instant)
-		{
-			gHUD.IsZooming = false;
-			gHUD.IsZoomed = false;
-			gHUD.SetFOV( 0 );
-			m_iFlags &= ~HUD_ACTIVE;
-			return;
 		}
 	}
 	
@@ -89,39 +82,31 @@ void CZoom::Think( void )
 	{
 		if( ZoomMode == 1 ) // zooming in
 		{
-			FOV -= 200 * g_fFrametime;
+			FOV = CL_UTIL_Approach( SNIPER_MID_ZOOM, FOV, 200 * g_fFrametime );
 			gHUD.m_flFOV = (int)FOV;
 
-			if( FOV <= 30 )
+			if( FOV == SNIPER_MID_ZOOM )
 			{
 				gHUD.IsZooming = false;
 				gHUD.IsZoomed = true;
-				gHUD.SetFOV( 30 );
+				gHUD.SetFOV( SNIPER_MID_ZOOM );
 				m_iFlags &= ~HUD_ACTIVE;
 				return;
 			}
 		}
 		else if( ZoomMode == 2 ) // zooming in to max
 		{
-			FOV -= 200 * g_fFrametime;
+			FOV = CL_UTIL_Approach( SNIPER_MAX_ZOOM, FOV, 200 * g_fFrametime );
 			gHUD.m_flFOV = (int)FOV;
 
-			if( FOV <= 10 )
+			if( FOV <= SNIPER_MAX_ZOOM )
 			{
 				gHUD.IsZooming = false;
 				gHUD.IsZoomed = true;
-				gHUD.SetFOV( 10 );
+				gHUD.SetFOV( SNIPER_MAX_ZOOM );
 				m_iFlags &= ~HUD_ACTIVE;
 				return;
 			}
-		}
-		else if( ZoomMode == 3 ) // zooming out (instant)
-		{
-			gHUD.IsZooming = false;
-			gHUD.IsZoomed = false;
-			gHUD.SetFOV( 0 );
-			m_iFlags &= ~HUD_ACTIVE;
-			return;
 		}
 	}
 
@@ -132,25 +117,17 @@ void CZoom::Think( void )
 	{
 		if( ZoomMode == 1 ) // zooming in
 		{
-			FOV -= 175 * g_fFrametime;
+			FOV = CL_UTIL_Approach( G36C_MAX_ZOOM, FOV, 175 * g_fFrametime );
 			gHUD.m_flFOV = (int)FOV;
 
-			if( FOV <= 45 )
+			if( FOV == G36C_MAX_ZOOM )
 			{
 				gHUD.IsZooming = false;
 				gHUD.IsZoomed = true;
-				gHUD.SetFOV( 45 );
+				gHUD.SetFOV( G36C_MAX_ZOOM );
 				m_iFlags &= ~HUD_ACTIVE;
 				return;
 			}
-		}
-		else if( ZoomMode == 2 ) // zooming out (instant)
-		{
-			gHUD.IsZooming = false;
-			gHUD.IsZoomed = false;
-			gHUD.SetFOV( 0 );
-			m_iFlags &= ~HUD_ACTIVE;
-			return;
 		}
 	}
 }

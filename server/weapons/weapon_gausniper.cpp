@@ -54,6 +54,8 @@ public:
 	void Reload( void );
 	void WeaponIdle( void );
 	void ResetZoom( void );
+	void CycleWeaponZoom( void );
+	void SetWeaponZoom( int iZoom );
 	void UpdateHUD( void );
 	bool ReflectMirror( TraceResult &tr, CBaseEntity *e );
 	void StartFire( void );
@@ -102,6 +104,7 @@ void CGauss::Spawn( void )
 
 	m_iDefaultAmmo = GAUSS_DEFAULT_GIVE;
 	m_iDefaultAmmo2 = 0;
+	m_iSavedZoomState = 1;
 
 	Charge = 0.0f;
 
@@ -254,7 +257,44 @@ void CGauss::Attack( void )
 	m_flTimeWeaponIdle = gpGlobals->time + 1.0;
 }
 
-void CGauss::SecondaryAttack(void)
+void CGauss::SetWeaponZoom( int iZoom )
+{
+	if( iZoom == 0 )
+	{
+		ResetZoom();
+	}
+	else if( iZoom == 1 ) // not zoomed, zoom to first level (fov 30)
+	{
+		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
+		m_pPlayer->ZoomState = 1; // zooming in, first step
+		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
+		WRITE_BYTE( m_pPlayer->ZoomState );
+		WRITE_BYTE( WEAPON_GAUSS );
+		MESSAGE_END();
+		m_pPlayer->m_flFOV = GAUSS_MID_ZOOM;
+	}
+	else if( iZoom == 2 ) // zoom to max level (fov 10)
+	{
+		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
+		m_pPlayer->ZoomState = 2; // zooming in, second step
+		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
+		WRITE_BYTE( m_pPlayer->ZoomState );
+		WRITE_BYTE( WEAPON_GAUSS );
+		MESSAGE_END();
+		m_pPlayer->m_flFOV = GAUSS_MAX_ZOOM;
+	}
+}
+
+void CGauss::CycleWeaponZoom( void )
+{
+	m_iSavedZoomState++;
+	if( m_iSavedZoomState > 2 )
+		m_iSavedZoomState = 1;
+
+	SetWeaponZoom( m_iSavedZoomState );
+}
+
+void CGauss::SecondaryAttack( void )
 {
 	CLIENT_COMMAND( m_pPlayer->edict(), "-attack2\n" );
 
@@ -269,37 +309,19 @@ void CGauss::SecondaryAttack(void)
 
 	if( m_pPlayer->ZoomState == 0 ) // not zoomed, zoom to first level (fov 30)
 	{
+		SetWeaponZoom( m_iSavedZoomState );
 		UTIL_ScreenFade( m_pPlayer, g_vecZero, 0.25, 0, 255, 0x0000 );
-		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
-		m_pPlayer->ZoomState = 1; // zooming in, first step
-		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
-			WRITE_BYTE( m_pPlayer->ZoomState );
-			WRITE_BYTE( WEAPON_GAUSS );
-		MESSAGE_END();
-		m_pPlayer->m_flFOV = GAUSS_MID_ZOOM;
+		if( !m_pPlayer->bShowZoomHint )
+		{
+			MESSAGE_BEGIN( MSG_ONE, gmsgHint, NULL, edict() );
+			WRITE_BYTE( 0 );
+			WRITE_STRING( "HINT_ZOOMING" );
+			MESSAGE_END();
+			m_pPlayer->bShowZoomHint = true;
+		}
 	}
-	else if( m_pPlayer->ZoomState == 1 ) // zoom to max level (fov 10)
-	{
-		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
-		m_pPlayer->ZoomState = 2; // zooming in, second step
-		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
-			WRITE_BYTE( m_pPlayer->ZoomState );
-			WRITE_BYTE( WEAPON_GAUSS );
-		MESSAGE_END();
-		m_pPlayer->m_flFOV = GAUSS_MAX_ZOOM;
-	}
-	else if( m_pPlayer->ZoomState == 2 ) // fully zoomed, unzoom fast
-	{
-		EMIT_SOUND( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/xbow_scope.wav", 1, 1.5 );
-		m_pPlayer->ZoomState = 3; // zooming out
-		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, m_pPlayer->pev );
-			WRITE_BYTE( m_pPlayer->ZoomState );
-			WRITE_BYTE( WEAPON_GAUSS );
-		MESSAGE_END();
-		m_pPlayer->ZoomState = 0; // hopefully we zoomed out by now. reset to default state
-		m_pPlayer->m_flFOV = 0;
-		UTIL_ScreenFade( m_pPlayer, g_vecZero, 0.5, 0, 255, 0x0000 );
-	}
+	else
+		ResetZoom();
 
 	UpdateHUD();
 

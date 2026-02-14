@@ -243,6 +243,7 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( m_flLastWeaponSwitchTime, FIELD_TIME ),
 	DEFINE_FIELD( LoudWeaponsRestricted, FIELD_BOOLEAN),
 	DEFINE_FIELD( bCheatsWereUsed, FIELD_BOOLEAN ),
+	DEFINE_FIELD( bShowZoomHint, FIELD_BOOLEAN ),
 END_DATADESC()
 
 extern cvar_t sv_regeneration;
@@ -2080,6 +2081,20 @@ void CBasePlayer::PlayerUse ( void )
 {
 	if( IsObserver() )
 		return;
+
+	if( ZoomState > 0 && (m_afButtonPressed & IN_USE) )
+	{
+		// cycle through weapon zoom modes
+		if( m_pActiveItem )
+		{
+			CBasePlayerWeapon *pWeapon = (CBasePlayerWeapon*)m_pActiveItem;
+			if( pWeapon )
+			{
+				pWeapon->CycleWeaponZoom();
+				return;
+			}
+		}
+	}
 
 	if( !CanUse )
 		return;
@@ -5356,6 +5371,7 @@ void CBasePlayer::Spawn( void )
 	{
 		BlastAbilityLVL = 1; // UNDONE - make a server cvar?
 		ShieldAvailableLVL = 3;
+		bShowZoomHint = true;
 	}
 	BlastChargesReady = 0;
 	LastSwimUpSound = -1.0f;

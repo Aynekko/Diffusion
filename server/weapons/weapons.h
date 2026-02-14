@@ -282,6 +282,8 @@ public:
 	virtual void ResetZoom( void ) { return; };
 	virtual BOOL UseDecrement( void ) { return FALSE; };
 	virtual void LowAmmoMsg(CBasePlayer* pPlayer);
+	virtual void CycleWeaponZoom( void ){ return; };
+	virtual void SetWeaponZoom( int iZoom ){ return; };
 	
 	int	PrimaryAmmoIndex(); 
 	int	SecondaryAmmoIndex(); 
@@ -301,6 +303,7 @@ public:
 	int	m_iClientClip;			// the last version of m_iClip sent to hud dll
 	int	m_iClientWeaponState;		// the last version of the weapon state sent to hud dll (is current weapon, is on target)
 	int	m_fInReload;			// Are we in the middle of a reload;
+	int m_iSavedZoomState; // player has a comfortable zoom state, save it and use
 
 	int	m_iDefaultAmmo;// how much ammo you get when you pick up this weapon as placed by a level designer.
 	int m_iDefaultAmmo2;
