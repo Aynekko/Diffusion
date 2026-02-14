@@ -3198,10 +3198,6 @@ void CCar::Idle( void )
 	// wheels' origin (aka "suspension"...)
 	// 1-2 front wheels, 3-4 rear wheels
 	//----------------------------
-	//----------------------------
-	// wheels' origin (aka "suspension"...)
-	// 1-2 front wheels, 3-4 rear wheels
-	//----------------------------
 	int FRW_InAir;
 	int FLW_InAir;
 	int RRW_InAir;

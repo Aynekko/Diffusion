@@ -144,12 +144,15 @@ inline float lerp( float start, float end, float frac )
 {
 	frac = bound( 0.0f, frac, 1.0f );
 
+	if( frac == 1.0f )
+		return end; // exact
+	else if( frac == 0.0f )
+		return start;
+
 	// Exact, monotonic, bounded, determinate, and (for a=b=0) consistent:
 	if( start <= 0 && end >= 0 || start >= 0 && end <= 0 )
 		return frac * end + (1 - frac) * start;
 
-	if( frac == 1 )
-		return end; // exact
 	// Exact at t=0, monotonic except near t=1,
 	// bounded, determinate, and consistent:
 	const float x = start + frac * (end - start);

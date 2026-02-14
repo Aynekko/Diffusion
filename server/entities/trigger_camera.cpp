@@ -323,29 +323,20 @@ void CTriggerCamera::FollowTarget(void)
 	}
 	else
 	{
-
 		SetLocalAngles( angles );
 
-		float dx = vecGoal.x - angles.x;
-		float dy = vecGoal.y - angles.y;
-
-		if( dx < -180 )
-			dx += 360;
-		if( dx > 180 )
-			dx = dx - 360;
-
-		if( dy < -180 )
-			dy += 360;
-		if( dy > 180 )
-			dy = dy - 360;
-
+		float dx = UTIL_AngleDiff( vecGoal.x, angles.x );
+		float dy = UTIL_AngleDiff( vecGoal.y, angles.y );
+		
 		Vector vecAvel;
-
-		vecAvel.x = dx * SnapSpeed * 0.01;  // 0.01 instead of frametime
-		vecAvel.y = dy * SnapSpeed * 0.01;
+		float mult = SnapSpeed * 0.01f;
+		if( mult > 1.0f / gpGlobals->frametime )
+			mult = 1.0f / gpGlobals->frametime;
+		vecAvel.x = dx;
+		vecAvel.y = dy;
 		vecAvel.z = 0;
-
-		SetLocalAvelocity( vecAvel );
+		
+		SetLocalAvelocity( vecAvel * mult );
 	}
 
 	if (!(FBitSet(pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL)))
