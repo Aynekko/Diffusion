@@ -3733,15 +3733,16 @@ void CBasePlayer::ManageElectroBlast( void )
 
 	if( ElectroblastButton )
 	{
+		if( !CanElectroBlast ) // disabled by script
+		{
+			if( BlastChargesReady > 0 )
+				UTIL_ShowMessage( "UTIL_NOBLAST", this );
+			goto skip_blast;
+		}
+
 		if( (gpGlobals->time > LastBlastTime + 3) && (BlastChargesReady > 0) )
 		{
 			LastBlastTime = gpGlobals->time;
-
-			if( !CanElectroBlast ) // disabled by script
-			{
-				UTIL_ShowMessage( "UTIL_NOBLAST", this );
-				goto skip_blast;
-			}
 
 			if( pev->flags & FL_FROZEN )
 				goto skip_blast;
