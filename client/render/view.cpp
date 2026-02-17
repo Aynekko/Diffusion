@@ -2409,6 +2409,9 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 //==========================
 void V_CalcRefdef( struct ref_params_s *pparams )
 {
+	if( pparams->vieworg == g_vecZero )
+		pparams->vieworg = PrevViewOrg;
+
 	// store a local copy in case we need to calc firstperson later
 	memcpy( &tr.viewparams, pparams, sizeof( ref_params_t ) );
 	g_fFrametime = pparams->frametime;
