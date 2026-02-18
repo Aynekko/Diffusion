@@ -214,7 +214,7 @@ void CWeaponG36C::PrimaryAttack()
 	if( m_fInZoom )
 		Cone *= 0.75;
 
-	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, Vector(Cone,Cone,Cone), 8192, BULLET_PLAYER_MP5, 0 );
+	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, Vector(Cone,Cone,Cone), 8192, BULLET_PLAYER_MP5, 0, DMG_WPN_G36C );
 	m_iClip--;
 
 	if( m_iClip <= 10 )

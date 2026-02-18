@@ -232,6 +232,7 @@ const char * const g_WpnAmmo[] =
 
 // diffusion - weapon damage
 #define DMG_WPN_MRC				15
+#define DMG_WPN_G36C			16
 #define DMG_WPN_CROSSBOW		110
 //#define DMG_WPN_DEAGLE		using BULLET_PLAYER_357 damage (90)
 #define DMG_WPN_FIVESEVEN		35
