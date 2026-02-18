@@ -354,6 +354,7 @@ typedef struct
 
 	int		screen_depth;
 	int		screen_color;
+	int		screen_color_native;
 
 	int		spotlightTexture;
 
@@ -850,6 +851,7 @@ void DroneScreenShader( void );
 void HeatDistortionShader( void );
 void LensFlare( void );
 void DownScale( void );
+void FSR( void );
 
 //
 // r_shadows.cpp

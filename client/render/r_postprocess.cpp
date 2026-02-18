@@ -193,6 +193,9 @@ static void InitSMAA( void )
 		GL_Bind( GL_TEXTURE0, 0 );
 	}
 
+	const int w = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 );
+	const int h = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 );
+
 	if( SMAA_AlbedoTex )
 	{
 		FREE_TEXTURE( SMAA_AlbedoTex );
@@ -201,13 +204,13 @@ static void InitSMAA( void )
 
 	if( !SMAA_AlbedoTex )
 	{
-		SMAA_AlbedoTex = CREATE_TEXTURE( "*SMAA_AlbedoTex", glState.width, glState.height, NULL, 0 );
+		SMAA_AlbedoTex = CREATE_TEXTURE( "*SMAA_AlbedoTex", w, h, NULL, 0 );
 		GL_Bind( GL_TEXTURE0, SMAA_AlbedoTex );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-		pglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, glState.width, glState.height, 0, GL_RGBA, GL_FLOAT, 0 );
+		pglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_FLOAT, 0 );
 		GL_Bind( GL_TEXTURE0, 0 );
 	}
 
@@ -219,13 +222,13 @@ static void InitSMAA( void )
 
 	if( !SMAA_EdgeTex )
 	{
-		SMAA_EdgeTex = CREATE_TEXTURE( "*SMAA_EdgeTex", glState.width, glState.height, NULL, 0 );
+		SMAA_EdgeTex = CREATE_TEXTURE( "*SMAA_EdgeTex", w, h, NULL, 0 );
 		GL_Bind( GL_TEXTURE0, SMAA_EdgeTex );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-		pglTexImage2D( GL_TEXTURE_2D, 0, GL_RG8, glState.width, glState.height, 0, GL_RGBA, GL_FLOAT, 0 );
+		pglTexImage2D( GL_TEXTURE_2D, 0, GL_RG8, w, h, 0, GL_RGBA, GL_FLOAT, 0 );
 		GL_Bind( GL_TEXTURE0, 0 );
 	}
 
@@ -237,13 +240,13 @@ static void InitSMAA( void )
 
 	if( !SMAA_BlendTex )
 	{
-		SMAA_BlendTex = CREATE_TEXTURE( "*SMAA_BlendTex", glState.width, glState.height, NULL, 0 );
+		SMAA_BlendTex = CREATE_TEXTURE( "*SMAA_BlendTex", w, h, NULL, 0 );
 		GL_Bind( GL_TEXTURE0, SMAA_BlendTex );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
 		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
-		pglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, glState.width, glState.height, 0, GL_RGBA, GL_FLOAT, 0 );
+		pglTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA8, w, h, 0, GL_RGBA, GL_FLOAT, 0 );
 		GL_Bind( GL_TEXTURE0, 0 );
 	}
 
@@ -291,28 +294,6 @@ static void InitBloom( void )
 
 void InitPostTextures( void )
 {
-	if( tr.screen_depth )
-	{
-		FREE_TEXTURE( tr.screen_depth );
-		tr.screen_depth = 0;
-	}
-	
-	if( !tr.screen_depth )
-		tr.screen_depth = CREATE_TEXTURE( "*screendepth", glState.width, glState.height, NULL, TF_DEPTHBUFFER ); 
-
-	if( tr.screen_color )
-	{
-		FREE_TEXTURE( tr.screen_color );
-		tr.screen_color = 0;
-	}
-
-	if( !tr.screen_color )
-		tr.screen_color = CREATE_TEXTURE( "*screencolor", glState.width, glState.height, NULL, TF_COLORBUFFER );
-
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR ); // this is useful for rendering scale below 1.0
-	GL_Bind( GL_TEXTURE0, 0 );
-
 	// sunshafts shader
 	if( target_rgb[0] )
 	{
@@ -1279,28 +1260,79 @@ void Enhance( void )
 	GL_CleanUpTextureUnits( 0 );
 }
 
+void FSR( void )
+{
+	if( gl_renderscale->value >= 1.0f )
+		return;
+
+	const int w = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 );
+	const int h = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 );
+
+	GL_Setup2D();
+
+	// get low resolution screen copy
+	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+
+	// render through full native viewport
+	pglViewport( 0, 0, w, h );
+
+	GL_BindShader( glsl.FSR_easu );
+	ASSERT( RI->currentshader != NULL );
+
+	// native screen size (not inverted)
+	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, w, h );
+	// rendering resolution
+	pglUniform2fARB( RI->currentshader->u_GenericCondition, (float)(glState.width), (float)(glState.height) );
+
+	RenderFSQ( w, h );
+
+	// get native full screen copy
+	GL_Bind( GL_TEXTURE0, tr.screen_color_native );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h );
+
+	GL_BindShader( glsl.FSR_rcas );
+	ASSERT( RI->currentshader != NULL );
+
+	// native screen size (not inverted)
+	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, w, h );
+
+	RenderFSQ( w, h );
+
+	GL_BindShader( NULL );
+	GL_CleanUpTextureUnits( 0 );
+}
+
 void SMAA( void )
 {
 	if( gl_smaa->value <= 0 )
 		return;
 
-	GL_Setup2D();
+	const int w = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 );
+	const int h = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 );
+
+	// set up full screen workspace
+	pglMatrixMode( GL_PROJECTION );
+	pglLoadIdentity();
+	pglOrtho( 0, w, h, 0, -99999, 99999 );
+	pglMatrixMode( GL_MODELVIEW );
+	pglLoadIdentity();
 
 	// 1: edge detection
 
 	GL_Bind( GL_TEXTURE0, SMAA_AlbedoTex );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h );
 
-	pglViewport( 0, 0, glState.width, glState.height );
+	pglViewport( 0, 0, w, h );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, SMAA_fbo );
 	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_EdgeTex ), 0 );
 
 	GL_BindShader( glsl.SMAAEdgeDetect );
 	ASSERT( RI->currentshader != NULL );
 
-	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height), (float)(glState.width), (float)(glState.height) );
-	RenderFSQ( glState.width, glState.height );
-
+	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)w, 1.0f / (float)h, (float)w, (float)h );
+	RenderFSQ( w, h );
+	
 	// 2: blending weights
 
 	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, SMAA_BlendTex ), 0 );
@@ -1312,8 +1344,8 @@ void SMAA( void )
 	GL_Bind( GL_TEXTURE1, SMAA_SearchTex );
 	GL_Bind( GL_TEXTURE2, SMAA_AreaTex );
 
-	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height), (float)(glState.width), (float)(glState.height) );
-	RenderFSQ( glState.width, glState.height );
+	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)w, 1.0f / (float)h, (float)w, (float)h );
+	RenderFSQ( w, h );
 	
 	// back to base FBO
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
@@ -1326,12 +1358,12 @@ void SMAA( void )
 	GL_Bind( GL_TEXTURE0, SMAA_AlbedoTex );
 	GL_Bind( GL_TEXTURE1, SMAA_BlendTex );
 
-	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height), (float)(glState.width), (float)(glState.height) );
-	RenderFSQ( glState.width, glState.height );
+	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)w, 1.0f / (float)h, (float)w, (float)h );
+	RenderFSQ( w, h );
 
 	// debug
 //	GL_Bind( GL_TEXTURE0, SMAA_BlendTex );
-//	RenderFSQ( glState.width, glState.height );
+//	RenderFSQ( w, h );
 
 	GL_BindShader( NULL );
 	GL_CleanupAllTextureUnits();

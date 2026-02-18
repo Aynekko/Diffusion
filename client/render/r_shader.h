@@ -205,6 +205,8 @@ typedef struct
 	glsl_program_t *SMAAEdgeDetect;
 	glsl_program_t *SMAABlendWeight;
 	glsl_program_t *SMAANeighborBlend;
+	glsl_program_t *FSR_easu;
+	glsl_program_t *FSR_rcas;
 } ref_shaders_t;
 
 void GL_AddShaderDirective( char *options, const char *directive );

@@ -2173,6 +2173,41 @@ void R_VidInit( void )
 	glState.width = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 ) * tr.renderscale;
 	glState.height = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 ) * tr.renderscale;
 
+	if( tr.screen_depth )
+	{
+		FREE_TEXTURE( tr.screen_depth );
+		tr.screen_depth = 0;
+	}
+
+	if( !tr.screen_depth )
+		tr.screen_depth = CREATE_TEXTURE( "*screendepth", glState.width, glState.height, NULL, TF_DEPTHBUFFER );
+
+	if( tr.screen_color )
+	{
+		FREE_TEXTURE( tr.screen_color );
+		tr.screen_color = 0;
+	}
+
+	if( !tr.screen_color )
+		tr.screen_color = CREATE_TEXTURE( "*screencolor", glState.width, glState.height, NULL, TF_COLORBUFFER );
+
+	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+	GL_Bind( GL_TEXTURE0, 0 );
+
+	if( tr.screen_color_native )
+	{
+		FREE_TEXTURE( tr.screen_color_native );
+		tr.screen_color_native = 0;
+	}
+
+	// create this texture only when it is needed
+	if( gl_renderscale->value < 1.0f )
+	{
+		if( !tr.screen_color_native )
+			tr.screen_color_native = CREATE_TEXTURE( "*screencolornative", RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 ), RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 ), NULL, TF_COLORBUFFER );
+	}
+
 	Msg( "^2Rendering resolution:^7 %ix%i, scale: %f\n", glState.width, glState.height, tr.renderscale );
 
 	// release old subview textures
@@ -2199,8 +2234,6 @@ void R_VidInit( void )
 	tr.glsl_valid_sequence++; // refresh shader cache
 
 	InitPostTextures();
-
-//	R_InitBloomTextures();
 
 	g_StudioRenderer.VidInit();
 

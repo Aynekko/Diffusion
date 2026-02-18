@@ -1675,6 +1675,23 @@ static void GL_InitEnhanceUniforms( glsl_program_t *shader )
 	GL_ShowProgramUniforms( shader );
 }
 
+static void GL_InitFSRUniforms( glsl_program_t *shader, bool bEASU )
+{
+	ASSERT( shader != NULL );
+
+	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
+	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
+	if( bEASU )
+		shader->u_GenericCondition = pglGetUniformLocationARB( shader->handle, "u_GenericCondition" );
+
+	GL_BindShader( shader );
+	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
+	GL_BindShader( GL_NONE );
+
+	GL_ValidateProgram( shader );
+	GL_ShowProgramUniforms( shader );
+}
+
 static void GL_InitSMAAEdgeDetectUniforms( glsl_program_t *shader )
 {
 	ASSERT( shader != NULL );
@@ -2982,6 +2999,11 @@ void GL_InitGPUShaders( void )
 	// various screen effects - sharpen, saturation...
 	glsl.Enhance = shader = GL_InitGPUShader( "Enhance", "generic", "enhance" );
 	GL_InitEnhanceUniforms( shader );
+
+	glsl.FSR_easu = shader = GL_InitGPUShader( "FSR_easu", "generic", "fsr_easu" );
+	GL_InitFSRUniforms( shader, true );
+	glsl.FSR_rcas = shader = GL_InitGPUShader( "FSR_rcas", "generic", "fsr_rcas" );
+	GL_InitFSRUniforms( shader, false );
 
 	glsl.SMAAEdgeDetect = shader = GL_InitGPUShader( "SMAAEdgeDetect", "smaaedgedetect", "smaaedgedetect" );
 	GL_InitSMAAEdgeDetectUniforms( shader );
