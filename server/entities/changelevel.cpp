@@ -265,7 +265,11 @@ void CChangeLevel::ChangeLevelNow(CBaseEntity* pActivator)
 			UTIL_Remove( pPlayerx->m_hDrone );
 			pPlayerx->GiveAmmo( 1, g_WpnAmmo[WEAPON_DRONE], 1 );
 		}
-		pPlayerx->m_pFlashlightMonster = NULL;
+		if( pPlayerx->m_pFlashlightMonster )
+		{
+			UTIL_Remove( pPlayerx->m_pFlashlightMonster );
+			pPlayerx->m_pFlashlightMonster = NULL;
+		}
 	}
 
 	//	ALERT( at_console, "Level touches %d levels\n", ChangeList( levels, 16 ) );
