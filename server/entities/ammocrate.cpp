@@ -13,6 +13,7 @@
 #define MAX_EQUIP 32
 
 #define SF_DYNAMIC_RESUPPLY BIT(0) // give the player what he needs the most
+#define SF_NO_DYNAMIC_FALLBACK BIT(1) // don't fallback to dynamic if can't give ammo from the item list - just give nothing
 
 class CAmmoCrate : public CBaseAnimating
 {
@@ -259,7 +260,7 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 	pPlayer->SendAchievementStatToClient( ACH_AMMOCRATES, 1, ACHVAL_ADD );
 
 	// if player didn't receive any ammo from items (ammo full)
-	// replace it with the dynamic ammo call
+	// replace it with the dynamic ammo call... *(read a comment further)
 	m_iCounter = 0;
 
 	// give items written in the entity
@@ -290,6 +291,10 @@ void CAmmoCrate::GiveItems( CBasePlayer *pPlayer )
 
 	// dynamic resupply - give player what he needs the most
 	if( !HasSpawnFlags( SF_DYNAMIC_RESUPPLY ) && m_iCounter == 0 )
+		return;
+
+	// * ...but if this explicit flag is set, and dynamic resupply is NOT set - ignore
+	if( HasSpawnFlags( SF_NO_DYNAMIC_FALLBACK ) && !HasSpawnFlags( SF_DYNAMIC_RESUPPLY ) )
 		return;
 
 	// weapon ids which have the lowest ammo
