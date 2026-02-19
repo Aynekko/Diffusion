@@ -50,10 +50,6 @@ extern DLL_GLOBAL BOOL		g_fGameOver;
 extern DLL_GLOBAL	BOOL	g_fDrawLines;
 int gEvilImpulse101;
 
-float     m_fRegenRemander; // DiffusionRegen
-float	  RegenWaitTime;
-float     RegenRate;
-
 extern DLL_GLOBAL int		g_iSkillLevel, gDisplayTitle;
 
 BOOL gInitHUD = TRUE;
@@ -2914,6 +2910,8 @@ void CBasePlayer::PreThink( void )
 		BhopEnabled = false;
 	}
 
+	RegenerateHealth();
+
 	g_pGameRules->PlayerThink( this );
 
 	if( g_fGameOver )
@@ -4438,8 +4436,9 @@ void CBasePlayer::LookAtPlayers( void )
 	SetBoneController( 3, headyaw );
 }
 
+// be aware! gpGlobals->frametime equals zero in PostThink if FL_FROZEN flag is set!
 void CBasePlayer::PostThink()
-{		
+{
 	/*
 	static float tm = 0;
 	if( pev->button & IN_USE && tm < gpGlobals->time )
@@ -4662,12 +4661,10 @@ void CBasePlayer::PostThink()
 	CheckPowerups(pev);
 	
 	UpdatePlayerSound();
-
+	
 	ManageStamina();
 
 	Dash();
-	
-	RegenerateHealth();
 	
 	// something bad happened
 	if( HasFlag( F_PLAYER_HASITEM ) && (m_pHoldableItem == NULL) )
@@ -4950,22 +4947,20 @@ void CBasePlayer::RegenerateHealth(void)
 		if( pev->health > 100 )
 			RegenRate *= 0.5f; // bonus health regenerate slower
 
-		if (IsAlive() && (pev->health < pev->max_health))
+		if( IsAlive() && (pev->health < pev->max_health) )
 		{
 			if (gpGlobals->time > m_fTimeLastHurt + RegenWaitTime)
 			{
 				// Regenerate based on rate, and scale it by the frametime
 				m_fRegenRemander += RegenRate * gpGlobals->frametime;
-
-				if (m_fRegenRemander >= 1)
+				
+				if( m_fRegenRemander >= 1.0f )
 				{
 					TakeHealth(m_fRegenRemander, DMG_GENERIC);
 					SendAchievementStatToClient( ACH_HPREGENERATE, (int)m_fRegenRemander, ACHVAL_ADD );
 					m_fRegenRemander = 0;
 				}
 			}
-			else
-				return;
 		}
 	}
 }

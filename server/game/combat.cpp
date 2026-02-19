@@ -834,7 +834,7 @@ int CBaseMonster :: TakeHealth (float flHealth, int bitsDamageType)
 	// UNDONE: time-based damage
 
 	m_bitsDamageType &= ~(bitsDamageType & ~DMG_TIMEBASED);
-	
+
 	return CBaseEntity::TakeHealth(flHealth, bitsDamageType);
 }
 

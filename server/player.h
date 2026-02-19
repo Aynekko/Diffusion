@@ -664,6 +664,10 @@ public:
 	bool bShowZoomHint;
 
 	float m_flNextRedScreenFromDamage; // not saved
+
+	float m_fRegenRemander; // DiffusionRegen not saved
+	float RegenWaitTime;
+	float RegenRate;
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025
