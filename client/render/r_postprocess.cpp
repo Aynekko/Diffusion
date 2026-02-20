@@ -1262,7 +1262,7 @@ void Enhance( void )
 
 void FSR( void )
 {
-	if( gl_renderscale->value >= 1.0f )
+	if( gl_fsr->value <= 0.0f )
 		return;
 
 	const int w = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 );
@@ -1288,7 +1288,8 @@ void FSR( void )
 	RenderFSQ( w, h );
 
 	// get native full screen copy
-	GL_Bind( GL_TEXTURE0, tr.screen_color_native );
+	if( gl_renderscale->value < 1.0f ) // switch to native texture only in non-native resolution
+		GL_Bind( GL_TEXTURE0, tr.screen_color_native );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h );
 
 	GL_BindShader( glsl.FSR_rcas );

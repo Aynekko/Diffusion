@@ -120,5 +120,6 @@ extern cvar_t *cl_background;
 extern cvar_t *hud_fontscale;
 extern cvar_t *r_pvs_radius;
 extern cvar_t *r_decals_ext;
+extern cvar_t *gl_fsr;
 
 #endif//R_CVARS_H

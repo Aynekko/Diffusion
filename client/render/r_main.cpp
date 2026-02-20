@@ -2230,8 +2230,10 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 
 	SMAA();
 
-	FSR();
-//	DownScale();
+	if( gl_fsr->value > 0.0f )
+		FSR();
+	else
+		DownScale();
 
 	R_RestoreGLState();
 
