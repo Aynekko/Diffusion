@@ -34,7 +34,7 @@ GNU General Public License for more details.
 #define SHADER_STATUS_FROMBINARY	BIT( 11 )
 
 #define SHADER_STATUS_OK		( SHADER_PROGRAM_LINKED|SHADER_VERTEX_COMPILED|SHADER_FRAGMENT_COMPILED )
-#define CheckShader( shader )		( shader && shader->status == SHADER_STATUS_OK )
+#define CheckShader( shader )		( shader && shader->status & SHADER_STATUS_OK )
 #define ScreenCopyRequired( x )	( x && FBitSet( x->status, SHADER_USE_SCREENCOPY ))
 
 enum
