@@ -110,10 +110,10 @@ void GL_Cull( const GLenum cull )
 	if( glState.faceCull == cull )
 		return;
 	
-	if( !cull )
+	if( cull == GL_NONE )
 	{
 		pglDisable( GL_CULL_FACE );
-		glState.faceCull = 0;
+		glState.faceCull = GL_NONE;
 		return;
 	}
 

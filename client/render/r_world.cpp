@@ -2821,6 +2821,7 @@ void R_DrawBrushList( void )
 	int	cached_mirror = -1;
 	int	cached_lightmap = -1;
 	int	cached_texture = -1;
+	GLenum cached_cull = GL_FRONT;
 	bool flush_buffer = false;
 	cl_entity_t *e = RI->currententity;
 	float cached_texofs[2] = { -1.0f, -1.0f };
@@ -2864,6 +2865,8 @@ void R_DrawBrushList( void )
 
 	bool bGotScreencopy = false;
 
+	GL_Cull( GL_FRONT );
+
 	for( i = 0; i < tr.num_draw_surfaces; i++ )
 	{
 		const gl_bmodelface_t *entry = &tr.draw_surfaces[i];
@@ -2889,6 +2892,9 @@ void R_DrawBrushList( void )
 			flush_buffer = true;
 
 		if( cached_texture != iTexnum )
+			flush_buffer = true;
+
+		if( cached_cull != glState.faceCull )
 			flush_buffer = true;
 
 		const int bLandscape = FBitSet( s->flags, SURF_LANDSCAPE ) ? 1 : 0;
@@ -2930,6 +2936,8 @@ void R_DrawBrushList( void )
 			}
 			else
 				waveHeight = 0.0f;
+
+			brush_params[1].w = waveHeight;
 
 			// write constants
 			pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
@@ -3121,7 +3129,10 @@ void R_DrawBrushList( void )
 				// bind real data
 				GL_Bind( GL_TEXTURE1, tr.lightmaps[es->lightmaptexturenum].lightmap );
 				if( FBitSet( s->flags, SURF_WATER ) )
-					GL_Bind( GL_TEXTURE2, tr.blackTexture ); // FIXME for some reason deluxmap is visible on water on AMD card...wtf?
+				{
+					if( !(RI->currentshader->status & SHADER_USE_CUBEMAPS) )
+						GL_Bind( GL_TEXTURE2, tr.blackTexture );
+				}
 				else
 				{
 					if( tr.lowmemory )
@@ -3139,6 +3150,8 @@ void R_DrawBrushList( void )
 			GL_Cull( GL_NONE );
 		else 
 			GL_Cull( GL_FRONT );
+
+		cached_cull = glState.faceCull;
 
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
 		{

@@ -1011,6 +1011,9 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 {
 	ASSERT( shader != NULL );
 
+	const bool bWater = GL_FindShaderDirective( shader, "BMODEL_WATER" );
+	const bool bRefractedWater = (bWater && GL_FindShaderDirective( shader, "BMODEL_WATER_REFRACTION" ));
+
 	shader->u_ColorMap = pglGetUniformLocationARB( shader->handle, "u_ColorMap" );
 	shader->u_LightMap = pglGetUniformLocationARB( shader->handle, "u_LightMap" );
 	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
@@ -1037,19 +1040,25 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 	}
 
 	shader->u_BrushParams = pglGetUniformLocationARB( shader->handle, "u_BrushParams" );
-	if( GL_FindShaderDirective( shader, "BMODEL_WATER" ) && GL_FindShaderDirective( shader, "BMODEL_WATER_REFRACTION" ) )
+
+	if( bRefractedWater )
 	{
 		shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
 	//	shader->u_zFar = pglGetUniformLocationARB( shader->handle, "u_zFar" );
 	}
-	shader->u_DeluxeMap = pglGetUniformLocationARB( shader->handle, "u_DeluxeMap" );
+
+	if( !bWater )
+		shader->u_DeluxeMap = pglGetUniformLocationARB( shader->handle, "u_DeluxeMap" );
+
 	if( GL_FindShaderDirective( shader, "BMODEL_SPECULAR" ) )
 	{
 		shader->u_GlossScale = pglGetUniformLocationARB( shader->handle, "u_GlossScale" );
 		shader->u_GlossSmoothness = pglGetUniformLocationARB( shader->handle, "u_GlossSmoothness" );
 	}
+
 	if( GL_FindShaderDirective( shader, "BMODEL_EMBOSS" ) )
 		shader->u_EmbossScale = pglGetUniformLocationARB( shader->handle, "u_EmbossScale" );
+
 	shader->u_Fresnel = pglGetUniformLocationARB( shader->handle, "u_Fresnel" );
 
 	if( GL_FindShaderDirective( shader, "BMODEL_MULTI_LAYERS" ) )
@@ -1065,7 +1074,7 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
 	pglUniform1iARB( shader->u_LightMap, GL_TEXTURE1 );
-	if( !GL_FindShaderDirective( shader, "BMODEL_WATER" ) )
+	if( !bWater )
 		pglUniform1iARB( shader->u_DeluxeMap, GL_TEXTURE2 );
 	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE3 );
 	pglUniform1iARB( shader->u_NormalMap, GL_TEXTURE4 );
@@ -1077,19 +1086,15 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 	else if( GL_FindShaderDirective( shader, "BMODEL_WATER_PLANAR" ) )
 		pglUniform1iARB( shader->u_WaterTex, GL_TEXTURE5 );
 
-	if( GL_FindShaderDirective( shader, "BMODEL_WATER_REFRACTION" ) )
+	if( bRefractedWater )
 		pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE6 );
 
 	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) )  // diffusioncubemaps
 	{
-		if( GL_FindShaderDirective( shader, "BMODEL_WATER" ) )
-		{
+		if( bWater )
 			pglUniform1iARB( shader->u_CubemapBox, GL_TEXTURE2 ); // water won't use deluxmap so I'll use it here
-		}
 		else
-		{
 			pglUniform1iARB( shader->u_CubemapBox, GL_TEXTURE6 ); // other brushes won't use depthmap so I'll use it here
-		}
 	}
 
 	GL_BindShader( GL_NONE );

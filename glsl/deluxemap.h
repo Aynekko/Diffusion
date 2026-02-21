@@ -17,13 +17,17 @@ GNU General Public License for more details.
 #define DELUXEMAP_H
 
 uniform sampler2D	u_LightMap;
+#if !defined( BMODEL_WATER )
 uniform sampler2D	u_DeluxeMap;
+#endif
 
+#if !defined( BMODEL_WATER )
 vec3 deluxemap2D( sampler2D tex, const vec2 uv )
 {
 	vec3 deluxmap = texture2D( tex, uv ).xyz;
 	return (( deluxmap - 0.5 ) * 2.0 );
 }
+#endif
 
 void ApplyLightStyle( const vec3 lminfo, const vec3 N, const vec3 V, const vec3 glossmap, float GlossSmoothness, float GlossScale, inout vec3 light, inout vec3 gloss )
 {

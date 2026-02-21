@@ -57,12 +57,15 @@ uniform vec2		u_ReflectScale;
 #endif
 
 #if defined( BMODEL_REFLECTION_PLANAR ) || defined( BMODEL_WATER_PLANAR )
-uniform sampler2D	u_WaterTex;     // water diffuse texture to mix with reflection
-uniform float           u_PlanarReflectScale;
+	#if defined( BMODEL_WATER_PLANAR )
+	uniform sampler2D	u_WaterTex;     // water diffuse texture to mix with reflection
+	#endif
+uniform float		u_PlanarReflectScale;
 #endif
 
+#if defined( BMODEL_WATER ) && defined( BMODEL_WATER_REFRACTION )
 uniform sampler2D	u_DepthMap;
-uniform sampler2D	u_GlowMap;
+#endif
 
 uniform vec4		u_RenderColor;
 uniform vec4		u_BrushParams[3];
@@ -293,11 +296,6 @@ void main( void )
 #if defined( BMODEL_INTERIOR )
 	if( diffuse.a < 0.98 )
 		diffuse = InteriorMapping( diffuse, var_TexDiffuse, N, 0, var_ViewVec, var_Position ); // u_realtime is currently not used
-#endif
-
-	// apply fullbright pixels
-#if defined( BMODEL_HAS_LUMA )
-	diffuse.rgb += texture2D( u_GlowMap, var_TexDiffuse ).rgb;
 #endif
 
 //------------------------------------------------------------------------------------------------------
