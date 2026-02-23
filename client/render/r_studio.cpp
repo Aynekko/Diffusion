@@ -2431,6 +2431,9 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 		}
 	}
 
+	if( m_pCurrentEntity->curstate.effects & EF_ROTATING )
+		FuncRotatingClient( m_pCurrentEntity );
+
 	Vector origin = m_pCurrentEntity->curstate.origin;
 	Vector angles = m_pCurrentEntity->curstate.angles;
 	if( m_fDrawViewModel )
@@ -2450,9 +2453,6 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 	}
 
 	Vector scale = Vector( 1.0f, 1.0f, 1.0f );
-
-	if( m_pCurrentEntity->curstate.effects & EF_ROTATING )
-		FuncRotatingClient( m_pCurrentEntity );
 
 	if( CVAR_TO_BOOL( m_pCvarLod ) )
 	{

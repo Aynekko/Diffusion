@@ -832,12 +832,6 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 
 		if( ent->curstate.effects & EF_SCREENMOVIE )
 			R_UpdateCinSound( ent ); // update cin sound properly
-
-		if( ent->curstate.effects & EF_ROTATING )
-		{
-			if( ent->model->type == mod_studio )
-				FuncRotatingClient( ent );
-		}
 		
 		// diffusion - setup the laser spot's local origin
 		if( ent->curstate.effects & EF_MYLASERSPOT )
@@ -1029,7 +1023,7 @@ void FuncRotatingClient( cl_entity_t *e )
 	iuser2 - speed
 	*/
 	
-	if( (tr.time != tr.oldtime) && (e->curstate.iuser1 == 1) ) // do not rotate when paused or off
+	if( (tr.time != tr.oldtime) && (e->curstate.iuser1 == 1) && !tr.fGamePaused ) // do not rotate when paused or off
 	{
 		e->baseline.angles.x += e->curstate.iuser2 * g_fFrametime * e->curstate.vuser1.x;
 		e->baseline.angles.y += e->curstate.iuser2 * g_fFrametime * e->curstate.vuser1.y;
