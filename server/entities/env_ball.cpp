@@ -275,6 +275,8 @@ public:
 	float m_maxFrame;
 
 	int m_iTrail;
+	bool bTailOn; // not saved
+	float m_flTailCreationDelay; // sets in precache, not saved
 
 	DECLARE_DATADESC();
 };
@@ -330,7 +332,7 @@ void CEnvBallEntity::Spawn( void )
 	Bounced = 0; // haven't bounced yet
 
 	SetThink( &CEnvBallEntity::AnimateThink );
-	SetNextThink( 0.1 );
+	SetNextThink( 0.2 );
 }
 
 void CEnvBallEntity::Precache( void )
@@ -351,6 +353,8 @@ void CEnvBallEntity::Precache( void )
 
 	SpriteExplosion = PRECACHE_MODEL( "sprites/white.spr" );
 	m_iTrail = PRECACHE_MODEL( "sprites/smoke.spr" );
+
+	m_flTailCreationDelay = gpGlobals->time + 0.1f;
 }
 
 void CEnvBallEntity::AnimateThink( void )
@@ -383,8 +387,10 @@ void CEnvBallEntity::AnimateThink( void )
 
 	if( HasSpawnFlags( ENVBALL_TAIL ) )
 	{
-		// create trail
-		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+		if( !bTailOn && gpGlobals->time > m_flTailCreationDelay )
+		{
+			// create trail
+			MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
 			WRITE_BYTE( TE_BEAMFOLLOW );
 			WRITE_SHORT( entindex() );	// entity
 			WRITE_SHORT( m_iTrail );	// model
@@ -394,9 +400,10 @@ void CEnvBallEntity::AnimateThink( void )
 			WRITE_BYTE( pev->rendercolor.y );   // g
 			WRITE_BYTE( pev->rendercolor.z );   // b
 			WRITE_BYTE( 15 );	// brightness
-		MESSAGE_END();
+			MESSAGE_END();
 
-		pev->spawnflags &= ~ENVBALL_TAIL;
+			bTailOn = true;
+		}
 	}
 
 	SetNextThink( 0 );
