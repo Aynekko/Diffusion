@@ -2863,7 +2863,7 @@ bool GL_PrecompileUberShaders( int &processed, int &total )
 	shaderlist_t curshader = shaders[shaders_processed_total];
 
 	int compiled_shader_counter = 0; // allow to load up to 10 shaders at once if they are loaded from disk cache or from hash
-	int compiled_shader_max = 10;
+	int compiled_shader_max = 20;
 
 	glsl_program_t *shader;
 	while( compiled_shader_counter < compiled_shader_max )
@@ -2938,7 +2938,7 @@ bool GL_PrecompileUberShaders( int &processed, int &total )
 				ALERT( at_aiconsole, "^1GL_PrecompileUberShaders: unhandled uniforms for shader %s!^7\n", curshader.glname );
 
 			compiled_shader_counter++;
-			compiled_shader_max -= 4; // decrease workload
+			compiled_shader_max -= 7; // decrease workload
 			compiled_count_total++;
 			// advance shader
 			shaders_processed_total++;
