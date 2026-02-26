@@ -467,6 +467,15 @@ void CStudioModelRenderer::UpdateInstanceMaterials( void )
 		m_pModelInstance->materials[i].glsl_sequence_proj[0] = -1;
 		m_pModelInstance->materials[i].glsl_sequence_proj[1] = -1;
 	}
+
+	// check for texture animations
+	mstudiomaterial_t *pmat = (mstudiomaterial_t *)m_pModelInstance->materials;
+	for( int i = 0; i < m_pStudioHeader->numtextures; i++, pmat++ )
+	{
+		int anim_id = tr.materials[pmat->gl_diffuse_id].animation_id;
+		if( anim_id >= 0 )
+			TryReloadingAnimation( pmat );
+	}
 }
 
 void CStudioModelRenderer::ClearInstanceData( bool create )
@@ -4796,21 +4805,6 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 			m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata( m_pRenderModel );
 
 			r_stats.c_studio_models_drawn++;
-		}
-
-		// check for texture animations
-		if( !FBitSet( m_pModelInstance->info_flags, MF_TEXTURE_ANIMS_DONE ) )
-		{
-			// reload material animations
-			mstudiomaterial_t *pmat = (mstudiomaterial_t *)m_pRenderModel->materials;
-			for( int i = 0; i < m_pStudioHeader->numtextures; i++, pmat++ )
-			{
-				int anim_id = tr.materials[pmat->gl_diffuse_id].animation_id;
-				if( anim_id >= 0 )
-					TryReloadingAnimation( pmat );
-			}
-
-			m_pModelInstance->info_flags |= MF_TEXTURE_ANIMS_DONE;
 		}
 		
 		StudioRenderModel();
