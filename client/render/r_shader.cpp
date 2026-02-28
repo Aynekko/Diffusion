@@ -2862,8 +2862,12 @@ bool GL_PrecompileUberShaders( int &processed, int &total )
 
 	shaderlist_t curshader = shaders[shaders_processed_total];
 
-	int compiled_shader_counter = 0; // allow to load up to 10 shaders at once if they are loaded from disk cache or from hash
-	float mult = 0.0167f / g_fFrametime;
+	int compiled_shader_counter = 0; // allow to load up to 50 shaders at once if they are loaded from disk cache or from hash
+	float fpsmax = fps_max->value;
+	if( fpsmax <= 0.0f ) fpsmax = 60.0f;
+	float target_frametime = 1.0f / fpsmax;
+	if( target_frametime < 0.01f ) target_frametime = 0.01f;
+	float mult = target_frametime / g_fFrametime;
 	int compiled_shader_max = 20 * mult;
 	compiled_shader_max = bound( 3, compiled_shader_max, 50 );
 
