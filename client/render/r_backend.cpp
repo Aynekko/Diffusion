@@ -423,6 +423,7 @@ void GL_BindFBO( const GLint buffer )
 // credits: https://stackoverflow.com/questions/5369507/opengl-es-1-0-2d-rounded-rectangle by user6458202
 //=============================================================================================================
 #define GLW_SMALL_ROUNDED_CORNER_SLICES 5  // How many vertexes you want of each corner
+static bool bCornersDone = false;
 static Vector2D glwRoundedCorners[GLW_SMALL_ROUNDED_CORNER_SLICES] = { Vector2D( 0, 0 ) }; // This array keep the generated vertexes of one corner
 static void createRoundedCorners( Vector2D *arr, int num )
 {
@@ -434,16 +435,17 @@ static void createRoundedCorners( Vector2D *arr, int num )
 		arr[i].x = cosf( a );
 		arr[i].y = sinf( a );
 	}
+	bCornersDone = true;
 }
-void FillRoundedRGBA( const float x, const float y, const float width, const float height, float radius, Vector4D rgba )
+void FillRoundedRGBA( const float x, const float y, const float width, const float height, float radius, float r, float g, float b, float a )
 {
-	if( glwRoundedCorners[0].x + glwRoundedCorners[0].y == 0 )
+	if( !bCornersDone )
 		createRoundedCorners( glwRoundedCorners, GLW_SMALL_ROUNDED_CORNER_SLICES );
 
-	rgba.x = bound( 0.0f, rgba.x, 1.0f );
-	rgba.y = bound( 0.0f, rgba.y, 1.0f );
-	rgba.z = bound( 0.0f, rgba.z, 1.0f );
-	rgba.w = bound( 0.0f, rgba.w, 1.0f );
+	r = bound( 0.0f, r, 1.0f );
+	g = bound( 0.0f, g, 1.0f );
+	b = bound( 0.0f, b, 1.0f );
+	a = bound( 0.0f, a, 1.0f );
 
 	float left = x;
 	float top = y;
@@ -452,11 +454,10 @@ void FillRoundedRGBA( const float x, const float y, const float width, const flo
 	int i;
 	if( radius > width * 0.5f ) radius = width * 0.5f;
 	if( radius > height * 0.5f ) radius = height * 0.5f;
-	pglDisable( GL_TEXTURE_2D );
 	GL_Texture2D( GL_FALSE );
 	GL_Blend( GL_TRUE );
 	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-	GL_Color4f( rgba.x, rgba.y, rgba.z, rgba.w );
+	GL_Color4f( r, g, b, a );
 	pglBegin( GL_QUAD_STRIP );
 	// Draw left rounded side.
 	for( i = 0; i < GLW_SMALL_ROUNDED_CORNER_SLICES; ++i )

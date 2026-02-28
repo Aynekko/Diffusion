@@ -136,7 +136,7 @@ int CHudDeathNotice :: Draw( float flTime )
 		if( CheckLocalPlayerName( rgDeathNoticeList[i].szVictim ) || CheckLocalPlayerName( rgDeathNoticeList[i].szKiller ) )
 		{
 			// -5 and +10 are the 5px rectangle extensions to the left and right
-			FillRoundedRGBA( x - 5, y - (SpriteHeight * 0.25f), ScreenWidth - x - DEATHNOTICE_RIGHT + 10, SpriteHeight + 5, DEATHNOTICE_ROUNDING, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+			FillRoundedRGBA( x - 5, y - (SpriteHeight * 0.25f), ScreenWidth - x - DEATHNOTICE_RIGHT + 10, SpriteHeight + 5, DEATHNOTICE_ROUNDING, 0.5f, 0.5f, 0.5f, 0.5f );
 		}
 
 		// and now, draw killer's name

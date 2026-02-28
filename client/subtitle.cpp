@@ -148,7 +148,7 @@ int CHudSubtitle::Draw( float flTime )
 	int frame_width = subtitle_width + frameborder + frameborder;
 	y -= frame_height;
 
-	FillRoundedRGBA( x - frameborder, y - frameborder, frame_width, frame_height, 10.0f, Vector4D( 0.1f, 0.1f, 0.1f, alpha * 0.75f ) );
+	FillRoundedRGBA( x - frameborder, y - frameborder, frame_width, frame_height, 10.0f, 0.1f, 0.1f, 0.1f, alpha * 0.75f );
 
 	int tmp_x = x;
 	int tmp_y = y;

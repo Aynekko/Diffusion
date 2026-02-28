@@ -112,7 +112,7 @@ void CHudHealthVisual::DrawAliceHealth( void )
 	const float barh = picsizey * 0.75f;
 	const float bary = y + picsizey * 0.25f;
 	const float barw = 15 * gHUD.fScale;
-	FillRoundedRGBA( barx, bary, barw, barh, 5, Vector4D( 0.8f, 0.8f, 0.8f, 0.8f ) );
+	FillRoundedRGBA( barx, bary, barw, barh, 5, 0.8f, 0.8f, 0.8f, 0.8f );
 
 	// red health
 	if( iAliceHealth <= 0 )
@@ -121,7 +121,7 @@ void CHudHealthVisual::DrawAliceHealth( void )
 	const float redbarh_full = barh * 0.95f;
 	const float redbarh = redbarh_full * (float)(iAliceHealth * 0.01f);
 	const float redbarw = barw * 0.9f;
-	FillRoundedRGBA( barx + (barw - redbarw) * 0.5f, (bary + (barh - redbarh_full) * 0.5f) + (redbarh_full - redbarh), redbarw, redbarh, 5, Vector4D( 1.0f, 0.1f, 0.1f, 0.75f ) );
+	FillRoundedRGBA( barx + (barw - redbarw) * 0.5f, (bary + (barh - redbarh_full) * 0.5f) + (redbarh_full - redbarh), redbarw, redbarh, 5, 1.0f, 0.1f, 0.1f, 0.75f );
 }
 
 int CHudHealthVisual :: Draw(float flTime)
@@ -184,7 +184,7 @@ int CHudHealthVisual :: Draw(float flTime)
 	if( flash_alpha > 0.0f )
 	{
 		flash_alpha -= g_fFrametime;
-		FillRoundedRGBA( cell_start_x - 5, cell_start_y - 5, total_cells_width + 10, cell_height + 10, 10, Vector4D( 1.0f, 0.0f, 0.0f, flash_alpha ) );
+		FillRoundedRGBA( cell_start_x - 5, cell_start_y - 5, total_cells_width + 10, cell_height + 10, 10, 1.0f, 0.0f, 0.0f, flash_alpha );
 	}
 
 	float transp = (health_val < m_iMaxHealth * 0.25f) ? (0.65f + fabs( sin( tr.time * 3 ) ) * 0.25f) : 0.65f;
@@ -192,9 +192,9 @@ int CHudHealthVisual :: Draw(float flTime)
 	for( cell = 0; cell < total_cells; cell++ )
 	{
 		if( cell >= num_red_cells ) // draw grey cells
-			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, 0.5f, 0.5f, 0.5f, 0.5f );
 		else
-			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, transp ) );
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, r, g, b, transp );
 		cell_start_x += cell_width + cell_margin;
 	}
 
@@ -208,7 +208,7 @@ int CHudHealthVisual :: Draw(float flTime)
 			if( cell > ( health_val - m_iMaxHealth ) * 0.5f )
 				break;
 
-			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, spec_cell_height, 3, Vector4D( r, g, b, 0.8f ) );
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, spec_cell_height, 3, r, g, b, 0.8f );
 			cell_start_x += cell_width + cell_margin;
 		}
 	}

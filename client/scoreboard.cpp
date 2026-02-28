@@ -225,13 +225,13 @@ int CHudScoreboard :: Draw( float fTime )
 	ScaleColors( r, g, b, boardA * 255 );
 
 	// diffusion - server name and map name (with background)
-	FillRoundedRGBA( xpos_rel, ypos - (50.0f * gHUD.fScale) - (15.0f * gHUD.fScale), ScoreBoardWidth, 50.0f * gHUD.fScale, 18, Vector4D( 0, 0, 0, 0.59f * boardA ) );
+	FillRoundedRGBA( xpos_rel, ypos - (50.0f * gHUD.fScale) - (15.0f * gHUD.fScale), ScoreBoardWidth, 50.0f * gHUD.fScale, 18, 0, 0, 0, 0.59f * boardA );
 	static char srvname[128];
 	Q_snprintf( srvname, sizeof( srvname ), "%s | %s", gHUD.m_szServerName, world->name );
 	DrawString( xpos, ypos - (50 * gHUD.fScale), srvname, r, g, b );
 
 	// diffusion - table background
-	FillRoundedRGBA( xpos_rel, ypos - 10, ScoreBoardWidth, ypos_bottom, 18, Vector4D( 0, 0, 0, 0.59f * boardA ) ); // bottom border
+	FillRoundedRGBA( xpos_rel, ypos - 10, ScoreBoardWidth, ypos_bottom, 18, 0, 0, 0, 0.59f * boardA ); // bottom border
 	
 	r = 255, g = 140, b = 0;
 	ScaleColors( r, g, b, boardA * 255 );
@@ -375,7 +375,7 @@ int CHudScoreboard :: Draw( float fTime )
 		if( team_info->ownteam ) // if it is their team, draw the background different color
 		{
 			// overlay the background in blue, then draw the score text over it
-			FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, Vector4D( 0.2f, 0.2f, 1.0f, 0.275f * boardA ) );
+			FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, 0.2f, 0.2f, 1.0f, 0.275f * boardA );
 		}
 
 		// draw their name (left to right)
@@ -472,18 +472,18 @@ float CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffs
 			{
 				// green is the suicide color? i wish this could do grey...
 				// diffusion - it can now! :)
-				FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, Vector4D( 0.5f, 0.5f, 0.5f, 0.275f * boardA ) );
+				FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, 0.5f, 0.5f, 0.5f, 0.275f * boardA );
 			}
 			else
 			{
 				// Highlight the killers name - overlay the background in red,  then draw the score text over it
-				FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, Vector4D( 1.0f, 0, 0, (boardA * 15.0f * (float)(m_fLastKillTime - gHUD.m_flTime )) / 255.0f ) );
+				FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, 1.0f, 0, 0, (boardA * 15.0f * (float)(m_fLastKillTime - gHUD.m_flTime )) / 255.0f );
 			}
 		}
 		else if( pl_info->thisplayer ) // if it is their name, draw it a different color
 		{
 			// overlay the background in blue, then draw the score text over it
-			FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, Vector4D( 0.2f, 0.2f, 1.0f, 0.275f * boardA ) );
+			FillRoundedRGBA( NameRangeMin + xpos_rel - 5, ypos, PingRangeMax - 5, RowGap, ROW_ROUNDING, 0.2f, 0.2f, 1.0f, 0.275f * boardA );
 		}
 
 		// draw their name (left to right)

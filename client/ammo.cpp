@@ -1089,7 +1089,7 @@ int CHudAmmo::Draw( float flTime )
 		if( cl_oldammohud->value <= 0 )
 		{
 			// RGB 0 111 210 - same color, but scaled down in brightness
-		//	FillRoundedRGBA( pos_x, pos_y, ammo_frame_w, ammo_frame_h, 10, Vector4D( 0.0f, 111.f / 255.f, 210.f / 255.f, 0.5f ) );
+		//	FillRoundedRGBA( pos_x, pos_y, ammo_frame_w, ammo_frame_h, 10, 0.0f, 111.f / 255.f, 210.f / 255.f, 0.5f );
 
 			// draw the ammo cells, figure out their positions
 			const int total_cells_width = ammo_frame_w - 20; // 10px borders from left and right
@@ -1132,25 +1132,25 @@ int CHudAmmo::Draw( float flTime )
 					for( int cell = 0; cell < total_cells; cell++ )
 					{
 						if( cell == 0 && WeaponID == WEAPON_RPG && pw->iClip ) // for RPG, draw the first cell as green if the rocket is ready
-							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.25f, 1.0f, 0.25f, 0.65f + (m_fFade / 255.f) ) );
+							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, 0.25f, 1.0f, 0.25f, 0.65f + (m_fFade / 255.f) );
 						else if( cell >= weapon_clip ) // draw grey cells
-							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, 0.5f, 0.5f, 0.5f, 0.5f );
 						else if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
-							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
+							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) );
 						else
-							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+							FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) );
 						cell_start_x += cell_width + cell_margin;
 					}
 				}
 				else // we have too much ammo to draw separate cells, use single bar
 				{
 					// draw the full bar (dark)
-					FillRoundedRGBA( cell_start_x, cell_start_y, total_cells_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+					FillRoundedRGBA( cell_start_x, cell_start_y, total_cells_width, cell_height, 3, 0.5f, 0.5f, 0.5f, 0.5f );
 					// draw the bar of actual ammo on top of it
 					if( PaintLowAmmo() && (float)weapon_clip / (float)total_cells <= 0.25f ) // low ammo!
-						FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) ) );
+						FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, 0.8f, 0.08f, 0.08f, 0.65f + (fabs( sin( tr.time * 3 ) ) * 0.25f) );
 					else
-						FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+						FillRoundedRGBA( cell_start_x, cell_start_y, ((float)total_cells_width / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType ), cell_height, 3, cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) );
 				}
 			}
 
@@ -1180,14 +1180,14 @@ int CHudAmmo::Draw( float flTime )
 				// draw the line to the left of the ammo count
 				if( bDrawOfflineAmmo )
 				{
-					FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - ammo_count_width, line_h, 2, Vector4D( 1.0f, 0.25f, 0.25f, OFFLINEFlashAlphaAmmo / 255.0f ) );
+					FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - ammo_count_width, line_h, 2, 1.0f, 0.25f, 0.25f, OFFLINEFlashAlphaAmmo / 255.0f );
 				}
 				else
 				{
 					// draw the full bar (dark)
-					FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - ammo_count_width, line_h, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+					FillRoundedRGBA( line_pos_x, line_pos_y, total_cells_width - ammo_count_width, line_h, 2, 0.5f, 0.5f, 0.5f, 0.5f );
 					// draw the bar of actual ammo on top of it
-					FillRoundedRGBA( line_pos_x, line_pos_y, ((((float)total_cells_width - ammo_count_width) / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType )), line_h, 2, Vector4D( cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) ) );
+					FillRoundedRGBA( line_pos_x, line_pos_y, ((((float)total_cells_width - ammo_count_width) / (float)pw->iMax1) * (float)gWR.CountAmmo( pw->iAmmoType )), line_h, 2, cell_r, cell_g, cell_b, 0.65f + (m_fFade / 255.f) );
 				}
 			}
 		}
@@ -1264,9 +1264,9 @@ int CHudAmmo::Draw( float flTime )
 			for( int cell = 0; cell < total_cells2; cell++ )
 			{
 				if( cell >= secondary_ammo_amount ) // draw grey cells
-					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width2, cell_height2, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width2, cell_height2, 3, 0.5f, 0.5f, 0.5f, 0.5f );
 				else
-					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width2, cell_height2, 3, Vector4D( cell2_r, cell2_g, cell2_b, 0.65f + (m_fFade2 / 255.f) ) );
+					FillRoundedRGBA( cell_start_x, cell_start_y, cell_width2, cell_height2, 3, cell2_r, cell2_g, cell2_b, 0.65f + (m_fFade2 / 255.f) );
 				cell_start_x += cell_width2 + cell_margin2;
 			}
 		}

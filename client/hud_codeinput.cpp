@@ -144,7 +144,7 @@ int CHudCodeInput::Draw( float flTime )
 	const int ymax = (ScreenHeight / 2) + (ImageHeight / 2);
 
 	// slightly blacken the screen
-	FillRoundedRGBA( x - 50, y - 50, ImageWidth + 100, ImageHeight + 100, 50, Vector4D( 0.0f, 0.0f, 0.0f, (150 - (DistanceFromInputStart * 2.0f)) / 255.0f ) );
+	FillRoundedRGBA( x - 50, y - 50, ImageWidth + 100, ImageHeight + 100, 50, 0.0f, 0.0f, 0.0f, (150 - (DistanceFromInputStart * 2.0f)) / 255.0f );
 	
 	// draw user inputs
 	if( CodeInputSpr.Initialized() )
@@ -197,7 +197,7 @@ int CHudCodeInput::Draw( float flTime )
 
 	const float text_x = (ScreenWidth - width) * 0.5f;
 	const float text_y = ScreenHeight * 0.8f;
-	FillRoundedRGBA( text_x - 10, text_y - 10, width + 20, gHUD.m_scrinfo.iCharHeight + 20, 15, Vector4D( 0.2f, 0.2f, 0.2f, 0.8f ) );
+	FillRoundedRGBA( text_x - 10, text_y - 10, width + 20, gHUD.m_scrinfo.iCharHeight + 20, 15, 0.2f, 0.2f, 0.2f, 0.8f );
 	DrawString( text_x, text_y, text, 255, 255, 255 );
 
 	return 1;

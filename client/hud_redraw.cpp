@@ -212,7 +212,7 @@ void CHud::DrawShaderCompilation( void )
 	float ypos = ScreenHeight * 0.8f;
 
 	float txtpos = (ScreenWidth - shadermessage_width) * 0.5f;
-	FillRoundedRGBA( txtpos - 100.0f, ypos - 10.0f, shadermessage_width + 200.0f, 20.0f + (gHUD.m_scrinfo.iCharHeight * 1.5f) + gHUD.m_scrinfo.iCharHeight, 10.0f, Vector4D( 0.2f, 0.2f, 0.2f, 0.8f ) );
+	FillRoundedRGBA( txtpos - 100.0f, ypos - 10.0f, shadermessage_width + 200.0f, 20.0f + (gHUD.m_scrinfo.iCharHeight * 1.5f) + gHUD.m_scrinfo.iCharHeight, 10.0f, 0.2f, 0.2f, 0.2f, 0.8f );
 
 	DrawString( (ScreenWidth - shadermessage_width) * 0.5f, ypos, shadermessage, 70, 169, 255 );
 

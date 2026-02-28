@@ -238,7 +238,7 @@ int CHudPuzzle::Draw( float flTime )
 	background_start_coord.y = ((float)ScreenHeight - square_dimension) * 0.5f;
 
 	// draw background
-	FillRoundedRGBA( background_start_coord.x, background_start_coord.y, square_dimension, square_dimension, 10, Vector4D( 0.5f, 0.5f, 0.5f, background_alpha ) );
+	FillRoundedRGBA( background_start_coord.x, background_start_coord.y, square_dimension, square_dimension, 10, 0.5f, 0.5f, 0.5f, background_alpha );
 
 	// draw blocks
 	/*
@@ -278,7 +278,7 @@ int CHudPuzzle::Draw( float flTime )
 				correct_block_coord = Vector2D( cell_start_x, cell_start_y );
 				#ifdef PUZZLE_DEBUG_MSG
 				// draw the target in debug
-				FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 1.0f, 0.25f, 0.25f, 1.0f ) );
+				FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, 1.0f, 0.25f, 0.25f, 1.0f );
 				#endif
 			}
 			if( i == field_size - 1 && j == field_size - 1 )
@@ -286,7 +286,7 @@ int CHudPuzzle::Draw( float flTime )
 			Vector4D color = Vector4D( 0.5f, 0.5f, 0.5f, 0.75f );
 			if( bPainted[i][j] )
 				color = Vector4D( 0.25f, 1.0f, 0.25f, 0.75f );
-			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, color );
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, color.x, color.y, color.z, color.w );
 			cell_start_x += cell_width + cell_margin;
 		}
 
@@ -300,7 +300,7 @@ int CHudPuzzle::Draw( float flTime )
 		current_active_block_coord = active_block_coord;
 	current_active_block_coord.x = lerp( current_active_block_coord.x, active_block_coord.x, g_fFrametime * 20.f );
 	current_active_block_coord.y = lerp( current_active_block_coord.y, active_block_coord.y, g_fFrametime * 20.f );
-	FillRoundedRGBA( current_active_block_coord.x, current_active_block_coord.y, cell_width, cell_height, 3, Vector4D( act_cell_r, act_cell_g, act_cell_b, 1.0f ) );
+	FillRoundedRGBA( current_active_block_coord.x, current_active_block_coord.y, cell_width, cell_height, 3, act_cell_r, act_cell_g, act_cell_b, 1.0f );
 
 	// draw bar
 	// background
@@ -308,7 +308,7 @@ int CHudPuzzle::Draw( float flTime )
 	float bar_w = blocks_dimension;
 	float bar_pos_x = background_start_coord.x + borderLR;
 	float bar_pos_y = background_start_coord.y + square_dimension - borderB * 0.8f;
-	FillRoundedRGBA( bar_pos_x, bar_pos_y, bar_w, bar_h, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+	FillRoundedRGBA( bar_pos_x, bar_pos_y, bar_w, bar_h, 3, 0.5f, 0.5f, 0.5f, 0.5f );
 	// filled
 	float total_length = (max_coord - min_coord).Length();
 	float current_length = (active_block_coord - correct_block_coord).Length();
@@ -320,7 +320,7 @@ int CHudPuzzle::Draw( float flTime )
 	bar_h -= 7;
 	bar_w = bar_w - ((bar_w / total_length) * current_length);
 	current_bar_width = lerp( current_bar_width, bar_w, g_fFrametime * 7.5f );
-	FillRoundedRGBA( bar_pos_x, bar_pos_y, current_bar_width, bar_h, 3, Vector4D( act_cell_r, act_cell_g, act_cell_b, 1.0f ) );
+	FillRoundedRGBA( bar_pos_x, bar_pos_y, current_bar_width, bar_h, 3, act_cell_r, act_cell_g, act_cell_b, 1.0f );
 
 	// move correct block every second - otherwise it's too easy! :)
 	if( tr.time > next_move_time )

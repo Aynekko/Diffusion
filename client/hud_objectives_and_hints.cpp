@@ -271,7 +271,7 @@ void CHudHintObjective::DrawHintPopUp( void )
 	hint_ypos = lerp( hint_ypos, ypos, g_fFrametime * 10.0f );
 
 	// draw background
-	FillRoundedRGBA( xpos, hint_ypos, frame_width, frame_height, 10.0f, Vector4D( 0.1f, 0.1f, 0.1f, hint_alpha * 0.75f ) );
+	FillRoundedRGBA( xpos, hint_ypos, frame_width, frame_height, 10.0f, 0.1f, 0.1f, 0.1f, hint_alpha * 0.75f );
 
 	// draw hint icon
 	float img_x = xpos + FRAMEBORDER;
@@ -363,7 +363,7 @@ int CHudHintObjective::Draw( float flTime )
 	obj_ypos = lerp( obj_ypos, ypos, g_fFrametime * 10.0f );
 
 	// draw background
-	FillRoundedRGBA( xpos, obj_ypos, frame_width, frame_height, 10.0f, Vector4D( 0.1f, 0.1f, 0.1f, obj_alpha * 0.75f ) );
+	FillRoundedRGBA( xpos, obj_ypos, frame_width, frame_height, 10.0f, 0.1f, 0.1f, 0.1f, obj_alpha * 0.75f );
 
 	// draw objective texts
 	int r, g, b;
@@ -430,9 +430,9 @@ int CHudHintObjective::Draw( float flTime )
 		const float timedbar_width = frame_width * taketh;
 		// how much should I move the x coord?
 		const float timedbar_xpos = xpos + ((frame_width - timedbar_width) * 0.5f);
-		FillRoundedRGBA( timedbar_xpos, obj_ypos + frame_height + 7, timedbar_width, 8.0f, 6.0f, Vector4D( 0.1f, 0.1f, 0.1f, obj_alpha * 0.75f ) );
+		FillRoundedRGBA( timedbar_xpos, obj_ypos + frame_height + 7, timedbar_width, 8.0f, 6.0f, 0.1f, 0.1f, 0.1f, obj_alpha * 0.75f );
 		if( timedbar_width > 4 )
-			FillRoundedRGBA( timedbar_xpos + 2, obj_ypos + frame_height + 9, timedbar_width - 4, 4.0f, 6.0f, Vector4D( 0.275f, 0.666f, 1.0f, obj_alpha * 0.75f ) );
+			FillRoundedRGBA( timedbar_xpos + 2, obj_ypos + frame_height + 9, timedbar_width - 4, 4.0f, 6.0f, 0.275f, 0.666f, 1.0f, obj_alpha * 0.75f );
 	}
 
 	return 1;

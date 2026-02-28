@@ -704,7 +704,7 @@ void GL_DepthRange( const GLfloat depthmin, const GLfloat depthmax );
 void GL_DepthTest( const GLint enable );
 void GL_Texture2D( const GLint enable );
 void GL_Color4f( const GLfloat r, const GLfloat g, const GLfloat b, const GLfloat a );
-void FillRoundedRGBA( const float posx, const float posy, const float w, const float h, float r, Vector4D rgba );
+void FillRoundedRGBA( const float posx, const float posy, const float w, const float h, float radius, float r = 1.0f, float g = 1.0f, float b = 1.0f, float a = 1.0f );
 
 //
 // r_cull.cpp

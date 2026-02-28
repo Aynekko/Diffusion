@@ -113,9 +113,9 @@ int CHudStamina :: Draw(float flTime)
 	for( cell = 0; cell < total_cells; cell++ )
 	{
 		if( cell >= stamina_val * 0.5f ) // draw grey cells
-			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, 0.5f, 0.5f, 0.5f, 0.5f );
 		else
-			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( r, g, b, a ) );
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, r, g, b, a );
 		cell_start_x += cell_width + cell_margin;
 	}
 

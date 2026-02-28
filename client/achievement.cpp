@@ -86,10 +86,10 @@ int CHudAchievement::Draw( float flTime )
 	}
 
 	// draw main frame
-	FillRoundedRGBA( x, y, final_width, fTOTAL_HEIGHT, 20, Vector4D( 0.05f, 0.05f, 0.05f, 0.8f ) );
+	FillRoundedRGBA( x, y, final_width, fTOTAL_HEIGHT, 20, 0.05f, 0.05f, 0.05f, 0.8f );
 
 	// draw square frame RGB 70 169 255
-	FillRoundedRGBA( x + fBORDER, y + fBORDER, fPIC_FRAME_SIZE, fPIC_FRAME_SIZE, 10, Vector4D( 0.275f, 0.663f, 1.0f, 0.8f ) );
+	FillRoundedRGBA( x + fBORDER, y + fBORDER, fPIC_FRAME_SIZE, fPIC_FRAME_SIZE, 10, 0.275f, 0.663f, 1.0f, 0.8f );
 
 	// draw the picture in the frame
 	GL_Bind( 0, CurrentImage );

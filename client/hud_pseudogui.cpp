@@ -252,7 +252,7 @@ int CPseudoGUI::Draw( float flTime )
 		return 1;
 
 	// draw darken frame
-	FillRoundedRGBA( rFrame.x, rFrame.y, rFrame.w, rFrame.h, 20, Vector4D( rFrame.r, rFrame.g, rFrame.b, rFrame.a ) );
+	FillRoundedRGBA( rFrame.x, rFrame.y, rFrame.w, rFrame.h, 20, rFrame.r, rFrame.g, rFrame.b, rFrame.a );
 
 	// draw black background for text
 	const float bord_from_below = rClose.h + 40 * gHUD.fScale;
@@ -269,7 +269,7 @@ int CPseudoGUI::Draw( float flTime )
 	rClose.a = 0.75f;
 
 	// inactive button
-	FillRoundedRGBA( rClose.x, rClose.y, rClose.w, rClose.h, 10, Vector4D( rClose.r, rClose.g, rClose.b, rClose.a ) );
+	FillRoundedRGBA( rClose.x, rClose.y, rClose.w, rClose.h, 10, rClose.r, rClose.g, rClose.b, rClose.a );
 
 	// active button
 	if( DotInRect( &rClose, gHUD.m_Cursor.x, gHUD.m_Cursor.y ) )
@@ -283,7 +283,7 @@ int CPseudoGUI::Draw( float flTime )
 	rClose.a = active_button_alpha;
 
 	if( active_button_alpha > 0 )
-		FillRoundedRGBA( rClose.x, rClose.y, rClose.w, rClose.h, 10, Vector4D( rClose.r, rClose.g, rClose.b, rClose.a ) );
+		FillRoundedRGBA( rClose.x, rClose.y, rClose.w, rClose.h, 10, rClose.r, rClose.g, rClose.b, rClose.a );
 
 	// draw "close" text
 	if( BtnText )
@@ -365,14 +365,14 @@ void CPseudoGUI::MessageDraw( const char *pText, int x, int y )
 		const float sbar_w = 20 * gHUD.fScale;
 		const float sbar_x = rFrame.x + rFrame.w - ((border - ( 15 * gHUD.fScale )) * 0.5f) - (sbar_w * 0.5f);
 		const float sbar_h = (text_end_pos - text_start_pos) + gHUD.m_scrinfo.iCharHeight;
-		FillRoundedRGBA( sbar_x, y, sbar_w, sbar_h, 2, Vector4D( 0.1f, 0.1f, 0.1f, 0.8f ) );
+		FillRoundedRGBA( sbar_x, y, sbar_w, sbar_h, 2, 0.1f, 0.1f, 0.1f, 0.8f );
 
 		// scrollbar handle
 		const float handle_x = sbar_x;
 		const float handle_y = y + ((sbar_h / num_lines) * scrolled_lines);
 		const float handle_h = sbar_h - ((sbar_h / num_lines) * (lines_below - 1));
 
-		FillRoundedRGBA( handle_x, handle_y, sbar_w, handle_h, 2, Vector4D( 0.5f, 0.5f, 0.5f, 0.8f ) );
+		FillRoundedRGBA( handle_x, handle_y, sbar_w, handle_h, 2, 0.5f, 0.5f, 0.5f, 0.8f );
 		pglDisable( GL_MULTISAMPLE_ARB );
 	}
 }
