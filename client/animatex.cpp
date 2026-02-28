@@ -164,7 +164,7 @@ void CAnimatex::SetColor( int R, int G, int B )
 
 void CAnimatex::SetTransparency( int A )
 {
-	a = A;
+	a = bound( 0, A, 255 );
 }
 
 void CAnimatex::SetRenderMode( int RenderMode )

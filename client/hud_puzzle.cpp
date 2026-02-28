@@ -7,13 +7,18 @@ DECLARE_MESSAGE( m_Puzzle, Puzzle )
 
 //#define PUZZLE_DEBUG_MSG
 
-float current_bar_width = 0;
-float background_alpha = 0.5f;
-Vector2D current_active_block_coord{ 0, 0 };
-float next_move_time = 0;
-CAnimatex checkmark;
-short entidx = 0;
-byte sign = 0;
+#define MAX_FIELD_SIZE 100
+
+static float current_bar_width = 0;
+static float background_alpha = 0.75f;
+static Vector2D current_active_block_coord{ 0, 0 };
+static float next_move_time = 0;
+static CAnimatex checkmark;
+static short entidx = 0;
+static byte sign = 0;
+static int move_correct_block_tries = 0;
+
+static bool bPainted[MAX_FIELD_SIZE][MAX_FIELD_SIZE];
 
 int CHudPuzzle::Init( void )
 {
@@ -54,10 +59,25 @@ void CHudPuzzle::MoveActiveBlock( int button )
 			active_block_id.x++;
 		break;
 	}
+
+	bPainted[(int)active_block_id.x][(int)active_block_id.y] = true;
+
+	PlaySound( "misc/puzzle_select.wav", 1.0 );
 }
 
 void CHudPuzzle::MoveCorrectBlock( int direction )
 {
+	if( move_correct_block_tries <= 0 )
+		return;
+
+	move_correct_block_tries--;
+
+	if( direction > 3 )
+		direction = RANDOM_LONG( 0, 3 );
+
+	// remember current position if we end up in a painted area, or the correct block
+	Vector2D rem = correct_block_id;
+
 	switch( direction )
 	{
 	case 0:
@@ -80,8 +100,17 @@ void CHudPuzzle::MoveCorrectBlock( int direction )
 
 	// don't solve itself!
 	if( correct_block_id.x == active_block_id.x && correct_block_id.y == active_block_id.y )
-		MoveCorrectBlock( RANDOM_LONG( 0, 3 ) );
+	{
+		correct_block_id = rem;
+		MoveCorrectBlock( move_correct_block_tries - 1 );
+	}
 
+	// painted area
+	if( bPainted[(int)correct_block_id.x][(int)correct_block_id.y] )
+	{
+		correct_block_id = rem;
+		MoveCorrectBlock( move_correct_block_tries - 1 );
+	}
 }
 
 void CHudPuzzle::Start( void )
@@ -92,7 +121,8 @@ void CHudPuzzle::Start( void )
 	current_active_block_coord.x = 0;
 	current_active_block_coord.y = 0;
 	solved = false;
-	background_alpha = 0.5f;
+	background_alpha = 0.75f;
+	memset( bPainted, false, sizeof( bPainted ) );
 
 	// make a good shuffle...
 	active_block_id.x = RANDOM_LONG( 0, field_size - 1 );
@@ -101,6 +131,8 @@ void CHudPuzzle::Start( void )
 	active_block_id.y = RANDOM_LONG( 0, field_size - 1 );
 	active_block_id.y = RANDOM_LONG( 0, field_size - 1 );
 	active_block_id.y = RANDOM_LONG( 0, field_size - 1 );
+	// paint the active green since it's where we are starting
+	bPainted[(int)active_block_id.x][(int)active_block_id.y] = true;
 	correct_block_id.x = RANDOM_LONG( 0, field_size - 1 );
 	correct_block_id.y = RANDOM_LONG( 0, field_size - 1 );
 	// prevent infinite loops
@@ -138,6 +170,7 @@ int CHudPuzzle::MsgFunc_Puzzle( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pszName, pbuf, iSize );
 	entidx = READ_SHORT();
 	field_size = READ_BYTE();
+	field_size = bound( 4, field_size, MAX_FIELD_SIZE ); // same on server
 	move_time = READ_BYTE() * 0.1f;
 	sign = READ_BYTE();
 	END_READ();
@@ -160,7 +193,7 @@ int CHudPuzzle::Draw( float flTime )
 		checkmark.ymin = (ScreenHeight * 0.5f) - checkmark_half_size;
 		checkmark.ymax = (ScreenHeight * 0.5f) + checkmark_half_size;
 		checkmark.SetRenderMode( kRenderTransAdd );
-		checkmark.SetTransparency( background_alpha * 2.0f * 255.0f );
+		checkmark.SetTransparency( background_alpha * 1.333f * 255.0f );
 		checkmark.DrawAnimate( 30 );
 
 		background_alpha = CL_UTIL_Approach( 0.0f, background_alpha, (0.5f / background_alpha) * g_fFrametime * 0.1f );
@@ -169,6 +202,29 @@ int CHudPuzzle::Draw( float flTime )
 
 		return 1;
 	}
+
+	if( (int)active_block_id.x == (int)correct_block_id.x && (int)active_block_id.y == (int)correct_block_id.y )
+	{
+		// chase!
+		move_correct_block_tries = 5;
+		MoveCorrectBlock( move_correct_block_tries - 1 );
+	}
+
+	// now check again - if target couldn't move, it means we've cornered it.
+	if( (int)active_block_id.x == (int)correct_block_id.x && (int)active_block_id.y == (int)correct_block_id.y )
+	{
+		solved = true;
+		// send result to server
+		char szbuf[64];
+		Q_snprintf( szbuf, sizeof( szbuf ), "solvepuzzle %i %i\n", (int)entidx, (int)sign );
+		ClientCmd( szbuf );
+		PlaySound( "misc/puzzle_pass.wav", 1.0 );
+		return 1;
+	}
+#ifdef PUZZLE_DEBUG_MSG
+	else
+		gEngfuncs.Con_NPrintf( 1, "act %.f %.f\ncorrect %.f %.f\n", active_block_id.x, active_block_id.y, correct_block_id.x, correct_block_id.y );
+#endif
 
 	// main field (background) is 80% of the screen height
 	float square_dimension = ScreenHeight * 0.8f;
@@ -215,13 +271,22 @@ int CHudPuzzle::Draw( float flTime )
 	{
 		for( int j = 0; j < field_size; j++ )
 		{
-			if( i == active_block_id.x && j == active_block_id.y )
+			if( i == (int)active_block_id.x && j == (int)active_block_id.y )
 				active_block_coord = Vector2D( cell_start_x, cell_start_y );
-			if( i == correct_block_id.x && j == correct_block_id.y )
+			if( i == (int)correct_block_id.x && j == (int)correct_block_id.y )
+			{
 				correct_block_coord = Vector2D( cell_start_x, cell_start_y );
+				#ifdef PUZZLE_DEBUG_MSG
+				// draw the target in debug
+				FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 1.0f, 0.25f, 0.25f, 1.0f ) );
+				#endif
+			}
 			if( i == field_size - 1 && j == field_size - 1 )
 				max_coord = Vector2D( cell_start_x, cell_start_y );
-			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, Vector4D( 0.5f, 0.5f, 0.5f, 0.5f ) );
+			Vector4D color = Vector4D( 0.5f, 0.5f, 0.5f, 0.75f );
+			if( bPainted[i][j] )
+				color = Vector4D( 0.25f, 1.0f, 0.25f, 0.75f );
+			FillRoundedRGBA( cell_start_x, cell_start_y, cell_width, cell_height, 3, color );
 			cell_start_x += cell_width + cell_margin;
 		}
 
@@ -233,22 +298,9 @@ int CHudPuzzle::Draw( float flTime )
 	// draw the active block
 	if( current_active_block_coord.IsNull() )
 		current_active_block_coord = active_block_coord;
-	current_active_block_coord.x = lerp( current_active_block_coord.x, active_block_coord.x, g_fFrametime * 10.f );
-	current_active_block_coord.y = lerp( current_active_block_coord.y, active_block_coord.y, g_fFrametime * 10.f );
-	FillRoundedRGBA( current_active_block_coord.x, current_active_block_coord.y, cell_width, cell_height, 3, Vector4D( act_cell_r, act_cell_g, act_cell_b, 0.5f ) );
-
-	if( active_block_id.x == correct_block_id.x && active_block_id.y == correct_block_id.y )
-	{
-		solved = true;
-		// send result to server
-		char szbuf[64];
-		Q_snprintf( szbuf, sizeof( szbuf ), "solvepuzzle %i %i\n", (int)entidx, (int)sign );
-		ClientCmd( szbuf );
-	}
-#ifdef PUZZLE_DEBUG_MSG
-	else
-		gEngfuncs.Con_NPrintf( 1, "act %.f %.f\ncorrect %.f %.f\n", active_block_id.x, active_block_id.y, correct_block_id.x, correct_block_id.y );
-#endif
+	current_active_block_coord.x = lerp( current_active_block_coord.x, active_block_coord.x, g_fFrametime * 20.f );
+	current_active_block_coord.y = lerp( current_active_block_coord.y, active_block_coord.y, g_fFrametime * 20.f );
+	FillRoundedRGBA( current_active_block_coord.x, current_active_block_coord.y, cell_width, cell_height, 3, Vector4D( act_cell_r, act_cell_g, act_cell_b, 1.0f ) );
 
 	// draw bar
 	// background
@@ -268,15 +320,16 @@ int CHudPuzzle::Draw( float flTime )
 	bar_h -= 7;
 	bar_w = bar_w - ((bar_w / total_length) * current_length);
 	current_bar_width = lerp( current_bar_width, bar_w, g_fFrametime * 7.5f );
-	FillRoundedRGBA( bar_pos_x, bar_pos_y, current_bar_width, bar_h, 3, Vector4D( act_cell_r, act_cell_g, act_cell_b, 0.5f ) );
+	FillRoundedRGBA( bar_pos_x, bar_pos_y, current_bar_width, bar_h, 3, Vector4D( act_cell_r, act_cell_g, act_cell_b, 1.0f ) );
 
 	// move correct block every second - otherwise it's too easy! :)
 	if( tr.time > next_move_time )
 	{
-		MoveCorrectBlock( RANDOM_LONG( 0, 3 ) );
+		move_correct_block_tries = 5;
+		MoveCorrectBlock( move_correct_block_tries - 1 );
 		// a chance to do it again
 		if( RANDOM_LONG(0,9) > 6 )
-			MoveCorrectBlock( RANDOM_LONG( 0, 3 ) );
+			MoveCorrectBlock( move_correct_block_tries - 1 );
 		next_move_time = tr.time + move_time;
 	}
 

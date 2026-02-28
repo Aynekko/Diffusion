@@ -30,7 +30,6 @@ void CHud :: Init( void )
 	m_AmmoSecondary.Init();
 	m_TextMessage.Init();
 	m_StatusIcons.Init();
-	m_StatusIconsTutor.Init(); // diffusion
 	m_StatusIconsAchievement.Init();
  	m_SayText.Init();
 	m_Menu.Init();
@@ -47,6 +46,7 @@ void CHud :: Init( void )
 	m_PseudoGUI.Init();
 	m_TriggerTimer.Init();
 	m_Puzzle.Init();
+	m_StatusIconsTutor.Init(); // tutors above puzzle
 	m_Message.Init(); // hud text messages (like subtitles) go next to last - always visible
 	m_Subtitle.Init();
 	m_HintObjectives.Init();

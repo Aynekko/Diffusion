@@ -662,6 +662,7 @@ public:
 	float fLerpToKiller;
 
 	bool bShowZoomHint;
+	bool bShowPuzzleTutorial;
 
 	float m_flNextRedScreenFromDamage; // not saved
 

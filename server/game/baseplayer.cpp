@@ -240,6 +240,7 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( LoudWeaponsRestricted, FIELD_BOOLEAN),
 	DEFINE_FIELD( bCheatsWereUsed, FIELD_BOOLEAN ),
 	DEFINE_FIELD( bShowZoomHint, FIELD_BOOLEAN ),
+	DEFINE_FIELD( bShowPuzzleTutorial, FIELD_BOOLEAN ),
 END_DATADESC()
 
 extern cvar_t sv_regeneration;

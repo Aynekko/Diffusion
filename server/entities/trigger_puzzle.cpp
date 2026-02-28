@@ -22,15 +22,15 @@ LINK_ENTITY_TO_CLASS( trigger_puzzle, CTriggerPuzzle );
 
 void CTriggerPuzzle::Precache( void )
 {
-	if( !FStringNull( pev->noise ) )
-		PRECACHE_SOUND( (char *)STRING( pev->noise ) );
+	PRECACHE_SOUND( "misc/puzzle_select.wav" );
+	PRECACHE_SOUND( "misc/puzzle_pass.wav" );
 }
 
 void CTriggerPuzzle::Spawn( void )
 {
 	Precache();
 
-	pev->iuser2 = bound( 4, pev->iuser2, 255 ); // puzzle field size
+	pev->iuser2 = bound( 4, pev->iuser2, 100 ); // puzzle field size
 	pev->fuser1 = bound( 0.5f, pev->fuser1, 10.0f ); // time step when the correct block changes position
 
 	// make a random code as a signature
@@ -51,9 +51,6 @@ void CTriggerPuzzle::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 		{
 			UTIL_FireTargets( GetTarget(), pActivator, pCaller, USE_TOGGLE, 0 );
 
-			if( !FStringNull( pev->noise ) )
-				EMIT_SOUND( ENT( pev ), CHAN_BODY, (char *)STRING( pev->noise ), 1, ATTN_NORM );
-
 			if( HasSpawnFlags( SF_PUZZLE_REMOVEONFIRE ) )
 				UTIL_Remove( this );
 		}
@@ -68,6 +65,16 @@ void CTriggerPuzzle::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	pev->iuser1 = RANDOM_LONG( 1, 255 );
 
 	CBasePlayer *pPlayer = (CBasePlayer *)pActivator;
+
+	if( !pPlayer->bShowPuzzleTutorial )
+	{
+		MESSAGE_BEGIN( MSG_ONE, gmsgStatusIconTutor, NULL, pActivator->pev );
+			WRITE_STRING( "tutor_puzzle" );
+			WRITE_STRING( 0 );
+		MESSAGE_END();
+
+		pPlayer->bShowPuzzleTutorial = true;
+	}
 
 	MESSAGE_BEGIN( MSG_ONE, gmsgPuzzle, NULL, pPlayer->pev );
 	WRITE_SHORT( entindex() );
