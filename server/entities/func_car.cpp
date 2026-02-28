@@ -2987,7 +2987,14 @@ void CCar::Camera(void)
 		{
 			fMouseTouchedOFF = 0.0f;
 			if( !SecondaryCamera )
+			{
+				if( !CamUnlocked && !bAimingView )
+				{
+					hDriver->SetAbsAngles( GetAbsAngles() );
+					hDriver->pev->fixangle = TRUE;
+				}
 				CamUnlocked = true;
+			}
 		}
 	}
 	else
