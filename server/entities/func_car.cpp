@@ -1702,7 +1702,13 @@ void CCar::Drive( void )
 	// CAR STUCK???
 	if( StuckTime > gpGlobals->time )
 		StuckTime = gpGlobals->time;
-	if( (hDriver->pev->button & IN_RELOAD) && (gpGlobals->time > StuckTime + 2.0f) )
+
+	if( hDriver->pev->button & IN_RELOAD )
+		fCarResetHolding = UTIL_Approach( 1.0f, fCarResetHolding, gpGlobals->frametime );
+	else
+		fCarResetHolding = UTIL_Approach( 0.0f, fCarResetHolding, 3.0f * gpGlobals->frametime );
+
+	if( fCarResetHolding == 1.0f )
 	{
 		ALERT( at_aiconsole, "CCar::TryUnstick by user\n" );
 		TryUnstick();
@@ -1714,6 +1720,7 @@ void CCar::Drive( void )
 		}
 
 		StuckTime = gpGlobals->time;
+		fCarResetHolding = 0.0f;
 	}
 
 	// will need those later!

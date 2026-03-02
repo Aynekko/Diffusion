@@ -1592,7 +1592,7 @@ void UTIL_ParticleEffect( const Vector &vecOrigin, const Vector &vecDirection, U
 
 float UTIL_Approach( float target, float value, float speed )
 {
-	if( speed == 0.0f ) // diffusion
+	if( speed == 0.0f || value == target ) // diffusion
 		return value;
 	
 	float delta = target - value;

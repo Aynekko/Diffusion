@@ -215,6 +215,8 @@ public:
 	float fMouseTouchedOFF;
 	Vector LastPlayerAngles;
 
+	float fCarResetHolding; // not saved
+
 	DECLARE_DATADESC();
 };
 
