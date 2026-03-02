@@ -2847,6 +2847,22 @@ void CCar::Drive( void )
 					Vector x = currentExhaust->GetAbsAngles();
 					x[ROLL] = RANDOM_LONG( 0, 359 );
 					currentExhaust->SetAbsAngles( x );
+
+					Vector PopLightOrg = currentExhaust->GetAbsOrigin() - gpGlobals->v_forward * 10; // hack - push it back a little
+					MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, PopLightOrg );
+					WRITE_BYTE( TE_DLIGHT );
+					WRITE_COORD( PopLightOrg.x );		// origin
+					WRITE_COORD( PopLightOrg.y );
+					WRITE_COORD( PopLightOrg.z );
+					WRITE_BYTE( 5 );	// radius
+					WRITE_BYTE( 255 - RANDOM_LONG( 0, 25 ) );	// R
+					WRITE_BYTE( 255 - RANDOM_LONG( 0, 25 ) );	// G
+					WRITE_BYTE( 180 + RANDOM_LONG( -25, 25 ) );	// B
+					WRITE_BYTE( 10 );	// life * 10
+					WRITE_BYTE( 25 ); // decay
+					WRITE_BYTE( 125 ); // brightness
+					WRITE_BYTE( 0 ); // shadows
+					MESSAGE_END();
 				}
 				poptime = gpGlobals->time + (RANDOM_FLOAT( 0.1f, 0.5f ) / num_pops);
 				num_pops -= 1.0f;
