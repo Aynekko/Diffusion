@@ -117,7 +117,7 @@ static size_t get_map_name( char *dest, size_t count )
 
 	size_t bytes_to_copy = Q_min( count - 1, static_cast<size_t>(dot - slash - 1) );
 
-	Q_strncpy( dest, slash + 1, bytes_to_copy );
+	Q_strncpy( dest, slash + 1, bytes_to_copy + 1 );
 	dest[bytes_to_copy] = '\0';
 
 	return bytes_to_copy;

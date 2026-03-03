@@ -25,6 +25,8 @@
 #include "r_quakeparticle.h"
 #include "enginecallback.h"
 #include "pm_materials.h"
+#include "build.h"
+#include "discord.h"
 
 extern bool g_bDuckToggled;
 
@@ -1139,7 +1141,10 @@ int CHud::MsgFunc_WaterSplash( const char *pszName, int iSize, void *pbuf )
 int CHud::MsgFunc_ServerName( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pszName, pbuf, iSize );
-	Q_strncpy( gHUD.m_szServerName, READ_STRING(), sizeof( gHUD.m_szServerName ) );
-	gHUD.m_szServerName[sizeof( gHUD.m_szServerName ) - 1] = 0;
+	Q_strncpy( m_szServerName, READ_STRING(), sizeof( m_szServerName ) );
+	m_szServerName[sizeof( m_szServerName ) - 1] = 0;
+#if XASH_64BIT && XASH_WIN32
+	discord_integration::update();
+#endif
 	return 0;
 }

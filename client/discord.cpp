@@ -113,6 +113,10 @@ namespace discord_integration
 				set_player_limit( gEngfuncs.GetMaxClients() );
 			}
 
+			inline void refresh()
+			{
+				dirty = true;
+			}
 
 			inline void update_presence_if_dirty()
 			{
@@ -137,21 +141,17 @@ namespace discord_integration
 
 				if( cur_state != game_state::NOT_PLAYING )
 				{
-					char map[256];
-					map[0] = '\0';
+					char map[256] = {};
 					char ServerName[256];
-					char *szServerName;
+					char *szServerName = gHUD.m_szServerName;
 					if( gEngfuncs.GetMaxClients() <= 1 )
 					{
 						ServerName[0] = '\0';
-						szServerName = gHUD.m_szServerName;
 					}
 					else
 					{
 						Q_sprintf( ServerName, "Server: " );
-						szServerName = gHUD.m_szServerName;
-						size_t map_len = strlen( map );
-						get_map_name( map + map_len, ARRAYSIZED( map ) - map_len );
+						get_map_name( map, sizeof( map ) );
 					}
 
 					Q_strncat( ServerName, szServerName, sizeof( ServerName ));
@@ -269,6 +269,11 @@ namespace discord_integration
 	void on_player_count_update()
 	{
 		discord_state->refresh_player_stats();
+	}
+
+	void update()
+	{
+		discord_state->refresh();
 	}
 }
 

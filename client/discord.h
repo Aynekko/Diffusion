@@ -36,4 +36,6 @@ namespace discord_integration
 	 * Call this when a player joins or leaves.
 	 */
 	void on_player_count_update();
+
+	void update();
 }
