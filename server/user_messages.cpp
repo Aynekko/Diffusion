@@ -135,7 +135,7 @@ void LinkUserMessages( void )
 	gmsgZoom = REG_USER_MSG( "Zoom", -1 );
 	gmsgTempEnt = REG_USER_MSG( "TempEnt", -1 );
 	gmsgWaterSplash = REG_USER_MSG( "WaterSplash", 7 );
-	gmsgBlastIcons = REG_USER_MSG( "BlastIcons", 3 );
+	gmsgBlastIcons = REG_USER_MSG( "BlastIcons", 4 );
 	gmsgGaussHUD = REG_USER_MSG( "GaussHUD", 2 );
 	gmsgShowNote = REG_USER_MSG( "ShowNote", -1 );
 	gmsgSubtitle = REG_USER_MSG( "Subtitle", -1 );

@@ -531,6 +531,7 @@ public:
 	bool CanShoot_CL;
 	int DrunkLevel_CL;
 	int SunLightScale_CL;
+	bool CanElectroBlast_CL;
 
 	string_t Objective; // objective name from titles.txt
 	string_t Objective2; // secondary objective
@@ -635,7 +636,9 @@ public:
 	int BlastChargesReady; // "ammo" - how many blasts are available right now
 	int m_iClientBlastChargesReady;
 	float LastBlastTime; // only blast once in 3 seconds
+	float NextRechargeTime;
 	bool BlastDMGOverride; // need to disable the damage during blast to not hurt ourselves
+	int m_iClientBlastTimer;
 
 	int ShieldAvailableLVL; // 0-3 levels
 

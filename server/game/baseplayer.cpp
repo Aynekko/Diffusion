@@ -227,6 +227,7 @@ BEGIN_DATADESC( CBasePlayer )
 	DEFINE_FIELD( BlastAbilityLVL, FIELD_INTEGER),
 	DEFINE_FIELD( BlastChargesReady, FIELD_INTEGER),
 	DEFINE_FIELD( LastBlastTime, FIELD_TIME ),
+	DEFINE_FIELD( NextRechargeTime, FIELD_TIME ),
 	DEFINE_FIELD( BlastDMGOverride, FIELD_BOOLEAN ),
 
 	// car
@@ -3695,34 +3696,37 @@ void CBasePlayer::ManageElectroBlast( void )
 			WRITE_STRING( "tutor_electroblast" );
 			WRITE_STRING( "textures/!tutor/tutor_electroblast.dds" );
 		MESSAGE_END();
-		LastBlastTime = gpGlobals->time - 27;
-		BlastChargesReady = 0;
+		LastBlastTime = gpGlobals->time - 3;
+		BlastChargesReady = 1;
 		BlastAbilityLVL = 1;
 	}
 
 	// here we regenerate the charges
 	if( BlastAbilityLVL == 1 )
 	{
-		if( (gpGlobals->time > LastBlastTime + 30) && (BlastChargesReady == 0) )
+		if( (BlastChargesReady == 0) && (gpGlobals->time > NextRechargeTime) )
 		{
 			BlastChargesReady++;
-			LastBlastTime = gpGlobals->time - 2;
+			LastBlastTime = 0.0f; // allow instantly
+			NextRechargeTime = gpGlobals->time + 30;
 		}
 	}
 	else if( BlastAbilityLVL == 2 )
 	{
-		if( (gpGlobals->time > LastBlastTime + 30) && (BlastChargesReady < 2) )
+		if( (BlastChargesReady < 2) && (gpGlobals->time > NextRechargeTime) )
 		{
 			BlastChargesReady++;
-			LastBlastTime = gpGlobals->time - 2;
+			LastBlastTime = 0.0f;
+			NextRechargeTime = gpGlobals->time + 30;
 		}
 	}
 	else if( BlastAbilityLVL == 3 )
 	{
-		if( (gpGlobals->time > LastBlastTime + 30) && (BlastChargesReady < 3) )
+		if( (BlastChargesReady < 3) && (gpGlobals->time > NextRechargeTime) )
 		{
 			BlastChargesReady++;
-			LastBlastTime = gpGlobals->time - 2;
+			LastBlastTime = 0.0f;
+			NextRechargeTime = gpGlobals->time + 30;
 		}
 	}
 
@@ -3789,6 +3793,7 @@ void CBasePlayer::ManageElectroBlast( void )
 			EMIT_SOUND_DYN( ENT( pev ), CHAN_STATIC, "player/electroblast.wav", 1.0, 0.3, 0, RANDOM_LONG( 95, 105 ) );
 
 			BlastChargesReady--;
+			NextRechargeTime = gpGlobals->time + 30;
 
 			m_flStaminaWait = gpGlobals->time + 5.0f;
 
@@ -5267,6 +5272,7 @@ void CBasePlayer::Spawn( void )
 	m_iClientStamina = -1;
 	m_iClientBlastAbilityLVL = -1;
 	m_iClientBlastChargesReady = -1;
+	m_iClientBlastTimer = -1;
 
 	// don't let uninitialized value here hurt the player
 	m_flFallVelocity = 0;
@@ -5361,6 +5367,7 @@ void CBasePlayer::Spawn( void )
 	ShieldOn = false;
 	LastUseCheckTime = gpGlobals->time;
 	LastBlastTime = gpGlobals->time;
+	NextRechargeTime = 0.0f;
 	BlastAbilityLVL = 0;
 	if( g_pGameRules->IsMultiplayer() )
 	{
@@ -5521,6 +5528,7 @@ void CBasePlayer :: Precache( void )
 	m_flFlashLightTime = 1;
 	m_iClientBlastChargesReady = -1;
 	m_iClientBlastAbilityLVL = -1;
+	m_iClientBlastTimer = -1;
 
 	m_bRainNeedsUpdate = true;
 
@@ -7147,24 +7155,26 @@ void CBasePlayer :: UpdateClientData( void )
 	}
 
 	// update blast charge client values when changed
-	if( m_iClientBlastChargesReady != BlastChargesReady )
+	bool bSendBlastUpdate = false;
+	if( m_iClientBlastChargesReady != BlastChargesReady || m_iClientBlastAbilityLVL != BlastAbilityLVL || CanElectroBlast_CL != CanElectroBlast )
+		bSendBlastUpdate = true;
+
+	int iBlastTimer = NextRechargeTime - gpGlobals->time;
+	if( iBlastTimer >= 0 && m_iClientBlastTimer != iBlastTimer )
+		bSendBlastUpdate = true;
+
+	if( bSendBlastUpdate )
 	{
 		MESSAGE_BEGIN( MSG_ONE, gmsgBlastIcons, NULL, pev );
 		WRITE_BYTE( BlastAbilityLVL );
 		WRITE_BYTE( BlastChargesReady );
 		WRITE_BYTE( CanElectroBlast );
+		WRITE_BYTE( iBlastTimer + 1 );
 		MESSAGE_END();
 		m_iClientBlastChargesReady = BlastChargesReady;
-	}
-
-	if( m_iClientBlastAbilityLVL != BlastAbilityLVL )
-	{
-		MESSAGE_BEGIN( MSG_ONE, gmsgBlastIcons, NULL, pev );
-		WRITE_BYTE( BlastAbilityLVL );
-		WRITE_BYTE( BlastChargesReady );
-		WRITE_BYTE( CanElectroBlast );
-		MESSAGE_END();
 		m_iClientBlastAbilityLVL = BlastAbilityLVL;
+		m_iClientBlastTimer = iBlastTimer;
+		CanElectroBlast_CL = CanElectroBlast;
 	}
 
 /*  //diffusion - no battery in game
