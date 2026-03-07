@@ -156,7 +156,7 @@ const char * const g_WpnAmmo[] =
 
 // weapon clip/carry ammo capacities
 #define URANIUM_MAX_CARRY		10
-#define AR2_MAX_CARRY			200
+#define AR2_MAX_CARRY			100
 #define G36C_MAX_CARRY			120
 #define MRC_MAX_CARRY			150
 #define	BERETTA_MAX_CARRY		45

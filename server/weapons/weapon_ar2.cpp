@@ -16,12 +16,9 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "weapons/weapons.h"
-#include "nodes.h"
 #include "player.h"
 #include "entities/soundent.h"
-#include "game/gamerules.h"
 
 class C_AR2 : public CBasePlayerWeapon
 {
@@ -194,7 +191,7 @@ void C_AR2::PrimaryAttack()
 		UTIL_SetSize( pShock, Vector( -4, -4, -4 ), Vector( 4, 4, 4 ) );
 		pShock->SetLocalVelocity( vecDir * 5000 );
 		pShock->SetNextThink( 0 );
-		pShock->pev->dmg = 15;
+		pShock->pev->dmg = 18.0f;
 	}
 
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
