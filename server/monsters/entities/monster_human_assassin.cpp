@@ -941,7 +941,7 @@ BOOL CHAssassin::CheckMeleeAttack2( float flDot, float flDist )
 	if( m_hEnemy != NULL )
 		pEnemy = m_hEnemy->MyMonsterPointer();
 
-	if( !pEnemy )
+	if( !pEnemy || pEnemy->pev->movetype == MOVETYPE_FLY )
 		return FALSE;
 
 	if( flDist <= 64 && flDot >= 0.7 && pEnemy->Classify() != CLASS_ALIEN_BIOWEAPON && pEnemy->Classify() != CLASS_PLAYER_BIOWEAPON )

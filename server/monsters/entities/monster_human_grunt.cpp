@@ -1094,19 +1094,19 @@ BOOL CHGrunt :: FCanCheckAttacks ( void )
 //=========================================================
 // CheckMeleeAttack1
 //=========================================================
-BOOL CHGrunt::CheckMeleeAttack1(float flDot, float flDist)
+BOOL CHGrunt::CheckMeleeAttack1( float flDot, float flDist )
 {
-	CBaseMonster* pEnemy = NULL;
+	CBaseMonster *pEnemy = NULL;
 
-	if (m_hEnemy != NULL)
+	if( m_hEnemy != NULL )
 		pEnemy = m_hEnemy->MyMonsterPointer();
 
-	if (!pEnemy)
+	if( !pEnemy || pEnemy->pev->movetype == MOVETYPE_FLY )
 		return FALSE;
 
-	if (flDist <= 64 && flDot >= 0.7 &&
+	if( flDist <= 64 && flDot >= 0.7 &&
 		pEnemy->Classify() != CLASS_ALIEN_BIOWEAPON &&
-		pEnemy->Classify() != CLASS_PLAYER_BIOWEAPON)
+		pEnemy->Classify() != CLASS_PLAYER_BIOWEAPON )
 	{
 		return TRUE;
 	}
