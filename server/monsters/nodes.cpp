@@ -32,7 +32,7 @@
 
 // to help eliminate node clutter by level designers, this is used to cap how many other nodes
 // any given node is allowed to 'see' in the first stage of graph creation "LinkVisibleNodes()".
-#define	MAX_NODE_INITIAL_LINKS	128
+#define	MAX_NODE_INITIAL_LINKS	160
 #define	MAX_NODES               1024
 
 extern DLL_GLOBAL edict_t		*g_pBodyQueueHead;
