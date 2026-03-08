@@ -2283,7 +2283,11 @@ int CStudioModelRenderer::StudioComputeBBox( cl_entity_t *e )
 	if( BoundsIsCleared( mins, maxs ) || BoundsIsNull( mins, maxs ) )
 	{
 		mstudioseqdesc_t *pseqdesc = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + e->curstate.sequence;
-		ALERT( at_aiconsole, "%s: sequence: %s has invalid bbox\n", RI->currentmodel->name, pseqdesc->label );
+		if( !(m_pModelInstance->info_flags & MF_INVALID_BOUNDS) )
+		{
+			ALERT( at_aiconsole, "%s: sequence: %s has invalid bbox\n", RI->currentmodel->name, pseqdesc->label );
+			m_pModelInstance->info_flags |= MF_INVALID_BOUNDS; // don't spam anymore
+		}
 		// some seqeunces can have invalid bbox size, so we need to start from default size
 		AddPointToBounds( RI->currentmodel->mins, mins, maxs );
 		AddPointToBounds( RI->currentmodel->maxs, mins, maxs );
