@@ -983,7 +983,11 @@ void CTalkMonster :: Touch( CBaseEntity *pOther )
 			if ( speed > 50 )
 			{
 				SetConditions( bits_COND_CLIENT_PUSH );
-				MakeIdealYaw( pOther->GetAbsOrigin() );
+				if( m_pSchedule != NULL && (m_pSchedule->iInterruptMask & bits_COND_CLIENT_PUSH) )
+				{
+					SetConditions( bits_COND_CLIENT_PUSH );
+					MakeIdealYaw( pOther->pev->origin );
+				}
 			}
 		}
 	}
