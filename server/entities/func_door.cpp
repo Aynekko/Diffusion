@@ -426,7 +426,8 @@ void CBaseDoor::DoorCloseThink ( void )
 {
 	CBaseEntity *pList[1];
 
-	if( !UTIL_MonstersInSphere( pList, 1, m_vecPosition1, AutoDoorRadius) )
+	// make radius bigger to prevent back-n-forth spamming
+	if( !UTIL_MonstersInSphere( pList, 1, m_vecPosition1, AutoDoorRadius * 1.5f ) )
 	{
 		Use( this, this, USE_OFF, 777 ); // HACKHACK this value is needed to override the master state
 		pev->nextthink = -1;
