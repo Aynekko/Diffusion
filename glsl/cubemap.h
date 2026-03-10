@@ -31,8 +31,10 @@ vec3 CubemapBoxParallaxCorrected( const vec3 vReflVec, vec3 vPosition, const vec
 //	vPosition = clamp( vPosition, cubeCenter - cubeExtent * 0.8 , cubeCenter + cubeExtent * 0.8 );
 
 	// min/max intersection
-	vec3 vBoxIntersectionMax = (vBoxExtentsMax - vPosition) / vReflVec;
-	vec3 vBoxIntersectionMin = (vBoxExtentsMin - vPosition) / vReflVec;
+	const float epsilon = 0.0001;
+	vec3 invRefl = 1.0 / (vReflVec + sign(vReflVec) * epsilon);
+	vec3 vBoxIntersectionMax = (vBoxExtentsMax - vPosition) * invRefl;
+	vec3 vBoxIntersectionMin = (vBoxExtentsMin - vPosition) * invRefl;
 
 	vec3 vFurthestPlane;
 
@@ -43,8 +45,8 @@ vec3 CubemapBoxParallaxCorrected( const vec3 vReflVec, vec3 vPosition, const vec
 	float fDistance = min( min( vFurthestPlane.x, vFurthestPlane.y ), vFurthestPlane.z );
 
 	// apply new reflection position
-	vec3 vInterectionPos = vPosition + vReflVec * fDistance;
-	return (vInterectionPos - vCubePos);
+	vec3 vIntersectionPos = vPosition + vReflVec * fDistance;
+	return (vIntersectionPos - vCubePos);
 }
 
 vec3 GetReflectionProbe( const vec3 vPos, const vec3 vView, const vec3 nWorld, const float CubeLod )

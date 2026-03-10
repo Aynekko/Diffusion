@@ -52,13 +52,16 @@ float GetFresnel( const vec3 V, const vec3 N, float fresnelExp, float scale )
 
 float linearizeDepth( float zfar, float depth )
 {
-	//	return 2.0 * Z_NEAR * zfar / ( zfar + Z_NEAR - ( 2.0 * depth - 1.0 ) * ( zfar - Z_NEAR ));
-	return -zfar * Z_NEAR / (depth * (zfar - Z_NEAR) - zfar);
+	float div = ( depth * ( zfar - Z_NEAR ) - zfar );
+	if ( abs( div ) < 0.0001 ) div = sign( div ) * 0.0001;
+	return -zfar * Z_NEAR / div;
 }
 
 float linearizeDepth( float depth, float znear, float zfar )
 {
-	return -zfar * znear / (depth * (zfar - znear) - zfar);
+	float div = ( depth * ( zfar - znear ) - zfar );
+	if ( abs( div ) < 0.0001 ) div = sign( div ) * 0.0001;
+	return -zfar * znear / div;
 }
 
 float ComputeStaticBump( const vec3 L, const vec3 N )
