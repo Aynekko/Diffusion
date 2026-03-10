@@ -979,15 +979,12 @@ void CTalkMonster :: Touch( CBaseEntity *pOther )
 		// diffusion - don't do this if prisoner
 		if( !HasSpawnFlags(SF_MONSTER_PRISONER) )
 		{
-			float speed = fabs(pOther->GetAbsVelocity().x) + fabs(pOther->GetAbsVelocity().y);
-			if ( speed > 50 )
+			float speed = pOther->GetAbsVelocity().Length2D();
+			if( speed > 50.0f )
 			{
 				SetConditions( bits_COND_CLIENT_PUSH );
-				if( m_pSchedule != NULL && (m_pSchedule->iInterruptMask & bits_COND_CLIENT_PUSH) )
-				{
-					SetConditions( bits_COND_CLIENT_PUSH );
+				if( m_MonsterState != MONSTERSTATE_SCRIPT )
 					MakeIdealYaw( pOther->pev->origin );
-				}
 			}
 		}
 	}
