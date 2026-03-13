@@ -94,6 +94,15 @@ const int g_sentryHealth[] =
 	70
 };
 
+// spider mine --------------------------------------------
+const int g_spidermineHealth[] =
+{
+	0,
+	30,
+	30,
+	30
+};
+
 // scientist (male/female) --------------------------------
 const int g_scientistHealth = 25;
 const int g_scientistHeal = 20;

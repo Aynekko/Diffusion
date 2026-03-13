@@ -244,8 +244,14 @@ void CTriggerRandomizer::FireRandomTarget( void )
 	// UNDONE pActivator should be player who activated the trigger
 	CBaseEntity *pActivator = this;
 	USE_TYPE useType = USE_TOGGLE;
+
+	// shuffle a bit...
+	int num_shuffles = RANDOM_LONG( 1, 4 );
+	int iFireTarget = RANDOM_LONG( 1, TotalTargets );
+	for( int i = 0; i < num_shuffles; i++ )
+		iFireTarget = RANDOM_LONG( 1, TotalTargets );
 	
-	switch( RANDOM_LONG( 1, TotalTargets ) )
+	switch( iFireTarget )
 	{
 	case 1:
 		if( LastUsedTarget == 1 ) { FireRandomTarget(); }

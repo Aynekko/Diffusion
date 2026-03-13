@@ -441,6 +441,7 @@
     <ClCompile Include="entities\func_tank.cpp" />
     <ClCompile Include="game\game.cpp" />
     <ClCompile Include="game\gamerules.cpp" />
+    <ClCompile Include="monsters\entities\monster_spidermine.cpp" />
     <ClCompile Include="user_messages.cpp" />
     <ClCompile Include="weapons\ggrenade.cpp" />
     <ClCompile Include="game\globals.cpp" />

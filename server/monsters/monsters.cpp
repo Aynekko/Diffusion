@@ -351,12 +351,15 @@ void CBaseMonster :: Look ( int iDistance )
 	CBaseEntity *pFlashlightMonster = NULL; // diffusion - find the player's flashlight "dot"
 	if( gpGlobals->maxClients == 1 )
 	{
-		// does this account only one flashlight at a time?..
-		if( (pFlashlightMonster = UTIL_FindEntityByClassname( pFlashlightMonster, "_flashlight" )) != NULL )
+		if( m_afCapability & bits_CAP_CANSEEFLASHLIGHT )
 		{
-			// if monster can see this flashlight, set the condition
-			if( !(pFlashlightMonster->pev->effects & EF_NODRAW) && FVisible( pFlashlightMonster ) && FInViewCone( pFlashlightMonster, m_flFieldOfView ) && ((pFlashlightMonster->GetAbsOrigin() - GetAbsOrigin()).Length() <= iDistance) && (m_afCapability & bits_CAP_CANSEEFLASHLIGHT) )
-				iSighted |= bits_COND_SEE_FLASHLIGHT;
+			// does this account only one flashlight at a time?..
+			if( (pFlashlightMonster = UTIL_FindEntityByClassname( pFlashlightMonster, "_flashlight" )) != NULL )
+			{
+				// if monster can see this flashlight, set the condition
+				if( !(pFlashlightMonster->pev->effects & EF_NODRAW) && FVisible( pFlashlightMonster ) && FInViewCone( pFlashlightMonster, m_flFieldOfView ) && ((pFlashlightMonster->GetAbsOrigin() - GetAbsOrigin()).Length() <= iDistance) )
+					iSighted |= bits_COND_SEE_FLASHLIGHT;
+			}
 		}
 	}
 
