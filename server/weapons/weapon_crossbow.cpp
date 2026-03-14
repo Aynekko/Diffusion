@@ -422,7 +422,6 @@ void CCrossbow::Spawn( void )
 	FallInit();// get ready to fall down.
 
 	bNeedPump = false;
-	m_iSavedZoomState = 1;
 }
 
 int CCrossbow::AddToPlayer( CBasePlayer *pPlayer )

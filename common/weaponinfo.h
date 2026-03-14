@@ -522,8 +522,8 @@ enum shotgunxm_e
 
 enum sniper_e
 {
-	SNIPER_DRAW = 0,
-	SNIPER_IDLE,
+	SNIPER_IDLE = 0,
+	SNIPER_DRAW,
 	SNIPER_SHOOT,
 	SNIPER_RELOAD_EMPTY,
 	SNIPER_RELOAD,

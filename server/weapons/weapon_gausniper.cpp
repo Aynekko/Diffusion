@@ -104,7 +104,6 @@ void CGauss::Spawn( void )
 
 	m_iDefaultAmmo = GAUSS_DEFAULT_GIVE;
 	m_iDefaultAmmo2 = 0;
-	m_iSavedZoomState = 1;
 
 	Charge = 0.0f;
 
@@ -287,11 +286,7 @@ void CGauss::SetWeaponZoom( int iZoom )
 
 void CGauss::CycleWeaponZoom( void )
 {
-	m_iSavedZoomState++;
-	if( m_iSavedZoomState > 2 )
-		m_iSavedZoomState = 1;
-
-	SetWeaponZoom( m_iSavedZoomState );
+	SetWeaponZoom( (m_pPlayer->ZoomState == 1) ? 2 : 1 );
 }
 
 void CGauss::SecondaryAttack( void )
@@ -309,7 +304,7 @@ void CGauss::SecondaryAttack( void )
 
 	if( m_pPlayer->ZoomState == 0 ) // not zoomed, zoom to first level (fov 30)
 	{
-		SetWeaponZoom( m_iSavedZoomState );
+		SetWeaponZoom( 1 );
 		UTIL_ScreenFade( m_pPlayer, g_vecZero, 0.25, 0, 255, 0x0000 );
 		if( !m_pPlayer->bShowZoomHint )
 		{

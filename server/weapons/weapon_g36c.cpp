@@ -60,7 +60,6 @@ void CWeaponG36C::Spawn( void )
 
 	m_iDefaultAmmo = MP5_DEFAULT_GIVE; // two rounds
 	m_iDefaultAmmo2 = 0;
-	m_iSavedZoomState = 1;
 
 	FallInit();// get ready to fall down.
 }

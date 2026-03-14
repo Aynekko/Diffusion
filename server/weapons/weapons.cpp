@@ -549,7 +549,6 @@ BEGIN_DATADESC( CBasePlayerWeapon )
 	DEFINE_FIELD( m_iClip, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iDefaultAmmo, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iDefaultAmmo2, FIELD_INTEGER ),
-	DEFINE_FIELD( m_iSavedZoomState, FIELD_INTEGER ),
 END_DATADESC()
 
 void CBasePlayerItem :: SetObjectCollisionBox( void )
