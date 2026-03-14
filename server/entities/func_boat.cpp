@@ -241,6 +241,9 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 			pPlayer->m_flFOV = 0;
 		}
 
+		// special for boat - add velocity because boats/jetskis don't stop instantly like cars, scale Z down
+		pPlayer->SetAbsVelocity( GetAbsVelocity() * Vector( 1.0f, 1.0f, 0.5f ) );
+
 		// reset player's angles, look in the vehicle direction
 		pPlayer->SetAbsAngles( GetAbsAngles() );
 		pPlayer->pev->fixangle = TRUE;
