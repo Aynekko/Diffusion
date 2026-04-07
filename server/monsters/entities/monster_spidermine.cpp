@@ -3,6 +3,7 @@
 #include "cbase.h"
 #include "weapons/weapons.h"
 #include "monsters.h"
+#include "game/game.h"
 
 //============================================================================
 // Spider mine for Diffusion
@@ -202,6 +203,9 @@ void CSpiderMine::StandbyThink( void )
 {
 	SetNextThink( 0.1f );
 
+	if( HasSpawnFlags( SF_MONSTER_ASLEEP ) || ai_disable.value )
+		return;
+
 	fEnemyNotSighted = 0.0f;
 	pev->movetype = MOVETYPE_TOSS;
 	m_iState = STATE_ON;
@@ -256,6 +260,9 @@ void CSpiderMine::HuntThink( void )
 	pev->movetype = MOVETYPE_PUSHSTEP;
 	m_iState = STATE_ON;
 	pev->framerate = pev->speed / SPIDER_MAX_SPEED;
+
+	if( HasSpawnFlags( SF_MONSTER_ASLEEP ) || ai_disable.value )
+		return;
 
 	StudioFrameAdvance( 0.1f );
 	
