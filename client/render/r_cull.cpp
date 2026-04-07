@@ -80,58 +80,48 @@ cull invisible surfaces
 */
 int R_CullSurfaceExt( msurface_t *surf, CFrustum *frustum )
 {
-	cl_entity_t	*e = RI->currententity;
-
 	if( !surf || !surf->texinfo || !surf->texinfo->texture )
 		return CULL_OTHER;
 
 	if( CVAR_TO_BOOL( r_nocull ) || IsBuildingCubemaps() )
 		return CULL_VISIBLE;
 
+	cl_entity_t *e = RI->currententity;
+
 	// only static ents can be culled by frustum
 	if( !R_StaticEntity( e ))
 		frustum = NULL;
 
-	if( surf->plane->normal != g_vecZero )
+	if( glState.faceCull != GL_NONE && surf->plane->normal != g_vecZero )
 	{
-		float	dist;
+		float dist;
 
 		if( FBitSet( RI->params, RP_OVERVIEW ))
 		{
-			Vector	orthonormal;
+			Vector orthonormal;
 
-			if( e == GET_ENTITY( 0 )) orthonormal[2] = surf->plane->normal[2];
-			else orthonormal = RI->objectMatrix.VectorRotate( surf->plane->normal );
+			if( e == GET_ENTITY( 0 ))
+				orthonormal[2] = surf->plane->normal[2];
+			else
+				orthonormal = RI->objectMatrix.VectorRotate( surf->plane->normal );
 
 			dist = orthonormal.z;
 		}
-		else dist = PlaneDiff( tr.modelorg, surf->plane );
+		else
+			dist = PlaneDiff( tr.modelorg, surf->plane );
+
+		if( surf->flags & SURF_PLANEBACK )
+			dist = -dist;
 
 		if( glState.faceCull == GL_FRONT )
 		{
-			if( surf->flags & SURF_PLANEBACK )
-			{
-				if( dist >= -BACKFACE_EPSILON )
-					return CULL_BACKSIDE; // wrong side
-			}
-			else
-			{
-				if( dist <= BACKFACE_EPSILON )
-					return CULL_BACKSIDE; // wrong side
-			}
+			if( dist <= BACKFACE_EPSILON )
+				return CULL_BACKSIDE; // wrong side
 		}
-		else if( glState.faceCull == GL_BACK )
+		else // GL_BACK
 		{
-			if( surf->flags & SURF_PLANEBACK )
-			{
-				if( dist <= BACKFACE_EPSILON )
-					return CULL_BACKSIDE; // wrong side
-			}
-			else
-			{
-				if( dist >= -BACKFACE_EPSILON )
-					return CULL_BACKSIDE; // wrong side
-			}
+			if( dist >= -BACKFACE_EPSILON )
+				return CULL_BACKSIDE;
 		}
 	}
 
