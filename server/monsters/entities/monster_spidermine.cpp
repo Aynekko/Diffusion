@@ -202,7 +202,7 @@ void CSpiderMine::ThrowThink( void )
 void CSpiderMine::StandbyThink( void )
 {
 	SetNextThink( 0.1f );
-
+	
 	if( HasSpawnFlags( SF_MONSTER_ASLEEP ) || ai_disable.value )
 		return;
 
@@ -379,7 +379,15 @@ void CSpiderMine::ExplodeThink( void )
 	SetNextThink( 0.1f );
 	StudioFrameAdvance( 0.1f );
 
-	if( m_fSequenceFinished )
+	if( pev->sequence == ANIM_JUMP )
+	{
+		if( m_fSequenceFinished )
+		{
+			DontThink();
+			Detonate();
+		}
+	}
+	else // detonate instantly
 	{
 		DontThink();
 		Detonate();
