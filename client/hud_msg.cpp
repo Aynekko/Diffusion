@@ -905,6 +905,13 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 	}
 	break;
 
+	case TE_RELOAD_CIRCLE:
+	{
+		m_CrosshairStatic.fReloadingLength = READ_BYTE() * 0.1f;
+		m_CrosshairStatic.fReloadingTime = tr.time + m_CrosshairStatic.fReloadingLength;
+	}
+	break;
+
 	case TE_BOAT_TRAIL:
 	{
 		pos.x = READ_COORD();

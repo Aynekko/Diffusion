@@ -779,6 +779,11 @@ void CCrossbow::WeaponIdle( void )
 			bNeedPump = false;
 			m_flNextPrimaryAttack = gpGlobals->time + CROSSBOW_PUMP_TIME;
 			m_flTimeWeaponIdle = gpGlobals->time + 8.0f;
+
+			MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, m_pPlayer->pev );
+				WRITE_BYTE( TE_RELOAD_CIRCLE );
+				WRITE_BYTE( (int)(CROSSBOW_PUMP_TIME * 10.0f) );
+			MESSAGE_END();
 			return;
 		}
 		

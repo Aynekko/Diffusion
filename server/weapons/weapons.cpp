@@ -1192,6 +1192,11 @@ BOOL CBasePlayerWeapon :: DefaultDeploy( const char *szViewModel, const char *sz
 
 	AskedForReload = false;
 
+	MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, m_pPlayer->pev );
+		WRITE_BYTE( TE_RELOAD_CIRCLE );
+		WRITE_BYTE( 0 );
+	MESSAGE_END();
+
 	return TRUE;
 }
 
@@ -1216,6 +1221,11 @@ BOOL CBasePlayerWeapon :: DefaultReload( int iClipSize, int iAnim, float fDelay,
 	m_fInReload = TRUE;
 
 	m_flTimeWeaponIdle = gpGlobals->time + 3;
+
+	MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, m_pPlayer->pev );
+		WRITE_BYTE( TE_RELOAD_CIRCLE );
+		WRITE_BYTE( (int)(fDelay * 10.0f) );
+	MESSAGE_END();
 
 	return TRUE;
 }

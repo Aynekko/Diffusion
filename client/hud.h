@@ -707,6 +707,10 @@ public:
 	void Reset( void );
 	void VidInitCrosshairs( void );
 	void DrawGaussZoomedHUD( void );
+
+	float fReloadingTime; // time in the future for the reloading circle
+	float fReloadingLength;
+	void DrawReloadingCircle( const float radius );
 private:
 	WEAPON	*m_pWeapon;
 

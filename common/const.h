@@ -671,6 +671,7 @@
 #define TE_TRIGGERTIMER 143 // trigger_timer parameters
 #define TE_SUNLIGHT_SCALE 144
 #define TE_NPCCLIP 145 // npc's reloading clip
+#define TE_RELOAD_CIRCLE 146
 
 #define MSG_BROADCAST		0	// unreliable to all
 #define MSG_ONE			1	// reliable to one (msg_entity)

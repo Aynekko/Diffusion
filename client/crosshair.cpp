@@ -13,6 +13,7 @@
 #include "r_cvars.h"
 #include "event_api.h"
 #include "r_local.h"
+#include <vector>
 
 DECLARE_MESSAGE( m_CrosshairStatic, CrosshairStatic );
 DECLARE_MESSAGE( m_CrosshairStatic, GaussHUD );
@@ -24,6 +25,91 @@ char dmg[8];
 // global scale for all images, unrelated to HUD scaling
 // (it's easier than to rescale the images themselves manually)
 #define CROSSHAIR_SCALE 0.25f
+
+//============================================================================================================
+// DrawReloadingCircle: this function draws a circle progress bar during reloading. (except shotguns)
+// fReloadingLength is received from server, radius of the circle is set using hitmarker sprite
+//============================================================================================================
+void CHudCrosshairStatic::DrawReloadingCircle( const float radius )
+{
+	if( cl_crosshair_reloading->value <= 0.0f || fReloadingLength == 0.0f || !radius )
+		return;
+
+	if( tr.time == tr.oldtime ) // paused
+		return;
+
+	if( CVAR_TO_BOOL( ui_is_active ) )
+		return;
+	
+	const float progress = ((fReloadingTime - tr.time) / fReloadingLength) * 100.0f;
+	
+	if( progress <= 0.0f || progress > 100.0f )
+		return;
+
+	const Vector2D center = Vector2D( ScreenWidth * 0.5f, ScreenHeight * 0.5f );
+	const int MAX_CIRCLE_SEGMENTS = 64;
+	const size_t MAX_VERTICES = (MAX_CIRCLE_SEGMENTS + 1) * 2;
+	const float thickness = 2.5f * gHUD.fScale;
+
+	static GLuint vbo, vao;
+	if( !vbo )
+	{
+		pglGenVertexArrays( 1, &vao );
+		pglGenBuffersARB( 1, &vbo );
+
+		pglBindVertexArray( vao );
+		pglBindBufferARB( GL_ARRAY_BUFFER_ARB, vbo );
+		pglBufferDataARB( GL_ARRAY_BUFFER_ARB, MAX_VERTICES * sizeof( Vector2D ), NULL, GL_STREAM_DRAW_ARB );
+
+		pglEnableVertexAttribArrayARB( 0 );
+		pglVertexAttribPointerARB( 0, 2, GL_FLOAT, GL_FALSE, sizeof( Vector2D ), (void *)0 );
+
+		pglBindVertexArray( 0 );
+	}
+
+	std::vector<Vector2D> vertices;
+	vertices.clear();
+
+	const float startAngle = -M_PI * 0.5f; // top of the circle
+	const float sweepAngle = M_PI2 * (progress / 100.0f);
+
+	for( int i = 0; i <= MAX_CIRCLE_SEGMENTS; ++i )
+	{
+		float t = static_cast<float>(i) / MAX_CIRCLE_SEGMENTS;
+		float angle = startAngle - sweepAngle * t; // minus sign = clockwise
+
+		float cosA = cos( angle );
+		float sinA = sin( angle );
+
+		// Outer vertex
+		vertices.emplace_back( center.x + radius * cosA, center.y + radius * sinA );
+
+		// Inner vertex
+		vertices.emplace_back( center.x + (radius - thickness) * cosA, center.y + (radius - thickness) * sinA );
+	}
+
+	if( vertices.empty() )
+		return;
+
+	float alpha = 0.5f;
+	// fade out first and last bits :)
+	if( progress < 25.0f )
+		alpha *= progress * 0.04f;
+	else if( progress > 90.0f )
+		alpha *= 1.0f - (progress - 90.0f) * 0.1f;
+
+	// Update GPU buffer with new vertices
+	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, vbo );
+	pglBufferSubDataARB( GL_ARRAY_BUFFER_ARB, 0, vertices.size() * sizeof( Vector2D ), vertices.data() );
+
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+	GL_Color4f( 1.0f, 0.3f, 0.3f, alpha );
+
+	// Draw the strip
+	pglBindVertexArray( vao );
+	pglDrawArrays( GL_TRIANGLE_STRIP, 0, static_cast<GLsizei>(vertices.size()) );
+	pglBindVertexArray( 0 );
+}
 
 int CHudCrosshairStatic::Init( void )
 {
@@ -142,6 +228,7 @@ int CHudCrosshairStatic::VidInit( void )
 	ZoomBlur = 0.0f;
 	CurCrosshair = cl_crosshair->value;
 	DamageDealt = 0;
+	fReloadingLength = 0.0f;
 
 	// load crosshair images
 	VidInitCrosshairs();
@@ -231,6 +318,8 @@ int CHudCrosshairStatic::DrawCrosshairs( float flTime )
 	crosshair_t cur_crosshair = cl_crosshair->value == 2 ? crosshair[WeaponID][1] : crosshair[WeaponID][0];
 	if( WeaponID == WEAPON_DRONE && !DroneControl )
 		cur_crosshair.texture = 0;
+
+	DrawReloadingCircle( cur_hitmarker.w );
 
 	float r, g, b, a;
 
