@@ -76,6 +76,13 @@ void CEnvStatic::KeyValue(KeyValueData* pkvd)
 
 void CEnvStatic::Spawn(void)
 {
+	if( !pev->model )
+	{
+		ALERT( at_error, "env_static at [%.f %.f %.f] without a model! Removed.\n", GetAbsOrigin().x, GetAbsOrigin().y, GetAbsOrigin().z );
+		UTIL_Remove( this );
+		return;
+	}
+
 	Precache();
 	
 	if( pev->scale == 0 )

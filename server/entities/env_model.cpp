@@ -77,6 +77,13 @@ void CEnvModel::KeyValue(KeyValueData* pkvd)
 
 void CEnvModel::Spawn(void)
 {
+	if( !pev->model )
+	{
+		ALERT( at_error, "env_model at [%.f %.f %.f] without a model! Removed.\n", GetAbsOrigin().x, GetAbsOrigin().y, GetAbsOrigin().z );
+		UTIL_Remove( this );
+		return;
+	}
+
 	Precache();
 	
 	SET_MODEL(edict(), STRING(pev->model));
