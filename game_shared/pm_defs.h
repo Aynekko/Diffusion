@@ -16,6 +16,8 @@
 #ifndef PM_DEFS_H
 #define PM_DEFS_H
 
+#include <string.h> // memcpy for PM_PlayerTrace hack
+
 #define MAX_PHYSENTS	600		// Must have room for all entities in the world.
 #define MAX_MOVEENTS	64
 #define MAX_CLIP_PLANES	5
@@ -90,6 +92,30 @@ typedef struct physent_s
 	vec3_t		vuser3;
 	vec3_t		vuser4;
 } physent_t;
+
+#ifdef __e2k__
+typedef struct pmplane_compat_s
+{
+	float normal[3];
+	float dist;
+} pmplane_compat_t;
+
+typedef struct pmtrace_compat_s
+{
+	qboolean allsolid;
+	qboolean startsolid;
+	qboolean inopen;
+	qboolean inwater;
+	float fraction;
+	float endpos[3];
+	pmplane_compat_t plane;
+	int ent;
+	float deltavelocity[3];
+	int hitgroup;
+} pmtrace_compat_t;
+
+static_assert(sizeof(pmtrace_t) == sizeof(pmtrace_compat_t));
+#endif // __e2k__
 
 typedef struct playermove_s
 {
@@ -202,8 +228,14 @@ typedef struct playermove_s
 	void		(*PM_StuckTouch)( int hitent, pmtrace_t *ptraceresult );
 	int		(*PM_PointContents)( float *p, int *truecontents /*filled in if this is non-null*/ );
 	int		(*PM_TruePointContents)( float *p );
-	int		(*PM_HullPointContents)( struct hull_s *hull, int num, float *p );   
+	int		(*PM_HullPointContents)( struct hull_s *hull, int num, float *p );
+
+#ifdef __e2k__
+	pmtrace_compat_t		(*PM_PlayerTraceCompat)( float *start, float *end, int traceFlags, int ignore_pe );
+#else
 	pmtrace_t		(*PM_PlayerTrace)( float *start, float *end, int traceFlags, int ignore_pe );
+#endif
+
 	struct pmtrace_s	*(*PM_TraceLine)( float *start, float *end, int flags, int usehulll, int ignore_pe );
 	int (*RandomLong)(int lLow, int lHigh);
 	float		(*RandomFloat)( float flLow, float flHigh );
@@ -225,6 +257,17 @@ typedef struct playermove_s
 	pmtrace_t		(*PM_PlayerTraceEx) (float *start, float *end, int traceFlags, int (*pfnIgnore)( physent_t *pe ));
 	int		(*PM_TestPlayerPositionEx) (float *pos, pmtrace_t *ptrace, int (*pfnIgnore)( physent_t *pe ));
 	struct pmtrace_s	*(*PM_TraceLineEx)( float *start, float *end, int flags, int usehulll, int (*pfnIgnore)( physent_t *pe ));
+
+#ifdef __e2k__
+	pmtrace_t PM_PlayerTrace( float *start, float *end, int traceFlags, int ignore_pe )
+	{
+		pmtrace_compat_t tr = PM_PlayerTraceCompat( start, end, traceFlags, ignore_pe );
+		pmtrace_t tr2;
+
+		memcpy( &tr2, &tr, sizeof( tr2 ));
+		return tr2;
+	}
+#endif
 } playermove_t;
 
 #endif//PM_DEFS_H
