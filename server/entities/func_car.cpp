@@ -2848,6 +2848,10 @@ void CCar::Drive( void )
 				else
 					currentExhaust = pExhaust1;
 				currentExhaust->pev->fuser2 = 1.0f;
+
+				if( POINT_CONTENTS( currentExhaust->GetAbsOrigin() ) == CONTENTS_WATER )
+					currentExhaust->pev->fuser2 = 0.0f; // don't do pops underwater
+
 				if( currentExhaust->pev->fuser2 == 1.0f )
 				{
 					EMIT_SOUND_DYN( currentExhaust->edict(), CHAN_BODY, pExhaustPopSounds[RANDOM_LONG( 0, SIZEOFARRAY( pExhaustPopSounds ) - 1 )], 1.0, ATTN_NORM, 0, RANDOM_LONG( 80, 120 ) );

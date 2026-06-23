@@ -196,7 +196,7 @@ public:
 	// example presets
 	void ExplosionParticles( int EntIndex, const Vector &pos );
 	void BulletParticles( int EntIndex, const Vector &org, const Vector &dir );
-	void Bubble( int EntIndex, const Vector &pos, float Speed, int Distance, float DieTime, float SinSpeed );
+	void Bubble( int EntIndex, const Vector &pos, float Speed, int Distance, float DieTime, float SinSpeed, Vector CustomVelocity = g_vecZero, int CustomFlags = 0 );
 	void Beamring( int EntIndex, const Vector &start, const Vector &end );
 	void SparkParticles( int EntIndex, const Vector &org, const Vector &dir );
 	void RicochetSparks( int EntIndex, const Vector &org, float scale );

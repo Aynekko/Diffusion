@@ -444,7 +444,17 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 				const float exh_alpha = 0.5f - (ent->curstate.vuser1.Length() * 0.001f);
 				if( exh_alpha > 0.0f )
 				{
-					g_pParticles.Smoke( ParticleEntIndex, 0, ent->curstate.origin, ent->curstate.vuser1, 1, 0.25f, 5.0f, 0.0f, 0.0f, Vector( 0.75f, 0.75f, 0.75f ), 800, exh_alpha );
+					const Vector org = ent->curstate.origin;
+					Vector vel = ent->curstate.vuser1;
+					if( POINT_CONTENTS( org ) == CONTENTS_WATER ) // make bubbles if the exhaust is in water
+					{
+						vel.z = RANDOM_LONG( 10, 35 );
+						vel.x *= RANDOM_FLOAT( 0.8f, 1.3f );
+						vel.y *= RANDOM_FLOAT( 0.8f, 1.3f );
+						g_pParticles.Bubble( ParticleEntIndex, org, 0, 0, 0, 0, vel, FPART_UNDERWATER );
+					}
+					else
+						g_pParticles.Smoke( ParticleEntIndex, 0, org, vel, 1, 0.25f, 5.0f, 0.0f, 0.0f, Vector( 0.75f, 0.75f, 0.75f ), 800, exh_alpha );
 					tr.ParticleTime[ParticleEntIndex] = tr.time + ent->curstate.fuser1;
 				}
 			}

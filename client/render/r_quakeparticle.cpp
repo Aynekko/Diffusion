@@ -2493,7 +2493,7 @@ void CQuakePartSystem::BloodParticle( int EntIndex, const Vector &pos, float Sca
 	AddParticle( &src, m_hBloodSplat, flags );
 }
 
-void CQuakePartSystem::Bubble( int EntIndex, const Vector &pos, float Speed, int Distance, float DieTime, float SinSpeed )
+void CQuakePartSystem::Bubble( int EntIndex, const Vector &pos, float Speed, int Distance, float DieTime, float SinSpeed, Vector CustomVelocity, int CustomFlags )
 {
 	if( !g_fRenderInitialized )
 		return;
@@ -2501,11 +2501,15 @@ void CQuakePartSystem::Bubble( int EntIndex, const Vector &pos, float Speed, int
 	CQuakePart src = InitializeParticle();
 
 	int flags = FPART_SINEWAVE | FPART_OPAQUE;
+	if( CustomFlags ) flags |= CustomFlags;
 
 	float Scale = 7.5f / RANDOM_FLOAT( 2.0f, 5.0f );
 
 	src.m_vecOrigin = pos;
-	src.m_vecVelocity.z = Speed;
+	if( CustomVelocity != g_vecZero )
+		src.m_vecVelocity = CustomVelocity;
+	else
+		src.m_vecVelocity.z = Speed; // default half-life behavior
 	src.m_flRadius = Scale;
 	src.m_flDistance = Distance;
 	src.ParticleType = TYPE_BUBBLES;
