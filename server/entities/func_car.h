@@ -141,6 +141,7 @@ public:
 	float TmpCameraModeAddDist_Main; // used for lerping
 	float CameraModeAddDist_Free;
 	float TmpCameraModeAddDist_Free; // used for lerping
+	float TmpMainCameraHeightLerper; // not saved, for smoothing out camera height change
 	float NewCameraAngleY;
 	float NewCameraAngleX;
 	float CamDistAdjust;

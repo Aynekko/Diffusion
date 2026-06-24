@@ -3199,6 +3199,13 @@ void CCar::Camera(void)
 			SET_VIEW( hDriver->edict(), pCamera1->edict() );
 			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * (CameraDistance + TmpCameraModeAddDist_Main) * CamDistAdjust, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 			CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
+			if( !TmpMainCameraHeightLerper )
+				TmpMainCameraHeightLerper = CamOrg.z;
+			else
+			{
+				TmpMainCameraHeightLerper = lerp( TmpMainCameraHeightLerper, CamOrg.z, gpGlobals->frametime * 10.0f );
+				CamOrg.z = TmpMainCameraHeightLerper;
+			}
 			pCamera1->SetAbsOrigin( CamOrg );
 			pCamera1->SetAbsAngles( CameraAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );
 		}
