@@ -6,9 +6,6 @@
 #include "utils.h"
 #include "triangleapi.h"
 #include "r_local.h"
-#include "pm_defs.h"
-#include "r_efx.h"
-#include "r_world.h"
 #include "event_api.h"
 
 #define SPEED_ARROW_STEP 2
@@ -180,7 +177,7 @@ void CScreenEffects::DrawSpeedometer(void)
 //	gEngfuncs.Con_NPrintf( 1,"%i\n", (int)gHUD.CarSpeed );
 
 	// draw the arrow
-	SpeedArrowRotation = CL_UTIL_Approach( gHUD.CarSpeed, SpeedArrowRotation, 25 * g_fFrametime );
+	SpeedArrowRotation = lerp( SpeedArrowRotation, gHUD.CarSpeed, 3.0f * g_fFrametime );
 	if( SpeedArrowRotation > 240 )
 		SpeedArrowRotation = 240;
 	GL_Bind( 0, SpeedometerArrow );
@@ -350,9 +347,7 @@ void CScreenEffects::DrawVoicePlayers( void )
 		x_pos = ScreenWidth - iBORDER - icon_size - iBORDER - ConsoleStringLen( g_PlayerInfoList[i].name );
 		DrawConsoleString( x_pos, y_pos, g_PlayerInfoList[i].name );
 		y_pos += h;
-	}
-
-	
+	}	
 }
 
 //===============================================
