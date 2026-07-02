@@ -59,22 +59,23 @@ cvar_t	sv_regeneration	= { "sv_regeneration","1", FCVAR_ARCHIVE };
 // Diffusion
 cvar_t	sv_allowhealthbars = { "sv_allowhealthbars", "1", FCVAR_ARCHIVE };
 cvar_t ai_draw_route = { "ai_draw_route", "0", FCVAR_CHEAT };
-cvar_t  ai_disable = { "ai_disable", "0", FCVAR_CHEAT };
-cvar_t  sv_ignore_triggers = { "sv_ignore_triggers", "0", FCVAR_CHEAT };
-cvar_t	mp_dash_air = { "mp_dash_air", "1", FCVAR_SERVER };
-cvar_t	mp_alwaysgib = { "mp_alwaysgib", "0", FCVAR_SERVER };
-cvar_t	sv_enablebunnyhopping = { "sv_enablebunnyhopping", "0", FCVAR_SERVER };
-cvar_t	mp_killercamera = { "mp_killercamera", "1", FCVAR_SERVER };
-cvar_t	mp_weaponbonus = { "mp_weaponbonus", "1", FCVAR_SERVER };
-cvar_t	mp_hidecorpses = { "mp_hidecorpses", "0", FCVAR_SERVER };
-cvar_t	mp_spectator_cmd_delay = { "mp_spectator_cmd_delay", "2", FCVAR_SERVER };
-cvar_t	mp_allow_spectators = { "mp_allow_spectators", "1", FCVAR_SERVER };
-cvar_t	mp_spectator_notify = { "mp_spectator_notify", "7", FCVAR_SERVER };
-cvar_t	mp_servermsg_delay = { "mp_servermsg_delay", "30", FCVAR_SERVER };
-cvar_t	mp_server_notify = { "mp_server_notify", "0", FCVAR_SERVER };
-cvar_t	mp_spawnprotect = { "mp_spawnprotect", "3", FCVAR_SERVER };
-cvar_t	mp_healthbonus = { "mp_healthbonus", "0", FCVAR_SERVER };
-cvar_t	mp_explodesatchels = { "mp_explodesatchels", "1", FCVAR_SERVER };
+cvar_t ai_disable = { "ai_disable", "0", FCVAR_CHEAT };
+cvar_t sv_ignore_triggers = { "sv_ignore_triggers", "0", FCVAR_CHEAT };
+cvar_t mp_dash = { "mp_dash", "1", FCVAR_SERVER };
+cvar_t mp_blastlevel = { "mp_blastlevel", "1", FCVAR_SERVER };
+cvar_t mp_alwaysgib = { "mp_alwaysgib", "0", FCVAR_SERVER };
+cvar_t sv_enablebunnyhopping = { "sv_enablebunnyhopping", "0", FCVAR_SERVER };
+cvar_t mp_killercamera = { "mp_killercamera", "1", FCVAR_SERVER };
+cvar_t mp_weaponbonus = { "mp_weaponbonus", "1", FCVAR_SERVER };
+cvar_t mp_hidecorpses = { "mp_hidecorpses", "0", FCVAR_SERVER };
+cvar_t mp_spectator_cmd_delay = { "mp_spectator_cmd_delay", "2", FCVAR_SERVER };
+cvar_t mp_allow_spectators = { "mp_allow_spectators", "1", FCVAR_SERVER };
+cvar_t mp_spectator_notify = { "mp_spectator_notify", "7", FCVAR_SERVER };
+cvar_t mp_servermsg_delay = { "mp_servermsg_delay", "30", FCVAR_SERVER };
+cvar_t mp_server_notify = { "mp_server_notify", "0", FCVAR_SERVER };
+cvar_t mp_spawnprotect = { "mp_spawnprotect", "3", FCVAR_SERVER };
+cvar_t mp_healthbonus = { "mp_healthbonus", "0", FCVAR_SERVER };
+cvar_t mp_explodesatchels = { "mp_explodesatchels", "1", FCVAR_SERVER };
 cvar_t mp_allow_bonuses = { "mp_allow_bonuses", "1", FCVAR_SERVER };
 cvar_t sv_train_debug = { "sv_train_debug", "0", FCVAR_SPONLY };
 cvar_t mp_maxturrets = { "mp_maxturrets", "3", FCVAR_SERVER }; // how many turrets a player can spawn
@@ -146,31 +147,31 @@ void GameDLLInit( void )
 #ifdef HAVE_STRINGPOOL
 	g_engfuncs.pfnAddServerCommand( "dump_strings", DumpStrings_f );
 #endif
-	CVAR_REGISTER (&displaysoundlist);
+	CVAR_REGISTER( &displaysoundlist );
 
-	CVAR_REGISTER (&teamplay);
-	CVAR_REGISTER (&fraglimit);
-	CVAR_REGISTER (&timelimit);
+	CVAR_REGISTER( &teamplay );
+	CVAR_REGISTER( &fraglimit );
+	CVAR_REGISTER( &timelimit );
 
-	CVAR_REGISTER (&fragsleft);
-	CVAR_REGISTER (&timeleft);
-	CVAR_REGISTER (&debugdraw);
-	CVAR_REGISTER (&physstats);
-	CVAR_REGISTER (&physdebug);
+	CVAR_REGISTER( &fragsleft );
+	CVAR_REGISTER( &timeleft );
+	CVAR_REGISTER( &debugdraw );
+	CVAR_REGISTER( &physstats );
+	CVAR_REGISTER( &physdebug );
 
-	CVAR_REGISTER (&friendlyfire);
-	CVAR_REGISTER (&falldamage);
-	CVAR_REGISTER (&weaponstay);
-	CVAR_REGISTER (&forcerespawn);
-	CVAR_REGISTER (&flashlight);
-	CVAR_REGISTER (&aimcrosshair);
-	CVAR_REGISTER (&decalfrequency);
-	CVAR_REGISTER (&teamlist);
-	CVAR_REGISTER (&teamoverride);
-	CVAR_REGISTER (&defaultteam);
-	CVAR_REGISTER (&allowmonsters);
+	CVAR_REGISTER( &friendlyfire );
+	CVAR_REGISTER( &falldamage );
+	CVAR_REGISTER( &weaponstay );
+	CVAR_REGISTER( &forcerespawn );
+	CVAR_REGISTER( &flashlight );
+	CVAR_REGISTER( &aimcrosshair );
+	CVAR_REGISTER( &decalfrequency );
+	CVAR_REGISTER( &teamlist );
+	CVAR_REGISTER( &teamoverride );
+	CVAR_REGISTER( &defaultteam );
+	CVAR_REGISTER( &allowmonsters );
 
-	CVAR_REGISTER (&mp_chattime);
+	CVAR_REGISTER( &mp_chattime );
 
 	// server debug drawing support requires build up to 1940
 	g_debugdraw = CVAR_GET_POINTER( "phys_debug" );
@@ -179,17 +180,18 @@ void GameDLLInit( void )
 	g_allow_physx = CVAR_GET_POINTER( "sv_allow_PhysX" );
 
 	// DiffusionRegen
-	CVAR_REGISTER ( &sv_regeneration );
+	CVAR_REGISTER( &sv_regeneration );
 
 	CVAR_REGISTER( &sv_allowhealthbars );
 
-	CVAR_REGISTER ( &ai_disable );
+	CVAR_REGISTER( &ai_disable );
 	CVAR_REGISTER( &ai_draw_route );
-	CVAR_REGISTER ( &sv_fade_props );
+	CVAR_REGISTER( &sv_fade_props );
 	CVAR_REGISTER( &sv_force_fadedistance );
 	CVAR_REGISTER( &sv_cubemap_culling );
 	CVAR_REGISTER( &sv_ignore_triggers );
-	CVAR_REGISTER( &mp_dash_air );
+	CVAR_REGISTER( &mp_dash );
+	CVAR_REGISTER( &mp_blastlevel );
 	CVAR_REGISTER( &mp_alwaysgib );
 	CVAR_REGISTER( &mp_killercamera );
 	CVAR_REGISTER( &mp_weaponbonus );

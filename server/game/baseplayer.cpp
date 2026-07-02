@@ -3684,6 +3684,14 @@ void CBasePlayer::ManageElectroBlast( void )
 
 		goto skip_blast;
 	}
+
+	if( g_pGameRules->IsMultiplayer() )
+	{
+		BlastAbilityLVL = mp_blastlevel.value;
+		BlastAbilityLVL = bound( 0, BlastAbilityLVL, 3 );
+		if( BlastAbilityLVL == 0 )
+			goto skip_blast;
+	}
 	
 	if( BlastAbilityLVL == 0 )
 		goto skip_blast;
@@ -5002,6 +5010,16 @@ void CBasePlayer::Dash(void)
 
 	if( !DashButton )
 		return;
+
+	if( g_pGameRules->IsMultiplayer() )
+	{
+		if( mp_dash.value <= 0 )
+		{
+			DashButton = false;
+			UTIL_ShowMessage( "UTIL_NODASH", this );
+			return;
+		}
+	}
 	
 	// player has suit, but dash it not allowed - show the message
 	if( !CanDash && ((pev->button & IN_MOVELEFT) || (pev->button & IN_MOVERIGHT) || (pev->button & IN_BACK) || (pev->button & IN_FORWARD)))
@@ -5019,11 +5037,9 @@ void CBasePlayer::Dash(void)
 		Dash_IsDucking = true;
 
 	// override the checks in multiplayer
-	if (g_pGameRules->IsMultiplayer())
+	if( g_pGameRules->IsMultiplayer() )
 	{
-		if (mp_dash_air.value > 0)
-			Dash_OnGround = true; // allow in air
-
+		Dash_OnGround = true; // allow in air
 		Dash_IsDucking = false; // allow in ducking
 	}
 	else
@@ -5371,7 +5387,7 @@ void CBasePlayer::Spawn( void )
 	BlastAbilityLVL = 0;
 	if( g_pGameRules->IsMultiplayer() )
 	{
-		BlastAbilityLVL = 1; // UNDONE - make a server cvar?
+		BlastAbilityLVL = mp_blastlevel.value;
 		ShieldAvailableLVL = 3;
 		bShowZoomHint = true;
 	}
