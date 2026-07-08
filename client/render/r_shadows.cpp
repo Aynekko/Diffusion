@@ -322,6 +322,7 @@ static void R_ShadowPassSetupFrame( plight_t *pl, int split = 0 )
 	}
 
 	RI->vieworg = pl->origin;
+	RI->pvsorigin = pl->origin;
 
 	// setup the screen FOV
 	RI->fov_x = pl->fov;
