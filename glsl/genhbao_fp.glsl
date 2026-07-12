@@ -22,7 +22,7 @@ vec2 AORes = ScreenRes * 0.5;
 vec2 InvAORes = 1.0 / AORes;
 vec2 NoiseScale = AORes * 0.25;
 
-const float AOStrength = 1.2;
+const float AOStrength = 1.25;
 const float R = 4.0;
 const float R2 = R * R * R * 2;
 const float NegInvR2 = - 1.0 / R2;

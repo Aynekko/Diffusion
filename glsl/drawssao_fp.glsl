@@ -10,7 +10,7 @@ uniform float		u_zFar;
 
 varying vec2		var_TexCoord;
 
-const float lumInfluence = 1.25;
+const float lumInfluence = 2.0;
 
 void main( void )
 {
