@@ -2226,6 +2226,9 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 	// draw main view
 	R_RenderScene();
 
+	if( CVAR_TO_BOOL( r_show_lightprobes ) )
+		DrawLightProbes();
+
 	SMAA();
 
 	if( gl_fsr->value > 0.0f )
@@ -2242,9 +2245,6 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 
 	if( CVAR_TO_BOOL( r_show_light_scissors ))
 		R_DrawLightScissors();
-
-	if( CVAR_TO_BOOL( r_show_lightprobes ))
-		DrawLightProbes();
 
 	R_UnloadFarGrass();
 
