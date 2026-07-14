@@ -39,6 +39,7 @@ public:
 
 LINK_ENTITY_TO_CLASS( weapon_python, CDeagle );
 LINK_ENTITY_TO_CLASS( weapon_357, CDeagle );
+LINK_ENTITY_TO_CLASS( weapon_deagle, CDeagle );
 
 int CDeagle::GetItemInfo(ItemInfo *p)
 {
