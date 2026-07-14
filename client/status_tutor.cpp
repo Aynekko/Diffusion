@@ -49,6 +49,14 @@ int CHudTutorial::MsgFunc_StatusIconTutor( const char *pszName, int iSize, void 
 	const char *img = READ_STRING();
 	END_READ();
 
+	// make sure that tutorial is valid
+	client_textmessage_t *test = TextMessageGet( pszTutorialName );
+	if( !test )
+	{
+		ConPrintf( "^1Error:^7 Couldn't get tutorial \"%s\" from titles.txt\n", pszTutorialName );
+		return 1;
+	}
+
 	CurrentImage = -1;
 	if( img[0] != '\0'  )
 		CurrentImage = LOAD_TEXTURE( img, NULL, 0, 0 );
@@ -66,10 +74,7 @@ void CHudTutorial::EnableTutorial( const char *pszTutorialName )
 	tutorial = TextMessageGet( pszTutorialName ); // titles.txt
 
 	if( !tutorial )
-	{
-		ConPrintf( "^1Error:^7 Couldn't get tutorial \"%s\" from titles.txt\n", pszTutorialName );
 		return;
-	}
 
 	// copy the message from titles.txt as is
 	tutorial_text[0] = '\0';
