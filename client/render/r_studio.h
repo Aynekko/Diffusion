@@ -343,6 +343,8 @@ private:
 
 	void StudioDrawAttachments( void );
 
+	void StudioDrawRagdollLimits( void );
+
 	void StudioDrawBodyPartsBBox( void );
 
 	int PrevGaitSequence;
@@ -377,6 +379,16 @@ private:
 		Vector		origin;		// attachment pos
 		Vector		angles;		// attachment angle
 		Vector dir;
+	};
+
+#define PROC_BONE_SNAPSHOTS	8
+
+	struct ProcBonesSnapshot_t
+	{
+		float		time;		// server timestamp of this snapshot
+		Vector		anchor;		// entity origin the bones were computed against
+		Radian		angles[MAXSTUDIOBONES];
+		Vector		origin[MAXSTUDIOBONES];
 	};
 
 	struct ModelInstance_t
@@ -429,10 +441,14 @@ private:
 		Vector4D			m_glstudiobones[MAXSTUDIOBONES*3];	// GLSL-friendly compacted matrix4x3
 		GLfloat			m_glbones[MAXSTUDIOBONES][16];
 
-		Radian		m_procangles[MAXSTUDIOBONES];
-		Vector		m_procorigin[MAXSTUDIOBONES];
+		ProcBonesSnapshot_t	m_procSnapshots[PROC_BONE_SNAPSHOTS];	// ring buffer, newest at m_procNewest
+		int		m_procNewest;
+		int		m_procCount;
+		float		m_procTimeOffset;	// measured tr.time minus snapshot timestamp
 		bool		m_bProceduralBones;
 		float		m_flLastBoneUpdate;
+		float		m_procRequestTime;	// earliest time the next ragdoll_request may go out
+		float		m_procHideUntil;	// don't render a boneless server ragdoll until this time
 
 		// GLSL cached arrays
 		Vector4D		m_studioquat[MAXSTUDIOBONES];
@@ -612,6 +628,8 @@ private:
 	cvar_t			*m_pCvarLod;
 	cvar_t			*m_pCvarLodScale;
 	cvar_t			*m_pCvarLodBias;
+	cvar_t			*m_pCvarRagdollInterp;
+	cvar_t			*m_pCvarBindPose;
 
 	CBaseBoneSetup		m_boneSetup;
 
@@ -698,7 +716,7 @@ public:
 
 	int	GetEntityRenderMode( cl_entity_t *ent );
 
-	void	StudioSetBonesExternal( const cl_entity_t *ent, const Vector pos[], const Radian ang[] );
+	void	StudioSetBonesExternal( const cl_entity_t *ent, const Vector pos[], const Radian ang[], float flTime, const Vector &anchor );
 
 	// Draw generic studiomodel (player too)
 	void	DrawStudioModelInternal( cl_entity_t *e );
@@ -796,9 +814,9 @@ inline void R_StudioClearLightCache( void )
 	g_StudioRenderer.ClearLightCache();
 }
 
-inline void R_StudioSetBonesExternal( const cl_entity_t *ent, const Vector pos[], const Radian ang[] )
+inline void R_StudioSetBonesExternal( const cl_entity_t *ent, const Vector pos[], const Radian ang[], float flTime, const Vector &anchor = g_vecZero )
 {
-	g_StudioRenderer.StudioSetBonesExternal( ent, pos, ang );
+	g_StudioRenderer.StudioSetBonesExternal( ent, pos, ang, flTime, anchor );
 }
 
 inline float R_StudioSequenceDuration( const cl_entity_t *ent, int sequence )

@@ -1,6 +1,8 @@
 /*
 physic.h - an abstract class for physics subsystem
 Copyright (C) 2012 Uncle Mike
+Copyright (C) 2025 Bacontsu
+Copyright (C) 2026 rickomax
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -18,24 +20,39 @@ GNU General Public License for more details.
 #define USE_PHYSICS_ENGINE
 
 class Vector;
+class Vector4D;
 class CBaseEntity;
+class matrix4x4;
 
 class IPhysicLayer
 {
 public:
+	enum class ForceMode
+	{
+		Force,
+		Impulse,
+		VelocityChange,
+		Acceleration
+	};
+
 	virtual void	InitPhysic( void ) = 0;
 	virtual void	FreePhysic( void ) = 0;
 	virtual void	Update( float flTime ) = 0;
 	virtual void	EndFrame( void ) = 0;
-	virtual void	*GetUtilLibrary( void ) = 0;
 	virtual bool	Initialized( void ) = 0;
 	virtual void	RemoveBody( struct edict_s *pEdict ) = 0;
 	virtual void	*CreateBodyFromEntity( CBaseEntity *pEntity ) = 0;
 	virtual void	*CreateBoxFromEntity( CBaseEntity *pObject ) = 0;
+	virtual void	*CreateRagdollEntity( CBaseEntity *pObject ) = 0;
+	virtual void	PrecacheRagdoll( const char *szModelName ) = 0;
+	virtual void	ReloadRagdollConfigs( void ) = 0;
+	virtual void	SendRagdollPose( CBaseEntity *pPlayer, int entindex ) = 0;
 	virtual void	*CreateKinematicBodyFromEntity( CBaseEntity *pEntity ) = 0;
 	virtual void	*CreateStaticBodyFromEntity( CBaseEntity *pObject ) = 0;
+	virtual void	*CreateTriggerFromEntity( CBaseEntity *pEntity ) = 0;
 	virtual void	*RestoreBody( CBaseEntity *pEntity ) = 0;
 	virtual void	SaveBody( CBaseEntity *pObject ) = 0;
+	virtual void	SaveRagdoll( CBaseEntity *pObject ) = 0;
 	virtual void	SetOrigin( CBaseEntity *pEntity, const Vector &origin ) = 0;
 	virtual void	SetAngles( CBaseEntity *pEntity, const Vector &angles ) = 0;
 	virtual void	SetVelocity( CBaseEntity *pEntity, const Vector &velocity ) = 0;
@@ -44,19 +61,22 @@ public:
 	virtual void	RotateObject( CBaseEntity *pEntity, const Vector &finalAngle ) = 0;
 	virtual void	SetLinearMomentum( CBaseEntity *pEntity, const Vector &velocity ) = 0;
 	virtual void	AddImpulse( CBaseEntity *pEntity, const Vector &impulse, const Vector &position, float factor ) = 0;
-	virtual void	AddForce( CBaseEntity *pEntity, const Vector &force ) = 0;
+	virtual void	AddForce( CBaseEntity *pEntity, const Vector &force, ForceMode mode = ForceMode::Force ) = 0;
+	virtual void	AddTorque( CBaseEntity *pEntity, const Vector &torque, ForceMode mode = ForceMode::Force ) = 0;
+	virtual void	SetHoldableTarget( CBaseEntity *pEntity, const Vector &targetOrigin, const Vector4D &targetQuat ) = 0;
+	virtual void	ClearHoldableTarget( CBaseEntity *pEntity ) = 0;
+	virtual void	GetTransform( CBaseEntity *pEntity, matrix4x4 &out ) = 0;
 	virtual void	EnableCollision( CBaseEntity *pEntity, int fEnable ) = 0;
 	virtual void	MakeKinematic( CBaseEntity *pEntity, int fEnable ) = 0;
 	virtual int	FLoadTree( char *szMapName ) = 0;
 	virtual int	CheckBINFile( char *szMapName ) = 0;
 	virtual int	BuildCollisionTree( char *szMapName ) = 0;
-	virtual bool	UpdateEntityPos( CBaseEntity *pEntity ) = 0;
+	virtual bool	UpdateEntityTransform( CBaseEntity *pEntity ) = 0;
 	virtual void	UpdateEntityAABB( CBaseEntity *pEntity ) = 0;
 	virtual bool	UpdateActorPos( CBaseEntity *pEntity ) = 0;
-	virtual void	SetupWorld( void ) = 0;	
-	virtual void	DebugDraw( void ) = 0;
+	virtual void	SetupWorld( void ) = 0;
+	virtual void	FreeWorld( void ) = 0;
 	virtual void	DrawPSpeeds( void ) = 0;
-	virtual void	FreeAllBodies( void ) = 0;
 	virtual void	TeleportCharacter( CBaseEntity *pEntity ) = 0;
 	virtual void	TeleportActor( CBaseEntity *pEntity ) = 0;
 	virtual void	MoveCharacter( CBaseEntity *pEntity ) = 0;

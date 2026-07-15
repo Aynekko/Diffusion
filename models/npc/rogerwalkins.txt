@@ -1,0 +1,27 @@
+//part			"bone"			aYx		aYy		aYz		aZx		aZy		aZz		syMin	syMax	szMin	szMax	tMin	tMax	ratio
+head			"Bip01 Head"		0.000026	-0.996855	-0.079253	1.000000	-0.000001	0.000344	-30	30	-35	35	-20	20	1.25
+torso			"Bip01 Spine"		0.000014	-0.999049	-0.043593	1.000000	-0.000001	0.000344	0	0	0	0	0	0	6.25
+upper_arm_right		"Bip01 R UpperArm"	0.014173	0.999548	0.026500	0.979800	-0.008596	-0.199795	-75	75	-95	95	-45	45	1.25
+lower_arm_right		"Bip01 R Forearm"	-0.025315	0.985707	-0.166553	0.979800	-0.008596	-0.199795	-8	8	-145	5	-10	10	1.25
+upper_arm_left		"Bip01 L UpperArm"	-0.010408	0.999545	0.028322	0.979784	0.004535	0.200008	-75	75	-95	95	-45	45	1.25
+lower_arm_left		"Bip01 L Forearm"	0.030936	0.984284	-0.173864	0.979784	0.004535	0.200008	-8	8	-145	5	-10	10	1.25
+upper_leg_right		"Bip01 R Thigh"		0.001723	-0.999006	0.044536	-0.999748	-0.000724	0.022437	-65	65	-85	45	-35	35	1.875
+lower_leg_right		"Bip01 R Calf"		-0.002211	-0.991444	-0.130514	-0.999748	-0.000724	0.022437	-8	8	-145	5	-8	8	1.875
+upper_leg_left		"Bip01 L Thigh"		-0.000947	-0.998972	0.045326	-0.999637	-0.000275	-0.026949	-65	65	-85	45	-35	35	1.875
+lower_leg_left		"Bip01 L Calf"		0.003664	-0.992052	-0.125775	-0.999637	-0.000275	-0.026949	-8	8	-145	5	-8	8	1.875
+
+// Bone adjustments
+adjustment		"Bip01 L Hand"			0	0	0
+adjustment		"Bip01 L Finger0"		0	0	0
+adjustment		"Bip01 L Finger01"		0	0	0
+adjustment		"Bip01 L Finger02"		0	0	0
+adjustment		"Bip01 L Finger2"		0	0	0
+adjustment		"Bip01 L Finger21"		0	0	0
+adjustment		"Bip01 L Finger22"		0	0	0
+adjustment		"Bip01 R Hand"			0	0	0
+adjustment		"Bip01 R Finger0"		0	0	0
+adjustment		"Bip01 R Finger01"		0	0	0
+adjustment		"Bip01 R Finger02"		0	0	0
+adjustment		"Bip01 R Finger2"		0	0	0
+adjustment		"Bip01 R Finger21"		0	0	0
+adjustment		"Bip01 R Finger22"		0	0	0

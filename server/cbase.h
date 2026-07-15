@@ -79,6 +79,7 @@ extern "C" EXPORT int Server_GetBlendingInterface( int, struct sv_blending_inter
 extern int DispatchSpawn( edict_t *pent );
 extern void DispatchKeyValue( edict_t *pentKeyvalue, KeyValueData *pkvd );
 extern void DispatchTouch( edict_t *pentTouched, edict_t *pentOther );
+extern void DispatchRagdollImpact( edict_t *pentEntity, edict_t *pentOther, const Vector &position, const Vector &normal, float force, int part );
 extern void DispatchUse( edict_t *pentUsed, edict_t *pentOther );
 extern void DispatchThink( edict_t *pent );
 extern void DispatchBlocked( edict_t *pentBlocked, edict_t *pentOther );
@@ -129,6 +130,11 @@ enum GrappleTarget
 #define ACTOR_KINEMATIC		2	// kinematic actor (mover with SOLID_BSP)
 #define ACTOR_CHARACTER		3	// player or monster physics shadow
 #define ACTOR_STATIC		4	// static actor (env_static)
+// 5 was ACTOR_VEHICLE, gap kept so saves stay valid
+#define ACTOR_TRIGGER		6	// used for func_water
+
+// saved ragdoll rest pose, RAGDOLL_PARTS * 7 floats (pos xyz + quat xyzw)
+#define RAGDOLL_SAVE_POSE_FLOATS	70
 
 #define PARENT_FROZEN_POS_X		BIT( 1 )	// compatible with PhysX flags NX_BF_FROZEN_
 #define PARENT_FROZEN_POS_Y		BIT( 2 )
@@ -266,8 +272,12 @@ public:
 	short		m_usActorGroup;	// NxActor->group
 	float		m_flBodyMass;	// NxActor->mass
 	BOOL		m_fFreezed;	// is body sleeps?
+	int		m_iFilterData[4];	// shape collision filter data
+	bool		m_fHasRagdollPose;	// a settled ragdoll pose was saved
+	float		m_flRagdollPose[RAGDOLL_SAVE_POSE_FLOATS];	// per-part world pos + quat, restores the ragdoll settled in place
 	bool		m_isChaining;
 	Vector		m_vecOldPosition;	// don't save this
+	Vector		m_vecOldBounds;	// don't save this
 
 	float		m_flShowHostile;	// for sprite monsters wake-up
 
@@ -405,6 +415,8 @@ public:
 	virtual int Classify ( void ) { return CLASS_NONE; };
 	virtual void DeathNotice ( entvars_t *pevChild ) { } // monster maker children use this to tell the monster maker that they have died.
 	virtual BOOL IsRigidBody( void ) { return (m_iActorType == ACTOR_DYNAMIC); } 
+	virtual float GetDensity( void ) const { return 0.0f; }
+	Vector GetScale( void ) const;
 
 	void SetMoveDir( const Vector& v ) { pev->movedir = v; }
 	void SetBaseVelocity( const Vector& v ) { pev->basevelocity = v; }
@@ -425,6 +437,11 @@ public:
 	virtual int	TakeHealth( float flHealth, int bitsDamageType );
 	virtual int	TakeArmor( float flArmor, int suit = 0 );
 	virtual void	Killed( entvars_t *pevAttacker, int iGib );
+	virtual void	OnRagdoll( void ) { pev->weaponmodel = 0; } // corpse became a ragdoll: hide/drop carried weapons
+	virtual bool	GetLastHitInfo( Vector &pos, Vector &dir, float &damage, int &group ) { return false; } // last trace attack, for the ragdoll push
+
+	// multiplier for the ragdoll death impulse, weighed from the recorded last-hit context
+	virtual float	GetRagdollImpulseMultiplier( float hitDamage ) { return 1.0f; }
 	virtual int	BloodColor( void ) { return DONT_BLEED; }
 	virtual void	TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	virtual BOOL	IsTriggered( CBaseEntity *pActivator ) {return TRUE;}
@@ -502,6 +519,9 @@ public:
 		if( m_hParent != NULL && !m_isChaining )
 			m_hParent->Touch( pOther );
 	}
+
+	// a physics body owned by this entity struck pOther, part is -1 when not a ragdoll
+	virtual void PhysicsImpact( CBaseEntity *pOther, const Vector &position, const Vector &normal, float force, int part ) {}
 
 	virtual void Blocked( CBaseEntity *pOther )
 	{
@@ -668,7 +688,10 @@ public:
 	{
 		if( m_iOldSolid == SOLID_NOT && pev->solid != SOLID_NOT )
 		{
-			WorldPhysic->EnableCollision( this, FALSE );
+			// the engine pusher goes non-solid every frame to trace its riders, toggling the PhysX shape with it drops resting corpses through the mover
+			// flip only the engine solid flag, leave the PhysX collision on
+			if( m_iActorType != ACTOR_KINEMATIC )
+				WorldPhysic->EnableCollision( this, FALSE );
 			m_iOldSolid = pev->solid;
 			pev->solid = SOLID_NOT;
 		}
@@ -678,7 +701,8 @@ public:
 	{
 		if( m_iOldSolid != SOLID_NOT && pev->solid == SOLID_NOT )
 		{
-			WorldPhysic->EnableCollision( this, TRUE );
+			if( m_iActorType != ACTOR_KINEMATIC )
+				WorldPhysic->EnableCollision( this, TRUE );
 			pev->solid = m_iOldSolid;
 			m_iOldSolid = SOLID_NOT;
 		}

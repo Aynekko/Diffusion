@@ -42,7 +42,7 @@ void CStudioBoneSetup :: ExtractAnimValue( int frame, const mstudioanimvalue_t *
 		return;
 	}
 
-	int k = frame;
+	int k = ( frame > 0 ) ? frame : 0;
 
 	// find the data list that has the frame
 	while( panimvalue->num.total <= k )
@@ -96,7 +96,7 @@ void CStudioBoneSetup :: ExtractAnimValue( int frame, const mstudioanimvalue_t *
 		return;
 	}
 
-	int k = frame;
+	int k = ( frame > 0 ) ? frame : 0;
 
 	while( panimvalue->num.total <= k )
 	{
@@ -373,6 +373,13 @@ void CStudioBoneSetup :: CalcAnimation( Vector pos[], Vector4D q[], mstudioseqde
 		pboneinfo = (mstudioboneinfo_t *)((byte *)pbone + m_pStudioHeader->numbones * sizeof( mstudiobone_t ));
 
 	float fFrame = cycle * (animdesc->numframes - 1);
+
+	// catches NaN and negative cycles too, garbage here reads far out of the animation data
+	if( !( fFrame > 0.0f ))
+		fFrame = 0.0f;
+	else if( fFrame > animdesc->numframes - 1 )
+		fFrame = animdesc->numframes - 1;
+
 	int iFrame = (int)fFrame;
 	float s = (fFrame - iFrame); // cut fractional part
 
@@ -1852,7 +1859,7 @@ void CStudioBoneSetup :: CalcPoseSingle( Vector pos[], Vector4D q[], int sequenc
 	else if( FBitSet( pseqdesc->flags, STUDIO_CYCLEPOSE ))
 	{
 		int iPose = bound( 0, pseqdesc->cycleposeindex, MAXSTUDIOPOSEPARAM - 1 );
-		cycle = m_flPoseParams[iPose];
+		cycle = bound( 0.0f, m_flPoseParams[iPose], 1.0f );
 	}
 	else if( cycle < 0.0f || cycle >= 1.0f )
 	{

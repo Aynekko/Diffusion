@@ -59,23 +59,23 @@ cvar_t	sv_regeneration	= { "sv_regeneration","1", FCVAR_ARCHIVE };
 // Diffusion
 cvar_t	sv_allowhealthbars = { "sv_allowhealthbars", "1", FCVAR_ARCHIVE };
 cvar_t ai_draw_route = { "ai_draw_route", "0", FCVAR_CHEAT };
-cvar_t ai_disable = { "ai_disable", "0", FCVAR_CHEAT };
-cvar_t sv_ignore_triggers = { "sv_ignore_triggers", "0", FCVAR_CHEAT };
+cvar_t  ai_disable = { "ai_disable", "0", FCVAR_CHEAT };
+cvar_t  sv_ignore_triggers = { "sv_ignore_triggers", "0", FCVAR_CHEAT };
 cvar_t mp_dash = { "mp_dash", "1", FCVAR_SERVER };
 cvar_t mp_blastlevel = { "mp_blastlevel", "1", FCVAR_SERVER };
-cvar_t mp_alwaysgib = { "mp_alwaysgib", "0", FCVAR_SERVER };
-cvar_t sv_enablebunnyhopping = { "sv_enablebunnyhopping", "0", FCVAR_SERVER };
-cvar_t mp_killercamera = { "mp_killercamera", "1", FCVAR_SERVER };
-cvar_t mp_weaponbonus = { "mp_weaponbonus", "1", FCVAR_SERVER };
-cvar_t mp_hidecorpses = { "mp_hidecorpses", "0", FCVAR_SERVER };
-cvar_t mp_spectator_cmd_delay = { "mp_spectator_cmd_delay", "2", FCVAR_SERVER };
-cvar_t mp_allow_spectators = { "mp_allow_spectators", "1", FCVAR_SERVER };
-cvar_t mp_spectator_notify = { "mp_spectator_notify", "7", FCVAR_SERVER };
-cvar_t mp_servermsg_delay = { "mp_servermsg_delay", "30", FCVAR_SERVER };
-cvar_t mp_server_notify = { "mp_server_notify", "0", FCVAR_SERVER };
-cvar_t mp_spawnprotect = { "mp_spawnprotect", "3", FCVAR_SERVER };
-cvar_t mp_healthbonus = { "mp_healthbonus", "0", FCVAR_SERVER };
-cvar_t mp_explodesatchels = { "mp_explodesatchels", "1", FCVAR_SERVER };
+cvar_t	mp_alwaysgib = { "mp_alwaysgib", "0", FCVAR_SERVER };
+cvar_t	sv_enablebunnyhopping = { "sv_enablebunnyhopping", "0", FCVAR_SERVER };
+cvar_t	mp_killercamera = { "mp_killercamera", "1", FCVAR_SERVER };
+cvar_t	mp_weaponbonus = { "mp_weaponbonus", "1", FCVAR_SERVER };
+cvar_t	mp_hidecorpses = { "mp_hidecorpses", "0", FCVAR_SERVER };
+cvar_t	mp_spectator_cmd_delay = { "mp_spectator_cmd_delay", "2", FCVAR_SERVER };
+cvar_t	mp_allow_spectators = { "mp_allow_spectators", "1", FCVAR_SERVER };
+cvar_t	mp_spectator_notify = { "mp_spectator_notify", "7", FCVAR_SERVER };
+cvar_t	mp_servermsg_delay = { "mp_servermsg_delay", "30", FCVAR_SERVER };
+cvar_t	mp_server_notify = { "mp_server_notify", "0", FCVAR_SERVER };
+cvar_t	mp_spawnprotect = { "mp_spawnprotect", "3", FCVAR_SERVER };
+cvar_t	mp_healthbonus = { "mp_healthbonus", "0", FCVAR_SERVER };
+cvar_t	mp_explodesatchels = { "mp_explodesatchels", "1", FCVAR_SERVER };
 cvar_t mp_allow_bonuses = { "mp_allow_bonuses", "1", FCVAR_SERVER };
 cvar_t sv_train_debug = { "sv_train_debug", "0", FCVAR_SPONLY };
 cvar_t mp_maxturrets = { "mp_maxturrets", "3", FCVAR_SERVER }; // how many turrets a player can spawn
@@ -96,7 +96,36 @@ cvar_t	*g_debugdraw = NULL;
 cvar_t	*g_physdebug = NULL;
 cvar_t	*p_speeds = NULL;
 cvar_t	*g_allow_physx = NULL;
-cvar_t	g_sync_physic = { "sv_sync_physic", "0", FCVAR_ARCHIVE };
+cvar_t	sv_allow_physx = { "sv_allow_PhysX", "1", FCVAR_ARCHIVE };	// master switch to enable the PhysX physics layer
+cvar_t	phys_ragdoll_push = { "phys_ragdoll_push", "1", FCVAR_ARCHIVE };	// ragdoll death knockback scale (impulse = damage * this * weapon multiplier)
+cvar_t	phys_ragdoll_push_min = { "phys_ragdoll_push_min", "0", FCVAR_ARCHIVE };	// lower clamp on the knockback impulse
+cvar_t	phys_ragdoll_push_max = { "phys_ragdoll_push_max", "0", FCVAR_ARCHIVE };	// upper clamp on the knockback impulse (0 = uncapped)
+cvar_t	phys_ragdoll_lineardamping = { "phys_ragdoll_lineardamping", "0.05", FCVAR_ARCHIVE };	// per-part linear velocity damping
+cvar_t	phys_ragdoll_angulardamping = { "phys_ragdoll_angulardamping", "0.25", FCVAR_ARCHIVE };	// per-part angular velocity damping
+cvar_t	phys_ragdoll_maxangvelocity = { "phys_ragdoll_maxangvelocity", "7", FCVAR_ARCHIVE };	// cap on a part's angular velocity
+cvar_t	phys_ragdoll_sleepthreshold = { "phys_ragdoll_sleepthreshold", "80", FCVAR_ARCHIVE };	// energy below which a part is put to sleep
+cvar_t	phys_ragdoll_maxdepenetration = { "phys_ragdoll_maxdepenetration", "150", FCVAR_ARCHIVE };	// cap on the velocity used to push overlapping parts apart
+cvar_t	phys_ragdoll_solverveliterations = { "phys_ragdoll_solverveliterations", "4", FCVAR_ARCHIVE };	// ragdoll velocity solver iterations
+cvar_t	phys_ragdoll_jointfriction = { "phys_ragdoll_jointfriction", "3", FCVAR_ARCHIVE };	// resistance in the ragdoll joints
+cvar_t	phys_ragdoll_animvelocity = { "phys_ragdoll_animvelocity", "1", FCVAR_ARCHIVE };	// scale of the death-animation velocity carried into the ragdoll
+cvar_t	phys_ragdoll_limitscale = { "phys_ragdoll_limitscale", "1", FCVAR_ARCHIVE };	// scale applied to the authored joint angle limits
+cvar_t	phys_ragdoll_limitspring = { "phys_ragdoll_limitspring", "0", FCVAR_ARCHIVE };	// spring strength at joint limits (0 = hard stop)
+cvar_t	phys_ragdoll_limitblend = { "phys_ragdoll_limitblend", "0.5", FCVAR_ARCHIVE };	// seconds to shrink the spawn-widened joint limits back to authored
+cvar_t	phys_ragdoll_radiusscale = { "phys_ragdoll_radiusscale", "0.7", FCVAR_ARCHIVE };	// scale of the part collision capsule radii
+cvar_t	phys_ragdoll_lifetime = { "phys_ragdoll_lifetime", "0", FCVAR_ARCHIVE };	// seconds before a corpse+ragdoll is removed; 0 keeps them until the level unloads
+cvar_t	phys_ragdoll_fadetime = { "phys_ragdoll_fadetime", "3", FCVAR_ARCHIVE };	// seconds the expired corpse takes to fade out before removal
+cvar_t	phys_ragdoll_buoyancy = { "phys_ragdoll_buoyancy", "1.1", FCVAR_ARCHIVE };	// upward force factor on submerged parts (0 = no buoyancy)
+cvar_t	phys_ragdoll_waterdrag = { "phys_ragdoll_waterdrag", "2", FCVAR_ARCHIVE };	// drag applied to submerged parts
+cvar_t	phys_ragdoll_limitdamping = { "phys_ragdoll_limitdamping", "5", FCVAR_ARCHIVE };	// damping at joint limits when limitspring is on
+cvar_t	phys_solveriterations = { "phys_solveriterations", "8", FCVAR_ARCHIVE };	// position solver iterations for all bodies (props and ragdolls)
+cvar_t	phys_ccd = { "phys_ccd", "1", FCVAR_ARCHIVE };	// enable speculative continuous collision detection
+cvar_t	phys_ragdoll_impactforce = { "phys_ragdoll_impactforce", "0", FCVAR_ARCHIVE };	// min contact impulse to fire PhysicsImpact (0 = every first contact)
+cvar_t	phys_ragdoll_restoregrace = { "phys_ragdoll_restoregrace", "0.5", FCVAR_ARCHIVE };	// seconds a save-restored ragdoll suppresses PhysicsImpact events
+cvar_t	phys_character_padding = { "phys_character_padding", "0.49", FCVAR_ARCHIVE };	// scale of the player/monster collision box half-extents
+cvar_t	phys_density_default = { "phys_density_default", "900", FCVAR_ARCHIVE };	// default body density when an entity specifies none
+cvar_t	phys_density_water = { "phys_density_water", "1000", FCVAR_ARCHIVE };	// water density used for buoyancy and drag on submerged bodies
+cvar_t	phys_water_lineardrag = { "phys_water_lineardrag", "500", FCVAR_ARCHIVE };	// linear drag on bodies moving through water
+cvar_t	phys_water_angulardrag = { "phys_water_angulardrag", "1", FCVAR_ARCHIVE };	// angular drag on bodies rotating in water
 
 void Cmd_ShowTriggers_f( void )
 {
@@ -127,6 +156,12 @@ void Cmd_ShowTriggers_f( void )
 	}
 }
 
+// re-reads the ragdoll .txt config files, so they can be edited while the game runs
+void Cmd_RagdollReload_f( void )
+{
+	WorldPhysic->ReloadRagdollConfigs();
+}
+
 // Register your console variables here
 // This gets called one time when the game is initialied
 void GameDLLInit( void )
@@ -137,9 +172,38 @@ void GameDLLInit( void )
 	g_psv_aim = CVAR_GET_POINTER( "sv_aim" );
 	g_footsteps = CVAR_GET_POINTER( "mp_footsteps" );
 	g_psv_stepsize = CVAR_GET_POINTER( "sv_stepsize" );
-	CVAR_REGISTER( &g_sync_physic );
+	CVAR_REGISTER( &phys_ragdoll_push );
+	CVAR_REGISTER( &phys_ragdoll_push_min );
+	CVAR_REGISTER( &phys_ragdoll_push_max );
+	CVAR_REGISTER( &phys_ragdoll_lineardamping );
+	CVAR_REGISTER( &phys_ragdoll_angulardamping );
+	CVAR_REGISTER( &phys_ragdoll_maxangvelocity );
+	CVAR_REGISTER( &phys_ragdoll_sleepthreshold );
+	CVAR_REGISTER( &phys_ragdoll_maxdepenetration );
+	CVAR_REGISTER( &phys_ragdoll_solverveliterations );
+	CVAR_REGISTER( &phys_ragdoll_jointfriction );
+	CVAR_REGISTER( &phys_ragdoll_animvelocity );
+	CVAR_REGISTER( &phys_ragdoll_limitscale );
+	CVAR_REGISTER( &phys_ragdoll_limitspring );
+	CVAR_REGISTER( &phys_ragdoll_limitblend );
+	CVAR_REGISTER( &phys_ragdoll_radiusscale );
+	CVAR_REGISTER( &phys_ragdoll_lifetime );
+	CVAR_REGISTER( &phys_ragdoll_fadetime );
+	CVAR_REGISTER( &phys_ragdoll_buoyancy );
+	CVAR_REGISTER( &phys_ragdoll_waterdrag );
+	CVAR_REGISTER( &phys_ragdoll_limitdamping );
+	CVAR_REGISTER( &phys_solveriterations );
+	CVAR_REGISTER( &phys_ccd );
+	CVAR_REGISTER( &phys_ragdoll_impactforce );
+	CVAR_REGISTER( &phys_ragdoll_restoregrace );
+	CVAR_REGISTER( &phys_character_padding );
+	CVAR_REGISTER( &phys_density_default );
+	CVAR_REGISTER( &phys_density_water );
+	CVAR_REGISTER( &phys_water_lineardrag );
+	CVAR_REGISTER( &phys_water_angulardrag );
 
 	g_engfuncs.pfnAddServerCommand( "showtriggers_toggle", Cmd_ShowTriggers_f );
+	g_engfuncs.pfnAddServerCommand( "ragdoll_reload", Cmd_RagdollReload_f );
 
 	g_engfuncs.pfnAddServerCommand( "dump_entity_sizes", DumpEntitySizes_f );
 	g_engfuncs.pfnAddServerCommand( "dump_entity_names", DumpEntityNames_f );
@@ -147,31 +211,31 @@ void GameDLLInit( void )
 #ifdef HAVE_STRINGPOOL
 	g_engfuncs.pfnAddServerCommand( "dump_strings", DumpStrings_f );
 #endif
-	CVAR_REGISTER( &displaysoundlist );
+	CVAR_REGISTER (&displaysoundlist);
 
-	CVAR_REGISTER( &teamplay );
-	CVAR_REGISTER( &fraglimit );
-	CVAR_REGISTER( &timelimit );
+	CVAR_REGISTER (&teamplay);
+	CVAR_REGISTER (&fraglimit);
+	CVAR_REGISTER (&timelimit);
 
-	CVAR_REGISTER( &fragsleft );
-	CVAR_REGISTER( &timeleft );
-	CVAR_REGISTER( &debugdraw );
-	CVAR_REGISTER( &physstats );
-	CVAR_REGISTER( &physdebug );
+	CVAR_REGISTER (&fragsleft);
+	CVAR_REGISTER (&timeleft);
+	CVAR_REGISTER (&debugdraw);
+	CVAR_REGISTER (&physstats);
+	CVAR_REGISTER (&physdebug);
 
-	CVAR_REGISTER( &friendlyfire );
-	CVAR_REGISTER( &falldamage );
-	CVAR_REGISTER( &weaponstay );
-	CVAR_REGISTER( &forcerespawn );
-	CVAR_REGISTER( &flashlight );
-	CVAR_REGISTER( &aimcrosshair );
-	CVAR_REGISTER( &decalfrequency );
-	CVAR_REGISTER( &teamlist );
-	CVAR_REGISTER( &teamoverride );
-	CVAR_REGISTER( &defaultteam );
-	CVAR_REGISTER( &allowmonsters );
+	CVAR_REGISTER (&friendlyfire);
+	CVAR_REGISTER (&falldamage);
+	CVAR_REGISTER (&weaponstay);
+	CVAR_REGISTER (&forcerespawn);
+	CVAR_REGISTER (&flashlight);
+	CVAR_REGISTER (&aimcrosshair);
+	CVAR_REGISTER (&decalfrequency);
+	CVAR_REGISTER (&teamlist);
+	CVAR_REGISTER (&teamoverride);
+	CVAR_REGISTER (&defaultteam);
+	CVAR_REGISTER (&allowmonsters);
 
-	CVAR_REGISTER( &mp_chattime );
+	CVAR_REGISTER (&mp_chattime);
 
 	// server debug drawing support requires build up to 1940
 	g_debugdraw = CVAR_GET_POINTER( "phys_debug" );
@@ -179,14 +243,20 @@ void GameDLLInit( void )
 	p_speeds = CVAR_GET_POINTER( "p_speeds" );
 	g_allow_physx = CVAR_GET_POINTER( "sv_allow_PhysX" );
 
+	if( !g_allow_physx )
+	{
+		CVAR_REGISTER( &sv_allow_physx );
+		g_allow_physx = CVAR_GET_POINTER( "sv_allow_PhysX" );
+	}
+
 	// DiffusionRegen
-	CVAR_REGISTER( &sv_regeneration );
+	CVAR_REGISTER ( &sv_regeneration );
 
 	CVAR_REGISTER( &sv_allowhealthbars );
 
-	CVAR_REGISTER( &ai_disable );
+	CVAR_REGISTER ( &ai_disable );
 	CVAR_REGISTER( &ai_draw_route );
-	CVAR_REGISTER( &sv_fade_props );
+	CVAR_REGISTER ( &sv_fade_props );
 	CVAR_REGISTER( &sv_force_fadedistance );
 	CVAR_REGISTER( &sv_cubemap_culling );
 	CVAR_REGISTER( &sv_ignore_triggers );

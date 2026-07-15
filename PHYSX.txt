@@ -1,0 +1,126 @@
+DIFFUSION - PHYSX 4.1 & RAGDOLLS
+================================
+
+
+1. ENABLING PHYSX
+-----------------
+
+PhysX is compiled in by default (USE_PHYSICS_ENGINE in server/physics/physic.h).
+sv_allow_PhysX 0 starts the server with the null physics layer instead,
+checked at map start.
+
+The SDK sources live in 3rd-party/physx. Visual Studio fetches and builds
+them on the first build (scripts/setup_physx.bat). On Linux run
+scripts/setup_physx.sh once, then build with waf.
+
+
+2. PVD (PHYSX VISUAL DEBUGGER)
+------------------------------
+
+Start PVD listening on 127.0.0.1:5425, launch the game with -physxdebug,
+then start a map. Keep PVD's up axis on Z+, the world is Z-up.
+
+
+3. RAGDOLL TXT FILES
+--------------------
+
+A model gets a ragdoll when a .txt with the same name sits next to it:
+
+    models/monster.mdl  ->  models/monster.txt
+
+The file maps the ten ragdoll parts to bones, one per line, bone name
+always quoted:
+
+    head            "Bip01 Head"
+    torso           "Bip01 Spine"
+    upper_arm_right "Bip01 R UpperArm"
+    lower_arm_right "Bip01 R Forearm"
+    upper_arm_left  "Bip01 L UpperArm"
+    lower_arm_left  "Bip01 L Forearm"
+    upper_leg_right "Bip01 R Thigh"
+    lower_leg_right "Bip01 R Calf"
+    upper_leg_left  "Bip01 L Thigh"
+    lower_leg_left  "Bip01 L Calf"
+
+The short form above uses built-in defaults for everything. The full form
+carries all thirteen numbers:
+
+    partname "bone"  aYx aYy aYz  aZx aZy aZz  yMin yMax zMin zMax tMin tMax  ratio
+
+    aY / aZ   swing axes, world space with the model in its bind pose
+    y/z/t     joint limit ranges in degrees, min/max pairs (can be asymmetric)
+    ratio     relative mass of the part, only the proportions matter
+
+Each line tunes the joint connecting the part to its parent (head = neck,
+lower_arm = elbow). The torso has no parent joint, only its ratio is used.
+
+'adjustment' lines reset bones that are not driven by physics (hands,
+fingers) to their bind pose plus an euler, instead of leaving them frozen
+in the death animation:
+
+    adjustment "Bip01 L Hand" 45 0 0
+
+Notes:
+
+  - all ten parts are required; a missing part or unknown bone name
+    prints a warning and the model gets no ragdoll
+  - bone names are case-insensitive
+  - collision comes from the model hitboxes, every part needs at least one
+  - configs are cached at level load, ragdoll_reload drops the cache
+  - r_drawentities 8 draws the joint limits on the models and re-reads the
+    txt files every 2 seconds while active. A magenta limb line means the
+    current pose is outside the limits
+  - saves don't store ragdoll poses, a loaded save re-drops dead monsters
+    from their restored pose
+
+Monsters that carry their gun as a bodygroup need an OnRagdoll() override
+to hide/drop it, the death animation event that normally does it never
+plays for ragdolls. See CHGrunt, CHAssassin and CBarney.
+
+
+4. RAGDOLL CVARS
+----------------
+
+Server side, read when a ragdoll spawns:
+
+    phys_ragdoll_push              1    death hit impulse scale, 0 disables
+    phys_ragdoll_push_min          0    lower clamp on the impulse
+    phys_ragdoll_push_max          0    upper clamp, 0 = uncapped
+    phys_ragdoll_lineardamping     0.05 per-part linear damping
+    phys_ragdoll_angulardamping    0.25 per-part angular damping
+    phys_ragdoll_maxangvelocity    7    spin cap, rad/s
+    phys_ragdoll_sleepthreshold    80   energy below which a part sleeps
+    phys_ragdoll_maxdepenetration  150  max speed pushing overlapping parts apart
+    phys_ragdoll_solverveliterations 4  velocity solver iterations
+    phys_ragdoll_jointfriction     3    rotation braking at the joints
+    phys_ragdoll_animvelocity      1    death-animation velocity carried over
+    phys_ragdoll_limitscale        1    global scale on the default joint limits
+    phys_ragdoll_limitspring       0    soft limits with this stiffness, 0 = hard
+    phys_ragdoll_limitdamping      5    damper for the soft limits
+    phys_ragdoll_limitblend        0.5  seconds to shrink spawn-widened limits
+    phys_ragdoll_radiusscale       0.7  thins the collision boxes across the bone
+    phys_ragdoll_lifetime          0    corpse lifetime, 0 = until level unload
+    phys_ragdoll_fadetime          3    fade-out seconds when the lifetime expires
+    phys_ragdoll_buoyancy          1.1  upward force on submerged parts, 0 = sink
+    phys_ragdoll_waterdrag         2    drag on submerged parts
+    phys_ragdoll_impactforce       0    min impulse to fire PhysicsImpact
+    phys_ragdoll_restoregrace      0.5  impact events muted after a save load
+
+Client side:
+
+    r_ragdoll_interp               0.1  interpolation delay for the 25Hz bone
+                                        stream, 0 = raw snapshots
+
+
+5. GENERAL PHYSICS CVARS
+------------------------
+
+These affect every PhysX body, not just ragdolls:
+
+    phys_solveriterations   8     position solver iterations
+    phys_ccd                1     speculative continuous collision detection
+    phys_character_padding  0.49  player/monster collision box scale
+    phys_density_default    900   body density when the entity has none
+    phys_density_water      1000  water density for buoyancy and drag
+    phys_water_lineardrag   500   linear drag in water
+    phys_water_angulardrag  1     angular drag in water

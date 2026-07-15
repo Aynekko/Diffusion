@@ -58,14 +58,18 @@ public:
 	virtual void	Update( float flTime ) {}
 	virtual void	EndFrame( void ) {}
 	virtual void	RemoveBody( struct edict_s *pEdict ) {}
-	virtual void	RemoveBody( const void *pBody ) {}
 	virtual void *CreateBodyFromEntity( CBaseEntity *pEntity ) { return NULL; }
 	virtual void *CreateBoxFromEntity( CBaseEntity *pObject ) { return NULL; }
+	virtual void *CreateRagdollEntity( CBaseEntity *pObject ) { return NULL; }
+	virtual void	PrecacheRagdoll( const char *szModelName ) {}
+	virtual void	ReloadRagdollConfigs( void ) {}
+	virtual void	SendRagdollPose( CBaseEntity *pPlayer, int entindex ) {}
 	virtual void *CreateKinematicBodyFromEntity( CBaseEntity *pEntity ) { return NULL; }
 	virtual void *CreateStaticBodyFromEntity( CBaseEntity *pObject ) { return NULL; }
-	virtual void *CreateVehicle( CBaseEntity *pObject, string_t scriptName = 0 ) { return NULL; }
+	virtual void *CreateTriggerFromEntity( CBaseEntity *pEntity ) { return NULL; }
 	virtual void *RestoreBody( CBaseEntity *pEntity ) { return NULL; }
 	virtual void	SaveBody( CBaseEntity *pObject ) {}
+	virtual void	SaveRagdoll( CBaseEntity *pObject ) {}
 	virtual void	SetOrigin( CBaseEntity *pEntity, const Vector &origin ) {}
 	virtual void	SetAngles( CBaseEntity *pEntity, const Vector &angles ) {}
 	virtual void	SetVelocity( CBaseEntity *pEntity, const Vector &velocity ) {}
@@ -74,20 +78,22 @@ public:
 	virtual void	RotateObject( CBaseEntity *pEntity, const Vector &finalAngle ) {}
 	virtual void	SetLinearMomentum( CBaseEntity *pEntity, const Vector &velocity ) {}
 	virtual void	AddImpulse( CBaseEntity *pEntity, const Vector &impulse, const Vector &position, float factor ) {}
-	virtual void	AddForce( CBaseEntity *pEntity, const Vector &force ) {}
+	virtual void	AddForce( CBaseEntity *pEntity, const Vector &force, ForceMode mode = ForceMode::Force ) {}
+	virtual void	AddTorque( CBaseEntity *pEntity, const Vector &torque, ForceMode mode = ForceMode::Force ) {}
+	virtual void	SetHoldableTarget( CBaseEntity *pEntity, const Vector &targetOrigin, const Vector4D &targetQuat ) {}
+	virtual void	ClearHoldableTarget( CBaseEntity *pEntity ) {}
+	virtual void	GetTransform( CBaseEntity *pEntity, matrix4x4 &out ) {}
 	virtual void	EnableCollision( CBaseEntity *pEntity, int fEnable ) {}
 	virtual void	MakeKinematic( CBaseEntity *pEntity, int fEnable ) {}
-	virtual void	UpdateVehicle( CBaseEntity *pObject ) {}
 	virtual int	FLoadTree( char *szMapName ) { return 0; }
 	virtual int	CheckBINFile( char *szMapName ) { return 0; }
 	virtual int	BuildCollisionTree( char *szMapName ) { return 0; }
-	virtual bool	UpdateEntityPos( CBaseEntity *pEntity ) { return false; }
+	virtual bool	UpdateEntityTransform( CBaseEntity *pEntity ) { return false; }
 	virtual void	UpdateEntityAABB( CBaseEntity *pEntity ) {}
 	virtual bool	UpdateActorPos( CBaseEntity *pEntity ) { return false; };
 	virtual void	SetupWorld( void ) {}
-	virtual void	DebugDraw( void ) {}
+	virtual void	FreeWorld( void ) {}
 	virtual void	DrawPSpeeds( void ) {}
-	virtual void	FreeAllBodies( void ) {}
 	virtual void	TeleportCharacter( CBaseEntity *pEntity ) {}
 	virtual void	TeleportActor( CBaseEntity *pEntity ) {}
 	virtual void	MoveCharacter( CBaseEntity *pEntity ) {}

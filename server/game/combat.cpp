@@ -635,6 +635,7 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 	{
 		SetTouch( NULL );
 		BecomeDead();
+		WorldPhysic->CreateRagdollEntity( this );
 	}
 	
 	// don't let the status bar glitch for players.with <0 health.
@@ -898,6 +899,34 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 
 	// set damage type sustained
 	m_bitsDamageType |= bitsDamageType;
+
+	// remember the inflictor classname when it's a real projectile, direct hits leave it null
+	m_iszLastHitInflictor = ( pevInflictor && pevInflictor != pevAttacker ) ? pevInflictor->classname : iStringNull;
+
+	// remember which weapon dealt the hit, some weapons share a damage type
+	m_iLastHitWeapon = WEAPON_NONE;
+	{
+		CBaseEntity *pAttacker = CBaseEntity::Instance( pevAttacker );
+		if( pAttacker )
+		{
+			if( pAttacker->IsPlayer( ))
+			{
+				CBasePlayerItem *pItem = ((CBasePlayer *)pAttacker)->m_pActiveItem;
+				if( pItem )
+				{
+					m_iLastHitWeapon = pItem->m_iId;
+				}
+			}
+			else
+			{
+				CBaseMonster *pMonster = pAttacker->MyMonsterPointer();
+				if( pMonster )
+				{
+					m_iLastHitWeapon = pMonster->GetActiveWeaponId();
+				}
+			}
+		}
+	}
 
 	// grab the vector of the incoming attack. ( pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit).
 	vecDir = Vector( 0, 0, 0 );
@@ -1501,10 +1530,82 @@ void CBaseMonster :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector
 			break;
 		}
 
+		m_vecLastHitPoint = ptr->vecEndPos;
+		m_vecLastHitDir = vecDir;
+		m_flLastHitDamage = flDamage;
+		m_flLastHitTime = gpGlobals->time;
+		m_iLastHitDamageType = bitsDamageType;	// weapon category, for ragdoll knockback
+
 		SpawnBlood(ptr->vecEndPos, BloodColor(), flDamage);// a little surface blood.
 		TraceBleed( flDamage, vecDir, ptr, bitsDamageType );
 		AddMultiDamage( pevAttacker, this, flDamage, bitsDamageType );
 	}
+}
+
+bool CBaseMonster::GetLastHitInfo( Vector &pos, Vector &dir, float &damage, int &group )
+{
+	if( m_flLastHitTime <= 0.0f || gpGlobals->time - m_flLastHitTime > 0.5f )
+	{
+		return false;
+	}
+
+	pos = m_vecLastHitPoint;
+	dir = m_vecLastHitDir;
+	damage = m_flLastHitDamage;
+	group = m_LastHitGroup;
+	return true;
+}
+
+//=========================================================
+// GetRagdollImpulseMultiplier
+//
+// scales the ragdoll death knockback by what caused the last hit
+//=========================================================
+float CBaseMonster::GetRagdollImpulseMultiplier( float hitDamage )
+{
+	// a projectile inflictor is the best hint, works for NPC vs NPC too
+	if( m_iszLastHitInflictor != iStringNull )
+	{
+		const char *pszInflictor = STRING( m_iszLastHitInflictor );
+
+		if( !strcmp( pszInflictor, "rpg_rocket" ) || !strcmp( pszInflictor, "grenade" ) || !strcmp( pszInflictor, "monster_satchel" ))
+		{
+			return 3.0f * hitDamage;
+		}
+		if( !strcmp( pszInflictor, "crossbow_bolt" ))
+		{
+			return 1.5f * hitDamage;
+		}
+	}
+
+	// weapon id tells apart weapons that share a damage type (shotgun vs 9mm)
+	switch( m_iLastHitWeapon )
+	{
+	case WEAPON_GAUSS:	return 2.5f * hitDamage;	// charged tau slug hits like a truck
+	case WEAPON_SHOTGUN:
+	case WEAPON_SHOTGUN_XM:	return 2.5f * hitDamage;	// buckshot really throws the body back
+	case WEAPON_SNIPER:	return 2.0f * hitDamage;	// heavy, high-velocity single round
+	case WEAPON_DEAGLE:	return 1.6f * hitDamage;	// .357 magnum, far punchier than a 9mm
+	case WEAPON_KNIFE:	return 1.5f * hitDamage;	// a solid melee shove
+	case WEAPON_SENTRY:	return 1.5f * hitDamage;	// heavy mounted autocannon rounds
+	case WEAPON_EGON:	return 1.3f * hitDamage;	// gluon beam shoves as it burns
+	case WEAPON_MRC:
+	case WEAPON_AR2:
+	case WEAPON_G36C:
+	case WEAPON_HKMP5:	return 1.2f * hitDamage;	// full-auto rifles/SMGs: a touch over neutral
+	}
+
+	// otherwise weigh by the damage-type category
+	if( m_iLastHitDamageType & DMG_NUCLEAR )    return 4.0f * hitDamage;
+	if( m_iLastHitDamageType & DMG_MORTAR )     return 3.0f * hitDamage;
+	if( m_iLastHitDamageType & DMG_BLAST )      return 2.5f * hitDamage;
+	if( m_iLastHitDamageType & DMG_SONIC )      return 2.0f * hitDamage;
+	if( m_iLastHitDamageType & DMG_ENERGYBEAM ) return 1.5f * hitDamage;
+	if( m_iLastHitDamageType & DMG_CRUSH )      return 2.0f * hitDamage;
+	if( m_iLastHitDamageType & DMG_CLUB )       return 1.5f * hitDamage;
+	if( m_iLastHitDamageType & DMG_SLASH )      return 1.2f * hitDamage;
+
+	return 1.0f * hitDamage; // bullets and everything else: neutral
 }
 
 //=========================================================
@@ -1517,7 +1618,7 @@ void CBaseEntity::MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 
 	float len = (vecEnd - vecSrc).Length();
 
-	// Делим пополам
+	// Г„ГҐГ«ГЁГ¬ ГЇГ®ГЇГ®Г«Г Г¬
 	Vector vecTemp = Vector( (vecEnd.x + vecSrc.x) * 0.5f, (vecEnd.y + vecSrc.y) * 0.5f, (vecEnd.z + vecSrc.z) * 0.5f );
 
 	if( len <= 1 )
