@@ -1557,55 +1557,175 @@ bool CBaseMonster::GetLastHitInfo( Vector &pos, Vector &dir, float &damage, int 
 }
 
 //=========================================================
+// Ragdoll impulse table, loaded once from ragdoll_impulse.txt
+// in the game folder. Each line is a key and a multiplier;
+// WEAPON_* keys match the last hit weapon, DMG_* keys match
+// the damage type bits, anything else matches the inflictor
+// classname (rpg_rocket, grenade...)
+//=========================================================
+#define MAX_IMPULSE_ENTRIES	64
+
+struct RagdollImpulseEntry
+{
+	char	name[32];	// inflictor classname entries only
+	int	id;		// weapon id or damage bits
+	float	mult;
+};
+
+static RagdollImpulseEntry g_ImpulseWeapons[MAX_IMPULSE_ENTRIES];
+static RagdollImpulseEntry g_ImpulseDamage[MAX_IMPULSE_ENTRIES];
+static RagdollImpulseEntry g_ImpulseInflictors[MAX_IMPULSE_ENTRIES];
+static int g_NumImpulseWeapons, g_NumImpulseDamage, g_NumImpulseInflictors;
+static bool g_ImpulseTableLoaded;
+
+static const struct { const char *name; int id; } g_ImpulseWeaponNames[] =
+{
+	{ "WEAPON_KNIFE", WEAPON_KNIFE },
+	{ "WEAPON_BERETTA", WEAPON_BERETTA },
+	{ "WEAPON_DEAGLE", WEAPON_DEAGLE },
+	{ "WEAPON_MRC", WEAPON_MRC },
+	{ "WEAPON_CYCLER", WEAPON_CYCLER },
+	{ "WEAPON_CROSSBOW", WEAPON_CROSSBOW },
+	{ "WEAPON_SHOTGUN", WEAPON_SHOTGUN },
+	{ "WEAPON_RPG", WEAPON_RPG },
+	{ "WEAPON_GAUSS", WEAPON_GAUSS },
+	{ "WEAPON_EGON", WEAPON_EGON },
+	{ "WEAPON_HORNETGUN", WEAPON_HORNETGUN },
+	{ "WEAPON_HANDGRENADE", WEAPON_HANDGRENADE },
+	{ "WEAPON_TRIPMINE", WEAPON_TRIPMINE },
+	{ "WEAPON_SATCHEL", WEAPON_SATCHEL },
+	{ "WEAPON_SNARK", WEAPON_SNARK },
+	{ "WEAPON_AR2", WEAPON_AR2 },
+	{ "WEAPON_DRONE", WEAPON_DRONE },
+	{ "WEAPON_SENTRY", WEAPON_SENTRY },
+	{ "WEAPON_HKMP5", WEAPON_HKMP5 },
+	{ "WEAPON_FIVESEVEN", WEAPON_FIVESEVEN },
+	{ "WEAPON_SNIPER", WEAPON_SNIPER },
+	{ "WEAPON_SHOTGUN_XM", WEAPON_SHOTGUN_XM },
+	{ "WEAPON_G36C", WEAPON_G36C },
+	{ "WEAPON_SMOKEGRENADE", WEAPON_SMOKEGRENADE },
+};
+
+static const struct { const char *name; int bits; } g_ImpulseDamageNames[] =
+{
+	{ "DMG_CRUSH", DMG_CRUSH },
+	{ "DMG_BULLET", DMG_BULLET },
+	{ "DMG_SLASH", DMG_SLASH },
+	{ "DMG_BURN", DMG_BURN },
+	{ "DMG_FREEZE", DMG_FREEZE },
+	{ "DMG_FALL", DMG_FALL },
+	{ "DMG_BLAST", DMG_BLAST },
+	{ "DMG_CLUB", DMG_CLUB },
+	{ "DMG_SHOCK", DMG_SHOCK },
+	{ "DMG_SONIC", DMG_SONIC },
+	{ "DMG_ENERGYBEAM", DMG_ENERGYBEAM },
+	{ "DMG_NUCLEAR", DMG_NUCLEAR },
+	{ "DMG_MORTAR", DMG_MORTAR },
+	{ "DMG_EMP", DMG_EMP },
+};
+
+static void LoadRagdollImpulseTable( void )
+{
+	if( g_ImpulseTableLoaded )
+		return;
+
+	g_ImpulseTableLoaded = true;
+
+	int length = 0;
+	char *pfile = (char *)LOAD_FILE( "ragdoll_impulse.txt", &length );
+
+	if( !pfile )
+	{
+		ALERT( at_console, "LoadRagdollImpulseTable: ragdoll_impulse.txt not found, using 1.0 for everything\n" );
+		return;
+	}
+
+	char token[256];
+	char *pdata = pfile;
+
+	while(( pdata = COM_ParseFile( pdata, token )) != NULL )
+	{
+		char key[32];
+		Q_strncpy( key, token, sizeof( key ));
+
+		if(( pdata = COM_ParseFile( pdata, token )) == NULL )
+			break;
+
+		float mult = Q_atof( token );
+
+		if( !Q_strnicmp( key, "WEAPON_", 7 ))
+		{
+			for( int i = 0; i < (int)( sizeof( g_ImpulseWeaponNames ) / sizeof( g_ImpulseWeaponNames[0] )); i++ )
+			{
+				if( !Q_stricmp( key, g_ImpulseWeaponNames[i].name ) && g_NumImpulseWeapons < MAX_IMPULSE_ENTRIES )
+				{
+					g_ImpulseWeapons[g_NumImpulseWeapons].id = g_ImpulseWeaponNames[i].id;
+					g_ImpulseWeapons[g_NumImpulseWeapons].mult = mult;
+					g_NumImpulseWeapons++;
+					break;
+				}
+			}
+		}
+		else if( !Q_strnicmp( key, "DMG_", 4 ))
+		{
+			for( int i = 0; i < (int)( sizeof( g_ImpulseDamageNames ) / sizeof( g_ImpulseDamageNames[0] )); i++ )
+			{
+				if( !Q_stricmp( key, g_ImpulseDamageNames[i].name ) && g_NumImpulseDamage < MAX_IMPULSE_ENTRIES )
+				{
+					g_ImpulseDamage[g_NumImpulseDamage].id = g_ImpulseDamageNames[i].bits;
+					g_ImpulseDamage[g_NumImpulseDamage].mult = mult;
+					g_NumImpulseDamage++;
+					break;
+				}
+			}
+		}
+		else if( g_NumImpulseInflictors < MAX_IMPULSE_ENTRIES )
+		{
+			Q_strncpy( g_ImpulseInflictors[g_NumImpulseInflictors].name, key, sizeof( g_ImpulseInflictors[0].name ));
+			g_ImpulseInflictors[g_NumImpulseInflictors].mult = mult;
+			g_NumImpulseInflictors++;
+		}
+	}
+
+	FREE_FILE( pfile );
+}
+
+//=========================================================
 // GetRagdollImpulseMultiplier
 //
 // scales the ragdoll death knockback by what caused the last hit
 //=========================================================
 float CBaseMonster::GetRagdollImpulseMultiplier( float hitDamage )
 {
+	LoadRagdollImpulseTable();
+
 	// a projectile inflictor is the best hint, works for NPC vs NPC too
 	if( m_iszLastHitInflictor != iStringNull )
 	{
 		const char *pszInflictor = STRING( m_iszLastHitInflictor );
 
-		if( !strcmp( pszInflictor, "rpg_rocket" ) || !strcmp( pszInflictor, "grenade" ) || !strcmp( pszInflictor, "monster_satchel" ))
+		for( int i = 0; i < g_NumImpulseInflictors; i++ )
 		{
-			return 3.0f * hitDamage;
-		}
-		if( !strcmp( pszInflictor, "crossbow_bolt" ))
-		{
-			return 1.5f * hitDamage;
+			if( !Q_stricmp( pszInflictor, g_ImpulseInflictors[i].name ))
+				return g_ImpulseInflictors[i].mult;
 		}
 	}
 
 	// weapon id tells apart weapons that share a damage type (shotgun vs 9mm)
-	switch( m_iLastHitWeapon )
+	for( int i = 0; i < g_NumImpulseWeapons; i++ )
 	{
-	case WEAPON_GAUSS:	return 2.5f * hitDamage;	// charged tau slug hits like a truck
-	case WEAPON_SHOTGUN:
-	case WEAPON_SHOTGUN_XM:	return 2.5f * hitDamage;	// buckshot really throws the body back
-	case WEAPON_SNIPER:	return 2.0f * hitDamage;	// heavy, high-velocity single round
-	case WEAPON_DEAGLE:	return 1.6f * hitDamage;	// .357 magnum, far punchier than a 9mm
-	case WEAPON_KNIFE:	return 1.5f * hitDamage;	// a solid melee shove
-	case WEAPON_SENTRY:	return 1.5f * hitDamage;	// heavy mounted autocannon rounds
-	case WEAPON_EGON:	return 1.3f * hitDamage;	// gluon beam shoves as it burns
-	case WEAPON_MRC:
-	case WEAPON_AR2:
-	case WEAPON_G36C:
-	case WEAPON_HKMP5:	return 1.2f * hitDamage;	// full-auto rifles/SMGs: a touch over neutral
+		if( g_ImpulseWeapons[i].id == m_iLastHitWeapon )
+			return g_ImpulseWeapons[i].mult;
 	}
 
-	// otherwise weigh by the damage-type category
-	if( m_iLastHitDamageType & DMG_NUCLEAR )    return 4.0f * hitDamage;
-	if( m_iLastHitDamageType & DMG_MORTAR )     return 3.0f * hitDamage;
-	if( m_iLastHitDamageType & DMG_BLAST )      return 2.5f * hitDamage;
-	if( m_iLastHitDamageType & DMG_SONIC )      return 2.0f * hitDamage;
-	if( m_iLastHitDamageType & DMG_ENERGYBEAM ) return 1.5f * hitDamage;
-	if( m_iLastHitDamageType & DMG_CRUSH )      return 2.0f * hitDamage;
-	if( m_iLastHitDamageType & DMG_CLUB )       return 1.5f * hitDamage;
-	if( m_iLastHitDamageType & DMG_SLASH )      return 1.2f * hitDamage;
+	// otherwise weigh by the damage-type category, first match in file order wins
+	for( int i = 0; i < g_NumImpulseDamage; i++ )
+	{
+		if( m_iLastHitDamageType & g_ImpulseDamage[i].id )
+			return g_ImpulseDamage[i].mult;
+	}
 
-	return 1.0f * hitDamage; // bullets and everything else: neutral
+	return 1.0f; // bullets and everything else: neutral
 }
 
 //=========================================================

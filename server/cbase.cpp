@@ -1145,6 +1145,34 @@ void CBaseEntity::UpdateOnRemove( void )
 
 /*
 ==============================
+PhysicsImpact
+
+a ragdoll part hit something: play an impact sound from the model's
+ragdoll config, replacing the scripted bodydrop thuds
+==============================
+*/
+void CBaseEntity::PhysicsImpact( CBaseEntity *pOther, const Vector &position, const Vector &normal, float force, int part )
+{
+	// underwater contacts don't make the dry body thud
+	if( UTIL_PointContents( position ) == CONTENTS_WATER )
+		return;
+
+	// a body landing spawns many limb contacts at once, keep only the first
+	if( m_flNextImpactSound > gpGlobals->time )
+		return;
+
+	float fvol = 1.0f;
+	const char *sample = WorldPhysic->GetRagdollImpactSound( STRING( pev->model ), force, &fvol );
+
+	if( !sample )
+		return;
+
+	m_flNextImpactSound = gpGlobals->time + 0.1f;
+	EMIT_SOUND_DYN( edict(), CHAN_BODY, sample, fvol, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ));
+}
+
+/*
+==============================
 SUB_UseTargets
 
 If self.delay is set, a DelayedUse entity will be created that will actually

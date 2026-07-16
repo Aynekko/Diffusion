@@ -521,7 +521,8 @@ public:
 	}
 
 	// a physics body owned by this entity struck pOther, part is -1 when not a ragdoll
-	virtual void PhysicsImpact( CBaseEntity *pOther, const Vector &position, const Vector &normal, float force, int part ) {}
+	virtual void PhysicsImpact( CBaseEntity *pOther, const Vector &position, const Vector &normal, float force, int part );
+	float m_flNextImpactSound;	// throttles ragdoll impact sounds
 
 	virtual void Blocked( CBaseEntity *pOther )
 	{
