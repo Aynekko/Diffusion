@@ -47,6 +47,7 @@ class HoldableItemController;
 #define RAGDOLL_PARTS	10
 #define RAGDOLL_JOINTS	9
 #define RAGDOLL_ADJUSTMENTS	64
+#define RAGDOLL_IMPACT_SOUNDS	8
 
 struct RagdollConfig
 {
@@ -70,6 +71,13 @@ struct RagdollConfig
 	char adjustBoneNames[RAGDOLL_ADJUSTMENTS][32];
 	float adjustEuler[RAGDOLL_ADJUSTMENTS][3];
 	int numAdjustments;
+
+	// 'impact_soft/impact_hard "sound.wav"' lines, 'impact_force N' flips the tier
+	char impactSoft[RAGDOLL_IMPACT_SOUNDS][64];
+	int numImpactSoft;
+	char impactHard[RAGDOLL_IMPACT_SOUNDS][64];
+	int numImpactHard;
+	float impactForce;
 };
 
 #define MAX_RAGDOLLS		256	// live ragdoll cap; spawning past it evicts the oldest corpse
@@ -101,6 +109,7 @@ struct RagdollDesc
 	float spawnTime;		// when the ragdoll was created
 	float fadeStartTime;		// non-zero once the lifetime expired and the corpse is fading out
 	float waterFrac[RAGDOLL_PARTS];	// submerged fraction per part (0..1), sampled at the update tick
+	float prevWaterFrac[RAGDOLL_PARTS];	// previous tick's fraction, to catch a part crossing the surface
 	int bones[RAGDOLL_PARTS];	// model bone index of each part
 	physx::PxRigidDynamic *bodies[RAGDOLL_PARTS];
 	physx::PxJoint *joints[RAGDOLL_JOINTS];
@@ -138,6 +147,7 @@ public:
 	void	*CreateRagdollEntity( CBaseEntity *pObject );
 	void	PrecacheRagdoll( const char *szModelName );
 	void	ReloadRagdollConfigs( void );
+	const char *GetRagdollImpactSound( const char *szModelName, float flForce, float *flVolume );
 	void	SendRagdollPose( CBaseEntity *pPlayer, int entindex );
 	void	*CreateKinematicBodyFromEntity( CBaseEntity *pEntity );
 	void	*CreateStaticBodyFromEntity( CBaseEntity *pObject );

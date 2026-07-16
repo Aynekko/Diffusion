@@ -18,11 +18,6 @@ GNU General Public License for more details.
 
 using namespace physx;
 
-enum ColllisionFlags : PxU32
-{
-	ConveyorActor = (1 << 0),
-};
-
 /*
 =================
 CollisionFilterData
@@ -44,7 +39,7 @@ constructs from a native PxFilterData, decoding the conveyor flag from word0
 */
 CollisionFilterData::CollisionFilterData(const physx::PxFilterData &data)
 {
-	m_conveyorFlag = data.word0 & ColllisionFlags::ConveyorActor;
+	m_conveyorFlag = data.word0 & k_FilterConveyor;
 }
 
 /*
@@ -81,6 +76,6 @@ encodes the current flags into a native PxFilterData
 PxFilterData CollisionFilterData::ToNativeType() const
 {
 	PxFilterData filterData;
-	filterData.word0 |= m_conveyorFlag ? ColllisionFlags::ConveyorActor : 0;
+	filterData.word0 |= m_conveyorFlag ? k_FilterConveyor : 0;
 	return filterData;
 }

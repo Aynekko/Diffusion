@@ -120,6 +120,8 @@ cvar_t	phys_ragdoll_limitdamping = { "phys_ragdoll_limitdamping", "5", FCVAR_ARC
 cvar_t	phys_solveriterations = { "phys_solveriterations", "8", FCVAR_ARCHIVE };	// position solver iterations for all bodies (props and ragdolls)
 cvar_t	phys_ccd = { "phys_ccd", "1", FCVAR_ARCHIVE };	// enable speculative continuous collision detection
 cvar_t	phys_ragdoll_impactforce = { "phys_ragdoll_impactforce", "0", FCVAR_ARCHIVE };	// min contact impulse to fire PhysicsImpact (0 = every first contact)
+cvar_t	phys_ragdoll_splash = { "phys_ragdoll_splash", "1", FCVAR_ARCHIVE };	// limbs entering water make a splash (sound + ring + particle)
+cvar_t	phys_ragdoll_splash_speed = { "phys_ragdoll_splash_speed", "80", FCVAR_ARCHIVE };	// min downward speed for a limb to splash
 cvar_t	phys_ragdoll_restoregrace = { "phys_ragdoll_restoregrace", "0.5", FCVAR_ARCHIVE };	// seconds a save-restored ragdoll suppresses PhysicsImpact events
 cvar_t	phys_character_padding = { "phys_character_padding", "0.49", FCVAR_ARCHIVE };	// scale of the player/monster collision box half-extents
 cvar_t	phys_density_default = { "phys_density_default", "900", FCVAR_ARCHIVE };	// default body density when an entity specifies none
@@ -195,6 +197,8 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &phys_solveriterations );
 	CVAR_REGISTER( &phys_ccd );
 	CVAR_REGISTER( &phys_ragdoll_impactforce );
+	CVAR_REGISTER( &phys_ragdoll_splash );
+	CVAR_REGISTER( &phys_ragdoll_splash_speed );
 	CVAR_REGISTER( &phys_ragdoll_restoregrace );
 	CVAR_REGISTER( &phys_character_padding );
 	CVAR_REGISTER( &phys_density_default );

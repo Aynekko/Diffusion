@@ -14,11 +14,11 @@ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 */
 #include "event_handler.h"
+#include "collision_filter_data.h"
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
 #include <algorithm>
-#include <cstring>
 
 using namespace physx;
 
@@ -137,10 +137,11 @@ void EventHandler::queueRagdollImpact(const PxContactPairHeader &pairHeader, con
 		return;
 	}
 
-	const char *n0 = a0->getName();
-	const char *n1 = a1->getName();
-	bool r0 = n0 && !strcmp(n0, "ragdoll");
-	bool r1 = n1 && !strcmp(n1, "ragdoll");
+	// ragdoll parts tag word0 of their shape filter data, the same bit the filter shader keys on
+	const PxShape *s0 = pair.shapes[0];
+	const PxShape *s1 = pair.shapes[1];
+	const bool r0 = s0 && (s0->getSimulationFilterData().word0 & k_FilterRagdollPart);
+	const bool r1 = s1 && (s1->getSimulationFilterData().word0 & k_FilterRagdollPart);
 	if (!r0 && !r1)
 	{
 		return; // no ragdoll part involved
@@ -183,12 +184,12 @@ void EventHandler::queueRagdollImpact(const PxContactPairHeader &pairHeader, con
 	// notify both owners on ragdoll vs ragdoll, part index lives in filter word1
 	if (r0)
 	{
-		int part = pair.shapes[0] ? (int)pair.shapes[0]->getSimulationFilterData().word1 : -1;
+		int part = (int)s0->getSimulationFilterData().word1;
 		m_impl->impactEvents.push_back({ a0, a1, bestPos, bestNormal, force, part });
 	}
 	if (r1)
 	{
-		int part = pair.shapes[1] ? (int)pair.shapes[1]->getSimulationFilterData().word1 : -1;
+		int part = (int)s1->getSimulationFilterData().word1;
 		m_impl->impactEvents.push_back({ a1, a0, bestPos, bestNormal, force, part });
 	}
 }

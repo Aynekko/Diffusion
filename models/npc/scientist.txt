@@ -13,3 +13,19 @@ lower_leg_left		"Bip02 L Leg1"		0.007142	-0.990693	-0.135926	-0.999164	-0.001599
 // Bone adjustments
 adjustment		"Bip02 L Hand"			0	0	0
 adjustment		"Bip02 R Hand"			0	0	0
+
+// Impact sounds
+impact_force		300
+impact_soft		body/body_medium_impact_soft1.wav
+impact_soft		body/body_medium_impact_soft2.wav
+impact_soft		body/body_medium_impact_soft3.wav
+impact_soft		body/body_medium_impact_soft4.wav
+impact_soft		body/body_medium_impact_soft5.wav
+impact_soft		body/body_medium_impact_soft6.wav
+impact_soft		body/body_medium_impact_soft7.wav
+impact_hard		body/body_medium_impact_hard1.wav
+impact_hard		body/body_medium_impact_hard2.wav
+impact_hard		body/body_medium_impact_hard3.wav
+impact_hard		body/body_medium_impact_hard4.wav
+impact_hard		body/body_medium_impact_hard5.wav
+impact_hard		body/body_medium_impact_hard6.wav

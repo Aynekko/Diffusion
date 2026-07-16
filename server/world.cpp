@@ -63,6 +63,7 @@ public:
 	virtual void *CreateRagdollEntity( CBaseEntity *pObject ) { return NULL; }
 	virtual void	PrecacheRagdoll( const char *szModelName ) {}
 	virtual void	ReloadRagdollConfigs( void ) {}
+	virtual const char *GetRagdollImpactSound( const char *szModelName, float flForce, float *flVolume ) { return NULL; }
 	virtual void	SendRagdollPose( CBaseEntity *pPlayer, int entindex ) {}
 	virtual void *CreateKinematicBodyFromEntity( CBaseEntity *pEntity ) { return NULL; }
 	virtual void *CreateStaticBodyFromEntity( CBaseEntity *pObject ) { return NULL; }

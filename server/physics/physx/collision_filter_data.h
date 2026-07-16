@@ -1,6 +1,7 @@
 /*
 collision_filter_data.h - part of PhysX physics engine implementation
 Copyright (C) 2023 SNMetamorph
+Copyright (C) 2026 rickomax
 
 This program is free software: you can redistribute it and/or modify
 it under the terms of the GNU General Public License as published by
@@ -16,6 +17,14 @@ GNU General Public License for more details.
 #pragma once
 #include <PxConfig.h>
 #include <PxPhysicsAPI.h>
+
+// word0 of a shape's simulation filter data is a bitmask of these collision groups
+enum PhysFilterGroup : physx::PxU32
+{
+	k_FilterConveyor    = (1u << 0),	// conveyor surface
+	k_FilterRagdollPart = (1u << 1),	// ragdoll body part (debris)
+	k_FilterCharacter   = (1u << 2),	// living character hull
+};
 
 class CollisionFilterData
 {

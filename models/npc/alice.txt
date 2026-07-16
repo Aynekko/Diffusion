@@ -43,3 +43,19 @@ adjustment		"Bip01 R Ring3"			0	0	0
 adjustment		"Bip01 R Pinky1"		0	0	0
 adjustment		"Bip01 R Pinky2"		0	0	0
 adjustment		"Bip01 R Pinky3"		0	0	0
+
+// Impact sounds
+impact_force		300
+impact_soft		body/body_medium_impact_soft1.wav
+impact_soft		body/body_medium_impact_soft2.wav
+impact_soft		body/body_medium_impact_soft3.wav
+impact_soft		body/body_medium_impact_soft4.wav
+impact_soft		body/body_medium_impact_soft5.wav
+impact_soft		body/body_medium_impact_soft6.wav
+impact_soft		body/body_medium_impact_soft7.wav
+impact_hard		body/body_medium_impact_hard1.wav
+impact_hard		body/body_medium_impact_hard2.wav
+impact_hard		body/body_medium_impact_hard3.wav
+impact_hard		body/body_medium_impact_hard4.wav
+impact_hard		body/body_medium_impact_hard5.wav
+impact_hard		body/body_medium_impact_hard6.wav

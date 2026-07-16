@@ -46,6 +46,7 @@ public:
 	virtual void	*CreateRagdollEntity( CBaseEntity *pObject ) = 0;
 	virtual void	PrecacheRagdoll( const char *szModelName ) = 0;
 	virtual void	ReloadRagdollConfigs( void ) = 0;
+	virtual const char *GetRagdollImpactSound( const char *szModelName, float flForce, float *flVolume ) = 0;
 	virtual void	SendRagdollPose( CBaseEntity *pPlayer, int entindex ) = 0;
 	virtual void	*CreateKinematicBodyFromEntity( CBaseEntity *pEntity ) = 0;
 	virtual void	*CreateStaticBodyFromEntity( CBaseEntity *pObject ) = 0;

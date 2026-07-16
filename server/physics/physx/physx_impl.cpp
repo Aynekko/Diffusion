@@ -55,10 +55,8 @@ using namespace physx;
 // hull-0 world/submodel collision reconstruction (defined later in this file)
 namespace { void PW_BuildWorld( mnode_t *root, std::vector<PxVec3> &verts, std::vector<PxU32> &tris ); }
 
-// extra word0 filter bits, bit 0 is the conveyor flag (collision_filter_data.cpp)
+// k_FilterRagdollPart / k_FilterCharacter word0 bits live in collision_filter_data.h;
 // ragdolls are debris, the filter shader keeps them out of character hulls
-static const PxU32 k_FilterRagdollPart = ( 1u << 1 );
-static const PxU32 k_FilterCharacter = ( 1u << 2 );
 
 // fixed physics step, 100Hz
 static const double k_SimulationStepSize = 1.0 / 100.0;
@@ -1666,6 +1664,9 @@ const RagdollConfig *CPhysicPhysX::GetRagdollConfig( const char *szModelName )
 		}
 	}
 	config.numAdjustments = 0;
+	config.numImpactSoft = 0;
+	config.numImpactHard = 0;
+	config.impactForce = 0.0f;
 
 	// the config lives next to the model: models/foo.mdl -> models/foo.txt
 	char szConfigPath[MAX_PATH];
@@ -1723,6 +1724,40 @@ const RagdollConfig *CPhysicPhysX::GetRagdollConfig( const char *szModelName )
 					config.adjustEuler[config.numAdjustments][1] = e[1];
 					config.adjustEuler[config.numAdjustments][2] = e[2];
 					config.numAdjustments++;
+				}
+				continue;
+			}
+
+			// 'impact_force N': contact impulse that flips the impact sound from soft to hard
+			if( !Q_stricmp( token, "impact_force" ))
+			{
+				if(( pdata = COM_ParseFile( pdata, token )) == NULL )
+				{
+					break;
+				}
+				config.impactForce = Q_atof( token );
+				continue;
+			}
+
+			// 'impact_soft/impact_hard "sound.wav"': one sound per line, repeat to add variants
+			if( !Q_stricmp( token, "impact_soft" ) || !Q_stricmp( token, "impact_hard" ))
+			{
+				const bool hard = !Q_stricmp( token, "impact_hard" );
+
+				if(( pdata = COM_ParseFile( pdata, token )) == NULL )
+				{
+					break;
+				}
+
+				int &count = hard ? config.numImpactHard : config.numImpactSoft;
+				if( count >= RAGDOLL_IMPACT_SOUNDS )
+				{
+					ALERT( at_warning, "GetRagdollConfig: %s too many impact sounds, \"%s\" ignored\n", szConfigPath, token );
+				}
+				else
+				{
+					Q_strncpy( hard ? config.impactHard[count] : config.impactSoft[count], token, 64 );
+					count++;
 				}
 				continue;
 			}
@@ -1837,7 +1872,68 @@ parses a model's ragdoll config at level load so the file i/o never happens at k
 */
 void CPhysicPhysX::PrecacheRagdoll( const char *szModelName )
 {
-	GetRagdollConfig( szModelName );
+	const RagdollConfig *config = GetRagdollConfig( szModelName );
+
+	if( !config )
+	{
+		return;
+	}
+
+	for( int i = 0; i < config->numImpactSoft; i++ )
+	{
+		PRECACHE_SOUND( (char *)config->impactSoft[i] );
+	}
+
+	for( int i = 0; i < config->numImpactHard; i++ )
+	{
+		PRECACHE_SOUND( (char *)config->impactHard[i] );
+	}
+}
+
+/*
+=================
+GetRagdollImpactSound
+
+picks a random impact sound for the model, hard tier when the contact impulse
+beats the config threshold; also derives a volume from the impulse
+=================
+*/
+const char *CPhysicPhysX::GetRagdollImpactSound( const char *szModelName, float flForce, float *flVolume )
+{
+	const RagdollConfig *config = GetRagdollConfig( szModelName );
+
+	if( !config || ( config->numImpactSoft <= 0 && config->numImpactHard <= 0 ))
+	{
+		return NULL;
+	}
+
+	// hard tier needs hard sounds and enough impulse; either list covers for a missing one
+	bool hard = ( config->numImpactHard > 0 );
+	if( hard && config->numImpactSoft > 0 && flForce < config->impactForce )
+	{
+		hard = false;
+	}
+
+	if( flVolume )
+	{
+		// full volume at twice the tier threshold, quieter below it
+		if( config->impactForce > 0.0f )
+		{
+			float frac = flForce / ( config->impactForce * 2.0f );
+			*flVolume = bound( 0.4f, frac * frac, 1.0f );
+		}
+		else
+		{
+			*flVolume = 1.0f;
+		}
+	}
+
+	if( hard )
+	{
+		return config->impactHard[RANDOM_LONG( 0, config->numImpactHard - 1 )];
+	}
+
+	return config->impactSoft[RANDOM_LONG( 0, config->numImpactSoft - 1 )];
 }
 
 /*
@@ -2057,6 +2153,7 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 	for( int i = 0; i < RAGDOLL_PARTS; i++ )
 	{
 		rag.waterFrac[i] = 0.0f;
+		rag.prevWaterFrac[i] = 0.0f;
 	}
 
 	// assign every bone to a part by walking up its parents until a part bone is found; bones outside any chain (tails, weapons...) fall to the torso
@@ -2694,7 +2791,9 @@ void CPhysicPhysX::RagdollSendBones( RagdollDesc &rag, CBaseEntity *pEntity, int
 		partWorld[i] = matrix4x4( const_cast<float *>( poseMat.front( )));
 	}
 
-	matrix4x4 localSpace = pEntity->EntityToWorldTransform().Invert();
+	// build the transform from origin+angles like the client decodes it, the cached
+	// entity transform loses its rotation on save restore and never recomputes while asleep
+	matrix4x4 localSpace = matrix4x4( pEntity->pev->origin, pEntity->pev->angles, 1.0f ).Invert();
 	static matrix4x4 boneWorld[MAXSTUDIOBONES];
 	Vector pos;
 	Radian ang;
@@ -2926,7 +3025,9 @@ void CPhysicPhysX::UpdateRagdolls( void )
 		}
 
 		// sample how deep each part sits in water, before the sleep skip
-		bool checkWater = ( CVAR_GET_FLOAT( "phys_ragdoll_buoyancy" ) > 0.0f );
+		bool splash = ( CVAR_GET_FLOAT( "phys_ragdoll_splash" ) > 0.0f );
+		bool checkWater = ( CVAR_GET_FLOAT( "phys_ragdoll_buoyancy" ) > 0.0f ) || splash;
+		float splashSpeed = CVAR_GET_FLOAT( "phys_ragdoll_splash_speed" );
 
 		for( int i = 0; i < RAGDOLL_PARTS; i++ )
 		{
@@ -2955,6 +3056,22 @@ void CPhysicPhysX::UpdateRagdolls( void )
 				}
 			}
 			rag.waterFrac[i] = (float)submerged / (float)k_WaterSamples;
+
+			// a part that was dry and just dipped in while moving down makes a splash;
+			// reuse the same water event the player entry uses (sound + ring + splash + drips)
+			if( splash && rag.prevWaterFrac[i] < 0.05f && rag.waterFrac[i] >= 0.125f )
+			{
+				float vz = rag.bodies[i]->getLinearVelocity().z;
+				if( vz < -splashSpeed )
+				{
+					Vector below( org.x, org.y, bottom );			// under the surface
+					Vector above( org.x, org.y, bottom + height + 32.0f );	// clear of it
+					int type = ( -vz > splashSpeed * 3.0f ) ? 1 : 0;	// bigger splash for a hard entry
+					pEntity->MakeWaterSplash( above, below, type );
+				}
+			}
+
+			rag.prevWaterFrac[i] = rag.waterFrac[i];
 		}
 
 		// blend the joint limits from the widened spawn ranges back to the authored ones
