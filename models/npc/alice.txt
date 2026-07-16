@@ -1,0 +1,45 @@
+//part			"bone"			aYx		aYy		aYz		aZx		aZy		aZz		syMin	syMax	szMin	szMax	tMin	tMax	ratio
+head			"Bip01 Head"		0.000000	0.990885	0.134708	-1.000000	0.000000	0.000000	-30	30	-35	35	-20	20	1.25
+torso			"Bip01 Spine"		0.000000	-0.994411	0.105576	-1.000000	0.000000	0.000000	0	0	0	0	0	0	6.25
+upper_arm_right		"Bip01 R Arm1"		0.000003	-0.193094	-0.981180	0.000001	0.981180	-0.193094	-75	75	-95	95	-45	45	1.25
+lower_arm_right		"Bip01 R Arm2"		0.000005	-0.131381	-0.991332	0.000001	0.991332	-0.131381	-8	8	-145	5	-10	10	1.25
+upper_arm_left		"Bip01 L Arm1"		0.000004	-0.122505	-0.992468	-0.000002	-0.992468	0.122505	-75	75	-95	95	-45	45	1.25
+lower_arm_left		"Bip01 L Arm2"		-0.000003	0.080963	0.996717	-0.000002	-0.996717	0.080963	-8	8	-145	5	-10	10	1.25
+upper_leg_right		"Bip01 R Leg"		0.916145	0.400769	-0.007904	0.400820	-0.916134	0.006499	-65	65	-85	45	-35	35	1.875
+lower_leg_right		"Bip01 R Leg1"		-0.936397	0.350393	0.019636	-0.350917	-0.934171	-0.064675	-8	8	-145	5	-8	8	1.875
+upper_leg_left		"Bip01 L Leg"		0.000001	0.999668	-0.025775	0.999989	0.000119	0.004636	-65	65	-85	45	-35	35	1.875
+lower_leg_left		"Bip01 L Leg1"		0.994996	-0.099142	-0.012397	-0.099821	-0.991743	-0.080509	-8	8	-145	5	-8	8	1.875
+
+// Bone adjustments
+adjustment		"Bip01 L Hand"			0	0	0
+adjustment		"Bip01 L Thumb1"		0	0	0
+adjustment		"Bip01 L Thumb2"		0	0	0
+adjustment		"Bip01 L Thumb3"		0	0	0
+adjustment		"Bip01 L Index1"		0	0	0
+adjustment		"Bip01 L Index2"		0	0	0
+adjustment		"Bip01 L Index3"		0	0	0
+adjustment		"Bip01 L Middle1"		0	0	0
+adjustment		"Bip01 L Middle2"		0	0	0
+adjustment		"Bip01 L Middle3"		0	0	0
+adjustment		"Bip01 L Ring1"			0	0	0
+adjustment		"Bip01 L Ring2"			0	0	0
+adjustment		"Bip01 L Ring3"			0	0	0
+adjustment		"Bip01 L Pinky1"		0	0	0
+adjustment		"Bip01 L Pinky2"		0	0	0
+adjustment		"Bip01 L Pinky3"		0	0	0
+adjustment		"Bip01 R Hand"			0	0	0
+adjustment		"Bip01 R Thumb1"		0	0	0
+adjustment		"Bip01 R Thumb2"		0	0	0
+adjustment		"Bip01 R Thumb3"		0	0	0
+adjustment		"Bip01 R Index1"		0	0	0
+adjustment		"Bip01 R Index2"		0	0	0
+adjustment		"Bip01 R Index3"		0	0	0
+adjustment		"Bip01 R Middle1"		0	0	0
+adjustment		"Bip01 R Middle2"		0	0	0
+adjustment		"Bip01 R Middle3"		0	0	0
+adjustment		"Bip01 R Ring1"			0	0	0
+adjustment		"Bip01 R Ring2"			0	0	0
+adjustment		"Bip01 R Ring3"			0	0	0
+adjustment		"Bip01 R Pinky1"		0	0	0
+adjustment		"Bip01 R Pinky2"		0	0	0
+adjustment		"Bip01 R Pinky3"		0	0	0

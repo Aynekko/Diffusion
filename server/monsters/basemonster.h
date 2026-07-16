@@ -50,6 +50,13 @@ public:
 	Activity		m_IdealActivity;// monster should switch to this activity
 		
 	int		m_LastHitGroup; // the last body region that took damage
+	Vector		m_vecLastHitPoint;	// where the last trace attack landed, for the ragdoll push
+	Vector		m_vecLastHitDir;
+	float		m_flLastHitDamage;
+	float		m_flLastHitTime;
+	int		m_iLastHitDamageType;	// bitsDamageType of the last hit
+	string_t	m_iszLastHitInflictor;	// classname of the last hit's projectile, 0 for direct hits
+	int		m_iLastHitWeapon;	// WEAPON_* id of the weapon that dealt the last hit, 0 = unknown
 		
 	MONSTERSTATE	m_MonsterState;// monster's current state
 	MONSTERSTATE	m_IdealMonsterState;// monster should change to this state
@@ -320,6 +327,11 @@ public:
 		BOOL GetEnemy ( void );
 		void MakeDamageBloodDecal ( int cCount, float flNoise, TraceResult *ptr, const Vector &vecDir );
 		void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
+		bool GetLastHitInfo( Vector &pos, Vector &dir, float &damage, int &group );
+		float GetRagdollImpulseMultiplier( float hitDamage );
+
+		// WEAPON_* id this monster attacks with, 0 if not weapon-specific
+		virtual int GetActiveWeaponId( void ) { return 0; }
 
 	// combat functions
 	float UpdateTarget ( entvars_t *pevTarget );

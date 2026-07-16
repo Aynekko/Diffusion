@@ -1427,6 +1427,9 @@ BEGIN_DATADESC_NO_BASE( CBaseEntity )
 	DEFINE_FIELD( m_usActorGroup, FIELD_SHORT ),
 	DEFINE_FIELD( m_flBodyMass, FIELD_FLOAT ),
 	DEFINE_FIELD( m_fFreezed, FIELD_BOOLEAN ),
+	DEFINE_ARRAY( m_iFilterData, FIELD_INTEGER, 4 ),
+	DEFINE_FIELD( m_fHasRagdollPose, FIELD_BOOLEAN ),
+	DEFINE_ARRAY( m_flRagdollPose, FIELD_FLOAT, RAGDOLL_SAVE_POSE_FLOATS ),
 
 	DEFINE_FIELD( IsOnFire, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_flCaughtFireTime, FIELD_TIME ),
@@ -1447,6 +1450,9 @@ int CBaseEntity::Save( CSave &save )
 
 	if( m_iActorType != ACTOR_INVALID )
 		WorldPhysic->SaveBody( this );
+
+	// capture a live ragdoll's settled pose so it restores in place
+	WorldPhysic->SaveRagdoll( this );
 
 	if( save.WriteEntVars( "ENTVARS", GetDataDescMap(), pev ))
 		return save.WriteAll( this, GetDataDescMap());
@@ -1509,7 +1515,22 @@ int CBaseEntity::Restore( CRestore &restore )
 	}
 
 	if( m_iActorType != ACTOR_INVALID )
+	{
 		m_pUserData = WorldPhysic->RestoreBody( this );
+	}
+	else if( pev->solid == SOLID_BSP && pev->modelindex > 1 && UTIL_GetModelType( pev->modelindex ) == mod_brush )
+	{
+		// saves written by builds where physics never initialized carry no actor type, rebuild a body anyway
+		m_iActorType = ACTOR_KINEMATIC;
+		m_pUserData = WorldPhysic->RestoreBody( this );
+		if( !m_pUserData ) { m_iActorType = ACTOR_INVALID; }
+	}
+
+	// ragdolls are not serialized, dead monsters get a fresh one from their restored pose
+	if( FBitSet( pev->flags, FL_MONSTER ) && pev->deadflag != DEAD_NO && !FBitSet( pev->effects, EF_NODRAW ))
+	{
+		WorldPhysic->CreateRagdollEntity( this );
+	}
 
 	return status;
 }
@@ -1750,3 +1771,16 @@ void CBaseEntity::ClearEffects(void)
 {
 // diffusion - add this to your entity to clear sprites/beams etc. when the entity is killed through "killtarget"
 }
+
+Vector CBaseEntity :: GetScale( void ) const
+{
+	if( Q_strcmp( GetClassname(), "env_static" ) == 0 )
+	{
+		if( pev->startpos.Length() > 0.001f )
+		{
+			return pev->startpos;
+		}
+	}
+	return pev->scale > 0.001f ? Vector( pev->scale, pev->scale, pev->scale ) : Vector( 1.0f, 1.0f, 1.0f );
+}
+

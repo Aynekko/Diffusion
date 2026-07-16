@@ -1142,6 +1142,7 @@ public:
 	int _cdecl MsgFunc_Weapons( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_StudioDecal( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_SetupBones( const char *pszName, int iSize, void *pbuf );
+	int _cdecl MsgFunc_RagdollBones( const char *pszName, int iSize, void *pbuf );
 	int _cdecl MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf ); // diffusion - I moved some tempentity from engine to client
 	int _cdecl MsgFunc_WaterSplash( const char *pszName, int iSize, void *pbuf ); // watersplash
 	int _cdecl MsgFunc_ServerName( const char *pszName, int iSize, void *pbuf );

@@ -1,0 +1,45 @@
+//part			"bone"			aYx		aYy		aYz		aZx		aZy		aZz		syMin	syMax	szMin	szMax	tMin	tMax	ratio
+head			"Bip01 Head"		0.000093	-1.000000	0.000102	1.000000	0.000093	0.000345	-30	30	-35	35	-20	20	1.25
+torso			"Bip01 Spine"		0.000093	-1.000000	0.000000	1.000000	0.000093	0.000344	0	0	0	0	0	0	6.25
+upper_arm_right		"Bip01 R UpperArm"	-0.000095	1.000000	-0.000000	0.868546	0.000083	-0.495608	-75	75	-95	95	-45	45	1.25
+lower_arm_right		"Bip01 R Forearm"	-0.098556	0.980057	-0.172554	0.868546	0.000083	-0.495609	-8	8	-145	5	-10	10	1.25
+upper_arm_left		"Bip01 L UpperArm"	-0.000095	1.000000	-0.000000	0.868205	0.000083	0.496206	-75	75	-95	95	-45	45	1.25
+lower_arm_left		"Bip01 L Forearm"	0.098488	0.980076	-0.172486	0.868204	0.000083	0.496207	-8	8	-145	5	-10	10	1.25
+upper_leg_right		"Bip01 R Thigh"		0.000061	-0.995004	0.099833	-1.000000	-0.000096	-0.000343	-65	65	-85	45	-35	35	1.875
+lower_leg_right		"Bip01 R Calf"		0.000130	-0.995004	-0.099834	-1.000000	-0.000096	-0.000343	-8	8	-145	5	-8	8	1.875
+upper_leg_left		"Bip01 L Thigh"		0.000061	-0.995004	0.099833	-1.000000	-0.000096	-0.000343	-65	65	-85	45	-35	35	1.875
+lower_leg_left		"Bip01 L Calf"		0.000130	-0.995004	-0.099834	-1.000000	-0.000096	-0.000343	-8	8	-145	5	-8	8	1.875
+
+// Bone adjustments
+adjustment		"Bip01 L Hand"		0	0	0
+adjustment		"Bip01 L Finger0"	0	0	0
+adjustment		"Bip01 L Finger01"	0	0	0
+adjustment		"Bip01 L Finger02"	0	0	0
+adjustment		"Bip01 L Finger1"	0	0	0
+adjustment		"Bip01 L Finger11"	0	0	0
+adjustment		"Bip01 L Finger12"	0	0	0
+adjustment		"Bip01 L Finger2"	0	0	0
+adjustment		"Bip01 L Finger21"	0	0	0
+adjustment		"Bip01 L Finger22"	0	0	0
+adjustment		"Bip01 L Finger3"	0	0	0
+adjustment		"Bip01 L Finger31"	0	0	0
+adjustment		"Bip01 L Finger32"	0	0	0
+adjustment		"Bip01 L Finger4"	0	0	0
+adjustment		"Bip01 L Finger41"	0	0	0
+adjustment		"Bip01 L Finger42"	0	0	0
+adjustment		"Bip01 R Hand"		0	0	0
+adjustment		"Bip01 R Finger0"	0	0	0
+adjustment		"Bip01 R Finger01"	0	0	0
+adjustment		"Bip01 R Finger02"	0	0	0
+adjustment		"Bip01 R Finger1"	0	0	0
+adjustment		"Bip01 R Finger11"	0	0	0
+adjustment		"Bip01 R Finger12"	0	0	0
+adjustment		"Bip01 R Finger2"	0	0	0
+adjustment		"Bip01 R Finger21"	0	0	0
+adjustment		"Bip01 R Finger22"	0	0	0
+adjustment		"Bip01 R Finger3"	0	0	0
+adjustment		"Bip01 R Finger31"	0	0	0
+adjustment		"Bip01 R Finger32"	0	0	0
+adjustment		"Bip01 R Finger4"	0	0	0
+adjustment		"Bip01 R Finger41"	0	0	0
+adjustment		"Bip01 R Finger42"	0	0	0

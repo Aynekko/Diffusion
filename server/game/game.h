@@ -80,6 +80,5 @@ extern cvar_t	*g_debugdraw;	// novodex physics debug
 extern cvar_t	*p_speeds;
 extern cvar_t	*g_physdebug;	// quake physics debug
 extern cvar_t	*g_allow_physx;
-extern cvar_t	g_sync_physic;
 
 #endif		// GAME_H

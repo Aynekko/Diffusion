@@ -120,6 +120,8 @@ void CStudioModelRenderer::Init( void )
 	m_pCvarViewmodelFov = CVAR_REGISTER( "cl_viewmodel_fov", "90", FCVAR_ARCHIVE );
 	m_pCvarCompatible = CVAR_REGISTER( "r_studio_compatible", "1", FCVAR_ARCHIVE );
 	m_pCvarLodScale = CVAR_REGISTER( "cl_lod_scale", "5.0", FCVAR_ARCHIVE );
+	m_pCvarRagdollInterp = CVAR_REGISTER( "r_ragdoll_interp", "0.1", FCVAR_ARCHIVE );
+	m_pCvarBindPose = CVAR_REGISTER( "r_bindpose", "0", 0 );
 	m_pCvarLodBias = CVAR_REGISTER( "cl_lod_bias", "0", FCVAR_ARCHIVE );
 	m_pCvarLod = CVAR_REGISTER( "cl_lod_enable", "0", FCVAR_ARCHIVE );
 
@@ -267,6 +269,31 @@ bool CStudioModelRenderer::StudioSetEntity( cl_entity_t *pEnt )
 	{
 		ALERT( at_error, "Couldn't create instance for entity %d\n", pEnt->index );
 		return false; // out of memory ?
+	}
+
+	// server ragdoll marker but no bone data yet, pull the pose and skip drawing until the first reply lands
+	if( m_pCurrentEntity->curstate.iuser2 == -677 && ( !m_pModelInstance->m_bProceduralBones || m_pModelInstance->m_procCount < 1 ))
+	{
+		if( tr.time > m_pModelInstance->m_procRequestTime || m_pModelInstance->m_procRequestTime > tr.time + 2.5f )
+		{
+			bool firstRequest = ( m_pModelInstance->m_procRequestTime == 0.0f );
+			char szCmd[32];
+
+			Q_snprintf( szCmd, sizeof( szCmd ), "ragdoll_request %i\n", m_pCurrentEntity->index );
+			gEngfuncs.pfnServerCmd( szCmd );
+			m_pModelInstance->m_procRequestTime = tr.time + 2.0f;
+
+			// bounded hide, fall back to the animation pose if the server has nothing to send
+			if( firstRequest )
+			{
+				m_pModelInstance->m_procHideUntil = tr.time + 0.5f;
+			}
+		}
+
+		if( tr.time < m_pModelInstance->m_procHideUntil )
+		{
+			return false;
+		}
 	}
 
 	// all done
@@ -521,6 +548,12 @@ void CStudioModelRenderer::ClearInstanceData( bool create )
 	memset( &m_pModelInstance->m_controller, 0, sizeof( m_pModelInstance->m_controller ) );
 	memset( &m_pModelInstance->m_seqblend, 0, sizeof( m_pModelInstance->m_seqblend ) );
 	m_pModelInstance->m_bProceduralBones = false;
+	m_pModelInstance->m_procNewest = 0;
+	m_pModelInstance->m_procCount = 0;
+	// reset the request throttle too, a stale stamp blocks requests after a load
+	m_pModelInstance->m_procRequestTime = 0.0f;
+	m_pModelInstance->m_procTimeOffset = 0.0f;
+	m_pModelInstance->m_procHideUntil = 0.0f;
 	m_pModelInstance->m_current_seqblend = 0;
 	m_pModelInstance->lerp.stairoldz = m_pCurrentEntity->origin[2];
 	m_pModelInstance->lerp.stairtime = tr.time;
@@ -616,6 +649,11 @@ bool CStudioModelRenderer::CheckBoneCache( float f )
 
 	if( m_pModelInstance->m_bProceduralBones )
 		return false; // needs to be updated every frame
+
+	if( CVAR_TO_BOOL( m_pCvarBindPose ))
+	{
+		return false; // bind pose debug view overrides cached bones
+	}
 
 	BoneCache_t *cache = &m_pModelInstance->bonecache;
 	const cl_entity_t *e = m_pCurrentEntity;
@@ -2374,7 +2412,8 @@ void CStudioModelRenderer::AddBlendSequence( int oldseq, int newseq, float prevf
 
 		pseqblending->blendtime = tr.time;
 		pseqblending->sequence = oldseq;
-		pseqblending->cycle = prevframe / m_boneSetup.LocalMaxFrame( oldseq );
+		float oldMaxFrame = m_boneSetup.LocalMaxFrame( oldseq );
+		pseqblending->cycle = ( oldMaxFrame > 0.0f ) ? ( prevframe / oldMaxFrame ) : 0.0f;
 		pseqblending->gaitseq = gaitseq;
 		pseqblending->fadeout = Q_min( poldseqdesc->fadeouttime / 100.0f, pnewseqdesc->fadeintime / 100.0f );
 		if( pseqblending->fadeout <= 0.0f )
@@ -3254,7 +3293,7 @@ void CStudioModelRenderer::CalculateIKLocks( CIKContext *pIK )
 	}
 }
 
-void CStudioModelRenderer::StudioSetBonesExternal( const cl_entity_t *ent, const Vector pos[], const Radian ang[] )
+void CStudioModelRenderer::StudioSetBonesExternal( const cl_entity_t *ent, const Vector pos[], const Radian ang[], float flTime, const Vector &anchor )
 {
 	m_pCurrentEntity = (cl_entity_t *)ent;
 	m_pRenderModel = ent->model;
@@ -3274,30 +3313,165 @@ void CStudioModelRenderer::StudioSetBonesExternal( const cl_entity_t *ent, const
 
 	m_pModelInstance = &m_ModelInstances[m_pCurrentEntity->modelhandle];
 
-	for( int i = 0; i < m_pStudioHeader->numbones; i++ )
+	if( !m_pModelInstance->m_bProceduralBones )
 	{
-		m_pModelInstance->m_procangles[i] = ang[i];
-		m_pModelInstance->m_procorigin[i] = pos[i];
+		m_pModelInstance->m_procNewest = 0;
+		m_pModelInstance->m_procCount = 0;
 	}
 
-	m_pModelInstance->m_flLastBoneUpdate = tr.time + 0.1f;
+	// snapshots go into a small ring buffer the renderer interpolates across
+	ProcBonesSnapshot_t *pSnapshot;
+
+	if( flTime <= 0.0f )
+	{
+		// untimestamped update (env_rope and other legacy senders): keep a single snapshot that is rendered as-is
+		m_pModelInstance->m_procNewest = 0;
+		m_pModelInstance->m_procCount = 1;
+		m_pModelInstance->m_procTimeOffset = 0.0f;
+		pSnapshot = &m_pModelInstance->m_procSnapshots[0];
+		pSnapshot->time = tr.time;
+		pSnapshot->anchor = ent->curstate.origin;
+	}
+	else if( m_pModelInstance->m_procCount > 0 && flTime <= m_pModelInstance->m_procSnapshots[m_pModelInstance->m_procNewest].time )
+	{
+		// duplicate or stale timestamp: overwrite the newest snapshot instead of advancing
+		pSnapshot = &m_pModelInstance->m_procSnapshots[m_pModelInstance->m_procNewest];
+		pSnapshot->time = flTime;
+		pSnapshot->anchor = anchor;
+	}
+	else
+	{
+		if( m_pModelInstance->m_procCount > 0 )
+		{
+			m_pModelInstance->m_procNewest = ( m_pModelInstance->m_procNewest + 1 ) % PROC_BONE_SNAPSHOTS;
+		}
+		if( m_pModelInstance->m_procCount < PROC_BONE_SNAPSHOTS )
+		{
+			m_pModelInstance->m_procCount++;
+		}
+		pSnapshot = &m_pModelInstance->m_procSnapshots[m_pModelInstance->m_procNewest];
+		pSnapshot->time = flTime;
+		pSnapshot->anchor = anchor;
+	}
+
+	for( int i = 0; i < m_pStudioHeader->numbones; i++ )
+	{
+		pSnapshot->angles[i] = ang[i];
+		pSnapshot->origin[i] = pos[i];
+	}
+
+	// measure the offset between client time and sender timestamps, snap down fast, drift up slowly
+	if( flTime > 0.0f )
+	{
+		float offset = tr.time - flTime;
+		float current = m_pModelInstance->m_procTimeOffset;
+
+		if( m_pModelInstance->m_procCount <= 1 || offset < current || offset - current > 1.0f )
+		{
+			m_pModelInstance->m_procTimeOffset = offset;
+		}
+		else { m_pModelInstance->m_procTimeOffset = Q_min( current + 0.002f, offset ); }
+	}
+
+	m_pModelInstance->m_flLastBoneUpdate = tr.time + 3.0f;
 	m_pModelInstance->m_bProceduralBones = true;
 }
 
 void CStudioModelRenderer::StudioCalcBonesProcedural( Vector pos[], Vector4D q[] )
 {
-	if( !m_pModelInstance->m_bProceduralBones )
+	if( !m_pModelInstance->m_bProceduralBones || m_pModelInstance->m_procCount < 1 )
+	{
 		return;
+	}
+
+	ProcBonesSnapshot_t *snapshots = m_pModelInstance->m_procSnapshots;
+	int newest = m_pModelInstance->m_procNewest;
+	int count = m_pModelInstance->m_procCount;
+
+	// render on a delayed timeline (ex_interp style) to hide packet jitter
+	float delay = m_pCvarRagdollInterp->value;
+	if( delay > 0.5f ) { delay = 0.1f; } // legacy on/off values fall back to the default delay
+
+	const ProcBonesSnapshot_t *from = &snapshots[newest];
+	const ProcBonesSnapshot_t *to = from;
+	float frac = 1.0f;
+
+	float renderTime = tr.time - m_pModelInstance->m_procTimeOffset - delay;
+
+	if( delay > 0.0f && count > 1 )
+	{
+		if( renderTime < from->time )
+		{
+			// walk back through the buffer to the pair of snapshots bracketing the render time
+			for( int k = 1; k < count; k++ )
+			{
+				to = from;
+				from = &snapshots[( newest - k + PROC_BONE_SNAPSHOTS ) % PROC_BONE_SNAPSHOTS];
+
+				if( renderTime >= from->time )
+				{
+					break;
+				}
+			}
+
+			if( renderTime <= from->time )
+			{
+				frac = 0.0f; // older than the whole buffer: clamp to the oldest snapshot
+			}
+			else if( to->time - from->time > 0.0001f )
+			{
+				frac = bound( 0.0f, ( renderTime - from->time ) / ( to->time - from->time ), 1.0f );
+			}
+			else { frac = 1.0f; }
+		}
+	}
+
+	// bones are relative to the origin at send time, shift the root bones by the anchor difference
+	Vector anchorRender;
+	if( from == to || frac >= 1.0f )
+	{
+		anchorRender = to->anchor;
+	}
+	else if( frac <= 0.0f )
+	{
+		anchorRender = from->anchor;
+	}
+	else { anchorRender = from->anchor * ( 1.0f - frac ) + to->anchor * frac; }
+
+	Vector rootShift = m_pModelInstance->m_protationmatrix.VectorIRotate( anchorRender - m_pCurrentEntity->curstate.origin );
+	mstudiobone_t *pbones = (mstudiobone_t *)((byte *)m_pStudioHeader + m_pStudioHeader->boneindex);
 
 	for( int i = 0; i < m_pStudioHeader->numbones; i++ )
 	{
-		q[i] = m_pModelInstance->m_procangles[i];
-		pos[i] = m_pModelInstance->m_procorigin[i];
+		if( from == to || frac >= 1.0f )
+		{
+			q[i] = to->angles[i];
+			pos[i] = to->origin[i];
+		}
+		else if( frac <= 0.0f )
+		{
+			q[i] = from->angles[i];
+			pos[i] = from->origin[i];
+		}
+		else
+		{
+			Vector4D q0 = from->angles[i];
+			Vector4D q1 = to->angles[i];
+			QuaternionSlerp( q0, q1, frac, q[i] );
+			pos[i] = from->origin[i] * ( 1.0f - frac ) + to->origin[i] * frac;
+		}
+
+		if( pbones[i].parent == -1 )
+		{
+			pos[i] += rootShift;
+		}
 	}
 
-	// update is expired
-	if( tr.time > m_pModelInstance->m_flLastBoneUpdate )
+	// update expired, but sleeping ragdolls are network-silent and keep their pose
+	if( tr.time > m_pModelInstance->m_flLastBoneUpdate && m_pCurrentEntity->curstate.iuser2 != -677 )
+	{
 		m_pModelInstance->m_bProceduralBones = false;
+	}
 }
 
 /*
@@ -3347,7 +3521,8 @@ void CStudioModelRenderer::StudioSetupBones( void )
 		pIK = &m_pModelInstance->m_ik;
 	}
 
-	cycle = f / m_boneSetup.LocalMaxFrame( e->curstate.sequence );
+	float seqMaxFrame = m_boneSetup.LocalMaxFrame( e->curstate.sequence );
+	cycle = ( seqMaxFrame > 0.0f ) ? ( f / seqMaxFrame ) : 0.0f;
 	StudioInterpolateControllers( e, dadt_blend );
 
 	m_boneSetup.InitPose( pos, q );
@@ -3382,7 +3557,8 @@ void CStudioModelRenderer::StudioSetupBones( void )
 		f = StudioEstimateGaitFrame( pseqdesc );
 
 		// convert gaitframe to cycle
-		cycle = f / m_boneSetup.LocalMaxFrame( m_pPlayerInfo->gaitsequence );
+		float gaitMaxFrame = m_boneSetup.LocalMaxFrame( m_pPlayerInfo->gaitsequence );
+		cycle = ( gaitMaxFrame > 0.0f ) ? ( f / gaitMaxFrame ) : 0.0f;
 
 		m_boneSetup.SetBoneWeights( m_flGaitBoneWeights ); // install weightlist for gait sequence
 		m_boneSetup.AccumulatePose( pIK, pos, q, m_pPlayerInfo->gaitsequence, cycle, 1.0 );
@@ -3415,6 +3591,16 @@ void CStudioModelRenderer::StudioSetupBones( void )
 	}
 
 	StudioCalcBonesProcedural( pos, q );
+
+	// debug view: show every model in its reference (bind) pose
+	if( CVAR_TO_BOOL( m_pCvarBindPose ))
+	{
+		for( i = 0; i < m_pStudioHeader->numbones; i++ )
+		{
+			pos[i] = Vector( pbones[i].value[0], pbones[i].value[1], pbones[i].value[2] );
+			q[i] = Radian( pbones[i].value[3], pbones[i].value[4], pbones[i].value[5] );
+		}
+	}
 
 	for( i = 0; i < m_pStudioHeader->numbones; i++ )
 	{
@@ -3489,7 +3675,7 @@ void CStudioModelRenderer::StudioMergeBones( matrix3x4 bones[], matrix3x4 cached
 	matrix3x4		bonematrix;
 	static Vector	pos[MAXSTUDIOBONES];
 	static Vector4D	q[MAXSTUDIOBONES];
-	float		poseparams[MAXSTUDIOPOSEPARAM];
+	float		poseparams[MAXSTUDIOPOSEPARAM] = { 0.0f };
 	int		sequence = m_pCurrentEntity->curstate.sequence;
 	model_t *oldmodel = m_pRenderModel;
 	studiohdr_t *oldheader = m_pStudioHeader;
@@ -3508,7 +3694,8 @@ void CStudioModelRenderer::StudioMergeBones( matrix3x4 bones[], matrix3x4 cached
 
 	mstudioseqdesc_t *pseqdesc = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + sequence;
 	float f = StudioEstimateFrame( pseqdesc );
-	float cycle = f / m_boneSetup.LocalMaxFrame( sequence );
+	float maxFrame = m_boneSetup.LocalMaxFrame( sequence );
+	float cycle = ( maxFrame > 0.0f ) ? ( f / maxFrame ) : 0.0f;
 
 	m_boneSetup.InitPose( pos, q );
 	m_boneSetup.AccumulatePose( NULL, pos, q, sequence, cycle, 1.0 );
@@ -4555,6 +4742,513 @@ void CStudioModelRenderer::StudioDrawAttachments( void )
 
 /*
 ===============
+Ragdoll limit visualization (r_drawentities 8)
+
+Client-side mirror of the server ragdoll config: the same models/x.txt
+file is parsed here (part name, quoted bone name, optional swingY swingZ
+twist limits in degrees) and the resulting joint limits are drawn on the
+model as swing cones and twist arcs. Files are re-read every couple of
+seconds while the mode is active, so edits show up almost immediately -
+run ragdoll_reload on the server to apply them to newly spawned ragdolls.
+===============
+*/
+#define RAGDOLL_VIS_PARTS	10
+#define RAGDOLL_VIS_JOINTS	9
+#define RAGDOLL_VIS_CACHE	8
+#define RAGDOLL_VIS_TTL	2.0f
+
+static const char *g_ragdollVisPartNames[RAGDOLL_VIS_PARTS] =
+{
+	"head",
+	"torso",
+	"upper_arm_right",
+	"lower_arm_right",
+	"upper_arm_left",
+	"lower_arm_left",
+	"upper_leg_right",
+	"lower_leg_right",
+	"upper_leg_left",
+	"lower_leg_left",
+};
+
+struct RagdollVisJoint
+{
+	int	child;
+	int	parent;
+	float	yMin, yMax;	// default limits, degrees (must match the server table)
+	float	zMin, zMax;
+	float	tMin, tMax;
+};
+
+static const RagdollVisJoint g_ragdollVisJoints[RAGDOLL_VIS_JOINTS] =
+{
+{ 0, 1, -30.0f, 30.0f, -35.0f, 35.0f, -20.0f, 20.0f },
+{ 2, 1, -75.0f, 75.0f, -95.0f, 95.0f, -45.0f, 45.0f },
+{ 3, 2, -8.0f, 8.0f, -145.0f, 5.0f, -10.0f, 10.0f },
+{ 4, 1, -75.0f, 75.0f, -95.0f, 95.0f, -45.0f, 45.0f },
+{ 5, 4, -8.0f, 8.0f, -145.0f, 5.0f, -10.0f, 10.0f },
+{ 6, 1, -65.0f, 65.0f, -85.0f, 45.0f, -35.0f, 35.0f },
+{ 7, 6, -8.0f, 8.0f, -145.0f, 5.0f, -8.0f, 8.0f },
+{ 8, 1, -65.0f, 65.0f, -85.0f, 45.0f, -35.0f, 35.0f },
+{ 9, 8, -8.0f, 8.0f, -145.0f, 5.0f, -8.0f, 8.0f },
+};
+
+struct RagdollVisConfig
+{
+	char	modelname[64];
+	float	recheckTime;	// re-read the file after this moment
+	bool	valid;
+	char	boneNames[RAGDOLL_VIS_PARTS][32];
+	// mirror of the server config (see GetRagdollConfig), limits in degrees
+	float	limits[RAGDOLL_VIS_PARTS][6];
+	int	numLimits[RAGDOLL_VIS_PARTS];	// 0 or 6
+	float	swingAxisY[RAGDOLL_VIS_PARTS][3];	// world-space at the reference pose
+	float	swingAxisZ[RAGDOLL_VIS_PARTS][3];
+	bool	hasAxes[RAGDOLL_VIS_PARTS];
+};
+
+static RagdollVisConfig g_ragdollVisCache[RAGDOLL_VIS_CACHE];
+static int g_ragdollVisCursor = 0;
+
+// parse models/x.txt next to the model, same format the server reads
+static const RagdollVisConfig *RagdollVisGetConfig( const char *modelname )
+{
+	RagdollVisConfig *cfg = NULL;
+
+	for( int i = 0; i < RAGDOLL_VIS_CACHE; i++ )
+	{
+		if( !Q_stricmp( g_ragdollVisCache[i].modelname, modelname ))
+		{
+			cfg = &g_ragdollVisCache[i];
+			break;
+		}
+	}
+
+	if( cfg )
+	{
+		// short TTL instead of a one-shot cache: the file is meant to be edited while this view is up
+		if( tr.time < cfg->recheckTime && cfg->recheckTime <= tr.time + RAGDOLL_VIS_TTL + 0.5f )
+		{
+			return cfg;
+		}
+	}
+	else
+	{
+		cfg = &g_ragdollVisCache[g_ragdollVisCursor];
+		g_ragdollVisCursor = ( g_ragdollVisCursor + 1 ) % RAGDOLL_VIS_CACHE;
+	}
+
+	Q_strncpy( cfg->modelname, modelname, sizeof( cfg->modelname ));
+	cfg->recheckTime = tr.time + RAGDOLL_VIS_TTL;
+	cfg->valid = false;
+
+	for( int i = 0; i < RAGDOLL_VIS_PARTS; i++ )
+	{
+		cfg->boneNames[i][0] = '\0';
+		cfg->numLimits[i] = 0;
+		for( int k = 0; k < 6; k++ )
+		{
+			cfg->limits[i][k] = 0.0f;
+		}
+		cfg->hasAxes[i] = false;
+		for( int k = 0; k < 3; k++ )
+		{
+			cfg->swingAxisY[i][k] = 0.0f;
+			cfg->swingAxisZ[i][k] = 0.0f;
+		}
+	}
+
+	char path[128];
+	Q_strncpy( path, modelname, sizeof( path ));
+	COM_StripExtension( path );
+	Q_strncat( path, ".txt", sizeof( path ));
+
+	char *pfile = (char *)gEngfuncs.COM_LoadFile( path, 5, NULL );
+	if( !pfile ) { return cfg; }
+
+	char token[256];
+	char *pdata = pfile;
+
+	while(( pdata = COM_ParseFile( pdata, token )) != NULL )
+	{
+		int part = -1;
+
+		for( int i = 0; i < RAGDOLL_VIS_PARTS; i++ )
+		{
+			if( !Q_stricmp( token, g_ragdollVisPartNames[i] ))
+			{
+				part = i;
+				break;
+			}
+		}
+
+		if( part == -1 )
+		{
+			continue;
+		}
+
+		if(( pdata = COM_ParseFile( pdata, token )) == NULL )
+		{
+			break;
+		}
+
+		Q_strncpy( cfg->boneNames[part], token, sizeof( cfg->boneNames[part] ));
+
+		// same two forms as the server: bone name alone, or all 13 numbers
+		float nums[16];
+		int numCount = 0;
+		for( ; numCount < 16; numCount++ )
+		{
+			char *ppeek = COM_ParseFile( pdata, token );
+
+			if( !ppeek || ( !isdigit( token[0] ) && token[0] != '-' && token[0] != '+' && token[0] != '.' ))
+			{
+				break;
+			}
+
+			nums[numCount] = Q_atof( token );
+			pdata = ppeek;
+		}
+
+		if( numCount == 13 )
+		{
+			cfg->swingAxisY[part][0] = nums[0];
+			cfg->swingAxisY[part][1] = nums[1];
+			cfg->swingAxisY[part][2] = nums[2];
+			cfg->swingAxisZ[part][0] = nums[3];
+			cfg->swingAxisZ[part][1] = nums[4];
+			cfg->swingAxisZ[part][2] = nums[5];
+			cfg->hasAxes[part] = true;
+
+			for( int k = 0; k < 6; k++ )
+			{
+				cfg->limits[part][k] = nums[6 + k];
+			}
+			cfg->numLimits[part] = 6;
+		}
+	}
+
+	gEngfuncs.COM_FreeFile( pfile );
+
+	cfg->valid = true;
+	for( int i = 0; i < RAGDOLL_VIS_PARTS; i++ )
+	{
+		if( !cfg->boneNames[i][0] )
+		{
+			cfg->valid = false;
+		}
+	}
+
+	return cfg;
+}
+
+// the bone marking the far end of a part's limb segment, must match the server logic
+static int RagdollVisLimbTipBone( studiohdr_t *phdr, mstudiobone_t *pbones, const int bones[], int part, const matrix3x4 refWorld[] )
+{
+	static const int nextPart[RAGDOLL_VIS_PARTS] = { -1, -1, 3, -1, 5, -1, 7, -1, 9, -1 };
+
+	if( nextPart[part] != -1 )
+	{
+		return bones[nextPart[part]];
+	}
+
+	Vector axis = refWorld[bones[part]].GetForward();
+	Vector org = refWorld[bones[part]].GetOrigin();
+	float bestDot = 0.25f;
+	int best = -1;
+
+	for( int j = 0; j < phdr->numbones; j++ )
+	{
+		if( pbones[j].parent != bones[part] )
+		{
+			continue;
+		}
+
+		Vector dir = refWorld[j].GetOrigin() - org;
+
+		if( dir.Length() < 0.1f )
+		{
+			continue;
+		}
+
+		float dot = DotProduct( dir.Normalize(), axis );
+
+		if( dot > bestDot )
+		{
+			best = j;
+			bestDot = dot;
+		}
+	}
+
+	return best;
+}
+
+// the joint X (twist/rest) axis swung by ay around Y and az around Z, in joint-local space
+static Vector RagdollVisSwingDir( float ay, float az )
+{
+	float t = sqrtf( ay * ay + az * az );
+
+	if( t < 0.0001f )
+	{
+		return Vector( 1.0f, 0.0f, 0.0f );
+	}
+
+	// Rodrigues rotation of the X axis about the in-plane axis (0, ay, az)/t
+	return Vector( cosf( t ), sinf( t ) * az / t, -sinf( t ) * ay / t );
+}
+
+void CStudioModelRenderer::StudioDrawRagdollLimits( void )
+{
+	const RagdollVisConfig *cfg = RagdollVisGetConfig( m_pRenderModel->name );
+
+	if( !cfg->valid )
+	{
+		return;
+	}
+
+	mstudiobone_t *pbones = (mstudiobone_t *)((byte *)m_pStudioHeader + m_pStudioHeader->boneindex);
+
+	// resolve config bone names against this model
+	int bones[RAGDOLL_VIS_PARTS];
+
+	for( int i = 0; i < RAGDOLL_VIS_PARTS; i++ )
+	{
+		bones[i] = -1;
+
+		for( int j = 0; j < m_pStudioHeader->numbones; j++ )
+		{
+			if( !Q_stricmp( cfg->boneNames[i], pbones[j].name ))
+			{
+				bones[i] = j;
+				break;
+			}
+		}
+
+		if( bones[i] == -1 )
+		{
+			return; // config does not fit this model
+		}
+	}
+
+	// reference pose: the skeleton's bind pose, the zero orientation the joint rest frames derive from
+	static matrix3x4 refWorld[MAXSTUDIOBONES];
+
+	for( int i = 0; i < m_pStudioHeader->numbones; i++ )
+	{
+		Vector pos;
+		Radian angle;
+		Vector4D q;
+
+		for( int j = 0; j < 3; j++ )
+		{
+			pos[j] = pbones[i].value[j];
+			angle[j] = pbones[i].value[j+3];
+		}
+
+		AngleQuaternion( angle, q );
+		matrix3x4 local = matrix3x4( pos, q );
+
+		if( pbones[i].parent == -1 )
+		{
+			refWorld[i] = local;
+		}
+		else { refWorld[i] = refWorld[pbones[i].parent].ConcatTransforms( local ); }
+	}
+
+	R_TransformForEntity( m_pModelInstance->m_protationmatrix );
+	GL_Texture2D( GL_FALSE );
+	GL_DepthTest( GL_FALSE );
+
+	for( int n = 0; n < RAGDOLL_VIS_JOINTS; n++ )
+	{
+		const RagdollVisJoint &joint = g_ragdollVisJoints[n];
+		int bp = bones[joint.parent];
+		int bc = bones[joint.child];
+
+		// limit ranges, degrees: config values override the table defaults (same rules as the server)
+		const float *cfgLim = cfg->limits[joint.child];
+		int numLim = cfg->numLimits[joint.child];
+
+		float yMin = joint.yMin, yMax = joint.yMax;
+		float zMin = joint.zMin, zMax = joint.zMax;
+		float tMin = joint.tMin, tMax = joint.tMax;
+
+		if( numLim >= 4 )
+		{
+			yMin = cfgLim[0]; yMax = cfgLim[1];
+			zMin = cfgLim[2]; zMax = cfgLim[3];
+			tMin = cfgLim[4]; tMax = cfgLim[5];
+		}
+		else
+		{
+			if( cfgLim[0] > 0.0f ) { yMax = cfgLim[0]; yMin = -yMax; }
+			if( cfgLim[1] > 0.0f ) { zMax = cfgLim[1]; zMin = -zMax; }
+			if( cfgLim[2] > 0.0f ) { tMax = cfgLim[2]; tMin = -tMax; }
+		}
+
+		yMin = DEG2RAD( yMin ); yMax = DEG2RAD( yMax );
+		zMin = DEG2RAD( zMin ); zMax = DEG2RAD( zMax );
+		tMin = DEG2RAD( tMin ); tMax = DEG2RAD( tMax );
+
+		// joint frame in the reference pose, must match the server: X is the twist/rest axis, Y swing1 (swingY), Z swing2 (swingZ)
+		matrix3x4 jointRef = refWorld[bc];
+		int tip = RagdollVisLimbTipBone( m_pStudioHeader, pbones, bones, joint.child, refWorld );
+		float len = Q_max( 4.0f, ( refWorld[bc].GetOrigin() - refWorld[bp].GetOrigin( )).Length() * 0.5f );
+		if( tip != -1 )
+		{
+			len = Q_max( 4.0f, ( refWorld[tip].GetOrigin() - refWorld[bc].GetOrigin( )).Length() * 0.75f );
+		}
+
+		if( cfg->hasAxes[joint.child] )
+		{
+			// config axes, world space at the reference pose (matches the server)
+			Vector axisY( cfg->swingAxisY[joint.child][0], cfg->swingAxisY[joint.child][1], cfg->swingAxisY[joint.child][2] );
+			Vector axisZ( cfg->swingAxisZ[joint.child][0], cfg->swingAxisZ[joint.child][1], cfg->swingAxisZ[joint.child][2] );
+
+			if( axisY.Length() > 0.001f && axisZ.Length() > 0.001f )
+			{
+				axisY = axisY.Normalize();
+				Vector axisX = CrossProduct( axisY, axisZ );
+
+				if( axisX.Length() > 0.001f )
+				{
+					axisX = axisX.Normalize();
+					axisZ = CrossProduct( axisX, axisY );
+
+					jointRef.SetForward( axisX );
+					jointRef.SetRight( axisY );
+					jointRef.SetUp( axisZ );
+				}
+			}
+		}
+		else if( tip != -1 )
+		{
+			Vector axisX = refWorld[tip].GetOrigin() - refWorld[bc].GetOrigin();
+
+			if( axisX.Length() > 0.1f )
+			{
+				axisX = axisX.Normalize();
+
+				Vector axisY = refWorld[bc].GetRight();
+				axisY = axisY - axisX * DotProduct( axisY, axisX );
+
+				if( axisY.Length() < 0.001f )
+				{
+					axisY = refWorld[bc].GetUp() - axisX * DotProduct( refWorld[bc].GetUp(), axisX );
+				}
+
+				axisY = axisY.Normalize();
+
+				jointRef.SetForward( axisX );
+				jointRef.SetRight( axisY );
+				jointRef.SetUp( CrossProduct( axisX, axisY ));
+			}
+		}
+
+		// carried by the current parent bone (cone) and child bone (red line)
+		matrix3x4 parentLocal = refWorld[bp].Invert().ConcatTransforms( jointRef );
+		matrix3x4 childLocal = refWorld[bc].Invert().ConcatTransforms( jointRef );
+		matrix3x4 frame = m_pModelInstance->m_pbones[bp].ConcatTransforms( parentLocal );
+		matrix3x4 curFrame = m_pModelInstance->m_pbones[bc].ConcatTransforms( childLocal );
+
+		Vector anchor = frame.GetOrigin();
+
+		// boundary of the swing range: the pyramid limit is a rectangle in angle space (Y rotation x Z rotation), walk its perimeter
+		float bay[32], baz[32];
+
+		for( int s = 0; s < 32; s++ )
+		{
+			float e = (float)( s % 8 ) / 8.0f;
+
+			switch( s / 8 )
+			{
+			case 0: bay[s] = yMin + ( yMax - yMin ) * e; baz[s] = zMin; break;
+			case 1: bay[s] = yMax; baz[s] = zMin + ( zMax - zMin ) * e; break;
+			case 2: bay[s] = yMax - ( yMax - yMin ) * e; baz[s] = zMax; break;
+			default: bay[s] = yMin; baz[s] = zMax - ( zMax - zMin ) * e; break;
+			}
+		}
+
+		// swing limit: ring at the boundary plus spokes from the anchor
+		pglColor3f( 1.0f, 0.9f, 0.0f );
+		pglBegin( GL_LINE_LOOP );
+		for( int s = 0; s < 32; s++ )
+		{
+			pglVertex3fv( anchor + frame.VectorRotate( RagdollVisSwingDir( bay[s], baz[s] )) * len );
+		}
+		pglEnd();
+
+		pglColor3f( 0.6f, 0.5f, 0.0f );
+		pglBegin( GL_LINES );
+		for( int s = 0; s < 32; s += 4 )
+		{
+			pglVertex3fv( anchor );
+			pglVertex3fv( anchor + frame.VectorRotate( RagdollVisSwingDir( bay[s], baz[s] )) * len );
+		}
+		pglEnd();
+
+		// rest axis (green) and the limb's current direction (red, magenta when outside the configured limits)
+		Vector curOrigin = curFrame.GetOrigin();
+		Vector curDir = curFrame.GetForward();
+		bool outside = false;
+
+		Vector local = frame.VectorIRotate( curDir );
+		float swing = acosf( bound( -1.0f, local.x, 1.0f ));
+
+		if( swing > 0.001f )
+		{
+			float w = swing / sinf( swing );
+			float cay = -local.z * w;
+			float caz = local.y * w;
+			outside = ( cay < yMin || cay > yMax || caz < zMin || caz > zMax );
+		}
+
+		if( !outside )
+		{
+			// twist: the child frame's roll around the rest axis
+			matrix3x4 relCur = frame.Invert().ConcatTransforms( curFrame );
+			Vector4D q = relCur.GetQuaternion();
+			float phi = 2.0f * atan2f( q.x, q.w );
+
+			if( phi > M_PI ) { phi -= M_PI * 2.0f; }
+			if( phi < -M_PI ) { phi += M_PI * 2.0f; }
+
+			outside = ( phi < tMin || phi > tMax );
+		}
+
+		pglBegin( GL_LINES );
+		pglColor3f( 0.0f, 1.0f, 0.0f );
+		pglVertex3fv( anchor );
+		pglVertex3fv( anchor + frame.GetForward() * ( len * 1.2f ));
+		if( outside ) { pglColor3f( 1.0f, 0.0f, 1.0f ); }
+		else { pglColor3f( 1.0f, 0.0f, 0.0f ); }
+		pglVertex3fv( curOrigin );
+		pglVertex3fv( curOrigin + curDir * ( len * 1.2f ));
+		pglEnd();
+
+		// twist range: an arc around the rest axis, halfway along it, with a tick marking the rest (zero) angle
+		pglColor3f( 0.2f, 0.6f, 1.0f );
+		pglBegin( GL_LINE_STRIP );
+		for( int s = 0; s <= 16; s++ )
+		{
+			float phi = tMin + ( tMax - tMin ) * (float)s / 16.0f;
+			Vector dir = Vector( 0.5f, cosf( phi ) * 0.4f, sinf( phi ) * 0.4f );
+			pglVertex3fv( anchor + frame.VectorRotate( dir ) * len );
+		}
+		pglEnd();
+
+		pglBegin( GL_LINES );
+		pglVertex3fv( anchor + frame.VectorRotate( Vector( 0.5f, 0.35f, 0.0f )) * len );
+		pglVertex3fv( anchor + frame.VectorRotate( Vector( 0.5f, 0.45f, 0.0f )) * len );
+		pglEnd();
+	}
+
+	GL_Texture2D( GL_TRUE );
+	GL_DepthTest( GL_TRUE );
+}
+
+/*
+===============
 StudioSetupRenderer
 
 ===============
@@ -4629,6 +5323,11 @@ void CStudioModelRenderer::StudioRenderModel( void )
 			DrawStudioMeshes();
 			GL_BindShader( NULL );
 			DBG_DrawBBox( m_pCurrentEntity->curstate.mins, m_pCurrentEntity->curstate.maxs );
+			break;
+		case 8:
+			DrawStudioMeshes();
+			GL_BindShader( NULL );
+			StudioDrawRagdollLimits();
 			break;
 	}
 }
