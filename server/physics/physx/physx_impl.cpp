@@ -2309,8 +2309,8 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 				continue;
 			}
 
-			// place the box relative to the part body just like the hitbox sits relative to its bone in the reference pose
-			matrix4x4 rel = refWorld[bones[i]].Invert().ConcatTransforms( refWorld[b] );
+			// place the box relative to the part body just like the hitbox bone sits at the death pose
+			matrix4x4 rel = boneWorld[bones[i]].Invert().ConcatTransforms( boneWorld[b] );
 			PxTransform boneLocal = RagdollPxTransform( rel );
 			pBoxShape->setLocalPose( boneLocal.transform( PxTransform( PxVec3( center.x, center.y, center.z ))));
 			pBoxShape->setSimulationFilterData( filterData );
@@ -2568,6 +2568,8 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 
 		matrix4x4 parentLocal = parentPose.Invert().ConcatTransforms( jointFrame );
 		matrix4x4 childLocal = childPose.Invert().ConcatTransforms( jointFrame );
+
+		parentLocal.SetOrigin( boneWorld[bones[desc.parent]].VectorITransform( boneWorld[bones[desc.child]].GetOrigin( )));
 
 		PxD6Joint *pJoint = PxD6JointCreate( *m_pPhysics,
 			rag.bodies[desc.parent], RagdollPxTransform( parentLocal ),
