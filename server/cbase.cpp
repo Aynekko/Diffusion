@@ -1715,7 +1715,7 @@ BOOL CBaseEntity :: ShouldToggle( USE_TYPE useType )
 int CBaseEntity :: DamageDecal( int bitsDamageType )
 {
 	if ( pev->rendermode == kRenderTransAlpha )
-		return -1;
+		return DECAL_GUNSHOT1;
 
 	if ( pev->rendermode != kRenderNormal )
 		return DECAL_BPROOF1;
