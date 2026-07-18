@@ -27,6 +27,14 @@ char dmg[8];
 #define CROSSHAIR_SCALE 0.25f
 
 //============================================================================================================
+// GetCrosshairScale: returns a crosshair scale based on user scale value and rendering resolution
+//============================================================================================================
+float CHudCrosshairStatic::GetCrosshairScale( void )
+{
+	return bound( 0.1f, CROSSHAIR_SCALE * cl_crosshair_scale->value, 5.0f ) * gHUD.fScale;
+}
+
+//============================================================================================================
 // DrawReloadingCircle: this function draws a circle progress bar during reloading. (except shotguns)
 // fReloadingLength is received from server, radius of the circle is set using hitmarker sprite
 //============================================================================================================
@@ -125,33 +133,35 @@ int CHudCrosshairStatic::Init( void )
 
 void CHudCrosshairStatic::VidInitCrosshairs( void )
 {
+	const float fCrosshairScale = GetCrosshairScale();
+
 	// load default crosshairs and hitmarkers
 	crosshair_default[0].texture = LOAD_TEXTURE( "textures/!crosshair/crossy.dds", NULL, 0, 0 );
 	if( crosshair_default[0].texture )
 	{
-		crosshair_default[0].w = RENDER_GET_PARM( PARM_TEX_WIDTH, crosshair_default[0].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
-		crosshair_default[0].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, crosshair_default[0].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
+		crosshair_default[0].w = RENDER_GET_PARM( PARM_TEX_WIDTH, crosshair_default[0].texture ) * fCrosshairScale;
+		crosshair_default[0].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, crosshair_default[0].texture ) * fCrosshairScale;
 	}
 
 	crosshair_default[1].texture = LOAD_TEXTURE( "textures/!crosshair/crossy_simple.dds", NULL, 0, 0 );
 	if( crosshair_default[1].texture )
 	{
-		crosshair_default[1].w = RENDER_GET_PARM( PARM_TEX_WIDTH, crosshair_default[0].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
-		crosshair_default[1].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, crosshair_default[0].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
+		crosshair_default[1].w = RENDER_GET_PARM( PARM_TEX_WIDTH, crosshair_default[0].texture ) * fCrosshairScale;
+		crosshair_default[1].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, crosshair_default[0].texture ) * fCrosshairScale;
 	}
 
 	hitmarker[0].texture = LOAD_TEXTURE( "textures/!crosshair/hitmarker.dds", NULL, 0, 0 );
 	if( hitmarker[0].texture )
 	{
-		hitmarker[0].w = RENDER_GET_PARM( PARM_TEX_WIDTH, hitmarker[0].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
-		hitmarker[0].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, hitmarker[0].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
+		hitmarker[0].w = RENDER_GET_PARM( PARM_TEX_WIDTH, hitmarker[0].texture ) * fCrosshairScale;
+		hitmarker[0].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, hitmarker[0].texture ) * fCrosshairScale;
 	}
 
 	hitmarker[1].texture = LOAD_TEXTURE( "textures/!crosshair/hitmarker_simple.dds", NULL, 0, 0 );
 	if( hitmarker[1].texture )
 	{
-		hitmarker[1].w = RENDER_GET_PARM( PARM_TEX_WIDTH, hitmarker[1].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
-		hitmarker[1].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, hitmarker[1].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
+		hitmarker[1].w = RENDER_GET_PARM( PARM_TEX_WIDTH, hitmarker[1].texture ) * fCrosshairScale;
+		hitmarker[1].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, hitmarker[1].texture ) * fCrosshairScale;
 	}
 
 	// load special crosshairs for weapons, if any
@@ -186,8 +196,8 @@ void CHudCrosshairStatic::VidInitCrosshairs( void )
 
 		if( crosshair[i][0].texture )
 		{
-			crosshair[i][0].w = RENDER_GET_PARM( PARM_TEX_WIDTH, crosshair[i][0].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
-			crosshair[i][0].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, crosshair[i][0].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
+			crosshair[i][0].w = RENDER_GET_PARM( PARM_TEX_WIDTH, crosshair[i][0].texture ) * fCrosshairScale;
+			crosshair[i][0].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, crosshair[i][0].texture ) * fCrosshairScale;
 		}
 	}
 
@@ -213,8 +223,8 @@ void CHudCrosshairStatic::VidInitCrosshairs( void )
 
 		if( crosshair[i][1].texture )
 		{
-			crosshair[i][1].w = RENDER_GET_PARM( PARM_TEX_WIDTH, crosshair[i][1].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
-			crosshair[i][1].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, crosshair[i][1].texture ) * CROSSHAIR_SCALE * gHUD.fScale;
+			crosshair[i][1].w = RENDER_GET_PARM( PARM_TEX_WIDTH, crosshair[i][1].texture ) * fCrosshairScale;
+			crosshair[i][1].h = RENDER_GET_PARM( PARM_TEX_HEIGHT, crosshair[i][1].texture ) * fCrosshairScale;
 		}
 	}
 }

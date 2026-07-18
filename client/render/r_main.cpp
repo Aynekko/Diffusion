@@ -569,6 +569,12 @@ void R_CheckChanges( void )
 		ClearBits( gl_renderscale->flags, FCVAR_CHANGED );
 	}
 
+	if( FBitSet( cl_crosshair_scale->flags, FCVAR_CHANGED ) )
+	{
+		gHUD.m_CrosshairStatic.VidInitCrosshairs();
+		ClearBits( cl_crosshair_scale->flags, FCVAR_CHANGED );
+	}
+
 	if( tr.fogEnabled != fog_enabled_old )
 	{
 		fog_enabled_old = tr.fogEnabled;

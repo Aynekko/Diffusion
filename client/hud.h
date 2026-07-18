@@ -711,6 +711,7 @@ public:
 	float fReloadingTime; // time in the future for the reloading circle
 	float fReloadingLength;
 	void DrawReloadingCircle( const float radius );
+	float GetCrosshairScale( void );
 private:
 	WEAPON	*m_pWeapon;
 
