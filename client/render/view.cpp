@@ -168,6 +168,7 @@ cvar_t *r_show_tbn;
 cvar_t *r_flashlightlockposition;
 cvar_t *cl_crosshair;
 cvar_t *cl_crosshair_reloading;
+cvar_t *cl_crosshair_scale;
 cvar_t *cl_useicon;
 cvar_t *cl_oldammohud;
 cvar_t *room_type;
@@ -342,6 +343,7 @@ void V_Init( void )
 	r_show_tbn = CVAR_REGISTER( "r_show_tbn", "0", 0 );
 	cl_crosshair = CVAR_REGISTER( "cl_crosshair", "1", FCVAR_ARCHIVE );
 	cl_crosshair_reloading = CVAR_REGISTER( "cl_crosshair_reloading", "1", FCVAR_ARCHIVE );
+	cl_crosshair_scale = CVAR_REGISTER( "cl_crosshair_scale", "1.0", FCVAR_ARCHIVE );
 	cl_useicon = CVAR_REGISTER( "cl_useicon", "1", FCVAR_ARCHIVE );
 	cl_oldammohud = CVAR_REGISTER( "cl_oldammohud", "0", FCVAR_ARCHIVE ); // Camblu request
 	cl_largehud = CVAR_REGISTER( "cl_largehud", "2", FCVAR_ARCHIVE );
