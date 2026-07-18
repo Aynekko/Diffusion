@@ -5388,6 +5388,7 @@ void CBasePlayer::Spawn( void )
 	if( g_pGameRules->IsMultiplayer() )
 	{
 		BlastAbilityLVL = mp_blastlevel.value;
+		NextRechargeTime = gpGlobals->time + 30;
 		ShieldAvailableLVL = 3;
 		bShowZoomHint = true;
 	}
