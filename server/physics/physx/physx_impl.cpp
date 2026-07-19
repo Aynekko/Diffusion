@@ -2002,6 +2002,12 @@ void *CPhysicPhysX::CreateRagdollEntity( CBaseEntity *pObject )
 		return NULL;
 	}
 
+	// no config, no ragdoll: a NULL return lets callers fall back cleanly
+	if( !GetRagdollConfig( STRING( pObject->pev->model )))
+	{
+		return NULL;
+	}
+
 	// guard against double-queueing the same entity
 	int entindex = pObject->entindex();
 	if( FindRagdoll( entindex ) != -1 )
@@ -2050,7 +2056,7 @@ void *CPhysicPhysX::CreateRagdollEntity( CBaseEntity *pObject )
 
 	m_numPendingRagdolls++;
 
-	return NULL;
+	return (void *)1;	// queued, the bodies are built next frame
 }
 
 /*
@@ -2309,7 +2315,7 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 				continue;
 			}
 
-			// place the box relative to the part body just like the hitbox bone sits at the death pose
+			// place the box relative to the part body
 			matrix4x4 rel = boneWorld[bones[i]].Invert().ConcatTransforms( boneWorld[b] );
 			PxTransform boneLocal = RagdollPxTransform( rel );
 			pBoxShape->setLocalPose( boneLocal.transform( PxTransform( PxVec3( center.x, center.y, center.z ))));
@@ -2569,6 +2575,7 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 		matrix4x4 parentLocal = parentPose.Invert().ConcatTransforms( jointFrame );
 		matrix4x4 childLocal = childPose.Invert().ConcatTransforms( jointFrame );
 
+		// sets the rest orientation stays reference-pose
 		parentLocal.SetOrigin( boneWorld[bones[desc.parent]].VectorITransform( boneWorld[bones[desc.child]].GetOrigin( )));
 
 		PxD6Joint *pJoint = PxD6JointCreate( *m_pPhysics,

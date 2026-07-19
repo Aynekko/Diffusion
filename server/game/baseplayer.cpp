@@ -1149,6 +1149,94 @@ entvars_t *g_pevLastInflictor;  // Set in combat.cpp.  Used to pass the damage i
 //======================================================================================
 // Killed: perform certain actions when player dies
 //======================================================================================
+/*
+===========
+SpawnRagdollCorpse
+
+create corpse entity that copies the model and pose at the moment of death
+============
+*/
+bool CBasePlayer::SpawnRagdollCorpse( void )
+{
+	if( CVAR_GET_FLOAT( "mp_hidecorpses" ) > 0 )
+		return false;
+
+	if( UTIL_GetModelType( pev->modelindex ) != mod_studio )
+		return false;
+
+	// the corpse wears the model the player selected in multiplayer
+	string_t iszModel = pev->model;
+	const char *pszSelected = g_engfuncs.pfnInfoKeyValue( g_engfuncs.pfnGetInfoKeyBuffer( edict( )), "model" );
+
+	if( pszSelected && pszSelected[0] )
+	{
+		// selected models live under models/player/<name>/
+		static const char *dirs[] = { "models/player", "models/players" };
+
+		for( int i = 0; i < 2; i++ )
+		{
+			char szCustom[64], szConfig[64];
+			Q_snprintf( szCustom, sizeof( szCustom ), "%s/%s/%s.mdl", dirs[i], pszSelected, pszSelected );
+			Q_snprintf( szConfig, sizeof( szConfig ), "%s/%s/%s.txt", dirs[i], pszSelected, pszSelected );
+
+			int iLength = 0;
+			byte *pTest = LOAD_FILE( szConfig, &iLength );
+
+			if( !pTest )
+				continue;
+
+			FREE_FILE( pTest );
+			pTest = LOAD_FILE( szCustom, &iLength );
+
+			if( !pTest )
+				continue;
+
+			FREE_FILE( pTest );
+			iszModel = ALLOC_STRING( szCustom );
+
+			// Xash allows this after map load, it just warns
+			PRECACHE_MODEL( (char *)STRING( iszModel ));
+			break;
+		}
+	}
+
+	CBaseEntity *pCorpse = CBaseEntity::Create( "ragdoll_corpse", GetAbsOrigin(), GetAbsAngles(), NULL );
+	if( !pCorpse )
+		return false;
+
+	// a real SET_MODEL links the edict so it actually networks to clients
+	SET_MODEL( ENT( pCorpse->pev ), STRING( iszModel ));
+	UTIL_SetOrigin( pCorpse, GetAbsOrigin( ));
+	UTIL_SetSize( pCorpse->pev, VEC_HULL_MIN, VEC_HULL_MAX );
+
+	// carry the visual state over so the ragdoll spawns from the same pose
+	pCorpse->pev->sequence = pev->sequence;
+	pCorpse->pev->frame = pev->frame;
+	pCorpse->pev->animtime = pev->animtime;
+	pCorpse->pev->framerate = pev->framerate;
+	pCorpse->pev->skin = pev->skin;
+	pCorpse->pev->body = pev->body;
+	pCorpse->pev->colormap = pev->colormap;
+	pCorpse->pev->effects = EF_NOINTERP;
+
+	for( int i = 0; i < 4; i++ )
+	{
+		pCorpse->pev->controller[i] = pev->controller[i];
+		pCorpse->pev->blending[i] = pev->blending[i];
+	}
+
+	pCorpse->SetAbsVelocity( GetAbsVelocity( ));
+
+	// fall back to the animated death and the classic body queue
+	if( !WorldPhysic->CreateRagdollEntity( pCorpse ))
+	{
+		UTIL_Remove( pCorpse );
+		return false;
+	}
+
+	return true;
+}
+
 void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 {
 	CSound *pSound;
@@ -1255,10 +1343,17 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 
 	DeathSound();
 
-	Vector vecAngles = GetAbsAngles();	
+	Vector vecAngles = GetAbsAngles();
 	vecAngles.x = 0;
 	vecAngles.z = 0;
 	SetAbsAngles( vecAngles );
+
+	// hand the death over to a ragdoll corpse
+	if( CVAR_GET_FLOAT( "phys_ragdoll_player" ) != 0.0f && WorldPhysic->Initialized( ))
+	{
+		if( SpawnRagdollCorpse( ))
+			pev->effects |= EF_NODRAW;
+	}
 
 	SetThink(&CBasePlayer::PlayerDeathThink);
 	SetNextThink( 0.1 );
