@@ -1,3 +1,4 @@
+
 rpg_rocket		3.0
 grenade			3.0
 monster_satchel		3.0

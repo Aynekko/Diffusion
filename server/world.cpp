@@ -354,10 +354,28 @@ class CCorpse : public CBaseEntity
 {
 	DECLARE_CLASS( CCorpse, CBaseEntity );
 public:
-	virtual int ObjectCaps( void ) { return FCAP_DONT_SAVE; }	
+	virtual int ObjectCaps( void ) { return FCAP_DONT_SAVE; }
 };
 
 LINK_ENTITY_TO_CLASS( bodyque, CCorpse );
+
+// a throwaway corpse
+class CRagdollCorpse : public CBaseAnimating
+{
+	DECLARE_CLASS( CRagdollCorpse, CBaseAnimating );
+public:
+	void Spawn( void )
+	{
+		pev->takedamage = DAMAGE_NO;
+		pev->solid = SOLID_NOT;
+		pev->movetype = MOVETYPE_NONE;
+		pev->deadflag = DEAD_DEAD;
+	}
+
+	virtual int ObjectCaps( void ) { return FCAP_DONT_SAVE; }
+};
+
+LINK_ENTITY_TO_CLASS( ragdoll_corpse, CRagdollCorpse );
 
 static void InitBodyQue(void)
 {

@@ -276,6 +276,7 @@ public:
 	virtual int TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType);
 	virtual void	Killed( entvars_t *pevAttacker, int iGib );
 	void GibMonster( void );
+	bool SpawnRagdollCorpse( void );
 	virtual Vector BodyTarget( const Vector &posSrc ) { return Center( ) + pev->view_ofs * RANDOM_FLOAT( 0.5, 1.1 ); };		// position to shoot at
 	virtual void StartSneaking( void ) { m_tSneaking = gpGlobals->time - 1; }
 	virtual void StopSneaking( void ) { m_tSneaking = gpGlobals->time + 30; }
