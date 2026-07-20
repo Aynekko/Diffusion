@@ -665,6 +665,13 @@ public:
 	EHANDLE m_hKiller;
 	float fLerpToKiller;
 
+	EHANDLE m_hRagdollCorpse;
+
+	int m_iRagdollSequence;
+	float m_flRagdollFrame;
+	byte m_ragdollController[4];
+	byte m_ragdollBlending[4];
+
 	bool bShowZoomHint;
 	bool bShowPuzzleTutorial;
 

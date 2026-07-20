@@ -1291,6 +1291,9 @@ void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )
 		}
 	}
 
+	// players choose their model after the map loads
+	WorldPhysic->PrecachePlayerRagdolls();
+
 	// Clients have not been initialized yet
 	for ( i = 0; i < edictCount; i++ )
 	{
@@ -2043,7 +2046,19 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 {
 	// don't send if flagged for NODRAW and it's not the host getting the message
 	if ( ( ent->v.effects & EF_NODRAW ) && ( ent != host ) )
-		return 0;
+	{
+		bool followRagdoll = false;
+
+		if( player )
+		{
+			CBasePlayer *pDead = (CBasePlayer *)GET_PRIVATE( ent );
+			if( pDead && pDead->m_hRagdollCorpse != NULL && !( pDead->m_afPhysicsFlags & PFLAG_OBSERVER ))
+				followRagdoll = true;
+		}
+
+		if( !followRagdoll )
+			return 0;
+	}
 
 	// Ignore ents without valid / visible models
 	if ( !ent->v.modelindex || !STRING( ent->v.model ) )

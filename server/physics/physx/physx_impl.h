@@ -146,6 +146,7 @@ public:
 	void	*CreateBoxFromEntity( CBaseEntity *pObject );
 	void	*CreateRagdollEntity( CBaseEntity *pObject );
 	void	PrecacheRagdoll( const char *szModelName );
+	void	PrecachePlayerRagdolls( void );
 	void	ReloadRagdollConfigs( void );
 	const char *GetRagdollImpactSound( const char *szModelName, float flForce, float *flVolume );
 	void	SendRagdollPose( CBaseEntity *pPlayer, int entindex );

@@ -1168,7 +1168,7 @@ void CBaseEntity::PhysicsImpact( CBaseEntity *pOther, const Vector &position, co
 		return;
 
 	m_flNextImpactSound = gpGlobals->time + 0.1f;
-	EMIT_SOUND_DYN( edict(), CHAN_BODY, sample, fvol, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ));
+	EMIT_SOUND_DYN( edict(), CHAN_STATIC, sample, fvol, ATTN_NORM, 0, RANDOM_LONG( 95, 105 ));
 }
 
 /*
