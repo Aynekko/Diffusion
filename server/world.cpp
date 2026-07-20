@@ -62,6 +62,7 @@ public:
 	virtual void *CreateBoxFromEntity( CBaseEntity *pObject ) { return NULL; }
 	virtual void *CreateRagdollEntity( CBaseEntity *pObject ) { return NULL; }
 	virtual void	PrecacheRagdoll( const char *szModelName ) {}
+	virtual void	PrecachePlayerRagdolls( void ) {}
 	virtual void	ReloadRagdollConfigs( void ) {}
 	virtual const char *GetRagdollImpactSound( const char *szModelName, float flForce, float *flVolume ) { return NULL; }
 	virtual void	SendRagdollPose( CBaseEntity *pPlayer, int entindex ) {}
@@ -370,9 +371,42 @@ public:
 		pev->solid = SOLID_NOT;
 		pev->movetype = MOVETYPE_NONE;
 		pev->deadflag = DEAD_DEAD;
+		m_hasHit = false;
 	}
 
 	virtual int ObjectCaps( void ) { return FCAP_DONT_SAVE; }
+
+	void SetRagdollHit( const Vector &pos, const Vector &dir, float damage, int group, float impulseMult )
+	{
+		m_hitPos = pos;
+		m_hitDir = dir;
+		m_hitDamage = damage;
+		m_hitGroup = group;
+		m_impulseMult = impulseMult;
+		m_hasHit = true;
+	}
+
+	bool GetLastHitInfo( Vector &pos, Vector &dir, float &damage, int &group )
+	{
+		if( !m_hasHit )
+			return false;
+
+		pos = m_hitPos;
+		dir = m_hitDir;
+		damage = m_hitDamage;
+		group = m_hitGroup;
+		return true;
+	}
+
+	float GetRagdollImpulseMultiplier( float hitDamage ) { return m_hasHit ? m_impulseMult : 1.0f; }
+
+private:
+	Vector m_hitPos;
+	Vector m_hitDir;
+	float m_hitDamage;
+	int m_hitGroup;
+	float m_impulseMult;
+	bool m_hasHit;
 };
 
 LINK_ENTITY_TO_CLASS( ragdoll_corpse, CRagdollCorpse );

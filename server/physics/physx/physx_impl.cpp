@@ -1892,6 +1892,27 @@ void CPhysicPhysX::PrecacheRagdoll( const char *szModelName )
 
 /*
 =================
+PrecachePlayerRagdolls
+
+=================
+*/
+void CPhysicPhysX::PrecachePlayerRagdolls( void )
+{
+	// the biped the server always simulates plus the fallback config
+	PrecacheRagdoll( "models/player.mdl" );
+
+	// every selectable model, models/player/<name>/<name>.mdl
+	int numFiles = 0;
+	char **files = GET_FILES_LIST( "models/player/*/*.mdl", &numFiles, TRUE );
+
+	for( int i = 0; i < numFiles; i++ )
+	{
+		PrecacheRagdoll( files[i] );
+	}
+}
+
+/*
+=================
 GetRagdollImpactSound
 
 picks a random impact sound for the model, hard tier when the contact impulse

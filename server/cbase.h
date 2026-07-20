@@ -442,6 +442,9 @@ public:
 
 	// multiplier for the ragdoll death impulse, weighed from the recorded last-hit context
 	virtual float	GetRagdollImpulseMultiplier( float hitDamage ) { return 1.0f; }
+
+	// hand a hit-detached corpse the killing blow so its ragdoll gets the same push the victim would have
+	virtual void	SetRagdollHit( const Vector &pos, const Vector &dir, float damage, int group, float impulseMult ) {}
 	virtual int	BloodColor( void ) { return DONT_BLEED; }
 	virtual void	TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	virtual BOOL	IsTriggered( CBaseEntity *pActivator ) {return TRUE;}

@@ -1166,7 +1166,8 @@ bool CBasePlayer::SpawnRagdollCorpse( void )
 
 	// the corpse wears the model the player selected in multiplayer
 	string_t iszModel = pev->model;
-	const char *pszSelected = g_engfuncs.pfnInfoKeyValue( g_engfuncs.pfnGetInfoKeyBuffer( edict( )), "model" );
+	char *pszInfo = g_engfuncs.pfnGetInfoKeyBuffer( edict( ));
+	const char *pszSelected = g_engfuncs.pfnInfoKeyValue( pszInfo, "model" );
 
 	if( pszSelected && pszSelected[0] )
 	{
@@ -1210,22 +1211,34 @@ bool CBasePlayer::SpawnRagdollCorpse( void )
 	UTIL_SetSize( pCorpse->pev, VEC_HULL_MIN, VEC_HULL_MAX );
 
 	// carry the visual state over so the ragdoll spawns from the same pose
-	pCorpse->pev->sequence = pev->sequence;
-	pCorpse->pev->frame = pev->frame;
-	pCorpse->pev->animtime = pev->animtime;
-	pCorpse->pev->framerate = pev->framerate;
+	pCorpse->pev->sequence = m_iRagdollSequence;
+	pCorpse->pev->frame = m_flRagdollFrame;
+	pCorpse->pev->animtime = gpGlobals->time;
+	pCorpse->pev->framerate = 0.0f;
 	pCorpse->pev->skin = pev->skin;
 	pCorpse->pev->body = pev->body;
-	pCorpse->pev->colormap = pev->colormap;
 	pCorpse->pev->effects = EF_NOINTERP;
+
+	// a live player is colored from its player info
+	int top = Q_atoi( g_engfuncs.pfnInfoKeyValue( pszInfo, "topcolor" ));
+	int bottom = Q_atoi( g_engfuncs.pfnInfoKeyValue( pszInfo, "bottomcolor" ));
+	pCorpse->pev->colormap = ( top & 0xFF ) | (( bottom & 0xFF ) << 8 );
 
 	for( int i = 0; i < 4; i++ )
 	{
-		pCorpse->pev->controller[i] = pev->controller[i];
-		pCorpse->pev->blending[i] = pev->blending[i];
+		pCorpse->pev->controller[i] = m_ragdollController[i];
+		pCorpse->pev->blending[i] = m_ragdollBlending[i];
 	}
 
 	pCorpse->SetAbsVelocity( GetAbsVelocity( ));
+
+	// pass our killing blow to the corpse
+	Vector hitPos, hitDir;
+	float hitDamage;
+	int hitGroup;
+
+	if( GetLastHitInfo( hitPos, hitDir, hitDamage, hitGroup ))
+		pCorpse->SetRagdollHit( hitPos, hitDir, hitDamage, hitGroup, GetRagdollImpulseMultiplier( hitDamage ));
 
 	// fall back to the animated death and the classic body queue
 	if( !WorldPhysic->CreateRagdollEntity( pCorpse ))
@@ -1233,6 +1246,8 @@ bool CBasePlayer::SpawnRagdollCorpse( void )
 		UTIL_Remove( pCorpse );
 		return false;
 	}
+
+	m_hRagdollCorpse = pCorpse;
 
 	return true;
 }
@@ -1276,6 +1291,15 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 	{
 		if ( pSound )
 			pSound->Reset();
+	}
+
+	// grab the live pose before the death animation replaces it
+	m_iRagdollSequence = pev->sequence;
+	m_flRagdollFrame = pev->frame;
+	for( int i = 0; i < 4; i++ )
+	{
+		m_ragdollController[i] = pev->controller[i];
+		m_ragdollBlending[i] = pev->blending[i];
 	}
 
 	SetAnimation( PLAYER_DIE );
@@ -1349,6 +1373,8 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 	SetAbsAngles( vecAngles );
 
 	// hand the death over to a ragdoll corpse
+	m_hRagdollCorpse = NULL;
+
 	if( CVAR_GET_FLOAT( "phys_ragdoll_player" ) != 0.0f && WorldPhysic->Initialized( ))
 	{
 		if( SpawnRagdollCorpse( ))
@@ -1953,6 +1979,13 @@ BOOL CBasePlayer::IsOnLadder( void )
 void CBasePlayer::PlayerDeathThink(void)
 {
 	float flForward;
+	if( m_hRagdollCorpse != NULL && !( m_afPhysicsFlags & PFLAG_OBSERVER ))
+	{
+		pev->solid = SOLID_NOT;
+		pev->movetype = MOVETYPE_NONE;
+		SetAbsVelocity( g_vecZero );
+		UTIL_SetOrigin( this, m_hRagdollCorpse->GetAbsOrigin( ));
+	}
 
 	if (FBitSet(pev->flags, FL_ONGROUND))
 	{
