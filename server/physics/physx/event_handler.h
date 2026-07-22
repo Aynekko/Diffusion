@@ -47,6 +47,12 @@ public:
 		int		part;		// ragdoll part index (filter word1), -1 if unknown
 	};
 
+	struct ScrapeEvent
+	{
+		physx::PxActor	*ragdollActor;
+		float		speed;
+	};
+
 	void onWorldInit();
 	void onWorldShutdown();
 
@@ -56,6 +62,7 @@ public:
 	TouchEventsQueue &getTouchEventsQueue();
 	std::vector<WaterContactPair> &getWaterContactPairs();
 	std::vector<ImpactEvent> &getImpactEvents();
+	std::vector<ScrapeEvent> &getScrapeEvents();
 
 	virtual void onConstraintBreak(physx::PxConstraintInfo* constraints, physx::PxU32 count) {};
 	virtual void onWake(physx::PxActor** actors, physx::PxU32 count) {};
@@ -66,6 +73,7 @@ public:
 
 private:
 	void queueRagdollImpact(const physx::PxContactPairHeader &pairHeader, const physx::PxContactPair &pair);
+	void queueRagdollScrape(const physx::PxContactPairHeader &pairHeader, const physx::PxContactPair &pair);
 
 	struct Impl
 	{
@@ -75,11 +83,13 @@ private:
 			touchEventsQueue.reserve( 256 );
 			waterContactPairs.reserve( 64 );
 			impactEvents.reserve( 256 );
+			scrapeEvents.reserve( 256 );
 		}
 
 		TouchEventsQueue touchEventsQueue;
 		std::vector<WaterContactPair> waterContactPairs;
 		std::vector<ImpactEvent> impactEvents;
+		std::vector<ScrapeEvent> scrapeEvents;
 	};
 	std::unique_ptr<Impl> m_impl;
 };

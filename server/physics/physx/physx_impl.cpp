@@ -1588,6 +1588,8 @@ void CPhysicPhysX::ReleaseRagdoll( size_t index, bool releaseBodies )
 {
 	RagdollDesc &rag = m_ragdolls[index];
 
+	StopRagdollScrapeSound( rag );
+
 	// joints must go before the bodies they connect
 	for( int i = 0; i < RAGDOLL_JOINTS; i++ )
 	{
@@ -1667,6 +1669,8 @@ const RagdollConfig *CPhysicPhysX::GetRagdollConfig( const char *szModelName )
 	config.numImpactSoft = 0;
 	config.numImpactHard = 0;
 	config.impactForce = 0.0f;
+	config.scrapeRough[0] = '\0';
+	config.scrapeSmooth[0] = '\0';
 
 	// the config lives next to the model: models/foo.mdl -> models/foo.txt
 	char szConfigPath[MAX_PATH];
@@ -1759,6 +1763,19 @@ const RagdollConfig *CPhysicPhysX::GetRagdollConfig( const char *szModelName )
 					Q_strncpy( hard ? config.impactHard[count] : config.impactSoft[count], token, 64 );
 					count++;
 				}
+				continue;
+			}
+
+			if( !Q_stricmp( token, "scrape_rough" ) || !Q_stricmp( token, "scrape_smooth" ))
+			{
+				const bool smooth = !Q_stricmp( token, "scrape_smooth" );
+
+				if(( pdata = COM_ParseFile( pdata, token )) == NULL )
+				{
+					break;
+				}
+
+				Q_strncpy( smooth ? config.scrapeSmooth : config.scrapeRough, token, 64 );
 				continue;
 			}
 
@@ -1888,6 +1905,16 @@ void CPhysicPhysX::PrecacheRagdoll( const char *szModelName )
 	{
 		PRECACHE_SOUND( (char *)config->impactHard[i] );
 	}
+
+	if( config->scrapeRough[0] )
+	{
+		PRECACHE_SOUND( (char *)config->scrapeRough );
+	}
+
+	if( config->scrapeSmooth[0] )
+	{
+		PRECACHE_SOUND( (char *)config->scrapeSmooth );
+	}
 }
 
 /*
@@ -1955,6 +1982,79 @@ const char *CPhysicPhysX::GetRagdollImpactSound( const char *szModelName, float 
 	}
 
 	return config->impactSoft[RANDOM_LONG( 0, config->numImpactSoft - 1 )];
+}
+
+void CPhysicPhysX::UpdateRagdollScrapeSound( RagdollDesc &rag, edict_t *pEdict )
+{
+	const RagdollConfig *config = GetRagdollConfig( STRING( pEdict->v.model ));
+	if( !config )
+	{
+		return;
+	}
+
+	const char *sample = config->scrapeRough[0] ? config->scrapeRough : config->scrapeSmooth;
+	if( !sample[0] )
+	{
+		return;
+	}
+
+	bool active = ( CVAR_GET_FLOAT( "phys_ragdoll_scrape" ) > 0.0f )
+		&& ( gpGlobals->time - rag.lastScrapeTime < 0.15f )
+		&& ( rag.waterFrac[1] < 0.5f );
+
+	if( active )
+	{
+		float vol = bound( 0.25f, rag.scrapeSpeed * ( 1.0f / 250.0f ), 1.0f );
+		int pitch = 95 + (int)( vol * 15.0f );
+
+		if( !rag.scrapePlaying )
+		{
+			EMIT_SOUND_DYN( pEdict, CHAN_BODY, sample, vol, ATTN_NORM, 0, pitch );
+			rag.scrapePlaying = true;
+			rag.scrapeSoundTime = gpGlobals->time + 0.2f;
+		}
+		else if( gpGlobals->time > rag.scrapeSoundTime )
+		{
+			EMIT_SOUND_DYN( pEdict, CHAN_BODY, sample, vol, ATTN_NORM, SND_CHANGE_VOL | SND_CHANGE_PITCH, pitch );
+			rag.scrapeSoundTime = gpGlobals->time + 0.2f;
+		}
+
+		rag.scrapeSpeed = 0.0f;
+	}
+	else if( rag.scrapePlaying )
+	{
+		STOP_SOUND( pEdict, CHAN_BODY, sample );
+		rag.scrapePlaying = false;
+		rag.scrapeSpeed = 0.0f;
+	}
+}
+
+void CPhysicPhysX::StopRagdollScrapeSound( RagdollDesc &rag )
+{
+	if( !rag.scrapePlaying )
+	{
+		return;
+	}
+
+	rag.scrapePlaying = false;
+
+	edict_t *pEdict = INDEXENT( rag.entindex );
+	if( !pEdict || pEdict->free || pEdict->serialnumber != rag.serialnumber || !pEdict->v.model )
+	{
+		return;
+	}
+
+	const RagdollConfig *config = GetRagdollConfig( STRING( pEdict->v.model ));
+	if( !config )
+	{
+		return;
+	}
+
+	const char *sample = config->scrapeRough[0] ? config->scrapeRough : config->scrapeSmooth;
+	if( sample[0] )
+	{
+		STOP_SOUND( pEdict, CHAN_BODY, sample );
+	}
 }
 
 /*
@@ -2176,6 +2276,10 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 	rag.lastSendTime = 0.0f;
 	rag.impactGraceUntil = 0.0f;
 	rag.fadeStartTime = 0.0f;
+	rag.lastScrapeTime = 0.0f;
+	rag.scrapeSpeed = 0.0f;
+	rag.scrapeSoundTime = 0.0f;
+	rag.scrapePlaying = false;
 
 	for( int i = 0; i < RAGDOLL_PARTS; i++ )
 	{
@@ -3103,6 +3207,8 @@ void CPhysicPhysX::UpdateRagdolls( void )
 
 			rag.prevWaterFrac[i] = rag.waterFrac[i];
 		}
+
+		UpdateRagdollScrapeSound( rag, pEdict );
 
 		// blend the joint limits from the widened spawn ranges back to the authored ones
 		if( !rag.limitBlendDone )
@@ -4335,6 +4441,28 @@ void CPhysicPhysX::HandleEvents()
 		Vector position( ev.position.x, ev.position.y, ev.position.z );
 		Vector normal( ev.normal.x, ev.normal.y, ev.normal.z );
 		DispatchRagdollImpact( entity, other, position, normal, ev.force, ev.part );
+	}
+
+	auto &scrapeEvents = m_eventHandler->getScrapeEvents();
+	while (!scrapeEvents.empty())
+	{
+		auto ev = scrapeEvents.front();
+		scrapeEvents.erase(scrapeEvents.begin());
+
+		edict_t *entity = reinterpret_cast<edict_t*>(ev.ragdollActor->userData);
+		if (!entity)
+		{
+			continue;
+		}
+
+		int idx = FindRagdoll( ENTINDEX( entity ));
+		if (idx < 0 || gpGlobals->time < m_ragdolls[idx].impactGraceUntil)
+		{
+			continue;
+		}
+
+		m_ragdolls[idx].lastScrapeTime = gpGlobals->time;
+		m_ragdolls[idx].scrapeSpeed = Q_max( m_ragdolls[idx].scrapeSpeed, ev.speed );
 	}
 
 	auto &waterContactPairs = m_eventHandler->getWaterContactPairs();

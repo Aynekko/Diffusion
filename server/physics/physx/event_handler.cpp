@@ -83,6 +83,11 @@ void EventHandler::purgeActor(PxActor *actor)
 	water.erase(std::remove_if(water.begin(), water.end(), [actor](const WaterContactPair &p) {
 		return p.waterTriggerActor == actor || p.objectActor == actor;
 	}), water.end());
+
+	auto &scrapes = m_impl->scrapeEvents;
+	scrapes.erase(std::remove_if(scrapes.begin(), scrapes.end(), [actor](const ScrapeEvent &e) {
+		return e.ragdollActor == actor;
+	}), scrapes.end());
 }
 
 /*
@@ -119,6 +124,11 @@ returns the queued ragdoll impact events
 std::vector<EventHandler::ImpactEvent>& EventHandler::getImpactEvents()
 {
 	return m_impl->impactEvents;
+}
+
+std::vector<EventHandler::ScrapeEvent>& EventHandler::getScrapeEvents()
+{
+	return m_impl->scrapeEvents;
 }
 
 /*
@@ -194,6 +204,69 @@ void EventHandler::queueRagdollImpact(const PxContactPairHeader &pairHeader, con
 	}
 }
 
+void EventHandler::queueRagdollScrape(const PxContactPairHeader &pairHeader, const PxContactPair &pair)
+{
+	PxActor *a0 = pairHeader.actors[0];
+	PxActor *a1 = pairHeader.actors[1];
+	if (!a0 || !a1)
+	{
+		return;
+	}
+
+	const PxShape *s0 = pair.shapes[0];
+	const PxShape *s1 = pair.shapes[1];
+	const bool r0 = s0 && (s0->getSimulationFilterData().word0 & k_FilterRagdollPart);
+	const bool r1 = s1 && (s1->getSimulationFilterData().word0 & k_FilterRagdollPart);
+	if (!r0 && !r1)
+	{
+		return;
+	}
+
+	if (r0 && r1 && a0->userData == a1->userData)
+	{
+		return;
+	}
+
+	float threshold = CVAR_GET_FLOAT("phys_ragdoll_scrapespeed");
+	if (threshold <= 0.0f)
+	{
+		return;
+	}
+
+	PxContactPairPoint points[1];
+	if (pair.extractContacts(points, 1) == 0)
+	{
+		return;
+	}
+
+	PxVec3 normal = points[0].normal;
+
+	for (int side = 0; side < 2; side++)
+	{
+		if (side == 0 ? !r0 : !r1)
+		{
+			continue;
+		}
+
+		PxActor *actor = side == 0 ? a0 : a1;
+		PxRigidDynamic *body = actor->is<PxRigidDynamic>();
+		if (!body)
+		{
+			continue;
+		}
+
+		PxVec3 vel = body->getLinearVelocity();
+		PxVec3 tangential = vel - normal * vel.dot(normal);
+		float speed = tangential.magnitude();
+		if (speed < threshold)
+		{
+			continue;
+		}
+
+		m_impl->scrapeEvents.push_back({ actor, speed });
+	}
+}
+
 
 /*
 =================
@@ -249,11 +322,14 @@ void EventHandler::onContact(const PxContactPairHeader &pairHeader, const PxCont
 		// ragdoll-vs-world impact fires once, on first contact (not while resting)
 		if (FBitSet(pair.events, PxPairFlag::eNOTIFY_TOUCH_FOUND)) {
 			queueRagdollImpact(pairHeader, pair);
+			queueRagdollScrape(pairHeader, pair);
 		}
 
 		if (!FBitSet(pair.events, PxPairFlag::eNOTIFY_TOUCH_PERSISTS)) {
 			continue; // was "return", which silently dropped the remaining pairs of the batch
 		}
+
+		queueRagdollScrape(pairHeader, pair);
 
 		PxActor *a1 = pairHeader.actors[0];
 		PxActor *a2 = pairHeader.actors[1];
