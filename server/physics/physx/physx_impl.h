@@ -78,6 +78,9 @@ struct RagdollConfig
 	char impactHard[RAGDOLL_IMPACT_SOUNDS][64];
 	int numImpactHard;
 	float impactForce;
+
+	char scrapeRough[64];
+	char scrapeSmooth[64];
 };
 
 #define MAX_RAGDOLLS		256	// live ragdoll cap; spawning past it evicts the oldest corpse
@@ -123,6 +126,11 @@ struct RagdollDesc
 
 	// impact events suppressed until this time (set on save restore)
 	float impactGraceUntil;
+
+	float lastScrapeTime;
+	float scrapeSpeed;
+	float scrapeSoundTime;
+	bool scrapePlaying;
 
 	// joint limits spawn widened to contain the death pose
 	float limitBlendDuration;
@@ -201,6 +209,8 @@ private:
 	bool RagdollComputeReferencePose( studiohdr_t *phdr, matrix4x4 refWorld[] );
 	int FindRagdoll( int entindex ) const;
 	void ReleaseRagdoll( size_t index, bool releaseBodies );
+	void UpdateRagdollScrapeSound( RagdollDesc &rag, edict_t *pEdict );
+	void StopRagdollScrapeSound( RagdollDesc &rag );
 	void RagdollSendBones( RagdollDesc &rag, CBaseEntity *pEntity, int msgDest, edict_t *pTarget, Vector &mins, Vector &maxs );
 	void RagdollApplyWaterForces( void );
 	bool TracingStateChanges(physx::PxActor *actor) const;
