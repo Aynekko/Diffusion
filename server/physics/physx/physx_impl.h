@@ -44,8 +44,9 @@ class EventHandler;
 class ContactModifyCallback;
 class HoldableItemController;
 
-#define RAGDOLL_PARTS	10
-#define RAGDOLL_JOINTS	9
+#define RAGDOLL_PARTS	12
+#define RAGDOLL_PARTS_REQUIRED	10	// parts past this one are optional
+#define RAGDOLL_JOINTS	11
 #define RAGDOLL_ADJUSTMENTS	64
 #define RAGDOLL_IMPACT_SOUNDS	8
 

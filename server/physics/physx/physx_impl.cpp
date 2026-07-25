@@ -1466,6 +1466,8 @@ static const char *k_RagdollPartNames[RAGDOLL_PARTS] =
 	"lower_leg_right",
 	"upper_leg_left",
 	"lower_leg_left",
+	"hand_right",
+	"hand_left",
 };
 
 struct RagdollJointDesc
@@ -1489,12 +1491,14 @@ static const RagdollJointDesc k_RagdollJointTable[RAGDOLL_JOINTS] =
 	{ 7, 6, -8.0f, 8.0f, -145.0f, 5.0f, -8.0f, 8.0f },	// knees
 	{ 8, 1, -65.0f, 65.0f, -85.0f, 45.0f, -35.0f, 35.0f },
 	{ 9, 8, -8.0f, 8.0f, -145.0f, 5.0f, -8.0f, 8.0f },
+	{ 10, 3, -25.0f, 25.0f, -45.0f, 45.0f, -30.0f, 30.0f },	// wrists
+	{ 11, 5, -25.0f, 25.0f, -45.0f, 45.0f, -30.0f, 30.0f },
 };
 
 // relative part masses of a humanoid (heavy torso, lighter limbs and head)
 static const float k_RagdollMassRatio[RAGDOLL_PARTS] =
 {
-	1.25f, 6.25f, 1.25f, 1.25f, 1.25f, 1.25f, 1.875f, 1.875f, 1.875f, 1.875f
+	1.25f, 6.25f, 1.25f, 1.25f, 1.25f, 1.25f, 1.875f, 1.875f, 1.875f, 1.875f, 0.4f, 0.4f
 };
 
 /*
@@ -1506,9 +1510,9 @@ finds the bone at the far end of a part's limb: the next configured part down th
 */
 static int RagdollLimbTipBone( studiohdr_t *phdr, mstudiobone_t *pbones, const int bones[], int part, const matrix4x4 refWorld[] )
 {
-	static const int nextPart[RAGDOLL_PARTS] = { -1, -1, 3, -1, 5, -1, 7, -1, 9, -1 };
+	static const int nextPart[RAGDOLL_PARTS] = { -1, -1, 3, 10, 5, 11, 7, -1, 9, -1, -1, -1 };
 
-	if( nextPart[part] != -1 )
+	if( nextPart[part] != -1 && bones[nextPart[part]] != -1 )
 	{
 		return bones[nextPart[part]];
 	}
@@ -1852,9 +1856,9 @@ const RagdollConfig *CPhysicPhysX::GetRagdollConfig( const char *szModelName )
 
 		FREE_FILE( pfile );
 
-		// a config is only usable if all ten parts got a bone
+		// a config is only usable if every required part got a bone
 		config.valid = true;
-		for( int i = 0; i < RAGDOLL_PARTS; i++ )
+		for( int i = 0; i < RAGDOLL_PARTS_REQUIRED; i++ )
 		{
 			if( !config.boneNames[i][0] )
 			{
@@ -2230,6 +2234,12 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 	{
 		bones[i] = -1;
 
+		// an optional part the config never named just stays off
+		if( !pConfig->boneNames[i][0] )
+		{
+			continue;
+		}
+
 		for( int j = 0; j < phdr->numbones; j++ )
 		{
 			if( !Q_stricmp( pConfig->boneNames[i], pStudioBones[j].name ))
@@ -2241,6 +2251,12 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 
 		if( bones[i] == -1 )
 		{
+			if( i >= RAGDOLL_PARTS_REQUIRED )
+			{
+				ALERT( at_warning, "CreateRagdollEntity: %s has no bone named \"%s\" for '%s', part skipped\n", STRING( pObject->pev->model ), pConfig->boneNames[i], k_RagdollPartNames[i] );
+				continue;
+			}
+
 			ALERT( at_error, "CreateRagdollEntity: %s has no bone named \"%s\" for '%s'\n", STRING( pObject->pev->model ), pConfig->boneNames[i], k_RagdollPartNames[i] );
 			return NULL;
 		}
@@ -2287,29 +2303,62 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 		rag.prevWaterFrac[i] = 0.0f;
 	}
 
-	// assign every bone to a part by walking up its parents until a part bone is found; bones outside any chain (tails, weapons...) fall to the torso
+	// assign every bone to a part by walking up its parents until a part bone is found
 	mstudiobone_t *pbone = (mstudiobone_t *)((byte *)phdr + phdr->boneindex);
 
-	for( int j = 0; j < phdr->numbones; j++ )
+	for( int pass = 0; pass < 2; pass++ )
 	{
-		int part = -1;
-		int b = j;
-
-		while( b != -1 && part == -1 )
+		for( int j = 0; j < phdr->numbones; j++ )
 		{
-			for( int i = 0; i < RAGDOLL_PARTS; i++ )
+			int part = -1;
+			int b = j;
+
+			while( b != -1 && part == -1 )
 			{
-				if( bones[i] == b )
+				for( int i = 0; i < RAGDOLL_PARTS; i++ )
 				{
-					part = i;
-					break;
+					if( bones[i] == b )
+					{
+						part = i;
+						break;
+					}
 				}
+				b = pbone[b].parent;
 			}
-			b = pbone[b].parent;
+			rag.bonePart[j] = ( part != -1 ) ? part : 1;
+			rag.studioParent[j] = pbone[j].parent;
+			rag.boneAdjusted[j] = false;
 		}
-		rag.bonePart[j] = ( part != -1 ) ? part : 1;
-		rag.studioParent[j] = pbone[j].parent;
-		rag.boneAdjusted[j] = false;
+
+		// an optional part with no hitbox of its own would be a shapeless body,
+		// drop it and let the second pass fold its bones back into the parent limb
+		mstudiobbox_t *pbox = (mstudiobbox_t *)((byte *)phdr + phdr->hitboxindex);
+		int boxes[RAGDOLL_PARTS] = { 0 };
+		bool dropped = false;
+
+		for( int h = 0; h < phdr->numhitboxes; h++ )
+		{
+			int b = pbox[h].bone;
+			if( b >= 0 && b < phdr->numbones )
+			{
+				boxes[rag.bonePart[b]]++;
+			}
+		}
+
+		for( int i = RAGDOLL_PARTS_REQUIRED; i < RAGDOLL_PARTS; i++ )
+		{
+			if( bones[i] != -1 && boxes[i] == 0 )
+			{
+				ALERT( at_warning, "CreateRagdollEntity: %s has no hitboxes for '%s', part skipped\n", STRING( pObject->pev->model ), k_RagdollPartNames[i] );
+				bones[i] = -1;
+				dropped = true;
+			}
+		}
+
+		if( !dropped )
+		{
+			break;
+		}
 	}
 
 	// derive geometry, collision masks and joint frames from the model reference pose
@@ -2370,7 +2419,7 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 		}
 	}
 
-	for( int i = 0; i < RAGDOLL_PARTS; i++ )
+	for( int i = 0; i < RAGDOLL_PARTS_REQUIRED; i++ )
 	{
 		if( partHitboxes[i] == 0 )
 		{
@@ -2406,10 +2455,17 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 	// one dynamic body per part, spawned at the death pose of its bone
 	for( int i = 0; i < RAGDOLL_PARTS; i++ )
 	{
+		rag.bodies[i] = nullptr;
+
+		if( bones[i] == -1 )
+		{
+			continue;
+		}
+
 		PxTransform pose = RagdollPxTransform( boneWorld[bones[i]] );
 		PxRigidDynamic *pBody = m_pPhysics->createRigidDynamic( pose );
 
-		// word1/word2 identify the part and owning ragdoll, word3 is the no-collide mask, the word0 debris bit keeps ragdolls out of character hulls
+		// identify the part and owning ragdoll
 		PxFilterData filterData;
 		filterData.word0 = k_FilterRagdollPart;
 		filterData.word1 = i;
@@ -2477,13 +2533,21 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 			partRatio[i] = k_RagdollMassRatio[i];	// guard bad/zero authored values
 		}
 
+		if( !rag.bodies[i] )
+		{
+			continue;
+		}
+
 		totalMass += rag.bodies[i]->getMass();
 		totalRatio += partRatio[i];
 	}
 
 	for( int i = 0; i < RAGDOLL_PARTS; i++ )
 	{
-		PxRigidBodyExt::setMassAndUpdateInertia( *rag.bodies[i], totalMass * partRatio[i] / totalRatio );
+		if( rag.bodies[i] )
+		{
+			PxRigidBodyExt::setMassAndUpdateInertia( *rag.bodies[i], totalMass * partRatio[i] / totalRatio );
+		}
 	}
 
 	// seed each part with its bone's animation velocity, sampled by rewinding the sequence
@@ -2510,6 +2574,11 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 
 			for( int i = 0; i < RAGDOLL_PARTS; i++ )
 			{
+				if( !rag.bodies[i] )
+				{
+					continue;
+				}
+
 				Vector org, ang;
 				pAnim->GetBonePosition( bones[i], org, ang );
 
@@ -2573,6 +2642,11 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 
 			for( int i = 0; i < RAGDOLL_PARTS; i++ )
 			{
+				if( !rag.bodies[i] )
+				{
+					continue;
+				}
+
 				float dist = ( boneWorld[bones[i]].GetOrigin() - hitPos ).Length();
 				if( dist < bestDist )
 				{
@@ -2582,7 +2656,7 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 			}
 		}
 
-		// push speed is damage scaled by the push cvar and the entity's knockback multiplier, clamped to the configured range (0 disables either bound)
+		// push speed is damage scaled by the push cvar and the entity's knockback multiplier
 		float pushSpeed = pushScale * pObject->GetRagdollImpulseMultiplier(hitDamage);
 		float pushMin = CVAR_GET_FLOAT( "phys_ragdoll_push_min" );
 		float pushMax = CVAR_GET_FLOAT( "phys_ragdoll_push_max" );
@@ -2604,7 +2678,7 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 		// the rest of the body gets a mass-weighted share of the same blow
 		for( int i = 0; i < RAGDOLL_PARTS; i++ )
 		{
-			if( i == part )
+			if( i == part || !rag.bodies[i] )
 			{
 				continue;
 			}
@@ -2633,6 +2707,13 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 	for( int n = 0; n < RAGDOLL_JOINTS; n++ )
 	{
 		const RagdollJointDesc &desc = k_RagdollJointTable[n];
+
+		if( !rag.bodies[desc.parent] || !rag.bodies[desc.child] )
+		{
+			rag.joints[n] = nullptr;
+			continue;
+		}
+
 		matrix4x4 parentPose = refWorld[bones[desc.parent]];
 		matrix4x4 childPose = refWorld[bones[desc.child]];
 
@@ -2717,7 +2798,7 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 		pJoint->setMotion( PxD6Axis::eSWING1, PxD6Motion::eLIMITED );
 		pJoint->setMotion( PxD6Axis::eSWING2, PxD6Motion::eLIMITED );
 
-		// limit ranges, degrees: config values override the scaled defaults, up to three are symmetric ranges (0 = default), six the asymmetric min/max form
+		// limit ranges
 		const float *cfgLim = pConfig->limits[desc.child];
 		int numLim = pConfig->numLimits[desc.child];
 
@@ -2921,6 +3002,12 @@ void CPhysicPhysX::RagdollSendBones( RagdollDesc &rag, CBaseEntity *pEntity, int
 
 	for( int i = 0; i < RAGDOLL_PARTS; i++ )
 	{
+		if( !rag.bodies[i] )
+		{
+			partWorld[i].Identity();
+			continue;
+		}
+
 		PxMat44 poseMat( rag.bodies[i]->getGlobalPose( ));
 		partWorld[i] = matrix4x4( const_cast<float *>( poseMat.front( )));
 	}
@@ -3845,7 +3932,7 @@ void *CPhysicPhysX :: RestoreBody( CBaseEntity *pEntity )
 		pRigidBody->setMass(pEntity->m_flBodyMass);
 		pRigidBody->setSolverIterationCounts((PxU32)CVAR_GET_FLOAT("phys_solveriterations"));
 
-		// old saves can carry the swept eENABLE_CCD bit, reapply CCD per the current cvar and never let swept CCD survive a restore
+		// old saves can carry the swept eENABLE_CCD bit, reapply CCD per the current cvar
 		if (pEntity->m_iActorType == ACTOR_DYNAMIC || pEntity->m_iActorType == ACTOR_KINEMATIC)
 		{
 			pRigidBody->setRigidBodyFlag(PxRigidBodyFlag::eENABLE_CCD, false);
@@ -4517,7 +4604,7 @@ int CPhysicPhysX :: ConvertEdgeToIndex( model_t *model, int edge )
 }
 
 //-----------------------------------------------------------------------------
-// reconstruct the solid world collision mesh from the BSP node tree (hull 0) instead of render faces, which miss invisible but solid brushes (null textures)
+// reconstruct the solid world collision mesh from the BSP node tree
 //-----------------------------------------------------------------------------
 namespace
 {
