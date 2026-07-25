@@ -3,15 +3,16 @@ head			"Bip01 Head"		0.000093	-1.000000	0.000102	1.000000	0.000093	0.000345	-30	
 torso			"Bip01 Spine"		0.000093	-1.000000	0.000000	1.000000	0.000093	0.000344	0	0	0	0	0	0	6.25
 upper_arm_right		"Bip01 R UpperArm"	-0.000095	1.000000	-0.000000	0.868546	0.000083	-0.495608	-75	75	-95	95	-45	45	1.25
 lower_arm_right		"Bip01 R Forearm"	-0.098556	0.980057	-0.172554	0.868546	0.000083	-0.495609	-8	8	-145	5	-10	10	1.25
+hand_right		"Bip01 R Hand"	-0.172533	0.937499	-0.302205	0.940988	0.066186	-0.331904	-25	25	-45	45	-30	30	0.4
 upper_arm_left		"Bip01 L UpperArm"	-0.000095	1.000000	-0.000000	0.868205	0.000083	0.496206	-75	75	-95	95	-45	45	1.25
 lower_arm_left		"Bip01 L Forearm"	0.098488	0.980076	-0.172486	0.868204	0.000083	0.496207	-8	8	-145	5	-10	10	1.25
+hand_left		"Bip01 L Hand"	0.182997	0.929458	-0.320343	0.916644	-0.043534	0.397326	-25	25	-45	45	-30	30	0.4
 upper_leg_right		"Bip01 R Thigh"		0.000061	-0.995004	0.099833	-1.000000	-0.000096	-0.000343	-65	65	-85	45	-35	35	1.875
 lower_leg_right		"Bip01 R Calf"		0.000130	-0.995004	-0.099834	-1.000000	-0.000096	-0.000343	-8	8	-145	5	-8	8	1.875
 upper_leg_left		"Bip01 L Thigh"		0.000061	-0.995004	0.099833	-1.000000	-0.000096	-0.000343	-65	65	-85	45	-35	35	1.875
 lower_leg_left		"Bip01 L Calf"		0.000130	-0.995004	-0.099834	-1.000000	-0.000096	-0.000343	-8	8	-145	5	-8	8	1.875
 
 // Bone adjustments
-adjustment		"Bip01 L Hand"		0	0	0
 adjustment		"Bip01 L Finger0"	0	0	0
 adjustment		"Bip01 L Finger01"	0	0	0
 adjustment		"Bip01 L Finger02"	0	0	0
@@ -27,7 +28,6 @@ adjustment		"Bip01 L Finger32"	0	0	0
 adjustment		"Bip01 L Finger4"	0	0	0
 adjustment		"Bip01 L Finger41"	0	0	0
 adjustment		"Bip01 L Finger42"	0	0	0
-adjustment		"Bip01 R Hand"		0	0	0
 adjustment		"Bip01 R Finger0"	0	0	0
 adjustment		"Bip01 R Finger01"	0	0	0
 adjustment		"Bip01 R Finger02"	0	0	0
@@ -58,3 +58,5 @@ impact_hard		body/body_medium_impact_hard3.wav
 impact_hard		body/body_medium_impact_hard4.wav
 impact_hard		body/body_medium_impact_hard5.wav
 impact_hard		body/body_medium_impact_hard6.wav
+scrape_rough		body/body_medium_scrape_rough_loop1.wav
+scrape_smooth		body/body_medium_scrape_smooth_loop1.wav

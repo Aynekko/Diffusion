@@ -134,7 +134,7 @@ enum GrappleTarget
 #define ACTOR_TRIGGER		6	// used for func_water
 
 // saved ragdoll rest pose, RAGDOLL_PARTS * 7 floats (pos xyz + quat xyzw)
-#define RAGDOLL_SAVE_POSE_FLOATS	70
+#define RAGDOLL_SAVE_POSE_FLOATS	84
 
 #define PARENT_FROZEN_POS_X		BIT( 1 )	// compatible with PhysX flags NX_BF_FROZEN_
 #define PARENT_FROZEN_POS_Y		BIT( 2 )
