@@ -2287,6 +2287,7 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 	RagdollDesc rag;
 	rag.entindex = entindex;
 	rag.serialnumber = pObject->edict()->serialnumber;
+	rag.isPlayer = FClassnameIs( pObject->pev, "ragdoll_corpse" );
 	rag.numBones = phdr->numbones;
 	rag.asleep = false;
 	rag.lastSendTime = 0.0f;
@@ -2955,7 +2956,7 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 		pObject->m_fHasRagdollPose = false;
 	}
 
-	EnforceRagdollLimit( 1 );
+	EnforceRagdollLimit( rag.isPlayer, 1 );
 
 	m_ragdolls[m_numRagdolls++] = rag;
 	m_flRagdollUpdateTime = 0.0f;
@@ -2967,27 +2968,41 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 =================
 EnforceRagdollLimit
 
-drops the oldest corpses until reserve more ragdolls fit under phys_ragdoll_maxcount
+drops the oldest corpses of one kind until reserve more of them fit under its cap
 =================
 */
-void CPhysicPhysX::EnforceRagdollLimit( int reserve )
+void CPhysicPhysX::EnforceRagdollLimit( bool player, int reserve )
 {
-	int limit = (int)CVAR_GET_FLOAT( "phys_ragdoll_maxcount" );
+	int limit = (int)CVAR_GET_FLOAT( player ? "phys_ragdoll_maxcount_player" : "phys_ragdoll_maxcount_npc" );
 
 	if( limit <= 0 || limit > MAX_RAGDOLLS )
 	{
 		limit = MAX_RAGDOLLS;
 	}
 
-	while( m_numRagdolls > 0 && m_numRagdolls + reserve > limit )
+	for( ;; )
 	{
-		int oldest = 0;
-		for( int i = 1; i < m_numRagdolls; i++ )
+		int count = 0;
+		int oldest = -1;
+
+		for( int i = 0; i < m_numRagdolls; i++ )
 		{
-			if( m_ragdolls[i].spawnTime < m_ragdolls[oldest].spawnTime )
+			if( m_ragdolls[i].isPlayer != player )
+			{
+				continue;
+			}
+
+			count++;
+
+			if( oldest == -1 || m_ragdolls[i].spawnTime < m_ragdolls[oldest].spawnTime )
 			{
 				oldest = i;
 			}
+		}
+
+		if( oldest == -1 || count + reserve <= limit )
+		{
+			break;
 		}
 
 		edict_t *pOldEdict = INDEXENT( m_ragdolls[oldest].entindex );
@@ -3198,7 +3213,8 @@ void CPhysicPhysX::UpdateRagdolls( void )
 	}
 	m_numPendingRagdolls = 0;
 
-	EnforceRagdollLimit( 0 );
+	EnforceRagdollLimit( false, 0 );
+	EnforceRagdollLimit( true, 0 );
 
 	if( !m_numRagdolls )
 	{
