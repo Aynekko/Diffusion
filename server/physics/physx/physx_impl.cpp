@@ -2955,8 +2955,31 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 		pObject->m_fHasRagdollPose = false;
 	}
 
-	// at the cap, evict the oldest corpse
-	if( m_numRagdolls >= MAX_RAGDOLLS )
+	EnforceRagdollLimit( 1 );
+
+	m_ragdolls[m_numRagdolls++] = rag;
+	m_flRagdollUpdateTime = 0.0f;
+
+	return rag.bodies[1];
+}
+
+/*
+=================
+EnforceRagdollLimit
+
+drops the oldest corpses until reserve more ragdolls fit under phys_ragdoll_maxcount
+=================
+*/
+void CPhysicPhysX::EnforceRagdollLimit( int reserve )
+{
+	int limit = (int)CVAR_GET_FLOAT( "phys_ragdoll_maxcount" );
+
+	if( limit <= 0 || limit > MAX_RAGDOLLS )
+	{
+		limit = MAX_RAGDOLLS;
+	}
+
+	while( m_numRagdolls > 0 && m_numRagdolls + reserve > limit )
 	{
 		int oldest = 0;
 		for( int i = 1; i < m_numRagdolls; i++ )
@@ -2982,11 +3005,6 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 			}
 		}
 	}
-
-	m_ragdolls[m_numRagdolls++] = rag;
-	m_flRagdollUpdateTime = 0.0f;
-
-	return rag.bodies[1];
 }
 
 /*
@@ -3179,6 +3197,8 @@ void CPhysicPhysX::UpdateRagdolls( void )
 		SpawnRagdoll( pEntity, &pending );
 	}
 	m_numPendingRagdolls = 0;
+
+	EnforceRagdollLimit( 0 );
 
 	if( !m_numRagdolls )
 	{

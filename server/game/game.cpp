@@ -113,6 +113,7 @@ cvar_t	phys_ragdoll_limitspring = { "phys_ragdoll_limitspring", "0", FCVAR_ARCHI
 cvar_t	phys_ragdoll_limitblend = { "phys_ragdoll_limitblend", "0.5", FCVAR_ARCHIVE };	// seconds to shrink the spawn-widened joint limits back to authored
 cvar_t	phys_ragdoll_radiusscale = { "phys_ragdoll_radiusscale", "0.7", FCVAR_ARCHIVE };	// scale of the part collision capsule radii
 cvar_t	phys_ragdoll_lifetime = { "phys_ragdoll_lifetime", "0", FCVAR_ARCHIVE };	// seconds before a corpse+ragdoll is removed; 0 keeps them until the level unloads
+cvar_t	phys_ragdoll_maxcount = { "phys_ragdoll_maxcount", "255", FCVAR_ARCHIVE };	// max live ragdolls, the oldest is recycled past it; 0 = no limit
 cvar_t	phys_ragdoll_fadetime = { "phys_ragdoll_fadetime", "3", FCVAR_ARCHIVE };	// seconds the expired corpse takes to fade out before removal
 cvar_t	phys_ragdoll_buoyancy = { "phys_ragdoll_buoyancy", "1.1", FCVAR_ARCHIVE };	// upward force factor on submerged parts (0 = no buoyancy)
 cvar_t	phys_ragdoll_waterdrag = { "phys_ragdoll_waterdrag", "2", FCVAR_ARCHIVE };	// drag applied to submerged parts
@@ -193,6 +194,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &phys_ragdoll_limitblend );
 	CVAR_REGISTER( &phys_ragdoll_radiusscale );
 	CVAR_REGISTER( &phys_ragdoll_lifetime );
+	CVAR_REGISTER( &phys_ragdoll_maxcount );
 	CVAR_REGISTER( &phys_ragdoll_fadetime );
 	CVAR_REGISTER( &phys_ragdoll_buoyancy );
 	CVAR_REGISTER( &phys_ragdoll_waterdrag );

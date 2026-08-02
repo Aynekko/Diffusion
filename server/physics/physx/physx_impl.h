@@ -210,6 +210,7 @@ private:
 	bool RagdollComputeReferencePose( studiohdr_t *phdr, matrix4x4 refWorld[] );
 	int FindRagdoll( int entindex ) const;
 	void ReleaseRagdoll( size_t index, bool releaseBodies );
+	void EnforceRagdollLimit( int reserve );
 	void UpdateRagdollScrapeSound( RagdollDesc &rag, edict_t *pEdict );
 	void StopRagdollScrapeSound( RagdollDesc &rag );
 	void RagdollSendBones( RagdollDesc &rag, CBaseEntity *pEntity, int msgDest, edict_t *pTarget, Vector &mins, Vector &maxs );
