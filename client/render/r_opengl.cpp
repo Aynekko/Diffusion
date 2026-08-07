@@ -578,6 +578,15 @@ static void GL_InitExtensions( void )
 	Msg( "CPU: %s\n", UTIL_GetCpuInfo() );
 #endif
 
+	// the renderer depends on the compatibility profile
+	// exit if engine reports something else
+	if( RENDER_GET_PARM( PARM_GL_CONTEXT_TYPE, 0 ) != CONTEXT_TYPE_GL )
+	{
+		g_fRenderInitialized = false;
+		HOST_ERROR( "This game requires the OpenGL renderer.\nGLES and OpenGL Core contexts are not supported.\n" );
+		return;
+	}
+
 	// initialize gl extensions
 	GL_CheckExtension( "OpenGL 1.1.0", opengl_110funcs, NULL, R_OPENGL_110 );
 	GL_CheckExtension( "OpenGL 2.0", opengl_200funcs, NULL, R_OPENGL_200 );
