@@ -578,6 +578,15 @@ static void GL_InitExtensions( void )
 	Msg( "CPU: %s\n", UTIL_GetCpuInfo() );
 #endif
 
+	// the renderer depends on the compatibility profile
+	// exit if engine reports something else
+	if( RENDER_GET_PARM( PARM_GL_CONTEXT_TYPE, 0 ) != CONTEXT_TYPE_GL )
+	{
+		g_fRenderInitialized = false;
+		HOST_ERROR( "This game requires the OpenGL renderer.\nGLES and OpenGL Core contexts are not supported.\n" );
+		return;
+	}
+
 	// initialize gl extensions
 	GL_CheckExtension( "OpenGL 1.1.0", opengl_110funcs, NULL, R_OPENGL_110 );
 	GL_CheckExtension( "OpenGL 2.0", opengl_200funcs, NULL, R_OPENGL_200 );
@@ -759,9 +768,6 @@ static void GL_InitExtensions( void )
 
 	// FBO support
 	GL_CheckExtension( "GL_ARB_framebuffer_object", fbofuncs, "gl_framebuffers", R_FRAMEBUFFER_OBJECT );
-
-	// Paranoia OpenGL32.dll may be eliminate shadows. Run special check for it
-	GL_CheckExtension( "PARANOIA_HACKS_V1", NULL, NULL, R_PARANOIA_EXT );
 
 	GL_CheckExtension( "GL_ARB_get_program_binary", binaryshaderfuncs, "gl_binaryshader", R_BINARY_SHADER_EXT );
 
