@@ -760,9 +760,6 @@ static void GL_InitExtensions( void )
 	// FBO support
 	GL_CheckExtension( "GL_ARB_framebuffer_object", fbofuncs, "gl_framebuffers", R_FRAMEBUFFER_OBJECT );
 
-	// Paranoia OpenGL32.dll may be eliminate shadows. Run special check for it
-	GL_CheckExtension( "PARANOIA_HACKS_V1", NULL, NULL, R_PARANOIA_EXT );
-
 	GL_CheckExtension( "GL_ARB_get_program_binary", binaryshaderfuncs, "gl_binaryshader", R_BINARY_SHADER_EXT );
 
 	// check for hardware skinning

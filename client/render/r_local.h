@@ -597,7 +597,6 @@ enum
 	R_OCCLUSION_QUERIES_EXT,
 	R_SEAMLESS_CUBEMAP,
 	R_BINARY_SHADER_EXT,
-	R_PARANOIA_EXT,		// custom OpenGL32.dll with hacked function glDepthRange
 	R_KHR_DEBUG,
 	R_ARB_PIXEL_BUFFER_OBJECT,
 	R_EXTCOUNT,		// must be last

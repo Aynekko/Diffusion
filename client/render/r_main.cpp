@@ -822,9 +822,7 @@ static void R_Clear( int bitMask )
 	}
 	else
 	{
-		if( GL_Support( R_PARANOIA_EXT ))
-			gldepthmin = 0.0001f;
-		else gldepthmin = 0.0f;
+		gldepthmin = 0.0f;
 		gldepthmax = 1.0f;
 	}
 
