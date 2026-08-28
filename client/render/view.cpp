@@ -80,6 +80,7 @@ cvar_t *cl_bob;
 cvar_t *cl_bobup;
 cvar_t *cl_waterdist;
 cvar_t *cl_chasedist;
+cvar_t *cl_deathcam_smooth;
 cvar_t *cl_weaponlag;
 cvar_t *cl_vsmoothing;
 cvar_t *v_centermove;
@@ -325,6 +326,7 @@ void V_Init( void )
 	cl_bobup = CVAR_REGISTER( "cl_bobup", "0.5", 0 );
 	cl_waterdist = CVAR_REGISTER( "cl_waterdist", "4", 0 );
 	cl_chasedist = CVAR_REGISTER( "cl_chasedist", "112", 0 );
+	cl_deathcam_smooth = CVAR_REGISTER( "cl_deathcam_smooth", "14", FCVAR_ARCHIVE );
 	cl_weaponlag = CVAR_REGISTER( "cl_weaponlag", "0.3", FCVAR_ARCHIVE );
 	cl_hitmarker = CVAR_REGISTER( "cl_hitmarker", "1", FCVAR_ARCHIVE );
 	cl_achievement_notify = CVAR_REGISTER( "cl_achievement_notify", "1", FCVAR_ARCHIVE );
@@ -1179,6 +1181,31 @@ void V_GetChasePos( int target, Vector &cl_angles, Vector &origin, Vector &angle
 
 	origin = ent->origin;
 
+	// a dead player trails its ragdoll, whose origin only moves at the ragdoll tick
+	static Vector chaseOrg;
+	static float chaseTime = 0.0f;
+	static int chaseTarget = 0;
+
+	if( FBitSet( ent->curstate.effects, EF_NODRAW ) && cl_deathcam_smooth->value > 0.0f )
+	{
+		float now = gEngfuncs.GetClientTime();
+		float gap = now - chaseTime;
+
+		// new target, a stall or a teleport: start from the target
+		if( chaseTarget != target || chaseTime == 0.0f || gap <= 0.0f || gap > 0.5f || ( origin - chaseOrg ).Length() > 256.0f )
+			chaseOrg = origin;
+		else
+			chaseOrg += ( origin - chaseOrg ) * ( 1.0f - exp( -g_fFrametime * cl_deathcam_smooth->value ));
+
+		chaseTime = now;
+		chaseTarget = target;
+		origin = chaseOrg;
+	}
+	else
+	{
+		chaseTime = 0.0f;
+	}
+
 	origin[2] += 28; // DEFAULT_VIEWHEIGHT - some offset
 
 	V_GetChaseOrigin( angles, origin, cl_chasedist->value, origin );
@@ -1803,6 +1830,28 @@ void V_CalcThirdPersonRefdef( struct ref_params_s *pparams )
 		oldz = pparams->simorg[2];
 
 	lasttime = pparams->time;
+
+	// the ragdoll origin only moves at the server's ragdoll tick
+	static Vector deathCamOrg;
+	static float deathCamTime = 0.0f;
+
+	if( pparams->health <= 0 && cl_deathcam_smooth->value > 0.0f )
+	{
+		float gap = pparams->time - deathCamTime;
+
+		// just died, a stall or a teleport: start from the target
+		if( deathCamTime == 0.0f || gap <= 0.0f || gap > 0.5f || ( pparams->vieworg - deathCamOrg ).Length() > 256.0f )
+			deathCamOrg = pparams->vieworg;
+		else
+			deathCamOrg += ( pparams->vieworg - deathCamOrg ) * ( 1.0f - exp( -pparams->frametime * cl_deathcam_smooth->value ));
+
+		deathCamTime = pparams->time;
+		pparams->vieworg = deathCamOrg;
+	}
+	else
+	{
+		deathCamTime = 0.0f;
+	}
 
 	V_GetChaseOrigin( pparams->viewangles, pparams->vieworg, cl_chasedist->value, pparams->vieworg );
 

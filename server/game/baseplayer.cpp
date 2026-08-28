@@ -2028,7 +2028,11 @@ void CBasePlayer::PlayerDeathThink(void)
 	
 	StopAnimation();
 
-	pev->effects |= EF_NOINTERP;
+	// let the client interpolate the origin the death cam trails
+	if( m_hRagdollCorpse != NULL )
+		pev->effects &= ~EF_NOINTERP;
+	else
+		pev->effects |= EF_NOINTERP;
 //	pev->effects &= ~EF_DIMLIGHT;
 //	pev->framerate = 0.0;
 
