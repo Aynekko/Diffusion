@@ -133,6 +133,10 @@ typedef struct glsl_prog_s
 	GLint u_AberrationScale;
 	GLint u_ShadowMode;
 	GLint u_ShadowParams;
+	GLint u_SunShadowMap;	// directional sun shadow depth map
+	GLint u_SunMatrix;	// world -> sun light clip, model -> sun light clip on studio models
+	GLint u_SunShadowParams;// texel size, cascade distance, fade band
+	GLint u_SunParams;	// studio: sun gate + vertex lightstyle slot for the sun
 	GLint u_WaveHeight;
 	GLint u_RenderAlpha;
 	GLint u_RefractScale;

@@ -100,6 +100,10 @@ typedef struct
 	float curambientlight;
 	float curshadelight;
 	Vector curplightvec;
+	Vector curworldlightvec;
+	Vector curambient[6];
+
+	Vector		ambient[6];	// ambient light cube from the level light probes, model space
 } mstudiolight_t;
 
 // 52 bytes here
@@ -629,6 +633,8 @@ private:
 	cvar_t			*m_pCvarLodScale;
 	cvar_t			*m_pCvarLodBias;
 	cvar_t			*m_pCvarRagdollInterp;
+	cvar_t			*m_pCvarProbeLerp;
+	cvar_t			*m_pCvarProbeRadius;
 	cvar_t			*m_pCvarBindPose;
 
 	CBaseBoneSetup		m_boneSetup;

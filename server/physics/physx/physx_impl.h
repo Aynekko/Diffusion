@@ -107,7 +107,7 @@ struct RagdollDesc
 {
 	int entindex;			// owning corpse entity
 	int serialnumber;		// edict serial, to detect a recycled slot
-	bool isPlayer;			// player/bot corpse
+	bool isPlayer;			// player/bot corpse, counted against its own cap
 	int numBones;			// bones in the model skeleton
 	bool asleep;			// all parts sleeping (network-silent)
 	float lastSendTime;		// last bone snapshot time

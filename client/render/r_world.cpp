@@ -2758,7 +2758,7 @@ void R_DrawShadowBrushList( void )
 			cached_texture = curtex;
 		}
 
-		if( es->culltype == CULL_OTHER ) // probably a twoside texture
+		if( tr.sunShadowTwoSided || es->culltype == CULL_OTHER ) // sun pass draws double-sided
 			GL_Cull( GL_NONE );
 		else
 			GL_Cull( GL_FRONT );
@@ -2943,6 +2943,19 @@ void R_DrawBrushList( void )
 			pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
 			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 			pglUniform4fvARB( RI->currentshader->u_BrushParams, 3, &brush_params[0][0] );
+
+			// realtime sun shadow (only bound for the sun shader variant)
+			if( tr.sunShadowActive && RI->currentshader->u_SunMatrix != -1 )
+			{
+				GLfloat gl_sunMatrix[16];
+				tr.sunShadowMatrix.CopyToArray( gl_sunMatrix );
+				pglUniformMatrix4fvARB( RI->currentshader->u_SunMatrix, 1, GL_FALSE, gl_sunMatrix );
+
+				const float sunTexel = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, tr.sunShadowTexture );
+				const float sunIntensity = bound( 0.0f, r_sun_shadow_intensity->value, 1.0f );
+				pglUniform4fARB( RI->currentshader->u_SunShadowParams, sunTexel, sunIntensity, r_sun_shadow_dist->value, r_sun_shadow_dist->value * 0.25f );
+				GL_Bind( GL_TEXTURE7, tr.sunShadowTexture );
+			}
 
 			// reset cache
 			cached_texofs[0] = -1.0f;

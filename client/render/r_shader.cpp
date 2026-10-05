@@ -1071,6 +1071,11 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 	shader->u_TexOffset = pglGetUniformLocationARB( shader->handle, "u_TexOffset" );
 	shader->u_RenderColor = pglGetUniformLocationARB( shader->handle, "u_RenderColor" );
 
+	// absent on non-sun variants, so these resolve to -1 there
+	shader->u_SunShadowMap = pglGetUniformLocationARB( shader->handle, "u_SunShadowMap" );
+	shader->u_SunMatrix = pglGetUniformLocationARB( shader->handle, "u_SunMatrix" );
+	shader->u_SunShadowParams = pglGetUniformLocationARB( shader->handle, "u_SunShadowParams" );
+
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
 	pglUniform1iARB( shader->u_LightMap, GL_TEXTURE1 );
@@ -1088,6 +1093,9 @@ static void GL_InitSolidBmodelUniforms( glsl_program_t *shader )
 
 	if( bRefractedWater )
 		pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE6 );
+
+	if( GL_FindShaderDirective( shader, "BMODEL_SUN_SHADOW" ) )
+		pglUniform1iARB( shader->u_SunShadowMap, GL_TEXTURE7 );
 
 	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) )  // diffusioncubemaps
 	{
@@ -1219,6 +1227,13 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 	shader->u_ColorMask = pglGetUniformLocationARB( shader->handle, "u_ColorMask" );
 	shader->u_MeshParams = pglGetUniformLocationARB( shader->handle, "u_MeshParams" );
 	shader->u_StudioLighting = pglGetUniformLocationARB( shader->handle, "u_StudioLighting" );
+	shader->u_AmbientCube = pglGetUniformLocationARB( shader->handle, "u_AmbientCube" );
+
+	// absent on non-sun variants, so these resolve to -1 there
+	shader->u_SunShadowMap = pglGetUniformLocationARB( shader->handle, "u_SunShadowMap" );
+	shader->u_SunMatrix = pglGetUniformLocationARB( shader->handle, "u_SunMatrix" );
+	shader->u_SunShadowParams = pglGetUniformLocationARB( shader->handle, "u_SunShadowParams" );
+	shader->u_SunParams = pglGetUniformLocationARB( shader->handle, "u_SunParams" );
 
 	if( GL_FindShaderDirective( shader, "REFLECTION_CUBEMAP" ) ) // diffusioncubemaps
 	{
@@ -1264,6 +1279,9 @@ static void GL_InitSolidStudioUniforms( glsl_program_t *shader )
 
 	if( GL_FindShaderDirective( shader, "STUDIO_HAS_COLORMASK" ) )
 		pglUniform1iARB( shader->u_ColorMask, GL_TEXTURE5 );
+
+	if( GL_FindShaderDirective( shader, "STUDIO_SUN_SHADOW" ) )
+		pglUniform1iARB( shader->u_SunShadowMap, GL_TEXTURE6 );
 
 	GL_BindShader( GL_NONE );
 
@@ -2003,8 +2021,24 @@ word GL_UberShaderForSolidBmodel( msurface_t *s, bool translucent )
 	else
 	{
 		// process lightstyles
+		const bool bSunShadow = ( CVAR_TO_BOOL( r_sun_shadow ) && tr.sunShadowActive );
+		bool bSunEmitted = false;
+
 		for( int i = 0; i < MAXLIGHTMAPS && s->styles[i] != LS_NONE; i++ )
+		{
 			GL_AddShaderDirective( options, va( "BMODEL_APPLY_STYLE%i", i ));
+
+			// blend the realtime sun shadow into the baked sun lightstyle
+			if( bSunShadow && s->styles[i] == LS_SUN )
+			{
+				if( !bSunEmitted )
+				{
+					GL_AddShaderDirective( options, "BMODEL_SUN_SHADOW" );
+					bSunEmitted = true;
+				}
+				GL_AddShaderDirective( options, va( "BMODEL_SUN_STYLE%i", i ));
+			}
+		}
 	}
 
 	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransAlpha && !IsLandscape )
@@ -2512,6 +2546,14 @@ word GL_UberShaderForSolidStudio( mstudiomaterial_t *mat, bool vertex_lighting, 
 		if( FBitSet( mat->flags, STUDIO_NF_FLATSHADE ))
 			GL_AddShaderDirective( options, "STUDIO_LIGHT_FLATSHADE" );
 	}
+
+	// the map was compiled with ambient light probes
+	if( world->numleaflights > 0 && !vertex_lighting && !fullbright )
+		GL_AddShaderDirective( options, "STUDIO_AMBIENT_PROBES" );
+
+	// receive the realtime sun shadow
+	if( CVAR_TO_BOOL( r_sun_shadow ) && tr.sunShadowActive && !fullbright && !FBitSet( mat->flags, STUDIO_NF_FULLBRIGHT|STUDIO_NF_ADDITIVE ))
+		GL_AddShaderDirective( options, "STUDIO_SUN_SHADOW" );
 
 	if( gl_emboss->value > 0 )
 	{

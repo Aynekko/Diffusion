@@ -121,6 +121,8 @@ void CStudioModelRenderer::Init( void )
 	m_pCvarCompatible = CVAR_REGISTER( "r_studio_compatible", "1", FCVAR_ARCHIVE );
 	m_pCvarLodScale = CVAR_REGISTER( "cl_lod_scale", "5.0", FCVAR_ARCHIVE );
 	m_pCvarRagdollInterp = CVAR_REGISTER( "r_ragdoll_interp", "0.1", FCVAR_ARCHIVE );
+	m_pCvarProbeLerp = CVAR_REGISTER( "r_lightprobe_lerp", "10", FCVAR_ARCHIVE );
+	m_pCvarProbeRadius = CVAR_REGISTER( "r_lightprobe_radius", "256", FCVAR_ARCHIVE );
 	m_pCvarBindPose = CVAR_REGISTER( "r_bindpose", "0", 0 );
 	m_pCvarLodBias = CVAR_REGISTER( "cl_lod_bias", "0", FCVAR_ARCHIVE );
 	m_pCvarLod = CVAR_REGISTER( "cl_lod_enable", "0", FCVAR_ARCHIVE );
@@ -4148,6 +4150,67 @@ void CStudioModelRenderer::StudioLighting( float *lv, int bone, int flags, const
 
 /*
 ===============
+R_PointAmbientFromLeaf
+
+samples the ambient light cube at a point from the light probes of its leaf, returns how much the probes cover the point, 0 when the leaf has none in reach
+===============
+*/
+static float R_PointAmbientFromLeaf( const Vector &point, float radius, Vector ambient[6] )
+{
+	memset( ambient, 0, sizeof( Vector ) * 6 );
+
+	if( world->numleaflights <= 0 || !world->leafs )
+	{
+		return 0.0f;
+	}
+
+	mleaf_t *leaf = Mod_PointInLeaf( point, worldmodel->nodes );
+	mworldleaf_t *info = &world->leafs[leaf - worldmodel->leafs];
+
+	if( info->num_lightprobes <= 0 )
+	{
+		return 0.0f;
+	}
+
+	// inverse squared distance weighted average of the leaf probes
+	mlightprobe_t *probe = info->ambient_light;
+	float totalFactor = 0.0f;
+	float nearestSqr = -1.0f;
+
+	for( int i = 0; i < info->num_lightprobes; i++, probe++ )
+	{
+		float dist = (Vector( probe->origin ) - point).LengthSqr();
+		float factor = 1.0f / (dist + 1.0f);
+		totalFactor += factor;
+
+		if( nearestSqr < 0.0f || dist < nearestSqr )
+			nearestSqr = dist;
+
+		for( int j = 0; j < 6; j++ )
+		{
+			Vector color;
+			color.x = probe->cube.color[j][0] * (1.0f / 255.0f);
+			color.y = probe->cube.color[j][1] * (1.0f / 255.0f);
+			color.z = probe->cube.color[j][2] * (1.0f / 255.0f);
+			ambient[j] += color * factor;
+		}
+	}
+
+	for( int i = 0; i < 6; i++ )
+	{
+		ambient[i] *= (1.0f / totalFactor);
+	}
+
+	// full weight within the radius, fading out at twice the radius so big leaves with a single probe don't light everything in them
+	if( radius <= 0.0f )
+		return 1.0f;
+
+	const float nearest = sqrtf( nearestSqr );
+	return bound( 0.0f, 2.0f - nearest / radius, 1.0f );
+}
+
+/*
+===============
 StudioStaticLight
 
 ===============
@@ -4270,12 +4333,63 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 		m_pModelInstance->lighting.curplightvec = m_pModelInstance->m_plightmatrix.VectorIRotate( lighting.plightvec ); // turn back to model space
 		if( bDoLerp )
 		{
-			m_pModelInstance->lighting.plightvec.x = lerp( m_pModelInstance->lighting.plightvec.x, m_pModelInstance->lighting.curplightvec.x, 20 * g_fFrametime );
-			m_pModelInstance->lighting.plightvec.y = lerp( m_pModelInstance->lighting.plightvec.y, m_pModelInstance->lighting.curplightvec.y, 20 * g_fFrametime );
-			m_pModelInstance->lighting.plightvec.z = lerp( m_pModelInstance->lighting.plightvec.z, m_pModelInstance->lighting.curplightvec.z, 20 * g_fFrametime );
+			// lerp in world space, in model space a quick turn swings the vector through zero
+			const float lightvecFrac = Q_min( 20.0f * g_fFrametime, 1.0f );
+			Vector &worldLightVec = m_pModelInstance->lighting.curworldlightvec;
+			if( worldLightVec == g_vecZero )
+				worldLightVec = Vector( lighting.plightvec );
+			else
+				worldLightVec = worldLightVec + ( Vector( lighting.plightvec ) - worldLightVec ) * lightvecFrac;
+			m_pModelInstance->lighting.plightvec = m_pModelInstance->m_plightmatrix.VectorIRotate( worldLightVec );
 		}
 		else
+		{
+			m_pModelInstance->lighting.curworldlightvec = Vector( lighting.plightvec );
 			m_pModelInstance->lighting.plightvec = m_pModelInstance->lighting.curplightvec;
+		}
+
+		// sample the ambient light cube from the level light probes and turn it to model space, same as plightvec
+		Vector worldCube[6];
+
+		// the shader drops the flat ambient once the probes are on, so hand it back as an even cube wherever the probes don't reach
+		const Vector flat = m_pModelInstance->lighting.color * ( m_pModelInstance->lighting.ambientlight / 255.0f );
+
+		const float coverage = R_PointAmbientFromLeaf( ent->origin, m_pCvarProbeRadius->value, worldCube );
+
+		for( int i = 0; i < 6; i++ )
+		{
+			worldCube[i] = LerpRGB( flat, worldCube[i], coverage );
+		}
+
+		// the probe set swaps whole at a leaf border, so ease into it like the ambient it replaces
+		const float probeRate = m_pCvarProbeLerp->value;
+		const float ambientFrac = ( probeRate > 0.0f ) ? Q_min( probeRate * g_fFrametime, 1.0f ) : 1.0f;
+
+		for( int i = 0; i < 6; i++ )
+		{
+			m_pModelInstance->lighting.curambient[i] = LerpRGB( m_pModelInstance->lighting.curambient[i], worldCube[i], ambientFrac );
+		}
+
+		// eased in world space for the same reason as plightvec, turned to model space after
+		const Vector *srcCube = bDoLerp ? m_pModelInstance->lighting.curambient : worldCube;
+
+		static const Vector cubeAxes[6] =
+		{
+			Vector( 1.0f, 0.0f, 0.0f ), Vector( -1.0f, 0.0f, 0.0f ),
+			Vector( 0.0f, 1.0f, 0.0f ), Vector( 0.0f, -1.0f, 0.0f ),
+			Vector( 0.0f, 0.0f, 1.0f ), Vector( 0.0f, 0.0f, -1.0f ),
+		};
+
+		for( int i = 0; i < 6; i++ )
+		{
+			// the light matrix carries the inverse model scale, keep the axis unit length
+			Vector dir = m_pModelInstance->m_plightmatrix.VectorRotate( cubeAxes[i] ).Normalize();
+
+			m_pModelInstance->lighting.ambient[i] =
+				dir.x * dir.x * srcCube[( dir.x < 0.0f ) ? 1 : 0] +
+				dir.y * dir.y * srcCube[( dir.y < 0.0f ) ? 3 : 2] +
+				dir.z * dir.z * srcCube[( dir.z < 0.0f ) ? 5 : 4];
+		}
 	}
 }
 
@@ -6219,6 +6333,21 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 			pglUniform3fvARB( RI->currentshader->u_MeshParams, 3, &meshparams[0][0] );
 
+			// realtime sun shadow (only present on the sun shader variant)
+			if( tr.sunShadowActive && RI->currentshader->u_SunMatrix != -1 )
+			{
+				GLfloat gl_sunMatrix[16];
+				// fold in the model transform so the lookup follows the mesh as it's drawn
+				matrix4x4 sunObjectMatrix = tr.sunShadowMatrix.Concat( matrix4x4( m_pModelInstance->m_protationmatrix ));
+				sunObjectMatrix.CopyToArray( gl_sunMatrix );
+				pglUniformMatrix4fvARB( RI->currentshader->u_SunMatrix, 1, GL_FALSE, gl_sunMatrix );
+
+				const float sunTexel = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, tr.sunShadowTexture );
+				const float sunIntensity = bound( 0.0f, r_sun_shadow_intensity->value, 1.0f );
+				pglUniform4fARB( RI->currentshader->u_SunShadowParams, sunTexel, sunIntensity, r_sun_shadow_dist->value, r_sun_shadow_dist->value * 0.25f );
+				GL_Bind( GL_TEXTURE6, tr.sunShadowTexture );
+			}
+
 			// reset cache
 			if( reset_cache )
 			{
@@ -6260,6 +6389,32 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 			}
 
 			pglUniform4fvARB( RI->currentshader->u_StudioLighting, 2, &studio_lighting[0][0] );
+			pglUniform3fvARB( RI->currentshader->u_AmbientCube, 6, &light->ambient[0][0] );
+
+			if( RI->currentshader->u_SunParams != -1 )
+			{
+				float sunGate = 0.0f;
+				float sunSlot = -1.0f;
+
+				if( FBitSet( m_pModelInstance->info_flags, MF_VERTEX_LIGHTING ))
+				{
+					// the sun contribution sits in its own lightstyle slot
+					for( int map = 0; map < MAXLIGHTMAPS; map++ )
+					{
+						if( m_pModelInstance->styles[map] == LS_SUN )
+							sunSlot = (float)map;
+					}
+				}
+				else
+				{
+					// gate the shadow on how much the sampled light direction points along the sun, so models lit by local lights are left untouched. curplightvec is unlerped, the lerped one lags behind when the model turns
+					const Vector worldLightVec = m_pModelInstance->m_plightmatrix.VectorRotate( light->curplightvec );
+					float align = DotProduct( worldLightVec.Normalize( ), tr.sky_normal.Normalize( ));
+					sunGate = bound( 0.0f, ( align - 0.5f ) * 4.0f, 1.0f );
+				}
+
+				pglUniform2fARB( RI->currentshader->u_SunParams, sunGate, sunSlot );
+			}
 
 		//	R_SetRenderColor( m_pCurrentEntity );
 			cached_entity = m_pCurrentEntity;
@@ -6519,7 +6674,7 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 			cached_texture = cur_texture;
 		}
 
-		if( mat->flags & STUDIO_NF_TWOSIDE || (m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide) )
+		if( tr.sunShadowTwoSided || mat->flags & STUDIO_NF_TWOSIDE || (m_pCurrentEntity->curstate.renderfx == kRenderFxTwoSide) )
 			GL_Cull( GL_NONE );
 		else
 			GL_Cull( GL_FRONT );
