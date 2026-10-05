@@ -52,6 +52,11 @@ varying vec3		var_Position;
 varying vec3		var_WorldNormal;
 #endif
 
+#if defined( BMODEL_SUN_SHADOW )
+uniform mat4		u_SunMatrix;	// world -> sun light clip
+varying vec4		var_SunCoord;
+#endif
+
 varying vec4		var_ViewSpace;
 
 void main( void )
@@ -116,6 +121,10 @@ void main( void )
 #if defined( REFLECTION_CUBEMAP ) || defined( BMODEL_INTERIOR )
 	var_Position = worldpos.xyz;
 	var_WorldNormal = srcN;
+#endif
+
+#if defined( BMODEL_SUN_SHADOW )
+	var_SunCoord = ( Mat4Texture( 0.5 ) * u_SunMatrix ) * worldpos;
 #endif
 
 	var_MatrixTBN = tbn;

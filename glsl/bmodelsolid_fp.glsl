@@ -22,6 +22,9 @@ GNU General Public License for more details.
 #endif
 #include "specular.h"
 #include "deluxemap.h"
+#if defined( BMODEL_SUN_SHADOW )
+#include "sun_shadow.h"
+#endif
 #if defined( REFLECTION_CUBEMAP )
 #include "cubemap.h"
 #endif
@@ -97,6 +100,10 @@ varying vec4		var_TexMirror;	// mirror coords
 #if defined( REFLECTION_CUBEMAP ) || defined( BMODEL_INTERIOR )
 varying vec3		var_Position;
 varying vec3		var_WorldNormal;
+#endif
+
+#if defined( BMODEL_SUN_SHADOW )
+varying vec4		var_SunCoord;
 #endif
 
 void main( void )
@@ -262,21 +269,41 @@ void main( void )
 	vec3 gloss = vec3( 0.0 );
 
 #if !defined( BMODEL_FULLBRIGHT )
+	#if defined( BMODEL_SUN_SHADOW )
+		float sunLit = SunShadowValue( var_SunCoord, length( var_ViewVec ));
+	#endif
+
 		// lighting the world polys
 	#if defined( BMODEL_APPLY_STYLE0 )
-		ApplyLightStyle( var_TexLight0, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		#if defined( BMODEL_SUN_STYLE0 )
+			ApplyLightStyleSun( var_TexLight0, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, sunLit, light, gloss );
+		#else
+			ApplyLightStyle( var_TexLight0, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		#endif
 	#endif
 
 	#if defined( BMODEL_APPLY_STYLE1 )
-		ApplyLightStyle( var_TexLight1, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		#if defined( BMODEL_SUN_STYLE1 )
+			ApplyLightStyleSun( var_TexLight1, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, sunLit, light, gloss );
+		#else
+			ApplyLightStyle( var_TexLight1, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		#endif
 	#endif
 
 	#if defined( BMODEL_APPLY_STYLE2 )
-		ApplyLightStyle( var_TexLight2, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		#if defined( BMODEL_SUN_STYLE2 )
+			ApplyLightStyleSun( var_TexLight2, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, sunLit, light, gloss );
+		#else
+			ApplyLightStyle( var_TexLight2, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		#endif
 	#endif
 
 	#if defined( BMODEL_APPLY_STYLE3 )
-		ApplyLightStyle( var_TexLight3, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		#if defined( BMODEL_SUN_STYLE3 )
+			ApplyLightStyleSun( var_TexLight3, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, sunLit, light, gloss );
+		#else
+			ApplyLightStyle( var_TexLight3, N, V, glossmap, GlossSmoothness, GlossScale * 0.5, light, gloss );
+		#endif
 	#endif
 
 	#if defined( BMODEL_APPLY_STYLE0 ) || defined( BMODEL_APPLY_STYLE1 ) || defined( BMODEL_APPLY_STYLE2 ) || defined( BMODEL_APPLY_STYLE3 )

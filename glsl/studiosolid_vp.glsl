@@ -44,11 +44,26 @@ uniform vec4		u_GammaTable[64];
 #define u_LightColor	u_StudioLighting[0].xyz
 #define u_LightAmbient	u_StudioLighting[0].w
 #define u_LightShade	u_StudioLighting[1].w
+
+#if defined( STUDIO_AMBIENT_PROBES )
+uniform vec3		u_AmbientCube[6];
+
+vec3 SampleAmbientCube( const in vec3 N )
+{
+	vec3 nSqr = N * N;
+	int side_x = ( N.x < 0.0 ) ? 1 : 0;
+	int side_y = ( N.y < 0.0 ) ? 1 : 0;
+	int side_z = ( N.z < 0.0 ) ? 1 : 0;
+
+	return nSqr.x * u_AmbientCube[side_x] + nSqr.y * u_AmbientCube[side_y+2] + nSqr.z * u_AmbientCube[side_z+4];
+}
+#endif
 #endif
 
 uniform vec3		u_MeshParams[3];
 #define MeshScale	u_MeshParams[2].x
 #define MeshAngles	u_MeshParams[1]
+#define MeshOrigin	u_MeshParams[0]
 uniform vec4		u_StudioParams[3];
 #define u_ViewOrigin	u_StudioParams[0].xyz
 #define u_RealTime		u_StudioParams[0].w
@@ -71,6 +86,14 @@ varying float		var_Distance;
 varying vec3		var_Position;
 varying vec3		var_WorldNormal;
 varying mat3		var_MatrixTBN;
+#endif
+
+#if defined( STUDIO_SUN_SHADOW )
+uniform mat4		u_SunMatrix;	// model -> sun light clip
+varying vec4		var_SunCoord;
+#if !defined( STUDIO_VERTEX_LIGHTING )
+varying vec3		var_SunDiffuse;	// directional part of the vertex light
+#endif
 #endif
 
 void main( void )
@@ -214,7 +237,13 @@ void main( void )
 		#endif			
 	}
 #else
+#if defined( STUDIO_AMBIENT_PROBES )
+	// the light probes provide a directional ambient, drop the flat term
+	float AmbientLight = 0.0;
+#else
 	float AmbientLight = u_LightAmbient;
+#endif
+	float DirectLight = 0.0;
 
 	#if defined( STUDIO_LIGHT_FLATSHADE )
 		AmbientLight += u_LightShade * 0.8;
@@ -224,15 +253,25 @@ void main( void )
 
 		lightcos = dot( normalize( srcN ), L );
 		lightcos = min( lightcos, 1.0 );
-		AmbientLight += u_LightShade;
+		DirectLight = u_LightShade;
 
 		// do modified hemispherical lighting
 		lightcos = ( lightcos + ( SHADE_LAMBERT - 1.0 )) / SHADE_LAMBERT;
 		if( lightcos > 0.0 )
-			AmbientLight -= u_LightShade * lightcos; 
-		AmbientLight = max( AmbientLight, 0.0 );
+			DirectLight -= u_LightShade * lightcos;
+		DirectLight = max( DirectLight, 0.0 );
 	#endif
+#if defined( STUDIO_SUN_SHADOW )
+	// keep the directional part separate so the sun shadow can scale it per-fragment
 	var_LightDiffuse = u_LightColor * ( AmbientLight / 255.0 );
+	var_SunDiffuse = u_LightColor * ( DirectLight / 255.0 );
+#else
+	var_LightDiffuse = u_LightColor * (( AmbientLight + DirectLight ) / 255.0 );
+#endif
+
+#if defined( STUDIO_AMBIENT_PROBES )
+	var_LightDiffuse += SampleAmbientCube( normalize( srcN ));
+#endif
 #endif
 	var_TexDiffuse = attr_TexCoord0;
 
@@ -267,5 +306,10 @@ void main( void )
 #if defined( REFLECTION_CUBEMAP ) || defined( STUDIO_INTERIOR )
 	var_Position = worldpos.xyz;
 	var_MatrixTBN = tbn;
+#endif
+
+#if defined( STUDIO_SUN_SHADOW )
+	// project the model space position into the sun shadow map
+	var_SunCoord = ( Mat4Texture( 0.5 ) * u_SunMatrix ) * worldpos;
 #endif
 }
