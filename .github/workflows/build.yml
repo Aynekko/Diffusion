@@ -94,9 +94,9 @@ jobs:
         for /f "usebackq tokens=*" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do call "%%i\VC\Auxiliary\Build\vcvarsall.bat" x64
         python scripts\build_physx_msvc.py x64
         if errorlevel 1 exit /b 1
-        msbuild server\server.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143
+        msbuild server\server.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:PostBuildEventUseInBuild=false
         if errorlevel 1 exit /b 1
-        msbuild client\client.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143
+        msbuild client\client.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:PostBuildEventUseInBuild=false
         if errorlevel 1 exit /b 1
     - name: Fetch menu source
       shell: bash
