@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <GameDir>D:\!DIFFUSION 2020\!GAME_developer</GameDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(GameDir)' != ''">
+    <LocalDebuggerCommand>$(GameDir)\Diffusion.exe</LocalDebuggerCommand>
+    <LocalDebuggerCommandArguments></LocalDebuggerCommandArguments>
+    <LocalDebuggerWorkingDirectory>$(GameDir)</LocalDebuggerWorkingDirectory>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+  </PropertyGroup>
+</Project>

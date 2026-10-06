@@ -73,6 +73,9 @@ BEGIN_DATADESC( CBaseMonster )
 	DEFINE_FIELD( m_Activity, FIELD_INTEGER ),
 	DEFINE_FIELD( m_IdealActivity, FIELD_INTEGER ),
 	DEFINE_FIELD( m_LastHitGroup, FIELD_INTEGER ),
+	DEFINE_FIELD( m_iLastHitDamageType, FIELD_INTEGER ),
+	DEFINE_FIELD( m_iszLastHitInflictor, FIELD_STRING ),
+	DEFINE_FIELD( m_iLastHitWeapon, FIELD_INTEGER ),
 	DEFINE_FIELD( m_MonsterState, FIELD_INTEGER ),
 	DEFINE_FIELD( m_IdealMonsterState, FIELD_INTEGER ),
 	DEFINE_FIELD( m_previousState, FIELD_INTEGER ),
@@ -3095,7 +3098,8 @@ void CBaseMonster :: HandleAnimEvent( MonsterEvent_t *pEvent )
 #endif
 
 	case MONSTER_EVENT_BODYDROP_HEAVY:
-		if ( pev->flags & FL_ONGROUND )
+		// ragdoll impact sounds replace these scripted thuds
+		if ( !WorldPhysic->Initialized() && ( pev->flags & FL_ONGROUND ) )
 		{
 			if ( RANDOM_LONG( 0, 1 ) == 0 )
 			{
@@ -3109,7 +3113,7 @@ void CBaseMonster :: HandleAnimEvent( MonsterEvent_t *pEvent )
 		break;
 
 	case MONSTER_EVENT_BODYDROP_LIGHT:
-		if ( pev->flags & FL_ONGROUND )
+		if ( !WorldPhysic->Initialized() && ( pev->flags & FL_ONGROUND ) )
 		{
 			if ( RANDOM_LONG( 0, 1 ) == 0 )
 			{

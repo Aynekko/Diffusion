@@ -277,6 +277,17 @@ void DispatchTouch( edict_t *pentTouched, edict_t *pentOther )
 		pEntity->Touch( pOther );
 }
 
+void DispatchRagdollImpact( edict_t *pentEntity, edict_t *pentOther, const Vector &position, const Vector &normal, float force, int part )
+{
+	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE( pentEntity );
+	CBaseEntity *pOther = pentOther ? (CBaseEntity *)GET_PRIVATE( pentOther ) : NULL;
+
+	if( pEntity && !(pEntity->pev->flags & FL_KILLME) )
+	{
+		pEntity->PhysicsImpact( pOther, position, normal, force, part );
+	}
+}
+
 void DispatchUse( edict_t *pentUsed, edict_t *pentOther )
 {
 	CBaseEntity *pEntity = (CBaseEntity *)GET_PRIVATE( pentUsed );

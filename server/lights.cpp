@@ -261,8 +261,12 @@ class CEnvLight : public CLight
 {
 	DECLARE_CLASS( CEnvLight, CLight );
 public:
-	void	KeyValue( KeyValueData* pkvd ); 
+	void	KeyValue( KeyValueData* pkvd );
 	void	Spawn( void );
+private:
+	// sun elevation from the "pitch" key, kept separately because the "angles" key only carries yaw and would clobber angles.x depending on key order
+	float	m_flSunPitch;
+	BOOL	m_fSunPitchSet;
 };
 
 LINK_ENTITY_TO_CLASS( light_environment, CEnvLight );
@@ -298,6 +302,12 @@ void CEnvLight::KeyValue( KeyValueData* pkvd )
 		sprintf( szColor, "%d", b );
 		CVAR_SET_STRING( "sv_skycolor_b", szColor );
 	}
+	else if (FStrEq(pkvd->szKeyName, "pitch"))
+	{
+		m_flSunPitch = Q_atof( pkvd->szValue );
+		m_fSunPitchSet = TRUE;
+		CLight::KeyValue( pkvd );
+	}
 	else
 	{
 		CLight::KeyValue( pkvd );
@@ -308,7 +318,13 @@ void CEnvLight::KeyValue( KeyValueData* pkvd )
 void CEnvLight :: Spawn( void )
 {
 	char szVector[64];
-	UTIL_MakeAimVectors( GetAbsAngles() );
+	Vector angles = GetAbsAngles();
+
+	// the "pitch" key has priority over angles.x, same as the light compilers do
+	if( m_fSunPitchSet )
+		angles.x = m_flSunPitch;
+
+	UTIL_MakeAimVectors( angles );
 
 	sprintf( szVector, "%f", gpGlobals->v_forward.x );
 	CVAR_SET_STRING( "sv_skyvec_x", szVector );

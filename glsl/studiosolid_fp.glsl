@@ -27,6 +27,9 @@ GNU General Public License for more details.
 #include "interior.h"
 #endif
 #include "alpha2coverage.h"
+#if defined( STUDIO_SUN_SHADOW )
+#include "sun_shadow.h"
+#endif
 
 uniform sampler2D	u_ColorMap;
 uniform sampler2D	u_NormalMap;
@@ -78,6 +81,14 @@ varying mat3		var_MatrixTBN;
 
 #if defined( REFLECTION_CUBEMAP )
 uniform float		u_Fresnel;
+#endif
+
+#if defined( STUDIO_SUN_SHADOW )
+varying vec4		var_SunCoord;
+#if !defined( STUDIO_VERTEX_LIGHTING )
+varying vec3		var_SunDiffuse;	// directional part of the vertex light
+#endif
+uniform vec2		u_SunParams;	// x = sun gate, y = vertex lightstyle slot of the sun
 #endif
 
 void main( void )
@@ -140,7 +151,11 @@ void main( void )
 	N = gl_FrontFacing ? -N : N;
  
 	vec3 V = normalize( var_ViewVec );
-	vec3 light_diffuse;		
+	vec3 light_diffuse;
+
+#if defined( STUDIO_SUN_SHADOW )
+	float sunLit = SunShadowValue( var_SunCoord, var_Distance );
+#endif
 
 #if defined( STUDIO_VERTEX_LIGHTING ) && !defined( STUDIO_FULLBRIGHT )
 	vec3 light_diffuse_sum = vec3(0.0);
@@ -157,8 +172,11 @@ void main( void )
 		#if defined( STUDIO_BUMP )
 			float NdotB = ComputeStaticBump( L, N );
 			light_diffuse = var_LightDiffuse[0] * NdotB;
-		#else	
+		#else
 			light_diffuse = var_LightDiffuse[0];
+		#endif
+		#if defined( STUDIO_SUN_SHADOW )
+			if( int( u_SunParams.y ) == 0 ) light_diffuse *= sunLit;
 		#endif			
  
 		#if defined( STUDIO_SPECULAR )
@@ -178,8 +196,11 @@ void main( void )
 		#if defined( STUDIO_BUMP )
 			float NdotB = ComputeStaticBump( L, N );
 			light_diffuse = var_LightDiffuse[1] * NdotB;
-		#else	
+		#else
 			light_diffuse = var_LightDiffuse[1];
+		#endif
+		#if defined( STUDIO_SUN_SHADOW )
+			if( int( u_SunParams.y ) == 1 ) light_diffuse *= sunLit;
 		#endif			
 
 		#if defined( STUDIO_SPECULAR )
@@ -199,8 +220,11 @@ void main( void )
 		#if defined( STUDIO_BUMP )
 			float NdotB = ComputeStaticBump( L, N );
 			light_diffuse = var_LightDiffuse[2] * NdotB;
-		#else	
+		#else
 			light_diffuse = var_LightDiffuse[2];
+		#endif
+		#if defined( STUDIO_SUN_SHADOW )
+			if( int( u_SunParams.y ) == 2 ) light_diffuse *= sunLit;
 		#endif			
 
 		#if defined( STUDIO_SPECULAR )
@@ -220,8 +244,11 @@ void main( void )
 		#if defined( STUDIO_BUMP )
 			float NdotB = ComputeStaticBump( L, N );
 			light_diffuse = var_LightDiffuse[3] * NdotB;
-		#else	
+		#else
 			light_diffuse = var_LightDiffuse[3];
+		#endif
+		#if defined( STUDIO_SUN_SHADOW )
+			if( int( u_SunParams.y ) == 3 ) light_diffuse *= sunLit;
 		#endif			
 
 		#if defined( STUDIO_SPECULAR )
@@ -237,13 +264,25 @@ void main( void )
 	light_diffuse = light_diffuse_sum;
 	diffuse.rgb *= light_diffuse; // apply lighting		
 #else
+	#if defined( STUDIO_SUN_SHADOW )
+		// scale only the directional part, the gate keeps models lit by other lights untouched
+		float sunFactor = mix( 1.0, sunLit, u_SunParams.x );
+	#endif
 	vec3 L;
 	#if defined( STUDIO_BUMP )
 		L = var_LightVec;
 		float NdotB = ComputeStaticBump( L, N );
-		light_diffuse = var_LightDiffuse * NdotB;
-	#else	
-		light_diffuse = var_LightDiffuse;
+		#if defined( STUDIO_SUN_SHADOW )
+			light_diffuse = ( var_LightDiffuse + var_SunDiffuse * sunFactor ) * NdotB;
+		#else
+			light_diffuse = var_LightDiffuse * NdotB;
+		#endif
+	#else
+		#if defined( STUDIO_SUN_SHADOW )
+			light_diffuse = var_LightDiffuse + var_SunDiffuse * sunFactor;
+		#else
+			light_diffuse = var_LightDiffuse;
+		#endif
 	#endif
 	diffuse.rgb *= light_diffuse; // apply lighting
 #endif

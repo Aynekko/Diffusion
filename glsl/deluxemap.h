@@ -53,4 +53,29 @@ void ApplyLightStyle( const vec3 lminfo, const vec3 N, const vec3 V, const vec3 
 #endif
 }
 
+void ApplyLightStyleSun( const vec3 lminfo, const vec3 N, const vec3 V, const vec3 glossmap, float GlossSmoothness, float GlossScale, float sunLit, inout vec3 light, inout vec3 gloss )
+{
+	vec4 lmsrc = texture2D( u_LightMap, lminfo.xy );
+	vec3 lightmap = lmsrc.rgb;
+	float sunFactor = sunLit;
+#if defined( BMODEL_WATER )
+	vec3 L = vec3( 1.0 );
+#else
+	vec3 deluxmap = deluxemap2D( u_DeluxeMap, lminfo.xy );
+	vec3 L = normalize( deluxmap );
+#endif
+
+#if defined( BMODEL_BUMP )
+        float NdotB = ComputeStaticBump( L, N );
+	lightmap *= NdotB;
+#endif
+	light += ( lightmap ) * lminfo.z * sunFactor;
+
+#if defined( BMODEL_SPECULAR )
+	float NdotLGloss = saturate( dot( N, L ));
+	vec3 specular = ComputeSpecular( N, V, L, glossmap, GlossSmoothness, GlossScale ) * lightmap * lminfo.z * lmsrc.a * NdotLGloss * sunFactor;
+	gloss += specular;
+#endif
+}
+
 #endif//DELUXEMAP_H

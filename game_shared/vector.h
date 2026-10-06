@@ -33,7 +33,7 @@
 #define _forceinline
 #endif
 
-class NxVec3;
+namespace physx { class PxVec3; }
 class Radian;
 
 inline void SinCos( float angle, float *sine, float *cosine ) 
@@ -135,7 +135,7 @@ public:
 inline float DotProduct(const Vector2D& a, const Vector2D& b) { return( a.x*b.x + a.y*b.y ); }
 inline Vector2D operator*(float fl, const Vector2D& v) { return v * fl; }
 
-class NxVec3;
+namespace physx { class PxVec3; }
 
 //=========================================================
 // 3D Vector
@@ -150,7 +150,7 @@ public:
 	inline Vector( const float *rgfl )		{ x = rgfl[0]; y = rgfl[1]; z = rgfl[2];   }
 	inline Vector(float rgfl[3])			{ x = rgfl[0]; y = rgfl[1]; z = rgfl[2];   }
 	inline Vector( float fill )			{ x = fill; y = fill; z = fill;            }
-	Vector(const NxVec3& v);
+	Vector(const physx::PxVec3& v);
 
 	// Initialization
 	void Init(float ix=0.0f, float iy=0.0f, float iz=0.0f){ x = ix; y = iy; z = iz; }
@@ -166,7 +166,8 @@ public:
 	inline Vector operator*(float fl) const		{ return Vector(x*fl, y*fl, z*fl);	   }
 	inline Vector operator/(float fl) const		{ return Vector(x/fl, y/fl, z/fl);	   }
 	inline Vector operator*(const Vector& v) const	{ return Vector(x*v.x, y*v.y, z*v.z);	   }
-	const Vector& operator=(const NxVec3& v);
+	const Vector& operator=(const physx::PxVec3& v);
+	operator physx::PxVec3() const;
 	
 	_forceinline Vector& operator+=(const Vector &v)
 	{
@@ -418,7 +419,7 @@ public:
 	inline Radian operator*(float fl) const		{ return Radian(x*fl, y*fl, z*fl);	   }
 	inline Radian operator/(float fl) const		{ return Radian(x/fl, y/fl, z/fl);	   }
 	inline Radian operator*(const Radian& v) const	{ return Radian(x*v.x, y*v.y, z*v.z);	   }
-	const Radian& operator=(const NxVec3& v);
+	const Radian& operator=(const physx::PxVec3& v);
 	
 	_forceinline Radian& operator+=(const Radian &v)
 	{

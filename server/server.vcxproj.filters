@@ -27,6 +27,9 @@
     <Filter Include="Source Files\physics">
       <UniqueIdentifier>{0a47372c-3818-49f7-9d65-43dee8992944}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\physics\physx">
+      <UniqueIdentifier>{a50a570a-7e79-48b1-b8ab-c54d2b736da9}</UniqueIdentifier>
+    </Filter>
     <Filter Include="Source Files\bot">
       <UniqueIdentifier>{907595da-b86b-468f-a4f5-830ea2673f9a}</UniqueIdentifier>
     </Filter>
@@ -500,17 +503,38 @@
     <ClCompile Include="entities\func_wall.cpp">
       <Filter>Source Files\entities</Filter>
     </ClCompile>
-    <ClCompile Include="physics\NxUserStream.cpp">
-      <Filter>Source Files\physics</Filter>
-    </ClCompile>
     <ClCompile Include="physics\meshdesc.cpp">
       <Filter>Source Files\physics</Filter>
     </ClCompile>
     <ClCompile Include="physics\tracemesh.cpp">
       <Filter>Source Files\physics</Filter>
     </ClCompile>
-    <ClCompile Include="physics\novodex.cpp">
-      <Filter>Source Files\physics</Filter>
+<ClCompile Include="physics\physx\assert_handler.cpp">
+      <Filter>Source Files\physics\physx</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\physx\collision_filter_data.cpp">
+      <Filter>Source Files\physics\physx</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\physx\contact_modify_callback.cpp">
+      <Filter>Source Files\physics\physx</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\physx\decomposed_shape.cpp">
+      <Filter>Source Files\physics\physx</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\physx\error_stream.cpp">
+      <Filter>Source Files\physics\physx</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\physx\event_handler.cpp">
+      <Filter>Source Files\physics\physx</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\physx\holdable_item_controller.cpp">
+      <Filter>Source Files\physics\physx</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\physx\io_streams.cpp">
+      <Filter>Source Files\physics\physx</Filter>
+    </ClCompile>
+    <ClCompile Include="physics\physx\physx_impl.cpp">
+      <Filter>Source Files\physics\physx</Filter>
     </ClCompile>
     <ClCompile Include="physics\physic.cpp">
       <Filter>Source Files\physics</Filter>
@@ -856,10 +880,34 @@
     <ClInclude Include="monsters\nodes.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="physics\novodex.h">
+<ClInclude Include="physics\physx\assert_handler.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="physics\NxUserStream.h">
+    <ClInclude Include="physics\physx\collision_filter_data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\physx\contact_modify_callback.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\physx\decomposed_shape.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\physx\error_stream.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\physx\event_handler.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\physx\holdable_item_controller.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\physx\io_streams.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\physx\physx_impl.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="physics\physx\PxConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="physics\physcallback.h">
@@ -956,9 +1004,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="game\saverestore.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="physics\NxErrorStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="clipfile.h">

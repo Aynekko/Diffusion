@@ -583,8 +583,150 @@ void R_RenderShadowCubeSide( plight_t *pl, int side )
 		pl->shadowTexture = R_AllocateShadowCubemap( side );
 }
 
+//==============================================================================
+// R_RenderSunShadow: render a single ortho depth map for the sky sun direction, fitted to a cascade around the view. blended with the baked shadowmask in the world solid shader so near surfaces get realtime shadows and far ones the bake.
+//==============================================================================
+void R_RenderSunShadow( void )
+{
+	tr.sunShadowActive = false;
+
+	if( !CVAR_TO_BOOL( r_sun_shadow ) || R_FullBright() || tr.fGamePaused || tr.shadows_notsupport )
+		return;
+
+	if( IsBuildingCubemaps() || !FBOsupported )
+		return;
+
+	worldmodel = GET_ENTITY( 0 )->model;
+	if( !worldmodel )
+		return;
+
+	// need a sun direction, which only exists on light_environment maps
+	Vector sunDir = tr.sky_normal;
+	float sunLen = sunDir.Length();
+	if( sunLen < 0.1f )
+		return;
+	sunDir = sunDir * ( 1.0f / sunLen );
+
+	const int size = bound( 256, (int)r_sun_shadow_size->value, 4096 );
+
+	// (re)create the depth texture on first use or a resolution change
+	if( !tr.sunShadowTexture || RENDER_GET_PARM( PARM_TEX_WIDTH, tr.sunShadowTexture ) != size )
+	{
+		if( tr.sunShadowTexture )
+			FREE_TEXTURE( tr.sunShadowTexture );
+		tr.sunShadowTexture = CREATE_TEXTURE( "*sunshadow", size, size, NULL, TF_SHADOW );
+		if( !tr.sunShadowTexture )
+			return;
+	}
+
+	const float dist = bound( 256.0f, r_sun_shadow_dist->value, 8192.0f );
+	const float backDist = 4096.0f;
+	const float farDist = backDist + dist * 2.0f;
+
+	// capture the camera state, we shadow what the player can see. vforward isn't set up yet at this point of the frame, take it from the angles
+	const Vector camOrigin = RI->vieworg;
+	Vector fwdFlat;
+	AngleVectors( RI->viewangles, fwdFlat, NULL, NULL );
+	fwdFlat.z = 0.0f;
+	float fwdLen = fwdFlat.Length();
+	if( fwdLen > 0.01f )
+		fwdFlat = fwdFlat * ( 1.0f / fwdLen );
+
+	const Vector center = camOrigin + fwdFlat * ( dist * 0.4f );
+	const Vector lightOrigin = center - sunDir * backDist;
+
+	Vector angles;
+	VectorAngles( sunDir, angles );
+
+	R_PushRefState();
+
+	static plight_t sunPl;
+	memset( &sunPl, 0, sizeof( sunPl ));
+	sunPl.pointlight = false;
+	sunPl.origin = lightOrigin;
+	sunPl.angles = angles;
+	sunPl.radius = farDist;
+
+	sunPl.modelviewMatrix.CreateModelview();
+	sunPl.modelviewMatrix.ConcatRotate( -angles.z, 1, 0, 0 );
+	sunPl.modelviewMatrix.ConcatRotate( -angles.x, 0, 1, 0 );
+	sunPl.modelviewMatrix.ConcatRotate( -angles.y, 0, 0, 1 );
+	sunPl.modelviewMatrix.ConcatTranslate( -lightOrigin.x, -lightOrigin.y, -lightOrigin.z );
+	sunPl.projectionMatrix.CreateOrtho( -dist, dist, -dist, dist, 1.0f, farDist );
+
+	RI->params = RP_SHADOWPASS;
+	RI->currentlight = &sunPl;
+	RI->vieworg = lightOrigin;
+	RI->pvsorigin = camOrigin;
+	RI->viewangles = angles;
+	AngleVectors( angles, RI->vforward, RI->vright, RI->vup );
+	RI->viewport[0] = RI->viewport[1] = 0;
+	RI->viewport[2] = RI->viewport[3] = size;
+
+	// cull with a world-space light basis. InitOrthogonal keeps the band [low, high] per axis: x = (xLeft, xRight), y = (yTop, yBottom), z = (zFar, zNear)
+	matrix4x4 cullMatrix;
+	cullMatrix.SetForward( RI->vforward );
+	cullMatrix.SetRight( RI->vright );
+	cullMatrix.SetUp( RI->vup );
+	cullMatrix.SetOrigin( lightOrigin );
+	RI->frustum.InitOrthogonal( cullMatrix, -dist, dist, -dist, dist, farDist, 0.0f );
+
+	sunPl.frustum = RI->frustum;
+	RI->frustum.ComputeFrustumBounds( sunPl.absmin, sunPl.absmax );
+
+	// attach the sun depth texture to the shadow framebuffer
+	if( !sh_framebuffer )
+		pglGenFramebuffers( 1, &sh_framebuffer );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, sh_framebuffer );
+	pglDrawBuffer( GL_NONE );
+	pglReadBuffer( GL_NONE );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, tr.sunShadowTexture ), 0 );
+
+	R_ShadowPassSetupGL( &sunPl );
+
+	// draw the casters double-sided so one-sided walls can't leak light
+	tr.sunShadowTwoSided = CVAR_TO_BOOL( r_sun_shadow_twosided );
+	if( tr.sunShadowTwoSided )
+		GL_Cull( GL_NONE );
+
+	// slope-scaled bias to keep the flat lit surfaces free of self-shadow acne
+	pglEnable( GL_POLYGON_OFFSET_FILL );
+	pglPolygonOffset( r_sun_shadow_offset_factor->value, r_sun_shadow_offset_units->value );
+
+	pglClear( GL_DEPTH_BUFFER_BIT );
+
+	// mark the world from the camera pvs, not the light origin up in the sky
+	R_FindViewLeaf();
+	R_MarkLeaves();
+
+	R_ShadowPassDrawWorld( &sunPl );
+	R_ShadowPassDrawSolidEntities( &sunPl );
+
+	tr.sunShadowTwoSided = false;
+
+	R_ShadowPassEndGL();
+
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, glState.frameBuffer == -1 ? 0 : glState.frameBuffer );
+
+	// receiver side depth bias, world units mapped onto the ortho depth range
+	if( r_sun_shadow_bias->value != 0.0f )
+	{
+		matrix4x4 biasMatrix;
+		biasMatrix.CreateTranslate( 0.0f, 0.0f, -2.0f * r_sun_shadow_bias->value / ( farDist - 1.0f ));
+		tr.sunShadowMatrix = biasMatrix.Concat( RI->worldviewProjectionMatrix );
+	}
+	else
+	{
+		tr.sunShadowMatrix = RI->worldviewProjectionMatrix;
+	}
+
+	R_PopRefState();
+
+	tr.sunShadowActive = true;
+}
+
 void R_RenderShadowmaps(void)
-{	
+{
 	if (R_FullBright() || !CVAR_TO_BOOL( gl_shadows ) || tr.fGamePaused || tr.shadows_notsupport)
 		return;
 

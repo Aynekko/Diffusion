@@ -50,6 +50,7 @@ DECLARE_HUDMESSAGE( WeaponAnim );
 DECLARE_HUDMESSAGE( KillDecals );
 DECLARE_HUDMESSAGE( StudioDecal );
 DECLARE_HUDMESSAGE( SetupBones );
+DECLARE_HUDMESSAGE( RagdollBones );
 DECLARE_HUDMESSAGE( TempEnt );
 DECLARE_HUDMESSAGE( WaterSplash );
 DECLARE_HUDMESSAGE( ServerName );
@@ -75,6 +76,7 @@ int CHud :: InitHUDMessages( void )
 	HOOK_MESSAGE( KillDecals );
 	HOOK_MESSAGE( StudioDecal );
 	HOOK_MESSAGE( SetupBones );
+	HOOK_MESSAGE( RagdollBones );
 	HOOK_MESSAGE( TempEnt );
 	HOOK_MESSAGE( WaterSplash );
 	HOOK_MESSAGE( ServerName );
@@ -488,7 +490,45 @@ int CHud :: MsgFunc_SetupBones( const char *pszName, int iSize, void *pbuf )
 		return 1;
 	}
 
-	R_StudioSetBonesExternal( ent, pos, ang );
+	R_StudioSetBonesExternal( ent, pos, ang, 0.0f );
+
+	return 1;
+}
+
+int CHud :: MsgFunc_RagdollBones( const char *pszName, int iSize, void *pbuf )
+{
+	static Vector pos[MAXSTUDIOBONES];
+	static Radian ang[MAXSTUDIOBONES];
+
+	BEGIN_READ( pszName, pbuf, iSize );
+		int entityIndex = READ_SHORT();
+		float messageTime = (float)READ_LONG() * 0.001f;
+		Vector anchor;
+		anchor.x = READ_COORD();
+		anchor.y = READ_COORD();
+		anchor.z = READ_COORD();
+		int boneCount = READ_BYTE();
+		for( int i = 0; i < boneCount; i++ )
+		{
+			pos[i].x = (float)READ_SHORT() * (1.0f/128.0f);
+			pos[i].y = (float)READ_SHORT() * (1.0f/128.0f);
+			pos[i].z = (float)READ_SHORT() * (1.0f/128.0f);
+			ang[i].x = (float)READ_SHORT() * (1.0f/512.0f);
+			ang[i].y = (float)READ_SHORT() * (1.0f/512.0f);
+			ang[i].z = (float)READ_SHORT() * (1.0f/512.0f);
+		}
+	END_READ();
+
+	cl_entity_t *ent = GET_ENTITY( entityIndex );
+
+	if( !ent )
+	{
+		ALERT( at_error, "RagdollBones: ent == NULL\n" );
+
+		return 1;
+	}
+
+	R_StudioSetBonesExternal( ent, pos, ang, messageTime, anchor );
 
 	return 1;
 }

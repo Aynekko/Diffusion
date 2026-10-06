@@ -46,6 +46,21 @@ typedef float vec_t;
 #define METER2INCH( x )		(float)( x * ( 1.0f / METERS_PER_INCH ))
 #define INCH2METER( x )		(float)( x * ( METERS_PER_INCH / 1.0f ))
 
+constexpr inline float CubicInchesPerCubicMeter( void )
+{
+	return 1.0f / ( METERS_PER_INCH * METERS_PER_INCH * METERS_PER_INCH );
+}
+
+constexpr inline float MetricDensityToEngine( float densityMetric )
+{
+	return densityMetric / CubicInchesPerCubicMeter();
+}
+
+constexpr inline float EngineDensityToMetric( float densityEngine )
+{
+	return densityEngine * CubicInchesPerCubicMeter();
+}
+
 // Keeps clutter down a bit, when using a float as a bit-vector
 #define SetBits( iBitVector, bits )	((iBitVector) = (iBitVector) | (bits))
 #define ClearBits( iBitVector, bits )	((iBitVector) = (iBitVector) & ~(bits))

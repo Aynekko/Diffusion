@@ -71,6 +71,7 @@ public:
 	void AlertSound( void );
 	int  Classify ( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
+	void OnRagdoll( void );
 
 	void RunTask( Task_t *pTask );
 	void StartTask( Task_t *pTask );
@@ -92,6 +93,8 @@ public:
 
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType);
 	void Killed( entvars_t *pevAttacker, int iGib );
+
+	virtual int GetActiveWeaponId( void );
 
 	DECLARE_DATADESC();
 
@@ -561,13 +564,32 @@ void CBarney :: BarneyFirePistol ( void )
 	if ( m_cAmmoLoaded <= 0 )
 		SetConditions(bits_COND_NO_AMMO_LOADED);
 }
-		
+
+//=========================================================
+// GetActiveWeaponId - .357 or 9mm sidearm, selected by pev->frags
+//=========================================================
+int CBarney :: GetActiveWeaponId( void )
+{
+	return pev->frags ? WEAPON_DEAGLE : WEAPON_BERETTA;
+}
+
 //=========================================================
 // HandleAnimEvent - catches the monster-specific messages
 // that occur when tagged animation frames are played.
 //
 // Returns number of events handled, 0 if none.
 //=========================================================
+void CBarney :: OnRagdoll( void )
+{
+	CBaseEntity::OnRagdoll();
+
+	// no gun-less body exists for barney, put a drawn gun back into the holster
+	if( m_fGunDrawn )
+	{
+		pev->body = m_iBaseBody + BARNEY_BODY_GUNHOLSTERED;
+	}
+}
+
 void CBarney :: HandleAnimEvent( MonsterEvent_t *pEvent )
 {
 	Vector pos = g_vecZero;

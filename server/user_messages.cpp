@@ -56,6 +56,7 @@ int gmsgRainData = 0;
 int gmsgStatusIcon = 0;
 int gmsgStatusIconTutor = 0;
 int gmsgSetupBones = 0;
+int gmsgRagdollBones = 0;
 int gmsgHealthVisual = 0; // diffusion health visual
 int gmsgHealthVisualAlice = 0;
 int gmsgStamina = 0; // DiffusionSprint
@@ -129,6 +130,7 @@ void LinkUserMessages( void )
 	gmsgStatusIcon = REG_USER_MSG( "StatusIcon", -1 );
 	gmsgStatusIconTutor = REG_USER_MSG( "StatusIconTutor", -1 );
 	gmsgSetupBones = REG_USER_MSG( "SetupBones", -1 );
+	gmsgRagdollBones = REG_USER_MSG( "RagdollBones", -1 );
 
 	gmsgCrosshairStatic = REG_USER_MSG( "CrosshairStatic", -1 );
 	gmsgUseIcon = REG_USER_MSG( "UseIcon", -1 );

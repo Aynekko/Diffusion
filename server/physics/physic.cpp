@@ -56,9 +56,6 @@ unsigned int EngineSetFeatures( void )
 
 void DrawDebugTriangles( void )
 {
-	if( g_debugdraw != NULL && g_debugdraw->value > 0.0f )
-		WorldPhysic->DebugDraw();
-
 	if( g_physdebug != NULL && g_physdebug->value > 0.0f )
 	{
 		edict_t *pEdict = INDEXENT( 1 );
@@ -1779,7 +1776,7 @@ void SV_Physics_Rigid( CBaseEntity *pEntity )
 
 	UTIL_WaterMove( pEntity );
 	SV_CheckWater( pEntity );
-	WorldPhysic->UpdateEntityPos( pEntity );
+	WorldPhysic->UpdateEntityTransform( pEntity );
 
 	// detect the ground
 	CBaseEntity *pGround = pEntity->GetGroundEntity();
@@ -2513,7 +2510,7 @@ void SV_Physics_Vehicle( CBaseEntity *pEntity )
 	SV_CheckWater( pEntity );
 
 	// sync physic states
-	WorldPhysic->UpdateEntityPos( pEntity );
+	WorldPhysic->UpdateEntityTransform( pEntity );
 
 	float movetime = gpGlobals->frametime;
 

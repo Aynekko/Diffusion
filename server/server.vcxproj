@@ -50,6 +50,7 @@
     <CharacterSet>MultiByte</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="$(ProjectDir)..\*.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
@@ -86,7 +87,7 @@
     <CodeAnalysisRuleAssemblies />
     <OutDir>.\..\x64\Debug\server\</OutDir>
     <IntDir>.\..\x64\Debug\server\</IntDir>
-    <TargetName>server</TargetName>
+    <TargetName>server_amd64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>.\..\temp\server\!release\</OutDir>
@@ -103,13 +104,13 @@
     <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
     <CodeAnalysisRules />
     <CodeAnalysisRuleAssemblies />
-    <TargetName>server</TargetName>
+    <TargetName>server_amd64</TargetName>
     <OutDir>.\..\x64\Release\server\</OutDir>
     <IntDir>.\..\x64\Release\server\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <Optimization>Disabled</Optimization>
@@ -117,9 +118,9 @@
       <WarningLevel>Level3</WarningLevel>
       <MinimalRebuild>true</MinimalRebuild>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\phys_shared;.\monsters;.\physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\3rd-party\physx\physx\include;..\3rd-party\physx\pxshared\include;.\monsters;.\physics;.\physics\physx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;PX_PHYSX_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <AssemblerListingLocation>.\..\temp\server\!debug\</AssemblerListingLocation>
       <BrowseInformation>true</BrowseInformation>
@@ -128,9 +129,10 @@
       <ProgramDataBaseFileName>.\..\temp\server\!debug\</ProgramDataBaseFileName>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
-    <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code\client-server-launcher\temp\server\!release\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server.dll"</Command>
-    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>call "$(ProjectDir)..\scripts\setup_physx.bat" x86 $(Configuration)</Command>
+      <Message>Checking PhysX SDK</Message>
+    </PreBuildEvent>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -153,23 +155,24 @@
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>.\server.def</ModuleDefinitionFile>
-      <OutputFile>.\..\temp\server\!debug\server.dll</OutputFile>
+      <OutputFile>.\..\temp\server\!debug\server_amd64.dll</OutputFile>
       <ImportLibrary>.\..\temp\server\!debug\server.lib</ImportLibrary>
-      <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\3rd-party\physx\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>physx_static_32d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <InlineFunctionExpansion>Default</InlineFunctionExpansion>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <Optimization>Disabled</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\phys_shared;.\monsters;.\physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\3rd-party\physx\physx\include;..\3rd-party\physx\pxshared\include;.\monsters;.\physics;.\physics\physx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <UndefineAllPreprocessorDefinitions>false</UndefineAllPreprocessorDefinitions>
-      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;DEBUG;_DEBUG;PX_PHYSX_STATIC_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerOutput>AssemblyAndSourceCode</AssemblerOutput>
       <AssemblerListingLocation>.\..\x64\Debug\server\</AssemblerListingLocation>
       <BrowseInformation>true</BrowseInformation>
@@ -178,9 +181,10 @@
       <ProgramDataBaseFileName>.\..\x64\Debug\server\</ProgramDataBaseFileName>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
-    <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\x64\Debug\server\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server_amd64.dll"</Command>
-    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>call "$(ProjectDir)..\scripts\setup_physx.bat" x64 $(Configuration)</Command>
+      <Message>Checking PhysX SDK</Message>
+    </PreBuildEvent>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -202,9 +206,10 @@
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>.\server.def</ModuleDefinitionFile>
-      <OutputFile>.\..\x64\Debug\server\server.dll</OutputFile>
+      <OutputFile>.\..\x64\Debug\server\server_amd64.dll</OutputFile>
       <ImportLibrary>.\..\x64\Debug\server\server.lib</ImportLibrary>
-      <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\3rd-party\physx\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>physx_static_64d.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -218,7 +223,7 @@
       <Optimization>Full</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
-      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\phys_shared;.\monsters;.\physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\3rd-party\physx\physx\include;..\3rd-party\physx\pxshared\include;.\monsters;.\physics;.\physics\physx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <AssemblerListingLocation>.\..\temp\server\!release\</AssemblerListingLocation>
       <PrecompiledHeaderOutputFile>.\..\temp\server\!release\server.pch</PrecompiledHeaderOutputFile>
@@ -233,9 +238,10 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
-    <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\temp\server\!release\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server.dll"</Command>
-    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>call "$(ProjectDir)..\scripts\setup_physx.bat" x86 $(Configuration)</Command>
+      <Message>Checking PhysX SDK</Message>
+    </PreBuildEvent>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -258,9 +264,10 @@
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>.\server.def</ModuleDefinitionFile>
-      <OutputFile>.\..\temp\server\!release\server.dll</OutputFile>
+      <OutputFile>.\..\temp\server\!release\server_amd64.dll</OutputFile>
       <ImportLibrary>.\..\temp\server\!release\server.lib</ImportLibrary>
-      <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\3rd-party\physx\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>msvcrt.lib;physx_static_32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -274,7 +281,7 @@
       <Optimization>MaxSpeed</Optimization>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <WarningLevel>TurnOffAllWarnings</WarningLevel>
-      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\phys_shared;.\monsters;.\physics;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\;..\engine;..\common;..\game_shared;..\3rd-party\physx\physx\include;..\3rd-party\physx\pxshared\include;.\monsters;.\physics;.\physics\physx;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeaderOutputFile>.\..\x64\Release\server\server.pch</PrecompiledHeaderOutputFile>
       <ObjectFileName>.\..\x64\Release\server\</ObjectFileName>
@@ -294,9 +301,10 @@
       <XMLDocumentationFileName>.\..\x64\Release\server\</XMLDocumentationFileName>
       <SourceDependenciesFile>.\..\x64\Release\server\</SourceDependenciesFile>
     </ClCompile>
-    <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\x64\Release\server\server.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\server_amd64.dll"</Command>
-    </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>call "$(ProjectDir)..\scripts\setup_physx.bat" x64 $(Configuration)</Command>
+      <Message>Checking PhysX SDK</Message>
+    </PreBuildEvent>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -318,19 +326,17 @@
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
       <ModuleDefinitionFile>.\server.def</ModuleDefinitionFile>
-      <OutputFile>.\..\x64\Release\server\server.dll</OutputFile>
+      <OutputFile>.\..\x64\Release\server\server_amd64.dll</OutputFile>
       <ImportLibrary>.\..\x64\Release\server\server.lib</ImportLibrary>
-      <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\3rd-party\physx\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>msvcrt.lib;physx_static_64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IncrementalLinkDatabaseFile>.\..\x64\Release\server\server.ilk</IncrementalLinkDatabaseFile>
-      <ManifestFile>.\..\x64\Release\server\server.dll.intermediate.manifest</ManifestFile>
+      <ManifestFile>.\..\x64\Release\server\server_amd64.dll.intermediate.manifest</ManifestFile>
       <ProgramDatabaseFile>.\..\x64\Release\server\server.pdb</ProgramDatabaseFile>
       <ProfileGuidedDatabase>.\..\x64\Release\server\server.pgd</ProfileGuidedDatabase>
       <LinkTimeCodeGenerationObjectFile>.\..\x64\Release\server\server.iobj</LinkTimeCodeGenerationObjectFile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
-    <PreBuildEvent>
-      <Command>copy /b buildtime.h +,,</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\common\virtualfs.cpp" />
@@ -525,13 +531,20 @@
     <ClCompile Include="entities\ents_xen_flora.cpp" />
     <ClCompile Include="entities\mortar.cpp" />
     <ClCompile Include="game\rules_multiplayer.cpp" />
-    <ClCompile Include="physics\novodex.cpp" />
+    <ClCompile Include="physics\physx\assert_handler.cpp" />
+    <ClCompile Include="physics\physx\collision_filter_data.cpp" />
+    <ClCompile Include="physics\physx\contact_modify_callback.cpp" />
+    <ClCompile Include="physics\physx\decomposed_shape.cpp" />
+    <ClCompile Include="physics\physx\error_stream.cpp" />
+    <ClCompile Include="physics\physx\event_handler.cpp" />
+    <ClCompile Include="physics\physx\holdable_item_controller.cpp" />
+    <ClCompile Include="physics\physx\io_streams.cpp" />
+    <ClCompile Include="physics\physx\physx_impl.cpp" />
     <ClCompile Include="game\observer.cpp" />
     <ClCompile Include="entities\path_track.cpp" />
     <ClCompile Include="entities\func_physbox.cpp" />
     <ClCompile Include="physics\physic.cpp" />
     <ClCompile Include="physics\meshdesc.cpp" />
-    <ClCompile Include="physics\NxUserStream.cpp" />
     <ClCompile Include="physics\tracemesh.cpp" />
     <ClCompile Include="game\baseplayer.cpp" />
     <ClCompile Include="entities\env_electrified_wire.cpp" />
@@ -608,7 +621,6 @@
     <ClInclude Include="game\game.h" />
     <ClInclude Include="game\gamerules.h" />
     <ClInclude Include="game\user_messages.h" />
-    <ClInclude Include="physics\NxErrorStream.h" />
     <ClInclude Include="player.h" />
     <ClInclude Include="game\saverestore.h" />
     <ClInclude Include="items.h" />
@@ -632,12 +644,20 @@
     <ClInclude Include="monsters\squadmonster.h" />
     <ClInclude Include="monsters\talkmonster.h" />
     <ClInclude Include="movelist.h" />
-    <ClInclude Include="physics\novodex.h" />
+    <ClInclude Include="physics\physx\assert_handler.h" />
+    <ClInclude Include="physics\physx\collision_filter_data.h" />
+    <ClInclude Include="physics\physx\contact_modify_callback.h" />
+    <ClInclude Include="physics\physx\decomposed_shape.h" />
+    <ClInclude Include="physics\physx\error_stream.h" />
+    <ClInclude Include="physics\physx\event_handler.h" />
+    <ClInclude Include="physics\physx\holdable_item_controller.h" />
+    <ClInclude Include="physics\physx\io_streams.h" />
+    <ClInclude Include="physics\physx\physx_impl.h" />
+    <ClInclude Include="physics\physx\PxConfig.h" />
     <ClInclude Include="physics\physcallback.h" />
     <ClInclude Include="physics\physic.h" />
     <ClInclude Include="physics\collision.h" />
     <ClInclude Include="physics\meshdesc.h" />
-    <ClInclude Include="physics\NxUserStream.h" />
     <ClInclude Include="physics\tracemesh.h" />
     <ClInclude Include="entities\CElectrifiedWire.h" />
     <ClInclude Include="entities\CRope.h" />
@@ -655,6 +675,17 @@
   <ItemGroup>
     <None Include="cpp.hint" />
   </ItemGroup>
+  <ItemDefinitionGroup>
+    <PreBuildEvent>
+      <Command>%(Command)
+copy /b buildtime.h +,,</Command>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(GameDir)' != ''">copy /Y "$(OutDir)*.dll" "$(GameDir)\diffusion\bin\"
+if exist "$(OutDir)*.pdb" copy /Y "$(OutDir)*.pdb" "$(GameDir)\diffusion\bin\"</Command>
+      <Message Condition="'$(GameDir)' != ''">Deploying server DLL to $(GameDir)\diffusion\bin</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

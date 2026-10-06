@@ -635,6 +635,7 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 	{
 		SetTouch( NULL );
 		BecomeDead();
+		WorldPhysic->CreateRagdollEntity( this );
 	}
 	
 	// don't let the status bar glitch for players.with <0 health.
@@ -898,6 +899,34 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 
 	// set damage type sustained
 	m_bitsDamageType |= bitsDamageType;
+
+	// remember the inflictor classname when it's a real projectile, direct hits leave it null
+	m_iszLastHitInflictor = ( pevInflictor && pevInflictor != pevAttacker ) ? pevInflictor->classname : iStringNull;
+
+	// remember which weapon dealt the hit, some weapons share a damage type
+	m_iLastHitWeapon = WEAPON_NONE;
+	{
+		CBaseEntity *pAttacker = CBaseEntity::Instance( pevAttacker );
+		if( pAttacker )
+		{
+			if( pAttacker->IsPlayer( ))
+			{
+				CBasePlayerItem *pItem = ((CBasePlayer *)pAttacker)->m_pActiveItem;
+				if( pItem )
+				{
+					m_iLastHitWeapon = pItem->m_iId;
+				}
+			}
+			else
+			{
+				CBaseMonster *pMonster = pAttacker->MyMonsterPointer();
+				if( pMonster )
+				{
+					m_iLastHitWeapon = pMonster->GetActiveWeaponId();
+				}
+			}
+		}
+	}
 
 	// grab the vector of the incoming attack. ( pretend that the inflictor is a little lower than it really is, so the body will tend to fly upward a bit).
 	vecDir = Vector( 0, 0, 0 );
@@ -1501,10 +1530,202 @@ void CBaseMonster :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector
 			break;
 		}
 
+		m_vecLastHitPoint = ptr->vecEndPos;
+		m_vecLastHitDir = vecDir;
+		m_flLastHitDamage = flDamage;
+		m_flLastHitTime = gpGlobals->time;
+		m_iLastHitDamageType = bitsDamageType;	// weapon category, for ragdoll knockback
+
 		SpawnBlood(ptr->vecEndPos, BloodColor(), flDamage);// a little surface blood.
 		TraceBleed( flDamage, vecDir, ptr, bitsDamageType );
 		AddMultiDamage( pevAttacker, this, flDamage, bitsDamageType );
 	}
+}
+
+bool CBaseMonster::GetLastHitInfo( Vector &pos, Vector &dir, float &damage, int &group )
+{
+	if( m_flLastHitTime <= 0.0f || gpGlobals->time - m_flLastHitTime > 0.5f )
+	{
+		return false;
+	}
+
+	pos = m_vecLastHitPoint;
+	dir = m_vecLastHitDir;
+	damage = m_flLastHitDamage;
+	group = m_LastHitGroup;
+	return true;
+}
+
+//=========================================================
+// Ragdoll impulse table, loaded once from ragdoll_impulse.txt
+// in the game folder. Each line is a key and a multiplier;
+// WEAPON_* keys match the last hit weapon, DMG_* keys match
+// the damage type bits, anything else matches the inflictor
+// classname (rpg_rocket, grenade...)
+//=========================================================
+#define MAX_IMPULSE_ENTRIES	64
+
+struct RagdollImpulseEntry
+{
+	char	name[32];	// inflictor classname entries only
+	int	id;		// weapon id or damage bits
+	float	mult;
+};
+
+static RagdollImpulseEntry g_ImpulseWeapons[MAX_IMPULSE_ENTRIES];
+static RagdollImpulseEntry g_ImpulseDamage[MAX_IMPULSE_ENTRIES];
+static RagdollImpulseEntry g_ImpulseInflictors[MAX_IMPULSE_ENTRIES];
+static int g_NumImpulseWeapons, g_NumImpulseDamage, g_NumImpulseInflictors;
+static bool g_ImpulseTableLoaded;
+
+static const struct { const char *name; int id; } g_ImpulseWeaponNames[] =
+{
+	{ "WEAPON_KNIFE", WEAPON_KNIFE },
+	{ "WEAPON_BERETTA", WEAPON_BERETTA },
+	{ "WEAPON_DEAGLE", WEAPON_DEAGLE },
+	{ "WEAPON_MRC", WEAPON_MRC },
+	{ "WEAPON_CYCLER", WEAPON_CYCLER },
+	{ "WEAPON_CROSSBOW", WEAPON_CROSSBOW },
+	{ "WEAPON_SHOTGUN", WEAPON_SHOTGUN },
+	{ "WEAPON_RPG", WEAPON_RPG },
+	{ "WEAPON_GAUSS", WEAPON_GAUSS },
+	{ "WEAPON_EGON", WEAPON_EGON },
+	{ "WEAPON_HORNETGUN", WEAPON_HORNETGUN },
+	{ "WEAPON_HANDGRENADE", WEAPON_HANDGRENADE },
+	{ "WEAPON_TRIPMINE", WEAPON_TRIPMINE },
+	{ "WEAPON_SATCHEL", WEAPON_SATCHEL },
+	{ "WEAPON_SNARK", WEAPON_SNARK },
+	{ "WEAPON_AR2", WEAPON_AR2 },
+	{ "WEAPON_DRONE", WEAPON_DRONE },
+	{ "WEAPON_SENTRY", WEAPON_SENTRY },
+	{ "WEAPON_HKMP5", WEAPON_HKMP5 },
+	{ "WEAPON_FIVESEVEN", WEAPON_FIVESEVEN },
+	{ "WEAPON_SNIPER", WEAPON_SNIPER },
+	{ "WEAPON_SHOTGUN_XM", WEAPON_SHOTGUN_XM },
+	{ "WEAPON_G36C", WEAPON_G36C },
+	{ "WEAPON_SMOKEGRENADE", WEAPON_SMOKEGRENADE },
+};
+
+static const struct { const char *name; int bits; } g_ImpulseDamageNames[] =
+{
+	{ "DMG_CRUSH", DMG_CRUSH },
+	{ "DMG_BULLET", DMG_BULLET },
+	{ "DMG_SLASH", DMG_SLASH },
+	{ "DMG_BURN", DMG_BURN },
+	{ "DMG_FREEZE", DMG_FREEZE },
+	{ "DMG_FALL", DMG_FALL },
+	{ "DMG_BLAST", DMG_BLAST },
+	{ "DMG_CLUB", DMG_CLUB },
+	{ "DMG_SHOCK", DMG_SHOCK },
+	{ "DMG_SONIC", DMG_SONIC },
+	{ "DMG_ENERGYBEAM", DMG_ENERGYBEAM },
+	{ "DMG_NUCLEAR", DMG_NUCLEAR },
+	{ "DMG_MORTAR", DMG_MORTAR },
+	{ "DMG_EMP", DMG_EMP },
+};
+
+static void LoadRagdollImpulseTable( void )
+{
+	if( g_ImpulseTableLoaded )
+		return;
+
+	g_ImpulseTableLoaded = true;
+
+	int length = 0;
+	char *pfile = (char *)LOAD_FILE( "ragdoll_impulse.txt", &length );
+
+	if( !pfile )
+	{
+		ALERT( at_console, "LoadRagdollImpulseTable: ragdoll_impulse.txt not found, using 1.0 for everything\n" );
+		return;
+	}
+
+	char token[256];
+	char *pdata = pfile;
+
+	while(( pdata = COM_ParseFile( pdata, token )) != NULL )
+	{
+		char key[32];
+		Q_strncpy( key, token, sizeof( key ));
+
+		if(( pdata = COM_ParseFile( pdata, token )) == NULL )
+			break;
+
+		float mult = Q_atof( token );
+
+		if( !Q_strnicmp( key, "WEAPON_", 7 ))
+		{
+			for( int i = 0; i < (int)( sizeof( g_ImpulseWeaponNames ) / sizeof( g_ImpulseWeaponNames[0] )); i++ )
+			{
+				if( !Q_stricmp( key, g_ImpulseWeaponNames[i].name ) && g_NumImpulseWeapons < MAX_IMPULSE_ENTRIES )
+				{
+					g_ImpulseWeapons[g_NumImpulseWeapons].id = g_ImpulseWeaponNames[i].id;
+					g_ImpulseWeapons[g_NumImpulseWeapons].mult = mult;
+					g_NumImpulseWeapons++;
+					break;
+				}
+			}
+		}
+		else if( !Q_strnicmp( key, "DMG_", 4 ))
+		{
+			for( int i = 0; i < (int)( sizeof( g_ImpulseDamageNames ) / sizeof( g_ImpulseDamageNames[0] )); i++ )
+			{
+				if( !Q_stricmp( key, g_ImpulseDamageNames[i].name ) && g_NumImpulseDamage < MAX_IMPULSE_ENTRIES )
+				{
+					g_ImpulseDamage[g_NumImpulseDamage].id = g_ImpulseDamageNames[i].bits;
+					g_ImpulseDamage[g_NumImpulseDamage].mult = mult;
+					g_NumImpulseDamage++;
+					break;
+				}
+			}
+		}
+		else if( g_NumImpulseInflictors < MAX_IMPULSE_ENTRIES )
+		{
+			Q_strncpy( g_ImpulseInflictors[g_NumImpulseInflictors].name, key, sizeof( g_ImpulseInflictors[0].name ));
+			g_ImpulseInflictors[g_NumImpulseInflictors].mult = mult;
+			g_NumImpulseInflictors++;
+		}
+	}
+
+	FREE_FILE( pfile );
+}
+
+//=========================================================
+// GetRagdollImpulseMultiplier
+//
+// scales the ragdoll death knockback by what caused the last hit
+//=========================================================
+float CBaseMonster::GetRagdollImpulseMultiplier( float hitDamage )
+{
+	LoadRagdollImpulseTable();
+
+	// a projectile inflictor is the best hint, works for NPC vs NPC too
+	if( m_iszLastHitInflictor != iStringNull )
+	{
+		const char *pszInflictor = STRING( m_iszLastHitInflictor );
+
+		for( int i = 0; i < g_NumImpulseInflictors; i++ )
+		{
+			if( !Q_stricmp( pszInflictor, g_ImpulseInflictors[i].name ))
+				return g_ImpulseInflictors[i].mult;
+		}
+	}
+
+	// weapon id tells apart weapons that share a damage type (shotgun vs 9mm)
+	for( int i = 0; i < g_NumImpulseWeapons; i++ )
+	{
+		if( g_ImpulseWeapons[i].id == m_iLastHitWeapon )
+			return g_ImpulseWeapons[i].mult;
+	}
+
+	// otherwise weigh by the damage-type category, first match in file order wins
+	for( int i = 0; i < g_NumImpulseDamage; i++ )
+	{
+		if( m_iLastHitDamageType & g_ImpulseDamage[i].id )
+			return g_ImpulseDamage[i].mult;
+	}
+
+	return 1.0f; // bullets and everything else: neutral
 }
 
 //=========================================================
@@ -1517,7 +1738,7 @@ void CBaseEntity::MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 
 	float len = (vecEnd - vecSrc).Length();
 
-	// Äåëèì ïîïîëàì
+	// Ã„Ã¥Ã«Ã¨Ã¬ Ã¯Ã®Ã¯Ã®Ã«Ã Ã¬
 	Vector vecTemp = Vector( (vecEnd.x + vecSrc.x) * 0.5f, (vecEnd.y + vecSrc.y) * 0.5f, (vecEnd.z + vecSrc.z) * 0.5f );
 
 	if( len <= 1 )

@@ -92,6 +92,7 @@ public:
 	int  ISoundMask ( void);
 	void Shoot( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
+	void OnRagdoll( void );
 	Schedule_t* GetSchedule ( void );
 	Schedule_t* GetScheduleOfType ( int Type );
 	BOOL CheckMeleeAttack1 ( float flDot, float flDist );	// jump
@@ -107,6 +108,7 @@ public:
 	void SetActivity(Activity NewActivity);
 	void ClearEffects(void);
 	BOOL HasHumanGibs( void ) { return TRUE; };
+	virtual int GetActiveWeaponId( void );
 	CUSTOM_SCHEDULES;
 
 	DECLARE_DATADESC();
@@ -671,6 +673,23 @@ void CHAssassin :: Shoot ( void )
 //	ALERT(at_console, "%3d\n", m_cAmmoLoaded);
 }
 
+//=========================================================
+// GetActiveWeaponId - 9mm pistols or the TMP
+//=========================================================
+int CHAssassin :: GetActiveWeaponId( void )
+{
+	if( HasWeapon( HASS_WPN_PISTOL ))
+	{
+		return WEAPON_BERETTA;
+	}
+	if( HasWeapon( HASS_WPN_TMP ))
+	{
+		return WEAPON_HKMP5;
+	}
+
+	return WEAPON_NONE;
+}
+
 
 //=========================================================
 // HandleAnimEvent - catches the monster-specific messages
@@ -678,6 +697,12 @@ void CHAssassin :: Shoot ( void )
 //
 // Returns number of events handled, 0 if none.
 //=========================================================
+void CHAssassin :: OnRagdoll( void )
+{
+	CBaseEntity::OnRagdoll();
+	SetBodygroup( GUN_GROUP, GUN_NONE );
+}
+
 void CHAssassin :: HandleAnimEvent( MonsterEvent_t *pEvent )
 {
 	switch( pEvent->event )

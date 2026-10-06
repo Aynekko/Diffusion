@@ -73,6 +73,7 @@ Studio models are position independent, so the cache manager can move them.
 #define STUDIO_NF_MASKED		0x0040	// use texture with alpha channel
 #define STUDIO_NF_NORMALMAP		0x0080	// indexed normalmap
 
+#define STUDIO_NF_SOLIDGEOM		0x0800	// use with STUDIO_NF_MASKED to have solid alpha-test polygones for rigid body collisions
 #define STUDIO_NF_TWOSIDE		0x1000	// render mesh as twosided
 
 #define STUDIO_NF_NODRAW		(1<<16)	// failed to create shader for this mesh

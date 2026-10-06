@@ -1530,6 +1530,23 @@ int	CHGrunt :: Classify ( void )
 }
 
 //=========================================================
+// GetActiveWeaponId - what this grunt shoots with, for the ragdoll knockback
+//=========================================================
+int CHGrunt :: GetActiveWeaponId( void )
+{
+	if( HasWeapon( HGRUNT_SHOTGUN ))
+	{
+		return WEAPON_SHOTGUN;
+	}
+	if( HasWeapon( HGRUNT_9MMAR ))
+	{
+		return WEAPON_HKMP5;	// grunt's 9mm assault rifle
+	}
+
+	return WEAPON_NONE;
+}
+
+//=========================================================
 //=========================================================
 CBaseEntity *CHGrunt :: Kick( void )
 {
@@ -1616,6 +1633,57 @@ void CHGrunt :: Shotgun ( void )
 
 	Vector angDir = UTIL_VecToAngles( vecShootDir );
 	SetBlending( 0, -angDir.x );
+}
+
+//=========================================================
+// OnRagdoll - death animation events never play for ragdolls, drop the carried gun here
+//=========================================================
+void CHGrunt :: OnRagdoll( void )
+{
+	CBaseEntity::OnRagdoll();
+
+	if( GetBodygroup( GUN_GROUP ) == GUN_NONE )
+	{
+		return;
+	}
+
+	Vector	vecGunPos;
+	Vector	vecGunAngles;
+
+	GetAttachment( 0, vecGunPos, vecGunAngles );
+	SetBodygroup( GUN_GROUP, GUN_NONE );
+
+	// same drop rules as the HGRUNT_AE_DROP_GUN animation event
+	if( HasSpawnFlags( SF_MONSTER_NO_WPN_DROP ))
+	{
+		if( !HasSpawnFlags( SF_MONSTER_WEAPON_LOCKED ))
+		{
+			if( HasWeapon( HGRUNT_SHOTGUN ))
+			{
+				DropItem( "weapon_shotgun", vecGunPos, vecGunAngles );
+			}
+			else
+			{
+				DropItem( "weapon_mrc", vecGunPos, vecGunAngles );
+			}
+		}
+		else
+		{
+			if( HasWeapon( HGRUNT_SHOTGUN ))
+			{
+				DropItem( "weapon_shotgun_locked", vecGunPos, vecGunAngles );
+			}
+			else
+			{
+				DropItem( "weapon_mrc_locked", vecGunPos, vecGunAngles );
+			}
+		}
+
+		if( HasWeapon( HGRUNT_GRENADELAUNCHER ))
+		{
+			DropItem( "ammo_ARgrenades", BodyTarget( GetAbsOrigin() ), vecGunAngles );
+		}
+	}
 }
 
 //=========================================================

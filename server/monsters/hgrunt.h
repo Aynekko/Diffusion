@@ -37,6 +37,7 @@ public:
 	virtual int  Classify(void);
 	int ISoundMask(void);
 	virtual void HandleAnimEvent(MonsterEvent_t *pEvent);
+	virtual void OnRagdoll(void);
 	void KeyValue( KeyValueData *pkvd );
 	BOOL FCanCheckAttacks(void);
 	BOOL CheckMeleeAttack1(float flDot, float flDist);
@@ -96,6 +97,8 @@ public:
 //	static TYPEDESCRIPTION m_SaveData[];
 
 	virtual int SizeForGrapple() { return GRAPPLE_MEDIUM; }
+
+	virtual int GetActiveWeaponId( void );
 
 	// checking the feasibility of a grenade toss is kind of costly, so we do it every couple of seconds,
 	// not every server frame.

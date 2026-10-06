@@ -58,14 +58,20 @@ public:
 	virtual void	Update( float flTime ) {}
 	virtual void	EndFrame( void ) {}
 	virtual void	RemoveBody( struct edict_s *pEdict ) {}
-	virtual void	RemoveBody( const void *pBody ) {}
 	virtual void *CreateBodyFromEntity( CBaseEntity *pEntity ) { return NULL; }
 	virtual void *CreateBoxFromEntity( CBaseEntity *pObject ) { return NULL; }
+	virtual void *CreateRagdollEntity( CBaseEntity *pObject ) { return NULL; }
+	virtual void	PrecacheRagdoll( const char *szModelName ) {}
+	virtual void	PrecachePlayerRagdolls( void ) {}
+	virtual void	ReloadRagdollConfigs( void ) {}
+	virtual const char *GetRagdollImpactSound( const char *szModelName, float flForce, float *flVolume ) { return NULL; }
+	virtual void	SendRagdollPose( CBaseEntity *pPlayer, int entindex ) {}
 	virtual void *CreateKinematicBodyFromEntity( CBaseEntity *pEntity ) { return NULL; }
 	virtual void *CreateStaticBodyFromEntity( CBaseEntity *pObject ) { return NULL; }
-	virtual void *CreateVehicle( CBaseEntity *pObject, string_t scriptName = 0 ) { return NULL; }
+	virtual void *CreateTriggerFromEntity( CBaseEntity *pEntity ) { return NULL; }
 	virtual void *RestoreBody( CBaseEntity *pEntity ) { return NULL; }
 	virtual void	SaveBody( CBaseEntity *pObject ) {}
+	virtual void	SaveRagdoll( CBaseEntity *pObject ) {}
 	virtual void	SetOrigin( CBaseEntity *pEntity, const Vector &origin ) {}
 	virtual void	SetAngles( CBaseEntity *pEntity, const Vector &angles ) {}
 	virtual void	SetVelocity( CBaseEntity *pEntity, const Vector &velocity ) {}
@@ -74,20 +80,22 @@ public:
 	virtual void	RotateObject( CBaseEntity *pEntity, const Vector &finalAngle ) {}
 	virtual void	SetLinearMomentum( CBaseEntity *pEntity, const Vector &velocity ) {}
 	virtual void	AddImpulse( CBaseEntity *pEntity, const Vector &impulse, const Vector &position, float factor ) {}
-	virtual void	AddForce( CBaseEntity *pEntity, const Vector &force ) {}
+	virtual void	AddForce( CBaseEntity *pEntity, const Vector &force, ForceMode mode = ForceMode::Force ) {}
+	virtual void	AddTorque( CBaseEntity *pEntity, const Vector &torque, ForceMode mode = ForceMode::Force ) {}
+	virtual void	SetHoldableTarget( CBaseEntity *pEntity, const Vector &targetOrigin, const Vector4D &targetQuat ) {}
+	virtual void	ClearHoldableTarget( CBaseEntity *pEntity ) {}
+	virtual void	GetTransform( CBaseEntity *pEntity, matrix4x4 &out ) {}
 	virtual void	EnableCollision( CBaseEntity *pEntity, int fEnable ) {}
 	virtual void	MakeKinematic( CBaseEntity *pEntity, int fEnable ) {}
-	virtual void	UpdateVehicle( CBaseEntity *pObject ) {}
 	virtual int	FLoadTree( char *szMapName ) { return 0; }
 	virtual int	CheckBINFile( char *szMapName ) { return 0; }
 	virtual int	BuildCollisionTree( char *szMapName ) { return 0; }
-	virtual bool	UpdateEntityPos( CBaseEntity *pEntity ) { return false; }
+	virtual bool	UpdateEntityTransform( CBaseEntity *pEntity ) { return false; }
 	virtual void	UpdateEntityAABB( CBaseEntity *pEntity ) {}
 	virtual bool	UpdateActorPos( CBaseEntity *pEntity ) { return false; };
 	virtual void	SetupWorld( void ) {}
-	virtual void	DebugDraw( void ) {}
+	virtual void	FreeWorld( void ) {}
 	virtual void	DrawPSpeeds( void ) {}
-	virtual void	FreeAllBodies( void ) {}
 	virtual void	TeleportCharacter( CBaseEntity *pEntity ) {}
 	virtual void	TeleportActor( CBaseEntity *pEntity ) {}
 	virtual void	MoveCharacter( CBaseEntity *pEntity ) {}
@@ -347,10 +355,61 @@ class CCorpse : public CBaseEntity
 {
 	DECLARE_CLASS( CCorpse, CBaseEntity );
 public:
-	virtual int ObjectCaps( void ) { return FCAP_DONT_SAVE; }	
+	virtual int ObjectCaps( void ) { return FCAP_DONT_SAVE; }
 };
 
 LINK_ENTITY_TO_CLASS( bodyque, CCorpse );
+
+// a throwaway corpse
+class CRagdollCorpse : public CBaseAnimating
+{
+	DECLARE_CLASS( CRagdollCorpse, CBaseAnimating );
+public:
+	void Spawn( void )
+	{
+		pev->takedamage = DAMAGE_NO;
+		pev->solid = SOLID_NOT;
+		pev->movetype = MOVETYPE_NONE;
+		pev->deadflag = DEAD_DEAD;
+		m_hasHit = false;
+	}
+
+	virtual int ObjectCaps( void ) { return FCAP_DONT_SAVE; }
+
+	void SetRagdollHit( const Vector &pos, const Vector &dir, float damage, int group, float impulseMult )
+	{
+		m_hitPos = pos;
+		m_hitDir = dir;
+		m_hitDamage = damage;
+		m_hitGroup = group;
+		m_impulseMult = impulseMult;
+		m_hasHit = true;
+	}
+
+	bool GetLastHitInfo( Vector &pos, Vector &dir, float &damage, int &group )
+	{
+		if( !m_hasHit )
+			return false;
+
+		pos = m_hitPos;
+		dir = m_hitDir;
+		damage = m_hitDamage;
+		group = m_hitGroup;
+		return true;
+	}
+
+	float GetRagdollImpulseMultiplier( float hitDamage ) { return m_hasHit ? m_impulseMult : 1.0f; }
+
+private:
+	Vector m_hitPos;
+	Vector m_hitDir;
+	float m_hitDamage;
+	int m_hitGroup;
+	float m_impulseMult;
+	bool m_hasHit;
+};
+
+LINK_ENTITY_TO_CLASS( ragdoll_corpse, CRagdollCorpse );
 
 static void InitBodyQue(void)
 {

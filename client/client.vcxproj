@@ -46,6 +46,7 @@
     <UseOfMfc>false</UseOfMfc>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <Import Project="$(ProjectDir)..\*.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
@@ -82,7 +83,7 @@
     <CodeAnalysisRuleAssemblies />
     <OutDir>.\..\x64\Release\client\</OutDir>
     <IntDir>.\..\x64\Release\client\</IntDir>
-    <TargetName>client</TargetName>
+    <TargetName>client_amd64</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>.\..\temp\client\!debug\</OutDir>
@@ -101,7 +102,7 @@
     <CodeAnalysisRuleAssemblies />
     <OutDir>.\..\x64\Debug\client\</OutDir>
     <IntDir>.\..\x64\Debug\client\</IntDir>
-    <TargetName>client</TargetName>
+    <TargetName>client_amd64</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -129,9 +130,6 @@
       <FloatingPointModel>Fast</FloatingPointModel>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
     </ClCompile>
-    <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\temp\client\!release\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client.dll"</Command>
-    </PostBuildEvent>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -152,7 +150,7 @@
       <LinkDLL>true</LinkDLL>
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <OutputFile>.\..\temp\client\!release\client.dll</OutputFile>
+      <OutputFile>.\..\temp\client\!release\client_amd64.dll</OutputFile>
       <ImportLibrary>.\..\temp\client\!release\client.lib</ImportLibrary>
       <AdditionalLibraryDirectories>..\common\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -191,9 +189,6 @@
       <OpenMPSupport>
       </OpenMPSupport>
     </ClCompile>
-    <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\x64\Release\client\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client_amd64.dll"</Command>
-    </PostBuildEvent>
     <Midl>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -213,7 +208,7 @@
       <LinkDLL>true</LinkDLL>
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc.lib;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <OutputFile>.\..\x64\Release\client\client.dll</OutputFile>
+      <OutputFile>.\..\x64\Release\client\client_amd64.dll</OutputFile>
       <ImportLibrary>.\..\x64\Release\client\client.lib</ImportLibrary>
       <AdditionalLibraryDirectories>.\..\common\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>.\..\3rd-party\discord-rpc.lib;msvcrt.lib;%(AdditionalDependencies)</AdditionalDependencies>
@@ -221,14 +216,11 @@
       </StackReserveSize>
       <StackCommitSize>
       </StackCommitSize>
-      <ManifestFile>.\..\x64\Release\client\client.dll.intermediate.manifest</ManifestFile>
+      <ManifestFile>.\..\x64\Release\client\client_amd64.dll.intermediate.manifest</ManifestFile>
       <ProfileGuidedDatabase>.\..\x64\Release\client\client.pgd</ProfileGuidedDatabase>
       <LinkTimeCodeGenerationObjectFile>.\..\x64\Release\client\client.iobj</LinkTimeCodeGenerationObjectFile>
       <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
-    <PreBuildEvent>
-      <Command>copy /b buildtime.h +,,</Command>
-    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -270,21 +262,12 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <OutputFile>.\..\temp\client\!debug\client.dll</OutputFile>
+      <OutputFile>.\..\temp\client\!debug\client_amd64.dll</OutputFile>
       <ImportLibrary>.\..\temp\client\!debug\client.lib</ImportLibrary>
       <AdditionalLibraryDirectories>..\common\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>msvcrtd.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
-    <CustomBuildStep>
-      <Command>
-      </Command>
-      <Outputs>
-      </Outputs>
-    </CustomBuildStep>
-    <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\temp\client\!debug\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client.dll"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
@@ -325,20 +308,11 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <IgnoreSpecificDefaultLibraries>libc;%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
-      <OutputFile>.\..\x64\Debug\client\client.dll</OutputFile>
+      <OutputFile>.\..\x64\Debug\client\client_amd64.dll</OutputFile>
       <ImportLibrary>.\..\x64\Debug\client\client.lib</ImportLibrary>
       <AdditionalLibraryDirectories>..\common\libs;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <AdditionalDependencies>.\..\3rd-party\discord-rpc.lib;msvcrtd.lib;opengl32.lib;glu32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <CustomBuildStep>
-      <Command>
-      </Command>
-      <Outputs>
-      </Outputs>
-    </CustomBuildStep>
-    <PostBuildEvent>
-      <Command>copy /Y "D:\!DIFFUSION 2020\source code 2022\client-server\x64\Debug\client\client.dll" "D:\!DIFFUSION 2020\!GAME_developer\diffusion\bin\client_amd64.dll"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\common\virtualfs.cpp" />
@@ -467,6 +441,17 @@
     <ClInclude Include="render\tbnfile.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
+  <ItemDefinitionGroup>
+    <PreBuildEvent>
+      <Command>copy /b buildtime.h +,,</Command>
+      <Message>Touching buildtime.h so the build date banner stays current</Message>
+    </PreBuildEvent>
+    <PostBuildEvent>
+      <Command Condition="'$(GameDir)' != ''">copy /Y "$(OutDir)*.dll" "$(GameDir)\diffusion\bin\"
+if exist "$(OutDir)*.pdb" copy /Y "$(OutDir)*.pdb" "$(GameDir)\diffusion\bin\"</Command>
+      <Message Condition="'$(GameDir)' != ''">Deploying client DLL to $(GameDir)\diffusion\bin</Message>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

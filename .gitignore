@@ -4,6 +4,8 @@
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 3rd-party/mainui_cpp
 3rd-party/game_launch
+3rd-party/physx
+3rd-party/physx-rs
 # User-specific files
 *.rsuser
 *.suo
@@ -369,3 +371,5 @@ FodyWeavers.xsd
 build/
 .lock*
 .waf*
+!scripts/*.rsp
+game_dir.props

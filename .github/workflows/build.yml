@@ -1,5 +1,8 @@
 name: Build
 on: [push, pull_request]
+permissions:
+  contents: write
+  actions: read
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -13,12 +16,30 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v4
     - name: Fetch dependencies
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
         git clone https://github.com/Aynekko/Diffusion-MainUI 3rd-party/mainui_cpp
         git clone https://github.com/Aynekko/Diffusion-executable 3rd-party/game_launch
-        wget https://github.com/FWGS/xash3d-fwgs/releases/download/continuous/xash3d-fwgs-amd64.AppImage
-        wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
-        chmod +x *.AppImage
+        git clone --depth 1 https://github.com/EmbarkStudios/physx-rs 3rd-party/physx-rs
+        git -C 3rd-party/physx-rs fetch --depth 1 origin 6b3a94534016270f8f6ebc665cd97ba7ce858d84
+        git -C 3rd-party/physx-rs checkout 6b3a94534016270f8f6ebc665cd97ba7ce858d84
+        if [ ! -f 3rd-party/physx-rs/physx-sys/PhysX/physx/include/PxPhysicsAPI.h ]; then
+          git -C 3rd-party/physx-rs submodule update --init --depth 1 physx-sys/PhysX
+        fi
+        ln -s physx-rs/physx-sys/PhysX 3rd-party/physx
+        assets=$(gh release view continuous -R FWGS/xash3d-fwgs --json assets --jq '.assets[].name')
+        echo "FWGS continuous release assets:"
+        echo "$assets"
+        engine_asset=$(echo "$assets" | grep -iE '(amd64|x86_64).*\.AppImage$' | head -1 || true)
+        if [ -n "$engine_asset" ]; then
+          echo "Using engine asset: $engine_asset"
+          gh release download continuous -R FWGS/xash3d-fwgs --pattern "$engine_asset" --output xash3d-fwgs-amd64.AppImage
+          gh release download continuous -R AppImage/appimagetool --pattern 'appimagetool-x86_64.AppImage' --output appimagetool-x86_64.AppImage
+          chmod +x *.AppImage
+        else
+          echo "::warning::FWGS continuous release currently has no Linux amd64 AppImage, the release will contain the game libraries only"
+        fi
     - name: Build for Linux
       run: |
         ./waf configure -T release install --destdir=out
@@ -28,6 +49,10 @@ jobs:
     # wow this is much more horrible than I expected
     - name: Repackage engine
       run: |
+        if [ ! -f xash3d-fwgs-amd64.AppImage ]; then
+          echo "Engine AppImage unavailable, skipping repackage"
+          exit 0
+        fi
         ./xash3d-fwgs-amd64.AppImage --appimage-extract
         pushd squashfs-root
         rm -rf libav* libsw* libref_soft.so libmenu* xash3d
@@ -45,10 +70,79 @@ jobs:
       with:
         name: diffusion-linux-amd64
         path: diffusion-linux-amd64.zip
+  build-win64:
+    runs-on: windows-2022
+    continue-on-error: true
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+    - name: Fetch PhysX SDK
+      shell: bash
+      run: |
+        git clone --depth 1 https://github.com/EmbarkStudios/physx-rs 3rd-party/physx-rs
+        git -C 3rd-party/physx-rs fetch --depth 1 origin 6b3a94534016270f8f6ebc665cd97ba7ce858d84
+        git -C 3rd-party/physx-rs checkout 6b3a94534016270f8f6ebc665cd97ba7ce858d84
+        if [ ! -f 3rd-party/physx-rs/physx-sys/PhysX/physx/include/PxPhysicsAPI.h ]; then
+          git -C 3rd-party/physx-rs submodule update --init --depth 1 physx-sys/PhysX
+        fi
+        cp -r 3rd-party/physx-rs/physx-sys/PhysX 3rd-party/physx
+    - name: Build for Windows x64
+      shell: cmd
+      run: |
+        for /f "usebackq tokens=*" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do call "%%i\VC\Auxiliary\Build\vcvarsall.bat" x64
+        python scripts\build_physx_msvc.py x64
+        if errorlevel 1 exit /b 1
+        msbuild server\server.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143
+        if errorlevel 1 exit /b 1
+        msbuild client\client.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143
+        if errorlevel 1 exit /b 1
+    - name: Fetch menu source
+      shell: bash
+      continue-on-error: true
+      run: |
+        git clone https://github.com/Aynekko/Diffusion-MainUI 3rd-party/mainui_cpp
+        python - <<'PYEOF'
+        import glob
+        marker = 'def get_flags_by_compiler(flags, compiler):'
+        guard = marker + "\n\tif isinstance(compiler, list) and compiler:\n\t\tcompiler = compiler[0]"
+        for f in glob.glob('3rd-party/mainui_cpp/**/fwgslib.py', recursive=True):
+            src = open(f).read()
+            if marker in src and 'isinstance(compiler, list)' not in src:
+                open(f, 'w').write(src.replace(marker, guard))
+                print('patched', f)
+        PYEOF
+    - name: Build menu for Windows x64
+      shell: cmd
+      continue-on-error: true
+      run: |
+        for /f "usebackq tokens=*" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do call "%%i\VC\Auxiliary\Build\vcvarsall.bat" x64
+        cd 3rd-party\mainui_cpp
+        python ..\..\waf configure build
+    - name: Package
+      shell: bash
+      run: |
+        mkdir -p out/diffusion/bin
+        cp x64/Release/server/server_amd64.dll out/diffusion/bin/
+        cp x64/Release/client/client_amd64.dll out/diffusion/bin/
+        menu=$(find 3rd-party/mainui_cpp/build -name 'menu*.dll' 2>/dev/null | head -1 || true)
+        if [ -n "$menu" ]; then
+          cp "$menu" out/diffusion/bin/
+        else
+          echo "::warning::menu dll was not built, win64 package ships without it"
+        fi
+        cd out
+        7z a ../diffusion-win64.zip diffusion
+    - name: Upload artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: diffusion-win64
+        path: diffusion-win64.zip
   release:
     name: "Upload to releases"
     runs-on: ubuntu-latest
-    needs: build
+    needs: [build, build-win64]
     if: ${{ github.event_name == 'push' }}
     steps:
     - name: Checkout

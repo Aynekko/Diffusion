@@ -4,6 +4,7 @@
 
 from waflib import Utils
 import os
+import json
 import xml.etree.ElementTree as ET
 
 def options(opt):
@@ -12,6 +13,11 @@ def options(opt):
 def configure(conf):
 	if conf.env.COMPILER_CC == 'msvc':
 		conf.fatal('for msvc use VS project')
+
+	physx_sdk = conf.path.parent.find_node('3rd-party/physx')
+	if not physx_sdk or not physx_sdk.find_node('physx/include/PxPhysicsAPI.h'):
+		conf.fatal('PhysX SDK not found. Place a PhysX 4.1 tree (physx/ and pxshared/ dirs) at 3rd-party/physx, e.g. physx-sys/PhysX from https://github.com/EmbarkStudios/physx-rs commit 6b3a945')
+	conf.env.PHYSX_SDK = physx_sdk.abspath()
 
 def build(bld):
 	sources = []
@@ -25,14 +31,46 @@ def build(bld):
 		srcfile = i.attrib['Include']
 		sources += [srcfile.replace('\\', '/')]
 
+	physx_root = bld.root.find_node(bld.env.PHYSX_SDK).find_node('physx')
+	manifest = json.load(open(bld.path.parent.find_node('scripts/physx_manifest.json').abspath()))
+
+	physx_platform_sources = manifest['sources_windows'] if bld.env.DEST_OS == 'win32' else manifest['sources_unix']
+	physx_sources = []
+	missing = []
+	for src in manifest['sources'] + physx_platform_sources:
+		node = physx_root.find_node(src)
+		if node:
+			physx_sources.append(node)
+		else:
+			missing.append(src)
+	if missing:
+		bld.fatal('PhysX SDK at %s is missing %d expected source files:\n%s' % (
+			physx_root.abspath(), len(missing), '\n'.join(missing)))
+	physx_includes = [physx_root.find_node(inc) for inc in manifest['includes']]
+	physx_include_paths = [n.abspath() for n in physx_includes if n]
+
+	bld.stlib(
+		source   = physx_sources,
+		target   = 'physx',
+		name     = 'physx',
+		features = 'cxx',
+		includes = physx_include_paths,
+		defines  = manifest['defines'],
+		cxxflags = ['-std=c++14', '-w', '-fno-strict-aliasing', '-fexceptions'],
+		idx = bld.get_taskgen_count()
+	)
+
 	bld.shlib(
 		source   = sources,
 		target   = bld.env.SERVER_LIBRARY_NAME + bld.env.POSTFIX,
 		name     = 'server',
 		features = 'c cxx',
-		includes = '. ../common ../engine ../phys_shared ../game_shared monsters physics',
-		defines  = '',
+		includes = '. ../common ../engine ../game_shared monsters physics physics/physx ' +
+			os.path.join(bld.env.PHYSX_SDK, 'physx', 'include') + ' ' +
+			os.path.join(bld.env.PHYSX_SDK, 'pxshared', 'include'),
+		defines  = ['PX_PHYSX_STATIC_LIB'],
+		use      = 'physx',
+		lib      = ['pthread', 'dl'] if bld.env.DEST_OS != 'win32' else [],
 		install_path = os.path.join(bld.env.GAMEDIR, bld.env.SERVER_INSTALL_DIR),
 		idx = bld.get_taskgen_count()
 	)
-

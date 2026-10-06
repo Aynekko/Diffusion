@@ -1,4 +1,4 @@
-LIBRARY server
+LIBRARY server_amd64
 EXPORTS
 	GiveFnptrsToDll			@1
 SECTIONS

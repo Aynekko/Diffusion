@@ -6,6 +6,7 @@ To complete these source files, you might also need:
 https://github.com/Aynekko/Diffusion-MainUI - The main menu binary source code  
 https://github.com/Aynekko/Diffusion-executable - The executable/launcher  
 https://github.com/FWGS/xash3d-fwgs - Xash3D FWGS engine which is used as a foundation for the game  
-  
+NVIDIA PhysX 4.1 SDK sources - run scripts/setup_physx 
+
 "3rd-party" folder contains Discord rich-presence.  
 "glsl" folder contains the shaders, which you will need to put into the game folder (diffusion/glsl)  

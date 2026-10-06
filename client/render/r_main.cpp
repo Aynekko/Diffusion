@@ -527,6 +527,13 @@ void R_CheckChanges( void )
 		settings_changed = true;
 	}
 
+	// this picks shader directives, so the ubershaders have to be rebuilt for a change to show without reloading the map
+	if( FBitSet( r_sun_shadow->flags, FCVAR_CHANGED ))
+	{
+		ClearBits( r_sun_shadow->flags, FCVAR_CHANGED );
+		settings_changed = true;
+	}
+
 	if( FBitSet( gl_water_refraction->flags, FCVAR_CHANGED ) )
 	{
 		ClearBits( gl_water_refraction->flags, FCVAR_CHANGED );
@@ -1806,7 +1813,19 @@ void R_RenderScene( void )
 	}
 	
 	if( RP_NORMALPASS() ) // no shadowpass for 3D sky and subviews
+	{
 		R_RenderShadowmaps();
+
+		static bool sunShadowWasActive = false;
+		R_RenderSunShadow();
+
+		// the ubershaders pick the sun shadow variant from sunShadowActive, which is off while paused (e.g. loading a save), so rebuild them whenever it flips
+		if( tr.sunShadowActive != sunShadowWasActive )
+		{
+			sunShadowWasActive = tr.sunShadowActive;
+			tr.glsl_valid_sequence++;
+		}
+	}
 
 	// recursive draw mirrors, portals, etc
 	R_RenderSubview(); // diffusion - I moved this here. position before shadowmaps cause the flashlight to flicker if there is a monitor or two in view (and no shadows).
