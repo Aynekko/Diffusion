@@ -43,6 +43,10 @@ jobs:
     - name: Build for Linux
       run: |
         ./waf configure -T release install --destdir=out
+        # Strip all game libraries (removes debug symbols)
+        find out -type f \( -name '*.so' -o -name 'diffusion_run' -o -name 'xash*' \) -print -exec strip --strip-all {} \;
+        # Show sizes
+        find out -type f \( -name '*.so' -o -name 'diffusion_run' \) -exec ls -lh {} \;
         pushd out
         zip -r ../diffusion-linux-amd64.zip diffusion
         popd
@@ -94,9 +98,9 @@ jobs:
         for /f "usebackq tokens=*" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do call "%%i\VC\Auxiliary\Build\vcvarsall.bat" x64
         python scripts\build_physx_msvc.py x64
         if errorlevel 1 exit /b 1
-        msbuild server\server.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:PostBuildEventUseInBuild=false
+        msbuild server\server.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:PostBuildEventUseInBuild=false /p:DebugType=None /p:DebugInformationFormat=None
         if errorlevel 1 exit /b 1
-        msbuild client\client.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:PostBuildEventUseInBuild=false
+        msbuild client\client.vcxproj /m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:PostBuildEventUseInBuild=false /p:DebugType=None /p:DebugInformationFormat=None
         if errorlevel 1 exit /b 1
     - name: Fetch menu source
       shell: bash
@@ -119,7 +123,7 @@ jobs:
       run: |
         for /f "usebackq tokens=*" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do call "%%i\VC\Auxiliary\Build\vcvarsall.bat" x64
         cd 3rd-party\mainui_cpp
-        python ..\..\waf configure build
+        python ..\..\waf configure -T release build
     - name: Package
       shell: bash
       run: |
