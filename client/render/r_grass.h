@@ -57,6 +57,7 @@ typedef struct gvert_s
 
 #define FGRASS_NODRAW	BIT( 0 )		// grass shader is failed to build
 #define FGRASS_NODLIGHT	BIT( 1 )		// grass dlight shader is failed to build
+#define FGRASS_SUNSHADOW	BIT( 2 )		// solid shader was picked with the sun shadow active
 
 // 20 bytes here
 typedef struct grassvert_s

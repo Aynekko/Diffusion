@@ -15,6 +15,7 @@ GNU General Public License for more details.
 
 #include "const.h"
 #include "mathlib.h"
+#include "matrix.h"
 #include "grass.h"
 
 attribute vec4		attr_Position;	// gl_VertexID emulation (already preserved by & 15)
@@ -35,6 +36,28 @@ uniform vec4 u_GrassParams[3];
 varying vec2		var_TexDiffuse;
 varying vec3		var_VertexLight;
 varying vec3		var_ViewVec;
+
+#if defined( GRASS_SUN_SHADOW )
+uniform mat4		u_SunMatrix;	// world -> sun light clip
+varying vec4		var_SunCoord;
+varying vec3		var_LightRest;	// unclamped, everything but the sun style
+varying vec3		var_LightSun;	// unclamped, the sun style alone
+#endif
+
+// clamp to the lightmap range, then screen gamma through the table
+vec3 GrassLightToScreen( vec3 light )
+{
+	light = min(( light * LIGHTMAP_SHIFT ), 1.0 );
+
+	float gammaIndex = ( light.r * 255.0 );
+	light.r = u_GammaTable[int( gammaIndex * 0.25 )][int( mod( gammaIndex, 4 ))];
+	gammaIndex = ( light.g * 255.0 );
+	light.g = u_GammaTable[int( gammaIndex * 0.25 )][int( mod( gammaIndex, 4 ))];
+	gammaIndex = ( light.b * 255.0 );
+	light.b = u_GammaTable[int( gammaIndex * 0.25 )][int( mod( gammaIndex, 4 ))];
+
+	return light;
+}
 
 void main( void )
 {
@@ -69,33 +92,55 @@ void main( void )
 	gl_ClipVertex = gl_ModelViewMatrix * worldpos;
 
 #if !defined( GRASS_FULLBRIGHT )
-	var_VertexLight = vec3( 0.0 );
+	vec3 lightAll = vec3( 0.0 );
+	vec3 lightSun = vec3( 0.0 );
+	vec3 styleLight;
 
 #if defined( GRASS_APPLY_STYLE0 )
-	var_VertexLight += UnpackVector( attr_LightColor.x ) * u_LightStyleValues[int( attr_LightStyles[0] )];
+	styleLight = UnpackVector( attr_LightColor.x ) * u_LightStyleValues[int( attr_LightStyles[0] )];
+	lightAll += styleLight;
+	#if defined( GRASS_SUN_STYLE0 )
+		lightSun += styleLight;
+	#endif
 #endif
 
 #if defined( GRASS_APPLY_STYLE1 )
-	var_VertexLight += UnpackVector( attr_LightColor.y ) * u_LightStyleValues[int( attr_LightStyles[1] )];
+	styleLight = UnpackVector( attr_LightColor.y ) * u_LightStyleValues[int( attr_LightStyles[1] )];
+	lightAll += styleLight;
+	#if defined( GRASS_SUN_STYLE1 )
+		lightSun += styleLight;
+	#endif
 #endif
 
 #if defined( GRASS_APPLY_STYLE2 )
-	var_VertexLight += UnpackVector( attr_LightColor.z ) * u_LightStyleValues[int( attr_LightStyles[2] )];
+	styleLight = UnpackVector( attr_LightColor.z ) * u_LightStyleValues[int( attr_LightStyles[2] )];
+	lightAll += styleLight;
+	#if defined( GRASS_SUN_STYLE2 )
+		lightSun += styleLight;
+	#endif
 #endif
 
 #if defined( GRASS_APPLY_STYLE3 )
-	var_VertexLight += UnpackVector( attr_LightColor.w ) * u_LightStyleValues[int( attr_LightStyles[3] )];
+	styleLight = UnpackVector( attr_LightColor.w ) * u_LightStyleValues[int( attr_LightStyles[3] )];
+	lightAll += styleLight;
+	#if defined( GRASS_SUN_STYLE3 )
+		lightSun += styleLight;
+	#endif
 #endif
-	var_VertexLight = min(( var_VertexLight * LIGHTMAP_SHIFT ), 1.0 );
 
-	// apply screen gamma
-	float gammaIndex = (var_VertexLight.r * 255.0);
-	var_VertexLight.r = u_GammaTable[int(gammaIndex*0.25)][int(mod(gammaIndex, 4 ))];
-	gammaIndex = (var_VertexLight.g * 255.0);
-	var_VertexLight.g = u_GammaTable[int(gammaIndex*0.25)][int(mod(gammaIndex, 4 ))];
-	gammaIndex = (var_VertexLight.b * 255.0);
-	var_VertexLight.b = u_GammaTable[int(gammaIndex*0.25)][int(mod(gammaIndex, 4 ))];
+	var_VertexLight = GrassLightToScreen( lightAll );
+
+#if defined( GRASS_SUN_SHADOW )
+	// the fragment shader darkens by these in the world's range
+	var_LightRest = ( lightAll - lightSun ) * LIGHTMAP_SHIFT;
+	var_LightSun = lightSun * LIGHTMAP_SHIFT;
+#endif
 #endif//GRASS_FULLBRIGHT
 
 	var_ViewVec = ( u_ViewOrigin - worldpos.xyz );
+
+#if defined( GRASS_SUN_SHADOW )
+	// the swayed and pushed-aside position, so the shadow moves with the blade
+	var_SunCoord = ( Mat4Texture( 0.5 ) * u_SunMatrix ) * worldpos;
+#endif
 }

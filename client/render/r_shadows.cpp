@@ -699,8 +699,10 @@ void R_RenderSunShadow( void )
 	R_FindViewLeaf();
 	R_MarkLeaves();
 
+	tr.sunShadowPass = true;
 	R_ShadowPassDrawWorld( &sunPl );
 	R_ShadowPassDrawSolidEntities( &sunPl );
+	tr.sunShadowPass = false;
 
 	tr.sunShadowTwoSided = false;
 
