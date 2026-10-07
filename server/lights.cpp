@@ -266,7 +266,6 @@ public:
 private:
 	// sun elevation from the "pitch" key, kept separately because the "angles" key only carries yaw and would clobber angles.x depending on key order
 	float	m_flSunPitch;
-	BOOL	m_fSunPitchSet;
 };
 
 LINK_ENTITY_TO_CLASS( light_environment, CEnvLight );
@@ -305,8 +304,6 @@ void CEnvLight::KeyValue( KeyValueData* pkvd )
 	else if (FStrEq(pkvd->szKeyName, "pitch"))
 	{
 		m_flSunPitch = Q_atof( pkvd->szValue );
-		m_fSunPitchSet = TRUE;
-		CLight::KeyValue( pkvd );
 	}
 	else
 	{
@@ -321,7 +318,7 @@ void CEnvLight :: Spawn( void )
 	Vector angles = GetAbsAngles();
 
 	// the "pitch" key has priority over angles.x, same as the light compilers do
-	if( m_fSunPitchSet )
+	if( m_flSunPitch != 0.0f )
 		angles.x = m_flSunPitch;
 
 	UTIL_MakeAimVectors( angles );
