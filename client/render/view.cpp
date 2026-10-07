@@ -193,6 +193,7 @@ cvar_t *r_pvs_radius;
 cvar_t *r_decals_ext;
 cvar_t *gl_fsr;
 cvar_t *fps_max;
+cvar_t *gl_texture_nearest;
 
 cvar_t	v_iyaw_cycle = { "v_iyaw_cycle", "2", 0, 2 };
 cvar_t	v_iroll_cycle = { "v_iroll_cycle", "0.5", 0, 0.5 };
@@ -387,6 +388,7 @@ void V_Init( void )
 	r_lighting_extended = CVAR_GET_POINTER( "r_lighting_extended" );
 	r_pvs_radius = CVAR_GET_POINTER( "r_pvs_radius" );
 	fps_max = CVAR_GET_POINTER( "fps_max" );
+	gl_texture_nearest = CVAR_GET_POINTER( "gl_texture_nearest" );
 
 	cl_vsmoothing = CVAR_REGISTER( "cl_vsmoothing", "0.05", FCVAR_ARCHIVE );
 	gl_allow_portals = CVAR_REGISTER( "gl_allow_portals", "1", FCVAR_ARCHIVE | FCVAR_CLIENTDLL );

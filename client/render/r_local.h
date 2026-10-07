@@ -496,6 +496,8 @@ typedef struct
 	float sunlightscale;
 	float renderscale;
 
+	bool bDoInitBloom;
+
 	int test; // counter/bool for testing purposes
 } ref_globals_t;
 

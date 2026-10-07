@@ -445,6 +445,7 @@ void R_CheckChanges( void )
 			FREE_TEXTURE( tr.screen_fbo_texture_color );
 			tr.screen_fbo_texture_color = 0;
 		}
+		// don't clear the flag - engine does this for this cvar
 	}
 
 	if( FBitSet( r_lightmap->flags, FCVAR_CHANGED ))
@@ -574,6 +575,12 @@ void R_CheckChanges( void )
 	{
 		R_VidInit();
 		ClearBits( gl_renderscale->flags, FCVAR_CHANGED );
+	}
+
+	if( FBitSet( gl_texture_nearest->flags, FCVAR_CHANGED ) )
+	{
+		tr.bDoInitBloom = true;
+		// don't clear the flag - engine does this for this cvar
 	}
 
 	if( FBitSet( cl_crosshair_scale->flags, FCVAR_CHANGED ) )

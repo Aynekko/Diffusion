@@ -290,6 +290,8 @@ static void InitBloom( void )
 	}
 
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+
+	tr.bDoInitBloom = false;
 }
 
 void InitPostTextures( void )
@@ -1075,6 +1077,9 @@ void Bloom( void )
 		return;
 
 	if( !tr.screen_fbo_texture_color )
+		InitBloom();
+
+	if( tr.bDoInitBloom ) // forced to restart for whatever reasons
 		InitBloom();
 
 	GL_Bind( GL_TEXTURE0, tr.screen_fbo_texture_color );
