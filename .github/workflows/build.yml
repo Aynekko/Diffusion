@@ -106,38 +106,28 @@ jobs:
         if errorlevel 1 exit /b 1
     - name: Fetch menu source
       shell: bash
-      continue-on-error: true
       run: |
         git clone https://github.com/Aynekko/Diffusion-MainUI 3rd-party/mainui_cpp
-        python - <<'PYEOF'
-        import glob
-        marker = 'def get_flags_by_compiler(flags, compiler):'
-        guard = marker + "\n\tif isinstance(compiler, list) and compiler:\n\t\tcompiler = compiler[0]"
-        for f in glob.glob('3rd-party/mainui_cpp/**/fwgslib.py', recursive=True):
-            src = open(f).read()
-            if marker in src and 'isinstance(compiler, list)' not in src:
-                open(f, 'w').write(src.replace(marker, guard))
-                print('patched', f)
-        PYEOF
     - name: Build menu for Windows x64
       shell: cmd
-      continue-on-error: true
       run: |
         for /f "usebackq tokens=*" %%i in (`"C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe" -latest -property installationPath`) do call "%%i\VC\Auxiliary\Build\vcvarsall.bat" x64
-        cd 3rd-party\mainui_cpp
-        python ..\..\waf configure -T release build
+        msbuild 3rd-party\mainui_cpp\menu.vcxproj /m ^
+          /p:Configuration=Release ^
+          /p:Platform=x64 ^
+          /p:PlatformToolset=v143 ^
+          /p:PostBuildEventUseInBuild=false ^
+          /p:Optimization=MaxSpeed ^
+          /p:DebugInformationFormat=None ^
+          /p:GenerateDebugInformation=false
+        if errorlevel 1 exit /b 1
     - name: Package
       shell: bash
       run: |
         mkdir -p out/diffusion/bin
         cp x64/Release/server/server_amd64.dll out/diffusion/bin/
         cp x64/Release/client/client_amd64.dll out/diffusion/bin/
-        menu=$(find 3rd-party/mainui_cpp/build -name 'menu*.dll' 2>/dev/null | head -1 || true)
-        if [ -n "$menu" ]; then
-          cp "$menu" out/diffusion/bin/
-        else
-          echo "::warning::menu dll was not built, win64 package ships without it"
-        fi
+        cp 3rd-party/mainui_cpp/x64/Release/menu.dll out/diffusion/bin/menu_amd64.dll
         # Copy shaders into the release
         cp -a glsl out/diffusion/
         cd out
