@@ -47,6 +47,8 @@ jobs:
         find out -type f \( -name '*.so' -o -name 'diffusion_run' -o -name 'xash*' \) -print -exec strip --strip-all {} \;
         # Show sizes
         find out -type f \( -name '*.so' -o -name 'diffusion_run' \) -exec ls -lh {} \;
+        # Copy shaders into the release
+        cp -a glsl out/diffusion/
         pushd out
         zip -r ../diffusion-linux-amd64.zip diffusion
         popd
@@ -136,6 +138,8 @@ jobs:
         else
           echo "::warning::menu dll was not built, win64 package ships without it"
         fi
+        # Copy shaders into the release
+        cp -a glsl out/diffusion/
         cd out
         7z a ../diffusion-win64.zip diffusion
     - name: Upload artifacts
