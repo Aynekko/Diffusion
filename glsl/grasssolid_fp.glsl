@@ -17,6 +17,9 @@ GNU General Public License for more details.
 #include "mathlib.h"
 #include "texfetch.h"
 #include "alpha2coverage.h"
+#if defined( GRASS_SUN_SHADOW )
+#include "sun_shadow.h"
+#endif
 
 uniform sampler2D		u_ColorMap;
 uniform sampler2D		u_NormalMap;
@@ -29,6 +32,12 @@ varying vec2		var_TexDiffuse;
 varying vec3		var_VertexLight;
 varying vec3		var_ViewVec;
 
+#if defined( GRASS_SUN_SHADOW )
+varying vec4		var_SunCoord;
+varying vec3		var_LightRest;
+varying vec3		var_LightSun;
+#endif
+
 void main( void )
 {
 	vec4 diffuse = texture2D( u_ColorMap, var_TexDiffuse );
@@ -40,6 +49,14 @@ void main( void )
 	
 #if !defined( GRASS_FULLBRIGHT )
 	vec3 light_diffuse = var_VertexLight;
+
+	#if defined( GRASS_SUN_SHADOW )
+		float sunLit = SunShadowValue( var_SunCoord, length( var_ViewVec ));
+		// grass light is clamped to 1.0 where the world goes up to 2.0, so taking the sun out of the clamped value barely moves it. darken by the ratio the ground under it gets instead, fully lit stays as it was
+		vec3 lit = min( var_LightRest + var_LightSun, 2.0 );
+		vec3 shadowed = min( var_LightRest + var_LightSun * sunLit, 2.0 );
+		light_diffuse *= shadowed / max( lit, vec3( 0.001 ));
+	#endif
 
 	// add bump
 	if( bool(u_GenericCondition == 1.0f) )

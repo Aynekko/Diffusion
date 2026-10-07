@@ -477,6 +477,20 @@ void R_DrawGrassMesh( grass_t *grass, int tex, word &hLastShader, word &hCachedM
 		grass_params[2] = Vector4D( m_flGrassFadeStart, m_flGrassFadeDist, m_flGrassFadeEnd, 0.0f );
 		// send!
 		pglUniform4fvARB( RI->currentshader->u_GrassParams, 3, &grass_params[0][0] );
+
+		// realtime sun shadow, only on the sun variant
+		if( tr.sunShadowActive && RI->currentshader->u_SunMatrix != -1 )
+		{
+			GLfloat gl_sunMatrix[16];
+			tr.sunShadowMatrix.CopyToArray( gl_sunMatrix );
+			pglUniformMatrix4fvARB( RI->currentshader->u_SunMatrix, 1, GL_FALSE, gl_sunMatrix );
+
+			const float sunTexel = 1.0f / (float)RENDER_GET_PARM( PARM_TEX_WIDTH, tr.sunShadowTexture );
+			const float sunIntensity = bound( 0.0f, r_sun_shadow_intensity->value, 1.0f );
+			pglUniform4fARB( RI->currentshader->u_SunShadowParams, sunTexel, sunIntensity, r_sun_shadow_dist->value, r_sun_shadow_dist->value * 0.25f );
+			GL_Bind( GL_TEXTURE2, tr.sunShadowTexture );
+		}
+
 		hLastShader = grass->vbo.shaderNum;
 		hCachedMatrix = -1;
 	}
@@ -1428,6 +1442,10 @@ bool R_AddGrassToChain( msurface_t *surf, CFrustum *frustum, bool lightpass, mwo
 	bool shadowpass = FBitSet( RI->params, RP_SHADOWPASS );
 	
 	if(( shadowpass && !CVAR_TO_BOOL( r_grass_shadows )) || ( lightpass && !CVAR_TO_BOOL( r_grass_lighting )))
+		return false;
+
+	// no grass in the sun map: its fade and size go by the view origin, which is the sun camera far back along the sun direction here, so it went in shrunk at random and shaded the real grass under it
+	if( shadowpass && tr.sunShadowPass )
 		return false;
 
 	if( !lightpass && !shadowpass )

@@ -348,6 +348,7 @@ typedef struct
 	matrix4x4	sunShadowMatrix;	// world -> sun light clip for the current frame
 	bool		sunShadowActive;	// sun shadow map was rendered this frame
 	bool		sunShadowTwoSided;	// sun pass in progress, draw the casters double-sided
+	bool		sunShadowPass;	// the sun depth map is being drawn
 	int		num_subview_used;	// used mirror textures per full frame
 	int		num_shadows_used;	// used shadow textures per full frame
 	int		num_CM_shadows_used; // // used shadow cube textures per full frame

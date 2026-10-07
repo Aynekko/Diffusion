@@ -1379,9 +1379,16 @@ static void GL_InitGrassSolidUniforms( glsl_program_t *shader )
 	shader->u_GenericCondition = pglGetUniformLocationARB( shader->handle, "u_GenericCondition" );
 	shader->u_GrassWind = pglGetUniformLocationARB( shader->handle, "u_GrassWind" );
 
+	// only on the sun variant, -1 elsewhere
+	shader->u_SunShadowMap = pglGetUniformLocationARB( shader->handle, "u_SunShadowMap" );
+	shader->u_SunMatrix = pglGetUniformLocationARB( shader->handle, "u_SunMatrix" );
+	shader->u_SunShadowParams = pglGetUniformLocationARB( shader->handle, "u_SunShadowParams" );
+
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ColorMap, GL_TEXTURE0 );
 	pglUniform1iARB( shader->u_NormalMap, GL_TEXTURE1 );
+	if( shader->u_SunShadowMap != -1 )
+		pglUniform1iARB( shader->u_SunShadowMap, GL_TEXTURE2 );
 	GL_BindShader( GL_NONE );
 
 	GL_ValidateProgram( shader );
@@ -2370,7 +2377,10 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 
 word GL_UberShaderForGrassSolid( msurface_t *s, grass_t *g )
 {
-	if( g->vbo.shaderNum && g->vbo.glsl_sequence == tr.glsl_valid_sequence )
+	// grass can be built (and its shader precached) mid-frame while the sun isn't active, so the sun state is part of the cache check, not just the sequence
+	const bool bSunShadow = ( CVAR_TO_BOOL( r_sun_shadow ) && tr.sunShadowActive );
+
+	if( g->vbo.shaderNum && g->vbo.glsl_sequence == tr.glsl_valid_sequence && ( FBitSet( g->vbo.flags, FGRASS_SUNSHADOW ) != 0 ) == bSunShadow )
 		return g->vbo.shaderNum; // valid
 
 	char glname[64];
@@ -2385,9 +2395,22 @@ word GL_UberShaderForGrassSolid( msurface_t *s, grass_t *g )
 	}
 	else
 	{
+		bool bSunEmitted = false;
+
 		// process lightstyles
 		for( int i = 0; i < MAXLIGHTMAPS && s->styles[i] != LS_NONE; i++ )
+		{
 			GL_AddShaderDirective( options, va( "GRASS_APPLY_STYLE%i", i ));
+
+			// grass takes its light from the surface it grows on, so it takes the sun shadow on the same style the surface does
+			if( bSunShadow && s->styles[i] == LS_SUN )
+			{
+				if( !bSunEmitted )
+					GL_AddShaderDirective( options, "GRASS_SUN_SHADOW" );
+				GL_AddShaderDirective( options, va( "GRASS_SUN_STYLE%i", i ));
+				bSunEmitted = true;
+			}
+		}
 	}
 
 	glsl_program_t *shader = GL_FindUberShader( glname, options, &GL_InitGrassSolidUniforms );
@@ -2399,6 +2422,10 @@ word GL_UberShaderForGrassSolid( msurface_t *s, grass_t *g )
 
 	g->vbo.glsl_sequence = tr.glsl_valid_sequence;
 	ClearBits( g->vbo.flags, FGRASS_NODRAW );
+
+	if( bSunShadow )
+		SetBits( g->vbo.flags, FGRASS_SUNSHADOW );
+	else ClearBits( g->vbo.flags, FGRASS_SUNSHADOW );
 
 	return (shader - glsl_programs);
 }
