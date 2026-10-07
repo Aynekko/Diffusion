@@ -410,7 +410,7 @@ void V_Init( void )
 	r_show_renderpass = CVAR_REGISTER( "r_show_renderpass", "0", 0 );
 	r_show_light_scissors = CVAR_REGISTER( "r_show_light_scissors", "0", 0 );
 	r_show_normals = CVAR_REGISTER( "r_show_normals", "0", 0 );
-	r_show_lightprobes = CVAR_REGISTER( "r_show_lightprobes", "0", FCVAR_ARCHIVE );
+	r_show_lightprobes = CVAR_REGISTER( "r_show_lightprobes", "0", 0 );
 
 	r_fade_props = CVAR_REGISTER( "r_fade_props", "1", FCVAR_ARCHIVE );
 	r_show_cubemaps = CVAR_REGISTER( "r_show_cubemaps", "0", FCVAR_ARCHIVE );
@@ -431,12 +431,12 @@ void V_Init( void )
 	gl_tonemap = CVAR_REGISTER( "gl_tonemap", "0", FCVAR_ARCHIVE );
 	r_shadowquality = CVAR_REGISTER( "r_shadowquality", "2", FCVAR_ARCHIVE );
 	r_sun_shadow = CVAR_REGISTER( "r_sun_shadow", "1", FCVAR_ARCHIVE );		// realtime directional shadow for the sun near the view
-	r_sun_shadow_dist = CVAR_REGISTER( "r_sun_shadow_dist", "1024", FCVAR_ARCHIVE );	// cascade coverage distance around the view
+	r_sun_shadow_dist = CVAR_REGISTER( "r_sun_shadow_dist", "800", FCVAR_ARCHIVE );	// cascade coverage distance around the view
 	r_sun_shadow_size = CVAR_REGISTER( "r_sun_shadow_size", "1024", FCVAR_ARCHIVE );	// sun shadow map resolution
 	r_sun_shadow_intensity = CVAR_REGISTER( "r_sun_shadow_intensity", "0.65", FCVAR_ARCHIVE );	// how dark the sun shadow gets, the rest stands in for baked bounce light
 	r_sun_shadow_offset_factor = CVAR_REGISTER( "r_sun_shadow_offset_factor", "2", FCVAR_ARCHIVE );	// slope-scaled depth offset for the sun shadow casters
 	r_sun_shadow_offset_units = CVAR_REGISTER( "r_sun_shadow_offset_units", "4", FCVAR_ARCHIVE );	// constant depth offset for the sun shadow casters
-	r_sun_shadow_bias = CVAR_REGISTER( "r_sun_shadow_bias", "0", FCVAR_ARCHIVE );		// receiver depth bias in world units, raise to fight acne, lower to fight peter-panning
+	r_sun_shadow_bias = CVAR_REGISTER( "r_sun_shadow_bias", "2", FCVAR_ARCHIVE );		// receiver depth bias in world units, raise to fight acne, lower to fight peter-panning
 	r_sun_shadow_twosided = CVAR_REGISTER( "r_sun_shadow_twosided", "0", FCVAR_ARCHIVE );	// draw the sun shadow casters double-sided so one-sided walls can't leak light
 	r_mirrorquality = CVAR_REGISTER( "r_mirrorquality", "3", FCVAR_ARCHIVE );
 	r_testdlight = CVAR_REGISTER( "r_testdlight", "0", FCVAR_CHEAT );
