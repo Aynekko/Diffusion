@@ -221,6 +221,14 @@ bool CStudioModelRenderer::StudioSetEntity( cl_entity_t *pEnt )
 	SET_CURRENT_ENTITY( m_pCurrentEntity );
 	m_pPlayerInfo = NULL;
 
+	if( RI->params & RP_SHADOWPASS )
+	{
+		// HACK!!! Don't draw player's dynamic shadow in SP if he doesn't have suit
+		// REMOVE THIS IF WE'LL HAVE NON-SUIT PLAYER MODEL
+		if( m_pCurrentEntity->player && tr.viewparams.maxclients == 1 && !gHUD.HasWeapon( WEAPON_SUIT ) )
+			return false;
+	}
+
 	if( !m_fDrawViewModel && (m_pCurrentEntity->player || m_pCurrentEntity->curstate.renderfx == kRenderFxDeadPlayer) )
 	{
 		if( m_pCurrentEntity->curstate.renderfx == kRenderFxDeadPlayer )
