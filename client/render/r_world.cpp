@@ -1959,6 +1959,11 @@ static void Mod_LoadWorld( model_t *mod, const byte *buf )
 		{
 			SetBits( surf->flags, SURF_FULLBRIGHT );
 		}
+		else if( !Q_strncmp( tex->name, "blocklight", 10 ) ) // using strncmp so mappers can use various textures like blocklight_grate etc.
+		{
+			SetBits( surf->flags, SURF_SHADOWPASS );
+			SetBits( surf->flags, SURF_FULLBRIGHT );
+		}
 		else if( !Q_strncmp( tex->name, "monitor", 7 ) )
 		{
 			SetBits( world->features, WORLD_HAS_SCREENS );
@@ -3359,7 +3364,14 @@ void R_DrawBrushModel( cl_entity_t *e, bool translucent )
 	// accumulate surfaces, build the lightmaps
 	psurf = &clmodel->surfaces[clmodel->firstmodelsurface];
 	for( int i = 0; i < clmodel->nummodelsurfaces; i++, psurf++ )
-	{	
+	{
+		if( !(RI->params & RP_SHADOWPASS) && !r_show_blocklight->value )
+		{
+			// skip shadow surfaces during regular pass
+			if( psurf->flags & SURF_SHADOWPASS )
+				continue;
+		}
+
 		if( FBitSet( psurf->flags, SURF_WATER ) )
 		{
 			if( FBitSet( psurf->flags, SURF_PLANEBACK ) )
@@ -3747,6 +3759,13 @@ void R_WorldMarkVisibleFaces( void )
 
 				surf = worldmodel->surfaces + facenum;
 				esrf = surf->info;
+
+				if( !(RI->params & RP_SHADOWPASS) && !r_show_blocklight->value )
+				{
+					// skip shadow surfaces during regular pass
+					if( surf->flags & SURF_SHADOWPASS )
+						continue;
+				}
 
 				R_AddGrassToChain( surf, NULL, false, leaf ); // update leaf bounds
 

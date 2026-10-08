@@ -125,6 +125,7 @@ cvar_t *r_show_renderpass;
 cvar_t *r_show_light_scissors;
 cvar_t *r_show_normals;
 cvar_t *r_show_lightprobes;
+cvar_t *r_show_blocklight;
 cvar_t *r_fade_props;
 cvar_t *r_show_cubemaps;
 cvar_t *r_bloom_sprites;
@@ -413,6 +414,7 @@ void V_Init( void )
 	r_show_light_scissors = CVAR_REGISTER( "r_show_light_scissors", "0", 0 );
 	r_show_normals = CVAR_REGISTER( "r_show_normals", "0", 0 );
 	r_show_lightprobes = CVAR_REGISTER( "r_show_lightprobes", "0", 0 );
+	r_show_blocklight = CVAR_REGISTER( "r_show_blocklight", "0", 0 );
 
 	r_fade_props = CVAR_REGISTER( "r_fade_props", "1", FCVAR_ARCHIVE );
 	r_show_cubemaps = CVAR_REGISTER( "r_show_cubemaps", "0", FCVAR_ARCHIVE );

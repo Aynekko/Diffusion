@@ -65,6 +65,7 @@ extern cvar_t	*r_show_renderpass;
 extern cvar_t	*r_show_light_scissors;
 extern cvar_t	*r_show_normals;
 extern cvar_t	*r_show_lightprobes;
+extern cvar_t *r_show_blocklight;
 extern cvar_t	*r_fade_props;
 extern cvar_t	*r_show_cubemaps;
 extern cvar_t	*r_bloom_sprites;
