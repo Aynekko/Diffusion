@@ -5591,6 +5591,13 @@ void CBasePlayer::Spawn( void )
 	fLerpToKiller = 0.0f;
 
 	g_pGameRules->PlayerSpawn( this );
+
+	// player can get suit in SP from GetPlayerSpawnSpot
+	// or in multiplayer from PlayerSpawn
+	// if for whatever reason he doesn't have suit after all that, choose temporary non-suit model
+	// getting item_suit will set body to 0
+	if( !HasWeapon( WEAPON_SUIT ) )
+		pev->body = 1;
 }
 
 void CBasePlayer::SetHUDTexts(void)

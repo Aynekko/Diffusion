@@ -216,6 +216,9 @@ class CItemSuit : public CItem
 		pPlayer->AddWeapon( WEAPON_SUIT );
 		pPlayer->NextBrokenDmgTime = gpGlobals->time + RANDOM_LONG(10,20); // diffusion - if the suit is broken, damage the player shortly after picking up
 
+		// make sure player model changes to suit model
+		pPlayer->pev->body = 0;
+
 		// force resend to update HUD
 		pPlayer->m_iClientHealth = -1;
 		pPlayer->m_iClientStamina = -1;
