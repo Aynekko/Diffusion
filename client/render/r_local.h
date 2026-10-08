@@ -525,6 +525,7 @@ typedef struct
 	unsigned int	c_mirror_passes;
 	unsigned int	c_screen_passes;
 	unsigned int	c_shadow_passes;
+	unsigned int	c_sunshadow_passes;
 	unsigned int	c_sky_passes;	// drawing through portal or monitor will be increase counter
 
 	unsigned int	c_total_tris;	// triangle count

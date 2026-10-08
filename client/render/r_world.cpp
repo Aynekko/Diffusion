@@ -3767,6 +3767,12 @@ void R_WorldMarkVisibleFaces( void )
 						continue;
 				}
 
+				if( FBitSet( surf->flags, SURF_DRAWSKY ) )
+				{
+					if( RP_NORMALPASS() )
+						tr.bSkySurfFound = true; // 3D sky will be rendered next frame (3dsky visibility state is delayed by 1 frame)
+				}
+
 				R_AddGrassToChain( surf, NULL, false, leaf ); // update leaf bounds
 
 				// in some cases surface is invisible but grass is visible
@@ -3774,13 +3780,13 @@ void R_WorldMarkVisibleFaces( void )
 #if 1
 				if( !force )
 				{
-					backplane = FBitSet( surf->flags, SURF_PLANEBACK ) ? true : false;
-					if( FBitSet( RI->params, RP_OVERVIEW ) )
-						dist = surf->plane->normal[2];
-					else dist = PlaneDiff( tr.modelorg, surf->plane );
-
 					if( !bBuildingCubemaps )
 					{
+						backplane = FBitSet( surf->flags, SURF_PLANEBACK ) ? true : false;
+						if( FBitSet( RI->params, RP_OVERVIEW ) )
+							dist = surf->plane->normal[2];
+						else dist = PlaneDiff( tr.modelorg, surf->plane );
+
 						if( (backplane && dist >= -BACKFACE_EPSILON) || (!backplane && dist <= BACKFACE_EPSILON) )
 							continue; // wrong side
 
@@ -3794,9 +3800,6 @@ void R_WorldMarkVisibleFaces( void )
 #endif
 				if( FBitSet( surf->flags, SURF_DRAWSKY ) )
 				{
-					if( RP_NORMALPASS() )
-						tr.bSkySurfFound = true; // 3D sky will be rendered next frame (3dsky visibility state is delayed by 1 frame)
-					
 					if( FBitSet( RI->params, RP_SHADOWPASS ) )
 						continue;
 

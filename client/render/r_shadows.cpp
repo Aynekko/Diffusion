@@ -595,6 +595,9 @@ void R_RenderSunShadow( void )
 
 	if( IsBuildingCubemaps() || !FBOsupported )
 		return;
+	
+	if( RP_NORMALPASS() && !tr.bSkySurfFound )
+		return;
 
 	worldmodel = GET_ENTITY( 0 )->model;
 	if( !worldmodel )
@@ -725,6 +728,7 @@ void R_RenderSunShadow( void )
 	R_PopRefState();
 
 	tr.sunShadowActive = true;
+	r_stats.c_sunshadow_passes++;
 }
 
 void R_RenderShadowmaps(void)

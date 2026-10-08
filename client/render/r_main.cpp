@@ -1976,7 +1976,10 @@ void HUD_PrintStats( void )
 		R_Speeds_Printf( "%3i mirrors\n", r_stats.c_mirror_passes );
 		R_Speeds_Printf( "%3i portals\n", r_stats.c_portal_passes );
 		R_Speeds_Printf( "%3i screens\n", r_stats.c_screen_passes );
-		R_Speeds_Printf( "%3i shadows\n", r_stats.c_shadow_passes );
+		if( r_stats.c_sunshadow_passes > 0 )
+			R_Speeds_Printf( "%3i shadows, %i sun shadows\n", r_stats.c_shadow_passes, r_stats.c_sunshadow_passes );
+		else
+			R_Speeds_Printf( "%3i shadows\n", r_stats.c_shadow_passes );
 		R_Speeds_Printf( "%3i 3d sky\n", r_stats.c_sky_passes );
 		R_Speeds_Printf( "%3i vis mergers\n", r_stats.c_vis_mergers );
 		R_Speeds_Printf( "%3i total\n\n", r_stats.num_passes );
