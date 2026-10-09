@@ -1430,7 +1430,6 @@ void CBasePlayer::GibMonster( void )
 void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 {
 	int animDesired;
-	float speed;
 	char szAnim[64];
 
 	// diffusion hacks
@@ -1457,7 +1456,7 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 		cached_waterlevel = pev->waterlevel;
 	}
 
-	speed = GetAbsVelocity().Length2D();
+	float speed = fabs( GetAbsVelocity().Length2D() );
 
 	if (pev->flags & FL_FROZEN || DroneControl)
 	{
@@ -1519,7 +1518,7 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 			m_IdealActivity = m_Activity;
 		else if ( pev->waterlevel > 1 )
 		{
-			if ( speed == 0 )
+			if ( speed < 1.0f )
 				m_IdealActivity = ACT_HOVER;
 			else
 				m_IdealActivity = ACT_SWIM;
@@ -1623,7 +1622,7 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 				strcpy( szAnim, "ref_aim_" );
 			strcat( szAnim, m_szAnimExtention );
 
-			if( fabs(speed) > 110 )
+			if( speed > 110.0f )
 			{
 				animDesired = pev->sequence;
 
@@ -1635,7 +1634,7 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 					m_Activity = ACT_WALK;
 				}
 			}
-			else if( (FBitSet( pev->flags, FL_DUCKING )) && (speed < 100) )
+			else if( (FBitSet( pev->flags, FL_DUCKING )) && (speed < 100.0f) )
 			{
 				animDesired = pev->sequence;
 
@@ -1664,7 +1663,7 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 
 	if( FBitSet( pev->flags, FL_DUCKING ) )
 	{
-		if( speed == 0 )
+		if( speed < 1.0f )
 		{
 			pev->gaitsequence = LookupActivity( ACT_CROUCHIDLE );
 			// pev->gaitsequence    = LookupActivity( ACT_CROUCH );
@@ -1677,14 +1676,14 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 				pev->gaitsequence = LookupActivity( ACT_CROUCH );
 		}
 	}
-	else if( speed > 200 )
+	else if( speed > 200.0f )
 	{
 		if( pev->button & IN_BACK )
 			pev->gaitsequence = LookupSequence( "run_back" );
 		else
 			pev->gaitsequence = LookupActivity( ACT_RUN );
 	}
-	else if( speed > 0 )
+	else if( speed > 1.0f )
 	{
 		if( pev->button & IN_BACK )
 			pev->gaitsequence = LookupSequence( "walk_back" );
