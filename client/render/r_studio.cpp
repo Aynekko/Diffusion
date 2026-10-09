@@ -2821,8 +2821,21 @@ void CStudioModelRenderer::StudioInterpolatePoseParams( cl_entity_t *e, float da
 //	if( !m_boneSetup.CountPoseParameters() )
 //	{
 		// interpolate blends
-	m_pModelInstance->m_poseparameter[0] = (e->curstate.blending[0] * dadt + e->latched.prevblending[0] * (1.0f - dadt)) / 255.0f;
-	m_pModelInstance->m_poseparameter[1] = (e->curstate.blending[1] * dadt + e->latched.prevblending[1] * (1.0f - dadt)) / 255.0f;
+//	m_pModelInstance->m_poseparameter[0] = (e->curstate.blending[0] * dadt + e->latched.prevblending[0] * (1.0f - dadt)) / 255.0f;
+//	m_pModelInstance->m_poseparameter[1] = (e->curstate.blending[1] * dadt + e->latched.prevblending[1] * (1.0f - dadt)) / 255.0f;
+	for( int i = 0; i < 2; i++ )
+	{
+		const int cur = e->curstate.blending[i];
+		const int prev = e->latched.prevblending[i];
+		float v;
+		
+		if( abs( cur - prev ) <= 1 )
+			v = (float)cur;
+		else
+			v = cur * dadt + prev * (1.0f - dadt);
+
+		m_pModelInstance->m_poseparameter[i] = v / 255.0f;
+	}
 	/*	}
 		else
 		{
@@ -2869,11 +2882,16 @@ void CStudioModelRenderer::StudioInterpolateControllers( cl_entity_t *e, float d
 			// check for 360% wrapping
 			if( FBitSet( pbonecontroller[j].type, STUDIO_RLOOP ) )
 			{
-				if( abs( e->curstate.controller[i] - e->latched.prevcontroller[i] ) > 128 )
+				const int cur = e->curstate.controller[i];
+				const int prev = e->latched.prevcontroller[i];
+
+				// slot is i, not j. j is the bonecontroller loop index.
+				if( abs( cur - prev ) > 128 )
 				{
-					int a = (e->curstate.controller[j] + 128) % 256;
-					int b = (e->latched.prevcontroller[j] + 128) % 256;
-					value = ((a * dadt) + (b * (1.0f - dadt)) - 128);
+					const int a = (cur + 128) & 255;
+					const int b = (prev + 128) & 255;
+					value = (a * dadt) + (b * (1.0f - dadt)) - 128.0f;
+					if( value < 0.0f ) value += 256.0f;
 				}
 				else
 				{
