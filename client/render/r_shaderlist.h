@@ -199,7 +199,6 @@ static shaderlist_t shaders[] = {
 	{"StudioSolid", "#define STUDIO_VERTEX_LIGHTING\n#define STUDIO_SPECULAR\n"},
 	{"StudioSolid", "#define STUDIO_VERTEX_LIGHTING\n#define STUDIO_EMBOSS\n#define STUDIO_SPECULAR\n"},
 	{"StudioSolid", "#define MAXSTUDIOBONES 1\n#define STUDIO_VERTEX_LIGHTING\n#define STUDIO_EMbOSS\n#define STUDIO_SPECULAR\n#define STUDIO_BUMP\n"},
-	{"BmodelSolid", "#define BMODEL_DEFAULTALPHATEST\n#define BMODEL_APPLY_STYLE0\n#define BMODEL_SPECULAR\n#define BMODEL_BUMP\n#define REFL...(truncated 36555 characters)...MAXSTUDIOBONES 1\n#define STUDIO_VERTEX_LIGHTING\n#define STUDIO_FULLBRIGHT\n#define STUDIO_ADDITIVE\n#define STUDIO_SPECULAR\n"},
 	{"BmodelDlight", "#define BMODEL_LIGHT_PROJECTION\n#define BMODEL_SPECULAR\n#define BMODEL_WATER\n#define BMODEL_WATER_REFRACTION\n#define NORMAL_RG_PARABOLOID\n#define BMODEL_HAS_SHADOWS\n"},
 	{"BmodelSolid", "#define BMODEL_APPLY_STYLE0\n#define BMODEL_BUMP\n#define TERRAIN_NUM_LAYERS 3\n#define BMODEL_MULTI_LAYERS\n"},
 	{"BmodelSolid", "#define BMODEL_DEFAULTALPHATEST\n#define BMODEL_APPLY_STYLE0\n#define BMODEL_WATER\n#define BMODEL_WATER_REFRACTION\n#define NORMAL_RG_PARABOLOID\n#define REFLECTION_CUBEMAP\n"},
