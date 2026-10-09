@@ -1495,19 +1495,6 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 			m_arrayxvert[vertID].binormal = binormal.Normalize();
 		}
 
-		// search for submodel offset
-		int	offset = (byte *)pSubModel - (byte *)m_pStudioHeader;
-		int j;
-
-		for( j = 0; j < MAXSTUDIOMODELS; j++ )
-		{
-			if( m_tbnverts->submodels[j].submodel_offset == offset )
-				break;
-		}
-
-		// store vertex offset for bounds checking
-		m_tbnverts->submodels[j].vertex_offset = m_nNumTBNVerts;
-
 		// store precomputed TBN into our cache
 		for( int i = 0; i < m_nNumArrayVerts; i++ )
 		{
@@ -1583,7 +1570,7 @@ mvbocache_t *CStudioModelRenderer::CreateMeshCache( dmodellight_t *dml )
 	mstudiobone_t *pbones;
 
 	// materials goes first to determine bump
-	if( unique_model ) 
+	if( unique_model )
 		LoadStudioMaterials();
 	else // precache studio shaders
 	{
@@ -1747,11 +1734,8 @@ mvbocache_t *CStudioModelRenderer::CreateMeshCache( dmodellight_t *dml )
 		}
 
 		// sanity check for TBN matrix
-		// diffusion - FIX THIS! m_nNumTBNVerts ASSERT doesn't go through
-		/*
-		if( m_iTBNState == TBNSTATE_LOADING && m_tbnverts != NULL )
+		if( m_tbnverts != NULL && (m_iTBNState == TBNSTATE_GENERATE || m_iTBNState == TBNSTATE_LOADING) )
 		{
-			// search for submodel offset
 			int	offset = (byte *)psubmodel - (byte *)m_pStudioHeader;
 
 			for( j = 0; j < MAXSTUDIOMODELS; j++ )
@@ -1761,9 +1745,15 @@ mvbocache_t *CStudioModelRenderer::CreateMeshCache( dmodellight_t *dml )
 			}
 
 			ASSERT( j != MAXSTUDIOMODELS );
-			ConPrintf( "%i %i\n", (int)m_nNumTBNVerts, m_tbnverts->submodels[j].vertex_offset );
-			ASSERT( m_nNumTBNVerts == m_tbnverts->submodels[j].vertex_offset );
-		}*/
+
+			if( j != MAXSTUDIOMODELS )
+			{
+				if( m_iTBNState == TBNSTATE_GENERATE )
+					m_tbnverts->submodels[j].vertex_offset = m_nNumTBNVerts;
+				else
+					ASSERT( m_nNumTBNVerts == m_tbnverts->submodels[j].vertex_offset );
+			}
+		}
 
 		for( j = 0; j < psubmodel->nummesh; j++ )
 		{
