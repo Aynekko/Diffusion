@@ -86,6 +86,7 @@ typedef struct mworldleaf_s
 	mlightprobe_t	*ambient_light;
 	byte		num_lightprobes;
 	byte		fogDensity;
+	byte		hasSky;		// at least one marksurface has SURF_DRAWSKY
 } mworldleaf_t;
 
 struct BmodelInstance_t

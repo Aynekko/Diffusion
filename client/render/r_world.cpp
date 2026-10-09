@@ -690,6 +690,15 @@ static void Mod_SetupWorldLeafs( void )
 		out->nummarksurfaces = in->nummarksurfaces;
 		out->cluster = in->cluster; // helper to acess to uncompressed visdata
 		out->fogDensity = in->ambient_sound_level[AMBIENT_SKY];
+		out->hasSky = false;
+		for( int j = 0; j < out->nummarksurfaces; j++ )
+		{
+			if( FBitSet( out->firstmarksurface[j]->flags, SURF_DRAWSKY ) )
+			{
+				out->hasSky = true;
+				break;
+			}
+		}
 	}
 }
 
@@ -3723,7 +3732,10 @@ void R_WorldMarkVisibleFaces( void )
 	const bool bBuildingCubemaps = IsBuildingCubemaps();
 
 	if( RP_NORMALPASS() )
+	{
 		tr.bSkySurfFound = false;
+		tr.bShouldUseDynamicSun = false;
+	}
 
 	// always skip the leaf 0, because it's an outside leaf
 	for( i = 1, leaf = &world->leafs[1]; i < world->numleafs; i++, leaf++ )
@@ -3731,6 +3743,9 @@ void R_WorldMarkVisibleFaces( void )
 		// during cubemap pass, all faces are visible - this way pvs is ignored and all faces have correct gamma. Fix it properly?
 		if( (CHECKVISBIT( RI->visbytes, leaf->cluster ) || bBuildingCubemaps) && (leaf->efrags || leaf->nummarksurfaces) )
 		{
+			if( RP_NORMALPASS() && leaf->hasSky )
+				tr.bShouldUseDynamicSun = true;
+
 			if( RI->frustum.CullBox( leaf->mins, leaf->maxs ) )
 				continue;
 

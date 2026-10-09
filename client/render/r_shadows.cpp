@@ -596,7 +596,7 @@ void R_RenderSunShadow( void )
 	if( IsBuildingCubemaps() || !FBOsupported )
 		return;
 	
-	if( RP_NORMALPASS() && !tr.bSkySurfFound )
+	if( RP_NORMALPASS() && !tr.bShouldUseDynamicSun )
 		return;
 
 	worldmodel = GET_ENTITY( 0 )->model;

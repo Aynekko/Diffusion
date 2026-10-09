@@ -403,6 +403,8 @@ typedef struct
 	Vector sky_camera_origin;
 	bool fIgnoreSkybox; // we already draw 3d skybox, so don't overwrite it in current pass
 	bool bSkySurfFound; // sets to true if a sky surface was found and turns on 3D sky for the next frame
+	bool bShouldUseDynamicSun; // sets to true if a sky surface was found and turns on dynamic sun for the next frame
+								// this needs a separate check because it should run earlier
 	ref_params_t viewparams;		// local copy of ref_params_t
 	struct movevars_s *movevars;
 
