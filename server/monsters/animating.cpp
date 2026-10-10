@@ -221,13 +221,16 @@ float CBaseAnimating::StudioGaitFrameAdvance( void )
 
 	SetAbsAngles( ang );
 
+	// don't rotate legs fast while flying, looks stupid
+	if( !(pev->flags & FL_ONGROUND) )
+		m_flGaitMovement *= 0.15f;
+
 	//	CalcGaitFrame(GetModelPtr(), m_flPoseParameter, pev->gaitsequence, pev->fuser1, m_flGaitMovement);
 	int localMaxFrame = GetBoneSetup()->LocalMaxFrame( pev->gaitsequence );
 	CalcGaitFrame( GetModelPtr(), pev->gaitsequence, pev->fuser1, m_flGaitMovement, localMaxFrame );
 
 	return m_flGaitMovement;
 }
-
 
 //=========================================================
 // LookupActivity

@@ -1427,62 +1427,37 @@ void CBasePlayer::GibMonster( void )
 // SetAnimation: set the activity based on an event or current state
 // ==================================================================
 
-void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
+void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 {
 	int animDesired;
 	char szAnim[64];
 
-	// diffusion hacks
-	bool ForceReset = false;
-	studiohdr_t *pstudiohdr;
-	mstudioseqdesc_t *pseqdesc = NULL;
-	if( pstudiohdr = (studiohdr_t *)GET_MODEL_PTR( edict() ) )
-	{
-		pseqdesc = (mstudioseqdesc_t *)((byte *)pstudiohdr + pstudiohdr->seqindex) + pev->sequence;
-		if( FBitSet( pev->flags, FL_DUCKING ) && (!strncmp( pseqdesc->label, "ref_aim_", 8 ) || !strncmp( pseqdesc->label, "ref_shoot_", 10 )) )
-			ForceReset = true;
-
-		if( !FBitSet( pev->flags, FL_DUCKING ) && (!strncmp( pseqdesc->label, "crouch_aim_", 11 ) || !strncmp( pseqdesc->label, "crouch_shoot_", 13 )) )
-			ForceReset = true;
-	}
-	if( m_pActiveItem && m_pActiveItem->m_iId != cached_weapon_id )
-	{
-		ForceReset = true;
-		cached_weapon_id = m_pActiveItem->m_iId;
-	}
-	if( pev->waterlevel != cached_waterlevel )
-	{
-		ForceReset = true;
-		cached_waterlevel = pev->waterlevel;
-	}
-
 	float speed = fabs( GetAbsVelocity().Length2D() );
 
-	if (pev->flags & FL_FROZEN || DroneControl)
+	if( (pev->flags & FL_FROZEN) || DroneControl )
 	{
 		speed = 0;
 		playerAnim = PLAYER_IDLE;
-		ForceReset = true;
 	}
 
-	switch (playerAnim) 
+	switch( playerAnim )
 	{
 	case PLAYER_JUMP:
 		m_IdealActivity = ACT_HOP;
 		pev->fuser1 = 0.0f;
 		break;
-	
+
 	case PLAYER_SUPERJUMP:
 		m_IdealActivity = ACT_LEAP;
 		pev->fuser1 = 0.0f;
 		break;
-	
+
 	case PLAYER_DIE:
 		m_IdealActivity = ACT_DIESIMPLE;
-		m_IdealActivity = GetDeathActivity( );
+		m_IdealActivity = GetDeathActivity();
 		break;
 
-	case PLAYER_ATTACK1:	
+	case PLAYER_ATTACK1:
 		switch( m_Activity )
 		{
 		case ACT_HOVER:
@@ -1514,21 +1489,25 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 		break;
 	case PLAYER_IDLE:
 	case PLAYER_WALK:
-		if ( !FBitSet( pev->flags, FL_ONGROUND ) && (m_Activity == ACT_HOP || m_Activity == ACT_LEAP) )	// Still jumping
-			m_IdealActivity = m_Activity;
-		else if ( pev->waterlevel > 1 )
+		if( !FBitSet( pev->flags, FL_ONGROUND ) && (m_Activity == ACT_HOP || m_Activity == ACT_LEAP) )	// Still jumping
 		{
-			if ( speed < 1.0f )
+			m_IdealActivity = m_Activity;
+		}
+		else if( pev->waterlevel > 1 )
+		{
+			if( speed == 0 )
 				m_IdealActivity = ACT_HOVER;
 			else
 				m_IdealActivity = ACT_SWIM;
 		}
 		else
+		{
 			m_IdealActivity = ACT_WALK;
+		}
 		break;
 	}
 
-	switch (m_IdealActivity)
+	switch( m_IdealActivity )
 	{
 	case ACT_HOVER:
 	case ACT_LEAP:
@@ -1536,23 +1515,23 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 	case ACT_HOP:
 	case ACT_DIESIMPLE:
 	default:
-		if ( m_Activity == m_IdealActivity)
+		if( m_Activity == m_IdealActivity )
 			return;
 		m_Activity = m_IdealActivity;
 
 		animDesired = LookupActivity( m_Activity );
 		// Already using the desired animation?
-		if (pev->sequence == animDesired)
+		if( pev->sequence == animDesired )
 			return;
 
 		pev->gaitsequence = 0;
 		pev->sequence = animDesired;
 		pev->frame = 0;
-		ResetSequenceInfo( );
+		ResetSequenceInfo();
 		return;
 
 	case ACT_RANGE_ATTACK1:
-		if ( FBitSet( pev->flags, FL_DUCKING ) )	// crouching
+		if( FBitSet( pev->flags, FL_DUCKING ) )	// crouching
 			strcpy( szAnim, "crouch_shoot_" );
 		else
 			strcpy( szAnim, "ref_shoot_" );
@@ -1586,69 +1565,31 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 			animDesired = 0;
 
 		if( pev->sequence != animDesired || !m_fSequenceLoops )
+		{
 			pev->frame = 0;
+		}
 
 		if( !m_fSequenceLoops )
+		{
 			pev->effects |= EF_NOINTERP;
+		}
 
 		m_Activity = m_IdealActivity;
+
 		pev->sequence = animDesired;
 		ResetSequenceInfo();
 		break;
 
 	case ACT_WALK:
-		/*
-		if (m_Activity != ACT_RANGE_ATTACK1 || m_fSequenceFinished)
-		{
-			if ( FBitSet( pev->flags, FL_DUCKING ) )	// crouching
-				strcpy( szAnim, "crouch_aim_" );
-			else
-				strcpy( szAnim, "ref_aim_" );
-			strcat( szAnim, m_szAnimExtention );
-			animDesired = LookupSequence( szAnim );
-			if (animDesired == -1)
-				animDesired = 0;
-
-			m_Activity = ACT_WALK;
-		}
-		else
-			animDesired = pev->sequence;*/
-			// diffusionplayermodelhack
 		if( (m_Activity != ACT_RANGE_ATTACK1 && m_Activity != ACT_RELOAD) || m_fSequenceFinished )
 		{
-			if( FBitSet( pev->flags, FL_DUCKING ) )    // crouching
+			if( FBitSet( pev->flags, FL_DUCKING ) )
 				strcpy( szAnim, "crouch_aim_" );
 			else
 				strcpy( szAnim, "ref_aim_" );
 			strcat( szAnim, m_szAnimExtention );
 
-			if( speed > 110.0f )
-			{
-				animDesired = pev->sequence;
-
-				if( m_Activity == ACT_HOP )
-				{
-					animDesired = LookupSequence( szAnim );
-					if( animDesired == -1 )
-						animDesired = 0;
-					m_Activity = ACT_WALK;
-				}
-			}
-			else if( (FBitSet( pev->flags, FL_DUCKING )) && (speed < 100.0f) )
-			{
-				animDesired = pev->sequence;
-
-				if( m_Activity == ACT_HOP || m_Activity == ACT_RELOAD )
-				{
-					animDesired = LookupSequence( szAnim );
-					if( animDesired == -1 )
-						animDesired = 0;
-					m_Activity = ACT_WALK;
-				}
-			}
-			else
-				animDesired = LookupSequence( szAnim );
-
+			animDesired = LookupSequence( szAnim );
 			if( animDesired == -1 )
 				animDesired = 0;
 
@@ -1666,73 +1607,34 @@ void CBasePlayer::SetAnimation(PLAYER_ANIM playerAnim)
 		if( speed < 1.0f )
 		{
 			pev->gaitsequence = LookupActivity( ACT_CROUCHIDLE );
-			// pev->gaitsequence    = LookupActivity( ACT_CROUCH );
 		}
 		else
 		{
-			if( (pev->button & IN_BACK) && FBitSet( pev->flags, FL_DUCKING ) )
-				pev->gaitsequence = LookupSequence( "crawl_back" );
-			else
-				pev->gaitsequence = LookupActivity( ACT_CROUCH );
+			pev->gaitsequence = LookupActivity( ACT_CROUCH );
 		}
 	}
 	else if( speed > 200.0f )
 	{
-		if( pev->button & IN_BACK )
-			pev->gaitsequence = LookupSequence( "run_back" );
-		else
-			pev->gaitsequence = LookupActivity( ACT_RUN );
+		pev->gaitsequence = LookupActivity( ACT_RUN );
 	}
-	else if( speed > 1.0f )
+	else if( speed > 0.0f )
 	{
-		if( pev->button & IN_BACK )
-			pev->gaitsequence = LookupSequence( "walk_back" );
-		else
-			pev->gaitsequence = LookupActivity( ACT_WALK );
+		pev->gaitsequence = LookupActivity( ACT_WALK );
 	}
 	else
 	{
-		// pev->gaitsequence	= LookupActivity( ACT_WALK );
-		pev->gaitsequence	= LookupSequence( "deep_idle" );
+		pev->gaitsequence = LookupSequence( "deep_idle" );
 	}
-
-	if( ForceReset )
-	{
-		m_Activity = ACT_RESET;
-
-		if( FBitSet( pev->flags, FL_DUCKING ) )    // crouching
-			strcpy( szAnim, "crouch_aim_" );
-		else
-			strcpy( szAnim, "ref_aim_" );
-		strcat( szAnim, m_szAnimExtention );
-
-		animDesired = LookupSequence( szAnim );
-		if( animDesired == -1 )
-			animDesired = 0;
-
-		if( m_Activity == ACT_HOP )
-		{
-			animDesired = LookupSequence( szAnim );
-			if( animDesired == -1 )
-				animDesired = 0;
-			m_Activity = ACT_WALK;
-		}
-
-		pev->sequence = animDesired;
-		pev->frame = 0;
-		ResetSequenceInfo();
-	}
-
 
 	// Already using the desired animation?
-	if ( pev->sequence == animDesired)
+	if( pev->sequence == animDesired )
 		return;
 
 	//ALERT( at_console, "Set animation to %d\n", animDesired );
 	// Reset to first frame of desired animation
-	pev->sequence		= animDesired;
-	pev->frame			= 0;
-	ResetSequenceInfo( );
+	pev->sequence = animDesired;
+	pev->frame = 0;
+	ResetSequenceInfo();
 }
 
 //============================================================================
