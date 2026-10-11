@@ -3,7 +3,6 @@
 #include "const.h"
 #include "mathlib.h"
 
-uniform sampler2D		u_ScreenMap;
 uniform sampler2D		u_ColorMap;
 uniform vec3			u_MotionBlur;
 
@@ -28,7 +27,7 @@ void main( void )
 	accum += texture2D( u_ColorMap, tc + Vec.xy * Multiplier * 8 ) * (1.0 - 8.0 / 8.0);
 	accum /= 8.0;
 	
- 	vec3 cScreen = texture2D( u_ScreenMap, var_TexCoord ).rgb;
+ 	vec3 cScreen = texture2D( u_ColorMap, var_TexCoord ).rgb;
 
 	vec3 outColor = cScreen * 0.4 + accum.rgb;
 	gl_FragColor = vec4( outColor, 1.0 );
