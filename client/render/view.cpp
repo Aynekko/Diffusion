@@ -1689,19 +1689,35 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 				// NOTE: fov computation moved into r_main.cpp
 
 				// this is smooth stair climbing in thirdperson mode but not affected for client model :(
-				if( !pparams->smoothing && pparams->onground && view->origin[2] - oldz > 0.0f && viewmonster != NULL )
+				if( !pparams->smoothing && pparams->onground && viewmonster != NULL )
 				{
-					float steptime;
+					const float delta = view->origin[2] - oldz;
+					float steptime = pparams->time - lasttime;
+					if( steptime < 0 )
+						steptime = 0;
 
-					steptime = pparams->time - lasttime;
-					if( steptime < 0 ) steptime = 0;
+					if( delta > 0.0f )
+					{
+						oldz += steptime * 150.0f;
 
-					oldz += steptime * 150.0f;
+						if( oldz > view->origin[2] )
+							oldz = view->origin[2];
+						if( view->origin[2] - oldz > pparams->movevars->stepsize )
+							oldz = view->origin[2] - pparams->movevars->stepsize;
+					}
+					else if( delta < 0.0f )
+					{
+						oldz -= steptime * 150.0f;
 
-					if( oldz > view->origin[2] )
+						if( oldz < view->origin[2] )
+							oldz = view->origin[2];
+						if( oldz - view->origin[2] > pparams->movevars->stepsize )
+							oldz = view->origin[2] + pparams->movevars->stepsize;
+					}
+					else
+					{
 						oldz = view->origin[2];
-					if( view->origin[2] - oldz > pparams->movevars->stepsize )
-						oldz = view->origin[2] - pparams->movevars->stepsize;
+					}
 
 					pparams->vieworg[2] += oldz - view->origin[2];
 				}
@@ -1830,24 +1846,44 @@ void V_CalcThirdPersonRefdef( struct ref_params_s *pparams )
 	V_CalcSendOrigin( pparams );
 
 	// this is smooth stair climbing in thirdperson mode but not affected for client model :(
-	if( !pparams->smoothing && pparams->onground && pparams->simorg[2] - oldz > 0.0f )
+	if( !pparams->smoothing && pparams->onground )
 	{
-		float steptime;
+		const float delta = pparams->simorg[2] - oldz;
+		float steptime = pparams->time - lasttime;
+		if( steptime < 0 )
+			steptime = 0;
 
-		steptime = pparams->time - lasttime;
-		if( steptime < 0 ) steptime = 0;
+		if( delta > 0.0f )
+		{
+			// stepping up
+			oldz += steptime * 150.0f;
 
-		oldz += steptime * 150.0f;
+			if( oldz > pparams->simorg[2] )
+				oldz = pparams->simorg[2];
+			if( pparams->simorg[2] - oldz > pparams->movevars->stepsize )
+				oldz = pparams->simorg[2] - pparams->movevars->stepsize;
+		}
+		else if( delta < 0.0f )
+		{
+			// stepping down
+			oldz -= steptime * 150.0f;
 
-		if( oldz > pparams->simorg[2] )
+			if( oldz < pparams->simorg[2] )
+				oldz = pparams->simorg[2];
+			if( oldz - pparams->simorg[2] > pparams->movevars->stepsize )
+				oldz = pparams->simorg[2] + pparams->movevars->stepsize;
+		}
+		else
+		{
 			oldz = pparams->simorg[2];
-		if( pparams->simorg[2] - oldz > pparams->movevars->stepsize )
-			oldz = pparams->simorg[2] - pparams->movevars->stepsize;
+		}
 
 		pparams->vieworg[2] += oldz - pparams->simorg[2];
 	}
 	else
+	{
 		oldz = pparams->simorg[2];
+	}
 
 	lasttime = pparams->time;
 
@@ -2193,8 +2229,8 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	cl_entity_t *view;
 	cl_entity_t *plr;
 	Vector	angles;
-	static float lasttime;
-	static bool IsUpsideDown;
+	static float lasttime = 0;
+	static bool IsUpsideDown = false;
 
 	V_DriftPitch( pparams );
 
@@ -2440,25 +2476,45 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 
 	static float oldz = 0;
 
-	if( !pparams->smoothing && pparams->onground && pparams->simorg[2] - oldz > 0.0f )
+	if( !pparams->smoothing && pparams->onground )
 	{
-		float steptime;
+		const float delta = pparams->simorg[2] - oldz;
+		float steptime = pparams->time - lasttime;
+		if( steptime < 0 )
+			steptime = 0;
 
-		steptime = pparams->time - lasttime;
-		if( steptime < 0 ) steptime = 0;
+		if( delta > 0.0f )
+		{
+			// stepping up
+			oldz += steptime * 150.0f;
 
-		oldz += steptime * 150.0f;
+			if( oldz > pparams->simorg[2] )
+				oldz = pparams->simorg[2];
+			if( pparams->simorg[2] - oldz > pparams->movevars->stepsize )
+				oldz = pparams->simorg[2] - pparams->movevars->stepsize;
+		}
+		else if( delta < 0.0f )
+		{
+			// stepping down
+			oldz -= steptime * 150.0f;
 
-		if( oldz > pparams->simorg[2] )
+			if( oldz < pparams->simorg[2] )
+				oldz = pparams->simorg[2];
+			if( oldz - pparams->simorg[2] > pparams->movevars->stepsize )
+				oldz = pparams->simorg[2] + pparams->movevars->stepsize;
+		}
+		else
+		{
 			oldz = pparams->simorg[2];
-		if( pparams->simorg[2] - oldz > pparams->movevars->stepsize )
-			oldz = pparams->simorg[2] - pparams->movevars->stepsize;
+		}
 
 		pparams->vieworg[2] += oldz - pparams->simorg[2];
 		view->origin.z += oldz - pparams->simorg[2];
 	}
 	else
+	{
 		oldz = pparams->simorg[2];
+	}
 
 	lasttime = pparams->time;
 

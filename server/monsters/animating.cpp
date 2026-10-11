@@ -223,7 +223,7 @@ float CBaseAnimating::StudioGaitFrameAdvance( void )
 
 	// don't rotate legs fast while flying, looks stupid
 	if( !(pev->flags & FL_ONGROUND) )
-		m_flGaitMovement *= 0.15f;
+		m_flGaitMovement *= (pev->flags & FL_DUCKING) ? 0.15f : 0.3f;
 
 	//	CalcGaitFrame(GetModelPtr(), m_flPoseParameter, pev->gaitsequence, pev->fuser1, m_flGaitMovement);
 	int localMaxFrame = GetBoneSetup()->LocalMaxFrame( pev->gaitsequence );

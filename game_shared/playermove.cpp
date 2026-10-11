@@ -823,6 +823,54 @@ CategorizeContinue:
 	pmove->chtexturetype = PM_FindTextureType( pmove->sztexturename );
 }
 
+void PM_StayOnGround( void )
+{
+	pmtrace_t trace;
+	Vector start, end;
+
+	// don't snap if we're not supposed to be on ground or are in water jump
+	if( pmove->onground == -1 || pmove->waterjumptime )
+		return;
+
+	if( pmove->movetype == MOVETYPE_NOCLIP || pmove->spectator )
+		return;
+
+	start = end = pmove->origin;
+
+	if( pmove->effects & EF_UPSIDEDOWN )
+	{
+		start.z -= 2.0f;
+		end.z += pmove->movevars->stepsize;
+	}
+	else
+	{
+		start.z += 2.0f;
+		end.z -= pmove->movevars->stepsize;
+	}
+
+	// see how far we can go without getting stuck
+	trace = pmove->PM_PlayerTrace( pmove->origin, start, PM_NORMAL, -1 );
+	start = trace.endpos;
+
+	// trace the full step distance from the safe position
+	trace = pmove->PM_PlayerTrace( start, end, PM_NORMAL, -1 );
+
+	if( trace.fraction > 0.0f &&			// moved at least a little
+		trace.fraction < 1.0f &&			// hit something
+		!trace.startsolid && !trace.allsolid &&
+		((pmove->effects & EF_UPSIDEDOWN) ?
+			(trace.plane.normal[2] <= -0.7f) :
+			(trace.plane.normal[2] >= 0.7f)) )
+	{
+		// only snap if the distance is meaningful
+		float flDelta = fabs( pmove->origin.z - trace.endpos.z );
+		if( flDelta > 0.03125f )			// 1/32 unit, similar to Source's COORD_RESOLUTION check
+		{
+			pmove->origin = trace.endpos;
+		}
+	}
+}
+
 void PM_UpdateStepSound( int LadderSound = 0 )
 {
 	if( pmove->movetype == MOVETYPE_NOCLIP )
@@ -890,7 +938,7 @@ void PM_UpdateStepSound( int LadderSound = 0 )
 	{
 		velwalk = 120;
 		velrun = 210;
-		flduck = 20;  // diffusion - more time between regular walking sounds
+		flduck = 100;  // diffusion - more time between regular walking sounds (to account player's model animation)
 	}
 	
 	if ( (pmove->cmd.buttons & IN_RUN) && (pmove->cmd.buttons & IN_FORWARD) && !(pmove->flags & FL_DUCKING))  // DiffusionSprint
@@ -1497,6 +1545,7 @@ void PM_WalkMove( void )
 	if( trace.fraction == 1.0f )
 	{
 		pmove->origin = trace.endpos;
+		PM_StayOnGround();
 		return;
 	}
 
@@ -1586,6 +1635,8 @@ usedown:
 		// copy z value from slide move
 		pmove->velocity.z = downvel.z;
 	}
+
+	PM_StayOnGround();
 }
 
 /*
