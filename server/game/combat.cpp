@@ -620,6 +620,9 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 	m_IdealMonsterState = MONSTERSTATE_DEAD;
 	// Make sure this condition is fired too (TakeDamage breaks out before this happens on death)
 	SetConditions( bits_COND_LIGHT_DAMAGE );
+
+	// for soldiers: drop live grenade if was in the process of throwing it but didn't throw
+	DropLiveGrenadeAfterDeath();
 	
 	// tell owner ( if any ) that we're dead.This is mostly for MonsterMaker functionality.
 	CBaseEntity *pOwner = CBaseEntity::Instance(pev->owner);

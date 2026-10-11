@@ -49,6 +49,7 @@ public:
 	void StartTask(Task_t *pTask);
 	void RunTask(Task_t *pTask);
 	BOOL HasHumanGibs( void ) { return TRUE; };
+	void DropLiveGrenadeAfterDeath( void );
 
 	bool BodyTurn( const Vector &vecTarget );
 	bool RunningShooting; // if true, we are firing bullets while running

@@ -394,6 +394,10 @@ public:
 	
 	float NextUpdateTime; // don't update the monster logic every frame
 
+	virtual void DropLiveGrenadeAfterDeath( void ){}
+
+	bool bDropLiveGrenadeAfterDeath; // don't save
+
 	int iTest; // just for testing purposes
 };
 

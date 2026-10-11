@@ -28,7 +28,6 @@
 */
 
 #include	"extdll.h"
-#include	"plane.h"
 #include	"util.h"
 #include	"cbase.h"
 #include	"monsters.h"
@@ -120,6 +119,7 @@ extern DLL_GLOBAL int		g_iSkillLevel;
 #define		HGRUNT_AE_GREN_DROP		( 9 )
 #define		HGRUNT_AE_CAUGHT_ENEMY	( 10) // grunt established sight with an enemy (player only) that had previously eluded the squad.
 #define		HGRUNT_AE_DROP_GUN		( 11) // grunt (probably dead) is dropping his mp5.
+#define		HGRUNT_AE_GREN_REMEMBER ( 12 ) // beginning of grenade throw animation. Sets bDropLiveGrenadeAfterDeath to true
 
 const char* CHGrunt::pGruntSentences[] =
 {
@@ -963,6 +963,23 @@ int CHGrunt::IRelationship ( CBaseEntity *pTarget )
 	return CSquadMonster::IRelationship( pTarget );
 }
 
+void CHGrunt::DropLiveGrenadeAfterDeath( void )
+{
+	if( !bDropLiveGrenadeAfterDeath )
+		return;
+
+	bDropLiveGrenadeAfterDeath = false;
+
+	Vector tossvel = Vector( RANDOM_LONG( -20, 20 ), RANDOM_LONG( -20, 20 ), 20 );
+	CBaseEntity *pGrenade = CGrenade::ShootTimed( pev, GetGunPosition(), tossvel, 2.0, ForceEMPGrenade );
+	if( pGrenade )
+	{
+		SET_MODEL( pGrenade->edict(), "models/weapons/w_grenade.mdl" );
+		pGrenade->pev->body = 1; // change to body without pin
+		pGrenade->pev->skin = (int)ForceEMPGrenade;
+	}
+}
+
 //=========================================================
 // GibMonster - make gun fly through the air.
 //=========================================================
@@ -1741,8 +1758,13 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			ClearConditions(bits_COND_NO_AMMO_LOADED);
 			break;
 
+		case HGRUNT_AE_GREN_REMEMBER:
+			bDropLiveGrenadeAfterDeath = true;
+			break;
+
 		case HGRUNT_AE_GREN_TOSS:
 		{
+			bDropLiveGrenadeAfterDeath = false;
 			if( CanSpawnDrone ) // I can spawn drones.
 			{
 				if( !DroneSpawned ) // I didn't spawn any of them yet, so check if I'm able to
@@ -2135,6 +2157,7 @@ void CHGrunt :: Precache()
 void CHGrunt :: StartTask ( Task_t *pTask )
 {
 	m_iTaskStatus = TASKSTATUS_RUNNING;
+	bDropLiveGrenadeAfterDeath = false; // clear it out just in case
 
 	switch ( pTask->iTask )
 	{
@@ -3139,6 +3162,7 @@ public:
 	Schedule_t *GetSchedule( void );
 	Schedule_t *GetScheduleOfType ( int Type );
 	void DeathSound( void );
+	void DropLiveGrenadeAfterDeath( void );
 };
 
 const char *CHGruntAlien::pAlienGruntSentences[] = 
@@ -3400,7 +3424,28 @@ void CHGruntAlien :: Precache()
 	PRECACHE_MODEL( "models/grenade_alien.mdl" );
 
 	PRECACHE_SOUND( "weapons/soldier_throw.wav" ); // grenade toss sound
-}	
+}
+
+void CHGruntAlien::DropLiveGrenadeAfterDeath( void )
+{
+	if( !bDropLiveGrenadeAfterDeath )
+		return;
+
+	bDropLiveGrenadeAfterDeath = false;
+
+	Vector tossvel = Vector( RANDOM_LONG( -20, 20 ), RANDOM_LONG( -20, 20 ), 20 );
+
+	CBaseEntity *Gren = CGrenade::ShootTimed( pev, GetGunPosition(), tossvel, 2.0 );
+	if( Gren )
+	{
+		SET_MODEL( Gren->edict(), "models/grenade_alien.mdl" );
+		Gren->SetTouch( &CGrenade::ExplodeTouch );
+		// Tumble in air
+		Vector avelocity( RANDOM_FLOAT( 100, 500 ), 0, 0 );
+		Gren->SetLocalAvelocity( avelocity );
+		EMIT_SOUND( ENT( Gren->pev ), CHAN_WEAPON, "hgrunt/ag_nade_beep.wav", 1, ATTN_NORM );
+	}
+}
 
 void CHGruntAlien::DeathSound( void )
 {
@@ -4117,8 +4162,13 @@ void CHGruntAlien :: HandleAnimEvent( MonsterEvent_t *pEvent )
 			ClearConditions(bits_COND_NO_AMMO_LOADED);
 			break;
 
+		case HGRUNT_AE_GREN_REMEMBER:
+			bDropLiveGrenadeAfterDeath = true;
+			break;
+
 		case HGRUNT_AE_GREN_TOSS:
 		{
+			bDropLiveGrenadeAfterDeath = false;
 			UTIL_MakeVectors(pev->angles);
 			// diffusion - regular grenade but it explodes upon contact
 			CBaseEntity *Gren = CGrenade::ShootTimed( pev, GetGunPosition(), m_vecTossVelocity, 3.5 );
@@ -4964,8 +5014,13 @@ void CHGruntSecurityGeneral::HandleAnimEvent(MonsterEvent_t* pEvent)
 		ClearConditions(bits_COND_NO_AMMO_LOADED);
 		break;
 
+	case HGRUNT_AE_GREN_REMEMBER:
+		bDropLiveGrenadeAfterDeath = true;
+		break;
+
 	case HGRUNT_AE_GREN_TOSS:
 	{
+		bDropLiveGrenadeAfterDeath = false;
 		if( !DroneSpawned ) // I didn't spawn any of them yet, so check if I'm able to
 		{
 			TraceResult tracer;
