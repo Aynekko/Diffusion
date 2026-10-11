@@ -38,10 +38,7 @@ int CL_IsThirdPerson( void )
 
 bool CL_IsCrouching( void )
 {
-	if( gEngfuncs.GetLocalPlayer()->curstate.usehull == 1 )
-		return true;
-
-	return false;
+	return (gEngfuncs.GetLocalPlayer()->curstate.usehull == 1);
 }
 
 cl_entity_t *v_intermission_spot;
@@ -1845,6 +1842,14 @@ void V_CalcThirdPersonRefdef( struct ref_params_s *pparams )
 
 	V_CalcSendOrigin( pparams );
 
+	static int lastHull = -1;
+	const int currentHull = gEngfuncs.GetLocalPlayer()->curstate.usehull;
+	if( currentHull == 1 && lastHull != 1 )
+	{
+		oldz = pparams->simorg[2];
+	}
+	lastHull = currentHull;
+
 	// this is smooth stair climbing in thirdperson mode but not affected for client model :(
 	if( !pparams->smoothing && pparams->onground )
 	{
@@ -1873,11 +1878,7 @@ void V_CalcThirdPersonRefdef( struct ref_params_s *pparams )
 			if( oldz - pparams->simorg[2] > pparams->movevars->stepsize )
 				oldz = pparams->simorg[2] + pparams->movevars->stepsize;
 		}
-		else
-		{
-			oldz = pparams->simorg[2];
-		}
-
+		
 		pparams->vieworg[2] += oldz - pparams->simorg[2];
 	}
 	else
@@ -2475,6 +2476,14 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	pparams->viewangles += pparams->punchangle;
 
 	static float oldz = 0;
+	static int lastHull = -1;
+
+	const int currentHull = gEngfuncs.GetLocalPlayer()->curstate.usehull;
+	if( currentHull == 1 && lastHull != 1 )
+	{
+		oldz = pparams->simorg[2];
+	}
+	lastHull = currentHull;
 
 	if( !pparams->smoothing && pparams->onground )
 	{
@@ -2487,7 +2496,6 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 		{
 			// stepping up
 			oldz += steptime * 150.0f;
-
 			if( oldz > pparams->simorg[2] )
 				oldz = pparams->simorg[2];
 			if( pparams->simorg[2] - oldz > pparams->movevars->stepsize )
@@ -2497,15 +2505,10 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 		{
 			// stepping down
 			oldz -= steptime * 150.0f;
-
 			if( oldz < pparams->simorg[2] )
 				oldz = pparams->simorg[2];
 			if( oldz - pparams->simorg[2] > pparams->movevars->stepsize )
 				oldz = pparams->simorg[2] + pparams->movevars->stepsize;
-		}
-		else
-		{
-			oldz = pparams->simorg[2];
 		}
 
 		pparams->vieworg[2] += oldz - pparams->simorg[2];
