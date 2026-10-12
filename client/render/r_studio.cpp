@@ -2877,6 +2877,9 @@ void CStudioModelRenderer::StudioInterpolateControllers( cl_entity_t *e, float d
 		int i = pbonecontroller[j].index;
 		float value;
 
+		if( i < 0 || i > 3 )
+			continue;
+
 		if( i <= 3 )
 		{
 			// check for 360% wrapping
@@ -2902,6 +2905,11 @@ void CStudioModelRenderer::StudioInterpolateControllers( cl_entity_t *e, float d
 			{
 				value = (e->curstate.controller[i] * dadt + e->latched.prevcontroller[i] * (1.0 - dadt));
 			}
+
+			if( value < 0.0f )
+				value += 256.0f;
+			else if( value >= 256.0f )
+				value -= 256.0f;
 
 			m_pModelInstance->m_controller[i] = bound( 0, Q_rint( value ), 255 );
 		}
