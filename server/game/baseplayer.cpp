@@ -1495,7 +1495,7 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 		}
 		else if( pev->waterlevel > 1 )
 		{
-			if( speed == 0 )
+			if( speed < 1.0f )
 				m_IdealActivity = ACT_HOVER;
 			else
 				m_IdealActivity = ACT_SWIM;
@@ -1617,7 +1617,7 @@ void CBasePlayer::SetAnimation( PLAYER_ANIM playerAnim )
 	{
 		pev->gaitsequence = LookupActivity( ACT_RUN );
 	}
-	else if( speed > 0.0f )
+	else if( speed > 1.0f )
 	{
 		pev->gaitsequence = LookupActivity( ACT_WALK );
 	}
