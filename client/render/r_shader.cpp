@@ -2899,6 +2899,13 @@ bool GL_PrecompileUberShaders( int &processed, int &total )
 	if( bPrecompiled )
 		return true;
 
+	if( !GL_Support( R_BINARY_SHADER_EXT ) )
+	{
+		Msg( "^1Couldn't precompile shaders - unsupported by current hardware or drivers.^7\n" );
+		bPrecompiled = true;
+		return true;
+	}
+
 	processed = shaders_processed_total;
 	total = iTotalShaders;
 
