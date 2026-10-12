@@ -438,7 +438,7 @@ void V_Init( void )
 	r_sun_shadow_offset_factor = CVAR_REGISTER( "r_sun_shadow_offset_factor", "2", FCVAR_ARCHIVE );	// slope-scaled depth offset for the sun shadow casters
 	r_sun_shadow_offset_units = CVAR_REGISTER( "r_sun_shadow_offset_units", "4", FCVAR_ARCHIVE );	// constant depth offset for the sun shadow casters
 	r_sun_shadow_bias = CVAR_REGISTER( "r_sun_shadow_bias", "2", FCVAR_ARCHIVE );		// receiver depth bias in world units, raise to fight acne, lower to fight peter-panning
-	r_sun_shadow_twosided = CVAR_REGISTER( "r_sun_shadow_twosided", "0", FCVAR_ARCHIVE );	// draw the sun shadow casters double-sided so one-sided walls can't leak light
+	r_sun_shadow_twosided = CVAR_REGISTER( "r_sun_shadow_twosided", "1", FCVAR_ARCHIVE );	// draw the sun shadow casters double-sided so one-sided walls can't leak light
 	r_mirrorquality = CVAR_REGISTER( "r_mirrorquality", "3", FCVAR_ARCHIVE );
 	r_testdlight = CVAR_REGISTER( "r_testdlight", "0", FCVAR_CHEAT );
 	gl_lensflare = CVAR_REGISTER( "gl_lensflare", "1", FCVAR_ARCHIVE );

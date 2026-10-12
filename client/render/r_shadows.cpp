@@ -454,6 +454,9 @@ void R_ShadowPassDrawSolidEntities( plight_t *pl )
 				continue;
 		}
 
+		if( !(pl->flags & CF_SUNLIGHT) && (RI->currententity->curstate.renderfx == kRenderFxOnlySunShadows) )
+			continue;
+
 		// this model has indicated to not make shadows
 		if( (RI->currententity->curstate.renderfx == kRenderFxNoShadows) || (RI->currententity->curstate.renderfx == kRenderFxFullbrightNoShadows) )
 			continue;
@@ -649,6 +652,7 @@ void R_RenderSunShadow( void )
 	sunPl.origin = lightOrigin;
 	sunPl.angles = angles;
 	sunPl.radius = farDist;
+	sunPl.flags |= CF_SUNLIGHT;
 
 	sunPl.modelviewMatrix.CreateModelview();
 	sunPl.modelviewMatrix.ConcatRotate( -angles.z, 1, 0, 0 );
