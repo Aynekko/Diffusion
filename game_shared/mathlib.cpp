@@ -1321,3 +1321,33 @@ void AngleVectors (const vec3_t angles, vec3_t forward, vec3_t right, vec3_t up)
 		up[2] = cr*cp;
 	}
 }
+
+void AngleMatrix( const Vector &angles, matrix3x4 &matrix )
+{
+	float sr, sp, sy, cr, cp, cy;
+
+	SinCos( DEG2RAD( angles[YAW] ), &sy, &cy );
+	SinCos( DEG2RAD( angles[PITCH] ), &sp, &cp );
+	SinCos( DEG2RAD( angles[ROLL] ), &sr, &cr );
+
+	// matrix = (YAW * PITCH) * ROLL
+	matrix[0][0] = cp * cy;
+	matrix[1][0] = cp * sy;
+	matrix[2][0] = -sp;
+
+	float crcy = cr * cy;
+	float crsy = cr * sy;
+	float srcy = sr * cy;
+	float srsy = sr * sy;
+	matrix[0][1] = sp * srcy - crsy;
+	matrix[1][1] = sp * srsy + crcy;
+	matrix[2][1] = sr * cp;
+
+	matrix[0][2] = (sp * crcy + srsy);
+	matrix[1][2] = (sp * crsy - srcy);
+	matrix[2][2] = cr * cp;
+
+	matrix[0][3] = 0.0f;
+	matrix[1][3] = 0.0f;
+	matrix[2][3] = 0.0f;
+}

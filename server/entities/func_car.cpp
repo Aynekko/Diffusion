@@ -1925,9 +1925,9 @@ void CCar::Drive( void )
 		RearWheelAng.x += Forward * AbsCarSpeed * (M_PI * 0.5) * gpGlobals->frametime * (1 + HeatingMult) * (1.0f / (bForward() ? DriftAmount : 1.0f)) / (RearWheelRadius * 0.05f);
 	}
 
-	if( FrontWheelAng.x > 359.9f || FrontWheelAng.x < -359.9f )
-		FrontWheelAng.x = 0.0f;
-
+	FrontWheelAng.x = AngleNormalize( FrontWheelAng.x );
+	RearWheelAng.x = AngleNormalize( RearWheelAng.x );
+	
 	pWheel1->SetLocalAngles( FrontWheelAng );
 	pWheel2->SetLocalAngles( FrontWheelAng );
 	pWheel3->SetLocalAngles( RearWheelAng );
@@ -2992,6 +2992,7 @@ void CCar::Camera(void)
 
 	float MouseWaitON = CAR_CAMERA_MOUSE_WAIT_ON;
 	float MouseWaitOFF = CAR_CAMERA_MOUSE_WAIT_OFF;
+	const bool bMouseHasMoved = (hDriver->pev->v_angle != LastPlayerAngles);
 	if( SecondaryCamera )
 	{
 		MouseWaitON = 0.0f;
@@ -3005,7 +3006,7 @@ void CCar::Camera(void)
 	// this is also used to stop free camera from snapping back on vehicles with no turret
 	const bool bAimingView = (hDriver->pev->button & IN_ATTACK2);
 
-	if( hDriver->pev->v_angle != LastPlayerAngles )
+	if( bMouseHasMoved )
 	{
 		if( fMouseTouchedON < MouseWaitON )
 			fMouseTouchedON += gpGlobals->frametime;
@@ -3019,6 +3020,9 @@ void CCar::Camera(void)
 				{
 					hDriver->SetAbsAngles( GetAbsAngles() );
 					hDriver->pev->fixangle = TRUE;
+					hDriver->pev->v_angle = GetAbsAngles();
+					hDriver->pev->v_angle.z = 0;
+					LastPlayerAngles = hDriver->GetAbsAngles();
 				}
 				CamUnlocked = true;
 			}
@@ -3031,7 +3035,7 @@ void CCar::Camera(void)
 
 		if( fMouseTouchedOFF >= MouseWaitOFF )
 		{
-			if( AbsCarSpeed > 200.0f )
+			if( AbsCarSpeed > 100.0f )
 			{
 				fMouseTouchedON = 0.0f;
 				CamUnlocked = false;
@@ -3043,7 +3047,7 @@ void CCar::Camera(void)
 
 	if( SecondaryCamera ) // first person or else
 	{
-		if( hDriver->pev->v_angle != LastPlayerAngles )
+		if( bMouseHasMoved )
 		{
 			// get player's turn angle, see if it's changed
 			float CurY = hDriver->pev->v_angle.y;
@@ -3051,33 +3055,10 @@ void CCar::Camera(void)
 			float CurX = hDriver->pev->v_angle.x;
 			float LastX = LastPlayerAngles.x;
 			// check the direction of the camera movement
-			bool MoveRight = (CurY > LastY);
-			bool MoveUp = (CurX > LastX);
-			float add = 0.0f;
-			if( MoveRight )
-			{
-				add = fabs( CurY - LastY ); // sometimes it equals to 359 so the check is needed
-				if( add < 180 )
-					Camera2RotationY += add;
-			}
-			else
-			{
-				add = fabs( CurY - LastY );
-				if( add < 180 )
-					Camera2RotationY -= add;
-			}
-			if( MoveUp )
-			{
-				add = fabs( CurX - LastX );
-				if( add < 180 )
-					Camera2RotationX += add;
-			}
-			else
-			{
-				add = fabs( CurX - LastX );
-				if( add < 180 )
-					Camera2RotationX -= add;
-			}
+			float deltaYaw = UTIL_AngleDiff( hDriver->pev->v_angle.y, LastPlayerAngles.y );
+			float deltaPitch = UTIL_AngleDiff( hDriver->pev->v_angle.x, LastPlayerAngles.x );
+			Camera2RotationX = AngleNormalize( Camera2RotationX + deltaPitch );
+			Camera2RotationY = AngleNormalize( Camera2RotationY + deltaYaw );
 		}
 		Camera2RotationY = bound( -100, Camera2RotationY, 100 );
 		Camera2RotationX = bound( -60, Camera2RotationX, 25 );
@@ -3102,27 +3083,21 @@ void CCar::Camera(void)
 	if( !CamDistAdjust )
 		CamDistAdjust = 1.0f;
 
-	if( CarSpeed < -75 ) // going backwards
+	if( CarSpeed < 0 ) // going backwards
 	{
-		NewCameraAngleY = UTIL_ApproachAngle( ChassisAngleY - 180, NewCameraAngleY, 200 * gpGlobals->frametime ); // smooth it out
+		float newang = ChassisAngleY - 180;
+		// check for wrap around of angle
+		NewCameraAngleY = AngleNormalize( newang );
 	}
-	else if( CarSpeed > 25 || IsBoat || IsHeli )
+	else if( CarSpeed > 0 || IsBoat || IsHeli )
 	{
-		if( AbsCarSpeed < MaxCarSpeed * 0.2f )
-			NewCameraAngleY = UTIL_ApproachAngle( ChassisAngleY, NewCameraAngleY, 200 * gpGlobals->frametime );
-		else
-			NewCameraAngleY = ChassisAngleY;
+		NewCameraAngleY = ChassisAngleY;
 	}
 
 	const float anglediff = AngleDiff( NewCameraAngleY, CameraAngles.y );
-	const float approach_speed = bound( 1.0f, AbsCarSpeed * 0.005f, 3.0f );
+	const float approach_speed = bound( 0.0f, AbsCarSpeed * 0.004f, 3.0f );
 
-	Vector vForward, vRight;
-	g_engfuncs.pfnAngleVectors( CameraAngles, vForward, vRight, NULL );
 	CameraAngles.y = UTIL_ApproachAngle( NewCameraAngleY, CameraAngles.y, approach_speed * anglediff * gpGlobals->frametime );
-
-	if( CarSpeed < -10 ) // going backwards
-		vRight = -vRight;
 
 	const float max_camera_lean = bound( 0.f, CarSpeed * 0.025f, 10.f );
 
@@ -3159,8 +3134,35 @@ void CCar::Camera(void)
 		Vector DriverAngles = hDriver->pev->v_angle;
 		Vector CamOrg;
 
-		UTIL_MakeVectors( DriverAngles );
-		UTIL_TraceLine( hDriver->GetAbsOrigin(), hDriver->GetAbsOrigin() - gpGlobals->v_forward * (FreeCameraDistance + TmpCameraModeAddDist_Free), dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+		if( CamUnlocked && !bAimingView )
+		{
+			if( bMouseHasMoved )
+			{
+				// get player's turn angle, see if it's changed
+				float CurY = hDriver->pev->v_angle.y;
+				float LastY = LastPlayerAngles.y;
+				float CurX = hDriver->pev->v_angle.x;
+				float LastX = LastPlayerAngles.x;
+				// check the direction of the camera movement
+				float deltaYaw = UTIL_AngleDiff( hDriver->pev->v_angle.y, LastPlayerAngles.y );
+				float deltaPitch = UTIL_AngleDiff( hDriver->pev->v_angle.x, LastPlayerAngles.x );
+				FreeCamRotation.x = AngleNormalize( FreeCamRotation.x + deltaPitch );
+				FreeCamRotation.y = AngleNormalize( FreeCamRotation.y + deltaYaw );
+			}
+
+			DriverAngles = FreeCamRotation;
+			// save it so thrid-person camera will respond properly when we let go of the mouse
+			CameraAngles = FreeCamRotation;
+			TmpCameraModeAddDist_Main = TmpCameraModeAddDist_Free;
+			
+		}
+
+		Vector vForward;
+		g_engfuncs.pfnAngleVectors( DriverAngles, vForward, NULL, NULL );
+		UTIL_TraceLine( 
+			GetAbsOrigin() + gpGlobals->v_up * CameraHeight,
+			GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * (FreeCameraDistance + TmpCameraModeAddDist_Free),
+			dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 		CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 		pFreeCam->SetAbsOrigin( CamOrg );
 		pFreeCam->SetAbsAngles( DriverAngles );
@@ -3182,6 +3184,12 @@ void CCar::Camera(void)
 		}
 		else if( pCamera1 )
 		{
+			// save it so free camera will respond properly when we touch the mouse
+			FreeCamRotation = CameraAngles;
+
+			Vector vForward;
+			g_engfuncs.pfnAngleVectors( CameraAngles, vForward, NULL, NULL );
+
 			// just like in NFS MW, move camera closer if we don't press accelerate (car is slowing down)
 			if( AbsCarSpeed > 50 )
 			{
@@ -3197,7 +3205,10 @@ void CCar::Camera(void)
 					CamDistAdjust = lerp( CamDistAdjust, 1.0f, gpGlobals->frametime );
 			}
 			SET_VIEW( hDriver->edict(), pCamera1->edict() );
-			UTIL_TraceLine( GetAbsOrigin() + gpGlobals->v_up * CameraHeight, GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * (CameraDistance + TmpCameraModeAddDist_Main) * CamDistAdjust, dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
+			UTIL_TraceLine( 
+				GetAbsOrigin() + gpGlobals->v_up * CameraHeight,
+				GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * (CameraDistance + TmpCameraModeAddDist_Main) * CamDistAdjust,
+				dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 			CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
 			if( !TmpMainCameraHeightLerper )
 				TmpMainCameraHeightLerper = CamOrg.z;

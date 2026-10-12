@@ -351,6 +351,7 @@ void SnapPlaneToGrid( struct mplane_s *plane );
 void SnapVectorToGrid( Vector &normal );
 float AngleDiff( float destAngle, float srcAngle );
 float AngleNormalize( float angle );
+void AngleMatrix( const Vector &angles, matrix3x4 &matrix );
 
 int BoxOnPlaneSide( const Vector &emins, const Vector &emaxs, const struct mplane_s *plane );
 #define BOX_ON_PLANE_SIDE(emins, emaxs, p) (((p)->type < 3)?(((p)->dist <= (emins)[(p)->type])? 1 : (((p)->dist >= (emaxs)[(p)->type])? 2 : 3)):BoxOnPlaneSide( (emins), (emaxs), (p)))

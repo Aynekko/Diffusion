@@ -1638,7 +1638,7 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 					CarViewAng = view->angles;
 
 				if( lerptime < 1.0f )
-					lerptime += g_fFrametime * (lerptime + 0.25f);
+					lerptime += g_fFrametime * (lerptime + 0.1f + (gHUD.CarSpeed * 0.01));
 				InterpolateOrigin( CarViewOrg, view->origin, CarViewOrg, lerptime );
 				InterpolateAngles( CarViewAng, view->angles, CarViewAng, lerptime );
 				pparams->viewangles = CarViewAng;
