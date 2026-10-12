@@ -602,6 +602,12 @@ void R_RenderSunShadow( void )
 	if( RP_NORMALPASS() && !tr.bShouldUseDynamicSun )
 		return;
 
+	if( tr.shader_modifier != NULL ) // mapper set custom settings
+	{
+		if( tr.shader_modifier->curstate.iuser3 > 0 )
+			return; // dynamic sun shadows are disabled
+	}
+
 	worldmodel = GET_ENTITY( 0 )->model;
 	if( !worldmodel )
 		return;
