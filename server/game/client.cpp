@@ -1634,6 +1634,9 @@ void ClientPrecache( void )
 	PRECACHE_SOUND("player/pl_pain6.wav");
 	PRECACHE_SOUND("player/pl_pain7.wav");
 
+	PRECACHE_SOUND( "player/headshot1.wav" );
+	PRECACHE_SOUND( "player/headshot2.wav" );
+
 	PRECACHE_MODEL("models/player.mdl");
 
 	// hud sounds

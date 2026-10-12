@@ -640,6 +640,17 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 		BecomeDead();
 		WorldPhysic->CreateRagdollEntity( this );
 	}
+
+	// make headshot sound (it has wider radius)
+	if( m_LastHitGroup == HITGROUP_HEAD && m_bloodColor == BLOOD_COLOR_RED )
+	{
+		m_LastHitGroup = 0;
+		switch( RANDOM_LONG( 0, 1 ) )
+		{
+		case 0: EMIT_SOUND_DYN( edict(), CHAN_BODY, "player/headshot1.wav", 1.0, 0.5, 0, PITCH_NORM ); break;
+		case 1: EMIT_SOUND_DYN( edict(), CHAN_BODY, "player/headshot2.wav", 1.0, 0.5, 0, PITCH_NORM ); break;
+		}
+	}
 	
 	// don't let the status bar glitch for players.with <0 health.
 	if (pev->health < -99)
