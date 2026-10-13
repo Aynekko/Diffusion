@@ -179,7 +179,7 @@ void CBaseMonster::CheckFire(void)
 				WRITE_BYTE( RANDOM_LONG(10,20) ); // framerate
 			MESSAGE_END();
 
-			TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), 1.0f, DMG_BURN );
+			TakeDamage( VARS( eoNullEntity ), VARS( eoNullEntity ), 1.0f, DMG_BURN | DMG_NEVERGIB );
 		}
 	}
 }

@@ -169,6 +169,9 @@ int CExplosiveBarrel::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacke
 	// the attacker now owns us.
 	if( pevAttacker )
 		m_hOwner = CBaseEntity::Instance( pevAttacker );
+
+	if( pevInflictor == pev )
+		return 0;
 	
 	switch( RANDOM_LONG( 0, 4 ) )
 	{
@@ -253,6 +256,11 @@ void CExplosiveBarrel::Ignite(void)
 		WRITE_BYTE(RANDOM_LONG(2, 7)); // scale x1.0
 		WRITE_BYTE(RANDOM_LONG(10, 20)); // framerate
 	MESSAGE_END();
+
+	if( m_hOwner )
+		RadiusDamage( pev, m_hOwner->pev, 2, 100, CLASS_NONE, DMG_BURN | DMG_NEVERGIB );
+	else
+		RadiusDamage( pev, pev, 2, 100, CLASS_NONE, DMG_BURN | DMG_NEVERGIB );
 
 	SetThink(&CExplosiveBarrel::Ignite);
 	SetNextThink(0.1);
