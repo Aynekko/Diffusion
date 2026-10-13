@@ -258,6 +258,7 @@ int CHudCrosshairStatic::VidInit( void )
 
 void CHudCrosshairStatic::Reset( void )
 {
+	ui_crosshair_setup->value = 0;
 	m_iFlags &= ~HUD_ACTIVE;
 }
 
@@ -293,7 +294,10 @@ int CHudCrosshairStatic::MsgFunc_CrosshairStatic( const char *pszName, int iSize
 		}
 	}
 	else
+	{
 		m_iFlags &= ~HUD_ACTIVE;
+		WeaponID = WEAPON_NONE;
+	}
 
 	END_READ();
 
@@ -320,6 +324,56 @@ int CHudCrosshairStatic::Draw( float flTime )
 	pglDisable( GL_MULTISAMPLE_ARB );
 
 	return 1;
+}
+
+void CHudCrosshairStatic::DrawTestCrosshair( void )
+{
+	if( ui_crosshair_setup->value <= 0.0f )
+		return;
+
+	// always decrease the value
+	ui_crosshair_setup->value -= g_fFrametime * 3.0f;
+	CVAR_SET_FLOAT( "ui_crosshair_setup", ui_crosshair_setup->value ); // I can't believe I have to do this
+	if( ui_crosshair_setup->value <= 0.0f )
+	{
+		ui_crosshair_setup->value = 0;
+		CVAR_SET_FLOAT( "ui_crosshair_setup", 0 );
+		return;
+	}
+
+	// drawing in the menu only
+	if( !CVAR_TO_BOOL( ui_is_active ) )
+		return;
+	
+	float r, g, b, a;
+	crosshair_t cur_crosshair;
+	if( WeaponID == WEAPON_NONE || (WeaponID == WEAPON_DRONE && !DroneControl) )
+		cur_crosshair = cl_crosshair->value == 2 ? crosshair_default[1] : crosshair_default[0];
+	else
+		cur_crosshair = cl_crosshair->value == 2 ? crosshair[WeaponID][1] : crosshair[WeaponID][0];
+
+	x = (ScreenWidth - cur_crosshair.w) * 0.5f;
+	y = (ScreenHeight - cur_crosshair.h) * 0.5f;
+	r = 0.275f;// 70 / 255;
+	g = 0.663f;// 169 / 255;
+	b = 1.0f;
+	a = 0.6f; // 150 / 255
+	a *= bound( 0.0f, ui_crosshair_setup->value * 100.0f / 255.0f, 255.0f );
+
+	pglEnable( GL_MULTISAMPLE_ARB );
+
+	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
+	gEngfuncs.pTriAPI->Color4f( r, g, b, a );
+
+	if( cur_crosshair.texture )
+	{
+		GL_Bind( GL_TEXTURE0, cur_crosshair.texture );
+		gEngfuncs.pTriAPI->Begin( TRI_QUADS );
+		DrawQuad( x, y, x + cur_crosshair.w, y + cur_crosshair.h );
+		gEngfuncs.pTriAPI->End();
+	}
+
+	pglDisable( GL_MULTISAMPLE_ARB );
 }
 
 int CHudCrosshairStatic::DrawCrosshairs( float flTime )

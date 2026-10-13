@@ -204,6 +204,7 @@ cvar_t *ui_is_active;
 cvar_t *ui_videooptions_active;
 cvar_t *ui_forcenoblur;
 cvar_t *cl_background;
+cvar_t *ui_crosshair_setup;
 
 int g_iPlayerClass;
 int g_iTeamNumber;
@@ -462,6 +463,7 @@ void V_Init( void )
 	ADD_COMMAND( "centerview", V_StartPitchDrift );
 
 	ui_is_active = CVAR_REGISTER( "ui_is_active", "0", FCVAR_UNLOGGED );
+	ui_crosshair_setup = CVAR_REGISTER( "ui_crosshair_setup", "0", FCVAR_UNLOGGED );
 	ui_videooptions_active = CVAR_REGISTER( "ui_videooptions_active", "0", FCVAR_UNLOGGED );
 	ui_forcenoblur = CVAR_REGISTER( "ui_forcenoblur", "0", FCVAR_UNLOGGED );
 	cl_background = CVAR_GET_POINTER( "cl_background" );

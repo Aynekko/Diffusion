@@ -671,6 +671,7 @@ public:
 	int VidInit(void);
 	int Draw(float flTime);
 	int DrawCrosshairs( float flTime );
+	void DrawTestCrosshair( void );
 	int x; int y;
 	SpriteHandle m_hCrosshairStatic;
 	int MsgFunc_CrosshairStatic( const char *pszName, int iSize, void *pbuf );
