@@ -1736,10 +1736,13 @@ Schedule_t *CAlice :: GetSchedule ( void )
 
 		case MONSTERSTATE_ALERT:	
 		case MONSTERSTATE_IDLE:
-			if ( HasConditions(bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE))
+			if( m_bStanding ) // TEMPORARY UNTIL I HAVE THE ANIMATIONS - don't do flinches in the sitting-shooting pose
 			{
-			// flinch if hurt
-			return GetScheduleOfType( SCHED_SMALL_FLINCH );
+				if( HasConditions( bits_COND_LIGHT_DAMAGE | bits_COND_HEAVY_DAMAGE ) )
+				{
+					// flinch if hurt
+					return GetScheduleOfType( SCHED_SMALL_FLINCH );
+				}
 			}
 
 			if( pev->health < 150 )
