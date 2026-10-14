@@ -1784,6 +1784,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 	TraceResult tr;
 	Vector vecRight = gpGlobals->v_right;
 	Vector vecUp = gpGlobals->v_up;
+	Vector vecSavedSrc = vecSrc;
 
 	if ( pevAttacker == NULL )
 		pevAttacker = pev;  // the default attacker is ourselves
@@ -1800,6 +1801,35 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 			y = RANDOM_FLOAT(-0.5,0.5) + RANDOM_FLOAT(-0.5,0.5);
 			z = x*x+y*y;
 		} while (z > 1);
+
+		if( iBulletType == BULLET_PLAYER_BUCKSHOT )
+		{
+			vecSrc = vecSavedSrc;
+
+			// special spread for shotguns
+			switch( iShot )
+			{
+			case 1: vecSpread = Vector( 0.001f, 0.001f, 0.001f ); break; // almost fully accurate
+			case 2: vecSpread = Vector( 0.0015f, 0.0015f, 0.0015f ); break; // near center
+			case 3:
+			case 4:
+			case 5:
+				vecSrc += gpGlobals->v_up * 0.018f;
+				vecSpread = Vector( 0.025f, 0.025f, 0.025f ); // 3 bullets in the upper area
+				break;
+			case 6:
+			case 7:
+			case 8:
+				vecSpread = VECTOR_CONE_8DEGREES;
+				break;
+			default:
+				vecSpread = VECTOR_CONE_10DEGREES;
+				break;
+			}
+
+			if( !IsPlayer() )
+				vecSpread *= 1.5f;
+		}
 
 		Vector vecDir = vecDirShooting +
 						x * vecSpread.x * vecRight +
