@@ -1809,14 +1809,14 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 			// special spread for shotguns
 			switch( iShot )
 			{
-			case 1: vecSpread = Vector( 0.001f, 0.001f, 0.001f ); break; // almost fully accurate
-			case 2: vecSpread = Vector( 0.0015f, 0.0015f, 0.0015f ); break; // near center
+			case 1: vecSpread = VECTOR_CONE_1DEGREES; break; // almost fully accurate
+			case 2: vecSpread = VECTOR_CONE_2DEGREES; break; // near center
 			case 3:
 			case 4:
-			case 5:
-				vecSrc += gpGlobals->v_up * 0.018f;
-				vecSpread = Vector( 0.025f, 0.025f, 0.025f ); // 3 bullets in the upper area
+				vecSrc += gpGlobals->v_up * 8.0f;
+				vecSpread = VECTOR_CONE_4DEGREES; // 2 bullets in the upper area
 				break;
+			case 5:
 			case 6:
 			case 7:
 			case 8:
