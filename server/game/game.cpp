@@ -119,6 +119,7 @@ cvar_t	phys_ragdoll_fadetime = { "phys_ragdoll_fadetime", "3", FCVAR_ARCHIVE };	
 cvar_t	phys_ragdoll_buoyancy = { "phys_ragdoll_buoyancy", "1.1", FCVAR_ARCHIVE };	// upward force factor on submerged parts (0 = no buoyancy)
 cvar_t	phys_ragdoll_waterdrag = { "phys_ragdoll_waterdrag", "2", FCVAR_ARCHIVE };	// drag applied to submerged parts
 cvar_t	phys_ragdoll_limitdamping = { "phys_ragdoll_limitdamping", "5", FCVAR_ARCHIVE };	// damping at joint limits when limitspring is on
+cvar_t	phys_ragdoll_player_sp = { "phys_ragdoll_player_sp", "0", FCVAR_ARCHIVE }; // create player's ragdoll in singleplayer when player dies (disabled by default)
 cvar_t	phys_solveriterations = { "phys_solveriterations", "8", FCVAR_ARCHIVE };	// position solver iterations for all bodies (props and ragdolls)
 cvar_t	phys_ccd = { "phys_ccd", "1", FCVAR_ARCHIVE };	// enable speculative continuous collision detection
 cvar_t	phys_ragdoll_impactforce = { "phys_ragdoll_impactforce", "60", FCVAR_ARCHIVE };	// min contact impulse to fire PhysicsImpact (0 = every first contact)
@@ -201,6 +202,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER( &phys_ragdoll_buoyancy );
 	CVAR_REGISTER( &phys_ragdoll_waterdrag );
 	CVAR_REGISTER( &phys_ragdoll_limitdamping );
+	CVAR_REGISTER( &phys_ragdoll_player_sp );
 	CVAR_REGISTER( &phys_solveriterations );
 	CVAR_REGISTER( &phys_ccd );
 	CVAR_REGISTER( &phys_ragdoll_impactforce );

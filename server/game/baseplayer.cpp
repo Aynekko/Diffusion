@@ -1161,6 +1161,9 @@ bool CBasePlayer::SpawnRagdollCorpse( void )
 	if( CVAR_GET_FLOAT( "mp_hidecorpses" ) > 0 )
 		return false;
 
+	if( !g_pGameRules->IsMultiplayer() && CVAR_GET_FLOAT( "phys_ragdoll_player_sp" ) == 0.0f )
+		return false;
+
 	if( UTIL_GetModelType( pev->modelindex ) != mod_studio )
 		return false;
 
