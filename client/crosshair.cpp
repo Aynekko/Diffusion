@@ -239,6 +239,7 @@ int CHudCrosshairStatic::VidInit( void )
 	CurCrosshair = cl_crosshair->value;
 	DamageDealt = 0;
 	fReloadingLength = 0.0f;
+	CVAR_SET_FLOAT( "ui_crosshair_setup", 0 );
 
 	// load crosshair images
 	VidInitCrosshairs();
@@ -358,7 +359,7 @@ void CHudCrosshairStatic::DrawTestCrosshair( void )
 	g = 0.663f;// 169 / 255;
 	b = 1.0f;
 	a = 0.6f; // 150 / 255
-	a *= bound( 0.0f, ui_crosshair_setup->value * 100.0f / 255.0f, 255.0f );
+	a *= bound( 0.0f, ui_crosshair_setup->value * 100.0f / 255.0f, 1.0f );
 
 	pglEnable( GL_MULTISAMPLE_ARB );
 
