@@ -1320,8 +1320,8 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 	pev->deadflag		= DEAD_DYING;
 	pev->movetype		= MOVETYPE_TOSS;
 	ClearBits( pev->flags, FL_ONGROUND );
-	if (GetAbsVelocity().z < 10)
-		ApplyAbsVelocityImpulse( Vector( 0, 0, RANDOM_FLOAT(0,300)));
+//	if (GetAbsVelocity().z < 10)
+//		ApplyAbsVelocityImpulse( Vector( 0, 0, RANDOM_FLOAT(0,300)));
 
 	// clear out the suit message cache so we don't keep chattering
 	SetSuitUpdate(NULL, FALSE, 0);
