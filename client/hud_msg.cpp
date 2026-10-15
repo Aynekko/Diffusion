@@ -1113,6 +1113,19 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 			gHUD.m_TriggerTimer.critical = false;
 	}
 	break;
+
+	case TE_PLAYERKILLERIDX:
+	{
+		gHUD.iKillerIndex = READ_BYTE();
+		if( gHUD.iKillerIndex > 0 )
+		{
+			gHUD.vDeathPosition.x = READ_COORD();
+			gHUD.vDeathPosition.y = READ_COORD();
+			gHUD.vDeathPosition.z = READ_COORD();
+		}
+		gHUD.fLerpToKiller = 0.0f;
+	}
+	break;
 	}
 
 	END_READ();

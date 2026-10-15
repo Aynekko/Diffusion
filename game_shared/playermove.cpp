@@ -3349,6 +3349,31 @@ void PM_PlayerMove ( qboolean server )
 		return;
 	}
 
+	// PVS for death camera
+	if( pmove->dead && pmove->iuser2 > 0 )
+	{
+		// Find the client this player's targeting
+		int target;
+		for( target = 0; target < pmove->numphysent; target++ )
+		{
+			if( pmove->physents[target].info == pmove->iuser2 )
+				break;
+		}
+
+		if( target == pmove->numphysent )
+			return;
+
+		// use targets position as own origin for PVS
+		pmove->angles = pmove->physents[target].angles;
+		pmove->origin = pmove->physents[target].origin;
+
+		// no velocity
+		pmove->velocity = g_vecZero;
+
+		PM_CategorizePosition();
+		return;
+	}
+
 	// Always try and unstick us unless we are in NOCLIP mode
 	if( pmove->movetype != MOVETYPE_NOCLIP && pmove->movetype != MOVETYPE_NONE )
 	{

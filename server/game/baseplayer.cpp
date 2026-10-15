@@ -1967,8 +1967,11 @@ void CBasePlayer::PlayerDeathThink(void)
 		{
 			if( !m_hKiller->IsAlive() )
 			{
-				m_hKiller = NULL;
-				fLerpToKiller = 0.0f;
+				pev->iuser2 = 0;
+				MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
+					WRITE_BYTE( TE_PLAYERKILLERIDX );
+					WRITE_BYTE( 0 );
+				MESSAGE_END();
 				StartDeathCam(); // go to dead camera.
 			}
 			else
@@ -1983,21 +1986,35 @@ void CBasePlayer::PlayerDeathThink(void)
 					pev->effects = EF_NODRAW;
 				}
 
-				if( m_afPhysicsFlags & PFLAG_OBSERVER ) // observe the killer position
+				if( gpGlobals->time > (m_fDeadTime + 1) )
 				{
-					Vector MyOrg = GetAbsOrigin();
-					Vector KillerOrg = m_hKiller->GetAbsOrigin();
-					// lerp into killer's position
-					Vector dest;
-					if( fLerpToKiller < 1.0f )
-						fLerpToKiller += 2.0f * gpGlobals->frametime;
-					VectorLerp( MyOrg, fLerpToKiller, KillerOrg, dest );
-					SetAbsOrigin( dest );
+					if( m_afPhysicsFlags & PFLAG_OBSERVER ) // observe the killer position
+					{
+						pev->iuser2 = m_hKiller->entindex();
+						if( bSendKillerIndex )
+						{
+							Vector Org = GetAbsOrigin();
+							MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
+								WRITE_BYTE( TE_PLAYERKILLERIDX );
+								WRITE_BYTE( m_hKiller->entindex() );
+								WRITE_COORD( Org.x );
+								WRITE_COORD( Org.y );
+								WRITE_COORD( Org.z );
+							MESSAGE_END();
+
+							bSendKillerIndex = false;
+						}
+					}
 				}
 			}
 		}
 		else if( (gpGlobals->time > (m_fDeadTime + 5)) && !(m_afPhysicsFlags & PFLAG_OBSERVER) )
 		{
+			pev->iuser2 = 0;
+			MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pev );
+				WRITE_BYTE( TE_PLAYERKILLERIDX );
+				WRITE_BYTE( 0 );
+			MESSAGE_END();
 			StartDeathCam(); // go to dead camera.
 		}
 	}
@@ -5492,7 +5509,7 @@ void CBasePlayer::Spawn( void )
 	CreateFlashlightMonster();
 
 	m_hKiller = NULL;
-	fLerpToKiller = 0.0f;
+	bSendKillerIndex = false;
 
 	g_pGameRules->PlayerSpawn( this );
 
@@ -5502,6 +5519,11 @@ void CBasePlayer::Spawn( void )
 	// getting item_suit will set body to 0
 	if( !HasWeapon( WEAPON_SUIT ) )
 		pev->body = 1;
+	else
+		pev->body = 0;
+
+	// clear spectator data
+	pev->iuser1 = pev->iuser2 = 0;
 }
 
 void CBasePlayer::SetHUDTexts(void)

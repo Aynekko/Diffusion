@@ -663,7 +663,7 @@ public:
 	float gtbdPrev; // for CheckTimeBasedDamage()
 
 	EHANDLE m_hKiller;
-	float fLerpToKiller;
+	bool bSendKillerIndex;
 
 	EHANDLE m_hRagdollCorpse;
 

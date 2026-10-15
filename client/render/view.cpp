@@ -476,6 +476,8 @@ void V_VidInit( void )
 	gun_roll_angle = 0;
 	weapon_move_angles = g_vecZero;
 	tmpViewEnt = NULL;
+	gHUD.iKillerIndex = 0;
+	gHUD.fLerpToKiller = 0.0f;
 	if( vid_brightness->value <= 0.0 ) CVAR_SET_FLOAT( "brightness", 1.5f ); // set default brightness to middle
 }
 
@@ -1838,9 +1840,26 @@ void V_CalcThirdPersonRefdef( struct ref_params_s *pparams )
 {
 	static float lasttime, oldz = 0;
 
-	pparams->vieworg = pparams->simorg;
-	pparams->vieworg += pparams->viewheight;
+	pparams->vieworg = pparams->simorg + pparams->viewheight;
 	pparams->viewangles = pparams->cl_viewangles;
+
+	if( pparams->health <= 0 && g_iUser2 > 0 )
+	{
+		cl_entity_t *ent = gEngfuncs.GetEntityByIndex( g_iUser2 );
+		if( ent && ent != GET_LOCAL_PLAYER() && ent->player )
+		{
+			Vector MyOrg = gHUD.vDeathPosition + pparams->viewheight;
+			Vector KillerOrg = ent->origin + pparams->viewheight;
+
+			Vector dest;
+			if( gHUD.fLerpToKiller < 1.0f )
+				gHUD.fLerpToKiller += g_fFrametime * 2.0f;
+			VectorLerp( MyOrg, gHUD.fLerpToKiller, KillerOrg, dest );
+			V_GetChaseOrigin( pparams->viewangles, dest, cl_chasedist->value, pparams->vieworg );
+		}
+
+		return;
+	}
 
 	V_CalcSendOrigin( pparams );
 
@@ -2563,6 +2582,12 @@ void V_CalcRefdef( struct ref_params_s *pparams )
 			gHUD.m_iCameraMode = 1;
 		else
 			gHUD.m_iCameraMode = 0;
+	}
+
+	if( pparams->health > 0 )
+	{
+		gHUD.iKillerIndex = 0;
+		gHUD.fLerpToKiller = 0.0f;
 	}
 
 	// switch to 1st-person in spectator mode (camera issues)

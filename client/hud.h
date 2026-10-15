@@ -1178,6 +1178,10 @@ public:
 	bool emptyclipspawned[TOTAL_WEAPONS];
 
 	char m_szServerName[96];
+
+	int iKillerIndex;
+	Vector vDeathPosition;
+	float fLerpToKiller;
 };
 
 extern CHud	gHUD;
