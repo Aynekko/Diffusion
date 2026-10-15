@@ -226,11 +226,6 @@ const char *SV_GetString( string_t iString )
 	return g_GameStringPool.FindString( iString );
 }
 
-void PrepWorldFrame( void )
-{
-	WorldPhysic->EndFrame();
-}
-
 int EngineAllowSaveGame( void )
 {
 	return g_bAllowSaves;
@@ -250,7 +245,7 @@ static physics_interface_t gPhysicsInterface =
 	NULL,	// not needs
 	EngineSetFeatures,
 	DrawDebugTriangles,
-	PrepWorldFrame,
+	NULL,
 	DrawOrthoTriangles,
 	SV_ClipMoveToEntity,
 	SV_ClipPMoveToEntity,
@@ -267,7 +262,11 @@ static physics_interface_t gPhysicsInterface =
 	NULL,
 #endif
 	SV_RestoreDecal,
-	PM_PlayerTouch
+	PM_PlayerTouch,
+	NULL,
+	NULL,
+	NULL,
+	NULL
 };
 
 int Server_GetPhysicsInterface( int iVersion, server_physics_api_t *pfuncsFromEngine, physics_interface_t *pFunctionTable )

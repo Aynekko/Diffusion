@@ -1443,6 +1443,8 @@ void StartFrame( void )
 
 void EndFrame( void )
 {
+	WorldPhysic->EndFrame();
+	
 	if ( g_fGameOver )
 		return;
 
