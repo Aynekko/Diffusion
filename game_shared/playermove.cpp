@@ -835,6 +835,9 @@ void PM_StayOnGround( void )
 	if( pmove->movetype == MOVETYPE_NOCLIP || pmove->spectator )
 		return;
 
+	if( pmove->velocity.Length() > 500.0f )
+		return;
+
 	start = end = pmove->origin;
 
 	if( pmove->effects & EF_UPSIDEDOWN )
