@@ -1871,10 +1871,13 @@ void V_CalcThirdPersonRefdef( struct ref_params_s *pparams )
 	}
 	lastHull = currentHull;
 
+	const bool bSkipDownwardSmooth = (gHUD.m_iKeyBits & IN_DUCK) || CL_IsCrouching();
+	const int iUpsideDown = (gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN) ? -1 : 1;
+
 	// this is smooth stair climbing in thirdperson mode but not affected for client model :(
 	if( !pparams->smoothing && pparams->onground )
 	{
-		const float delta = pparams->simorg[2] - oldz;
+		const float delta = (pparams->simorg[2] - oldz) * iUpsideDown;
 		float steptime = pparams->time - lasttime;
 		if( steptime < 0 )
 			steptime = 0;
@@ -1882,25 +1885,29 @@ void V_CalcThirdPersonRefdef( struct ref_params_s *pparams )
 		if( delta > 0.0f )
 		{
 			// stepping up
-			oldz += steptime * 150.0f;
-
-			if( oldz > pparams->simorg[2] )
+			oldz += steptime * 150.0f * iUpsideDown;
+			if( (oldz - pparams->simorg[2]) * iUpsideDown > 0.0f )
 				oldz = pparams->simorg[2];
-			if( pparams->simorg[2] - oldz > pparams->movevars->stepsize )
-				oldz = pparams->simorg[2] - pparams->movevars->stepsize;
+			if( (pparams->simorg[2] - oldz) * iUpsideDown > pparams->movevars->stepsize )
+				oldz = pparams->simorg[2] - pparams->movevars->stepsize * iUpsideDown;
+
+			pparams->vieworg[2] += oldz - pparams->simorg[2];
 		}
-		else if( delta < 0.0f )
+		else if( delta < 0.0f && !bSkipDownwardSmooth )
 		{
 			// stepping down
-			oldz -= steptime * 150.0f;
-
-			if( oldz < pparams->simorg[2] )
+			oldz -= steptime * 150.0f * iUpsideDown;
+			if( (oldz - pparams->simorg[2]) * iUpsideDown < 0.0f )
 				oldz = pparams->simorg[2];
-			if( oldz - pparams->simorg[2] > pparams->movevars->stepsize )
-				oldz = pparams->simorg[2] + pparams->movevars->stepsize;
+			if( (oldz - pparams->simorg[2]) * iUpsideDown > pparams->movevars->stepsize )
+				oldz = pparams->simorg[2] + pparams->movevars->stepsize * iUpsideDown;
+
+			pparams->vieworg[2] += oldz - pparams->simorg[2];
 		}
-		
-		pparams->vieworg[2] += oldz - pparams->simorg[2];
+		else
+		{
+			oldz = pparams->simorg[2];
+		}
 	}
 	else
 	{
@@ -2511,10 +2518,11 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	lastHull = currentHull;
 
 	const bool bSkipDownwardSmooth = (gHUD.m_iKeyBits & IN_DUCK) || CL_IsCrouching();
+	const int iUpsideDown = (gEngfuncs.GetLocalPlayer()->curstate.effects & EF_UPSIDEDOWN) ? -1 : 1;
 
 	if( !pparams->smoothing && pparams->onground )
 	{
-		const float delta = pparams->simorg[2] - oldz;
+		const float delta = (pparams->simorg[2] - oldz) * iUpsideDown;
 		float steptime = pparams->time - lasttime;
 		if( steptime < 0 )
 			steptime = 0;
@@ -2522,11 +2530,11 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 		if( delta > 0.0f )
 		{
 			// stepping up
-			oldz += steptime * 150.0f;
-			if( oldz > pparams->simorg[2] )
+			oldz += steptime * 150.0f * iUpsideDown;
+			if( (oldz - pparams->simorg[2]) * iUpsideDown > 0.0f )
 				oldz = pparams->simorg[2];
-			if( pparams->simorg[2] - oldz > pparams->movevars->stepsize )
-				oldz = pparams->simorg[2] - pparams->movevars->stepsize;
+			if( (pparams->simorg[2] - oldz) * iUpsideDown > pparams->movevars->stepsize )
+				oldz = pparams->simorg[2] - pparams->movevars->stepsize * iUpsideDown;
 
 			pparams->vieworg[2] += oldz - pparams->simorg[2];
 			view->origin.z += oldz - pparams->simorg[2];
@@ -2534,11 +2542,11 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 		else if( delta < 0.0f && !bSkipDownwardSmooth )
 		{
 			// stepping down
-			oldz -= steptime * 150.0f;
-			if( oldz < pparams->simorg[2] )
+			oldz -= steptime * 150.0f * iUpsideDown;
+			if( (oldz - pparams->simorg[2]) * iUpsideDown < 0.0f )
 				oldz = pparams->simorg[2];
-			if( oldz - pparams->simorg[2] > pparams->movevars->stepsize )
-				oldz = pparams->simorg[2] + pparams->movevars->stepsize;
+			if( (oldz - pparams->simorg[2]) * iUpsideDown > pparams->movevars->stepsize )
+				oldz = pparams->simorg[2] + pparams->movevars->stepsize * iUpsideDown;
 
 			pparams->vieworg[2] += oldz - pparams->simorg[2];
 			view->origin.z += oldz - pparams->simorg[2];
