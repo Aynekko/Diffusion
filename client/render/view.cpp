@@ -2499,12 +2499,18 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 	static float oldz = 0;
 	static int lastHull = -1;
 
+	// fuck this shit mang.
+	// don't use downward smoothing when player is crouching, this produces a hitch in MP
+	// (by ALL means, if button is pressed or we use crouch hull)
+	// P.S. the reason this started to happen was adding PM_StayOnGround, but it is needed.
 	const int currentHull = gEngfuncs.GetLocalPlayer()->curstate.usehull;
 	if( currentHull == 1 && lastHull != 1 )
 	{
 		oldz = pparams->simorg[2];
 	}
 	lastHull = currentHull;
+
+	const bool bSkipDownwardSmooth = (gHUD.m_iKeyBits & IN_DUCK) || CL_IsCrouching();
 
 	if( !pparams->smoothing && pparams->onground )
 	{
@@ -2521,8 +2527,11 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 				oldz = pparams->simorg[2];
 			if( pparams->simorg[2] - oldz > pparams->movevars->stepsize )
 				oldz = pparams->simorg[2] - pparams->movevars->stepsize;
+
+			pparams->vieworg[2] += oldz - pparams->simorg[2];
+			view->origin.z += oldz - pparams->simorg[2];
 		}
-		else if( delta < 0.0f )
+		else if( delta < 0.0f && !bSkipDownwardSmooth )
 		{
 			// stepping down
 			oldz -= steptime * 150.0f;
@@ -2530,10 +2539,14 @@ void V_CalcFirstPersonRefdef( struct ref_params_s *pparams )
 				oldz = pparams->simorg[2];
 			if( oldz - pparams->simorg[2] > pparams->movevars->stepsize )
 				oldz = pparams->simorg[2] + pparams->movevars->stepsize;
-		}
 
-		pparams->vieworg[2] += oldz - pparams->simorg[2];
-		view->origin.z += oldz - pparams->simorg[2];
+			pparams->vieworg[2] += oldz - pparams->simorg[2];
+			view->origin.z += oldz - pparams->simorg[2];
+		}
+		else
+		{
+			oldz = pparams->simorg[2];
+		}
 	}
 	else
 	{

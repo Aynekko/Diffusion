@@ -835,7 +835,11 @@ void PM_StayOnGround( void )
 	if( pmove->movetype == MOVETYPE_NOCLIP || pmove->spectator )
 		return;
 
-	if( pmove->velocity.Length() > 500.0f )
+	if( pmove->cmd.buttons & IN_DUCK || pmove->flags & FL_DUCKING )
+		return;
+
+	const float speed = pmove->velocity.Length();
+	if( speed < 100.0f || speed > 500.0f )
 		return;
 
 	start = end = pmove->origin;
