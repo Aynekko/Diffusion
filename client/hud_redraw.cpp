@@ -210,15 +210,27 @@ void CHud::DrawShaderCompilation( void )
 	}
 
 	float ypos = ScreenHeight * 0.8f;
+	const float r = 0.275f; // 70
+	const float g = 0.663f; // 169
+	const float b = 1.0f; // 255
 
-	float txtpos = (ScreenWidth - shadermessage_width) * 0.5f;
-	FillRoundedRGBA( txtpos - 100.0f, ypos - 10.0f, shadermessage_width + 200.0f, 20.0f + (gHUD.m_scrinfo.iCharHeight * 1.5f) + gHUD.m_scrinfo.iCharHeight, 10.0f, 0.2f, 0.2f, 0.2f, 0.8f );
+	// draw outline
+	const float outline_w = 800.0f;
+	const float outline_h = 20.0f;
+	const float border = 5.0f; // outline thickess is actually 3
+	FillRoundedRGBA( (ScreenWidth - outline_w) * 0.5f, ypos, outline_w, outline_h, 2.5f, r, g, b, 1.0f );
+	// draw black background for the bar itself
+	FillRoundedRGBA( ((ScreenWidth - outline_w) * 0.5f) + 3.0f, ypos + 3.0f, outline_w - 6.0f, outline_h - 6.0f, 2.5f, 0, 0, 0, 1.0f );
+	// draw the moving loading bar
+	FillRoundedRGBA( ((ScreenWidth - outline_w) * 0.5f) + border, ypos + border, (outline_w - border - border) * ((float)shaders_processed / (float)shaders_total), outline_h - border - border, 0.0f, r, g, b, 1.0f );
 
-	DrawString( (ScreenWidth - shadermessage_width) * 0.5f, ypos, shadermessage, 70, 169, 255 );
+	const float txtpos_x = (ScreenWidth - outline_w) * 0.5f;
+	const float txtpos_y = ypos - gHUD.m_scrinfo.iCharHeight - 5;
+	DrawString( txtpos_x, txtpos_y, shadermessage, 70, 169, 255 );
 
 	static char counter[256];
 	Q_snprintf( counter, sizeof( counter ), "%i / %i\n", shaders_processed, shaders_total );
-	// calculate width to align center...
+	// calculate width
 	float counter_width = 0.0f;
 	buf = counter;
 	while( *buf && *buf != '\n' )
@@ -228,8 +240,7 @@ void CHud::DrawShaderCompilation( void )
 		buf++;
 	}
 
-	ypos += gHUD.m_scrinfo.iCharHeight * 1.5f;
-	DrawString( (ScreenWidth - counter_width) * 0.5f, ypos, counter, 70, 169, 255 );
+	DrawString( txtpos_x + outline_w - counter_width, txtpos_y, counter, 70, 169, 255 );
 }
 
 int CHud :: Redraw( float flTime, int intermission )

@@ -447,18 +447,31 @@ void FillRoundedRGBA( const float x, const float y, const float width, const flo
 	b = bound( 0.0f, b, 1.0f );
 	a = bound( 0.0f, a, 1.0f );
 
-	float left = x;
-	float top = y;
-	float bottom = y + height - 1;
-	float right = x + width - 1;
+	if( a == 0.0f )
+		return;
+
+	const float left = x;
+	const float top = y;
+	const float bottom = y + height - 1;
+	const float right = x + width - 1;
 	int i;
 	if( radius > width * 0.5f ) radius = width * 0.5f;
 	if( radius > height * 0.5f ) radius = height * 0.5f;
+
 	GL_Texture2D( GL_FALSE );
-	GL_Blend( GL_TRUE );
-	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+	if( a < 1.0f )
+	{
+		GL_Blend( GL_TRUE );
+		GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+	}
+	else
+		GL_Blend( GL_FALSE );
+
 	GL_Color4f( r, g, b, a );
+
 	pglBegin( GL_QUAD_STRIP );
+
 	// Draw left rounded side.
 	for( i = 0; i < GLW_SMALL_ROUNDED_CORNER_SLICES; ++i )
 	{
@@ -467,6 +480,7 @@ void FillRoundedRGBA( const float x, const float y, const float width, const flo
 		pglVertex2f( left + radius - radius * glwRoundedCorners[i].x,
 			top + radius - radius * glwRoundedCorners[i].y );
 	}
+
 	// Draw right rounded side.
 	for( i = GLW_SMALL_ROUNDED_CORNER_SLICES - 1; i >= 0; --i )
 	{
@@ -475,7 +489,11 @@ void FillRoundedRGBA( const float x, const float y, const float width, const flo
 		pglVertex2f( right - radius + radius * glwRoundedCorners[i].x,
 			top + radius - radius * glwRoundedCorners[i].y );
 	}
+
 	pglEnd();
+
 	GL_Texture2D( GL_TRUE );
-	GL_Blend( GL_FALSE );
+
+	if( a < 1.0f )
+		GL_Blend( GL_FALSE );
 }

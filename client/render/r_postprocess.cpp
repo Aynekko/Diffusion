@@ -604,14 +604,24 @@ void GaussBlur( void )
 		return;
 
 	// blur when paused (menu is shown)
-	if( RP_NORMALPASS() && !cl_background->value )
+	if( RP_NORMALPASS() )
 	{
-		if( !CVAR_TO_BOOL( ui_videooptions_active ) && (tr.time == tr.oldtime || CVAR_TO_BOOL( ui_is_active )) )
-			pausedblur += 0.5 * g_fFrametime;
+		if( cl_background->value )
+		{
+			if( tr.time == tr.oldtime )
+				pausedblur = 0.1f;
+			else
+				pausedblur -= 0.25f * g_fFrametime;
+		}
 		else
-			pausedblur -= 0.5 * g_fFrametime;
+		{
+			if( !CVAR_TO_BOOL( ui_videooptions_active ) && (tr.time == tr.oldtime || CVAR_TO_BOOL( ui_is_active )) )
+				pausedblur += 0.5f * g_fFrametime;
+			else
+				pausedblur -= 0.5f * g_fFrametime;
+		}
 
-		pausedblur = bound( 0, pausedblur, 0.1 );
+		pausedblur = bound( 0.0f, pausedblur, 0.1f );
 
 		if( pausedblur > 0 )
 		{

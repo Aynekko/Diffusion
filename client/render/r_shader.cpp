@@ -2896,8 +2896,20 @@ void GL_ListGPUShaders( void )
 
 bool GL_PrecompileUberShaders( int &processed, int &total )
 {
+	static bool bPauseSent = false;
+
 	if( bPrecompiled )
+	{
+		if( bPauseSent )
+		{
+			if( RENDER_GET_PARM( PARAM_GAMEPAUSED, 0 ) )
+				ClientCmd( "pause\n" );
+
+			bPauseSent = false;
+		}
+
 		return true;
+	}
 
 	if( !GL_Support( R_BINARY_SHADER_EXT ) )
 	{
@@ -2932,6 +2944,8 @@ bool GL_PrecompileUberShaders( int &processed, int &total )
 		bCompilingShaders = true;
 		compiled_count_total = 0;
 		compiled_failed_total = 0;
+		ClientCmd( "pause\n" );
+		bPauseSent = true;
 	}
 
 	bPrecompiled = false;
