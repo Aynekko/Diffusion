@@ -3798,9 +3798,19 @@ void CStudioModelRenderer::StudioBuildNormalTable( void )
 	m_chromeOrigin.y = sin( m_pCvarGlowShellFreq->value * tr.time ) * 4000.0f;
 	m_chromeOrigin.z = cos( m_pCvarGlowShellFreq->value * tr.time * 0.33f ) * 4000.0f;
 
+	const int renderamt = (e->curstate.rendermode == kRenderFade) ? (e->curstate.renderamt * tr.fadeblend[e->index]) : e->curstate.renderamt;
+
 	if( e->curstate.rendercolor.r || e->curstate.rendercolor.g || e->curstate.rendercolor.b )
-		gEngfuncs.pTriAPI->Color4ub( e->curstate.rendercolor.r, e->curstate.rendercolor.g, e->curstate.rendercolor.b, 255 );
-	else gEngfuncs.pTriAPI->Color4ub( 255, 255, 255, 255 );
+	{
+		int r, g, b;
+		r = e->curstate.rendercolor.r;
+		g = e->curstate.rendercolor.b;
+		b = e->curstate.rendercolor.b;
+		ScaleColors( r, g, b, renderamt );
+		gEngfuncs.pTriAPI->Color4ub( r, g, b, renderamt );
+	}
+	else
+		gEngfuncs.pTriAPI->Color4ub( renderamt, renderamt, renderamt, renderamt );
 }
 
 /*
