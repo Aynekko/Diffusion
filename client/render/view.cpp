@@ -201,6 +201,7 @@ cvar_t	v_iroll_level = { "v_iroll_level", "0.1", 0, 0.1f };
 cvar_t	v_ipitch_level = { "v_ipitch_level", "0.3", 0, 0.3f };
 
 cvar_t *ui_is_active;
+cvar_t *ui_shadersdone;
 cvar_t *ui_videooptions_active;
 cvar_t *ui_forcenoblur;
 cvar_t *cl_background;
@@ -463,6 +464,7 @@ void V_Init( void )
 	ADD_COMMAND( "centerview", V_StartPitchDrift );
 
 	ui_is_active = CVAR_REGISTER( "ui_is_active", "0", FCVAR_UNLOGGED );
+	ui_shadersdone = CVAR_REGISTER( "ui_shadersdone", "0", FCVAR_UNLOGGED );
 	ui_crosshair_setup = CVAR_REGISTER( "ui_crosshair_setup", "0", FCVAR_UNLOGGED );
 	ui_videooptions_active = CVAR_REGISTER( "ui_videooptions_active", "0", FCVAR_UNLOGGED );
 	ui_forcenoblur = CVAR_REGISTER( "ui_forcenoblur", "0", FCVAR_UNLOGGED );

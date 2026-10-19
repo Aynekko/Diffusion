@@ -2908,6 +2908,9 @@ bool GL_PrecompileUberShaders( int &processed, int &total )
 			bPauseSent = false;
 		}
 
+		if( ui_shadersdone->value != 1 )
+			CVAR_SET_FLOAT( "ui_shadersdone", 1 );
+
 		return true;
 	}
 
