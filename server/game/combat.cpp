@@ -1834,9 +1834,10 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		Vector vecDir = vecDirShooting +
 						x * vecSpread.x * vecRight +
 						y * vecSpread.y * vecUp;
-		Vector vecEnd;
 
-		vecEnd = vecSrc + vecDir * flDistance;
+		vecDir = vecDir.Normalize();
+		Vector vecEnd = vecSrc + vecDir * flDistance;
+
 		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, pentIgnore != NULL ? pentIgnore : ENT(pev)/*pentIgnore*/, &tr);
 
 		tracer = 0;

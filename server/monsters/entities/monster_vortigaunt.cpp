@@ -845,6 +845,7 @@ void CISlave :: ZapBeam( int side )
 	vecAim = ShootAtEnemy( vecSrc );
 	float deflection = 0.01;
 	vecAim = vecAim + side * gpGlobals->v_right * RANDOM_FLOAT( 0, deflection ) + gpGlobals->v_up * RANDOM_FLOAT( -deflection, deflection );
+	vecAim = vecAim.Normalize();
 	UTIL_TraceLine ( vecSrc, vecSrc + vecAim * 1024, dont_ignore_monsters, ENT( pev ), &tr);
 
 	m_hBeam[m_iBeams] = CBeam::BeamCreate( "sprites/lgtning.spr", 50 );
