@@ -1119,7 +1119,7 @@ int V_FindViewModelByWeaponModel( int weaponindex )
 
 	if( weaponModel )
 	{
-		int len = strlen( weaponModel->name );
+		int len = static_cast<int>(strlen( weaponModel->name ));
 		int i = 0;
 
 		while( modelmap[i] != NULL )

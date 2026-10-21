@@ -518,7 +518,7 @@ void CSave :: WriteString( const char *pname, const char *pdata )
 	short	token = (short)TokenHash( pdata );
 	WriteShort( pname, &token, 1 );
 #else
-	BufferField( pname, strlen(pdata) + 1, pdata );
+	BufferField( pname, static_cast<int>(strlen( pdata ) + 1), pdata );
 #endif
 }
 
@@ -531,14 +531,14 @@ void CSave :: WriteString( const char *pname, const int *stringId, int count )
 	WriteShort( pname, &token, 1 );
 #else
 	size = 0;
-	for ( i = 0; i < count; i++ )
-		size += strlen( STRING( stringId[i] ) ) + 1;
+	for( i = 0; i < count; i++ )
+		size += static_cast<int>( strlen( STRING( stringId[i] ) ) + 1 );
 
 	BufferHeader( pname, size );
 	for ( i = 0; i < count; i++ )
 	{
 		const char *pString = STRING(stringId[i]);
-		BufferData( pString, strlen(pString)+1 );
+		BufferData( pString, static_cast<int>( strlen( pString ) + 1 ) );
 	}
 #endif
 }
@@ -587,8 +587,8 @@ void CSave :: WriteFunction( DATAMAP *pRootMap, const char *pname, void **data, 
 {
 	const char *functionName = UTIL_FunctionToName( pRootMap, *data );
 
-	if ( functionName )
-		BufferField( pname, strlen(functionName) + 1, functionName );
+	if( functionName )
+		BufferField( pname, static_cast<int>(strlen( functionName ) + 1), functionName );
 	else
 		ALERT( at_error, "Invalid function pointer in class %s!\n", pRootMap->dataClassName );
 }

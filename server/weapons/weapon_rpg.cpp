@@ -682,19 +682,18 @@ void CRoboRocket2 :: FollowThink( void  )
 
 	Vector vecTarget;
 	Vector vecDir;
-	
-	float flDist, flMax, flDot;
 	TraceResult tr;
 
 	Vector angles = GetLocalAngles();
 	UTIL_MakeVectors( angles );
 
 	vecTarget = gpGlobals->v_forward;
-	flMax = 4096;
 	
 	/* disable auto-following
 	if (m_hEnemy != NULL)
 	{
+		float flDist, flMax, flDot;
+		flMax = 4096.0f;
 		Vector vecEnemyOrigin = m_hEnemy->GetAbsOrigin();
 		UTIL_TraceLine ( GetAbsOrigin(), m_hEnemy->GetAbsOrigin(), dont_ignore_monsters, ENT(pev), &tr );
 		// ALERT( at_console, "%f\n", tr.flFraction );

@@ -128,7 +128,7 @@ char *CHudTextMessage::LookupString( const char *msg, int *msg_dest )
 
 void StripEndNewlineFromString( char *str )
 {
-	int s = strlen( str ) - 1;
+	int s = static_cast<int>(strlen( str ) - 1);
 	if ( str[s] == '\n' || str[s] == '\r' )
 		str[s] = 0;
 }
@@ -180,23 +180,23 @@ int CHudTextMessage::MsgFunc_TextMsg( const char *pszName, int iSize, void *pbuf
 	switch( msg_dest )
 	{
 	case HUD_PRINTCENTER:
-		_snprintf( psz, MSG_BUF_SIZE, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		snprintf( psz, MSG_BUF_SIZE, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
 		psz[MSG_BUF_SIZE - 1] = '\0';
 		CenterPrint( ConvertCRtoNL( psz ) );
 		break;
 	case HUD_PRINTNOTIFY:
 		psz[0] = 1;  // mark this message to go into the notify buffer
-		_snprintf( psz + 1, MSG_BUF_SIZE - 1, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		snprintf( psz + 1, MSG_BUF_SIZE - 1, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
 		psz[MSG_BUF_SIZE - 2] = '\0';
 		ConsolePrint( ConvertCRtoNL( psz ) );
 		break;
 	case HUD_PRINTTALK:
-		_snprintf( psz, MSG_BUF_SIZE, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		snprintf( psz, MSG_BUF_SIZE, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
 		psz[MSG_BUF_SIZE - 1] = '\0';
 		gHUD.m_SayText.SayTextPrint( ConvertCRtoNL( psz ), MSG_BUF_SIZE );
 		break;
 	case HUD_PRINTCONSOLE:
-		_snprintf( psz, MSG_BUF_SIZE, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
+		snprintf( psz, MSG_BUF_SIZE, szBuf[0], szBuf[1], szBuf[2], szBuf[3], szBuf[4] );
 		psz[MSG_BUF_SIZE - 1] = '\0';
 		ConsolePrint( ConvertCRtoNL( psz ) );
 		break;

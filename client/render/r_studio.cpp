@@ -333,7 +333,7 @@ bool CStudioModelRenderer::StudioSaveTBN( void )
 	Q_strncpy( szModelname, m_pRenderModel->name + Q_strlen( "models/" ), sizeof( szModelname ) );
 	COM_StripExtension( szModelname );
 	Q_snprintf( szFilename, sizeof( szFilename ), "cache/%s.tbn", szModelname );
-	size_t tbn_size = sizeof( dmodeltbn_t ) + (m_tbnverts->numverts - 1) * sizeof( dvertmatrix_t );
+	long tbn_size = sizeof( dmodeltbn_t ) + (m_tbnverts->numverts - 1) * sizeof( dvertmatrix_t );
 
 	if( gRenderfuncs.pfnSaveFile( szFilename, m_tbnverts, tbn_size ) )
 		return true;

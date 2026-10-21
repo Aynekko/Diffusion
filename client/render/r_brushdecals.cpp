@@ -34,7 +34,7 @@ static struct decalarray_s
 
 static GLuint decal_vao;
 static GLuint decal_vbo;
-int num_render_decals = 0;
+static unsigned int num_render_decals = 0;
 decal_t *decal_list[MAX_RENDER_DECALS];
 short cached_decal_texture = -1;
 short cached_brush_texture = -1;

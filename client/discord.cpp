@@ -109,7 +109,7 @@ namespace discord_integration
 
 			inline void refresh_player_stats()
 			{
-				set_player_count( get_player_count() );
+				set_player_count( static_cast<int>( get_player_count() ) );
 				set_player_limit( gEngfuncs.GetMaxClients() );
 			}
 

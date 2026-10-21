@@ -1146,11 +1146,10 @@ int PM_ClipVelocity( Vector in, Vector normal, Vector &out, float overbounce )
 {
 	float backoff;
 	float angle;
-	int i, blocked;
 	
 	angle = normal[ 2 ];
 
-	blocked = 0x00; // Assume unblocked.
+	int blocked = 0x00; // Assume unblocked.
 	if( angle > 0 ) // If the plane that is blocking us has a positive z component, then assume it's a floor.
 		blocked |= 0x01;
 	if( !angle ) // If the plane has no Z, it is vertical (wall/step)

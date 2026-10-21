@@ -120,7 +120,7 @@ void UTIL_ReplaceKeyBindings( const char *inbuf, int inbufsizebytes, char *outbu
 					pos += 1;
 				}
 				strcat( outbuf, locName );
-				pos += strlen( locName );
+				pos += static_cast<int>(strlen( locName ));
 				if( bAddBrackets )
 				{
 					strcat( outbuf, "]" );

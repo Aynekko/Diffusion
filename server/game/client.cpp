@@ -455,7 +455,7 @@ void Host_Say( edict_t *pEntity, int teamonly )
 		_snprintf( text, sizeof( text ) - 1, "%c%s: ", 2, STRING( pEntity->v.netname ) );
 	text[sizeof( text ) - 1] = '\0';
 
-	j = sizeof(text) - 2 - strlen(text);  // -2 for /n and null terminator
+	j = sizeof(text) - 2 - static_cast<int>(strlen(text));  // -2 for /n and null terminator
 	if ( (int)strlen(p) > j )
 		p[j] = 0;
 
