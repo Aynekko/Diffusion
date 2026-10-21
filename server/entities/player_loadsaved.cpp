@@ -1,10 +1,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "player.h"
 #include "shake.h"
-#include "game/gamerules.h"
-#include "game/game.h"
 
 class CRevertSaved : public CPointEntity
 {

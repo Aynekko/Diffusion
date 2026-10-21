@@ -26,8 +26,6 @@
 #include "player.h"
 #include "monsters.h"
 #include "weapons/weapons.h"
-#include "nodes.h"
-#include "entities/soundent.h"
 #include "decals.h"
 #include "game/gamerules.h"
 

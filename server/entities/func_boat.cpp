@@ -2,7 +2,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
-#include "triggers.h"
 #include "game/gamerules.h"
 
 #define SF_BOAT_ONLYTRIGGER			BIT(0) // only trigger or external button

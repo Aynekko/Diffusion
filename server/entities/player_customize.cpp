@@ -2,8 +2,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
-#include "game/gamerules.h"
-#include "talkmonster.h"
 
 //================================================================================
 //diffusion - player customize

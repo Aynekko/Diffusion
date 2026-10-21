@@ -1,9 +1,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "player.h"
-#include "game/gamerules.h"
-#include "triggers.h"
 
 //===========================================================
 //LRC- trigger_onsight

@@ -1,7 +1,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "player.h"
 
 //======================================================================
 // diffusion - client-side rotating entity, brush or model.

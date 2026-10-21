@@ -21,7 +21,6 @@
 #include "player.h"
 #include "weapons/weapons.h"
 #include "game/gamerules.h"
-#include "game/skill.h"
 #include "game/game.h"
 #include "items.h"
 #include "hltv.h"

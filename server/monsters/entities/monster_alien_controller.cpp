@@ -29,8 +29,6 @@
 
 // CDrone
 #include	"entities/soundent.h"
-#include	"customentity.h"
-#include	"explode.h"
 #include	"entities/func_break.h"
 #include	"player.h"
 

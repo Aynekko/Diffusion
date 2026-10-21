@@ -20,7 +20,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "entities/trains.h"
-#include "game/saverestore.h"
 
 class CPathCorner : public CBaseDelay
 {

@@ -19,7 +19,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
-#include "weapons/weapons.h"
 #include "game/gamerules.h"
 #include "game/teamplay_gamerules.h"
 #include "game/game.h"

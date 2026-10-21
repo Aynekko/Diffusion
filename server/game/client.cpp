@@ -26,7 +26,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/saverestore.h"
 #include "player.h"
 #include "spectator.h"
 #include "game/client.h"

@@ -2,7 +2,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "talkmonster.h"
-#include "triggers.h"
 
 #define SF_RELAY_FIREONCE		0x0001
 

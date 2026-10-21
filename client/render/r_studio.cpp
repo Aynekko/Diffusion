@@ -25,10 +25,8 @@ GNU General Public License for more details.
 #include <mathlib.h>
 #include "pm_defs.h"
 #include "triangleapi.h"
-#include "entity_types.h"
 #include "r_shader.h"
 #include "r_world.h"
-#include "enginefeatures.h"
 #include <vector>
 #include <algorithm>
 

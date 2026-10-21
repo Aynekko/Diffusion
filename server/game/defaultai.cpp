@@ -22,7 +22,6 @@
 #include	"game/schedule.h"
 #include	"game/defaultai.h"
 #include	"entities/soundent.h"
-#include	"nodes.h"
 #include	"game/scripted.h"
 
 //=========================================================

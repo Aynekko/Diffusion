@@ -18,10 +18,7 @@
 #include "customentity.h"
 #include "effects.h"
 #include "weapons/weapons.h"
-#include "player.h"
 #include "decals.h"
-#include "shake.h"
-#include "game/gamerules.h"
 
 
 LINK_ENTITY_TO_CLASS( beam, CBeam );

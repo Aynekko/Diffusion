@@ -23,7 +23,6 @@
 #include	"talkmonster.h"
 #include	"game/schedule.h"
 #include	"game/defaultai.h"
-#include	"game/scripted.h"
 #include	"animation.h"
 #include	"entities/soundent.h"
 

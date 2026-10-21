@@ -1,7 +1,6 @@
 ﻿#include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "triggers.h"
 #include "game/gamerules.h"
 #include "monsters.h"
 

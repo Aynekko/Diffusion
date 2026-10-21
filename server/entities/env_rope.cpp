@@ -16,7 +16,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/gamerules.h"
 #include "CRope.h"
 #include "CRopeSegment.h"
 #include "studio.h"

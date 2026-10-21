@@ -18,10 +18,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "nodes.h"
 #include "monsters.h"
-#include "animation.h"
-#include "game/saverestore.h"
 #include "squadmonster.h"
 #include "plane.h"
 

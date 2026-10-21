@@ -1,8 +1,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "player.h"
-#include "triggers.h"
 
 //=======================================================================================================================
 // diffusion - change entity's controller values

@@ -2,7 +2,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "weapons/weapons.h"
-#include "triggers.h"
 #include "entities/soundent.h"
 
 //==========================================================================

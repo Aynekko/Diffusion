@@ -36,8 +36,6 @@
 #include "game/scriptevent.h"
 #endif
 
-#include "cbase.h"
-
 // Global engine <-> studio model rendering code interface
 float m_poseparameter[MAXSTUDIOPOSEPARAM]; // stub
 server_studio_api_t IEngineStudio;

@@ -24,7 +24,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "entities/trains.h"
-#include "game/saverestore.h"
 #include "game/game.h"
 
 BEGIN_DATADESC( CBasePlatTrain )

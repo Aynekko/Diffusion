@@ -3,9 +3,7 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons/weapons.h"
-#include "nodes.h"
 #include "player.h"
-#include "game/gamerules.h"
 
 class CShotgunXM : public CBasePlayerWeapon
 {

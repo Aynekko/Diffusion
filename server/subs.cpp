@@ -24,7 +24,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "game/saverestore.h"
-#include "nodes.h"
 #include "doors.h"
 
 #define MOVE_TOGGLE_NONE		0

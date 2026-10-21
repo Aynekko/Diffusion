@@ -3,7 +3,6 @@
 #include "cbase.h"
 #include "player.h"
 #include "entities/trains.h"			// trigger_camera has train functionality
-#include "triggers.h"
 
 #define SF_CAMERA_PLAYER_POSITION		BIT(0)
 #define SF_CAMERA_PLAYER_TARGET			BIT(1)

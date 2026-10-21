@@ -2,11 +2,9 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
-#include "game/gamerules.h"
-#include "game/game.h"
 
 // =================== PLAYER_KEYCATCHER ==============================================
-static catchtable_t gPlayerButtonTable[] =
+static const catchtable_t gPlayerButtonTable[] =
 {
 { "attack", IN_ATTACK },
 { "jump", IN_JUMP },

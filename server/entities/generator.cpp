@@ -1,13 +1,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "player.h"
-#include "game/saverestore.h"
-#include "entities/trains.h"			// trigger_camera has train functionality
-#include "game/gamerules.h"
-#include "talkmonster.h"
-#include "weapons/weapons.h"
-#include "triggers.h"
 
 //=======================================================================
 // 		   Logic_generator

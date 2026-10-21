@@ -2,7 +2,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "studio.h"
-#include "matrix.h"
 
 // =================== ENV_STATIC ==============================================
 #define SF_STATIC_SOLID			BIT( 0 )

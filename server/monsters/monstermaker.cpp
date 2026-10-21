@@ -21,7 +21,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "monsters.h"
-#include "game/saverestore.h"
 
 // Monstermaker spawnflags
 #define	SF_MONSTERMAKER_START_ON	BIT(0) // start active ( if has targetname )

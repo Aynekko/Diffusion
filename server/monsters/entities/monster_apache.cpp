@@ -18,10 +18,7 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons/weapons.h"
-#include "nodes.h"
 #include "effects.h"
-#include "entities/func_break.h"
-#include "player.h"
 
 extern DLL_GLOBAL int		g_iSkillLevel;
 

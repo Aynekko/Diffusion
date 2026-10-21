@@ -19,7 +19,6 @@
 #include "weapons/weapons.h"
 #include "monsters.h"
 #include "player.h"
-#include "game/gamerules.h"
 
 class CDeagle : public CBasePlayerWeapon
 {

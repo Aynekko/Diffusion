@@ -19,17 +19,13 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include	"nodes.h"
 #include	"monsters.h"
 #include	"game/schedule.h"
-#include	"customentity.h"
 #include	"weapons/weapons.h"
 #include	"effects.h"
 #include	"entities/soundent.h"
-#include	"decals.h"
 #include	"explode.h"
 #include	"entities/func_break.h"
-#include	"player.h"
 
 //=========================================================
 // Gargantua Monster

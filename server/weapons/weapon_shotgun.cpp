@@ -18,9 +18,7 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons/weapons.h"
-#include "nodes.h"
 #include "player.h"
-#include "game/gamerules.h"
 
 // special deathmatch shotgun spreads
 #define VECTOR_CONE_DM_SHOTGUN	Vector( 0.08716f, 0.04362f, 0.00f ) // 10 degrees by 5 degrees

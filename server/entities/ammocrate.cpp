@@ -4,7 +4,6 @@
 #include "player.h"
 #include "game/gamerules.h"
 #include "weapons/weapons.h"
-#include "animation.h"
 
 //==========================================================================
 // diffusion - ammo crate (FIXME not solid, needs a brush - i.e. invisible one with metal texture)

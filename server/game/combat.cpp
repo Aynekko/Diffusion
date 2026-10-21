@@ -30,7 +30,6 @@
 #include "weapons/weapons.h"
 #include "entities/func_break.h"
 #include "player.h"
-#include "game/gamerules.h"
 
 extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern DLL_GLOBAL int		g_iSkillLevel;

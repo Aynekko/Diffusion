@@ -1,7 +1,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/gamerules.h"
 #include "triggers.h"
 
 class CTriggerGravityField : public CTriggerInOut

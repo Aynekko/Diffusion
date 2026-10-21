@@ -4,7 +4,6 @@
 #include "player.h"
 #include "game/gamerules.h"
 #include "shake.h"
-#include "weapons/weapons.h"
 
 //==========================================================================
 // diffusion - bonus entity for multiplayer, spawned on the place of dead player

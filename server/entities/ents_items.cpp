@@ -25,7 +25,6 @@
 #include "cbase.h"
 #include "weapons/weapons.h"
 #include "player.h"
-#include "game/skill.h"
 #include "items.h"
 #include "game/gamerules.h"
 

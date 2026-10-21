@@ -18,7 +18,6 @@
 // observer.cpp
 //
 #include	"extdll.h"
-#include	"game/game.h"
 #include	"util.h"
 #include	"cbase.h"
 #include	"player.h"

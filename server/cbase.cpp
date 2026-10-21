@@ -15,15 +15,11 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
-#include  <assert.h>
 #include  <utlarray.h>
 #include	"game/saverestore.h"
-#include	"game/client.h"
 #include	"decals.h"
 #include	"nodes.h"
-#include	"game/gamerules.h"
 #include	"weapons/weapons.h"
-#include	"game/game.h"
 
 //#define USE_ENGINE_TOUCH_TRIGGERS
 

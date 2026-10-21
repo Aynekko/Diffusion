@@ -3,7 +3,6 @@
 #include "cbase.h"
 #include "player.h"
 #include "game/gamerules.h"
-#include "game/game.h"
 
 #define SF_REMOVE_SUIT		BIT( 0 )
 #define SF_REMOVE_CYCLER	BIT( 1 )

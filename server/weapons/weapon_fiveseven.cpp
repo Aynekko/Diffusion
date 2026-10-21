@@ -18,9 +18,7 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "weapons/weapons.h"
-#include "nodes.h"
 #include "player.h"
-#include "game/gamerules.h"
 
 class CWpnFiveSeven : public CBasePlayerWeapon
 {

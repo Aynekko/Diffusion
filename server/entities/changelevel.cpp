@@ -3,10 +3,7 @@
 #include "cbase.h"
 #include "player.h"
 #include "game/saverestore.h"
-#include "entities/trains.h"			// trigger_camera has train functionality
 #include "game/gamerules.h"
-#include "talkmonster.h"
-#include "weapons/weapons.h"
 #include "triggers.h"
 
 class CTriggerVolume : public CPointEntity	// Derive from point entity so this doesn't move across levels

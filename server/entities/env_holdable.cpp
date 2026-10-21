@@ -1,7 +1,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "basemonster.h"
 
 //==================================================================
 // diffusion - reason for this entity is only one - hull issues

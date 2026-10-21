@@ -16,13 +16,11 @@ GNU General Public License for more details.
 #include "hud.h"
 #include "utils.h"
 #include "const.h"
-#include "ref_params.h"
 #include "r_local.h"
 #include <mathlib.h>
 #include <stringlib.h>
 #include "r_shader.h"
 #include "virtualfs.h"
-#include "r_particle.h"
 #include "r_world.h"
 #include "crclib.h"
 #include "r_shaderlist.h"

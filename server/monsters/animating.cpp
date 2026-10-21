@@ -18,7 +18,6 @@
 #include "studio.h"
 #include "cbase.h"
 #include "animation.h"
-#include "game/saverestore.h"
 #include "bs_defs.h"
 #include "player.h"
 

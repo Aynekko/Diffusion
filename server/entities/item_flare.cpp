@@ -2,7 +2,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "weapons/weapons.h"
-#include "triggers.h"
 
 //==========================================================================
 // diffusion - simplified version of a flare, as much as I could do it.

@@ -2,13 +2,7 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
-#include "game/saverestore.h"
-#include "game/gamerules.h"
-#include "entities/trains.h"			// trigger_camera has train functionality
 #include "game/game.h"
-#include "talkmonster.h"
-#include "weapons/weapons.h"
-#include "triggers.h"
 
 //**********************************************************
 // The Multimanager Entity - when fired, will fire up to 16 targets 

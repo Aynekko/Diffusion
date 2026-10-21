@@ -1,7 +1,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/gamerules.h"
 #include "triggers.h"
 
 #define SF_WATEREF_STARTOFF BIT(0)

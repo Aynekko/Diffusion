@@ -1,9 +1,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "player.h"
-#include "entities/trains.h"			// trigger_camera has train functionality
-#include "game/gamerules.h"
 
 //
 // Render parameters trigger

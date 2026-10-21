@@ -15,13 +15,10 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "weapons/weapons.h"
-#include "nodes.h"
 #include "entities/soundent.h"
 #include "effects.h"
 #include "customentity.h"
-#include "player.h"
 
 typedef struct 
 {

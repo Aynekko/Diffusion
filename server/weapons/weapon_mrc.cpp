@@ -16,12 +16,9 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "weapons/weapons.h"
-#include "nodes.h"
 #include "player.h"
 #include "entities/soundent.h"
-#include "game/gamerules.h"
 
 class CMRC : public CBasePlayerWeapon
 {

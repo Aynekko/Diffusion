@@ -17,8 +17,6 @@ GNU General Public License for more details.
 #define NOMINMAX
 #include <windows.h>
 #endif // _WIN32
-#include <stdio.h>
-#include <vector.h>
 #include <stringlib.h>
 #include <ctype.h>
 

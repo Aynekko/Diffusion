@@ -25,7 +25,6 @@
 #include	"cbase.h"
 #include	"effects.h"
 #include	"weapons/weapons.h"
-#include	"customentity.h"
 #include	"shock.h"
 
 LINK_ENTITY_TO_CLASS(shock_beam, CShock)

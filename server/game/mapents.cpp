@@ -6,9 +6,6 @@
 #include	"extdll.h"
 #include  "util.h"
 #include	"cbase.h"
-#include	"game/saverestore.h"
-#include	"game/client.h"
-#include	"utlarray.h"
 
 struct CSpawnEntry
 {

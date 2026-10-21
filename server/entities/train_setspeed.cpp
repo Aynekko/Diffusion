@@ -2,7 +2,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "entities/trains.h"
-#include "triggers.h"
 
 #define SF_ACTIVATE_TRAIN		BIT( 0 )
 #define SF_TRAINSPEED_DEBUG		BIT( 1 )

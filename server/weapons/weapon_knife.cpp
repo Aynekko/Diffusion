@@ -16,11 +16,8 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "monsters.h"
 #include "weapons/weapons.h"
-#include "nodes.h"
 #include "player.h"
-#include "game/gamerules.h"
 
 static const int iCheckDist = 85;
 static const int iFireDist = 130;

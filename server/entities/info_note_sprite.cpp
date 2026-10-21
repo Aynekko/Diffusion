@@ -2,8 +2,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
-#include "triggers.h"
-#include "effects.h"
 
 //=======================================================================================================================
 // diffusion - simple sprite note, to reduce the amount of entites on the map

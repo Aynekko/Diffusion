@@ -2,7 +2,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "player.h"
-#include "triggers.h"
 #include "game/game.h"
 #include "game/gamerules.h"
 #include "weapons/weapons.h"

@@ -3,7 +3,6 @@
 #include "cbase.h"
 #include "monsters.h"
 #include "entities/func_break.h"
-#include "customentity.h"
 #include "effects.h"
 #include "studio.h"
 

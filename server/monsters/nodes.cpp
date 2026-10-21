@@ -20,9 +20,7 @@
 #include	"util.h"
 #include	"cbase.h"
 #include  "virtualfs.h"
-#include	"monsters.h"
 #include	"nodes.h"
-#include	"animation.h"
 #include	"doors.h"
 
 #define	HULL_STEP_SIZE 16// how far the test hull moves on each step

@@ -1,8 +1,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/gamerules.h"
-#include "triggers.h"
 
 //==================================================================================
 // This trigger will fire when the level spawns (or respawns if not fire once)

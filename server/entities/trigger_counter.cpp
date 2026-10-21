@@ -1,8 +1,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "player.h"
-#include "game/gamerules.h"
 #include "triggers.h"
 
 /*QUAKED trigger_counter (.5 .5 .5) ? nomessage

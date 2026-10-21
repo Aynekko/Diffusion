@@ -1,10 +1,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/saverestore.h"
 #include "entities/func_break.h"
-#include "decals.h"
-#include "explode.h"
 
 BEGIN_DATADESC(CPushable)
 	DEFINE_FIELD(m_maxSpeed, FIELD_FLOAT),

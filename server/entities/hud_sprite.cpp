@@ -3,7 +3,6 @@
 #include "cbase.h"
 #include "player.h"
 #include "game/gamerules.h"
-#include "game/game.h"
 
 class CHudSprite : public CBaseEntity
 {

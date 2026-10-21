@@ -23,9 +23,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/saverestore.h"
 #include "weapons/weapons.h"
-#include "decals.h"
 #include "entities/soundent.h"
 
 class CFuncMortarField : public CBaseToggle

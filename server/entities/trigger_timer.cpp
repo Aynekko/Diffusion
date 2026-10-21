@@ -2,7 +2,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "game/skill.h"
-#include "triggers.h"
 
 //=======================================================================================================================
 // diffusion - starts a desired timer when triggered (visible on HUD with a message)

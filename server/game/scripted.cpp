@@ -23,7 +23,6 @@
 #include "util.h"
 #include "cbase.h"
 #include "monsters.h"
-#include "talkmonster.h"
 
 #ifndef ANIMATION_H
 #include "animation.h"
@@ -35,9 +34,6 @@
 
 #include "game/schedule.h"
 #include "game/scripted.h"
-#include "game/defaultai.h"
-
-
 
 /*
 classname "scripted_sequence"

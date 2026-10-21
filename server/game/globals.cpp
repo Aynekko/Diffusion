@@ -25,8 +25,6 @@
 
 #include "extdll.h"
 #include "util.h"
-#include "cbase.h"
-#include "entities/soundent.h"
 
 DLL_GLOBAL ULONG		g_ulFrameCount;
 DLL_GLOBAL ULONG		g_ulModelIndexEyes;

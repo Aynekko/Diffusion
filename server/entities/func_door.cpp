@@ -16,8 +16,6 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/client.h"
-#include "player.h"
 #include "doors.h"
 #include "entities/trains.h"		// for func_traindoor
 

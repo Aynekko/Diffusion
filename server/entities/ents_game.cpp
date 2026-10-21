@@ -28,7 +28,6 @@
 #include "game/gamerules.h"
 #include "cbase.h"
 #include "player.h"
-#include "weapons/weapons.h"
 
 class CRuleEntity : public CBaseEntity
 {

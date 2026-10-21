@@ -1,10 +1,7 @@
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
-#include "game/saverestore.h"
 #include "entities/func_break.h"
-#include "decals.h"
-#include "explode.h"
 
 // pushablemaker spawnflags
 #define SF_PUSHABLEMAKER_START_ON	1 // start active ( if has targetname )
