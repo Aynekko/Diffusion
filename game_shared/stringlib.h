@@ -6,6 +6,7 @@
 #define STRINGLIB_H
 
 #include <string.h>
+#include <cstdarg>
 
 #define MAX_TOKEN_CHARS	1024
 
