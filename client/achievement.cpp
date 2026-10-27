@@ -175,16 +175,18 @@ void CHudAchievement::LoadAchievementFile( void )
 	char szFilename[MAX_PATH];
 	Q_snprintf( szFilename, sizeof( szFilename ), "data/achievements.bin" );
 
-	byte *aMemFile = LOAD_FILE( szFilename, NULL );
+	int iLength = 0;
+	byte *aMemFile = LOAD_FILE( szFilename, &iLength );
 
-	if( !aMemFile )
+	if( !aMemFile || iLength != (int)sizeof( ach_data ) )
 	{
 		Msg( "^2Achievements:^7 Couldn't load achievement file. Creating a default one...\n" );
 		CreateDefaultAchievementFile();
 
 		// try again.
-		aMemFile = LOAD_FILE( szFilename, NULL );
-		if( !aMemFile )
+		iLength = 0;
+		aMemFile = LOAD_FILE( szFilename, &iLength );
+		if( !aMemFile || iLength != (int)sizeof( ach_data ) )
 		{
 			Msg( "^2Achievements:^7 ^1Error:^7 Couldn't load achievement file due to unknown error. Achievements are disabled.\n" );
 			bAchievements = false;
@@ -192,11 +194,10 @@ void CHudAchievement::LoadAchievementFile( void )
 		}
 	}
 
-	achievement_data_t *pData = (achievement_data_t*)aMemFile;
 #ifndef _WIN32
-	memcpy( &ach_data, pData, sizeof( ach_data ));
+	memcpy( &ach_data, aMemFile, sizeof( ach_data ));
 #else
-	memcpy_s( &ach_data, sizeof( ach_data ), pData, sizeof( ach_data ) );
+	memcpy_s( &ach_data, sizeof( ach_data ), aMemFile, sizeof( ach_data ) );
 #endif
 
 	gEngfuncs.COM_FreeFile( aMemFile );
@@ -238,11 +239,20 @@ void CHudAchievement::UserCmd_ReportAchievementsToConsole(void)
 
 void CHudAchievement::CheckAchievement(void)
 {
+	if( !bAchievements )
+		return;
+
 	if( AchievementCheckTime > tr.time + ACHIEVEMENT_CHECK_TIME )
 		AchievementCheckTime = tr.time + ACHIEVEMENT_CHECK_TIME;
 	
 	if( tr.time < AchievementCheckTime )
 		return;
+
+	if( IsAchDrawing )
+	{
+		AchievementCheckTime = tr.time + 1.0f;
+		return;
+	}
 
 	for( int i = 0; i < TOTAL_ACHIEVEMENTS; i++ )
 	{
@@ -281,6 +291,8 @@ void CHudAchievement::UserCmd_ResetAchievementFile( void )
 //====================================================================================
 void CHudAchievement::CreateDefaultAchievementFile(void)
 {
+	memset( &ach_data, 0, sizeof( ach_data ) );
+
 	// populate achievement defaults
 	for( int i = 0; i < TOTAL_ACHIEVEMENTS; i++ )
 	{

@@ -131,8 +131,7 @@ void CHud::Think( void )
 
 	SuitIsOffline();
 
-	if( m_StatusIconsAchievement.bAchievements )
-		m_StatusIconsAchievement.CheckAchievement();
+	m_StatusIconsAchievement.CheckAchievement();
 
 	// make breathing effect
 	static float lastbreathtime = 0;
