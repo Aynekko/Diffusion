@@ -988,31 +988,32 @@ void CHGrunt :: GibMonster ( void )    // diffusion - grunts never drop guns ini
 	Vector	vecGunPos;
 	Vector	vecGunAngles;
 
-if ( pev->spawnflags & SF_MONSTER_NO_WPN_DROP )
+	if( pev->spawnflags & SF_MONSTER_NO_WPN_DROP )
+	{
+		if( GetBodygroup( 2 ) != 2 )
+		{// throw a gun if the grunt has one
+			GetAttachment( 0, vecGunPos, vecGunAngles );
 
-	if ( GetBodygroup( 2 ) != 2)
-	{// throw a gun if the grunt has one
-		GetAttachment( 0, vecGunPos, vecGunAngles );
-		
-		CBaseEntity *pGun;
-		if ( HasWeapon( HGRUNT_SHOTGUN ))
-			pGun = DropItem( "weapon_shotgun", vecGunPos, vecGunAngles );
-		else
-			pGun = DropItem( "weapon_9mmAR", vecGunPos, vecGunAngles );
+			CBaseEntity *pGun;
+			if( HasWeapon( HGRUNT_SHOTGUN ) )
+				pGun = DropItem( "weapon_shotgun", vecGunPos, vecGunAngles );
+			else
+				pGun = DropItem( "weapon_9mmAR", vecGunPos, vecGunAngles );
 
-		if ( pGun )
-		{
-			pGun->SetLocalVelocity( Vector( RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( 200, 300 )));
-			pGun->SetLocalAvelocity( Vector( 0, RANDOM_FLOAT( 200, 400 ), 0 ));
-		}
-	
-		if ( HasWeapon( HGRUNT_GRENADELAUNCHER ))
-		{
-			pGun = DropItem( "ammo_ARgrenades", vecGunPos, vecGunAngles );
-			if ( pGun )
+			if( pGun )
 			{
-				pGun->SetLocalVelocity( Vector( RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( 200, 300 )));
-				pGun->SetLocalAvelocity( Vector( 0, RANDOM_FLOAT( 200, 400 ), 0 ));
+				pGun->SetLocalVelocity( Vector( RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( 200, 300 ) ) );
+				pGun->SetLocalAvelocity( Vector( 0, RANDOM_FLOAT( 200, 400 ), 0 ) );
+			}
+
+			if( HasWeapon( HGRUNT_GRENADELAUNCHER ) )
+			{
+				pGun = DropItem( "ammo_ARgrenades", vecGunPos, vecGunAngles );
+				if( pGun )
+				{
+					pGun->SetLocalVelocity( Vector( RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( -100, 100 ), RANDOM_FLOAT( 200, 300 ) ) );
+					pGun->SetLocalAvelocity( Vector( 0, RANDOM_FLOAT( 200, 400 ), 0 ) );
+				}
 			}
 		}
 	}
@@ -1251,6 +1252,7 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 			// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
 			m_fThrowGrenade = FALSE;
+			return m_fThrowGrenade;
 		}
 	}
 
@@ -1313,7 +1315,7 @@ BOOL CHGrunt::CheckRangeAttack2Impl( float grenadeSpeed, float flDot, float flDi
 					// throw a hand grenade
 					m_fThrowGrenade = TRUE;
 					// don't check again for a while.
-					m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
+					m_flNextGrenadeCheck = gpGlobals->time + 0.1f; // 1/3 second.
 				}
 			}
 		}
@@ -1394,7 +1396,7 @@ void CHGrunt :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecD
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return;
 	
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return;
 
 	// check for helmet shot
@@ -1428,7 +1430,7 @@ int CHGrunt :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 	if( HasSpawnFlags(SF_MONSTER_NODAMAGE) )
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 	
 	Forget( bits_MEMORY_INCOVER );
@@ -2149,6 +2151,8 @@ void CHGrunt :: Precache()
 	PRECACHE_SOUND( "weapons/punch1.wav" );
 	PRECACHE_SOUND( "weapons/punch2.wav" );
 	PRECACHE_SOUND( "weapons/punch3.wav" );
+
+	PRECACHE_MODEL( HGRUNT_FLASHLIGHT_SPR );
 }	
 
 //=========================================================
@@ -2273,7 +2277,8 @@ void CHGrunt :: RunTask ( Task_t *pTask )
 		MakeIdealYaw( m_vecEnemyLKP );
 		ChangeYaw( pev->yaw_speed );
 
-		if( gpGlobals->time > AttackStartTime )
+		const float flEnd = (pTask->flData > 0) ? m_flWaitFinished : AttackStartTime;
+		if( gpGlobals->time >= flEnd )
 			TaskComplete();
 
 		break;
@@ -3011,7 +3016,6 @@ public:
 	void Spawn( void );
 	void Precache( void );
 	void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
-	int m_iSpriteTexture;	// Don't save, precache
 };
 
 LINK_ENTITY_TO_CLASS( monster_security_repel, CSecuritySoldierRepel );
@@ -3055,7 +3059,7 @@ void CDeadHGrunt::KeyValue( KeyValueData *pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "pose"))
 	{
-		m_iPose = Q_atoi(pkvd->szValue);
+		m_iPose = bound( 0, Q_atoi( pkvd->szValue ), 2 );
 		pkvd->fHandled = TRUE;
 	}
 	else 
@@ -3503,7 +3507,7 @@ void CHGruntAlien::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector v
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return;
 
 	UTIL_Sparks ( ptr->vecEndPos );
@@ -3525,12 +3529,12 @@ int CHGruntAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker,
 	if( HasSpawnFlags(SF_MONSTER_NODAMAGE) )
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 	
 	Forget( bits_MEMORY_INCOVER );
 
-	if( pevInflictor->owner == edict() )
+	if( pevInflictor && pevInflictor->owner == edict() )
 		return 0; // diffusion - this should be done better somehow
 
 	return CSquadMonster :: TakeDamage ( pevInflictor, pevAttacker, flDamage, bitsDamageType );
@@ -4667,6 +4671,8 @@ void CHGruntSecurityGeneral::Precache()
 
 	PRECACHE_SOUND("zombie/claw_miss2.wav");// because we use the basemonster SWIPE animation event
 
+	PRECACHE_MODEL( HGRUNT_FLASHLIGHT_SPR );
+
 	UTIL_PrecacheOther("monster_security_drone");
 
 	// get voice pitch
@@ -4752,6 +4758,7 @@ BOOL CHGruntSecurityGeneral::CheckRangeAttack2Impl( float grenadeSpeed, float fl
 			// crap, I might blow my own guy up. Don't throw a grenade and don't check again for a while.
 			m_flNextGrenadeCheck = gpGlobals->time + 1; // one full second.
 			m_fThrowGrenade = FALSE;
+			return m_fThrowGrenade;
 		}
 	}
 
@@ -4783,7 +4790,7 @@ BOOL CHGruntSecurityGeneral::CheckRangeAttack2Impl( float grenadeSpeed, float fl
 				// throw a drone
 				m_fThrowGrenade = TRUE;
 				// don't check again for a while.
-				m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
+				m_flNextGrenadeCheck = gpGlobals->time + 0.1f; // 1/3 second.
 			}
 			else
 			{
@@ -4800,7 +4807,7 @@ BOOL CHGruntSecurityGeneral::CheckRangeAttack2Impl( float grenadeSpeed, float fl
 					// throw a hand grenade
 					m_fThrowGrenade = TRUE;
 					// don't check again for a while.
-					m_flNextGrenadeCheck = gpGlobals->time; // 1/3 second.
+					m_flNextGrenadeCheck = gpGlobals->time + 0.1f; // 1/3 second.
 				}
 			}
 		}
@@ -4958,7 +4965,7 @@ int CHGruntSecurityGeneral::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAt
 	if( HasSpawnFlags(SF_MONSTER_NODAMAGE) )
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 
 	Forget(bits_MEMORY_INCOVER);
@@ -5821,7 +5828,7 @@ int CHGruntSecurity::TakeDamage(entvars_t* pevInflictor, entvars_t* pevAttacker,
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 
 	Forget(bits_MEMORY_INCOVER);
@@ -5876,8 +5883,6 @@ public:
 	void Andrew_Escape( void );
 	void WarpEffect( void );
 	void PainSound( void );
-
-	float AndrewLastHurt;
 };
 
 LINK_ENTITY_TO_CLASS( monster_andrew_grunt, CAndrewGrunt );
@@ -6054,7 +6059,7 @@ void CAndrewGrunt::CollectPoints(void)
 	{
 		if( RespawnPoints == MAX_ANDREW_SPAWNS ) // fixed limit for now
 		{
-			ALERT( at_aiconsole, "^2Andrew Grunt:^7 found too many spawn points! Max. is %i.\n", MAX_ANDREW_SPAWNS );
+			ALERT( at_aiconsole, "^2Andrew Grunt:^7 found too many respawn points! Max. is %i.\n", MAX_ANDREW_SPAWNS );
 			break;
 		}
 
@@ -6064,7 +6069,14 @@ void CAndrewGrunt::CollectPoints(void)
 		RespawnPoints++;
 	}
 
-	ALERT( at_aiconsole, "^2Andrew Grunt^7: found %i spawn points.\n", RespawnPoints );
+	if( RespawnPoints == 0 )
+	{
+		ALERT( at_aiconsole, "^2Andrew Grunt^7: no respawn points! NPC deleted.\n", RespawnPoints );
+		UTIL_Remove( this );
+		return;
+	}
+
+	ALERT( at_aiconsole, "^2Andrew Grunt^7: found %i respawn points.\n", RespawnPoints );
 }
 
 void CAndrewGrunt::SetActivity( Activity NewActivity )
@@ -6374,7 +6386,7 @@ void CAndrewGrunt::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector v
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return;
 
 	if( AndrewSpecialMode )
@@ -6415,7 +6427,7 @@ int CAndrewGrunt::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	if( HasSpawnFlags(SF_MONSTER_NODAMAGE) )
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 
 	bitsDamageType |= DMG_NEVERGIB;

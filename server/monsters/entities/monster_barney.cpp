@@ -752,7 +752,7 @@ int CBarney :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	if( HasSpawnFlags(SF_MONSTER_NODAMAGE))
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 	
 	// make sure friends talk about it if player hurts talkmonsters...
@@ -763,7 +763,7 @@ int CBarney :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	// LRC - if my reaction to the player has been overridden, don't do this stuff
 	if (m_iPlayerReact) return ret;
 
-	if ( m_MonsterState != MONSTERSTATE_PRONE && (pevAttacker->flags & FL_CLIENT) )
+	if ( m_MonsterState != MONSTERSTATE_PRONE && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 	{
 		m_flPlayerDamage += flDamage;
 

@@ -584,7 +584,7 @@ int CISlave :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 	
 	// don't slash one of your own
@@ -607,7 +607,7 @@ void CISlave::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return;
 
 	if (bitsDamageType & DMG_SHOCK)

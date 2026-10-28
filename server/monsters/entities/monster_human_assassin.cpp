@@ -1880,7 +1880,7 @@ void SecAssAlien::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector ve
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return;
 
 	UTIL_Sparks ( ptr->vecEndPos );
@@ -1902,10 +1902,10 @@ int SecAssAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 
-	if( pevInflictor->owner == edict() )
+	if( pevInflictor && pevInflictor->owner == edict() )
 		return 0; // diffusion - this should be done better somehow
 
 	return CBaseMonster :: TakeDamage ( pevInflictor, pevAttacker, flDamage, bitsDamageType );

@@ -876,7 +876,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 
 	if (!pev->takedamage)

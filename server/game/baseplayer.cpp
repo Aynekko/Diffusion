@@ -540,7 +540,6 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 	}*/
 	
 	// have suit diagnose the problem - ie: report damage type
-	int bitsDamage = bitsDamageType;
 	int ffound = TRUE;
 	int fmajor;
 	int fcritical;
@@ -660,6 +659,14 @@ skip_shield:
 		}
 	}
 
+	if( bitsDamageType & DMG_DROWN )
+	{
+		// instead of punchangle, player will get a blue screenfade
+		// and disable gibbing from drowning
+		bitsDamageType &= ~DMG_ALWAYSGIB;
+		bitsDamageType |= DMG_NEVERGIB;
+	}
+
 	// keep track of amount of damage last sustained
 	m_lastDamageAmount = flDamage;
 
@@ -727,6 +734,7 @@ skip_shield:
 		// DMG_BLAST
 		// DMG_SHOCK
 
+	int bitsDamage = bitsDamageType;
 	m_bitsDamageType |= bitsDamage; // Save this so we can report it to the client
 	m_bitsHUDDamage = -1;  // make sure the damage bits get resent
 
@@ -817,17 +825,10 @@ skip_shield:
 	}
 	
 	// diffusion
-	if( bitsDamage & DMG_FALL )
+	if( bitsDamageType & DMG_FALL )
 	{
 		// use punchangle in PM_CheckFalling
 		// BUGBUG player receives DMG_GENERIC, if gets falldamage while holding crouch!
-	}
-	else if( bitsDamage & DMG_DROWN )
-	{
-		// instead of punchangle, player will get a blue screenfade
-		// and disable gibbing from drowning
-		bitsDamage &= ~DMG_ALWAYSGIB;
-		bitsDamage |= DMG_NEVERGIB;
 	}
 	else
 	{
@@ -888,7 +889,7 @@ skip_shield:
 	}
 
 	// achievement
-	if( !(bitsDamageType & DMG_TRIGGER) && pevInflictor->owner != edict() && pevAttacker != pev ) // do not count the damage received from yourself or from trigger
+	if( !(bitsDamageType & DMG_TRIGGER) && pevInflictor && pevInflictor->owner != edict() && pevAttacker != pev ) // do not count the damage received from yourself or from trigger
 		SendAchievementStatToClient( ACH_RECEIVEDAMAGE, (int)flDamage, ACHVAL_ADD );
 
 	if (pev->health < pev->max_health)                // DiffusionRegen
@@ -2508,7 +2509,7 @@ void CBasePlayer::UpdateStatusBar()
 				{
 					m_flHealthbarsDisappearDelay = gpGlobals->time + 0.1;
 
-					if( pEntity->IsMonster() )
+					if( pEntity->IsMonster() && pEntity->pev->max_health > 0 )
 					{
 						CBaseMonster *pMonster = (CBaseMonster *)pEntity;
 
@@ -2537,7 +2538,7 @@ void CBasePlayer::UpdateStatusBar()
 					}
 					else if( pEntity->EnableHealthBar )
 					{
-						if( pEntity->pev->health > 0 )
+						if( pEntity->pev->health > 0 && pEntity->pev->max_health > 0 )
 						{
 							healthbarsnewvalues[0] = 100 * (pEntity->pev->health / pEntity->pev->max_health);
 							healthbarsnewvalues[1] = pEntity->HealthBarType;
@@ -2562,7 +2563,7 @@ void CBasePlayer::UpdateStatusBar()
 
 	// Check values and send if they don't match
 	bool ResendHealthbar = false;
-	if( memcmp( healthbarsnewvalues, healthbarscache, 4 ) )
+	if( memcmp( healthbarsnewvalues, healthbarscache, sizeof( healthbarsnewvalues ) ) )
 		ResendHealthbar = true;
 
 	if( ResendHealthbar )
@@ -2612,11 +2613,7 @@ void CBasePlayer::UpdateStatusBar()
 						newSBarState[SBAR_ID_TARGETHEALTH] = 0; // not used here
 						newSBarState[SBAR_ID_TARGETARMOR] = 0; // not used here
 
-						sprintf( TmpText, "%s\n", STRING( pEntity->CustomNameString ) );
-
-						strcpy( sbuf1, "1 " );
-						strcat( sbuf1, (char *)(TmpText) );
-						strcat( sbuf1, "2\n3" );
+						Q_snprintf( sbuf1, SBAR_STRING_SIZE, "1 %s\n2\n3", STRING( pEntity->CustomNameString ) );
 
 						m_flStatusBarDisappearDelay = gpGlobals->time + 0.2;
 					}
@@ -3221,7 +3218,10 @@ void CBasePlayer::PreThink( void )
 	CBaseEntity *pUseObject = NULL;
 
 	if( !CanUse || (pev->flags & FL_FROZEN) || pCar )
+	{
 		m_iUseIcon = USEICON_NOICON;
+		m_hCachedUseObject = NULL;
+	}
 	else
 	{
 		// find a useable object, figure out what icon to show
@@ -3806,10 +3806,10 @@ void CBasePlayer::ManageElectroBlast( void )
 
 		if( (gpGlobals->time > LastBlastTime + 3) && (BlastChargesReady > 0) )
 		{
-			LastBlastTime = gpGlobals->time;
-
 			if( pev->flags & FL_FROZEN )
 				goto skip_blast;
+
+			LastBlastTime = gpGlobals->time;
 
 			// do blast
 			UTIL_ScreenShakeLocal( this, GetAbsOrigin(), 10.0, 150.0, 1.0, 400, true );
@@ -4660,18 +4660,7 @@ void CBasePlayer::PostThink()
 		else if ( m_flFallVelocity > PLAYER_MAX_SAFE_FALL_SPEED )
 		{// after this point, we start doing damage
 			
-			float flFallDamage = g_pGameRules->FlPlayerFallDamage( this );
-
-			if ( !IsAlive() && flFallDamage > pev->health )
-			{//splat
-				// note: play on item channel because we play footstep landing on body channel
-				switch( RANDOM_LONG(0,2) )
-				{
-					case 0: EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/bodysplat1.wav", 1, ATTN_NORM); break;
-					case 1: EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/bodysplat2.wav", 1, ATTN_NORM); break;
-					case 2: EMIT_SOUND(ENT(pev), CHAN_ITEM, "common/bodysplat3.wav", 1, ATTN_NORM); break;
-				}
-			}
+			const float flFallDamage = g_pGameRules->FlPlayerFallDamage( this );
 
 			if ( flFallDamage > 0 )
 				TakeDamage(VARS(eoNullEntity), VARS(eoNullEntity), flFallDamage, DMG_FALL ); 
@@ -4958,28 +4947,24 @@ void CBasePlayer::ManageStamina(void)
 	// +: waiting time before recharge (this was tricky lol)
 	if( ((m_afButtonReleased & IN_RUN) || (m_afButtonReleased & IN_FORWARD)) && m_flStaminaWait == 0.0f )
 	{
-		// mother of god...
-		if (!(pev->button & IN_MOVELEFT) || !(pev->button & IN_MOVERIGHT) || !(pev->button & IN_BACK) && (pev->flags & FL_ONGROUND) && !(pev->flags & FL_DUCKING))
-		{
-			/*
-			if we have 90 stamina: 50/90 = 0.56 sec wait time
-			60 stamina: 50/60 = 0.83 sec
-			30 stamina: 50/30 = 1.66 sec
-			15 stamina: 50/15 = 3.33 sec (will be limited to 3 sec)
-			*/
+		/*
+		if we have 90 stamina: 50/90 = 0.56 sec wait time
+		60 stamina: 50/60 = 0.83 sec
+		30 stamina: 50/30 = 1.66 sec
+		15 stamina: 50/15 = 3.33 sec (will be limited to 3 sec)
+		*/
 
-			m_flStaminaWait = gpGlobals->time + (50.0f / (1.0f + m_flStaminaValue));
+		m_flStaminaWait = gpGlobals->time + (50.0f / (1.0f + m_flStaminaValue));
 
-		//	if (m_afButtonPressed & IN_JUMP) // faster recover from jumps
-		//		m_flStaminaWait -= 0.5;
+	//	if (m_afButtonPressed & IN_JUMP) // faster recover from jumps
+	//		m_flStaminaWait -= 0.5;
 
-			if( pev->health > 100 ) // special mode? less wait
-				m_flStaminaWait -= 0.5f;
+		if( pev->health > 100 ) // special mode? less wait
+			m_flStaminaWait -= 0.5f;
 
-			m_flStaminaWait = bound( 0, m_flStaminaWait, gpGlobals->time + 3 );
+		m_flStaminaWait = bound( 0, m_flStaminaWait, gpGlobals->time + 3 );
 
-		//	ALERT(at_console, "%.2f\n", m_flStaminaWait - gpGlobals->time);
-		}
+	//	ALERT(at_console, "%.2f\n", m_flStaminaWait - gpGlobals->time);
 	}
 
 	m_flStaminaValue = bound( 0.0f, m_flStaminaValue, 100.0f );
@@ -5546,30 +5531,6 @@ void CBasePlayer::SetHUDTexts(void)
 	m_DroneTextParms.fadeoutTime = 0.5;
 	m_DroneTextParms.holdTime = 1;
 	m_DroneTextParms.fxTime = 0;
-}
-
-void CBasePlayer :: CheckCompatibility( void )
-{
-	hudtextparms_t	m_textParms;
-
-	m_textParms.channel = 0;
-	m_textParms.x = -1;
-	m_textParms.y = -1;
-	m_textParms.effect = 0;
-
-	m_textParms.r1 = 255;
-	m_textParms.g1 = 255;
-	m_textParms.b1 = 255;
-	m_textParms.a1 = 200;
-
-	m_textParms.r2 = 255;
-	m_textParms.g2 = 160;
-	m_textParms.b2 = 0;
-	m_textParms.a2 = 200;
-	m_textParms.fadeinTime = 3;
-	m_textParms.fadeoutTime = 3;
-	m_textParms.holdTime = 10;
-	m_textParms.fxTime = 0.25;
 }
 
 void CBasePlayer :: Precache( void )
@@ -6485,7 +6446,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 		GiveNamedItem( "weapon_9mmhandgun" );
 		GiveNamedItem( "weapon_shotgun" );
 		GiveNamedItem( "weapon_shotgun_xm" );
-		GiveNamedItem( "weapon_9mmAR" );
+		GiveNamedItem( "weapon_mrc" );
 		GiveNamedItem( "ammo_ARgrenades" );
 		GiveNamedItem( "weapon_handgrenade" );
 		GiveNamedItem( "weapon_tripmine" );
@@ -6554,6 +6515,7 @@ void CBasePlayer::CheatImpulseCommands( int iImpulse )
 			edict_t *pWorld = INDEXENT( 0 );
 
 			Vector start = EyePosition();
+			UTIL_MakeVectors( pev->v_angle );
 			Vector end = start + gpGlobals->v_forward * 1024;
 			UTIL_TraceLine( start, end, dont_ignore_monsters, edict(), &tr );
 			if ( tr.pHit )
@@ -6915,6 +6877,7 @@ void CBasePlayer :: UpdateClientData( void )
 			MESSAGE_END();
 
 			// Send spectator statuses
+			/*
 			CBasePlayer* plr;
 			for (int i = 1; i <= gpGlobals->maxClients; i++)
 			{
@@ -6922,6 +6885,7 @@ void CBasePlayer :: UpdateClientData( void )
 				if (!plr || !plr->IsObserver())
 					continue;
 			}
+			*/
 
 			g_pGameRules->InitHUD( this );
 			m_fGameHUDInitialized = TRUE;
@@ -6930,7 +6894,6 @@ void CBasePlayer :: UpdateClientData( void )
 			if ( g_pGameRules->IsMultiplayer() )
 				UTIL_FireTargets( "game_playerjoin", this, this, USE_TOGGLE, 0 );
 
-			CheckCompatibility();
 			m_iStartMessage = 1; //send player init messages
 		}
 
@@ -7251,7 +7214,7 @@ void CBasePlayer :: UpdateClientData( void )
 		WRITE_BYTE( BlastAbilityLVL );
 		WRITE_BYTE( BlastChargesReady );
 		WRITE_BYTE( CanElectroBlast );
-		WRITE_BYTE( iBlastTimer + 1 );
+		WRITE_BYTE( Q_max( iBlastTimer, -1 ) + 1 );
 		MESSAGE_END();
 		m_iClientBlastChargesReady = BlastChargesReady;
 		m_iClientBlastAbilityLVL = BlastAbilityLVL;

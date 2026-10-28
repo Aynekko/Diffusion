@@ -2991,12 +2991,12 @@ void CDrone::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir,
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return;
 	
 	if( pev->owner )
 	{
-		if( (pevAttacker->flags & FL_CLIENT) && (VARS(pev->owner) == pevAttacker) )
+		if( pevAttacker && (pevAttacker->flags & FL_CLIENT) && (VARS(pev->owner) == pevAttacker) )
 			return;
 	}
 	
@@ -3013,12 +3013,12 @@ int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 	
 	if( pev->owner )
 	{
-		if( (pevAttacker->flags & FL_CLIENT) && (VARS( pev->owner ) == pevAttacker) )
+		if( pevAttacker && (pevAttacker->flags & FL_CLIENT) && (VARS( pev->owner ) == pevAttacker) )
 			return 0;
 	}
 
@@ -3653,7 +3653,7 @@ void CDroneAlien::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector ve
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return;
 	
 	if (RANDOM_LONG(0,3) == 0)
@@ -3669,7 +3669,7 @@ int CDroneAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 	
 	// HACK HACK -- until we fix this.
@@ -4324,7 +4324,7 @@ void CAlienShip::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vec
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return;
 	
 	if (RANDOM_LONG(0,3) == 0)
@@ -4340,7 +4340,7 @@ int CAlienShip::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 
-	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && (pevAttacker->flags & FL_CLIENT) )
+	if( HasSpawnFlags( SF_MONSTER_NOPLAYERDAMAGE ) && pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		return 0;
 
 	// HACK HACK -- until we fix this.
