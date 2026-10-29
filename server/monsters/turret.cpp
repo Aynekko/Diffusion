@@ -1389,6 +1389,7 @@ LINK_ENTITY_TO_CLASS( _playersentry, CSentry );
 BEGIN_DATADESC( CSentry )
 	DEFINE_FUNCTION( SentryTouch ),
 	DEFINE_FUNCTION( SentryDeath ),
+	DEFINE_FUNCTION( PostDeathThink ),
 END_DATADESC()
 
 int CSentry::ObjectCaps( void )
