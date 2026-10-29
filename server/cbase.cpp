@@ -1538,22 +1538,25 @@ int CBaseEntity::Restore( CRestore &restore )
 		UTIL_SetSize( pev, mins, maxs ); // Reset them
 	}
 
-	if( m_iActorType != ACTOR_INVALID )
+	if( WorldPhysic && WorldPhysic->Initialized() )
 	{
-		m_pUserData = WorldPhysic->RestoreBody( this );
-	}
-	else if( pev->solid == SOLID_BSP && pev->modelindex > 1 && UTIL_GetModelType( pev->modelindex ) == mod_brush )
-	{
-		// saves written by builds where physics never initialized carry no actor type, rebuild a body anyway
-		m_iActorType = ACTOR_KINEMATIC;
-		m_pUserData = WorldPhysic->RestoreBody( this );
-		if( !m_pUserData ) { m_iActorType = ACTOR_INVALID; }
-	}
+		if( m_iActorType != ACTOR_INVALID )
+		{
+			m_pUserData = WorldPhysic->RestoreBody( this );
+		}
+		else if( pev->solid == SOLID_BSP && pev->modelindex > 1 && UTIL_GetModelType( pev->modelindex ) == mod_brush )
+		{
+			// saves written by builds where physics never initialized carry no actor type, rebuild a body anyway
+			m_iActorType = ACTOR_KINEMATIC;
+			m_pUserData = WorldPhysic->RestoreBody( this );
+			if( !m_pUserData ) { m_iActorType = ACTOR_INVALID; }
+		}
 
-	// ragdolls are not serialized, dead monsters get a fresh one from their restored pose
-	if( FBitSet( pev->flags, FL_MONSTER ) && pev->deadflag != DEAD_NO && !FBitSet( pev->effects, EF_NODRAW ))
-	{
-		WorldPhysic->CreateRagdollEntity( this );
+		// ragdolls are not serialized, dead monsters get a fresh one from their restored pose
+		if( FBitSet( pev->flags, FL_MONSTER ) && pev->deadflag != DEAD_NO && !FBitSet( pev->effects, EF_NODRAW ) )
+		{
+			WorldPhysic->CreateRagdollEntity( this );
+		}
 	}
 
 	return status;

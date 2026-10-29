@@ -394,7 +394,7 @@ releases the actor (and any ragdoll) backing an edict and clears its user data
 */
 void CPhysicPhysX :: RemoveBody( edict_t *pEdict )
 {
-	if( !m_pScene || !pEdict || pEdict->free )
+	if( !m_pScene || !UTIL_IsValidEntity( pEdict ) )
 	{
 		return; // scene purge all the objects automatically
 	}
@@ -406,6 +406,9 @@ void CPhysicPhysX :: RemoveBody( edict_t *pEdict )
 	}
 
 	CBaseEntity *pEntity = CBaseEntity::Instance( pEdict );
+	if( !pEntity )
+		return;
+
 	PxActor *pActor = ActorFromEntity( pEntity );
 
 	if (pActor)
@@ -1432,6 +1435,9 @@ used for characters: clients and monsters
 */
 void *CPhysicPhysX :: CreateBoxFromEntity( CBaseEntity *pObject )
 {
+	if( pObject->m_pUserData )
+		RemoveBody( pObject->edict() );
+
 	PxBoxGeometry boxGeometry;
 	boxGeometry.halfExtents = pObject->pev->size * CVAR_GET_FLOAT("phys_character_padding");
 
@@ -3876,6 +3882,9 @@ void *CPhysicPhysX :: RestoreBody( CBaseEntity *pEntity )
 		return NULL;
 	}
 
+	if( pEntity->m_pUserData )
+		RemoveBody( pEntity->edict() );
+
 	PxShape *pShape;
 	PxRigidActor *pActor;
 	PxTransform pose;
@@ -3891,10 +3900,12 @@ void *CPhysicPhysX :: RestoreBody( CBaseEntity *pEntity )
 	m.CopyToArray(mat);
 	pose = PxTransform(PxMat44(mat));
 
-	if (pEntity->m_iActorType == ACTOR_STATIC) {
+	if (pEntity->m_iActorType == ACTOR_STATIC)
+	{
 		pActor = m_pPhysics->createRigidStatic(pose);
 	}
-	else {
+	else
+	{
 		pActor = m_pPhysics->createRigidDynamic(pose);
 	}
 
@@ -3916,8 +3927,10 @@ void *CPhysicPhysX :: RestoreBody( CBaseEntity *pEntity )
 		case ACTOR_DYNAMIC:
 		{
 			PxConvexMesh *convexMesh = ConvexMeshFromEntity(pEntity);
-			if (!convexMesh) {
-				ALERT(at_error, "RestoreBody: failed to create convex mesh\n");
+			if( !convexMesh )
+			{
+				ALERT( at_error, "RestoreBody: failed to create convex mesh\n" );
+				pActor->release();
 				return NULL;
 			}
 
@@ -3936,13 +3949,16 @@ void *CPhysicPhysX :: RestoreBody( CBaseEntity *pEntity )
 		case ACTOR_STATIC:
 		{
 			PxTriangleMesh *triangleMesh = TriangleMeshFromEntity(pEntity);
-			if (!triangleMesh) {
-				ALERT(at_error, "RestoreBody: failed to create triangle mesh\n");
+			if( !triangleMesh )
+			{
+				ALERT( at_error, "RestoreBody: failed to create triangle mesh\n" );
+				pActor->release();
 				return NULL;
 			}
 
 			PxMaterial *pMaterial = m_pDefaultMaterial;
-			if (pEntity->pev->flags & FL_CONVEYOR) {
+			if( pEntity->pev->flags & FL_CONVEYOR )
+			{
 				pMaterial = m_pConveyorMaterial;
 			}
 			pShape = PxRigidActorExt::createExclusiveShape(*pActor, PxTriangleMeshGeometry(triangleMesh, scale), *pMaterial);
@@ -3951,13 +3967,16 @@ void *CPhysicPhysX :: RestoreBody( CBaseEntity *pEntity )
 		}
 		default:
 		{
-			ALERT(at_error, "RestoreBody: invalid actor type %i\n", pEntity->m_iActorType);
+			ALERT( at_error, "RestoreBody: invalid actor type %i\n", pEntity->m_iActorType );
+			pActor->release();
 			return NULL;
 		}
 	}
 
-	if (!pShape) {
+	if( !pShape )
+	{
 		ALERT(at_error, "RestoreBody: failed to create shape\n");
+		pActor->release();
 		return NULL;
 	}
 
@@ -3974,6 +3993,8 @@ void *CPhysicPhysX :: RestoreBody( CBaseEntity *pEntity )
 	}
 
 	pShape->setSimulationFilterData(filterData);
+
+	bool bPutToSleep = false;
 
 	// fill in actor description
 	if (pEntity->m_iActorType != ACTOR_STATIC)
@@ -4002,16 +4023,22 @@ void *CPhysicPhysX :: RestoreBody( CBaseEntity *pEntity )
 		}
 
 		PxRigidBodyExt::updateMassAndInertia(*pRigidBody, density);
-		if (pEntity->m_fFreezed && pEntity->m_iActorType == ACTOR_DYNAMIC) {
-			pRigidBody->putToSleep();
+		if( pEntity->m_fFreezed && pEntity->m_iActorType == ACTOR_DYNAMIC )
+		{
+			bPutToSleep = true;
 		}
 	}
 
 	pActor->userData = pEntity->edict();
-	pActor->setActorFlags(static_cast<PxActorFlags>(pEntity->m_iActorFlags));
-	pActor->setName(pEntity->GetClassname());
+	pActor->setActorFlags( static_cast<PxActorFlags>(pEntity->m_iActorFlags) );
+	pActor->setName( pEntity->GetClassname() );
 	pEntity->m_pUserData = pActor;
-	m_pScene->addActor(*pActor);
+	m_pScene->addActor( *pActor );
+
+	// must go after addActor
+	if( bPutToSleep )
+		pRigidBody->putToSleep();
+
 	return pActor;
 }
 
@@ -4566,6 +4593,8 @@ void CPhysicPhysX::HandleEvents()
 		impactEvents.erase(impactEvents.begin());
 
 		edict_t *entity = reinterpret_cast<edict_t*>(ev.ragdollActor->userData);
+		if( !entity )
+			continue;
 
 		// restored ragdolls get a grace window, resting contacts aren't real hits
 		int idx = FindRagdoll( ENTINDEX( entity ));
