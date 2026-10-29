@@ -55,15 +55,35 @@ static const char *GL_GetDriverString( void )
 	return driver;
 }
 
+#define SHADER_CACHE_REVISION 1 // bump this number when you edit a shared #include file in glsl folder
+
 static char *GL_GetShaderCacheFilename( const char *glname, const char *options, char *filename, size_t size )
 {
 	const char *driver = GL_GetDriverString();
-	char unique_key[512];
-	Q_snprintf( unique_key, sizeof( unique_key ), "%s%s%s", glname, options, driver );
 
+	if( !glname ) glname = "";
+	if( !options ) options = "";
+
+	char salt[160];
+	Q_snprintf( salt, sizeof( salt ), "r%i|%i|%i|%i|%f|%i|%i",
+		SHADER_CACHE_REVISION,
+		glConfig.max_skinning_bones,
+		MAX_LIGHTSTYLES,
+		MAXLIGHTMAPS,
+		GRASS_ANIM_DIST,
+		(int)GL_Support( R_EXT_GPU_SHADER4 ),
+		(int)GL_Support( R_TEXTURE_ARRAY_EXT ) );
+
+	// separate hash for all parts
 	unsigned int crc = 0;
 	CRC32_Init( &crc );
-	CRC32_ProcessBuffer( &crc, unique_key, Q_strlen( unique_key ) );
+	CRC32_ProcessBuffer( &crc, glname, Q_strlen( glname ) );
+	CRC32_ProcessBuffer( &crc, "|", 1 );
+	CRC32_ProcessBuffer( &crc, options, Q_strlen( options ) );
+	CRC32_ProcessBuffer( &crc, "|", 1 );
+	CRC32_ProcessBuffer( &crc, salt, Q_strlen( salt ) );
+	CRC32_ProcessBuffer( &crc, "|", 1 );
+	CRC32_ProcessBuffer( &crc, driver, Q_strlen( driver ) );
 	crc = CRC32_Final( crc );
 
 	Q_snprintf( filename, size, ".shadercache/%08x.bin", crc );
@@ -298,7 +318,6 @@ static bool GL_ProcessShader( const char *filename, CVirtualFS *out, bool compat
 static void GL_LoadGPUShader( glsl_program_t *shader, const char *name, GLenum shaderType, bool compatible, const char *defines = NULL )
 {
 	char		filename[256];
-	GLhandleARB	object;
 	CVirtualFS	source;
 	GLint		compiled;
 
@@ -318,15 +337,15 @@ static void GL_LoadGPUShader( glsl_program_t *shader, const char *name, GLenum s
 	}
 
 	// load includes, add some directives
-	if( !GL_ProcessShader( filename, &source, compatible, defines ))
+	if( !GL_ProcessShader( filename, &source, compatible, defines ) )
 		return;
 
 	GLcharARB *buffer = (GLcharARB *)source.GetBuffer();
 	int bufferSize = (int)source.GetSize();
 
 	ALERT( at_aiconsole, "\nloading '%s'\n", filename );
-	object = pglCreateShaderObjectARB( shaderType );
-	pglShaderSourceARB( object, GL_TRUE, (const GLcharARB **)&buffer, &bufferSize );
+	GLhandleARB	object = pglCreateShaderObjectARB( shaderType );
+	pglShaderSourceARB( object, 1, (const GLcharARB **)&buffer, &bufferSize );
 
 	// compile shader
 	pglCompileShaderARB( object );
@@ -338,7 +357,8 @@ static void GL_LoadGPUShader( glsl_program_t *shader, const char *name, GLenum s
 	{
 		if( developer_level ) Msg( "%s", GL_PrintInfoLog( object ));
 		if( developer_level ) Msg( "Shader options:%s\n", GL_PretifyListOptions( defines ));
-		ALERT( at_error, "Couldn't compile %s\n", filename ); 
+		ALERT( at_error, "Couldn't compile %s\n", filename );
+		pglDeleteObjectARB( object );
 		return;
 	}
 
@@ -544,6 +564,8 @@ static glsl_program_t *GL_InitGPUShader( const char *glname, const char *vpname,
 
 	ASSERT( glname != NULL );
 
+	if( !defines ) defines = "";
+
 	find = va( "%s %s", glname, defines );
 	hash = COM_HashKey( find, SHADERS_HASH_SIZE );
 
@@ -562,7 +584,7 @@ static glsl_program_t *GL_InitGPUShader( const char *glname, const char *vpname,
 		if( !glsl_programs[i].name[0] )
 			break;
 
-	if( num_glsl_programs >= MAX_GLSL_PROGRAMS )
+	if( i >= MAX_GLSL_PROGRAMS )
 	{
 		ALERT( at_error, "GL_InitGPUShader: GLSL shaders limit exceeded (%i max)\n", MAX_GLSL_PROGRAMS );
 		return NULL;
@@ -600,45 +622,48 @@ static glsl_program_t *GL_InitGPUShader( const char *glname, const char *vpname,
 		int filesize;
 		byte *data = (byte *)gEngfuncs.COM_LoadFile( filename, 5, &filesize );
 
-		if( data && filesize > (int)sizeof( GLuint ) )
+		if( data )
 		{
-			if( !GL_IsSourceNewerThanCache( vpname, fpname, defines, filename ) )
+			if( filesize > (int)sizeof( GLuint ) )
 			{
-				GLuint format = *(GLuint *)data;
-				byte *binary = data + sizeof( GLuint );
-				int bin_size = filesize - sizeof( GLuint );
-
-				pglProgramBinaryARB( shader->handle, format, binary, bin_size );
-
-				GLint linked = 0;
-				pglGetObjectParameterivARB( shader->handle, GL_OBJECT_LINK_STATUS_ARB, &linked );
-
-				if( linked )
+				if( !GL_IsSourceNewerThanCache( vpname, fpname, defines, filename ) )
 				{
-					shader->status = SHADER_VERTEX_COMPILED | SHADER_FRAGMENT_COMPILED | SHADER_PROGRAM_LINKED | SHADER_STATUS_FROMBINARY;
-					shader->nextHash = NULL;
+					GLuint format = *(GLuint *)data;
+					byte *binary = data + sizeof( GLuint );
+					int bin_size = filesize - sizeof( GLuint );
 
-					ALERT( at_aiconsole, "\n^2Loaded shader binary:^7 %s\n", filename );
+					pglProgramBinaryARB( shader->handle, format, binary, bin_size );
 
-					gEngfuncs.COM_FreeFile( data );
+					GLint linked = 0;
+					pglGetObjectParameterivARB( shader->handle, GL_OBJECT_LINK_STATUS_ARB, &linked );
 
-					// add to hash table
-					shader->nextHash = glsl_programsHashTable[hash];
-					glsl_programsHashTable[hash] = shader;
-					return shader;
+					if( linked )
+					{
+						shader->status = SHADER_VERTEX_COMPILED | SHADER_FRAGMENT_COMPILED | SHADER_PROGRAM_LINKED | SHADER_STATUS_FROMBINARY;
+						shader->nextHash = NULL;
+
+						ALERT( at_aiconsole, "\n^2Loaded shader binary:^7 %s\n", filename );
+
+						gEngfuncs.COM_FreeFile( data );
+
+						// add to hash table
+						shader->nextHash = glsl_programsHashTable[hash];
+						glsl_programsHashTable[hash] = shader;
+						return shader;
+					}
+					else
+					{
+						ALERT( at_warning, "^1Cached binary %s FAILED to link:^7 %s\n", filename, GL_PrintInfoLog( shader->handle ) );
+						pglDeleteObjectARB( shader->handle );
+						shader->handle = pglCreateProgramObjectARB();  // Recreate
+						pglProgramParameteriARB( shader->handle, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE );
+					}
 				}
 				else
 				{
-					ALERT( at_warning, "^1Cached binary %s FAILED to link:^7 %s\n", filename, GL_PrintInfoLog( shader->handle ) );
-					pglDeleteObjectARB( shader->handle );
-					shader->handle = pglCreateProgramObjectARB();  // Recreate
-					pglProgramParameteriARB( shader->handle, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE );
+					ALERT( at_aiconsole, "^3Shader binary for %s is outdated and will be recompiled.^7\n", glname );
+					compiled_outdated_total++;
 				}
-			}
-			else
-			{
-				ALERT( at_aiconsole, "^3Shader binary for %s is outdated and will be recompiled.^7\n", glname );
-				compiled_outdated_total++;
 			}
 
 			gEngfuncs.COM_FreeFile( data );
@@ -762,11 +787,13 @@ static glsl_program_t *GL_CreateUberShader( GLuint slot, const char *glname, con
 	if( !GL_Support( R_SHADER_GLSL100_EXT ))
 		return NULL;
 
-	if( num_glsl_programs >= MAX_GLSL_PROGRAMS )
+	if( slot >= MAX_GLSL_PROGRAMS )
 	{
 		ALERT( at_error, "GL_CreateUberShader: GLSL shaders limit exceeded (%i max)\n", MAX_GLSL_PROGRAMS );
 		return NULL;
 	}
+
+	if( !defines ) defines = "";
 
 	// alloc new shader
 	glsl_program_t *shader = &glsl_programs[slot];
@@ -792,23 +819,6 @@ static glsl_program_t *GL_CreateUberShader( GLuint slot, const char *glname, con
 
 				shader->handle = pglCreateProgramObjectARB();
 				pglProgramBinaryARB( shader->handle, format, binary, bin_size );
-				pglProgramParameteriARB( shader->handle, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE );
-
-				if( FBitSet( shader->status, SHADER_VERTEX_COMPILED ) )
-				{
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_POSITION, "attr_Position" );
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_TEXCOORD0, "attr_TexCoord0" );
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_TEXCOORD1, "attr_TexCoord1" );
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_TEXCOORD2, "attr_TexCoord2" );
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_NORMAL, "attr_Normal" );
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_BONE_INDEXES, "attr_BoneIndexes" );
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_BONE_WEIGHTS, "attr_BoneWeights" );
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_LIGHT_STYLES, "attr_LightStyles" );
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_LIGHT_COLOR, "attr_LightColor" );
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_LIGHT_VECS, "attr_LightVecs" );
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_TANGENT, "attr_Tangent" );
-					pglBindAttribLocationARB( shader->handle, ATTR_INDEX_BINORMAL, "attr_Binormal" );
-				}
 
 				GLint linked = 0;
 				pglGetObjectParameterivARB( shader->handle, GL_OBJECT_LINK_STATUS_ARB, &linked );
@@ -855,6 +865,9 @@ static glsl_program_t *GL_CreateUberShader( GLuint slot, const char *glname, con
 	shader->handle = pglCreateProgramObjectARB();
 	if( !shader->handle )
 		return NULL; // some bad happens
+
+	if( bSupportBinaryShader )
+		pglProgramParameteriARB( shader->handle, GL_PROGRAM_BINARY_RETRIEVABLE_HINT, GL_TRUE );
 
 	Q_strncpy( shader->name, glname, sizeof( shader->name ));
 	Q_strncpy( shader->options, defines, sizeof( shader->options ));
@@ -932,15 +945,7 @@ static glsl_program_t *GL_CreateUberShader( GLuint slot, const char *glname, con
 	}
 
 	if( slot == num_glsl_programs )
-	{
-		if( num_glsl_programs == MAX_GLSL_PROGRAMS )
-		{
-			ALERT( at_error, "GL_CreateUberShader: GLSL shaders limit exceeded (%i max)\n", MAX_GLSL_PROGRAMS );
-			GL_FreeGPUShader( shader );
-			return NULL;
-		}
 		num_glsl_programs++;
-	}
 
 	// all done, program is loaded
 
@@ -957,6 +962,8 @@ static glsl_program_t *GL_FindUberShader( const char *glname, const char *option
 		return NULL;
 
 	ASSERT( glname != NULL );
+
+	if( !options ) options = "";
 
 	find = va( "%s %s", glname, options );
 	hash = COM_HashKey( find, SHADERS_HASH_SIZE );
@@ -975,6 +982,12 @@ static glsl_program_t *GL_FindUberShader( const char *glname, const char *option
 	for( i = 1; i < num_glsl_programs; i++ )
 		if( !glsl_programs[i].name[0] )
 			break;
+
+	if( i >= MAX_GLSL_PROGRAMS )
+	{
+		ALERT( at_error, "GL_FindUberShader: GLSL shaders limit exceeded (%i max)\n", MAX_GLSL_PROGRAMS );
+		return NULL;
+	}
 
 	prog = GL_CreateUberShader( i, glname, options, pfnInitUniforms );
 
@@ -1920,29 +1933,30 @@ static void GL_InitWaterDropsUniforms( glsl_program_t *shader )
 
 const char *GL_PretifyListOptions( const char *options, bool newlines )
 {
-	static char output[MAX_OPTIONS_LENGTH];
+	static char output[MAX_OPTIONS_LENGTH + 2];
+
+	if( !options || !*options )
+		return "";
+
 	const char *pstart = options;
-	const char *pend = options + Q_strlen( options );
-	char *pout = output;
+	char *pout = output, *plimit = output + sizeof( output ) - 2;
 
-	*pout = '\0';
-
-	while( pstart < pend )
+	while( (pstart = Q_strstr( pstart, "#define" )) != NULL )
 	{
-		const char *pfind = Q_strstr( pstart, "#define" );
-		if( !pfind ) break;
+		pstart += 7;
 
-		pstart = pfind + Q_strlen( "#define" );
-
-		for( ; *pstart != '\n'; pstart++, pout++ )
-			*pout = *pstart;
-		if( newlines )
+		while( *pstart && *pstart != '\n' && pout < plimit )
 			*pout++ = *pstart++;
-		else pstart++; // skip '\n'
+
+		if( newlines && *pstart == '\n' && pout < plimit )
+			*pout++ = '\n';
+
+		if( *pstart == '\n' )
+			pstart++;
 	}
 
 	if( pout == output )
-		return ""; // nothing found
+		return "";
 
 	*pout++ = ' ';
 	*pout = '\0';
@@ -2828,7 +2842,7 @@ word GL_UberShaderForDlightGeneric( const plight_t *pl )
 	}
 	else
 	{
-		if( tr.projLightShaderNum && tr.glsl_sequence_proj[shadows] == tr.glsl_valid_sequence )
+		if( tr.projLightShaderNum[shadows] && tr.glsl_sequence_proj[shadows] == tr.glsl_valid_sequence )
 			return tr.projLightShaderNum[shadows]; // valid
 	}
 
@@ -2920,7 +2934,7 @@ bool GL_PrecompileUberShaders( int &processed, int &total )
 	}
 
 	processed = shaders_processed_total;
-	total = iTotalShaders;
+	total = iTotalShaders - 1;
 
 	if( shaders_processed_total == iTotalShaders - 1 )
 	{
@@ -3208,8 +3222,6 @@ void GL_FreeUberShaders( void )
 		if( FBitSet( glsl_programs[i].status, SHADER_UBERSHADER )) 
 			GL_FreeGPUShader( &glsl_programs[i] );
 	}
-
-	memset( glsl_programsHashTable, 0, sizeof( glsl_programsHashTable ) );
 
 	GL_BindShader( GL_NONE );
 }
