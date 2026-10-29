@@ -797,7 +797,11 @@ void R_RenderShadowmaps(void)
 	{
 		plight_t *pl = &cl_plights[i];
 
-		pl->shadowTexture = 0;
+		// set default shadow textures
+		if( pl->pointlight )
+			pl->shadowTexture = tr.depthCubemap;
+		else
+			pl->shadowTexture = tr.depthTexture;
 
 		if( FBitSet( pl->flags, CF_NOSHADOWS ) )
 			continue;
