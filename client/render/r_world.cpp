@@ -1859,7 +1859,7 @@ void Mod_ThrowModelInstances( void )
 		pglBindVertexArray( GL_FALSE );
 		pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 		pglBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
-		GL_BindShader( GL_NONE );
+		GL_BindShader( NULL );
 		GL_BindFBO( FBO_MAIN );
 	}
 }
@@ -2799,7 +2799,7 @@ void R_DrawShadowBrushList( void )
 
 	GL_SelectTexture( glConfig.max_texture_units - 1 ); // force to cleanup all the units
 	GL_CleanUpTextureUnits( 0 );
-	GL_BindShader( GL_FALSE );
+	GL_BindShader( NULL );
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 	tr.num_draw_surfaces = 0;
 
@@ -2809,7 +2809,7 @@ void R_DrawShadowBrushList( void )
 		R_DrawGrass();
 
 	pglBindVertexArray( 0 );
-	GL_BindShader( GL_FALSE );
+	GL_BindShader( NULL );
 	pglBindBufferARB( GL_ARRAY_BUFFER_ARB, 0 );
 
 	GL_Cull( GL_FRONT );

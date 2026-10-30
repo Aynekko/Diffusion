@@ -164,11 +164,14 @@ create a bush with specified pos
 */
 static bool R_CreateSingleBush( msurface_t *surf, mextrasurf_t *es, grasshdr_t *hdr, const Vector &pos, float size, float height )
 {
+	const int saveVerts = m_iNumVertex, saveElems = m_iNumIndex, saveState = m_iVertexState;
+
 	for( int i = 0; i < 16; i++ )
 	{
 		gvert_t *entry = &m_arraygvert[m_iNumVertex];
 		Vector vertex = R_GetPointForBush( i, pos, size );
-		memcpy( entry->styles, surf->styles, sizeof( entry->styles ));
+		memset( entry->light, 0, sizeof( entry->light ) );
+		memcpy( entry->styles, surf->styles, sizeof( entry->styles ) );
 		R_GrassLightForVertex( surf, es, vertex, pos.z, entry->light );
 		AddPointToBounds( vertex, hdr->mins, hdr->maxs ); // build bbox for grass
 		Vector dir = ( vertex - pos ).Normalize();
@@ -183,13 +186,17 @@ static bool R_CreateSingleBush( msurface_t *surf, mextrasurf_t *es, grasshdr_t *
 		entry->center[2] = FloatToHalf( pos.z );
 		entry->center[3] = FloatToHalf( i );
 #else
-		entry->normal = Vector4D( dir.x, dir.y, dir.z, scale );
+		entry->normal = Vector4D( dir.x, dir.y, dir.z * height, scale );
 		entry->center = Vector4D( pos.x, pos.y, pos.z, i );
 #endif
 		// generate indices
 		if( !R_GrassAdvanceVertex( ))
 		{
-			// vertexes is out
+			// vertexes are out, the bush could be incomplete
+			// roll back to saved count
+			m_iNumVertex = saveVerts;
+			m_iNumIndex = saveElems;
+			m_iVertexState = saveState;
 			return false;
 		}
 	}
@@ -299,7 +306,10 @@ bool R_BuildGrassMesh( msurface_t *surf, mextrasurf_t *es, grassentry_t *entry, 
 		float area = 0.5f * normalLength;
 
 		// compute the number of samples to take
-		int numSamples = area * entry->density * DENSITY_FACTOR;
+		float fSamples = area * entry->density * DENSITY_FACTOR;
+		int numSamples = (int)fSamples;
+		if( RANDOM_FLOAT( 0.0f, 1.0f ) < fSamples - numSamples )
+			numSamples++;
 
 		// now take a sample, and randomly place an object there
 		for( int j = 0; j < numSamples; j++ )
@@ -708,11 +718,14 @@ construct and rendering the grass
 */
 void R_RenderShadowGrassOnList( void )
 {
-	if( !CVAR_TO_BOOL( r_grass_shadows ) )
+	if( !CVAR_TO_BOOL( r_grass ) || !CVAR_TO_BOOL( r_grass_shadows ) )
+		return;
+
+	if( !CheckShader( glsl.grassDepthFill ) )
 		return;
 	
-	word	hCachedMatrix = -1;
-	word	hLastShader = -1;
+	word hCachedMatrix = -1;
+	word hLastShader = -1;
 
 	if( !FBitSet( world->features, WORLD_HAS_GRASS ))
 		return; // don't waste time
@@ -746,14 +759,14 @@ clear the chains
 */
 void R_GrassPrepareFrame( void )
 {
+	for( int i = 0; i < GRASS_TEXTURES; i++ )
+		grass_surfaces[i] = NULL;
+
 	if( !CVAR_TO_BOOL( r_grass ) )
 		return;
 
 	if( !FBitSet( world->features, WORLD_HAS_GRASS ) )
 		return; // don't waste time
-	
-	for( int i = 0; i < GRASS_TEXTURES; i++ )
-		grass_surfaces[i] = NULL;
 
 	// diffusion - make grass distance FOV-based.
 	// for FOV above 70 default values are used
@@ -799,13 +812,17 @@ Select the program for grass (diffuse\light\skybox)
 */
 word R_ChooseGrassProgram( msurface_t *s, grass_t *g, bool lightpass )
 {
-	if( FBitSet( RI->params, RP_SHADOWPASS )) // shadow pass
-		return (glsl.grassDepthFill - glsl_programs);
+	word hProgram;
 
-	if( lightpass )
-		return GL_UberShaderForGrassDlight( RI->currentlight, g );
+	if( FBitSet( RI->params, RP_SHADOWPASS ) )
+		hProgram = glsl.grassDepthFill ? (word)(glsl.grassDepthFill - glsl_programs) : 0;
+	else if( lightpass )
+		hProgram = GL_UberShaderForGrassDlight( RI->currentlight, g );
+	else
+		hProgram = GL_UberShaderForGrassSolid( s, g );
 
-	return GL_UberShaderForGrassSolid( s, g );
+	glsl_program_t *prog = &glsl_programs[hProgram];
+	return (hProgram && CheckShader( prog )) ? hProgram : 0;
 }
 
 /*
@@ -945,6 +962,7 @@ void R_GrassInitForSurface( msurface_t *surf )
 		// turn the face into a bunch of polygons, and compute the area of each
 		v0 = &world->vertexes[es->firstvertex];
 		int count = 0;
+		float fcount = 0.0f;
 
 		for( int j = 1; j < es->numverts - 1; j++ )
 		{
@@ -961,13 +979,15 @@ void R_GrassInitForSurface( msurface_t *surf )
 			float area = 0.5f * normalLength;
 
 			// compute the maximum number of samples to take
-			count += area * entry->density * DENSITY_FACTOR;
+			const float fSamples = area * entry->density * DENSITY_FACTOR;
+			count += fSamples;
+			fcount += fSamples;
 		}
 
 		if( m_bGrassUseVBO )
 		{
-			if( count )
-				es->grasscount++; // mesh added 
+			if( fcount > 0.0f )
+				es->grasscount++;
 		}
 		else
 			es->grasscount += count;
@@ -1213,7 +1233,7 @@ parse grass definitions and load textures
 */
 void R_GrassInit( void )
 {
-	static int random_seed = 1; // starts from 1
+	int random_seed = 1; // starts from 1
 
 	char *afile = (char *)gEngfuncs.COM_LoadFile( "data/grassinfo.txt", 5, NULL );
 	if( !afile ) ALERT( at_error, "couldn't load grassinfo.txt\n" );
@@ -1340,11 +1360,14 @@ void R_GrassShutdown( void )
 		if( !grasstexs[i].gl_texturenum )
 			continue;
 
-		FREE_TEXTURE( grasstexs[i].gl_texturenum );
+		if( grasstexs[i].gl_texturenum != tr.defaultTexture )
+			FREE_TEXTURE( grasstexs[i].gl_texturenum );
 
 		if( grasstexs[i].gl_normalmapnum )
 			FREE_TEXTURE( grasstexs[i].gl_normalmapnum );
 	}
+
+	memset( grasstexs, 0, sizeof( grasstexs ) );
 }
 
 /*
@@ -1704,7 +1727,7 @@ void R_DrawGrass( qboolean lightpass )
 			numverts += 16;
 
 			// array is full, time to dump				
-			if( numverts == MAX_GRASS_ELEMS )
+			if( numverts + 16 > MAX_GRASS_ELEMS )
 			{
 				r_stats.c_grass_polys += (numverts / 4);
 				r_stats.c_total_tris += (numverts / 2);
@@ -1747,11 +1770,15 @@ multi-pass rendering
 */
 void R_DrawGrassLight( plight_t *pl )
 {
-	word	shaderNum = GL_UberShaderForDlightGeneric( pl );
-	GLfloat	gl_lightViewProjMatrix[16];
-
-	if( !tr.num_light_grass || !shaderNum || tr.nodlights )
+	if( !tr.num_light_grass || tr.nodlights )
 		return;
+
+	word shaderNum = GL_UberShaderForDlightGeneric( pl );
+
+	if( !shaderNum )
+		return;
+
+	GLfloat	gl_lightViewProjMatrix[16];
 
 	pglBindVertexArray( 0 );
 	GL_BindShader( &glsl_programs[shaderNum] );			
