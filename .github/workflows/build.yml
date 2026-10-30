@@ -69,6 +69,8 @@ jobs:
         cp ../scripts/AppRun .
         cp ../3rd-party/game_launch/game_icon.png diffusion.png
         popd
+        chmod -R a+rX squashfs-root
+        chmod a+rx squashfs-root/AppRun
         ./appimagetool-x86_64.AppImage squashfs-root/
         zip -u diffusion-linux-amd64.zip Diffusion-x86_64.AppImage
     - name: Upload artifacts
