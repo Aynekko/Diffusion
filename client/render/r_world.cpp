@@ -2372,9 +2372,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 		const msurface_t *s = entry->surface;
 		const texture_t *tex = s->texinfo->texture;
 		const int iTexnum = es->gl_texturenum;
-		material_t MT = tr.materials[iTexnum];
-		if( tex->anim_total > 0 )
-			MT = tr.materials[tex->gl_texturenum];
+		const material_t &MT = (tex->anim_total > 0) ? tr.materials[tex->gl_texturenum] : tr.materials[iTexnum];
 
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 			flush_buffer = true;
@@ -2451,7 +2449,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 				GL_Bind( GL_TEXTURE0, tr.whiteTexture );
 				GL_LoadIdentityTexMatrix();
 			}
-			else if( FBitSet( s->flags, SURF_MOVIE ) && e->curstate.body )
+			else if( FBitSet( s->flags, SURF_MOVIE ) && e->curstate.body && es->cintexturenum > 0 )
 			{
 				GL_Bind( GL_TEXTURE0, tr.cinTextures[es->cintexturenum - 1] );
 				GL_LoadIdentityTexMatrix();
@@ -2836,6 +2834,7 @@ void R_DrawBrushList( void )
 	float cached_texofs[2] = { -1.0f, -1.0f };
 	int startv, endv;
 	mcubemap_t *cached_cubemap = NULL;
+	bool bBlackCubemapUsed = false;
 
 	const bool bUseRefractedWater = (!tr.lowmemory && (gl_water_refraction->value > 0) && (e->curstate.renderfx != kRenderFxNoRefraction) && ( tr.waterTextures.Count() > 0 ));
 
@@ -2887,9 +2886,19 @@ void R_DrawBrushList( void )
 		const msurface_t *s = entry->surface;
 		const texture_t *tex = s->texinfo->texture;
 		const int iTexnum = es->gl_texturenum;
-		material_t MT = tr.materials[iTexnum];
-		if( tex->anim_total > 0 )
-			MT = tr.materials[tex->gl_texturenum];
+		const material_t &MT = (tex->anim_total > 0) ? tr.materials[tex->gl_texturenum] : tr.materials[iTexnum];
+
+		if( tr.viewparams.waterlevel >= 3 && RP_NORMALPASS() && FBitSet( s->flags, SURF_WATER ) )
+			GL_Cull( GL_BACK );
+		else if( es->culltype == CULL_OTHER ) // probably a twoside texture
+			GL_Cull( GL_NONE );
+		else
+			GL_Cull( GL_FRONT );
+
+		if( cached_cull != glState.faceCull )
+			flush_buffer = true;
+
+		cached_cull = glState.faceCull;
 
 		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
 			flush_buffer = true;
@@ -2935,18 +2944,8 @@ void R_DrawBrushList( void )
 
 			ASSERT( RI->currentshader != NULL );
 
-			// set the current waveheight
-			if( FBitSet( s->flags, SURF_WATER ) )
-			{
-				if( s->polys->verts[0][2] >= RI->vieworg[2] )
-					waveHeight = -RI->currententity->curstate.scale;
-				else
-					waveHeight = RI->currententity->curstate.scale;
-			}
-			else
-				waveHeight = 0.0f;
-
-			brush_params[1].w = waveHeight;
+			waveHeight = 0.0f;
+			brush_params[1].w = 0.0f;
 
 			// write constants
 			pglUniform1fvARB( RI->currentshader->u_LightStyleValues, MAX_LIGHTSTYLES, &tr.lightstyles[0] );
@@ -2969,19 +2968,31 @@ void R_DrawBrushList( void )
 			// reset cache
 			cached_texofs[0] = -1.0f;
 			cached_texofs[1] = -1.0f;
-			cached_texture = NULL;
+			cached_texture = -1;
 			cached_lightmap = -1;
 			cached_mirror = -1;
 			cached_landscape = -1;
 
 			// diffusioncubemaps
 			cached_cubemap = NULL;
+			bBlackCubemapUsed = false;
 
 			cached_glossscale = -1.0f;
 			cached_glosssmoothness = -1.0f;
 			cached_embossscale = -1.0f;
 			cached_fresnel = -1.0f;
 			cached_reflectscale = { -1.0f, 0.0f };
+		}
+
+		if( FBitSet( s->flags, SURF_WATER ) )
+		{
+			const float wh = (s->polys->verts[0][2] >= RI->vieworg[2]) ? -e->curstate.scale : e->curstate.scale;
+			if( wh != waveHeight )
+			{
+				waveHeight = wh;
+				brush_params[1].w = wh;
+				pglUniform4fvARB( RI->currentshader->u_BrushParams, 3, &brush_params[0][0] );
+			}
 		}
 
 		if( (cached_mirror != es->subtexture[glState.stack_position]) || (cached_texture != iTexnum) || (cached_landscape != bLandscape) )
@@ -3005,7 +3016,7 @@ void R_DrawBrushList( void )
 			}
 			else
 			{
-				if( FBitSet( s->flags, SURF_MOVIE ) && e->curstate.body )
+				if( FBitSet( s->flags, SURF_MOVIE ) && e->curstate.body && es->cintexturenum > 0 )
 					GL_Bind( GL_TEXTURE0, tr.cinTextures[es->cintexturenum - 1] );
 				else if( FBitSet( s->flags, SURF_LANDSCAPE ) )
 					GL_Bind( GL_TEXTURE0, iTexnum );
@@ -3166,15 +3177,6 @@ void R_DrawBrushList( void )
 			cached_lightmap = es->lightmaptexturenum;
 		}
 
-		if( tr.viewparams.waterlevel >= 3 && RP_NORMALPASS() && FBitSet( s->flags, SURF_WATER ) )
-			GL_Cull( GL_BACK );
-		else if( es->culltype == CULL_OTHER ) // probably a twoside texture
-			GL_Cull( GL_NONE );
-		else 
-			GL_Cull( GL_FRONT );
-
-		cached_cull = glState.faceCull;
-
 		if( cached_texofs[0] != es->texofs[0] || cached_texofs[1] != es->texofs[1] )
 		{
 			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
@@ -3200,6 +3202,7 @@ void R_DrawBrushList( void )
 
 					pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
 					cached_cubemap = es->cubemap;
+					cached_reflectscale = { -1.0f, 0.0f };
 				}
 			}
 			else // surface doesn't have a cubemap
@@ -3210,6 +3213,7 @@ void R_DrawBrushList( void )
 				cubemap_params[2] = g_vecZero;
 				pglUniform3fvARB( RI->currentshader->u_Cubemap, 3, &cubemap_params[0][0] );
 				cached_cubemap = NULL;
+				bBlackCubemapUsed = true;
 			}
 
 			if( MT.ReflectScale != cached_reflectscale )
@@ -3264,7 +3268,7 @@ void R_DrawBrushList( void )
 	if( RP_NORMALPASS() )
 	{
 		for( i = 0; i < tr.num_draw_surfaces; i++ )
-			memset( tr.draw_surfaces[i].surface->info->subtexture, 0, sizeof( short[8] ) );
+			memset( tr.draw_surfaces[i].surface->info->subtexture, 0, sizeof( tr.draw_surfaces[i].surface->info->subtexture ) );
 	}
 
 	tr.num_draw_surfaces = 0;
