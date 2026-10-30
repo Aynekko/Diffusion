@@ -2313,6 +2313,13 @@ setup light projection for each
 */
 void R_DrawLightForSurfList( plight_t *pl )
 {
+	if( !pl->shadowTexture )
+	{
+		// must always have an actual shadow texture or a stub if it's a shadowless light
+		Msg( "^1Error:^7 R_DrawLightForSurfList: shadow texture for the light is missing!\n" );
+		return;
+	}
+
 	int cached_texture = -1;
 	bool flush_buffer = false;
 	cl_entity_t *e = RI->currententity;
@@ -2365,6 +2372,8 @@ void R_DrawLightForSurfList( plight_t *pl )
 
 	bool bGotScreencopy = false;
 
+	glsl_program_t *cur_shader = NULL;
+
 	for( int i = 0; i < tr.num_light_surfaces; i++ )
 	{
 		const gl_bmodelface_t *entry = &tr.light_surfaces[i];
@@ -2374,13 +2383,16 @@ void R_DrawLightForSurfList( plight_t *pl )
 		const int iTexnum = es->gl_texturenum;
 		const material_t &MT = (tex->anim_total > 0) ? tr.materials[tex->gl_texturenum] : tr.materials[iTexnum];
 
-		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
-			flush_buffer = true;
+		glsl_program_t *pShader = &glsl_programs[entry->hProgram];
 
-		if( cached_texture != iTexnum )
-			flush_buffer = true;
+		if( !entry->hProgram || !CheckShader( pShader ) )
+			continue;
 
+		const bool bShaderChanged = (cur_shader != pShader);
 		const int bLandscape = FBitSet( s->flags, SURF_LANDSCAPE ) ? 1 : 0;
+
+		if( bShaderChanged || cached_texture != iTexnum || cached_landscape != bLandscape )
+			flush_buffer = true;
 
 		if( flush_buffer )
 		{
@@ -2397,36 +2409,34 @@ void R_DrawLightForSurfList( plight_t *pl )
 		}
 
 		// begin draw the sorted list
-		if( (i == 0) || (RI->currentshader != &glsl_programs[entry->hProgram]) )
+		if( bShaderChanged )
 		{
-			GL_BindShader( &glsl_programs[entry->hProgram] );
+			cur_shader = pShader;
+			GL_BindShader( pShader );
 
 			ASSERT( RI->currentshader != NULL );
 
 			// write constants
 			pglUniformMatrix4fvARB( RI->currentshader->u_LightViewProjectionMatrix, 1, GL_FALSE, &gl_lightViewProjMatrix[0] );
 
-			float waveHeight = 0.0f;
-
-			// set the current waveheight
-			if( FBitSet( s->flags, SURF_WATER ) )
-			{
-				if( s->polys->verts[0][2] >= RI->vieworg[2] )
-					waveHeight = -RI->currententity->curstate.scale;
-				else
-					waveHeight = RI->currententity->curstate.scale;
-			}
-
-			light_params[4].w = waveHeight;
+			light_params[4].w = 0.0f;
 
 			// send through one call
 			pglUniform4fvARB( RI->currentshader->u_LightParams, 6, &light_params[0][0] );
 
+			if( FBitSet( s->flags, SURF_WATER ) )
+			{
+				const float wh = (s->polys->verts[0][2] >= RI->vieworg[2]) ? -e->curstate.scale : e->curstate.scale;
+				if( wh != light_params[4].w )
+				{
+					light_params[4].w = wh;
+					pglUniform4fvARB( RI->currentshader->u_LightParams, 6, &light_params[0][0] );
+				}
+			}
+
 			pglUniformMatrix4fvARB( RI->currentshader->u_ModelMatrix, 1, GL_FALSE, &glm->modelMatrix[0] );
 			pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)glState.width, 1.0f / (float)glState.height );
 		//	R_SetRenderColor( RI->currententity );
-
-			pglUniform3fARB( RI->currentshader->u_TexOffset, es->texofs[0], es->texofs[1], tr.time );
 
 			// reset cache
 			cached_texture = -1;
@@ -2456,13 +2466,7 @@ void R_DrawLightForSurfList( plight_t *pl )
 			}
 			else if( bLandscape )
 			{
-				if( land && land->terrain && land->terrain->indexmap.gl_diffuse_id > 0 )
-					GL_Bind( GL_TEXTURE0, land->terrain->indexmap.gl_diffuse_id );
-				
-				if( land && land->terrain && land->terrain->layermap.gl_diffuse_id > 0 )
-					GL_Bind( GL_TEXTURE0, land->terrain->layermap.gl_diffuse_id );
-				else 
-					GL_Bind( GL_TEXTURE0, iTexnum );
+				GL_Bind( GL_TEXTURE0, iTexnum );
 				GL_LoadIdentityTexMatrix();
 			}
 			else if( FBitSet( s->flags, SURF_SCREEN ) && es->subtexture[glState.stack_position] )
@@ -3018,7 +3022,7 @@ void R_DrawBrushList( void )
 			{
 				if( FBitSet( s->flags, SURF_MOVIE ) && e->curstate.body && es->cintexturenum > 0 )
 					GL_Bind( GL_TEXTURE0, tr.cinTextures[es->cintexturenum - 1] );
-				else if( FBitSet( s->flags, SURF_LANDSCAPE ) )
+				else if( bLandscape )
 					GL_Bind( GL_TEXTURE0, iTexnum );
 				else if( MT.gl_fallbacktex_id > 0 )
 					GL_Bind( GL_TEXTURE0, MT.gl_fallbacktex_id );
@@ -3033,7 +3037,7 @@ void R_DrawBrushList( void )
 				GL_LoadIdentityTexMatrix();
 			}
 			
-			if( FBitSet( s->flags, SURF_LANDSCAPE ) )
+			if( bLandscape )
 			{
 				if( land && land->terrain )
 				{

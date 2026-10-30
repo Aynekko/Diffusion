@@ -5948,6 +5948,13 @@ void CStudioModelRenderer::BuildMeshListForLight( plight_t *pl )
 
 void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 {
+	if( !pl->shadowTexture )
+	{
+		// must always have an actual shadow texture or a stub if it's a shadowless light
+		Msg( "^1Error:^7 DrawLightForMeshList: shadow texture for the light is missing!\n" );
+		return;
+	}
+	
 	model_t *cached_model = NULL;
 	GLfloat	gl_lightViewProjMatrix[16];
 
