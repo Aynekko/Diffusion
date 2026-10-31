@@ -1512,6 +1512,7 @@ static void GL_InitBilateralBlurUniforms( glsl_program_t *shader )
 	shader->u_ScreenMap = pglGetUniformLocationARB( shader->handle, "u_ScreenMap" );
 	shader->u_DepthMap = pglGetUniformLocationARB( shader->handle, "u_DepthMap" );
 	shader->u_ScreenSizeInv = pglGetUniformLocationARB( shader->handle, "u_ScreenSizeInv" );
+	shader->u_zFar = pglGetUniformLocationARB( shader->handle, "u_zFar" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_ScreenMap, GL_TEXTURE0 );
@@ -1594,12 +1595,10 @@ static void GL_InitGenHBAOUniforms( glsl_program_t *shader )
 	ASSERT( shader != NULL );
 
 	shader->u_DepthMap = pglGetUniformLocationARB( shader->handle, "u_DepthMap" );
-	shader->u_BlendTexture = pglGetUniformLocationARB( shader->handle, "u_BlendTexture" );
 	shader->u_HBAOParams = pglGetUniformLocationARB( shader->handle, "u_HBAOParams" );
 
 	GL_BindShader( shader );
 	pglUniform1iARB( shader->u_DepthMap, GL_TEXTURE0 );
-	pglUniform1iARB( shader->u_BlendTexture, GL_TEXTURE1 );
 	GL_BindShader( GL_NONE );
 
 	GL_ValidateProgram( shader );

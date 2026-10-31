@@ -38,7 +38,6 @@ static int LuminanceTex = 0;
 static int exposure_storage_texture[2];
 static GLuint exposure_storage_fbo[2];
 static int noise_texture = 0;
-static int noise_texture_random = 0;
 static int SMAA_AreaTex = 0;
 static int SMAA_SearchTex = 0;
 static int SMAA_AlbedoTex = 0;
@@ -47,6 +46,7 @@ static int SMAA_BlendTex = 0;
 static GLuint SMAA_fbo;
 static GLuint SSAOfbo;
 static GLuint sunshafts_fbo;
+static const float fAOScale = 0.5f;
 
 static void InitAutoExposure(void)
 {
@@ -118,7 +118,7 @@ static void InitSSAO( void )
 	}
 
 	if( !ScreenAO1 )
-		ScreenAO1 = CREATE_TEXTURE( "*screenao1", glState.width * 0.75, glState.height * 0.75, NULL, TF_SCREEN );
+		ScreenAO1 = CREATE_TEXTURE( "*screenao1", glState.width * fAOScale, glState.height * fAOScale, NULL, TF_SCREEN );
 
 	if( ScreenAO2 )
 	{
@@ -127,7 +127,7 @@ static void InitSSAO( void )
 	}
 
 	if( !ScreenAO2 )
-		ScreenAO2 = CREATE_TEXTURE( "*screenao2", glState.width * 0.75, glState.height * 0.75, NULL, TF_SCREEN );
+		ScreenAO2 = CREATE_TEXTURE( "*screenao2", glState.width * fAOScale, glState.height * fAOScale, NULL, TF_SCREEN );
 
 	if( !SSAOfbo )
 		pglGenFramebuffers( 1, &SSAOfbo );
@@ -320,7 +320,6 @@ void InitPostTextures( void )
 	InitSMAA();
 
 	noise_texture = LOAD_TEXTURE( "gfx/noise.dds", NULL, 0, 0 );
-	noise_texture_random = LOAD_TEXTURE( "gfx/noise_random.dds", NULL, 0, 0 );
 }
 
 void RenderFSQ( int wide, int tall )
@@ -953,8 +952,8 @@ void SSAO( void )
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
 
 	// set target viewport
-	const int width = glState.width * 0.75;
-	const int height = glState.height * 0.75;
+	const int width = glState.width * fAOScale;
+	const int height = glState.height * fAOScale;
 
 	pglViewport( 0, 0, width, height );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, SSAOfbo );
@@ -974,12 +973,11 @@ void SSAO( void )
 		GL_BindShader( glsl.genHBAO );
 		ASSERT( RI->currentshader != NULL );
 
-		GL_Bind( GL_TEXTURE1, noise_texture_random );
-
 		Vector2D hbao_params[5];
 		// focal length
-		hbao_params[0].x = 1.0f / tanf( DEG2RAD( RI->fov_x ) * 0.5f ) * ((float)glState.height / (float)glState.width);
-		hbao_params[0].y = 1.0f / tanf( DEG2RAD( RI->fov_y ) * 0.5f );
+		const float tanHalfFovY = tanf( DEG2RAD( RI->fov_y ) * 0.5f );
+		hbao_params[0].x = 1.0f / tanHalfFovY * ((float)glState.height / (float)glState.width);
+		hbao_params[0].y = 1.0f / tanHalfFovY;
 
 		Vector2D InvFocalLength;
 		InvFocalLength.x = 1.0f / hbao_params[0].x;
@@ -1011,6 +1009,7 @@ void SSAO( void )
 	GL_Bind( GL_TEXTURE1, tr.screen_depth );
 	ASSERT( RI->currentshader != NULL );
 	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / glState.width, 0.0f ); // screen size inv
+	pglUniform1fARB( RI->currentshader->u_zFar, zFar );
 	RenderFSQ( glState.width, glState.height );
 	
 	GL_Bind( GL_TEXTURE0, ScreenAO2 );
