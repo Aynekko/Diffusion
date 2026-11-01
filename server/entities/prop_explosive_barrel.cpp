@@ -160,6 +160,19 @@ void CExplosiveBarrel::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_T
 void CExplosiveBarrel::TraceAttack(entvars_t* pevAttacker, float flDamage, Vector vecDir, TraceResult* ptr, int bitsDamageType)
 {
 	UTIL_Ricochet(ptr->vecEndPos, RANDOM_FLOAT(0.5, 1.0));
+
+	if( !(bitsDamageType & DMG_BURN) )
+	{
+		switch( RANDOM_LONG( 0, 4 ) )
+		{
+		case 0: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit1.wav", 1, ATTN_NORM ); break;
+		case 1: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit2.wav", 1, ATTN_NORM ); break;
+		case 2: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit3.wav", 1, ATTN_NORM ); break;
+		case 3: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit4.wav", 1, ATTN_NORM ); break;
+		case 4: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit5.wav", 1, ATTN_NORM ); break;
+		}
+	}
+
 	CBaseMonster::TraceAttack(pevAttacker, flDamage, vecDir, ptr, bitsDamageType);
 }
 
@@ -171,15 +184,6 @@ int CExplosiveBarrel::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacke
 
 	if( pevInflictor == pev )
 		return 0;
-	
-	switch( RANDOM_LONG( 0, 4 ) )
-	{
-	case 0: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit1.wav", 1, ATTN_NORM ); break;
-	case 1: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit2.wav", 1, ATTN_NORM ); break;
-	case 2: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit3.wav", 1, ATTN_NORM ); break;
-	case 3: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit4.wav", 1, ATTN_NORM ); break;
-	case 4: EMIT_SOUND( edict(), CHAN_STATIC, "drone/drone_hit5.wav", 1, ATTN_NORM ); break;
-	}
 
 	// immune to slash damage (i.e. player's knife)
 	if( bitsDamageType & DMG_SLASH )
@@ -190,6 +194,9 @@ int CExplosiveBarrel::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacke
 
 	if( pev->waterlevel > 1 )
 		return 0;
+
+	if( bitsDamageType & DMG_BURN )
+		flDamage *= 0.5f;
 
 	bool IgniteCondition = false;
 
@@ -208,7 +215,7 @@ int CExplosiveBarrel::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacke
 		}
 	}
 	else
-		pev->health -= flDamage / 2; // accept only halved external damage when on fire
+		pev->health -= flDamage * 0.5f; // accept only halved external damage when on fire
 
 	if( pev->health <= 18 )
 		IgniteCondition = true;
@@ -219,8 +226,8 @@ int CExplosiveBarrel::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacke
 		pev->effects |= EF_DIMLIGHT;
 		CSoundEnt::InsertSound(bits_SOUND_DANGER, GetAbsOrigin(), 250, 0.3);
 	//	pev->renderfx = kRenderFxFullbrightNoShadows; // don't cast dynamic shadows while on fire, and be fullbright // done on client
-		SetThink(&CExplosiveBarrel::Ignite);
-		SetNextThink(0.1);
+		SetThink( &CExplosiveBarrel::Ignite );
+		SetNextThink( 0.1 );
 	}
 
 	return 0; // this way we won't use Killed()
@@ -257,9 +264,9 @@ void CExplosiveBarrel::Ignite(void)
 	MESSAGE_END();
 
 	if( m_hOwner )
-		RadiusDamage( pev, m_hOwner->pev, 2, 100, CLASS_NONE, DMG_BURN | DMG_NEVERGIB );
+		RadiusDamage( pev, m_hOwner->pev, 1.0f, 100, CLASS_NONE, DMG_BURN | DMG_NEVERGIB );
 	else
-		RadiusDamage( pev, pev, 2, 100, CLASS_NONE, DMG_BURN | DMG_NEVERGIB );
+		RadiusDamage( pev, pev, 1.0f, 100, CLASS_NONE, DMG_BURN | DMG_NEVERGIB );
 
 	SetThink(&CExplosiveBarrel::Ignite);
 	SetNextThink(0.1);

@@ -3027,7 +3027,7 @@ int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 		flDamage *= 3.0f;
 	
 	// HACK HACK -- until we fix this.
-	if ( IsAlive() )
+	if( IsAlive() && !(bitsDamageType & DMG_BURN) )
 		PainSound();
 	
 //------------------------------------------------	
@@ -3673,7 +3673,7 @@ int CDroneAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 		return 0;
 	
 	// HACK HACK -- until we fix this.
-	if ( IsAlive() )
+	if( IsAlive() && !(bitsDamageType & DMG_BURN) )
 		PainSound();
 	
 //------------------------------------------------	
@@ -4344,7 +4344,7 @@ int CAlienShip::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 		return 0;
 
 	// HACK HACK -- until we fix this.
-	if ( IsAlive() )
+	if( IsAlive() && !(bitsDamageType & DMG_BURN) )
 		PainSound();
 	
 	if( FClassnameIs(pevInflictor, "shootball") || FClassnameIs(pevInflictor, "playerball") )

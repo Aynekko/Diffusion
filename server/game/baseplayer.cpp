@@ -447,7 +447,7 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
 		AddMultiDamage( pevAttacker, this, flDamage, bitsDamageType );
 	}
 
-	if( HasFlag( F_METAL_MONSTER ) )
+	if( HasFlag( F_METAL_MONSTER ) && !(bitsDamageType & DMG_BURN) )
 	{
 		UTIL_Sparks( ptr->vecEndPos );
 
