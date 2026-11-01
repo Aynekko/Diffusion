@@ -1375,6 +1375,7 @@ void PM_WalkMove( void )
 	Vector original, originalvel;
 	Vector down, downvel;
 	float downdist, updist;
+	Vector upOrigin;
 
 	pmtrace_t trace;
 
@@ -1534,7 +1535,7 @@ void PM_WalkMove( void )
 		pmove->origin = trace.endpos;
 
 	// Copy this origin to up.
-	Vector upOrigin = pmove->origin;
+	upOrigin = pmove->origin;
 
 	// decide which one went farther
 	downdist = (down[0] - original[0]) * (down[0] - original[0]) + (down[1] - original[1]) * (down[1] - original[1]);
