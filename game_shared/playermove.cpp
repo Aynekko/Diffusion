@@ -127,18 +127,6 @@ playermove_t *pmove = NULL;
 
 #define MAX_CLIENTS 32
 
-#define	CONTENTS_CURRENT_0		-9
-#define	CONTENTS_CURRENT_90		-10
-#define	CONTENTS_CURRENT_180	-11
-#define	CONTENTS_CURRENT_270	-12
-#define	CONTENTS_CURRENT_UP		-13
-#define	CONTENTS_CURRENT_DOWN	-14
-
-#define CONTENTS_TRANSLUCENT		-15
-#define CONTENTS_FLYFIELD		-17
-#define CONTENTS_FLYFIELD_GRAVITY	-18
-#define CONTENTS_FOG		-19
-
 static Vector rgv3tStuckTable[54];
 static int rgStuckLast[MAX_CLIENTS][2];
 static float rgStuckCheckTime[MAX_CLIENTS][2]; // Last time we did a full
@@ -697,130 +685,49 @@ Determine texture info for the texture we are standing on.
 */
 void PM_CategorizeTextureType( void )
 {
-	if (pmove->movetype == MOVETYPE_NOCLIP)
+	if( pmove->movetype == MOVETYPE_NOCLIP )
 		return;
 
-	Vector start, end;
-	const char *pTextureName;
-	
-	start = end = pmove->origin;
+	const float dir = (pmove->effects & EF_UPSIDEDOWN) ? -1.0f : 1.0f;
+	const float depth = (pmove->flags & FL_DUCKING) ? 25.0f : 50.0f;
 
-	// diffusion - no more concrete sound when walking on the edge.
+	// center first, then 4 corners
+	static const float offs[5][2] = { {0,0}, {-16,-16}, {16,-16}, {16,16}, {-16,16} };
 
-	// default stuff
-	pmove->sztexturename[0] = '\0';
-	pmove->chtexturetype = CHAR_TEX_CONCRETE;
-
-	// stick end point into the floor a bit, starting from the center of player's hull
-	if( pmove->flags & FL_DUCKING )
-		end[2] -= ((pmove->effects & EF_UPSIDEDOWN) ? -1 : 1) * 25;
-	else
-		end[2] -= ((pmove->effects & EF_UPSIDEDOWN) ? -1 : 1) * 50;
-
-	pmtrace_t	*tracey, *traceyA, *traceyB, *traceyC, *traceyD;
-	
-	// trace the center first
-	tracey = pmove->PM_TraceLine( start, end, 0, 2, -1);
-	// fraction is always 0.72 ideally, when standing on something, it gets higher on slopes, but usually not higher than 0.95
-//	pmove->Con_Printf("tracey fraction %.4f\n", tracey->fraction);
-
-	int TexturePlace = 0; // default value for the center
-	Vector startA, endA, startB, endB, startC, endC, startD, endD;
-	startA = endA = startB = endB = startC = endC = startD = endD = pmove->origin;
-
-	if( tracey->fraction < 1 )
+	for( int i = 0; i < 5; i++ )
 	{
-		// we made a hit from the center, so we'll handle from here
-	}
-	else
-	{
-		// we didn't make the hit from the center, looks like we are on the edge
-		// time to check the corners!
+		Vector start = pmove->origin;
+		start[0] += offs[i][0];
+		start[1] += offs[i][1];
 
-		// A
-		if( pmove->flags & FL_DUCKING )
-			endA[2] -= ((pmove->effects & EF_UPSIDEDOWN) ? -1 : 1) * 25;
-		else
-			endA[2] -= ((pmove->effects & EF_UPSIDEDOWN) ? -1 : 1) * 50;
-		startA[0] -= 16; startA[1] -=16; endA[0] -= 16; endA[1] -= 16;
-		traceyA = pmove->PM_TraceLine( startA, endA, 0, 2, -1);
-//		pmove->Con_Printf("traceyA fraction %.4f\n", traceyA->fraction);
-		if( traceyA->fraction < 1 )
-		{
-			TexturePlace = 1;
-			goto CategorizeContinue;
-		}
-		
-		// B
-		if( pmove->flags & FL_DUCKING )
-			endB[2] -= ((pmove->effects & EF_UPSIDEDOWN) ? -1 : 1) * 25;
-		else
-			endB[2] -= ((pmove->effects & EF_UPSIDEDOWN) ? -1 : 1) * 50;
-		startB[0] += 16; startB[1] -=16; endB[0] += 16; endB[1] -= 16;
-		traceyB = pmove->PM_TraceLine( startB, endB, 0, 2, -1);
-//		pmove->Con_Printf("traceyB fraction %.4f\n", traceyB->fraction);
-		if( traceyB->fraction < 1 )
-		{
-			TexturePlace = 2;
-			goto CategorizeContinue;
-		}
+		Vector end = start;
+		end[2] -= dir * depth;
 
-		// C
-		if( pmove->flags & FL_DUCKING )
-			endC[2] -= ((pmove->effects & EF_UPSIDEDOWN) ? -1 : 1) * 25;
-		else
-			endC[2] -= ((pmove->effects & EF_UPSIDEDOWN) ? -1 : 1) * 50;
-		startC[0] += 16; startC[1] +=16; endC[0] += 16; endC[1] += 16;
-		traceyC = pmove->PM_TraceLine( startC, endC, 0, 2, -1);
-//		pmove->Con_Printf("traceyC fraction %.4f\n", traceyC->fraction);
-		if( traceyC->fraction < 1 )
-		{
-			TexturePlace = 3;
-			goto CategorizeContinue;
-		}
+		pmtrace_t *tr = pmove->PM_TraceLine( start, end, 0, 2, -1 );
+		if( tr->fraction >= 1.0f || tr->ent < 0 )
+			continue;
 
-		// D
-		if( pmove->flags & FL_DUCKING )
-			endD[2] -= ((pmove->effects & EF_UPSIDEDOWN) ? -1 : 1) * 25;
-		else
-			endD[2] -= ((pmove->effects & EF_UPSIDEDOWN) ? -1 : 1) * 50;
-		startD[0] -= 16; startD[1] +=16; endD[0] -= 16; endD[1] += 16;
-		traceyD = pmove->PM_TraceLine( startD, endD, 0, 2, -1);
-//		pmove->Con_Printf("traceyD fraction %.4f\n", traceyD->fraction);
-		if( traceyD->fraction < 1 )
-		{
-			TexturePlace = 4;
-			goto CategorizeContinue;
-		}
-	}
+		// onground can be -1 on slopes at speed, so use the entity we actually hit
+		int ground = (pmove->onground != -1) ? pmove->onground : tr->ent;
 
-CategorizeContinue:	
-	switch( TexturePlace )
-	{
-	default:
-	case 0: pTextureName = pmove->PM_TraceTexture( pmove->onground, start, end ); break;	// center
-	case 1: pTextureName = pmove->PM_TraceTexture( pmove->onground, startA, endA ); /*pmove->Con_Printf("A\n");*/ break;
-	case 2: pTextureName = pmove->PM_TraceTexture( pmove->onground, startB, endB ); /*pmove->Con_Printf("B\n");*/ break;
-	case 3: pTextureName = pmove->PM_TraceTexture( pmove->onground, startC, endC ); /*pmove->Con_Printf("C\n");*/ break;
-	case 4: pTextureName = pmove->PM_TraceTexture( pmove->onground, startD, endD ); /*pmove->Con_Printf("D\n");*/ break;
-	}
+		const char *pTextureName = pmove->PM_TraceTexture( ground, start, end );
+		if( !pTextureName )
+			continue;
 
-	if ( !pTextureName )
+		// strip leading '-0' or '+0~' or '{' or '!'
+		if( *pTextureName == '-' || *pTextureName == '+' )
+			pTextureName += 2;
+
+		if( *pTextureName == '{' || *pTextureName == '!' || *pTextureName == '~' || *pTextureName == ' ' )
+			pTextureName++;
+
+		Q_strncpy( pmove->sztexturename, pTextureName, sizeof( pmove->sztexturename ) );
+		pmove->sztexturename[CBTEXTURENAMEMAX - 1] = 0;
+		pmove->chtexturetype = PM_FindTextureType( pmove->sztexturename );
 		return;
+	}
 
-	// strip leading '-0' or '+0~' or '{' or '!'
-	if (*pTextureName == '-' || *pTextureName == '+')
-		pTextureName += 2;
-
-	if (*pTextureName == '{' || *pTextureName == '!' || *pTextureName == '~' || *pTextureName == ' ')
-		pTextureName++;
-	// '}}'
-	
-	Q_strncpy( pmove->sztexturename, pTextureName, sizeof( pmove->sztexturename ) );
-	pmove->sztexturename[ CBTEXTURENAMEMAX - 1 ] = 0;
-		
-	// get texture type
-	pmove->chtexturetype = PM_FindTextureType( pmove->sztexturename );
+	// if nothing found (maybe not onground) keep the last known texture instead of resetting to concrete
 }
 
 void PM_StayOnGround( void )
@@ -1086,8 +993,11 @@ qboolean PM_AddToTouched(pmtrace_t tr, Vector impactvelocity)
 
 	tr.deltavelocity = impactvelocity;
 
-	if (pmove->numtouch >= MAX_PHYSENTS)
-		pmove->Con_DPrintf("Too many entities were touched!\n");
+	if( pmove->numtouch >= MAX_PHYSENTS )
+	{
+		pmove->Con_DPrintf( "Too many entities were touched!\n" );
+		return false;
+	}
 
 	pmove->touchindex[pmove->numtouch++] = tr;
 
@@ -1624,11 +1534,11 @@ void PM_WalkMove( void )
 		pmove->origin = trace.endpos;
 
 	// Copy this origin to up.
-	pmove->up = pmove->origin;
+	Vector upOrigin = pmove->origin;
 
 	// decide which one went farther
 	downdist = (down[0] - original[0]) * (down[0] - original[0]) + (down[1] - original[1]) * (down[1] - original[1]);
-	updist = (pmove->up[0] - original[0]) * (pmove->up[0] - original[0]) + (pmove->up[1] - original[1]) * (pmove->up[1] - original[1]);
+	updist = (upOrigin[0] - original[0]) * (upOrigin[0] - original[0]) + (upOrigin[1] - original[1]) * (upOrigin[1] - original[1]);
 
 	if( downdist > updist )
 	{
@@ -1940,7 +1850,7 @@ qboolean PM_CheckWater ()
 	// Grab point contents.
 	cont = pmove->PM_PointContents (point, &truecont );
 	// Are we under water? (not solid and not empty?)
-	if ((cont <= CONTENTS_WATER && cont > CONTENTS_TRANSLUCENT ) || (cont >= CONTENTS_FOG && cont <= CONTENTS_FLYFIELD))
+	if ((cont <= CONTENTS_WATER && cont > CONTENTS_TRANSLUCENT ) || (cont >= CONTENT_FOG && cont <= CONTENT_FLYFIELD))
 	{
 		// Set water type
 		pmove->watertype = cont;
@@ -1955,7 +1865,7 @@ qboolean PM_CheckWater ()
 		point[2] = pmove->origin[2] + heightover2;
 		cont = pmove->PM_PointContents (point, NULL );
 		// If that point is also under water...
-		if ((cont <= CONTENTS_WATER && cont > CONTENTS_TRANSLUCENT ) || (cont >= CONTENTS_FOG && cont <= CONTENTS_FLYFIELD))
+		if ((cont <= CONTENTS_WATER && cont > CONTENTS_TRANSLUCENT ) || (cont >= CONTENT_FOG && cont <= CONTENT_FLYFIELD))
 		{
 			// Set a higher water level.
 			pmove->waterlevel = 2;
@@ -1964,7 +1874,7 @@ qboolean PM_CheckWater ()
 			point[2] = pmove->origin[2] + pmove->view_ofs[2];
 
 			cont = pmove->PM_PointContents (point, NULL );
-			if ((cont <= CONTENTS_WATER && cont > CONTENTS_TRANSLUCENT ) || cont == CONTENTS_FOG) // Flyfields never cover the eyes
+			if ((cont <= CONTENTS_WATER && cont > CONTENTS_TRANSLUCENT ) || cont == CONTENT_FOG) // Flyfields never cover the eyes
 				pmove->waterlevel = 3;  // In over our eyes
 		}
 
@@ -2160,7 +2070,7 @@ int PM_CheckStuck( void )
 	if( !pmove->server || pmove->physents[hitent].solid == SOLID_CUSTOM )
 	{
 		// world, BSP model or custom convex hull
-		if(( !hitent == 0 ) || pmove->physents[hitent].model || pmove->physents[hitent].solid == SOLID_CUSTOM )
+		if(( hitent == 0 ) || pmove->physents[hitent].model || pmove->physents[hitent].solid == SOLID_CUSTOM )
 		{
 			int nReps = 0;
 			PM_ResetStuckOffsets( pmove->player_index, pmove->server );
@@ -2448,8 +2358,9 @@ void PM_Duck( void )
 							pmove->origin += ( pmove->player_mins[1] - pmove->player_mins[0] );
 						else
 							pmove->origin -= ( pmove->player_mins[1] - pmove->player_mins[0]);
+
 						// See if we are stuck?
-						PM_FixPlayerCrouchStuck( STUCK_MOVEUP );
+						PM_FixPlayerCrouchStuck( (pmove->effects & EF_UPSIDEDOWN) ? STUCK_MOVEDOWN : STUCK_MOVEUP );
 
 						// Recategorize position since ducking can change origin
 						PM_CategorizePosition();
@@ -2864,7 +2775,7 @@ void PM_Jump (void)
 	}
 
 	// If we are in the water most of the way...
-	if (pmove->waterlevel >= 2 && pmove->watertype != CONTENTS_FOG)
+	if (pmove->waterlevel >= 2 && pmove->watertype != CONTENT_FOG)
 	{	// swimming, not jumping
 		pmove->onground = -1;
 
@@ -2929,6 +2840,7 @@ void PM_Jump (void)
 	if( !bUsingBhop )
 		PM_PreventMegaBunnyJumping();
 
+	PM_CategorizeTextureType();
 	PM_PlayStepSound( PM_MapTextureTypeStepType( pmove->chtexturetype ), 1.0 );
 
 	// See if user can super long jump?
@@ -2969,10 +2881,10 @@ void PM_Jump (void)
 		// diffusion - speed boost similar to HL2. needs to be tested more.
 		if( (pmove->cmd.buttons & IN_FORWARD) && (pmove->cmd.buttons & IN_JUMP) && !(pmove->cmd.buttons & IN_RUN) && !(pmove->cmd.buttons & IN_DUCK) )
 		{
-			if( (pmove->velocity.Length() < 350) )
+			if( (pmove->velocity.Length2D() < 350) )
 			{
-				pmove->velocity[0] *= 1.35;
-				pmove->velocity[1] *= 1.35;
+				pmove->velocity[0] *= 1.35f;
+				pmove->velocity[1] *= 1.35f;
 			}
 		}
 	}
@@ -3003,11 +2915,17 @@ void PM_CheckWaterJump (void)
 	if ( pmove->waterjumptime )
 		return;
 
-	// Don't hop out if we just jumped in
-	if ( pmove->velocity[2] < -180 && !( pmove->effects & EF_UPSIDEDOWN ) )
-		return; // only hop out if we are moving up
-	if( pmove->velocity[2] > -180 && (pmove->effects & EF_UPSIDEDOWN) )
-		return; // only hop out if we are moving up
+	// Don't hop out if we just jumped in, only hop out if we are moving up
+	if( pmove->effects & EF_UPSIDEDOWN )
+	{
+		if( pmove->velocity[2] > 180 )
+			return;
+	}
+	else
+	{
+		if( pmove->velocity[2] < -180 )
+			return;
+	}
 
 	// See if we are backing up
 	flatvelocity = pmove->velocity;
@@ -3037,12 +2955,8 @@ void PM_CheckWaterJump (void)
 	savehull = pmove->usehull;
 	pmove->usehull = 2;
 	tr = pmove->PM_PlayerTrace( vecStart, vecEnd, PM_NORMAL, -1 );
-	if ( 
-		 tr.fraction < 1.0 && 
-			( (!(pmove->effects & EF_UPSIDEDOWN) && fabs( tr.plane.normal[2] ) < 0.1f) ||
-				((pmove->effects & EF_UPSIDEDOWN) && fabs( tr.plane.normal[2] ) > -0.1f)
-			)
-		)  // Facing a near vertical wall?
+
+	if( tr.fraction < 1.0 && fabs( tr.plane.normal[2] ) < 0.1f ) // Facing a near vertical wall?
 	{
 		if (pmove->effects & EF_UPSIDEDOWN)
 			vecStart[2] -= pmove->player_maxs[savehull][2] - WJ_HEIGHT;
@@ -3075,9 +2989,14 @@ void PM_CheckFalling( void )
 	if ( pmove->onground != -1 && !pmove->dead && pmove->flFallVelocity >= 200 )
 	{// diffusion - always play step sound when landing
 		float fvol = 0.5;
-		pmove->flTimeStepSound = 0;
-		PM_UpdateStepSound();
+
+		if( pmove->flags & FL_DUCKING )
+			fvol *= 0.35f;
+
+		PM_CategorizeTextureType();
 		PM_PlayStepSound( PM_MapTextureTypeStepType( pmove->chtexturetype ), fvol );
+
+		pmove->flTimeStepSound = 300;
 	}
 
 	// diffusion - no crash sounds when god
@@ -3141,7 +3060,8 @@ void PM_PlayWaterSounds( void )
 		rand = pmove->RandomLong( 0, 3 );
 		while( last_rand == rand )
 			rand = pmove->RandomLong( 0, 3 );
-		switch ( pmove->RandomLong(0,3) )
+
+		switch ( rand )
 		{
 		case 0:
 			pmove->PM_PlaySound( CHAN_BODY, "footsteps/wade1.wav", 1, ATTN_NORM, 0, PITCH_NORM );
@@ -3333,14 +3253,14 @@ void PM_PlayerMove ( qboolean server )
 		return;
 #endif
 
+	// # of msec to apply movement
+	pmove->frametime = pmove->cmd.msec * 0.001;
+
 	// Adjust speeds etc.
 	PM_CheckParameters();
 
 	// Assume we don't touch anything
 	pmove->numtouch = 0;                    
-
-	// # of msec to apply movement
-	pmove->frametime = pmove->cmd.msec * 0.001;    
 
 	PM_ReduceTimers();
 
@@ -3733,7 +3653,7 @@ void PM_Move ( struct playermove_s *ppmove, int server )
 
 int PM_GetVisEntInfo( int ent )
 {
-	if ( ent >= 0 && ent <= pmove->numvisent )
+	if ( ent >= 0 && ent < pmove->numvisent )
 		return pmove->visents[ ent ].info;
 
 	return -1;
@@ -3741,7 +3661,7 @@ int PM_GetVisEntInfo( int ent )
 
 int PM_GetPhysEntInfo( int ent )
 {
-	if ( ent >= 0 && ent <= pmove->numphysent)
+	if ( ent >= 0 && ent < pmove->numphysent)
 		return pmove->physents[ ent ].info;
 
 	return -1;
