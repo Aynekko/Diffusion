@@ -1828,11 +1828,13 @@ loading the new map
 */
 void Mod_PrepareModelInstances( void )
 {
+	g_StudioRenderer.DestroyAllModelInstances();
+
 	// invalidate model handles
 	for( int i = 1; i < RENDER_GET_PARM( PARM_MAX_ENTITIES, 0 ); i++ )
 	{
 		cl_entity_t *e = GET_ENTITY( i );
-		if( !e ) break;
+		if( !e ) continue;
 		e->modelhandle = INVALID_HANDLE;
 	}
 

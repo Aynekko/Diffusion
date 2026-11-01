@@ -176,6 +176,13 @@ inline float lerp( float start, float end, float frac )
 
 inline Vector LerpRGB( Vector a, Vector b, float t )
 {
+	t = bound( 0.0f, t, 1.0f );
+
+	if( t == 1.0f )
+		return b; // exact
+	else if( t == 0.0f )
+		return a;
+
 	return Vector
 	(
 		a.x + (b.x - a.x) * t,

@@ -69,8 +69,8 @@ int HUD_GetStudioModelInterface( int version, struct r_studio_interface_s **ppin
 //================================================================================================
 void CBaseBoneSetup::debugMsg( const char *szFmt, ... )
 {
-	char	buffer[2048];	// must support > 1k messages
-	va_list	args;
+	char buffer[2048];	// must support > 1k messages
+	va_list args;
 
 	if( developer_level <= DEV_NONE )
 		return;
@@ -79,7 +79,7 @@ void CBaseBoneSetup::debugMsg( const char *szFmt, ... )
 	Q_vsnprintf( buffer, 2048, szFmt, args );
 	va_end( args );
 
-	gEngfuncs.Con_Printf( buffer );
+	gEngfuncs.Con_Printf( "%s", buffer );
 }
 
 mstudioanim_t *CBaseBoneSetup::GetAnimSourceData( mstudioseqdesc_t *pseqdesc )
@@ -289,7 +289,7 @@ bool CStudioModelRenderer::StudioSetEntity( gl_studiomesh_t *entry )
 	if( entry->parent->modelhandle == INVALID_HANDLE )
 		return false; // not initialized?
 
-	if( (phdr = (studiohdr_t *)IEngineStudio.Mod_Extradata( m_pRenderModel )) == NULL )
+	if( (phdr = (studiohdr_t *)IEngineStudio.Mod_Extradata( entry->model )) == NULL )
 		return false; // no model?
 
 	RI->currentmodel = m_pRenderModel = entry->model;
@@ -505,6 +505,7 @@ void CStudioModelRenderer::ClearInstanceData( bool create )
 	m_pModelInstance->visframe = -1;
 	m_pModelInstance->radius = 0.0f;
 	m_pModelInstance->info_flags = 0;
+	m_pModelInstance->bHasAdditiveMeshes = false;
 
 	ClearBounds( m_pModelInstance->absmin, m_pModelInstance->absmax );
 	memset( &m_pModelInstance->bonecache, 0, sizeof( BoneCache_t ) );
@@ -567,15 +568,15 @@ void CStudioModelRenderer::ClearInstanceData( bool create )
 #else
 		if( FBitSet( pattachment[i].flags, STUDIO_ATTACHMENT_LOCAL ) )
 		{
-			att[i].local[0][0] = pattachment->vectors[0][0];
-			att[i].local[0][1] = pattachment->vectors[0][1];
-			att[i].local[0][2] = pattachment->vectors[0][2];
-			att[i].local[1][0] = pattachment->vectors[1][0];
-			att[i].local[1][1] = pattachment->vectors[1][1];
-			att[i].local[1][2] = pattachment->vectors[1][2];
-			att[i].local[2][0] = pattachment->vectors[2][0];
-			att[i].local[2][1] = pattachment->vectors[2][1];
-			att[i].local[2][2] = pattachment->vectors[2][2];
+			att[i].local[0][0] = pattachment[i].vectors[0][0];
+			att[i].local[0][1] = pattachment[i].vectors[0][1];
+			att[i].local[0][2] = pattachment[i].vectors[0][2];
+			att[i].local[1][0] = pattachment[i].vectors[1][0];
+			att[i].local[1][1] = pattachment[i].vectors[1][1];
+			att[i].local[1][2] = pattachment[i].vectors[1][2];
+			att[i].local[2][0] = pattachment[i].vectors[2][0];
+			att[i].local[2][1] = pattachment[i].vectors[2][1];
+			att[i].local[2][2] = pattachment[i].vectors[2][2];
 		}
 		else
 			att[i].local.Identity();
@@ -1180,7 +1181,6 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 	mstudioboneweight_t *pnormweight = (mstudioboneweight_t *)((byte *)m_pStudioHeader + pSubModel->blendnorminfoindex);
 	bool has_boneweights = (m_pStudioHeader->flags & STUDIO_HAS_BONEWEIGHTS) != 0;
 	bool has_vertexlight = (dml != NULL && dml->numverts > 0) ? true : false;
-	matrix3x4 skinMat;
 	int	i;
 	std::vector<Vector> localverts;
 	localverts.resize( pSubModel->numverts );
@@ -1201,6 +1201,7 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 			#endif
 			for( int i = 0; i < pSubModel->numverts; i++ )
 			{
+				matrix3x4 skinMat;
 				ComputeSkinMatrix( &pvertweight[i], bones, skinMat );
 				localverts[i] = skinMat.VectorTransform( pstudioverts[i] );
 			}
@@ -1457,6 +1458,7 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 			Vector binormal = m_arrayxvert[vertID].binormal.Normalize();
 			Vector normal = m_arrayxvert[vertID].normal;
 
+			matrix3x4 skinMat;
 			ComputeSkinMatrix( &m_arrayxvert[vertID], bones, skinMat );
 			tangent = skinMat.VectorIRotate( tangent );
 			binormal = skinMat.VectorIRotate( binormal );
@@ -1528,7 +1530,7 @@ void CStudioModelRenderer::MeshCreateBuffer( vbomesh_t *pOut, const mstudiomesh_
 
 mvbocache_t *CStudioModelRenderer::CreateMeshCache( dmodellight_t *dml )
 {
-	const float start_time = Sys_DoubleTime();
+	const double start_time = Sys_DoubleTime();
 	bool unique_model = (dml == NULL);	// just for more readable code
 	TmpModel_t	submodel[MAXSTUDIOMODELS];	// list of unique models
 	static matrix3x4	bones[MAXSTUDIOBONES];
@@ -1812,10 +1814,14 @@ void CStudioModelRenderer::CreateMeshCacheVL( const char *modelname, int cacheID
 		return; // for some reasons we missed this lump
 
 	m_pRenderModel = IEngineStudio.Mod_ForName( modelname, false );
+
+	if( !m_pRenderModel )
+		return;
+
 	m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata( m_pRenderModel );
 
-	if( !m_pRenderModel || !m_pStudioHeader )
-		return; // download in progress?
+	if( !m_pStudioHeader )
+		return;
 
 	// first initialization
 	if( cacheID < vl->nummodels && vl->dataofs[cacheID] != -1 )
@@ -2074,10 +2080,13 @@ void CStudioModelRenderer::FreeStudioMaterials( void )
 
 void CStudioModelRenderer::DestroyAllModelInstances( void )
 {
-	// NOTE: should destroy in reverse-order because it's linked list not array!
-	for( int i = m_ModelInstances.Count(); --i >= 0; )
+	word i = m_ModelInstances.Head();
+
+	while( m_ModelInstances.IsValidIndex( i ) )
 	{
+		const word next = m_ModelInstances.Next( i );
 		DestroyInstance( i );
+		i = next;
 	}
 
 	m_DecalMaterial.RemoveAll();
@@ -2480,7 +2489,7 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 		const int numLods = m_pModelInstance->numlods;
 
 		if( CVAR_TO_BOOL( m_pCvarLodScale ) )
-			lodnum /= (int)fabs( m_pCvarLodScale->value );
+			lodnum = (int)((float)lodnum / fabsf( m_pCvarLodScale->value ));
 		if( CVAR_TO_BOOL( m_pCvarLodBias ) )
 			lodnum += (int)fabs( m_pCvarLodBias->value );
 
@@ -2727,7 +2736,7 @@ float CStudioModelRenderer::StudioEstimateInterpolant( void )
 float CStudioModelRenderer::StudioEstimateInterpolant( float *dadt_blend )
 {
 	const cl_entity_t *e = RI->currententity;
-	double interval = g_fFrametime;	// monster think interval
+	double interval = bound( 0.0001f, g_fFrametime, 1.0f );	// monster think interval
 	float dadt = 1.0f;
 	*dadt_blend = 1.0f;
 
@@ -2979,7 +2988,7 @@ void CStudioModelRenderer::BlendSequence( Vector pos[], Vector4D q[], mstudioble
 			{
 				if( !Q_strcmp( pbones[i].name, "Bip01 Spine" ) )
 					copy = false;
-				else if( !Q_strcmp( pbones[pbones[i].parent].name, "Bip01 Pelvis" ) )
+				else if( pbones[i].parent >= 0 && !Q_strcmp( pbones[pbones[i].parent].name, "Bip01 Pelvis" ) )
 					copy = true;
 				m_flGaitBoneWeights[i] = (copy) ? 1.0f : 0.0f;
 			}
@@ -3218,10 +3227,10 @@ void CStudioModelRenderer::CalculateIKLocks( CIKContext *pIK )
 
 				for( int k = 0; k < 3 && distSquared <= flRadius; k++ )
 				{
-					if( pTarget->est.pos[j] < inst->absmin[j] )
-						eorg = pTarget->est.pos[j] - inst->absmin[j];
-					else if( pTarget->est.pos[j] > inst->absmax[j] )
-						eorg = pTarget->est.pos[j] - inst->absmax[j];
+					if( pTarget->est.pos[k] < inst->absmin[k] )
+						eorg = pTarget->est.pos[k] - inst->absmin[k];
+					else if( pTarget->est.pos[k] > inst->absmax[k] )
+						eorg = pTarget->est.pos[k] - inst->absmax[k];
 					else eorg = 0.0f;
 
 					distSquared += eorg * eorg;
@@ -3749,7 +3758,7 @@ void CStudioModelRenderer::StudioBuildNormalTable( void )
 	{
 		int r, g, b;
 		r = e->curstate.rendercolor.r;
-		g = e->curstate.rendercolor.b;
+		g = e->curstate.rendercolor.g;
 		b = e->curstate.rendercolor.b;
 		ScaleColors( r, g, b, renderamt );
 		gEngfuncs.pTriAPI->Color4ub( r, g, b, renderamt );
@@ -3813,7 +3822,7 @@ void CStudioModelRenderer::StudioGenerateNormals( void )
 				}
 				else
 				{
-					ptricmds += i;
+					ptricmds += i * 4;
 				}
 			}
 			else
@@ -3845,7 +3854,7 @@ void CStudioModelRenderer::StudioGenerateNormals( void )
 				}
 				else
 				{
-					ptricmds += i;
+					ptricmds += i * 4;
 				}
 			}
 		}
@@ -4060,7 +4069,7 @@ int CStudioModelRenderer::StudioSetupModel( int bodypart, void **ppbodypart, voi
 	mstudiomodel_t *psubmodel;
 	int index;
 
-	if( bodypart > m_pStudioHeader->numbodyparts )
+	if( bodypart >= m_pStudioHeader->numbodyparts )
 		bodypart = 0;
 	pbodypart = (mstudiobodyparts_t *)((byte *)m_pStudioHeader + m_pStudioHeader->bodypartindex) + bodypart;
 
@@ -5855,7 +5864,7 @@ void CStudioModelRenderer::AddBodyPartToDrawList( studiohdr_t *phdr, mbodypart_s
 	if( !bodyparts ) bodyparts = m_pRenderModel->studiocache->bodyparts;
 	if( !bodyparts ) HOST_ERROR( "%s missed cache\n", m_pCurrentEntity->model->name );
 
-	bodypart = bound( 0, bodypart, phdr->numbodyparts );
+	bodypart = bound( 0, bodypart, phdr->numbodyparts - 1 );
 	mbodypart_t *pBodyPart = &bodyparts[bodypart];
 	int index = m_pCurrentEntity->curstate.body / pBodyPart->base;
 	index = index % pBodyPart->nummodels;
@@ -6050,7 +6059,7 @@ void CStudioModelRenderer::DrawLightForMeshList( plight_t *pl )
 			if( tr.materials[iTexnum].FoliageSwayHeight != 0 )
 			{
 				pglUniform1fARB( RI->currentshader->u_RealTime, tr.time );
-				pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, (float)tr.materials[iTexnum].FoliageSwayHeight );
+				pglUniform1iARB( RI->currentshader->u_FoliageSwayHeight, tr.materials[iTexnum].FoliageSwayHeight );
 			}
 
 			// reset cache
@@ -6282,7 +6291,6 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	meshparams[2] = Vector( scale, m_pCurrentEntity->curstate.fuser2, 0.0f ); // fuser2 is the dirt on the car body/wheels
 
 	const mstudiolight_t *light = &m_pModelInstance->lighting;
-	const int num_bones = Q_min( m_pStudioHeader->numbones, glConfig.max_skinning_bones );
 
 	Vector4D lightstyles;
 	for( int map = 0; map < MAXLIGHTMAPS; map++ )
@@ -6396,6 +6404,8 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 
 		if( cached_entity != m_pCurrentEntity || (cached_model != m_pRenderModel) )
 		{
+			const int num_bones = Q_min( m_pStudioHeader->numbones, glConfig.max_skinning_bones );
+
 			// update bones array
 			if( m_pRenderModel == IEngineStudio.GetModelByIndex( m_pCurrentEntity->curstate.weaponmodel ) )
 			{
@@ -6659,9 +6669,9 @@ void CStudioModelRenderer::DrawStudioMeshesShadow( void )
 		}
 
 		if( tr.materials[mat->gl_diffuse_id].FoliageSwayHeight != 0 )
-			pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, (float)tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
+			pglUniform1iARB( RI->currentshader->u_FoliageSwayHeight, tr.materials[mat->gl_diffuse_id].FoliageSwayHeight );
 		else
-			pglUniform1fARB( RI->currentshader->u_FoliageSwayHeight, 0.0f ); // stub value
+			pglUniform1iARB( RI->currentshader->u_FoliageSwayHeight, 0 ); // stub value
 
 		if( cached_model != m_pRenderModel )
 		{
@@ -6817,14 +6827,14 @@ void CStudioModelRenderer::DrawViewModel( void )
 	// bound FOV values
 	if( m_pCvarViewmodelFov->value < 50 )
 		gEngfuncs.Cvar_SetValue( "cl_viewmodel_fov", 50 );
-	else if( m_pCvarViewmodelFov->value > 130 )
+	else if( m_pCvarViewmodelFov->value > 120 )
 		gEngfuncs.Cvar_SetValue( "cl_viewmodel_fov", 120 );
 
 	// Find the offset our current FOV is from the default value
 	float flFOVOffset = gHUD.default_fov->value - RI->fov_x;
 
 	// Adjust the viewmodel's FOV to move with any FOV offsets on the viewer's end
-	m_flViewmodelFov = m_pCvarViewmodelFov->value - flFOVOffset;
+	m_flViewmodelFov = bound( 10.0f, m_pCvarViewmodelFov->value - flFOVOffset, 120.0f );
 
 	// calc local FOV
 	const float x = (float)ScreenWidth / tan( m_flViewmodelFov / 360 * M_PI );

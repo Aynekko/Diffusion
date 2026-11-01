@@ -101,7 +101,7 @@ void main( void )
 	vec4 position = vec4( attr_Position, 1.0 );
 
 #if defined( STUDIO_SWAY_FOLIAGE )
-	if( position.z > u_FoliageSwayHeight )
+	if( position.z > float( u_FoliageSwayHeight ) )
 	{
 		position.x += position.z * 0.025 * sin( position.z + u_RealTime * 0.25 );
 		position.y += position.z * 0.025 * cos( position.z + u_RealTime * 0.25 );
