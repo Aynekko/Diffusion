@@ -643,7 +643,6 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 	// make headshot sound (it has wider radius)
 	if( m_LastHitGroup == HITGROUP_HEAD && m_bloodColor == BLOOD_COLOR_RED )
 	{
-		m_LastHitGroup = 0;
 		switch( RANDOM_LONG( 0, 1 ) )
 		{
 		case 0: EMIT_SOUND_DYN( edict(), CHAN_BODY, "player/headshot1.wav", 1.0, 0.5, 0, PITCH_NORM ); break;
@@ -1712,6 +1711,8 @@ float CBaseMonster::GetRagdollImpulseMultiplier( float hitDamage )
 {
 	LoadRagdollImpulseTable();
 
+	const float fHeadshotImpulse = (m_LastHitGroup == HITGROUP_HEAD && m_bloodColor == BLOOD_COLOR_RED) ? 3.0f : 1.0f;
+
 	// a projectile inflictor is the best hint, works for NPC vs NPC too
 	if( m_iszLastHitInflictor != iStringNull )
 	{
@@ -1720,7 +1721,7 @@ float CBaseMonster::GetRagdollImpulseMultiplier( float hitDamage )
 		for( int i = 0; i < g_NumImpulseInflictors; i++ )
 		{
 			if( !Q_stricmp( pszInflictor, g_ImpulseInflictors[i].name ))
-				return g_ImpulseInflictors[i].mult;
+				return g_ImpulseInflictors[i].mult * fHeadshotImpulse;
 		}
 	}
 
@@ -1728,17 +1729,17 @@ float CBaseMonster::GetRagdollImpulseMultiplier( float hitDamage )
 	for( int i = 0; i < g_NumImpulseWeapons; i++ )
 	{
 		if( g_ImpulseWeapons[i].id == m_iLastHitWeapon )
-			return g_ImpulseWeapons[i].mult;
+			return g_ImpulseWeapons[i].mult * fHeadshotImpulse;
 	}
 
 	// otherwise weigh by the damage-type category, first match in file order wins
 	for( int i = 0; i < g_NumImpulseDamage; i++ )
 	{
 		if( m_iLastHitDamageType & g_ImpulseDamage[i].id )
-			return g_ImpulseDamage[i].mult;
+			return g_ImpulseDamage[i].mult * fHeadshotImpulse;
 	}
 
-	return 1.0f; // bullets and everything else: neutral
+	return 1.0f * fHeadshotImpulse; // bullets and everything else: neutral
 }
 
 //=========================================================
@@ -1751,7 +1752,7 @@ void CBaseEntity::MakeWaterSplash( Vector vecSrc, Vector vecEnd, int Type )
 
 	float len = (vecEnd - vecSrc).Length();
 
-	// Äåëèì ïîïîëàì
+	// halve it
 	Vector vecTemp = Vector( (vecEnd.x + vecSrc.x) * 0.5f, (vecEnd.y + vecSrc.y) * 0.5f, (vecEnd.z + vecSrc.z) * 0.5f );
 
 	if( len <= 1 )
