@@ -451,6 +451,9 @@
 if exist "$(OutDir)*.pdb" copy /Y "$(OutDir)*.pdb" "$(GameDir)\diffusion\bin\"</Command>
       <Message Condition="'$(GameDir)' != ''">Deploying client DLL to $(GameDir)\diffusion\bin</Message>
     </PostBuildEvent>
+    <Link>
+      <GenerateDebugInformation Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</GenerateDebugInformation>
+    </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
