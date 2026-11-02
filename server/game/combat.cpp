@@ -592,6 +592,8 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 	
 	ClearEffects();
 
+	bool bStartSmoke = false;
+
 	// clear fire
 	if( IsOnFire )
 	{
@@ -600,6 +602,8 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 		pev->rendermode = kRenderTransColor;
 		pev->rendercolor = Vector( 10, 10, 10 ); // crispy critter
 		pev->renderamt = 255;
+		bStartSmoke = true;
+		num_death_smokes = 50;
 	}
 	pev->effects &= ~EF_DIMLIGHT;
 	IsOnFire = false;
@@ -664,6 +668,43 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 		bFlashlightCap = false;
 		pev->effects &= ~EF_MONSTERFLASHLIGHT;
 	}
+
+	if( bStartSmoke )
+	{
+		SetThink( &CBaseMonster::DeathSmoke );
+		SetNextThink( 0.1f );
+	}
+}
+
+void CBaseMonster::DeathSmoke( void )
+{
+	if( num_death_smokes <= 0 )
+	{
+		DontThink();
+		return;
+	}
+
+	num_death_smokes--;
+
+	Vector vecOrigin = GetAbsOrigin();
+
+	MESSAGE_BEGIN( MSG_PVS, gmsgTempEnt, vecOrigin );
+		WRITE_BYTE( TE_SMOKE );
+		WRITE_COORD( vecOrigin.x + RANDOM_LONG( -16, 16 ) );
+		WRITE_COORD( vecOrigin.y + RANDOM_LONG( -16, 16 ) );
+		WRITE_COORD( vecOrigin.z + 5.0f );
+		WRITE_SHORT( g_sModelIndexSmoke );
+		WRITE_BYTE( 10 ); // scale x1.0
+		WRITE_BYTE( 10 ); // framerate
+		WRITE_BYTE( 0 ); // pos randomize
+	MESSAGE_END();
+
+	if( num_death_smokes < 10 )
+		SetNextThink( 0.3f );
+	else if( num_death_smokes < 30 )
+		SetNextThink( 0.2f );
+	else
+		SetNextThink( 0.1f );
 }
 
 //

@@ -334,7 +334,6 @@ public:
 		virtual int GetActiveWeaponId( void ) { return 0; }
 
 	// combat functions
-	float UpdateTarget ( entvars_t *pevTarget );
 	virtual Activity GetDeathActivity ( void );
 	Activity GetSmallFlinchActivity( void );
 	virtual void Killed( entvars_t *pevAttacker, int iGib );
@@ -345,6 +344,7 @@ public:
 	virtual BOOL	HasHumanGibs( void );
 	virtual BOOL	HasAlienGibs( void );
 	virtual void	FadeMonster( void );	// Called instead of GibMonster() when gibs are disabled
+	virtual void	DeathSmoke( void );
 
 	Vector ShootAtEnemy( const Vector &shootOrigin );
 	virtual Vector BodyTarget( const Vector &posSrc ) { return Center( ) * 0.75 + EyePosition() * 0.25; };		// position to shoot at
@@ -397,6 +397,8 @@ public:
 	virtual void DropLiveGrenadeAfterDeath( void ){}
 
 	bool bDropLiveGrenadeAfterDeath; // don't save
+
+	int num_death_smokes;
 
 	int iTest; // just for testing purposes
 };

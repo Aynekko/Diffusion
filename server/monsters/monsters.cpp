@@ -113,6 +113,7 @@ BEGIN_DATADESC( CBaseMonster )
 	DEFINE_FUNCTION( CorpseFallThink ),
 	DEFINE_FUNCTION( MonsterInitThink ),
 	DEFINE_FUNCTION( ClearEffects ),
+	DEFINE_FUNCTION( DeathSmoke ),
 
 	DEFINE_FIELD( m_flHungryTime, FIELD_TIME ),
 	DEFINE_KEYFIELD( m_flDistTooFar, FIELD_FLOAT, "m_flDistTooFar" ), // diffusion - now keyfields to override
@@ -127,7 +128,7 @@ BEGIN_DATADESC( CBaseMonster )
 	DEFINE_FIELD( m_HackedGunPos, FIELD_VECTOR ),
 	DEFINE_FIELD( m_scriptState, FIELD_INTEGER ),
 	DEFINE_FIELD( m_pCine, FIELD_CLASSPTR ),
-
+	DEFINE_FIELD( num_death_smokes, FIELD_INTEGER ),
 	DEFINE_FIELD( NextUpdateTime, FIELD_TIME ),
 END_DATADESC()
 
