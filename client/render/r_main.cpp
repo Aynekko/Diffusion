@@ -1539,7 +1539,7 @@ float R_ComputeFadingDistance( cl_entity_t *e )
 	// keep the custom render mode intact, only switch to Fade if Normal or Solid (those can't fade)
 	if( tr.fadeblend[e->index] < 1.0f )
 	{
-		if( (e->curstate.rendermode == kRenderNormal) || (e->curstate.rendermode == kRenderTransAlpha) )
+		if( R_ModelOpaque( e->curstate.rendermode, e->curstate.renderamt ) )
 			e->curstate.rendermode = kRenderFade; // this is a 100% clone of Texture, the only difference is light brightness (Texture has much less - see BMODEL_KRENDERTRANSTEXTURE)
 	}
 
