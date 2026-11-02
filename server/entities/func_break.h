@@ -89,6 +89,7 @@ public:
 	int	m_iszGibModel;
 	int	m_iszSpawnObject;
 	string_t m_iszFireOnRespawn;
+	int m_iLastHitDamageType;
 };
 
 class CPushable : public CBreakable

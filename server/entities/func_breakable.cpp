@@ -390,6 +390,9 @@ void CBreakable::Precache( void )
 
 void CBreakable::DamageSound( void )
 {
+	if( m_iLastHitDamageType & DMG_BURN )
+		return;
+	
 	int pitch;
 	float fvol;
 	const char *rgpsz[6];
@@ -579,6 +582,8 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 	if( HasSpawnFlags( SF_BREAK_NOEXPLOSIONS ) && ((bitsDamageType & DMG_BLAST) || (bitsDamageType & DMG_MORTAR) || (bitsDamageType & DMG_EMP)) ) // EMP also included here just in case!
 		return 0;
+
+	m_iLastHitDamageType = bitsDamageType;
 	
 	Vector vecTemp;
 	CBaseEntity *pAttacker = NULL;
