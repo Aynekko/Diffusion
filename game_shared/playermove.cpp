@@ -2882,7 +2882,7 @@ void PM_Jump (void)
 		// diffusion - speed boost similar to HL2. needs to be tested more.
 		if( (pmove->cmd.buttons & IN_FORWARD) && (pmove->cmd.buttons & IN_JUMP) && !(pmove->cmd.buttons & IN_RUN) && !(pmove->cmd.buttons & IN_DUCK) )
 		{
-			if( (pmove->velocity.Length2D() < 350) )
+			if( (pmove->velocity.Length2D() < 270) )
 			{
 				pmove->velocity[0] *= 1.35f;
 				pmove->velocity[1] *= 1.35f;
