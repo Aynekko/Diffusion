@@ -117,7 +117,7 @@ void HUD_DrawTransparentTriangles( void )
 
 			// FIXME frustum culling is not performed if this entity was parented (moving)
 			// it's using default 512 box just to test PVS visibility
-			if( RI->currententity->curstate.mins.x != -256.0f && RI->currententity->curstate.maxs != 256.0f )
+			if( RI->currententity->curstate.mins.x != -256.0f && RI->currententity->curstate.maxs.x != 256.0f )
 			{
 				if( R_CullModel( RI->currententity, absmin, absmax ) )
 					continue;
@@ -174,18 +174,17 @@ void R_SetupCable( cl_entity_t *e )
 	Vector vdirection;
 	Vector vmidpoint;
 	
-	float TargetSway = e->curstate.fuser3;
 	const int NumberOfCables = (int)e->curstate.vuser2.y;
-	
-	// origin of the cable can move when parented. if so, add shaking
-	const float Speed = (e->curstate.origin - e->prevstate.origin).Length() / g_fFrametime;
-	TargetSway *= 1.0f + (Speed * 0.05f);
 
 	// approach faster when shaking starts, but slower when coming to a halt
-	const float ApproachSpeed = (e->curstate.fuser3 > tr.cableSwayIntensity[e->index]) ? g_fFrametime * (0.1f + 0.5f * fabs( tr.cableSwayIntensity[e->index] - e->curstate.fuser3 )) : (g_fFrametime * 0.1f);
-	tr.cableSwayIntensity[e->index] = CL_UTIL_Approach( TargetSway, tr.cableSwayIntensity[e->index], ApproachSpeed );
 	if( (tr.time != tr.oldtime) && e->visframe != tr.realframecount ) // animate only once per frame
 	{
+		// origin of the cable can move when parented. if so, add shaking
+		const float Speed = (g_fFrametime > 0.0f) ? ((e->curstate.origin - e->prevstate.origin).Length() / g_fFrametime) : 0.0f;
+		float TargetSway = e->curstate.fuser3;
+		TargetSway *= 1.0f + (Speed * 0.05f);
+		const float ApproachSpeed = (e->curstate.fuser3 > tr.cableSwayIntensity[e->index]) ? g_fFrametime * (0.1f + 0.5f * fabs( tr.cableSwayIntensity[e->index] - e->curstate.fuser3 )) : (g_fFrametime * 0.1f);
+		tr.cableSwayIntensity[e->index] = CL_UTIL_Approach( TargetSway, tr.cableSwayIntensity[e->index], ApproachSpeed );
 		tr.cableSwayPhase[e->index] += g_fFrametime * tr.cableSwayIntensity[e->index];
 		e->visframe = tr.realframecount;
 	}
@@ -208,12 +207,12 @@ void R_SetupCable( cl_entity_t *e )
 	// choose a cable for waterdrop
 	int WaterdropCable = 0;
 	if( bMakeWaterDrops && NumberOfCables > 1 )
-		WaterdropCable = RANDOM_LONG( 1, NumberOfCables );
+		WaterdropCable = RANDOM_LONG( 1, NumberOfCables - 1 );
 	const float DeSync[] = { 0.0f, 0.666f, -0.42f, -0.834f, 0.444f, -0.711f };
 
 	for( int cablenum = 0; cablenum < NumberOfCables; cablenum++ )
 	{
-		if( cable_numverts >= MAX_CABLE_VERTS - (inumpoints * 2) )
+		if( cable_numverts >= MAX_CABLE_VERTS - (inumpoints * 2 + 2) )
 			break; // array full
 		
 		float SwayPhase = tr.cableSwayPhase[e->index];
@@ -221,7 +220,8 @@ void R_SetupCable( cl_entity_t *e )
 		if( cablenum > 0 )
 		{
 			falldepth += e->curstate.vuser2.z * cablenum;
-			SwayPhase += DeSync[bound( 0, cablenum % sizeof( DeSync ) - 1, sizeof( DeSync ) - 1 )];
+			const int numDeSync = sizeof( DeSync ) / sizeof( DeSync[0] );
+			SwayPhase += DeSync[(cablenum - 1) % numDeSync];
 		}
 
 		if( tr.cableSwayIntensity[e->index] > 0.0f ) // sway intensity
@@ -380,14 +380,20 @@ void R_SetupVolumetricLight( cl_entity_t *e )
 	if( !tr.volumetric_light_texture )
 		return;
 
+	if( e->index >= 8192 )
+		return;
+
 	Vector vTangent, vDir, vRight, vVertex;
 	Vector v_angles = e->curstate.angles;
 	Vector ang_forward, ang_right, ang_up;
 	gEngfuncs.pfnAngleVectors( v_angles, ang_forward, ang_right, ang_up );
 
+	const int num_sprites = bound( 1, e->curstate.vuser1.z, MAX_LIGHT_SPRITES );
+	if( volumetric_numverts + num_sprites * 6 > MAX_VOLUMETRIC_VERTS )
+		return;
+
 	const float light_length = e->curstate.vuser1.x;
 	const float light_width = e->curstate.vuser1.y;
-	const int num_sprites = bound( 1, e->curstate.vuser1.z, MAX_LIGHT_SPRITES );
 
 	// this way we can shape our cone how we want
 	const float start_cone_scale = e->curstate.vuser2.x; // distance between sprites at start point
@@ -430,7 +436,6 @@ void R_SetupVolumetricLight( cl_entity_t *e )
 			g_pParticles.SmokeVolume( e->index, 3, vposition1 + forward * ParticleDist, g_vecZero, g_vecZero, ParticleColor, 0.0f, 1.0f - RemapVal( ParticleDist, light_length * 0.1f, light_length * 0.75f, 0.0f, 1.0f ), 1000 );
 		}
 
-		forward.z = 0;
 		vTangent = vposition1 - vposition2;
 		vDir = vposition1 - RI->vieworg;
 		vRight = CrossProduct( vTangent, -vDir ); vRight = vRight.Normalize();
