@@ -274,6 +274,7 @@ public:
 	BOOL		m_fFreezed;	// is body sleeps?
 	int		m_iFilterData[4];	// shape collision filter data
 	bool		m_fHasRagdollPose;	// a settled ragdoll pose was saved
+	bool  m_fRagdollPoseAsleep;
 	float		m_flRagdollPose[RAGDOLL_SAVE_POSE_FLOATS];	// per-part world pos + quat, restores the ragdoll settled in place
 	bool		m_isChaining;
 	Vector		m_vecOldPosition;	// don't save this

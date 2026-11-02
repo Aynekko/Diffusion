@@ -2720,7 +2720,8 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 
 	rag.spawnTime = gpGlobals->time;
 	rag.limitBlendDuration = limitBlend;
-	rag.limitBlendDone = ( limitBlend <= 0.0f );
+	bool restoreSettled = pObject->m_fHasRagdollPose && pObject->m_fRagdollPoseAsleep;
+	rag.limitBlendDone = (limitBlend <= 0.0f) || restoreSettled;
 	rag.limitSpring = limitSpring;
 	rag.limitDamping = limitDamping;
 
@@ -2957,6 +2958,7 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 	if( pObject->m_fHasRagdollPose )
 	{
 		const float *pose = pObject->m_flRagdollPose;
+		const bool wasAsleep = pObject->m_fRagdollPoseAsleep;
 		for( int i = 0; i < RAGDOLL_PARTS; i++, pose += 7 )
 		{
 			if( !rag.bodies[i] )
@@ -2966,11 +2968,21 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 			PxTransform xform( PxVec3( pose[0], pose[1], pose[2] ),
 				PxQuat( pose[3], pose[4], pose[5], pose[6] ));
 			rag.bodies[i]->setGlobalPose( xform );
-			rag.bodies[i]->setLinearVelocity( PxVec3( 0.0f ));
-			rag.bodies[i]->setAngularVelocity( PxVec3( 0.0f ));
-			rag.bodies[i]->putToSleep();
+			if( wasAsleep )
+			{
+				rag.bodies[i]->setLinearVelocity( PxVec3( 0.0f ) );
+				rag.bodies[i]->setAngularVelocity( PxVec3( 0.0f ) );
+				rag.bodies[i]->putToSleep();
+			}
+			else
+			{
+				// saved velocities if you store them, otherwise zero
+				rag.bodies[i]->setLinearVelocity( PxVec3( 0.0f ) );
+				rag.bodies[i]->setAngularVelocity( PxVec3( 0.0f ) );
+				rag.bodies[i]->wakeUp();
+			}
 		}
-		rag.asleep = true;
+		rag.asleep = false;
 		rag.impactGraceUntil = gpGlobals->time + CVAR_GET_FLOAT( "phys_ragdoll_restoregrace" );
 		// consume it: a later kill/re-save of this entity starts fresh
 		pObject->m_fHasRagdollPose = false;
@@ -3848,7 +3860,17 @@ void CPhysicPhysX :: SaveRagdoll( CBaseEntity *pObject )
 	}
 
 	RagdollDesc &rag = m_ragdolls[idx];
+
 	float *pose = pObject->m_flRagdollPose;
+
+	bool settled = rag.limitBlendDone;
+	for( int i = 0; settled && i < RAGDOLL_PARTS; i++ )
+	{
+		if( rag.bodies[i] && !rag.bodies[i]->isSleeping() )
+			settled = false;
+	}
+	pObject->m_fRagdollPoseAsleep = settled;
+
 	for (int i = 0; i < RAGDOLL_PARTS; i++, pose += 7)
 	{
 		if (!rag.bodies[i])
