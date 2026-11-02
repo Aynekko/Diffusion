@@ -1589,6 +1589,7 @@ static RagdollImpulseEntry g_ImpulseDamage[MAX_IMPULSE_ENTRIES];
 static RagdollImpulseEntry g_ImpulseInflictors[MAX_IMPULSE_ENTRIES];
 static int g_NumImpulseWeapons, g_NumImpulseDamage, g_NumImpulseInflictors;
 static bool g_ImpulseTableLoaded;
+static float g_ImpulseHeadshotMult = 1.0f;
 
 static const struct { const char *name; int id; } g_ImpulseWeaponNames[] =
 {
@@ -1665,7 +1666,11 @@ static void LoadRagdollImpulseTable( void )
 
 		float mult = Q_atof( token );
 
-		if( !Q_strnicmp( key, "WEAPON_", 7 ))
+		if( !Q_stricmp( key, "headshot_mult" ) )
+		{
+			g_ImpulseHeadshotMult = (mult > 0.0f) ? mult : 1.0f;
+		}
+		else if( !Q_strnicmp( key, "WEAPON_", 7 ))
 		{
 			for( int i = 0; i < (int)( sizeof( g_ImpulseWeaponNames ) / sizeof( g_ImpulseWeaponNames[0] )); i++ )
 			{
@@ -1711,7 +1716,7 @@ float CBaseMonster::GetRagdollImpulseMultiplier( float hitDamage )
 {
 	LoadRagdollImpulseTable();
 
-	const float fHeadshotImpulse = (m_LastHitGroup == HITGROUP_HEAD && m_bloodColor == BLOOD_COLOR_RED) ? 3.0f : 1.0f;
+	const float fHeadshotImpulse = (m_LastHitGroup == HITGROUP_HEAD && m_bloodColor == BLOOD_COLOR_RED) ? g_ImpulseHeadshotMult : 1.0f;
 
 	// a projectile inflictor is the best hint, works for NPC vs NPC too
 	if( m_iszLastHitInflictor != iStringNull )
