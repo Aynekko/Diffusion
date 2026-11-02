@@ -1259,7 +1259,7 @@ float CBaseMonster :: DamageForce( float damage )
 // only damage ents that can clearly be seen by the explosion!
 
 	
-void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType )
+void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType, bool bOnlyMonsterPlayer )
 {
 	CBaseEntity *pEntity = NULL;
 	TraceResult	tr;
@@ -1296,7 +1296,13 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				continue;
 			}
 
-			// blast's don't tavel into or out of water
+			if( bOnlyMonsterPlayer )
+			{
+				if( !pEntity->IsMonster() && !pEntity->IsPlayer() )
+					continue;
+			}
+
+			// blasts don't travel into or out of water
 			if (bInWater && pEntity->pev->waterlevel == 0)
 				continue;
 			if (!bInWater && pEntity->pev->waterlevel == 3)
@@ -1347,15 +1353,15 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 }
 
 // diffusion - here I have added the radius back in both
-void CBaseMonster :: RadiusDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType )
+void CBaseMonster :: RadiusDamage(entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType, bool bOnlyMonsterPlayer )
 {
-	::RadiusDamage( GetAbsOrigin(), pevInflictor, pevAttacker, flDamage, flRadius, iClassIgnore, bitsDamageType );
+	::RadiusDamage( GetAbsOrigin(), pevInflictor, pevAttacker, flDamage, flRadius, iClassIgnore, bitsDamageType, bOnlyMonsterPlayer );
 }
 
 
-void CBaseMonster :: RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType )
+void CBaseMonster :: RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, float flRadius, int iClassIgnore, int bitsDamageType, bool bOnlyMonsterPlayer )
 {
-	::RadiusDamage( vecSrc, pevInflictor, pevAttacker, flDamage, flRadius, iClassIgnore, bitsDamageType );
+	::RadiusDamage( vecSrc, pevInflictor, pevAttacker, flDamage, flRadius, iClassIgnore, bitsDamageType, bOnlyMonsterPlayer );
 }
 
 

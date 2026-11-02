@@ -264,9 +264,9 @@ void CExplosiveBarrel::Ignite(void)
 	MESSAGE_END();
 
 	if( m_hOwner )
-		RadiusDamage( pev, m_hOwner->pev, 1.0f, 100, CLASS_NONE, DMG_BURN | DMG_NEVERGIB );
+		RadiusDamage( pev, m_hOwner->pev, 1.0f, 100, CLASS_NONE, DMG_BURN | DMG_NEVERGIB, true ); // true: only touch monsters/players, no breakables
 	else
-		RadiusDamage( pev, pev, 1.0f, 100, CLASS_NONE, DMG_BURN | DMG_NEVERGIB );
+		RadiusDamage( pev, pev, 1.0f, 100, CLASS_NONE, DMG_BURN | DMG_NEVERGIB, true );
 
 	SetThink(&CExplosiveBarrel::Ignite);
 	SetNextThink(0.1);

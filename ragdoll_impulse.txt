@@ -1,4 +1,4 @@
-headshot_mult		10.0
+headshot_mult		50.0
 
 rpg_rocket		15.0
 grenade			15.0
