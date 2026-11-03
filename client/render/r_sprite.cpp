@@ -148,6 +148,9 @@ float CSpriteModelRenderer :: GetSpriteFrameInterpolant( mspriteframe_t **oldfra
 	float frametime = (1.0f / framerate); // 10 fps as default
 	int	i, j, iframe, oldf, newf;
 
+	if( oldframe ) *oldframe = NULL;
+	if( curframe ) *curframe = NULL;
+
 	// misc info
 	m_fDoInterp = FBitSet( m_pCurrentEntity->curstate.effects, EF_NOINTERP ) ? false : true;
 
@@ -173,17 +176,19 @@ float CSpriteModelRenderer :: GetSpriteFrameInterpolant( mspriteframe_t **oldfra
 	}
 	else if( iframe >= m_pSpriteHeader->numframes )
 	{
-		ALERT( at_warning, "R_GetSpriteFrameInterpolant: no such frame %d (%s)\n", frame, m_pRenderModel->name );
+		ALERT( at_warning, "R_GetSpriteFrameInterpolant: no such frame %d (%s)\n", iframe, m_pRenderModel->name );
 		iframe = m_pSpriteHeader->numframes - 1;
 	}
 
 	// calc interpolant range
+	const int numframes = m_pSpriteHeader->numframes;
+
 	oldf = (int)Q_floor( frame - 0.5 );
 	newf = (int)Q_ceil( frame - 0.5 );
 
-	// FIXME: allow interp between first and last frame
-	oldf = oldf % ( m_pSpriteHeader->numframes - 1 );
-	newf = newf % ( m_pSpriteHeader->numframes + 1 );
+	// allow interpolation between the last and the first frame
+	oldf = (oldf % numframes + numframes) % numframes;
+	newf = (newf % numframes + numframes) % numframes;
 
 	// NOTE: we allow interpolation between single and angled frames e.g. for Doom monsters
 	if( m_pSpriteHeader->frames[iframe].type == FRAME_SINGLE || m_pSpriteHeader->frames[iframe].type == FRAME_ANGLED )
@@ -207,23 +212,33 @@ float CSpriteModelRenderer :: GetSpriteFrameInterpolant( mspriteframe_t **oldfra
 		if( oldframe ) *oldframe = GetSpriteFrame( oldf, m_pCurrentEntity->angles[YAW] );
 		if( curframe ) *curframe = GetSpriteFrame( newf, m_pCurrentEntity->angles[YAW] );
 	}
-	else if( m_pSpriteHeader->frames[iframe].type == FRAME_GROUP ) 
+	else if( m_pSpriteHeader->frames[iframe].type == FRAME_GROUP )
 	{
-		mspritegroup_t	*pspritegroup = (mspritegroup_t *)m_pSpriteHeader->frames[iframe].frameptr;
-		float		*pintervals = pspritegroup->intervals;
-		float		fullinterval, targettime, jinterval;
-		float		jtime = 0.0f;
+		mspritegroup_t *pspritegroup = (mspritegroup_t *)m_pSpriteHeader->frames[iframe].frameptr;
+		float *pintervals = pspritegroup->intervals;
+		const int groupframes = pspritegroup->numframes;
+		float fullinterval, targettime, jinterval;
+		float jtime = 0.0f;
 
-		fullinterval = pintervals[pspritegroup->numframes-1];
+		if( groupframes < 1 )
+			return 0.0f; // empty group
+
+		fullinterval = pintervals[groupframes - 1];
+
+		if( groupframes < 2 || fullinterval <= 0.0f )
+		{
+			// nothing to interpolate between (or broken timing data)
+			if( oldframe ) *oldframe = pspritegroup->frames[0];
+			if( curframe ) *curframe = pspritegroup->frames[0];
+			return 0.0f;
+		}
+
 		jinterval = pintervals[1] - pintervals[0];
-
-		// when loading in Mod_LoadSpriteGroup, we guaranteed all interval values
-		// are positive, so we don't have to worry about division by zero
-		targettime = tr.time - ((int)( tr.time / fullinterval )) * fullinterval;
+		targettime = tr.time - ((int)(tr.time / fullinterval)) * fullinterval;
 
 		// LordHavoc: since I can't measure the time properly when it loops from numframes - 1 to 0,
 		// i instead measure the time of the first frame, hoping it is consistent
-		for( i = 0, j = (pspritegroup->numframes - 1); i < (pspritegroup->numframes - 1); i++ )
+		for( i = 0, j = (groupframes - 1); i < (groupframes - 1); i++ )
 		{
 			if( pintervals[i] > targettime )
 				break;
@@ -232,12 +247,19 @@ float CSpriteModelRenderer :: GetSpriteFrameInterpolant( mspriteframe_t **oldfra
 			jtime = pintervals[i];
 		}
 
-		lerpFrac = (targettime - jtime) / jinterval;
+		// jinterval can still be zero if two consecutive interval values are equal
+		if( jinterval > 0.0f )
+			lerpFrac = bound( 0.0f, (targettime - jtime) / jinterval, 1.0f );
+		else
+			lerpFrac = 0.0f;
 
 		// get the interpolated frames
 		if( oldframe ) *oldframe = pspritegroup->frames[j];
 		if( curframe ) *curframe = pspritegroup->frames[i];
 	}
+
+	if( oldframe && !*oldframe ) *oldframe = GetSpriteFrame( iframe, m_pCurrentEntity->angles[YAW] );
+	if( curframe && !*curframe ) *curframe = GetSpriteFrame( iframe, m_pCurrentEntity->angles[YAW] );
 
 	return lerpFrac;
 }
@@ -256,7 +278,7 @@ void CSpriteModelRenderer :: SpriteComputeOrigin( cl_entity_t *e )
 	// link sprite with parent (if present)
 	if( e->curstate.movetype == MOVETYPE_FOLLOW )
 	{
-		cl_entity_t *parent;
+		cl_entity_t *parent = NULL;
 		
 		if( e->curstate.aiment == -1 ) // diffusion - HACKHACK for viewmodel
 			parent = GET_VIEWMODEL();
@@ -350,7 +372,7 @@ float CSpriteModelRenderer :: GlowSightDistance( void )
 
 	float dist = (sprite_origin - RI->vieworg).Length();
 
-	if( !FBitSet( RI->params, RP_MIRRORVIEW ) || !FBitSet( RI->params, RP_SHADOWPASS ) )
+	if( !FBitSet( RI->params, RP_MIRRORVIEW ) && !FBitSet( RI->params, RP_SHADOWPASS ) )
 	{
 		//------------------------------------------
 		int maxLoops = 4;
@@ -617,6 +639,8 @@ void CSpriteModelRenderer::RenderSpritesBatch( void )
 	if( !CVAR_TO_BOOL( r_sprites_batch ) )
 		return;
 
+	cached_sprite_texture = -1;
+
 	sprite_batch_t *pSpriteBatch;
 	
 	bool bRenderSet = false;
@@ -635,6 +659,7 @@ void CSpriteModelRenderer::RenderSpritesBatch( void )
 			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 			GL_DepthMask( GL_FALSE );
 			GL_Cull( GL_NONE ); // might be two-side
+			pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
 			R_LoadIdentity();
 
@@ -670,6 +695,7 @@ void CSpriteModelRenderer::RenderSpritesBatch( void )
 			GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
 			GL_DepthMask( GL_FALSE );
 			GL_Cull( GL_NONE ); // might be two-side
+			pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
 			R_LoadIdentity();
 
@@ -751,10 +777,18 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 		tr.blend = Lerp( fogFactor, 0.0f, tr.blend );
 	}
 
-	Vector color, color2;
+	float lerp = 1.0f, ilerp;
+	mspriteframe_t *frame = NULL, *oldframe = NULL;
 
-	// all sprites can have color
-	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+	if( SpriteAllowLerping( m_pCurrentEntity, m_pSpriteHeader ) )
+		lerp = GetSpriteFrameInterpolant( &oldframe, &frame );
+	else
+		frame = oldframe = GetSpriteFrame( m_pCurrentEntity->curstate.frame, m_pCurrentEntity->angles[YAW] );
+
+	if( !frame || !oldframe )
+		return;
+
+	Vector color, color2;
 
 	// NOTE: never pass sprites with rendercolor '0 0 0' it's a stupid Valve Hammer Editor bug
 	if( m_pCurrentEntity->curstate.rendercolor.r || m_pCurrentEntity->curstate.rendercolor.g || m_pCurrentEntity->curstate.rendercolor.b )
@@ -769,28 +803,6 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 		color[1] = 1.0f;
 		color[2] = 1.0f;
 	}
-          
-	if( SpriteHasLightmap( m_pSpriteHeader->texFormat ))
-	{
-		Vector lightColor;
-
-		gEngfuncs.pTriAPI->LightAtPoint( sprite_origin, (float *)&lightColor );
-		color2 = lightColor * ( 1.0f / 255.0f );
-
-		if( glState.drawTrans )
-			GL_DepthMask( GL_TRUE );
-
-		// NOTE: sprites with 'lightmap' looks ugly when alpha func is GL_GREATER 0.0
-		GL_AlphaFunc( GL_GEQUAL, 0.5f );
-	}
-
-	float lerp = 1.0f, ilerp;
-	mspriteframe_t *frame, *oldframe;
-
-	if( SpriteAllowLerping( m_pCurrentEntity, m_pSpriteHeader ))
-		lerp = GetSpriteFrameInterpolant( &oldframe, &frame );
-	else
-		frame = oldframe = GetSpriteFrame( m_pCurrentEntity->curstate.frame, m_pCurrentEntity->angles[YAW] );
 
 	int type;
 	if( m_pCurrentEntity->curstate.iuser1 > 0 )
@@ -819,48 +831,48 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 		v_right = v_right.Normalize();
 		break;
 	case SPR_FWD_PARALLEL_UPRIGHT:
-		{
-			float dot = RI->vforward.z;
-			if(( dot > 0.999848f ) || ( dot < -0.999848f ))	// cos(1 degree) = 0.999848
-				return; // invisible
+	{
+		float dot = RI->vforward.z;
+		if( (dot > 0.999848f) || (dot < -0.999848f) )	// cos(1 degree) = 0.999848
+			return; // invisible
 
-			v_right.x = RI->vforward.y;
-			v_right.y = -RI->vforward.x;
-			v_right.z = 0.0f;
-			v_up.x = v_up.y = 0.0f;
-			v_up.z = 1.0f;
-			v_right = v_right.Normalize();
-		}
-		break;
+		v_right.x = RI->vforward.y;
+		v_right.y = -RI->vforward.x;
+		v_right.z = 0.0f;
+		v_up.x = v_up.y = 0.0f;
+		v_up.z = 1.0f;
+		v_right = v_right.Normalize();
+	}
+	break;
 	case SPR_FWD_PARALLEL_ORIENTED:
-		{
-			float angle = m_pCurrentEntity->angles[ROLL] * (M_PI * 2.0f / 360.0f);
-			float sr, cr;
+	{
+		float angle = m_pCurrentEntity->angles[ROLL] * (M_PI * 2.0f / 360.0f);
+		float sr, cr;
 
-			SinCos( angle, &sr, &cr );
+		SinCos( angle, &sr, &cr );
 
-			v_right = RI->vright * cr + RI->vup * sr;
-			v_up = RI->vright * -sr + RI->vup * cr;
-		}
-		break;
+		v_right = RI->vright * cr + RI->vup * sr;
+		v_up = RI->vright * -sr + RI->vup * cr;
+	}
+	break;
 	case SPR_FWD_PARALLEL: // normal sprite
 	default:
-	#if 1
-		v_right = RI->vright; 
+#if 1
+		v_right = RI->vright;
 		v_up = RI->vup;
-	#else
+#else
 		// diffusion - look at player, but don't rotate with view rotation
 		Vector ViewVec;
 		VectorAngles( m_pCurrentEntity->curstate.origin - RI->vieworg, ViewVec );
 		gEngfuncs.pfnAngleVectors( ViewVec, NULL, v_right, v_up );
-	#endif
+#endif
 		break;
 	}
 
 	if( CVAR_TO_BOOL( r_sprites_batch ) )
 	{
 		// only batching additive or glow sprites
-		if( m_pCurrentEntity->curstate.rendermode == kRenderConstantGlow || m_pCurrentEntity->curstate.rendermode == kRenderGlow || m_pCurrentEntity->curstate.rendermode == kRenderTransAdd )
+		if( oldframe == frame && (m_pCurrentEntity->curstate.rendermode == kRenderConstantGlow || m_pCurrentEntity->curstate.rendermode == kRenderGlow || m_pCurrentEntity->curstate.rendermode == kRenderTransAdd) )
 		{
 			// find slot
 			const int texnum = frame->gl_texturenum;
@@ -879,10 +891,10 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 			}
 
 			// found free slot
-			if( slot != -1 )
+			if( slot != -1 && sprBatch[slot].numverts + VERTS_PER_SPRITE <= MAX_SPRITE_VERTS )
 			{
 				Vector point;
-				byte transparency = tr.blend * 255;
+				byte transparency = bound( 0.0f, tr.blend, 1.0f ) * 255;
 				sprBatch[slot].texture = texnum;
 				Vector clr = color * 255;
 				Vector org = sprite_origin;
@@ -951,6 +963,23 @@ void CSpriteModelRenderer :: SpriteDrawModel( void )
 				return;
 			}
 		}
+	}
+
+	// all sprites can have color
+	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+
+	if( SpriteHasLightmap( m_pSpriteHeader->texFormat ) )
+	{
+		Vector lightColor;
+
+		gEngfuncs.pTriAPI->LightAtPoint( sprite_origin, (float *)&lightColor );
+		color2 = lightColor * (1.0f / 255.0f);
+
+		if( glState.drawTrans )
+			GL_DepthMask( GL_TRUE );
+
+		// NOTE: sprites with 'lightmap' looks ugly when alpha func is GL_GREATER 0.0
+		GL_AlphaFunc( GL_GEQUAL, 0.5f );
 	}
 
 	R_LoadIdentity();
@@ -1087,8 +1116,14 @@ void CSpriteModelRenderer::SpriteDrawModelShadowPass( void )
 
 	mspriteframe_t *frame = GetSpriteFrame( m_pCurrentEntity->curstate.frame, m_pCurrentEntity->angles[YAW] );
 
-	int type = m_pSpriteHeader->type;
 	float scale = m_pCurrentEntity->curstate.scale;
+	if( !scale ) scale = 1.0f;
+
+	int type;
+	if( m_pCurrentEntity->curstate.iuser1 > 0 )
+		type = m_pCurrentEntity->curstate.iuser1 - 1; // diffusion - use custom angle type
+	else
+		type = m_pSpriteHeader->type;
 
 	// automatically roll parallel sprites if requested
 	if( m_pCurrentEntity->angles[ROLL] != 0.0f && type == SPR_FWD_PARALLEL )
@@ -1178,9 +1213,23 @@ void CSpriteModelRenderer::DrawSpriteModelInternal( cl_entity_t *e )
 
 mspriteframe_t *CSpriteModelRenderer::GetSpriteFrame( const model_t *m_pSpriteModel, int frame )
 {
-	if(( m_pSpriteHeader = (msprite_t *)Mod_Extradata( (model_t *)m_pSpriteModel )) == NULL )
+	msprite_t *hdr = (msprite_t *)Mod_Extradata( (model_t *)m_pSpriteModel );
+	if( !hdr )
 		return NULL;
 
+	msprite_t *oldHdr = m_pSpriteHeader;
+	model_t *oldModel = m_pRenderModel;
+	cl_entity_t *oldEnt = m_pCurrentEntity;
+
+	m_pSpriteHeader = hdr;
+	m_pRenderModel = (model_t *)m_pSpriteModel;
 	m_pCurrentEntity = NULL;
-	return GetSpriteFrame( frame, 0.0f );
+
+	mspriteframe_t *f = GetSpriteFrame( frame, 0.0f );
+
+	m_pSpriteHeader = oldHdr;
+	m_pRenderModel = oldModel;
+	m_pCurrentEntity = oldEnt;
+
+	return f;
 }

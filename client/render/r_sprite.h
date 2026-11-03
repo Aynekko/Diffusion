@@ -19,7 +19,8 @@ GNU General Public License for more details.
 #include "sprite.h"
 
 // for sprites with a single frame only! - batch rendering (glow etc.)
-#define MAX_SPRITE_VERTS 65536
+#define MAX_SPRITE_VERTS 4096
+#define VERTS_PER_SPRITE 6
 #define MAX_SPRITE_BATCHES 64
 
 struct sprite_batch_t
@@ -28,7 +29,7 @@ struct sprite_batch_t
 	Vector SpriteVertexesArray[MAX_SPRITE_VERTS];
 	byte SpriteColorArray[MAX_SPRITE_VERTS][4];
 	Vector2D SpriteTexCoordsArray[MAX_SPRITE_VERTS];
-	unsigned short numverts;
+	int numverts;
 };
 
 /*
