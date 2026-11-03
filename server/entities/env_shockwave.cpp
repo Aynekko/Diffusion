@@ -36,7 +36,7 @@ public:
 	int m_iFrameRate;
 	int m_iStartFrame;
 	int m_iSpriteTexture;
-	char m_iType;
+	int m_iType;
 
 	DECLARE_DATADESC();
 };

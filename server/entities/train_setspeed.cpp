@@ -30,7 +30,7 @@ LINK_ENTITY_TO_CLASS(train_setspeed, CTrainSetSpeed);
 
 // Global Savedata for train speed modifier
 BEGIN_DATADESC(CTrainSetSpeed)
-	DEFINE_KEYFIELD(m_iMode, FIELD_CHARACTER, "mode"),
+	DEFINE_KEYFIELD(m_iMode, FIELD_INTEGER, "mode"),
 	DEFINE_KEYFIELD(m_flTime, FIELD_FLOAT, "time"),
 	DEFINE_FIELD(m_flInterval, FIELD_FLOAT),
 	DEFINE_FIELD(m_pTrain, FIELD_CLASSPTR),

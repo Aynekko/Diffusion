@@ -1,3 +1,4 @@
+#include <iostream>
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"

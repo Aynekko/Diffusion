@@ -11,7 +11,10 @@
 #pragma once
 #endif
 
-#include <iostream>
+#include <string.h>		// strlen, strcat
+#include <stdio.h>		// sprintf
+#include <stddef.h>		// size_t, offsetof
+#include <type_traits>	// compile-time field checks
 #include "utlarray.h"
 #include "ehandle.h"
 
@@ -76,29 +79,91 @@ DECLARE_FIELD_SIZE( FIELD_TIME, sizeof( float ), sizeof( float ) )
 DECLARE_FIELD_SIZE( FIELD_MODELNAME, sizeof( int ), sizeof( int ) )
 DECLARE_FIELD_SIZE( FIELD_SOUNDNAME, sizeof( int ), sizeof( int ) )
 
-template< int FIELD_TYPE, size_t MEMBER_SIZE >
-struct CDatamapMemberCheck { enum { OK = 1 }; };
+//-----------------------------------------------------------------------------
+// Compile-time validation of the DEFINE_* macros
+//-----------------------------------------------------------------------------
 
-template< size_t MEMBER_SIZE >
-struct CDatamapMemberCheck< FIELD_BOOLEAN, MEMBER_SIZE >
+// Per-FIELD-type rules for the element type E. Types without a rule are only size-checked.
+template< int FT, typename E >
+struct CDatamapKindCheck { enum { OK = 1 }; };
+
+#define DATAMAP_KIND_RULE( _fieldType, _condition, _message ) \
+	template< typename E > \
+	struct CDatamapKindCheck< _fieldType, E > \
+	{ \
+		static_assert( _condition, _message ); \
+		enum { OK = 1 }; \
+	};
+
+#define DM_PLAIN_INT( E )	( std::is_integral<E>::value && !std::is_same<E, bool>::value )
+#define DM_STRING_T( E )	( DM_PLAIN_INT( E ) && sizeof( E ) == sizeof( int ))
+
+DATAMAP_KIND_RULE( FIELD_FLOAT, (std::is_same<E, float>::value), "FIELD_FLOAT member must be a float" )
+DATAMAP_KIND_RULE( FIELD_TIME, (std::is_same<E, float>::value), "FIELD_TIME member must be a float" )
+DATAMAP_KIND_RULE( FIELD_INTEGER, ((DM_PLAIN_INT( E ) || std::is_enum<E>::value) && sizeof( E ) == sizeof( int )), "FIELD_INTEGER member must be a 4-byte int, BOOL or enum" )
+DATAMAP_KIND_RULE( FIELD_BOOLEAN, (std::is_same<E, bool>::value), "FIELD_BOOLEAN member must be a bool (use FIELD_INTEGER for BOOL)" )
+DATAMAP_KIND_RULE( FIELD_SHORT, (std::is_integral<E>::value && sizeof( E ) == sizeof( short )), "FIELD_SHORT member must be a 2-byte integer" )
+DATAMAP_KIND_RULE( FIELD_CHARACTER, (std::is_integral<E>::value && sizeof( E ) == 1), "FIELD_CHARACTER member must be a 1-byte integer (char/byte)" )
+DATAMAP_KIND_RULE( FIELD_STRING, DM_STRING_T( E ), "FIELD_STRING member must be a string_t" )
+DATAMAP_KIND_RULE( FIELD_MODELNAME, DM_STRING_T( E ), "FIELD_MODELNAME member must be a string_t" )
+DATAMAP_KIND_RULE( FIELD_SOUNDNAME, DM_STRING_T( E ), "FIELD_SOUNDNAME member must be a string_t" )
+DATAMAP_KIND_RULE( FIELD_VECTOR, (sizeof( E ) == 3 * sizeof( float )), "FIELD_VECTOR member must be a Vector / vec3_t" )
+DATAMAP_KIND_RULE( FIELD_POSITION_VECTOR, (sizeof( E ) == 3 * sizeof( float )), "FIELD_POSITION_VECTOR member must be a Vector / vec3_t" )
+DATAMAP_KIND_RULE( FIELD_EHANDLE, (sizeof( E ) == sizeof( EHANDLE )), "FIELD_EHANDLE member must be an EHANDLE" )
+DATAMAP_KIND_RULE( FIELD_CLASSPTR, (std::is_pointer<E>::value &&std::is_base_of< CBaseEntity, typename std::remove_pointer<E>::type >::value), "FIELD_CLASSPTR member must be a pointer to a CBaseEntity-derived class" )
+DATAMAP_KIND_RULE( FIELD_EVARS, (std::is_same<E, entvars_t *>::value), "FIELD_EVARS member must be an entvars_t *" )
+DATAMAP_KIND_RULE( FIELD_EDICT, (std::is_same<E, edict_t *>::value), "FIELD_EDICT member must be an edict_t *" )
+DATAMAP_KIND_RULE( FIELD_ENTITY, (std::is_integral<E>::value && sizeof( E ) == sizeof( int )), "FIELD_ENTITY member must be an EOFFSET (int)" )
+DATAMAP_KIND_RULE( FIELD_POINTER, (std::is_pointer<E>::value), "FIELD_POINTER member must be a pointer" )
+DATAMAP_KIND_RULE( FIELD_FUNCTION, (std::is_member_function_pointer<E>::value || (std::is_pointer<E>::value && std::is_function< typename std::remove_pointer<E>::type >::value)), "FIELD_FUNCTION member must be a function pointer" )
+
+#undef DATAMAP_KIND_RULE
+
+// Raw-byte members (single field over an array: vec3_t, byte[4]...) skip the kind check
+template< int FT, typename E, bool SKIP > struct CDatamapKindGate { enum { OK = 1 }; };
+template< int FT, typename E > struct CDatamapKindGate< FT, E, false > { enum { OK = CDatamapKindCheck< FT, E >::OK }; };
+
+template< int FT, typename T, int N >
+struct CDatamapMemberCheck
 {
-	static_assert(MEMBER_SIZE == sizeof( bool ), "FIELD_BOOLEAN member must be a bool (BOOL should use FIELD_INTEGER)");
-	enum { OK = 1 };
+	// remove_all_extents also handles 2D arrays like float m[4][4]
+	typedef typename std::remove_cv< typename std::remove_all_extents< T >::type >::type E;
+
+	static_assert(N > 0 && N <= 0xFFFF, "field count must fit the typedesc's unsigned short");
+
+	// FIELD_FUNCTION is exempt: a member function pointer is 16 bytes on GCC/Clang, only the first word is saved
+	static_assert(FT == FIELD_FUNCTION || sizeof( T ) == static_cast<size_t>(N) * static_cast<size_t>(CDatamapFieldSizeDeducer<FT>::SIZE),
+		"member size does not match what save/restore reads and writes for this FIELD type");
+
+	// restore writes raw bytes over the member, so a vtable pointer would be overwritten
+	static_assert(!std::is_polymorphic<E>::value, "member has a vtable, it can't be saved as raw bytes");
+
+	// the element type can't be verified for:
+	//  - a single field over a raw array (vec3_t, byte controller[4])
+	//  - a class/struct holding N elements (matrix4x4, Vector4D...): saved as raw bytes,
+	//    the size check above is what protects it
+	enum { RAW_BLOCK = (std::is_array<T>::value && N == 1) || std::is_class<E>::value };
+	enum { KIND_OK = CDatamapKindGate< FT, E, (RAW_BLOCK != 0) >::OK };
+	enum { COUNT = N };
 };
+
+#define _FIELD_CHECKED( name, fieldtype, count )	CDatamapMemberCheck< fieldtype, decltype( ((classNameTypedef *)0)->name ), count >::COUNT
+#define _EFIELD_CHECKED( name, fieldtype, count )	CDatamapMemberCheck< fieldtype, decltype( ((entvars_t *)0)->name ), count >::COUNT
 
 #define _FIELD(name, fieldtype, count, flags, mapname )		{ fieldtype, #name, offsetof(classNameTypedef, name), count, flags, mapname, NULL }
 #define _EFIELD(name, fieldtype, count, flags, mapname )		{ fieldtype, #name, offsetof(entvars_t, name), count, flags, mapname, NULL }
 #define DEFINE_FIELD_NULL					{ FIELD_VOID, 0, 0, 0, 0, 0, 0 }
-#define DEFINE_FIELD(name, fieldtype) \
-	_FIELD(name, fieldtype, CDatamapMemberCheck<fieldtype, sizeof(((classNameTypedef *)0)->name)>::OK, FTYPEDESC_SAVE, NULL )
-#define DEFINE_KEYFIELD(name, fieldtype, mapname) \
-	_FIELD(name, fieldtype, CDatamapMemberCheck<fieldtype, sizeof(((classNameTypedef *)0)->name)>::OK, FTYPEDESC_KEY|FTYPEDESC_SAVE, mapname )
-//#define DEFINE_AUTO_ARRAY(name, fieldtype)			_FIELD(name, fieldtype, SIZEOFARRAY(((classNameTypedef *)0)->name), FTYPEDESC_SAVE, NULL ) // diffusion - do not use, it fails on 64-bit
-#define DEFINE_ARRAY(name, fieldtype, count)			_FIELD(name, fieldtype, count, FTYPEDESC_SAVE, NULL )
-#define DEFINE_ENTITY_FIELD(name, fieldtype)			_EFIELD(name, fieldtype, 1, FTYPEDESC_KEY|FTYPEDESC_SAVE, #name )
-#define DEFINE_ENTITY_GLOBAL_FIELD(name, fieldtype)		_EFIELD(name, fieldtype, 1, FTYPEDESC_KEY|FTYPEDESC_SAVE|FTYPEDESC_GLOBAL, #name )
-#define DEFINE_GLOBAL_FIELD(name, fieldtype)			_FIELD(name, fieldtype, 1, FTYPEDESC_GLOBAL|FTYPEDESC_SAVE, NULL )
-#define DEFINE_GLOBAL_KEYFIELD(name, fieldtype, mapname)		_FIELD(name, fieldtype, 1, FTYPEDESC_GLOBAL|FTYPEDESC_KEY|FTYPEDESC_SAVE, mapname )
+#define DEFINE_FIELD(name, fieldtype)			_FIELD(name, fieldtype, _FIELD_CHECKED( name, fieldtype, 1 ), FTYPEDESC_SAVE, NULL )
+#define DEFINE_KEYFIELD(name, fieldtype, mapname)	_FIELD(name, fieldtype, _FIELD_CHECKED( name, fieldtype, 1 ), FTYPEDESC_KEY|FTYPEDESC_SAVE, mapname )
+#define DEFINE_ARRAY(name, fieldtype, count)		_FIELD(name, fieldtype, _FIELD_CHECKED( name, fieldtype, count ), FTYPEDESC_SAVE, NULL )
+#define DEFINE_GLOBAL_FIELD(name, fieldtype)		_FIELD(name, fieldtype, _FIELD_CHECKED( name, fieldtype, 1 ), FTYPEDESC_GLOBAL|FTYPEDESC_SAVE, NULL )
+#define DEFINE_GLOBAL_KEYFIELD(name, fieldtype, mapname)	_FIELD(name, fieldtype, _FIELD_CHECKED( name, fieldtype, 1 ), FTYPEDESC_GLOBAL|FTYPEDESC_KEY|FTYPEDESC_SAVE, mapname )
+#define DEFINE_ENTITY_FIELD(name, fieldtype)		_EFIELD(name, fieldtype, _EFIELD_CHECKED( name, fieldtype, 1 ), FTYPEDESC_KEY|FTYPEDESC_SAVE, #name )
+#define DEFINE_ENTITY_GLOBAL_FIELD(name, fieldtype)	_EFIELD(name, fieldtype, _EFIELD_CHECKED( name, fieldtype, 1 ), FTYPEDESC_KEY|FTYPEDESC_SAVE|FTYPEDESC_GLOBAL, #name )
+
+// opt-out for deliberate exceptions
+#define DEFINE_FIELD_UNCHECKED(name, fieldtype)		_FIELD(name, fieldtype, 1, FTYPEDESC_SAVE, NULL )
+#define DEFINE_ENTITY_FIELD_UNCHECKED(name, fieldtype)	_EFIELD(name, fieldtype, 1, FTYPEDESC_KEY|FTYPEDESC_SAVE, #name )
 
 // replaces EXPORT table for portability and non-DLL based systems (xbox)
 #define DEFINE_FUNCTION_RAW( function, func_type )		{ FIELD_VOID, nameHolder.GenerateName(#function), 0, 1, FTYPEDESC_FUNCTIONTABLE, NULL, (func_t)((func_type)(&classNameTypedef::function)) }

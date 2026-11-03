@@ -59,7 +59,7 @@ BEGIN_DATADESC(CTriggerCamera)
 	DEFINE_FIELD(m_moveDistance, FIELD_FLOAT),
 	DEFINE_FIELD(m_targetSpeed, FIELD_FLOAT),
 	DEFINE_FIELD(m_initialSpeed, FIELD_FLOAT),
-	DEFINE_KEYFIELD(SnapSpeed, FIELD_INTEGER, "snapspeed"),
+	DEFINE_KEYFIELD(SnapSpeed, FIELD_FLOAT, "snapspeed"),
 	DEFINE_KEYFIELD(CameraFOV, FIELD_INTEGER, "fov"),
 	DEFINE_KEYFIELD(m_acceleration, FIELD_FLOAT, "acceleration"),
 	DEFINE_KEYFIELD(m_deceleration, FIELD_FLOAT, "deceleration"),

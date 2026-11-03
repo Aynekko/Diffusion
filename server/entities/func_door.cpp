@@ -1445,7 +1445,7 @@ BEGIN_DATADESC( CBaseTrainDoor )
 	DEFINE_KEYFIELD( m_iMoveSnd, FIELD_STRING, "movesnd" ),
 	DEFINE_KEYFIELD( m_iStopSnd, FIELD_STRING, "stopsnd" ),
 	DEFINE_FIELD( m_vecOldAngles, FIELD_VECTOR ),
-	DEFINE_FIELD( door_state, FIELD_CHARACTER ),
+	DEFINE_FIELD( door_state, FIELD_INTEGER ),
 	DEFINE_FIELD( m_hTrain, FIELD_EHANDLE ),
 	DEFINE_FIELD( m_vecPosition1, FIELD_VECTOR ), // all traindoor positions are local
 	DEFINE_FIELD( m_vecPosition2, FIELD_VECTOR ),

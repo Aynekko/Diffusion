@@ -118,7 +118,7 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 	}
 	else if( FStrEq( pkvd->szKeyName, "respawntime" ) )
 	{
-		RespawnTime = Q_atoi( pkvd->szValue );
+		RespawnTime = Q_atof( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else if( FStrEq( pkvd->szKeyName, "healthbar" ) )
@@ -162,7 +162,7 @@ BEGIN_DATADESC( CBreakable )
 	DEFINE_FUNCTION( BreakTouch ),
 	DEFINE_FUNCTION( Die ),
 	DEFINE_FUNCTION( BreakRespawn ),
-	DEFINE_KEYFIELD( RespawnTime, FIELD_INTEGER, "respawntime"),
+	DEFINE_KEYFIELD( RespawnTime, FIELD_FLOAT, "respawntime"),
 	DEFINE_KEYFIELD( m_iszFireOnRespawn, FIELD_STRING, "FireOnRespawn" ),
 END_DATADESC()
 

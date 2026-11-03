@@ -55,7 +55,7 @@ private:
 LINK_ENTITY_TO_CLASS(func_rotating, CFuncRotating);
 
 BEGIN_DATADESC(CFuncRotating)
-	DEFINE_FIELD(m_bStopAtStartPos, FIELD_FLOAT),
+	DEFINE_FIELD(m_bStopAtStartPos, FIELD_CHARACTER),
 	DEFINE_FIELD(m_flFanFriction, FIELD_FLOAT),
 	DEFINE_FIELD(m_flAttenuation, FIELD_FLOAT),
 	DEFINE_FIELD(m_flTargetSpeed, FIELD_FLOAT),
