@@ -146,8 +146,8 @@ LINK_ENTITY_TO_CLASS( ambient_generic, CAmbientGeneric );
 
 BEGIN_DATADESC( CAmbientGeneric )
 	DEFINE_KEYFIELD( m_flAttenuation, FIELD_FLOAT, "attenuation" ),
-	DEFINE_FIELD( m_fActive, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_fLooping, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fActive, FIELD_INTEGER ),
+	DEFINE_FIELD( m_fLooping, FIELD_INTEGER ),
 
 	// HACKHACK - This is not really in the spirit of the save/restore design, but save this
 	// out as a binary data block.  If the dynpitchvol_t is changed, old saved games will NOT

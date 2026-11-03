@@ -120,10 +120,10 @@ LINK_ENTITY_TO_CLASS( monster_barney, CBarney );
 
 BEGIN_DATADESC( CBarney )
 	DEFINE_FIELD( m_iBaseBody, FIELD_INTEGER ), //LRC
-	DEFINE_FIELD( m_fGunDrawn, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fGunDrawn, FIELD_INTEGER ),
 	DEFINE_FIELD( m_painTime, FIELD_TIME ),
 	DEFINE_FIELD( m_checkAttackTime, FIELD_TIME ),
-	DEFINE_FIELD( m_lastAttackCheck, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_lastAttackCheck, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flPlayerDamage, FIELD_FLOAT ),
 	DEFINE_FIELD( m_iClipSize, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flNextHolsterTime, FIELD_TIME ),
@@ -1215,10 +1215,10 @@ BEGIN_DATADESC( CAlice )
 	DEFINE_FIELD( NewEnemySentenceTime, FIELD_TIME ),
 	DEFINE_FIELD( bAliceFollowing, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_iBaseBody, FIELD_INTEGER ), //LRC
-	DEFINE_FIELD( m_fGunDrawn, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fGunDrawn, FIELD_INTEGER ),
 	DEFINE_FIELD( m_painTime, FIELD_TIME ),
 	DEFINE_FIELD( m_checkAttackTime, FIELD_TIME ),
-	DEFINE_FIELD( m_lastAttackCheck, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_lastAttackCheck, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flPlayerDamage, FIELD_FLOAT ),
 	DEFINE_FIELD( m_iClipSize, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flNextHolsterTime, FIELD_TIME ),

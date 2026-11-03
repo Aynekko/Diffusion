@@ -546,8 +546,8 @@ public:
 };
 
 BEGIN_DATADESC( CBaseButton )
-	DEFINE_FIELD( m_fStayPushed, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_fRotating, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fStayPushed, FIELD_INTEGER ),
+	DEFINE_FIELD( m_fRotating, FIELD_INTEGER ),
 	DEFINE_KEYFIELD( m_sounds, FIELD_STRING, "sounds" ),
 	DEFINE_KEYFIELD( m_iLockedSound, FIELD_STRING, "locked_sound" ),
 	DEFINE_KEYFIELD( m_bLockedSentence, FIELD_CHARACTER, "locked_sentence" ),

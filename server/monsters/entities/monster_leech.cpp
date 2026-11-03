@@ -143,7 +143,7 @@ LINK_ENTITY_TO_CLASS( monster_leech, CLeech );
 
 BEGIN_DATADESC( CLeech )
 	DEFINE_FIELD( m_flTurning, FIELD_FLOAT ),
-	DEFINE_FIELD( m_fPathBlocked, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fPathBlocked, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flAccelerate, FIELD_FLOAT ),
 	DEFINE_FIELD( m_obstacle, FIELD_FLOAT ),
 	DEFINE_FIELD( m_top, FIELD_FLOAT ),

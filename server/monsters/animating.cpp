@@ -25,8 +25,8 @@ BEGIN_DATADESC( CBaseAnimating )
 	DEFINE_FIELD( m_flFrameRate, FIELD_FLOAT ),
 	DEFINE_FIELD( m_flGroundSpeed, FIELD_FLOAT ),
 	DEFINE_FIELD( m_flLastEventCheck, FIELD_TIME ),
-	DEFINE_FIELD( m_fSequenceFinished, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_fSequenceLoops, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fSequenceFinished, FIELD_INTEGER ),
+	DEFINE_FIELD( m_fSequenceLoops, FIELD_INTEGER ),
 END_DATADESC()
 
 void *CBaseAnimating :: GetModelPtr( void )

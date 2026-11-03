@@ -2976,7 +2976,7 @@ void *CPhysicPhysX::SpawnRagdoll( CBaseEntity *pObject, const PendingRagdoll *pP
 			}
 			else
 			{
-				// saved velocities if you store them, otherwise zero
+				// TODO: save-restore velocities?
 				rag.bodies[i]->setLinearVelocity( PxVec3( 0.0f ) );
 				rag.bodies[i]->setAngularVelocity( PxVec3( 0.0f ) );
 				rag.bodies[i]->wakeUp();

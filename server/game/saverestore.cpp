@@ -783,6 +783,8 @@ int CSave :: WriteFields( const char *pname, const void *pBaseData, DATAMAP *pMa
 			WriteVector( pTest->fieldName, (float *)pOutputData, pTest->fieldSize );
 			break;
 		case FIELD_BOOLEAN:
+			WriteData( pTest->fieldName, sizeof( bool ) * pTest->fieldSize, (const char *)pOutputData );
+			break;
 		case FIELD_INTEGER:
 			WriteInt( pTest->fieldName, (int *)pOutputData, pTest->fieldSize );
 			break;
@@ -1022,6 +1024,8 @@ int CRestore::ReadField( const void *pBaseData, DATAMAP *pMap, TYPEDESCRIPTION *
 						((float *)pOutputData)[2] = ((float *)pInputData)[2] + position.z;
 						break;
 					case FIELD_BOOLEAN:
+						*((bool *)pOutputData) = (*(const unsigned char *)pInputData != 0);
+						break;
 					case FIELD_INTEGER:
 						*((int *)pOutputData) = *( int *)pInputData;
 						break;

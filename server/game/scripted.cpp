@@ -129,7 +129,7 @@ BEGIN_DATADESC( CCineMonster )
 	DEFINE_FIELD( m_saved_solid, FIELD_INTEGER ),
 	DEFINE_FIELD( m_saved_effects, FIELD_INTEGER ),
 	DEFINE_KEYFIELD( m_iFinishSchedule, FIELD_INTEGER, "m_iFinishSchedule" ),
-	DEFINE_FIELD( m_interruptable, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_interruptable, FIELD_INTEGER ),
 	DEFINE_FUNCTION( CineThink )
 END_DATADESC()
 
@@ -1050,7 +1050,7 @@ BEGIN_DATADESC( CScriptedSentence )
 	DEFINE_FIELD( m_flAttenuation, FIELD_FLOAT ),
 	DEFINE_KEYFIELD( Attenuation, FIELD_FLOAT, "attenuation" ),
 	DEFINE_FIELD( m_flVolume, FIELD_FLOAT ),
-	DEFINE_FIELD( m_active, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_active, FIELD_INTEGER ),
 	DEFINE_KEYFIELD( m_iszListener, FIELD_STRING, "listener" ),
 	DEFINE_FUNCTION( FindThink ),
 	DEFINE_FUNCTION( DelayThink ),

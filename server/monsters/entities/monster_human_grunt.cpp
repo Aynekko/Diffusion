@@ -165,9 +165,9 @@ BEGIN_DATADESC(CHGrunt)
 	DEFINE_FIELD(m_flNextPainTime, FIELD_TIME),
 	//	DEFINE_FIELD( m_flLastEnemySightTime, FIELD_TIME ), // don't save, go to zero
 	DEFINE_FIELD(m_vecTossVelocity, FIELD_VECTOR),
-	DEFINE_FIELD(m_fThrowGrenade, FIELD_BOOLEAN),
-	DEFINE_FIELD(m_fStanding, FIELD_BOOLEAN),
-	DEFINE_FIELD(m_fFirstEncounter, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_fThrowGrenade, FIELD_INTEGER ),
+	DEFINE_FIELD(m_fStanding, FIELD_INTEGER ),
+	DEFINE_FIELD(m_fFirstEncounter, FIELD_INTEGER ),
 	DEFINE_FIELD(m_cClipSize, FIELD_INTEGER),
 	DEFINE_FIELD(m_iSentence, FIELD_INTEGER),
 	DEFINE_FIELD(CanSpawnDrone, FIELD_BOOLEAN),

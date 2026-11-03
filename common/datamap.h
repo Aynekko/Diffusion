@@ -69,18 +69,30 @@ DECLARE_FIELD_SIZE( FIELD_POSITION_VECTOR, 3 * sizeof( float ), 3 * sizeof( floa
 DECLARE_FIELD_SIZE( FIELD_POINTER, sizeof( void * ), sizeof( void * ) )
 DECLARE_FIELD_SIZE( FIELD_INTEGER, sizeof( int ), sizeof( int ) )
 DECLARE_FIELD_SIZE( FIELD_FUNCTION, sizeof( void * ), sizeof( void * ) )
-DECLARE_FIELD_SIZE( FIELD_BOOLEAN, sizeof( int ), sizeof( int ) )
+DECLARE_FIELD_SIZE( FIELD_BOOLEAN, sizeof( bool ), sizeof( bool ) )
 DECLARE_FIELD_SIZE( FIELD_SHORT, sizeof( short ), sizeof( short ) )
 DECLARE_FIELD_SIZE( FIELD_CHARACTER, sizeof( char ), sizeof( char ) )
 DECLARE_FIELD_SIZE( FIELD_TIME, sizeof( float ), sizeof( float ) )
 DECLARE_FIELD_SIZE( FIELD_MODELNAME, sizeof( int ), sizeof( int ) )
 DECLARE_FIELD_SIZE( FIELD_SOUNDNAME, sizeof( int ), sizeof( int ) )
 
+template< int FIELD_TYPE, size_t MEMBER_SIZE >
+struct CDatamapMemberCheck { enum { OK = 1 }; };
+
+template< size_t MEMBER_SIZE >
+struct CDatamapMemberCheck< FIELD_BOOLEAN, MEMBER_SIZE >
+{
+	static_assert(MEMBER_SIZE == sizeof( bool ), "FIELD_BOOLEAN member must be a bool (BOOL should use FIELD_INTEGER)");
+	enum { OK = 1 };
+};
+
 #define _FIELD(name, fieldtype, count, flags, mapname )		{ fieldtype, #name, offsetof(classNameTypedef, name), count, flags, mapname, NULL }
 #define _EFIELD(name, fieldtype, count, flags, mapname )		{ fieldtype, #name, offsetof(entvars_t, name), count, flags, mapname, NULL }
 #define DEFINE_FIELD_NULL					{ FIELD_VOID, 0, 0, 0, 0, 0, 0 }
-#define DEFINE_FIELD(name, fieldtype)				_FIELD(name, fieldtype, 1, FTYPEDESC_SAVE, NULL )
-#define DEFINE_KEYFIELD(name, fieldtype, mapname)			_FIELD(name, fieldtype, 1, FTYPEDESC_KEY|FTYPEDESC_SAVE, mapname )
+#define DEFINE_FIELD(name, fieldtype) \
+	_FIELD(name, fieldtype, CDatamapMemberCheck<fieldtype, sizeof(((classNameTypedef *)0)->name)>::OK, FTYPEDESC_SAVE, NULL )
+#define DEFINE_KEYFIELD(name, fieldtype, mapname) \
+	_FIELD(name, fieldtype, CDatamapMemberCheck<fieldtype, sizeof(((classNameTypedef *)0)->name)>::OK, FTYPEDESC_KEY|FTYPEDESC_SAVE, mapname )
 //#define DEFINE_AUTO_ARRAY(name, fieldtype)			_FIELD(name, fieldtype, SIZEOFARRAY(((classNameTypedef *)0)->name), FTYPEDESC_SAVE, NULL ) // diffusion - do not use, it fails on 64-bit
 #define DEFINE_ARRAY(name, fieldtype, count)			_FIELD(name, fieldtype, count, FTYPEDESC_SAVE, NULL )
 #define DEFINE_ENTITY_FIELD(name, fieldtype)			_EFIELD(name, fieldtype, 1, FTYPEDESC_KEY|FTYPEDESC_SAVE, #name )

@@ -105,9 +105,9 @@ LINK_ENTITY_TO_CLASS( monster_flyer_flock, CFlockingFlyerFlock );
 BEGIN_DATADESC( CFlockingFlyer )
 	DEFINE_FIELD( m_pSquadLeader, FIELD_CLASSPTR ),
 	DEFINE_FIELD( m_pSquadNext, FIELD_CLASSPTR ),
-	DEFINE_FIELD( m_fTurning, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_fCourseAdjust, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_fPathBlocked, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fTurning, FIELD_INTEGER ),
+	DEFINE_FIELD( m_fCourseAdjust, FIELD_INTEGER ),
+	DEFINE_FIELD( m_fPathBlocked, FIELD_INTEGER ),
 	DEFINE_FIELD( m_vecReferencePoint, FIELD_POSITION_VECTOR ),
 	DEFINE_FIELD( m_vecAdjustedVelocity, FIELD_VECTOR ),
 	DEFINE_FIELD( m_flGoalSpeed, FIELD_FLOAT ),

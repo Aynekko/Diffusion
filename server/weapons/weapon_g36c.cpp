@@ -48,8 +48,8 @@ public:
 LINK_ENTITY_TO_CLASS( weapon_g36c, CWeaponG36C );
 
 BEGIN_DATADESC( CWeaponG36C )
-	DEFINE_FIELD( m_fInZoom, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_fZoomInUse, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fInZoom, FIELD_INTEGER ),
+	DEFINE_FIELD( m_fZoomInUse, FIELD_INTEGER ),
 END_DATADESC()
 
 void CWeaponG36C::Spawn( void )

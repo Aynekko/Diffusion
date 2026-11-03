@@ -1852,7 +1852,7 @@ BEGIN_DATADESC( CFuncTankControls )
 	DEFINE_FIELD( m_vecControllerUsePos, FIELD_VECTOR ),
 	DEFINE_ARRAY( m_iTankName, FIELD_STRING, MAX_CONTROLLED_TANKS ),
 	DEFINE_FIELD( m_cTanks, FIELD_INTEGER ),
-	DEFINE_FIELD( m_fVerifyTanks, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fVerifyTanks, FIELD_INTEGER ),
 	DEFINE_KEYFIELD( TargetActivate, FIELD_STRING, "targetactivate" ),
 	DEFINE_KEYFIELD( TargetDeactivate, FIELD_STRING, "targetdeactivate" ),
 END_DATADESC()

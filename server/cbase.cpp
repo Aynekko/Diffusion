@@ -1420,7 +1420,7 @@ BEGIN_DATADESC_NO_BASE( CBaseEntity )
 	DEFINE_FIELD( m_iOldSolid, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iOldMoveType, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flMoveDoneTime, FIELD_FLOAT ),		// local time saved as float, not time!
-	DEFINE_FIELD( m_fPicked, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fPicked, FIELD_INTEGER ),
 	DEFINE_FIELD( m_iStyle, FIELD_INTEGER ),
 	DEFINE_FIELD( m_flGaitYaw, FIELD_FLOAT ),
 
@@ -1450,7 +1450,7 @@ BEGIN_DATADESC_NO_BASE( CBaseEntity )
 	DEFINE_FIELD( m_iBodyFlags, FIELD_INTEGER ),
 	DEFINE_FIELD( m_usActorGroup, FIELD_SHORT ),
 	DEFINE_FIELD( m_flBodyMass, FIELD_FLOAT ),
-	DEFINE_FIELD( m_fFreezed, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fFreezed, FIELD_INTEGER ),
 	DEFINE_ARRAY( m_iFilterData, FIELD_INTEGER, 4 ),
 	DEFINE_FIELD( m_fHasRagdollPose, FIELD_BOOLEAN ),
 	DEFINE_FIELD( m_fRagdollPoseAsleep, FIELD_BOOLEAN ),

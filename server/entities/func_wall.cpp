@@ -25,7 +25,7 @@ public:
 LINK_ENTITY_TO_CLASS(func_wall, CFuncWall);
 
 BEGIN_DATADESC( CFuncWall )
-	DEFINE_KEYFIELD( MonstersCanSeeThrough, FIELD_BOOLEAN, "monstersee" ),
+	DEFINE_KEYFIELD( MonstersCanSeeThrough, FIELD_INTEGER, "monstersee" ),
 END_DATADESC()
 
 void CFuncWall::KeyValue( KeyValueData *pkvd )

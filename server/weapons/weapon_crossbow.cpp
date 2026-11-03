@@ -406,8 +406,8 @@ public:
 LINK_ENTITY_TO_CLASS( weapon_crossbow, CCrossbow );
 
 BEGIN_DATADESC( CCrossbow )
-	DEFINE_FIELD( m_fInZoom, FIELD_BOOLEAN ),
-	DEFINE_FIELD( m_fZoomInUse, FIELD_BOOLEAN ),
+	DEFINE_FIELD( m_fInZoom, FIELD_INTEGER ),
+	DEFINE_FIELD( m_fZoomInUse, FIELD_INTEGER ),
 END_DATADESC()
 
 void CCrossbow::Spawn( void )

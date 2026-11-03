@@ -13,7 +13,7 @@ LINK_ENTITY_TO_CLASS(env_spritetrain, CSprite);
 BEGIN_DATADESC(CSprite)
 	DEFINE_FIELD(m_lastTime, FIELD_TIME),
 	DEFINE_FIELD(m_maxFrame, FIELD_FLOAT),
-	DEFINE_FIELD(m_activated, FIELD_BOOLEAN),
+	DEFINE_FIELD(m_activated, FIELD_INTEGER),
 	DEFINE_FUNCTION(AnimateThink),
 	DEFINE_FUNCTION(ExpandThink),
 	DEFINE_FUNCTION(AnimateUntilDead),
