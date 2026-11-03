@@ -211,11 +211,13 @@ static int gInputSizes[FIELD_TYPECOUNT] =
 CSaveRestoreBuffer :: CSaveRestoreBuffer( void )
 {
 	m_pdata = NULL;
+	modelOriginOffset = modelSpaceOffset = g_vecZero;
 }
 
 CSaveRestoreBuffer :: CSaveRestoreBuffer( SAVERESTOREDATA *pdata )
 {
 	m_pdata = pdata;
+	modelOriginOffset = modelSpaceOffset = g_vecZero;
 }
 
 CSaveRestoreBuffer :: ~CSaveRestoreBuffer( void )
@@ -279,7 +281,7 @@ int CSaveRestoreBuffer :: EntityFlagsSet( int entityIndex, int flags )
 {
 	if ( !m_pdata || entityIndex < 0 )
 		return 0;
-	if ( entityIndex > m_pdata->tableCount )
+	if ( entityIndex >= m_pdata->tableCount )
 		return 0;
 
 	m_pdata->pTable[ entityIndex ].flags |= flags;
@@ -333,14 +335,22 @@ unsigned int CSaveRestoreBuffer :: HashString( const char *pszToken )
 
 unsigned short CSaveRestoreBuffer :: TokenHash( const char *pszToken )
 {
-	unsigned short	hash = (unsigned short)(HashString( pszToken ) % (unsigned)m_pdata->tokenCount );
-	
 #if _DEBUG
 	static int tokensparsed = 0;
 	tokensparsed++;
 	if ( !m_pdata->tokenCount || !m_pdata->pTokens )
 		ALERT( at_error, "No token table array in TokenHash()!" );
 #endif
+
+	if( !m_pdata || m_pdata->tokenCount <= 0 )
+	{
+#if _DEBUG
+		ALERT( at_error, "No token table in TokenHash()!\n" );
+#endif
+		return 0;
+	}
+
+	unsigned short	hash = (unsigned short)(HashString( pszToken ) % (unsigned)m_pdata->tokenCount);
 
 	for ( int i=0; i<m_pdata->tokenCount; i++ )
 	{
@@ -388,7 +398,7 @@ void CSave :: Log( DATAMAP *pMap, const char *pName, const char *pFieldName, FIE
 				short *pValue = ( short* )( value );
 				short nValue = pValue[iCount];
 				Q_snprintf( szTempBuf, sizeof( szTempBuf ), "%d", nValue );
-				Q_strncat( szBuf, szTempBuf, sizeof( szTempBuf ));
+				Q_strncat( szBuf, szTempBuf, sizeof( szBuf ));
 				break;
 			}
 		case FIELD_FLOAT:
@@ -397,7 +407,7 @@ void CSave :: Log( DATAMAP *pMap, const char *pName, const char *pFieldName, FIE
 				float *pValue = ( float* )( value );
 				float flValue = pValue[iCount];
 				Q_snprintf( szTempBuf, sizeof( szTempBuf ), "%f", flValue );
-				Q_strncat( szBuf, szTempBuf, sizeof( szTempBuf ));
+				Q_strncat( szBuf, szTempBuf, sizeof( szBuf ));
 				break;
 			}
 		case FIELD_BOOLEAN:
@@ -405,7 +415,7 @@ void CSave :: Log( DATAMAP *pMap, const char *pName, const char *pFieldName, FIE
 				bool *pValue = ( bool* )( value );
 				bool bValue = pValue[iCount];
 				Q_snprintf( szTempBuf, sizeof( szTempBuf ), "%d", ( int )( bValue ) );
-				Q_strncat( szBuf, szTempBuf, sizeof( szTempBuf ));
+				Q_strncat( szBuf, szTempBuf, sizeof( szBuf ));
 				break;
 			}
 		case FIELD_INTEGER:
@@ -413,7 +423,7 @@ void CSave :: Log( DATAMAP *pMap, const char *pName, const char *pFieldName, FIE
 				int *pValue = ( int* )( value );
 				int nValue = pValue[iCount];
 				Q_snprintf( szTempBuf, sizeof( szTempBuf ), "%d", nValue );
-				Q_strncat( szBuf, szTempBuf, sizeof( szTempBuf ));
+				Q_strncat( szBuf, szTempBuf, sizeof( szBuf ));
 				break;
 			}
 		case FIELD_STRING:
@@ -423,7 +433,7 @@ void CSave :: Log( DATAMAP *pMap, const char *pName, const char *pFieldName, FIE
 				string_t *pValue = ( string_t* )( value );
 				string_t sValue = pValue[iCount];
 				Q_snprintf( szTempBuf, sizeof( szTempBuf ), "%s", ( char* )STRING( sValue ) );
-				Q_strncat( szBuf, szTempBuf, sizeof( szTempBuf ));
+				Q_strncat( szBuf, szTempBuf, sizeof( szBuf ));
 				break;					
 			}
 		case FIELD_VECTOR:
@@ -432,7 +442,7 @@ void CSave :: Log( DATAMAP *pMap, const char *pName, const char *pFieldName, FIE
 				Vector *pValue = ( Vector* )( value );
 				Vector vecValue = pValue[iCount];
 				Q_snprintf( szTempBuf, sizeof( szTempBuf ), "(%f %f %f)", vecValue.x, vecValue.y, vecValue.z );
-				Q_strncat( szBuf, szTempBuf, sizeof( szTempBuf ));
+				Q_strncat( szBuf, szTempBuf, sizeof( szBuf ));
 				break;
 			}
 		case FIELD_CHARACTER:
@@ -441,15 +451,15 @@ void CSave :: Log( DATAMAP *pMap, const char *pName, const char *pFieldName, FIE
 				char *pValue = ( char* )( value );
 				char chValue = pValue[iCount];
 				Q_snprintf( szTempBuf, sizeof( szTempBuf ), "%d", chValue );
-				Q_strncat( szBuf, szTempBuf, sizeof( szTempBuf ));
+				Q_strncat( szBuf, szTempBuf, sizeof( szBuf ));
 				break;
 			}
 		case FIELD_FUNCTION:
 			{
 				void **pValue = (void **)value;
 				const char *funcName = UTIL_FunctionToName( pMap, *pValue );
-				Q_snprintf( szTempBuf, sizeof( szTempBuf ), "%s", funcName );
-				Q_strncat( szBuf, szTempBuf, sizeof( szTempBuf ));
+				Q_snprintf( szTempBuf, sizeof( szTempBuf ), "%s", funcName ? funcName : "(null)" );
+				Q_strncat( szBuf, szTempBuf, sizeof( szBuf ));
 				break;
 			}
 		default:
@@ -460,16 +470,16 @@ void CSave :: Log( DATAMAP *pMap, const char *pName, const char *pFieldName, FIE
 		if ( ( iCount + 1 ) != count )
 		{
 			Q_strncpy( szTempBuf, " ", sizeof( szTempBuf ) );
-			Q_strncat( szBuf, szTempBuf, sizeof( szTempBuf ));
+			Q_strncat( szBuf, szTempBuf, sizeof( szBuf ));
 		}
 		else
 		{
 			Q_strncpy( szTempBuf, "\n", sizeof( szTempBuf ) );
-			Q_strncat( szBuf, szTempBuf, sizeof( szTempBuf ));
+			Q_strncat( szBuf, szTempBuf, sizeof( szBuf ));
 		}
 	}
 
-	ALERT( at_console, szBuf );
+	ALERT( at_console, "%s", szBuf );
 }
 
 void CSave :: WriteData( const char *pname, int size, const char *pdata )
@@ -561,8 +571,8 @@ void CSave :: WritePositionVector( const char *pname, const Vector &value )
 		Vector tmp = value - m_pdata->vecLandmarkOffset;
 		WriteVector( pname, tmp );
 	}
-
-	WriteVector( pname, value );
+	else
+		WriteVector( pname, value );
 }
 
 void CSave :: WritePositionVector( const char *pname, const float *value, int count )
@@ -590,7 +600,10 @@ void CSave :: WriteFunction( DATAMAP *pRootMap, const char *pname, void **data, 
 	if( functionName )
 		BufferField( pname, static_cast<int>(strlen( functionName ) + 1), functionName );
 	else
+	{
 		ALERT( at_error, "Invalid function pointer in class %s!\n", pRootMap->dataClassName );
+		BufferField( pname, 1, "" );
+	}
 }
 
 void EntvarsKeyvalue( entvars_t *pev, KeyValueData *pkvd )
@@ -711,6 +724,7 @@ int CSave :: WriteFields( const char *pname, const void *pBaseData, DATAMAP *pMa
 		void *pOutputData;
 		pTest = &pFields[ i ];
 		pOutputData = ((char *)pBaseData + pTest->fieldOffset );
+		const int entCount = Q_min( pTest->fieldSize, MAX_ENTITYARRAY );
 
 		// UNDONE: Must we do this twice?
 		if ( DataEmpty( (const char *)pOutputData, pTest->fieldSize * gSizes[pTest->fieldType] ) )
@@ -739,7 +753,7 @@ int CSave :: WriteFields( const char *pname, const void *pBaseData, DATAMAP *pMa
 		case FIELD_EHANDLE:
 			if ( pTest->fieldSize > MAX_ENTITYARRAY )
 				ALERT( at_error, "Can't save more than %d entities in an array!!!\n", MAX_ENTITYARRAY );
-			for ( j = 0; j < pTest->fieldSize; j++ )
+			for ( j = 0; j < entCount; j++ )
 			{
 				switch( pTest->fieldType )
 				{
@@ -760,7 +774,7 @@ int CSave :: WriteFields( const char *pname, const void *pBaseData, DATAMAP *pMa
 					break;
 				}
 			}
-			WriteInt( pTest->fieldName, entityArray, pTest->fieldSize );
+			WriteInt( pTest->fieldName, entityArray, entCount );
 			break;
 		case FIELD_POSITION_VECTOR:
 			WritePositionVector( pTest->fieldName, (float *)pOutputData, pTest->fieldSize );
@@ -818,13 +832,20 @@ void CSave :: BufferField( const char *pname, int size, const char *pdata )
 	BufferData( pdata, size );
 }
 
-void CSave :: BufferHeader( const char *pname, int size )
+void CSave::BufferHeader( const char *pname, int size )
 {
-	short	hashvalue = TokenHash( pname );
-	if ( size > 1<<(sizeof(short)*8) )
-		ALERT( at_error, "CSave :: BufferHeader() size parameter exceeds 'short'!" );
-	BufferData( (const char *)&size, sizeof(short) );
-	BufferData( (const char *)&hashvalue, sizeof(short) );
+	short hashvalue = TokenHash( pname );
+
+	if( size < 0 || size > 0xFFFF )
+	{
+#ifdef _DEBUG
+		ALERT( at_error, "CSave::BufferHeader() size parameter exceeds 'short'!\n" );
+#endif
+		return;
+	}
+
+	BufferData( (const char *)&size, sizeof( short ) );
+	BufferData( (const char *)&hashvalue, sizeof( short ) );
 }
 
 void CSave :: BufferData( const char *pdata, int size )
@@ -853,6 +874,9 @@ void CSave :: BufferData( const char *pdata, int size )
 
 int CRestore::ReadField( const void *pBaseData, DATAMAP *pMap, TYPEDESCRIPTION *pFields, int fieldCount, int startField, int size, char *pName, void *pData )
 {
+	if( !pName )
+		return -1;
+
 	int i, j, stringCount, fieldNumber, entityIndex;
 	TYPEDESCRIPTION *pTest;
 	float	time, timeData;
@@ -878,10 +902,27 @@ int CRestore::ReadField( const void *pBaseData, DATAMAP *pMap, TYPEDESCRIPTION *
 		{
 			if ( !m_global || !(pTest->flags & FTYPEDESC_GLOBAL) )
 			{
-				for ( j = 0; j < pTest->fieldSize; j++ )
+				int count = pTest->fieldSize;
+				switch( pTest->fieldType )
+				{
+				case FIELD_STRING:
+				case FIELD_MODELNAME:
+				case FIELD_SOUNDNAME:
+					break;
+				case FIELD_FUNCTION:
+					count = Q_min( count, 1 );
+					break;
+				default:
+					if( gInputSizes[pTest->fieldType] > 0 )
+						count = Q_min( count, size / gInputSizes[pTest->fieldType] );
+					break;
+				}
+
+				for ( j = 0; j < count; j++ )
 				{
 					void *pOutputData = ((char *)pBaseData + pTest->fieldOffset + (j*gSizes[pTest->fieldType]) );
 					void *pInputData = (char *)pData + j * gInputSizes[pTest->fieldType];
+					char *pEnd;
 
 					switch( pTest->fieldType )
 					{
@@ -898,12 +939,20 @@ int CRestore::ReadField( const void *pBaseData, DATAMAP *pMap, TYPEDESCRIPTION *
 					case FIELD_SOUNDNAME:
 					case FIELD_STRING:
 						// Skip over j strings
+						pEnd = (char *)pData + size;
 						pString = (char *)pData;
 						for ( stringCount = 0; stringCount < j; stringCount++ )
 						{
-							while (*pString)
+							while( pString < pEnd && *pString )
 								pString++;
+							if( pString >= pEnd )
+								break;
 							pString++;
+						}
+						if( pString >= pEnd )
+						{
+							*((int *)pOutputData) = 0;
+							break;
 						}
 						pInputData = pString;
 						if( ((char *)pInputData)[0] == '\0' )
@@ -1037,9 +1086,17 @@ int CRestore::ReadFields( const char *pname, const void *pBaseData, DATAMAP *pMa
 			memset( ((char *)pBaseData + pFields[i].fieldOffset), 0, pFields[i].fieldSize * gSizes[pFields[i].fieldType] );
 	}
 
-	for ( i = 0; i < fileCount; i++ )
+	for( i = 0; i < fileCount; i++ )
 	{
 		BufferReadHeader( &header );
+
+		// a token outside the table means a corrupt record
+		if( !m_pdata || header.token >= m_pdata->tokenCount || !m_pdata->pTokens[header.token] || !header.pData )
+		{
+			ALERT( at_error, "CRestore::ReadFields: bad field token %d while reading %s\n", header.token, pname );
+			continue;
+		}
+
 		lastField = ReadField( pBaseData, pMap, pFields, fieldCount, lastField, header.size, m_pdata->pTokens[header.token], header.pData );
 		lastField++;
 	}

@@ -36,7 +36,7 @@ public:
 	edict_t		*EntityFromIndex( int entityIndex );
 
 	unsigned short	TokenHash( const char *pszToken );
-	Vector GetLandmark() const { return ( m_pdata->fUseLandmark ) ? m_pdata->vecLandmarkOffset : g_vecZero; }
+	Vector GetLandmark() const { return ( m_pdata && m_pdata->fUseLandmark ) ? m_pdata->vecLandmarkOffset : g_vecZero; }
 	Vector		modelSpaceOffset; // used only for globaly entity brushes modelled in different coordinate systems.
 	Vector		modelOriginOffset;
 protected:
