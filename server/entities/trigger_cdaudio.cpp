@@ -60,7 +60,7 @@ void PlayCDTrack(int iTrack)
 	}
 
 	if (iTrack == -1)
-		CLIENT_COMMAND(pClient, "cd pause\n");
+		CLIENT_COMMAND(pClient, "cd stop\n");
 	else
 	{
 		char string[64];
