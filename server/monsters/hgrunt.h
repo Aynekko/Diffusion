@@ -81,7 +81,7 @@ public:
 	EHANDLE AlienEye;
 
 //	int	Save(CSave &save);
-//	int Restore(CRestore &restore);
+	int Restore( CRestore &restore );
 
 	CBaseEntity	*Kick(void);
 	Schedule_t	*GetSchedule(void);

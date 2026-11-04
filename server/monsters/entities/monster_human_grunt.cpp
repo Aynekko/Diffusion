@@ -914,6 +914,23 @@ void CHGrunt::KeyValue( KeyValueData *pkvd )
 		CBaseMonster::KeyValue(pkvd);
 }
 
+int CHGrunt::Restore( CRestore &restore )
+{
+	int status = CSquadMonster::Restore( restore );
+	if( !status )
+		return 0;
+
+	// disable running-shooting
+	const int seq = pev->sequence;
+	if( seq == LookupSequence( "runshootmp5" ) || seq == LookupSequence( "runshootshotgun" ) )
+	{
+		m_IdealActivity = ACT_IDLE;
+		SetActivity( ACT_IDLE );
+	}
+
+	return status;
+}
+
 //=========================================================
 // Speak Sentence - say your cued up sentence.
 //
