@@ -6949,11 +6949,8 @@ void CBasePlayer :: UpdateClientData( void )
 		
 		// update zoom state
 		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, pev );
-		WRITE_BYTE( ZoomState );
-		if( m_pActiveItem != NULL )
-			WRITE_BYTE( m_pActiveItem->m_iId );
-		else
-			WRITE_BYTE( 0 );
+			WRITE_BYTE( ZoomState );
+			WRITE_BYTE( m_pActiveItem != NULL ? m_pActiveItem->m_iId : 0 );
 		MESSAGE_END();
 
 		InitStatusBar();

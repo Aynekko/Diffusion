@@ -1,5 +1,6 @@
 #include "hud.h"
 #include "utils.h"
+#include "render/r_local.h"
 #include "parsemsg.h"
 #include "weaponinfo.h"
 
@@ -49,7 +50,10 @@ void CZoom::Think( void )
 		FOV = 0;
 		gHUD.IsZooming = false;
 		gHUD.IsZoomed = false;
-		gHUD.SetFOV( 0 );
+		// zoom always tries to reset itself when player spawns
+		// don't reset it when we are using trigger_camera (saverestore issue)
+		if( tr.viewparams.viewentity < tr.viewparams.maxclients )
+			gHUD.SetFOV( 0 );
 		m_iFlags &= ~HUD_ACTIVE;
 		return;
 	}
