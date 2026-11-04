@@ -368,48 +368,60 @@ Calc sight distance for glow-sprites
 */
 float CSpriteModelRenderer :: GlowSightDistance( void )
 {
-	pmtrace_t	tr;
+	const float dist = (sprite_origin - RI->vieworg).Length();
+	Vector vecStart = RI->vieworg;
 
-	float dist = (sprite_origin - RI->vieworg).Length();
-
-	if( !FBitSet( RI->params, RP_MIRRORVIEW ) && !FBitSet( RI->params, RP_SHADOWPASS ) )
+	if( FBitSet( RI->params, RP_MIRRORVIEW ) )
 	{
-		//------------------------------------------
-		int maxLoops = 4;
-		int ignoreent = -1;	// first, ignore no entity
-		Vector vecStart = RI->vieworg;
-		while( maxLoops > 0 )
-		{
-			gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-			// diffusion - PM_GLASS_IGNORE and PM_TRACELINE_PHYSENTSONLY take a lot of fps...
-			gEngfuncs.pEventAPI->EV_PlayerTrace( vecStart, sprite_origin, PM_TRACELINE_ANYVISIBLE, ignoreent, &tr );
-			if( tr.ent > 0 )
-			{
-				cl_entity_t *ent = GET_ENTITY( PM_GetPhysEntInfo( tr.ent ) );
-				if( ent != NULL )
-				{
-					if( ent->curstate.rendermode == kRenderNormal )
-						return 0.0f;
+		const mplane_t &mp = RI->clipPlane;
+		float eyeSide = DotProduct( vecStart, mp.normal ) - mp.dist;      // < 0: behind the mirror
+		float sprSide = DotProduct( sprite_origin, mp.normal ) - mp.dist; // > 0: in front of it
 
-					if( ent->curstate.rendermode == kRenderTransTexture && ent->curstate.renderamt == 0 ) // HACKHACK invisible brush "collision"
-						return 0.0f;
+		if( sprSide <= 0.0f )
+			return 0.0f; // behind the mirror plane
 
-					if( ent->curstate.rendermode == kRenderTransColor && ent->curstate.renderamt == 255 )
-						return 0.0f;
-				}
-			}
-			else
-				break;
-
-			ignoreent = tr.ent;	// ignore last hit entity
-			vecStart = tr.endpos;
-			maxLoops--;
-		}
-		//------------------------------------------
-
-		if( (1.0f - tr.fraction) * dist > 8.0f )
-			return 0.0f;
+		// trace start is now at the point where the ray crosses the mirror plane
+		if( eyeSide < 0.0f )
+			vecStart = vecStart + (sprite_origin - vecStart) * (eyeSide / (eyeSide - sprSide));
 	}
+
+	int maxLoops = 4;
+	float segLen = dist;
+	int ignoreent = -1;	// first, ignore no entity
+	pmtrace_t trace;
+
+	while( maxLoops > 0 )
+	{
+		segLen = (sprite_origin - vecStart).Length();
+		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
+		// diffusion - PM_GLASS_IGNORE and PM_TRACELINE_PHYSENTSONLY take a lot of fps...
+		gEngfuncs.pEventAPI->EV_PlayerTrace( vecStart, sprite_origin, PM_TRACELINE_ANYVISIBLE, ignoreent, &trace );
+		if( trace.ent > 0 )
+		{
+			cl_entity_t *ent = GET_ENTITY( PM_GetPhysEntInfo( trace.ent ) );
+
+			if( ent != NULL )
+			{
+				if( ent->curstate.rendermode == kRenderNormal )
+					return 0.0f;
+
+				if( ent->curstate.rendermode == kRenderTransTexture && ent->curstate.renderamt == 0 ) // HACKHACK invisible brush "collision"
+					return 0.0f;
+
+				if( ent->curstate.rendermode == kRenderTransColor && ent->curstate.renderamt == 255 )
+					return 0.0f;
+			}
+		}
+		else
+			break;
+
+		ignoreent = trace.ent;	// ignore last hit entity
+		vecStart = trace.endpos;
+		maxLoops--;
+	}
+
+	if( (1.0f - trace.fraction) * segLen > 8.0f )
+		return 0.0f;
 
 	return dist;
 }
@@ -1191,6 +1203,8 @@ void CSpriteModelRenderer::SpriteDrawModelShadowPass( void )
 
 	if( m_pSpriteHeader->texFormat == SPR_ALPHTEST )
 		GL_AlphaTest( GL_FALSE );
+
+	r_stats.c_sprite_models_drawn++;
 }
 
 void CSpriteModelRenderer::DrawSpriteModelInternal( cl_entity_t *e )
