@@ -605,6 +605,12 @@ void CBaseTank :: StopControl( CBasePlayer *pController, CFuncTankControls *pCon
 
 	pController->m_flFOV = 0;
 	ZoomState = 0;
+
+	// reset reloading circle, it could be active at the moment of leaving
+	MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pController->pev );
+		WRITE_BYTE( TE_RELOAD_CIRCLE );
+		WRITE_BYTE( 0 );
+	MESSAGE_END();
 }
 
 void CBaseTank :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
@@ -1225,7 +1231,7 @@ void CBaseTank :: TrackTarget( void )
 
 		if( ReloadingFunction )
 		{
-			if( gpGlobals->time <= ReloadStartTime + 0.5 )
+			if( gpGlobals->time <= ReloadStartTime )
 				return; // still reloading
 
 			if( (pController->pev->button & IN_RELOAD) && (BulletsFired > 0) )
@@ -1235,6 +1241,10 @@ void CBaseTank :: TrackTarget( void )
 				if( m_hBeam )
 					m_hBeam->pev->renderamt = 0;
 				BulletsFired = 0;
+				MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pController->pev );
+					WRITE_BYTE( TE_RELOAD_CIRCLE );
+					WRITE_BYTE( (int)(ReloadingTime * 10.0f) );
+				MESSAGE_END();
 			}
 		}
 
@@ -1342,7 +1352,7 @@ void CBaseTank :: TrackTarget( void )
 	
 	if( ReloadingFunction )
 	{
-		if( (TankClipSize > 0) && (gpGlobals->time > ReloadStartTime + 1) ) // FIXME somehow it turns on way too early, gotta add a second
+		if( (TankClipSize > 0) && (gpGlobals->time > ReloadStartTime) )
 		{
 			if( m_hBeam )
 				m_hBeam->pev->renderamt = LASER_BRIGHTNESS;
@@ -1426,6 +1436,19 @@ void CBaseTank :: Fire( const Vector &barrelEnd, const Vector &forward, entvars_
 				if( m_hBeam )
 					m_hBeam->pev->renderamt = 0;
 				BulletsFired = 0;
+
+				CFuncTankControls *pControls = NULL;
+				CBasePlayer *pController = NULL;
+				if( m_hControls )
+					pControls = (CFuncTankControls *)(CBaseEntity *)m_hControls;
+				if( pControls && pControls->m_hController )
+				{
+					pController = (CBasePlayer *)(CBaseEntity *)pControls->m_hController;
+					MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pController->pev );
+						WRITE_BYTE( TE_RELOAD_CIRCLE );
+						WRITE_BYTE( (int)(ReloadingTime * 10.0f) );
+					MESSAGE_END();
+				}
 			}
 			else
 			{

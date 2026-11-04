@@ -6948,10 +6948,13 @@ void CBasePlayer :: UpdateClientData( void )
 		Objective2_CL = Objective2;
 		
 		// update zoom state
-		MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, pev );
-			WRITE_BYTE( ZoomState );
-			WRITE_BYTE( m_pActiveItem != NULL ? m_pActiveItem->m_iId : 0 );
-		MESSAGE_END();
+		if( !(m_pTank && m_pTank->OnControls( this )) )
+		{
+			MESSAGE_BEGIN( MSG_ONE, gmsgZoom, NULL, pev );
+				WRITE_BYTE( ZoomState );
+				WRITE_BYTE( m_pActiveItem != NULL ? m_pActiveItem->m_iId : 0 );
+			MESSAGE_END();
+		}
 
 		InitStatusBar();
 
