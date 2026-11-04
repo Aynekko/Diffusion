@@ -47,6 +47,9 @@ void HUD_DrawNormalTriangles( void )
 		RI->currentmodel = RI->currententity->model;
 		SET_CURRENT_ENTITY( RI->currententity );
 
+		// animation needs to be always updated
+		R_UpdateCableAnimation( RI->currententity );
+
 		Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
 		Vector absmax = RI->currententity->origin + RI->currententity->curstate.maxs;
 		
@@ -92,6 +95,9 @@ void HUD_DrawTransparentTriangles( void )
 			RI->currententity = tr.trans_entities[i];
 			RI->currentmodel = RI->currententity->model;
 			SET_CURRENT_ENTITY( RI->currententity );
+
+			// animation needs to be always updated
+			R_UpdateCableAnimation( RI->currententity );
 
 			Vector absmin = RI->currententity->origin + RI->currententity->curstate.mins;
 			Vector absmax = RI->currententity->origin + RI->currententity->curstate.maxs;
@@ -145,6 +151,22 @@ void HUD_DrawTransparentTriangles( void )
 		R_DrawWeather();
 }
 
+void R_UpdateCableAnimation( cl_entity_t *e )
+{
+	// approach faster when shaking starts, but slower when coming to a halt
+	if( (tr.time != tr.oldtime) && e->visframe != tr.realframecount ) // animate only once per frame
+	{
+		// origin of the cable can move when parented. if so, add shaking
+		const float Speed = (g_fFrametime > 0.0f) ? ((e->curstate.origin - e->prevstate.origin).Length() / g_fFrametime) : 0.0f;
+		float TargetSway = e->curstate.fuser3;
+		TargetSway *= 1.0f + (Speed * 0.05f);
+		const float ApproachSpeed = (e->curstate.fuser3 > tr.cableSwayIntensity[e->index]) ? g_fFrametime * (0.1f + 0.5f * fabs( tr.cableSwayIntensity[e->index] - e->curstate.fuser3 )) : (g_fFrametime * 0.1f);
+		tr.cableSwayIntensity[e->index] = CL_UTIL_Approach( TargetSway, tr.cableSwayIntensity[e->index], ApproachSpeed );
+		tr.cableSwayPhase[e->index] += g_fFrametime * tr.cableSwayIntensity[e->index];
+		e->visframe = tr.realframecount;
+	}
+}
+
 //==========================================================================
 // R_SetupCable
 // diffusion - thanks to Bacontsu for the cable rendering code!
@@ -175,19 +197,6 @@ void R_SetupCable( cl_entity_t *e )
 	Vector vmidpoint;
 	
 	const int NumberOfCables = (int)e->curstate.vuser2.y;
-
-	// approach faster when shaking starts, but slower when coming to a halt
-	if( (tr.time != tr.oldtime) && e->visframe != tr.realframecount ) // animate only once per frame
-	{
-		// origin of the cable can move when parented. if so, add shaking
-		const float Speed = (g_fFrametime > 0.0f) ? ((e->curstate.origin - e->prevstate.origin).Length() / g_fFrametime) : 0.0f;
-		float TargetSway = e->curstate.fuser3;
-		TargetSway *= 1.0f + (Speed * 0.05f);
-		const float ApproachSpeed = (e->curstate.fuser3 > tr.cableSwayIntensity[e->index]) ? g_fFrametime * (0.1f + 0.5f * fabs( tr.cableSwayIntensity[e->index] - e->curstate.fuser3 )) : (g_fFrametime * 0.1f);
-		tr.cableSwayIntensity[e->index] = CL_UTIL_Approach( TargetSway, tr.cableSwayIntensity[e->index], ApproachSpeed );
-		tr.cableSwayPhase[e->index] += g_fFrametime * tr.cableSwayIntensity[e->index];
-		e->visframe = tr.realframecount;
-	}
 
 	float falldepth = e->curstate.fuser1;
 	if( falldepth <= 0.0f )

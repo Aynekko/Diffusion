@@ -682,6 +682,7 @@ void GL_CheckForErrors_( const char *filename, const int fileline );
 // tri.cpp
 //
 void R_SetupCable( cl_entity_t *e );
+void R_UpdateCableAnimation( cl_entity_t *e );
 void R_RenderCables( void );
 void R_SetupVolumetricLight( cl_entity_t *e );
 void R_RenderVolumetricLights( void );
