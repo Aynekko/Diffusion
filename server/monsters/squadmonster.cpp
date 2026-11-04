@@ -153,7 +153,7 @@ void CSquadMonster :: SquadRemove( CSquadMonster *pRemove )
 		{
 			for (int i = 0; i < MAX_SQUAD_MEMBERS-1;i++)
 			{
-				if (pSquadLeader->m_hSquadMember[i] == this)
+				if (pSquadLeader->m_hSquadMember[i] == pRemove)
 				{
 					pSquadLeader->m_hSquadMember[i] = NULL;
 					break;
@@ -272,7 +272,6 @@ void CSquadMonster :: SquadMakeEnemy ( CBaseEntity *pEnemy )
 			//	&& (pMember->m_pSchedule && (pMember->m_pSchedule->iInterruptMask & bits_COND_NEW_ENEMY))
 				// My enemy might be not an enemy for member of my squad, e.g. if I was provoked by player.
 				&& pMember->IRelationship( pEnemy ) >= R_DL )
-				if( pMember->m_hEnemy != pEnemy && !pMember->HasConditions( bits_COND_SEE_ENEMY ) )
 				{
 					// give them a new enemy
 					pMember->SetEnemy( pEnemy );
@@ -430,7 +429,7 @@ void CSquadMonster :: StartMonster( void )
 		}
 
 		// try to form squads now.
-		// diffusion - increased radius (1024) and size
+		// diffusion - increased radius and size
 		int iSquadSize = SquadRecruit( 4096, MAX_SQUAD_MEMBERS - 1 );
 
 		if ( iSquadSize )
@@ -516,20 +515,14 @@ BOOL CSquadMonster :: NoFriendlyFire( void )
 */
 BOOL CSquadMonster::NoFriendlyFire( void )  // freeslave
 {
-	//!!!BUGBUG - to fix this, the planes must be aligned to where the monster will be firing its gun, not the direction it is facing!!!
-	if( m_hEnemy )
-	{
-		UTIL_MakeVectors( UTIL_VecToAngles( m_hEnemy->Center() - pev->origin ) );
-	}
-	else
-	{
-		// if there's no enemy, pretend there's a friendly in the way, so the monster won't shoot.
-		return FALSE;
-	}
+	if( !m_hEnemy )
+		return FALSE; // if there's no enemy, pretend there's a friendly in the way, so the monster won't shoot.
 
 	const Vector enemyCenter = m_hEnemy->Center();
 	const Vector gunPos = GetGunPosition();
-	const Vector posVecs[3] = {gunPos, gunPos + gpGlobals->v_right * pev->size.x * 1, gpGlobals->v_right * pev->size.x * (-1)};
+
+	UTIL_MakeVectors( UTIL_VecToAngles( enemyCenter - GetAbsOrigin() ) );
+	const Vector posVecs[3] = { gunPos, gunPos + gpGlobals->v_right * pev->size.x * 1, gunPos - gpGlobals->v_right * pev->size.x };
 	const Vector enemyVec[3] = {enemyCenter, enemyCenter + gpGlobals->v_right * m_hEnemy->pev->size.x * 0.5, enemyCenter + gpGlobals->v_right * m_hEnemy->pev->size.x * -0.5};
 	for (int j=0; j<3; ++j)
 	{

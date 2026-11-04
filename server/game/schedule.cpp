@@ -486,8 +486,6 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 			if ( m_fSequenceFinished && pev->frame >= 255 )
 			{
 				pev->deadflag = DEAD_DEAD;
-				
-				SetThink ( NULL );
 				StopAnimation();
 
 			//	SetThink(&CBaseMonster :: CorpseFallThink ); // diffusion - by Ku2zoff
@@ -510,6 +508,14 @@ void CBaseMonster :: RunTask ( Task_t *pTask )
 				{
 					// body is gonna be around for a while, so have it stink for a bit.
 					CSoundEnt::InsertSound ( bits_SOUND_CARCASS, GetAbsOrigin(), 384, 30 );
+
+					if( num_death_smokes > 0 )
+					{
+						SetThink( &CBaseMonster::DeathSmoke );
+						SetNextThink( 0.0f );
+					}
+					else
+						SetThink( NULL );
 				}
 			}
 			break;

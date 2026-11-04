@@ -116,6 +116,7 @@ BEGIN_DATADESC( CBaseMonster )
 	DEFINE_FUNCTION( DeathSmoke ),
 
 	DEFINE_FIELD( m_flHungryTime, FIELD_TIME ),
+	DEFINE_FIELD( m_flDistTooClose, FIELD_FLOAT ),
 	DEFINE_KEYFIELD( m_flDistTooFar, FIELD_FLOAT, "m_flDistTooFar" ), // diffusion - now keyfields to override
 	DEFINE_KEYFIELD( m_flDistLook, FIELD_FLOAT, "m_flDistLook" ),
 	DEFINE_KEYFIELD( HealthbarDisabled, FIELD_BOOLEAN, "nohealthbar" ),
@@ -338,14 +339,14 @@ void CBaseMonster :: Look ( int iDistance )
 	// DON'T let visibility information from last frame sit around!
 	ClearConditions(bits_COND_SEE_HATE | bits_COND_SEE_DISLIKE | bits_COND_SEE_ENEMY | bits_COND_SEE_FEAR | bits_COND_SEE_NEMESIS | bits_COND_SEE_CLIENT | bits_COND_SEE_FLASHLIGHT | bits_COND_SEETHROUGHWALL );
 
+	m_pLink = NULL;
+
 	if( HasSpawnFlags( SF_MONSTER_PRISONER ) )
 	{
 		// See no evil if prisoner is set
 		SetConditions( iSighted );
 		return;
 	}
-
-	m_pLink = NULL;
 
 	CBaseEntity	*pSightEnt = NULL;// the current visible entity that we're dealing with
 	
@@ -1180,7 +1181,7 @@ int CBaseMonster :: CheckEnemy ( CBaseEntity *pEnemy )
 
 		if ( pEnemyMonster )
 		{
-			if ( pEnemyMonster->FInViewCone ( this, m_flFieldOfView ) )
+			if ( pEnemyMonster->FInViewCone ( this, pEnemyMonster->m_flFieldOfView ) )
 				SetConditions ( bits_COND_ENEMY_FACING_ME );
 			else
 				ClearConditions( bits_COND_ENEMY_FACING_ME );
@@ -1404,7 +1405,7 @@ void CBaseMonster :: SetSequenceByName ( char *szSequence )
 	else
 	{
 		// Not available try to get default anim
-		ALERT ( at_aiconsole, "%s has no sequence named:%f\n", STRING(pev->classname), szSequence );
+		ALERT( at_aiconsole, "%s has no sequence named: %s\n", STRING( pev->classname ), szSequence );
 		pev->sequence = 0;	// Set to the reset anim (if it's there)
 	}
 }
@@ -2773,26 +2774,26 @@ float	CBaseMonster::FlYawDiff ( void )
 // Thanks to SoloKiller.
 //=========================================================
 
-float CBaseMonster::ChangeYaw ( int yawSpeed )
-{	
-	float ideal, current, move, speed;
+float CBaseMonster::ChangeYaw( int yawSpeed )
+{
 	Vector angles = GetAbsAngles();
+	const float current = UTIL_AngleMod( angles.y );
+	const float ideal = pev->ideal_yaw;
+	float move = 0.0f;
 
-	current = UTIL_AngleMod( angles.y );
-	ideal = pev->ideal_yaw;
-
-	if (current != ideal)
+	if( current != ideal )
 	{
 		float delta = gpGlobals->frametime;
 		if( delta > 0.25f )
 			delta = 0.25f;
-		speed = yawSpeed * delta;
+		const float speed = yawSpeed * delta;
 		angles.y = UTIL_ApproachAngle( ideal, current, speed, true );
+		move = UTIL_AngleDiff( angles.y, current );
 
 		SetAbsAngles( angles );
 	}
 	else
-		move = 0;
+		move = 0.0f;
 
 	return move;
 }

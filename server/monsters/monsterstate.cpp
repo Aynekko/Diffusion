@@ -93,7 +93,9 @@ void CBaseMonster :: RunAI ( void )
 			if( !FNullEnt( FIND_CLIENT_IN_PVS( edict() ) ) || (m_MonsterState == MONSTERSTATE_COMBAT) )
 			{
 				Look( m_flDistLook );
-				Listen();// check for audible sounds. 
+				Listen();// check for audible sounds.
+
+				ClearConditions( IgnoreConditions() );
 
 				// check for low health
 				if( pev->max_health > 0 ) // make sure this is valid

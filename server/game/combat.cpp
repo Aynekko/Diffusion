@@ -214,6 +214,7 @@ void CGib :: SpawnRandomGibs( entvars_t *pevVictim, int cGibs, int human )
 			vecNewVelocity.z += RANDOM_FLOAT ( -0.25, 0.25 );
 
 			vecNewVelocity *= RANDOM_FLOAT ( 300, 400 );
+			pGib->AdjustVelocityBasedOnHealth( pevVictim->health, vecNewVelocity );
 			pGib->SetAbsVelocity( vecNewVelocity );
 
 			Vector vecNewAngularVelocity = pGib->GetLocalAvelocity();
@@ -222,9 +223,7 @@ void CGib :: SpawnRandomGibs( entvars_t *pevVictim, int cGibs, int human )
 			pGib->SetLocalAvelocity( vecNewAngularVelocity );
  
 			// copy owner's blood color
-			pGib->m_bloodColor = (CBaseEntity::Instance(pevVictim))->BloodColor();
-
-			pGib->AdjustVelocityBasedOnHealth( pevVictim->health, vecNewVelocity );			
+			pGib->m_bloodColor = (CBaseEntity::Instance(pevVictim))->BloodColor();			
 
 			pGib->pev->solid = SOLID_BBOX;
 			UTIL_SetSize( pGib->pev, g_vecZero, g_vecZero );
@@ -592,7 +591,7 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 	
 	ClearEffects();
 
-	bool bStartSmoke = false;
+	num_death_smokes = 0;
 
 	// clear fire
 	if( IsOnFire )
@@ -602,7 +601,6 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 		pev->rendermode = kRenderTransColor;
 		pev->rendercolor = Vector( 10, 10, 10 ); // crispy critter
 		pev->renderamt = 255;
-		bStartSmoke = true;
 		num_death_smokes = 50;
 	}
 	pev->effects &= ~EF_DIMLIGHT;
@@ -667,12 +665,6 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 	{
 		bFlashlightCap = false;
 		pev->effects &= ~EF_MONSTERFLASHLIGHT;
-	}
-
-	if( bStartSmoke )
-	{
-		SetThink( &CBaseMonster::DeathSmoke );
-		SetNextThink( 0.1f );
 	}
 }
 
@@ -937,7 +929,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	flTake = flDamage;
 
 	// achievement
-	if( pevAttacker->flags & FL_CLIENT )
+	if( pevAttacker && pevAttacker->flags & FL_CLIENT )
 	{
 		if( !HasFlag(F_NOT_A_MONSTER) )
 		{
@@ -958,6 +950,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 
 	// remember which weapon dealt the hit, some weapons share a damage type
 	m_iLastHitWeapon = WEAPON_NONE;
+	if( m_iszLastHitInflictor == iStringNull )
 	{
 		CBaseEntity *pAttacker = CBaseEntity::Instance( pevAttacker );
 		if( pAttacker )
@@ -1024,7 +1017,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 	}
 
 	// npc has no enemy and is being attacked by the player...
-	if( (pevAttacker->flags & FL_CLIENT) && IsMonster() && (m_hEnemy == NULL || m_MonsterState != MONSTERSTATE_COMBAT) )
+	if( pevAttacker && (pevAttacker->flags & FL_CLIENT) && IsMonster() && (m_hEnemy == NULL || m_MonsterState != MONSTERSTATE_COMBAT) )
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pevAttacker );
 		if( pPlayer )
@@ -1043,7 +1036,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 
 	// diffusion
 	// Insert a combat sound so that nearby NPCs hear battle
-	if( pevAttacker->flags & (FL_CLIENT|FL_MONSTER) )
+	if( pevAttacker && (pevAttacker->flags & (FL_CLIENT | FL_MONSTER)) )
 		CSoundEnt::InsertSound ( bits_SOUND_COMBAT, GetAbsOrigin(), 512, 0.5 );
 
 	// HACKHACK Don't kill monsters in a script.  Let them break their scripts first
@@ -1055,17 +1048,18 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 //	}
 
 	// cool thingy :)
-	if( (pevAttacker->flags & FL_CLIENT) && (pevAttacker != pev) && !HasFlag( F_NOT_A_MONSTER ) )
+	if( pevAttacker && (pevAttacker->flags & FL_CLIENT) && (pevAttacker != pev) && !HasFlag( F_NOT_A_MONSTER ) )
 	{
-		CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pevAttacker);
-		if (pPlayer)
+		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pevAttacker );
+		if( pPlayer )
 		{
-			if (pev->health <= 0)
+			if( pev->health <= 0 )
 				pPlayer->ConfirmedHit = 2; // killed
 			else
 				pPlayer->ConfirmedHit = 1; // dealt damage
+
+			pPlayer->DamageDealt = (int)flTake;
 		}
-		pPlayer->DamageDealt = (int)flTake;
 	}
 
 	if ( pev->health <= 0 )
@@ -1073,7 +1067,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 		g_pevLastInflictor = pevInflictor;
 
 		// achievement - this should be in killed, but for some reason tank not counted there...
-		if( pevAttacker->flags & FL_CLIENT )
+		if( pevAttacker && (pevAttacker->flags & FL_CLIENT) )
 		{
 			CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pevAttacker );
 
@@ -1975,7 +1969,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 					BulletDamage *= 0.75;
 			}
 
-			if( BulletDamage <= 0 )
+			if( iBulletType != BULLET_NONE && BulletDamage <= 0.0f )
 				ALERT( at_warning, "FireBullets: Registered a bullet shot without any damage!\n" );
 
 			// diffusion - check for correct texture (skip sky)
