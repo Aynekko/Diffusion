@@ -701,7 +701,7 @@ int HUD_AddEntity( int type, struct cl_entity_s* ent, const char* modelname )
 					dl->color.g = 180;
 					dl->color.b = 100;
 					radius *= 0.5;
-					ent->curstate.renderfx = kRenderFxFullbrightNoShadows;
+				//	ent->curstate.renderfx = kRenderFxFullbrightNoShadows; // done in StudioStaticLight instead
 				}
 				R_SetupLightProjection( dl, ent->origin + Vector(0,0,20), g_vecZero, radius, 90 );
 				R_SetupLightAttenuationTexture( dl );

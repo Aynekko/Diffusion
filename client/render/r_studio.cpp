@@ -4292,6 +4292,12 @@ void CStudioModelRenderer::StudioStaticLight( cl_entity_t *ent )
 			}
 		}
 
+		if( ent->curstate.iuser3 == -661 && ent->curstate.effects & EF_DIMLIGHT ) // burning prop_explosive_barrel
+		{
+			lighting.ambientlight = 128;
+			lighting.shadelight = 192;
+		}
+
 		if( lighting.ambientlight > 128 )
 			lighting.ambientlight = 128;
 		if( lighting.shadelight > 192 )

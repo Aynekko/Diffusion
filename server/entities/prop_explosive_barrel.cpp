@@ -98,9 +98,12 @@ void CExplosiveBarrel::RespawnBarrel(void)
 	pev->effects &= ~EF_NODRAW;
 	pev->takedamage = DAMAGE_YES;
 	ObjectCaps();
+	if( !HasFlag( F_ENTITY_ONCEUSED ) )
+	{
+		if( pev->iuser4 > EXTENDED_FADEDISTANCE )
+			pev->iuser4 -= EXTENDED_FADEDISTANCE;
+	}
 	SetFlag( F_ENTITY_ONCEUSED );
-	if( pev->iuser4 > EXTENDED_FADEDISTANCE )
-		pev->iuser4 -= EXTENDED_FADEDISTANCE;
 	RelinkEntity( TRUE );
 }
 
