@@ -1318,7 +1318,7 @@ void R_CheckFog( void )
 		tr.fogColor[1] = fogColor.g / 255.0f;
 		tr.fogColor[2] = fogColor.b / 255.0f;
 		tr.fogDensity = ent ? ((ent->curstate.renderamt) * 0.000025f) : (fogDensity * 0.000025f);
-		if( tr.fogDensity > 0.01f )
+		if( tr.fogDensity > 0.0001f )
 			tr.fogEnabled = true;
 	}
 }
