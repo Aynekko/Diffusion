@@ -359,8 +359,8 @@ int CHud :: MsgFunc_KillDecals( const char *pszName, int iSize, void *pbuf )
 	int entityIndex = READ_SHORT();
 
 	// diffusion - studiodecalsfpslossissue
-//	if( g_fRenderInitialized )
-//		g_StudioRenderer.RemoveAllDecals( entityIndex );
+	if( g_fRenderInitialized )
+		g_StudioRenderer.RemoveAllDecals( entityIndex );
 
 	cl_entity_t *ent = gEngfuncs.GetEntityByIndex( entityIndex );
 

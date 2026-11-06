@@ -2090,6 +2090,12 @@ void CStudioModelRenderer::DestroyAllModelInstances( void )
 	}
 
 	m_DecalMaterial.RemoveAll();
+
+	for( int j = 0; j < RENDER_GET_PARM( PARM_MAX_ENTITIES, 0 ); j++ )
+	{
+		cl_entity_t *ent = GET_ENTITY( j );
+		if( ent ) ent->modelhandle = INVALID_HANDLE;
+	}
 }
 
 /*
