@@ -46,7 +46,9 @@ extern int gmsgPuzzle;
 // g-cont. begin custom Xash messages
 extern int gmsgParticle;
 extern int gmsgKillPart;
-//extern int gmsgStudioDecal; // diffusion - studiodecalsfpslossissue
+#if !STUDIODECAL_DISABLE
+extern int gmsgStudioDecal;
+#endif
 extern int gmsgKillDecals;
 extern int gmsgMusicFade;
 extern int gmsgRainData;

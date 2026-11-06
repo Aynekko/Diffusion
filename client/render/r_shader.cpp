@@ -1453,6 +1453,7 @@ static void GL_InitGenericDlightUniforms( glsl_program_t *shader )
 	GL_ShowProgramUniforms( shader );
 }
 
+#if !STUDIODECAL_DISABLE
 static void GL_InitStudioDecalUniforms( glsl_program_t *shader )
 {
 	ASSERT( shader != NULL );
@@ -1469,6 +1470,7 @@ static void GL_InitStudioDecalUniforms( glsl_program_t *shader )
 	GL_ValidateProgram( shader );
 	GL_ShowProgramUniforms( shader );
 }
+#endif
 
 static void GL_InitSkyBoxUniforms( glsl_program_t *shader )
 {
@@ -2800,6 +2802,7 @@ word GL_UberShaderForDlightStudio( const plight_t *pl, struct mstudiomat_s *mat,
 	return shaderNum;
 }
 
+#if !STUDIODECAL_DISABLE
 word GL_UberShaderForStudioDecal( mstudiomaterial_t *mat )
 {
 	char glname[64];
@@ -2823,6 +2826,7 @@ word GL_UberShaderForStudioDecal( mstudiomaterial_t *mat )
 
 	return (shader - glsl_programs);
 }
+#endif
 
 word GL_UberShaderForDlightGeneric( const plight_t *pl )
 {

@@ -358,9 +358,10 @@ int CHud :: MsgFunc_KillDecals( const char *pszName, int iSize, void *pbuf )
 
 	int entityIndex = READ_SHORT();
 
-	// diffusion - studiodecalsfpslossissue
+#if !STUDIODECAL_DISABLE
 	if( g_fRenderInitialized )
 		g_StudioRenderer.RemoveAllDecals( entityIndex );
+#endif
 
 	cl_entity_t *ent = gEngfuncs.GetEntityByIndex( entityIndex );
 
@@ -374,8 +375,7 @@ int CHud :: MsgFunc_KillDecals( const char *pszName, int iSize, void *pbuf )
 
 int CHud :: MsgFunc_StudioDecal( const char *pszName, int iSize, void *pbuf )
 {
-	return 1; // diffusion - studiodecalsfpslossissue
-	
+#if !STUDIODECAL_DISABLE
 	Vector vecEnd, vecSrc;
 
 	if( !g_fRenderInitialized )
@@ -459,6 +459,9 @@ int CHud :: MsgFunc_StudioDecal( const char *pszName, int iSize, void *pbuf )
 	END_READ();
 
 	return 1;
+#else
+	return 0;
+#endif
 }
 
 int CHud :: MsgFunc_SetupBones( const char *pszName, int iSize, void *pbuf )

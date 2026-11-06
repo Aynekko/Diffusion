@@ -49,7 +49,9 @@ int gmsgPuzzle = 0;
 // g-cont. begin custom Xash messages
 int gmsgParticle = 0;
 int gmsgKillPart = 0;
-//int gmsgStudioDecal = 0; // diffusion - studiodecalsfpslossissue
+#if !STUDIODECAL_DISABLE
+int gmsgStudioDecal = 0;
+#endif
 int gmsgKillDecals = 0;
 int gmsgMusicFade = 0;
 int gmsgRainData = 0;
@@ -124,7 +126,9 @@ void LinkUserMessages( void )
 	gmsgParticle = REG_USER_MSG( "Particle", -1 );
 	gmsgKillPart = REG_USER_MSG( "KillPart", 2 );
 	gmsgKillDecals = REG_USER_MSG( "KillDecals", 2 );
-	//	gmsgStudioDecal = REG_USER_MSG("StudioDecal", 33); // diffusion - studiodecalsfpslossissue
+#if !STUDIODECAL_DISABLE
+	gmsgStudioDecal = REG_USER_MSG( "StudioDecal", 33 );
+#endif
 	gmsgRainData = REG_USER_MSG( "RainData", 17 );
 	gmsgMusicFade = REG_USER_MSG( "MusicFade", 2 );
 	gmsgStatusIcon = REG_USER_MSG( "StatusIcon", -1 );

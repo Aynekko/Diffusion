@@ -549,6 +549,7 @@ private:
 	CUtlLinkedList< ModelInstance_t, word > m_ModelInstances;
 
 	// decal stuff
+#if !STUDIODECAL_DISABLE
 	bool ComputePoseToDecal( const Vector &vecStart, const Vector &vecEnd );
 	void AddDecalToModel( DecalBuildInfo_t& buildInfo );
 	void AddDecalToMesh( DecalBuildInfo_t& buildInfo );
@@ -572,14 +573,17 @@ private:
 	void RetireDecal( DecalHistoryList_t& historyList );
 	void DestroyDecalList( word handle );
 	word CreateDecalList( void );
+#endif
 	bool StudioSetEntity( cl_entity_t *pEnt );
 	bool StudioSetEntity( gl_studiomesh_t *entry );
 	virtual bool IsModelInstanceValid( ModelInstance_t *inst );
 	bool StudioSetupInstance( void );
 	virtual void DestroyInstance( word handle );
+#if !STUDIODECAL_DISABLE
 	void DrawDecal( cl_entity_t *e );
 	void ComputeDecalTransform( DecalMaterial_t& decalMaterial, const matrix3x4 bones[] );
 	void DrawDecalMaterial( DecalMaterial_t& decalMaterial, const matrix3x4 bones[] );
+#endif
 
 	virtual void DrawStudioMeshes( void );
 	virtual void DrawStudioMeshesShadow( void );
@@ -712,10 +716,17 @@ public:
 
 	void	DestroyAllModelInstances( void );
 
+#if !STUDIODECAL_DISABLE
 	void	StudioDecalShoot( const Vector &vecStart, const Vector &vecEnd, int decalTex, cl_entity_t *ent, int flags, modelstate_t *state );
 	int	StudioDecalList( decallist_t *pList, int count );
 	void	StudioClearDecals( void );
 	void	RemoveAllDecals( int entityIndex );
+#else
+	void StudioDecalShoot( const Vector &vecStart, const Vector &vecEnd, int decalTex, cl_entity_t *ent, int flags, modelstate_t *state ) {};
+	int StudioDecalList( decallist_t *pList, int count ) { return 0; };
+	void StudioClearDecals( void ) {};
+	void RemoveAllDecals( int entityIndex ) {};
+#endif
 
 	void	ProcessUserData( model_t *mod, qboolean create, const byte *buffer );
 

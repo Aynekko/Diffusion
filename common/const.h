@@ -971,4 +971,9 @@ const Vector2D sunflower[50] =
 
 #define MAX_MOTD_LENGTH	4096
 
+// set this to false and recompile if you want to enable studio decals
+// they currently tank fps if there are plenty of them, and also they don't have lightpass
+// I made sure they work as is when I implemented this define.
+#define STUDIODECAL_DISABLE true
+
 #endif//CONST_H

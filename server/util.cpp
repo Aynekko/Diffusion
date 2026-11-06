@@ -2079,8 +2079,7 @@ void UTIL_DecalTrace( TraceResult *pTrace, int decalNumber )
 
 void UTIL_StudioDecalTrace( TraceResult *pTrace, int decalNumber, int flags )
 {
-	return; // diffusion - studiodecalsfpslossissue
-	/*
+#if !STUDIODECAL_DISABLE
 	short entityIndex;
 	int decalIndex;
 
@@ -2148,13 +2147,13 @@ void UTIL_StudioDecalTrace( TraceResult *pTrace, int decalNumber, int flags )
 		if( FBitSet( pEntity->pev->iuser1, CF_STATIC_ENTITY ))
 			WRITE_SHORT( pEntity->pev->iuser3 );
 		else WRITE_SHORT( 0 );
-	MESSAGE_END();*/
+	MESSAGE_END();
+#endif
 }
 
 void UTIL_RestoreStudioDecal( const Vector &vecEnd, const Vector &vecSrc, int entityIndex, int modelIndex, const char *name, int flags, modelstate_t *state, int lightcache )
 {
-	return; // diffusion - studiodecalsfpslossissue
-	/*
+#if !STUDIODECAL_DISABLE
 	MESSAGE_BEGIN( MSG_INIT, gmsgStudioDecal );
 		WRITE_COORD( vecEnd.x );	// write pos
 		WRITE_COORD( vecEnd.y );
@@ -2180,7 +2179,7 @@ void UTIL_RestoreStudioDecal( const Vector &vecEnd, const Vector &vecSrc, int en
 		WRITE_BYTE( state->skin );
 		WRITE_SHORT( lightcache );
 	MESSAGE_END();
-	*/
+#endif
 }
 
 /*

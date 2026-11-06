@@ -14,6 +14,9 @@ GNU General Public License for more details.
 */
 
 #include "hud.h"
+
+#if !STUDIODECAL_DISABLE
+
 #include "utils.h"
 #include "r_local.h"
 #include "com_model.h"
@@ -30,7 +33,7 @@ word CStudioModelRenderer :: CreateDecalList( void )
 	word handle = m_DecalList.AddToTail();
 
 	m_DecalList[handle].m_FirstMaterial = m_DecalMaterial.InvalidIndex();
-
+	
 	return handle;
 }
 
@@ -1289,7 +1292,7 @@ void CStudioModelRenderer :: DrawDecal( cl_entity_t *e )
 
 	// All decal vertex data is are stored in pose space
 	// So as long as the pose-to-world transforms are set, we're all ready!
-
+	
 	// Get the decal list for this lod
 	DecalModelList_t const& list = m_DecalList[inst->m_DecalHandle];
 
@@ -1368,7 +1371,7 @@ void CStudioModelRenderer :: DrawDecal( cl_entity_t *e )
 		if( valid && FBitSet( decalMaterial.flags, STUDIO_NF_HAS_ALPHA ))
 			GL_Cull( GL_NONE );
 		else GL_Cull( GL_FRONT );
-
+		
 		DrawDecalMaterial( decalMaterial, m_pworldtransform );
 	}
 
@@ -1381,3 +1384,5 @@ void CStudioModelRenderer :: DrawDecal( cl_entity_t *e )
 	GL_CleanUpTextureUnits( 0 );
 	GL_Cull( GL_FRONT );
 }
+
+#endif

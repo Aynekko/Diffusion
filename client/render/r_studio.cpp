@@ -434,7 +434,9 @@ void CStudioModelRenderer::DestroyInstance( word handle )
 
 	ModelInstance_t *inst = &m_ModelInstances[handle];
 
+#if !STUDIODECAL_DISABLE
 	DestroyDecalList( inst->m_DecalHandle );
+#endif
 	inst->m_DecalHandle = INVALID_HANDLE;
 
 	if( inst->materials != NULL )
@@ -490,7 +492,9 @@ void CStudioModelRenderer::ClearInstanceData( bool create )
 	}
 	else
 	{
+#if !STUDIODECAL_DISABLE
 		DestroyDecalList( m_pModelInstance->m_DecalHandle );
+#endif
 		if( m_pModelInstance->m_pJiggleBones != NULL )
 			delete m_pModelInstance->m_pJiggleBones;
 		m_pModelInstance->m_pJiggleBones = NULL;
@@ -498,7 +502,6 @@ void CStudioModelRenderer::ClearInstanceData( bool create )
 
 	m_pModelInstance->m_pEntity = m_pCurrentEntity;
 	m_pModelInstance->m_pModel = m_pRenderModel;
-	m_pModelInstance->m_DecalHandle = INVALID_HANDLE;
 	m_pModelInstance->m_VlCache = NULL;
 	m_pModelInstance->m_DecalCount = 0;
 	m_pModelInstance->cached_frame = -1;
@@ -2469,7 +2472,7 @@ void CStudioModelRenderer::StudioSetUpTransform( void )
 
 	Vector origin = m_pCurrentEntity->curstate.origin;
 	Vector angles = m_pCurrentEntity->curstate.angles;
-	if( m_fDrawViewModel )
+	if( m_fDrawViewModel || m_fShootDecal )
 	{
 		origin = m_pCurrentEntity->origin;
 		angles = m_pCurrentEntity->angles;
@@ -6621,7 +6624,9 @@ void CStudioModelRenderer::DrawStudioMeshes( void )
 	pglBindBufferARB( GL_ELEMENT_ARRAY_BUFFER_ARB, 0 );
 	pglBindVertexArray( GL_FALSE );
 
-	//		DrawDecal( RI->currententity ); // diffusion - studiodecalsfpslossissue
+#if !STUDIODECAL_DISABLE
+	DrawDecal( RI->currententity );
+#endif
 	m_nNumDrawMeshes = 0;
 }
 
