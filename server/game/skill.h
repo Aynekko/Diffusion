@@ -22,9 +22,9 @@
 const int g_RoboHealth[] =
 {
 	0,
-	1600,
-	1800,
-	2200
+	2000,
+	2300,
+	2500
 };
 
 const int g_RoboDmgSlash[] =
