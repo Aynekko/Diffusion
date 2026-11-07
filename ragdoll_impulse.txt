@@ -3,7 +3,7 @@ headshot_mult		50.0
 rpg_rocket		15.0
 grenade			15.0
 monster_satchel		15.0
-crossbow_bolt		7.5
+crossbow_bolt		4000.0
 
 WEAPON_GAUSS		12.5
 WEAPON_SHOTGUN		12.5
