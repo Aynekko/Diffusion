@@ -5711,34 +5711,21 @@ EnableCollision
 toggles collision and visualization on a body
 =================
 */
-void CPhysicPhysX :: EnableCollision( CBaseEntity *pEntity, int fEnable )
+void CPhysicPhysX::EnableCollision( CBaseEntity *pEntity, int fEnable )
 {
-	PxActor *pActor = ActorFromEntity(pEntity);
-	if (!pActor)
-	{
+	PxActor *pActor = ActorFromEntity( pEntity );
+	if( !pActor )
 		return;
-	}
 
-	PxRigidDynamic *pRigidBody = pActor->is<PxRigidDynamic>();
-	if (pRigidBody->getNbShapes() <= 0)
-	{
+	PxRigidActor *pRigidActor = pActor->is<PxRigidActor>();
+	if( !pRigidActor || pRigidActor->getNbShapes() <= 0 )
 		return;
-	}
 
-	if (TracingStateChanges(pActor)) {
-		ALERT(at_console, "PhysX: EnableCollision( entity = %x, state = %s )\n", pEntity, fEnable ? "true" : "false");
-	}
+	if( TracingStateChanges( pActor ) )
+		ALERT( at_console, "PhysX: EnableCollision( entity = %x, state = %s )\n", pEntity, fEnable ? "true" : "false" );
 
-	if (fEnable)
-	{
-		ToggleCollision(pRigidBody, true);
-		pActor->setActorFlag(PxActorFlag::eVISUALIZATION, true);
-	}
-	else
-	{
-		ToggleCollision(pRigidBody, false);
-		pActor->setActorFlag(PxActorFlag::eVISUALIZATION, false);
-	}
+	ToggleCollision( pRigidActor, fEnable != 0 );
+	pActor->setActorFlag( PxActorFlag::eVISUALIZATION, fEnable != 0 );
 }
 
 /*
