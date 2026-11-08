@@ -327,6 +327,15 @@ float RadiusFromBounds( const Vector &mins, const Vector &maxs )
 //
 // quaternion operations
 //
+static inline bool QuaternionNeedsFlip( const Vector4D &p, const Vector4D &q )
+{
+	float d0 = p.x - q.x, d1 = p.y - q.y, d2 = p.z - q.z, d3 = p.w - q.w;
+	float s0 = p.x + q.x, s1 = p.y + q.y, s2 = p.z + q.z, s3 = p.w + q.w;
+	float a = d0 * d0 + d1 * d1 + d2 * d2 + d3 * d3;
+	float b = s0 * s0 + s1 * s1 + s2 * s2 + s3 * s3;
+	return a > b;
+}
+
 /*
 ====================
 AngleQuaternion
@@ -411,30 +420,19 @@ if not, reverse q
 */
 void QuaternionAlign( const Vector4D &p, const Vector4D &q, Vector4D &qt )
 {
-	// decide if one of the quaternions is backwards
-	float a = 0;
-	float b = 0;
-	int i;
-
-	for( i = 0; i < 4; i++ ) 
+	if( QuaternionNeedsFlip( p, q ) )
 	{
-		a += (p[i] - q[i]) * (p[i] - q[i]);
-		b += (p[i] + q[i]) * (p[i] + q[i]);
-	}
-
-	if( a > b ) 
-	{
-		for( i = 0; i < 4; i++ ) 
-		{
-			qt[i] = -q[i];
-		}
+		qt.x = -q.x;
+		qt.y = -q.y;
+		qt.z = -q.z;
+		qt.w = -q.w;
 	}
 	else if( &qt != &q )
 	{
-		for( i = 0; i < 4; i++ ) 
-		{
-			qt[i] = q[i];
-		}
+		qt.x = q.x;
+		qt.y = q.y;
+		qt.z = q.z;
+		qt.w = q.w;
 	}
 }
 
@@ -573,10 +571,18 @@ multiply two quaternions
 */
 void QuaternionMultiply( const Vector4D &q1, const Vector4D &q2, Vector4D &out )
 {
-	out[0] = q1[3] * q2[0] + q1[0] * q2[3] + q1[1] * q2[2] - q1[2] * q2[1];
-	out[1] = q1[3] * q2[1] + q1[1] * q2[3] + q1[2] * q2[0] - q1[0] * q2[2];
-	out[2] = q1[3] * q2[2] + q1[2] * q2[3] + q1[0] * q2[1] - q1[1] * q2[0];
-	out[3] = q1[3] * q2[3] - q1[0] * q2[0] - q1[1] * q2[1] - q1[2] * q2[2];
+	const float ax = q1[0], ay = q1[1], az = q1[2], aw = q1[3];
+	const float bx = q2[0], by = q2[1], bz = q2[2], bw = q2[3];
+
+	float ox = aw * bx + ax * bw + ay * bz - az * by;
+	float oy = aw * by + ay * bw + az * bx - ax * bz;
+	float oz = aw * bz + az * bw + ax * by - ay * bx;
+	float ow = aw * bw - ax * bx - ay * by - az * bz;
+
+	out[0] = ox;
+	out[1] = oy;
+	out[2] = oz;
+	out[3] = ow;
 }
 
 /*
@@ -588,7 +594,9 @@ transform vector by quaternion
 */
 void QuaternionVectorTransform( const Vector4D &q, const Vector &v, Vector &out )
 {
-	float	wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
+	float wx, wy, wz, xx, yy, yz, xy, xz, zz, x2, y2, z2;
+
+	const float vx = v[0], vy = v[1], vz = v[2];
 
 	// 9 muls, 3 adds
 	x2 = q[0] + q[0]; y2 = q[1] + q[1]; z2 = q[2] + q[2];
@@ -597,9 +605,13 @@ void QuaternionVectorTransform( const Vector4D &q, const Vector &v, Vector &out 
 	wx = q[3] * x2; wy = q[3] * y2; wz = q[3] * z2;
 
 	// 9 muls, 9 subs, 9 adds
-	out[0] = ( 1.0f - yy - zz ) * v[0] + ( xy - wz ) * v[1] + ( xz + wy ) * v[2];
-	out[1] = ( xy + wz ) * v[0] + ( 1.0f - xx - zz ) * v[1] + ( yz - wx ) * v[2];
-	out[2] = ( xz - wy ) * v[0] + ( yz + wx ) * v[1] + ( 1.0f - xx - yy ) * v[2];
+	float ox = (1.0f - yy - zz) * vx + (xy - wz) * vy + (xz + wy) * vz;
+	float oy = (xy + wz) * vx + (1.0f - xx - zz) * vy + (yz - wx) * vz;
+	float oz = (xz - wy) * vx + (yz + wx) * vy + (1.0f - xx - yy) * vz;
+
+	out[0] = ox;
+	out[1] = oy;
+	out[2] = oz;
 }
 
 /*
@@ -611,28 +623,38 @@ transform quat\vector by another quat\vector
 */
 void QuaternionConcatTransforms( const Vector4D &q1, const Vector &v1, const Vector4D &q2, const Vector &v2, Vector4D &q, Vector &v )
 {
-	QuaternionMultiply( q1, q2, q );
-	QuaternionVectorTransform( q1, v2, v );
-	v += v1;
+	Vector t;
+	Vector4D r;
+
+	QuaternionVectorTransform( q1, v2, t );
+	QuaternionMultiply( q1, q2, r );
+
+	q.x = r.x; q.y = r.y; q.z = r.z; q.w = r.w;
+	v.x = t.x + v1.x;
+	v.y = t.y + v1.y;
+	v.z = t.z + v1.z;
 }
 
 void QuaternionMult( const Vector4D &p, const Vector4D &q, Vector4D &qt )
 {
-	if( &p == &qt )
+	float qx = q.x, qy = q.y, qz = q.z, qw = q.w;
+
+	if( QuaternionNeedsFlip( p, q ) )
 	{
-		Vector4D	p2 = p;
-		QuaternionMult( p2, q, qt );
-		return;
+		qx = -qx; qy = -qy; qz = -qz; qw = -qw;
 	}
 
-	// decide if one of the quaternions is backwards
-	Vector4D	q2;
+	const float px = p.x, py = p.y, pz = p.z, pw = p.w;
 
-	QuaternionAlign( p, q, q2 );
-	qt.x =  p.x * q2.w + p.y * q2.z - p.z * q2.y + p.w * q2.x;
-	qt.y = -p.x * q2.z + p.y * q2.w + p.z * q2.x + p.w * q2.y;
-	qt.z =  p.x * q2.y - p.y * q2.x + p.z * q2.w + p.w * q2.z;
-	qt.w = -p.x * q2.x - p.y * q2.y - p.z * q2.z + p.w * q2.w;
+	float ox = px * qw + py * qz - pz * qy + pw * qx;
+	float oy = -px * qz + py * qw + pz * qx + pw * qy;
+	float oz = px * qy - py * qx + pz * qw + pw * qz;
+	float ow = -px * qx - py * qy - pz * qz + pw * qw;
+
+	qt.x = ox;
+	qt.y = oy;
+	qt.z = oz;
+	qt.w = ow;
 }
 
 void QuaternionScale( const Vector4D &p, float t, Vector4D &q )
@@ -733,11 +755,26 @@ void QuaternionConjugate( const Vector4D &p, Vector4D &q )
 //-----------------------------------------------------------------------------
 float QuaternionAngleDiff( const Vector4D &p, const Vector4D &q )
 {
-	Vector4D qInv, diff;
-	QuaternionConjugate( q, qInv );
-	QuaternionMult( p, qInv, diff );
+	Vector4D qInv;
+	qInv.x = -q.x;
+	qInv.y = -q.y;
+	qInv.z = -q.z;
+	qInv.w = q.w;
 
-	float sinang = sqrt( diff.x * diff.x + diff.y * diff.y + diff.z * diff.z );
+	float ix = qInv.x, iy = qInv.y, iz = qInv.z, iw = qInv.w;
+
+	if( QuaternionNeedsFlip( p, qInv ) )
+	{
+		ix = -ix; iy = -iy; iz = -iz; iw = -iw;
+	}
+
+	const float px = p.x, py = p.y, pz = p.z, pw = p.w;
+
+	float dx = px * iw + py * iz - pz * iy + pw * ix;
+	float dy = -px * iz + py * iw + pz * ix + pw * iy;
+	float dz = px * iy - py * ix + pz * iw + pw * iz;
+
+	float sinang = sqrt( dx * dx + dy * dy + dz * dz );
 	float angle = RAD2DEG( 2 * asin( sinang ) );
 	return angle;
 }
