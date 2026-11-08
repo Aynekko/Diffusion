@@ -17,6 +17,12 @@
 // fuser2 is used for both body and wheels' models to control the amount of dirt on the car
 // fuser3 on wheels is used to desync the sounds...thanks to FWGS update I have to do this, otherwise I'd need to use 4 different sounds :|
 
+static void SetView( const edict_t *a, const edict_t *b )
+{
+//	ALERT( at_console, "SET VIEW\n" );
+	SET_VIEW( a, b );
+}
+
 BEGIN_DATADESC( CCar )
 	DEFINE_KEYFIELD( wheel1, FIELD_STRING, "wheel1" ),
 	DEFINE_KEYFIELD( wheel2, FIELD_STRING, "wheel2" ),
@@ -62,7 +68,6 @@ BEGIN_DATADESC( CCar )
 	DEFINE_KEYFIELD( DamageMult, FIELD_FLOAT, "damagemult" ),
 	DEFINE_KEYFIELD( CameraHeight, FIELD_INTEGER, "camheight" ),
 	DEFINE_KEYFIELD( CameraDistance, FIELD_INTEGER, "camdistance" ),
-	DEFINE_KEYFIELD( FreeCameraDistance, FIELD_INTEGER, "freecamdistance" ),
 	DEFINE_FIELD( hDriver, FIELD_EHANDLE ),
 	DEFINE_FUNCTION( Setup ),
 	DEFINE_FUNCTION( Drive ),
@@ -74,7 +79,6 @@ BEGIN_DATADESC( CCar )
 	DEFINE_FIELD( pChassis, FIELD_EHANDLE ),
 	DEFINE_FIELD( pCamera1, FIELD_EHANDLE ),
 	DEFINE_FIELD( pCamera2, FIELD_EHANDLE ),
-	DEFINE_FIELD( pFreeCam, FIELD_EHANDLE ),
 	DEFINE_FIELD( pCarHurt, FIELD_EHANDLE ),
 	DEFINE_FIELD( pDriverMdl, FIELD_EHANDLE ),
 	DEFINE_FIELD( pChassisMdl, FIELD_EHANDLE ),
@@ -99,10 +103,8 @@ BEGIN_DATADESC( CCar )
 	DEFINE_FIELD( DriftAmount, FIELD_FLOAT ),
 	DEFINE_KEYFIELD( ShiftingTime, FIELD_FLOAT, "shiftingtime" ),
 	DEFINE_FIELD( num_exhausts, FIELD_INTEGER ),
-	DEFINE_FIELD( CameraModeAddDist_Main, FIELD_FLOAT ),
-	DEFINE_FIELD( TmpCameraModeAddDist_Main, FIELD_FLOAT ),
-	DEFINE_FIELD( CameraModeAddDist_Free, FIELD_FLOAT ),
-	DEFINE_FIELD( TmpCameraModeAddDist_Free, FIELD_FLOAT ),
+	DEFINE_FIELD( CameraModeAddDist, FIELD_FLOAT ),
+	DEFINE_FIELD( TmpCameraModeAddDist, FIELD_FLOAT ),
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( func_car, CCar );
@@ -336,11 +338,6 @@ void CCar::KeyValue( KeyValueData *pkvd )
 		CameraDistance = Q_atoi( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
-	else if( FStrEq( pkvd->szKeyName, "freecamdistance" ) )
-	{
-		FreeCameraDistance = Q_atoi( pkvd->szValue );
-		pkvd->fHandled = TRUE;
-	}
 	else if( FStrEq( pkvd->szKeyName, "frontwheelradius" ) )
 	{
 		FrontWheelRadius = Q_atoi( pkvd->szValue );
@@ -493,6 +490,8 @@ void CCar::Precache( void )
 	UTIL_PrecacheOther( "apc_projectile" );
 
 	pev->spawnflags |= SF_CAR_DOIDLEUNSTICK;
+
+	LastViewEnt = NULL;
 }
 
 void CCar::Spawn( void )
@@ -888,6 +887,7 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 		
 		pPlayer->pCar = this;
 		pPlayer->m_flFOV = CAR_FOV;
+		LastViewEnt = NULL;
 
 		if( StartSilent )
 			StartSilent = false;
@@ -951,8 +951,7 @@ void CCar::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType,
 			AccelAddX = 0;
 			BrakeAddX = 0;
 			EnteringShake = 2.0f;
-			CameraModeAddDist_Free = 100.0f;
-			CameraModeAddDist_Main = 50.0f;
+			CameraModeAddDist = 50.0f;
 			if( pExhaust1 )
 			{
 				pExhaust1->pev->iuser3 = -665;
@@ -1071,7 +1070,14 @@ void CCar::Setup( void )
 
 	if( !pWheel1 || !pWheel2 || !pWheel3 || !pWheel4 )
 	{
-		ALERT( at_error, "CAR WITH NO WHEELS! Must be 4 wheels present.\n" );
+		ALERT( at_error, "func_car WITH NOT ENOUGH WHEELS! Must be all 4 wheels present.\n" );
+		UTIL_Remove( this );
+		return;
+	}
+
+	if( !pCamera1 )
+	{
+		ALERT( at_error, "func_car WITH NO MAIN CAMERA! This is fatal, vehicle deleted.\n" );
 		UTIL_Remove( this );
 		return;
 	}
@@ -1126,25 +1132,22 @@ void CCar::Setup( void )
 			CameraDistance = 230;
 	}
 
-	if( pCamera1 )
+	pCamera1->SetNullModel();
+	pCamera1->pev->effects |= EF_SKIPPVS;
+	if( !CameraHeight )
 	{
-		pCamera1->SetNullModel();
-		pCamera1->pev->effects |= EF_SKIPPVS;
-		if( !CameraHeight )
+		if( pChassisMdl )
 		{
-			if( pChassisMdl )
-			{
-				// get camera distance according to model bounds
-				Vector mins = g_vecZero;
-				Vector maxs = g_vecZero;
-				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-				CameraHeight = (int)(fabs( mins.z - maxs.z ) * pChassisMdl->pev->scale);
-			}
-			else
-				CameraHeight = 80;
+			// get camera distance according to model bounds
+			Vector mins = g_vecZero;
+			Vector maxs = g_vecZero;
+			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+			CameraHeight = (int)(fabs( mins.z - maxs.z ) * pChassisMdl->pev->scale);
 		}
-		pCamera1->pev->iuser3 = -673;
+		else
+			CameraHeight = 80;
 	}
+	pCamera1->pev->iuser3 = -673;
 
 	if( pCamera2 )
 	{
@@ -1173,34 +1176,15 @@ void CCar::Setup( void )
 
 	if( pTankTower )
 	{
+		if( !pTankTower->pev->model )
+			pTankTower->SetNullModel();
+
 		if( pChassisMdl )
 			pTankTower->SetParent( (CBaseEntity *)pChassisMdl );
 		else if( pChassis )
 			pTankTower->SetParent( (CBaseEntity *)pChassis );
 		else
 			pTankTower->SetParent( this );
-	}
-
-	pFreeCam = CBaseEntity::Create( "info_target", GetAbsOrigin(), GetAbsAngles(), edict() );
-	if( pFreeCam )
-	{
-		pFreeCam->SetNullModel();
-		pFreeCam->SetParent( this );
-		if( FreeCameraDistance <= 0 )
-		{
-			if( pChassisMdl )
-			{
-				// get camera distance according to model bounds
-				Vector mins = g_vecZero;
-				Vector maxs = g_vecZero;
-				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-				FreeCameraDistance = (int)((mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale);
-			}
-			else
-				FreeCameraDistance = CameraDistance;
-		}
-		pFreeCam->pev->effects |= EF_SKIPPVS;
-		pFreeCam->pev->iuser3 = -673;
 	}
 
 	if( pDoorHandle1 )
@@ -1521,6 +1505,8 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 	case 3: pWheelX = pWheel3; break;
 	case 4: pWheelX = pWheel4; break;
 	}
+
+	*ChassisShake = 1.0f;
 	
 	// trace down from the wheel origin
 	Vector Tex_vecStart = pWheelX->GetAbsOrigin();
@@ -1538,7 +1524,7 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 			switch( chTextureType )
 			{
 			case CHAR_TEX_GRASS:
-				*ChassisShake = 2.5f;
+				*ChassisShake = 1.25f;
 				soundtype = 2;
 				handbrakesoundtype = 7;
 				*surf_Mult = surf_GrassMult;
@@ -1547,7 +1533,7 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 				AddDirt = true;
 				break;
 			case CHAR_TEX_GRAVEL:
-				*ChassisShake = 5.0f;
+				*ChassisShake = 2.0f;
 				soundtype = 3;
 				handbrakesoundtype = 7;
 				*surf_Mult = surf_GravelMult;
@@ -1556,7 +1542,7 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 				Type = 1;
 				break;
 			case CHAR_TEX_SNOW:
-				*ChassisShake = 2.0f;
+				*ChassisShake = 1.25f;
 				soundtype = 4;
 				handbrakesoundtype = 7;
 				*surf_Mult = surf_SnowMult;
@@ -1564,7 +1550,7 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 				// UNDONE snow "dirt"?
 				break;
 			case CHAR_TEX_DIRT:
-				*ChassisShake = 4.0f;
+				*ChassisShake = 1.75f;
 				soundtype = 1;
 				handbrakesoundtype = 7;
 				*surf_Mult = surf_DirtMult;
@@ -1574,7 +1560,6 @@ void CCar::SetupTireSoundAtSurface( int wheelnum, float AbsCarSpeed, float *Chas
 				break;
 			case CHAR_TEX_WOOD:
 			case CHAR_TEX_WOODSTEP:
-				*ChassisShake = 1.0f;
 				soundtype = 5;
 				handbrakesoundtype = 7;
 				*surf_Mult = surf_WoodMult;
@@ -1689,6 +1674,12 @@ void CCar::Drive( void )
 		SetNextThink( 0 );
 		return;
 	}
+
+	if( !LastPlayerAngles )
+		LastPlayerAngles = hDriver->pev->v_angle;
+
+	bLastPlayerAnglesUpdated = false;
+	bMouseHasMoved = (hDriver->pev->v_angle != LastPlayerAngles);
 
 	// reset all velocity from previous frame
 	pev->velocity = g_vecZero;
@@ -1936,7 +1927,7 @@ void CCar::Drive( void )
 	//----------------------------
 	// texture sound (tires) and chassis shaking (from dirt etc.)
 	//----------------------------
-	float ChassisShake = 0.0f;
+	ChassisShake = 0.0f;
 	float ChassisShake1 = 0.0f;
 	float ChassisShake2 = 0.0f;
 	float ChassisShake3 = 0.0f;
@@ -1947,8 +1938,10 @@ void CCar::Drive( void )
 	float surf_Mult3 = 1.0f;
 	float surf_Mult4 = 1.0f;
 
-	for( int setupwheel = 1; setupwheel <= 4; setupwheel++ )
-		SetupTireSoundAtSurface( setupwheel, AbsCarSpeed, &ChassisShake1, &surf_Mult1 );
+	SetupTireSoundAtSurface( 1, AbsCarSpeed, &ChassisShake1, &surf_Mult1 );
+	SetupTireSoundAtSurface( 2, AbsCarSpeed, &ChassisShake2, &surf_Mult2 );
+	SetupTireSoundAtSurface( 3, AbsCarSpeed, &ChassisShake3, &surf_Mult3 );
+	SetupTireSoundAtSurface( 4, AbsCarSpeed, &ChassisShake4, &surf_Mult4 );
 
 	if( !HasSpawnFlags(SF_CAR_CANTBEDIRTY) )
 	{
@@ -2582,6 +2575,10 @@ void CCar::Drive( void )
 		StuckTime = gpGlobals->time;
 	}
 
+	//----------------------------
+	// camera handing
+	//----------------------------
+
 	Camera();
 
 	//----------------------------
@@ -2672,7 +2669,7 @@ void CCar::Drive( void )
 		if( bAimingView || CamUnlocked )
 		{
 			// turret moves almost freely because we use it as a camera
-			TowerAngles = hDriver->pev->v_angle;
+			TowerAngles = pCamera1->GetAbsAngles();
 			TowerAngles.x *= 0.35f; // let's not get carried away...
 			Camera2RotationX = 0;
 			Camera2RotationY = 0;
@@ -2735,13 +2732,16 @@ void CCar::Drive( void )
 		NewAccelAddX = UTIL_Approach( 0.0f, NewAccelAddX, gpGlobals->frametime );
 	LastCarSpeed = CarSpeed;
 
+	if( !bLastPlayerAnglesUpdated ) // could be updated in the middle of the run for any reasons
+		LastPlayerAngles = hDriver->pev->v_angle;
+
 	//-----------------------------------------------------
 	// !!! hDriver can become NULL after this, by taking damage and dying, game will crash.
 	//-----------------------------------------------------
 	if( TookDamage && DriverDamage > 10.0f )
 	{
 		UTIL_ScreenShakeLocal( hDriver, GetAbsOrigin(), AbsCarSpeed * 0.01, 100, 1, 300, true );
-		TakeDamage( pev, pev, DriverDamage, DMG_CRUSH );
+		TakeDamage( pev, pev, DriverDamage, DMG_CRUSH ); // hDriver can become NULL after this, if player dies
 	}
 
 	if( hDriver == NULL )
@@ -2984,15 +2984,12 @@ void CCar::Camera(void)
 	if( !hDriver || !(hDriver->pev->flags & FL_CLIENT) )
 		return;
 
-	if( !LastPlayerAngles )
-		LastPlayerAngles = hDriver->pev->v_angle;
-
 	if( !pCamera2 )
 		SecondaryCamera = false;
 
 	float MouseWaitON = CAR_CAMERA_MOUSE_WAIT_ON;
 	float MouseWaitOFF = CAR_CAMERA_MOUSE_WAIT_OFF;
-	const bool bMouseHasMoved = (hDriver->pev->v_angle != LastPlayerAngles);
+
 	if( SecondaryCamera )
 	{
 		MouseWaitON = 0.0f;
@@ -3003,8 +3000,7 @@ void CCar::Camera(void)
 	const float ChassisAngleX = pChassis->GetAbsAngles().x;
 	const float ChassisAngleY = pChassis->GetAbsAngles().y;
 
-	// this is also used to stop free camera from snapping back on vehicles with no turret
-	const bool bAimingView = (hDriver->pev->button & IN_ATTACK2);
+	const bool bAimingView = (pTankTower && (hDriver->pev->button & IN_ATTACK2));
 
 	if( bMouseHasMoved )
 	{
@@ -3022,7 +3018,9 @@ void CCar::Camera(void)
 					hDriver->pev->fixangle = TRUE;
 					hDriver->pev->v_angle = GetAbsAngles();
 					hDriver->pev->v_angle.z = 0;
-					LastPlayerAngles = hDriver->GetAbsAngles();
+					LastPlayerAngles = GetAbsAngles();
+					bLastPlayerAnglesUpdated = true;
+
 				}
 				CamUnlocked = true;
 			}
@@ -3060,22 +3058,16 @@ void CCar::Camera(void)
 			Camera2RotationX = AngleNormalize( Camera2RotationX + deltaPitch );
 			Camera2RotationY = AngleNormalize( Camera2RotationY + deltaYaw );
 		}
-		Camera2RotationY = bound( -100, Camera2RotationY, 100 );
-		Camera2RotationX = bound( -60, Camera2RotationX, 25 );
 	}
 
-	if( CamUnlocked )
+	if( !SecondaryCamera )
 	{
-		CameraModeAddDist_Free = bound( 0.0f, CameraModeAddDist_Free, 200.0f );
+		CameraModeAddDist = bound( 0.0f, CameraModeAddDist, 100.0f );
 		// lerp to the new position
-		TmpCameraModeAddDist_Free = lerp( TmpCameraModeAddDist_Free, CameraModeAddDist_Free, 10.0f * gpGlobals->frametime );
+		TmpCameraModeAddDist = lerp( TmpCameraModeAddDist, CameraModeAddDist, 10.0f * gpGlobals->frametime );
 	}
-	else if( !SecondaryCamera )
-	{
-		CameraModeAddDist_Main = bound( 0.0f, CameraModeAddDist_Main, 100.0f );
-		// lerp to the new position
-		TmpCameraModeAddDist_Main = lerp( TmpCameraModeAddDist_Main, CameraModeAddDist_Main, 10.0f * gpGlobals->frametime );
-	}
+	else
+		TmpCameraModeAddDist = 0;
 
 	if( !NewCameraAngleY )
 		NewCameraAngleY = ChassisAngleY;
@@ -3121,51 +3113,85 @@ void CCar::Camera(void)
 			CameraAngles.x = lerp( CameraAngles.x, -NewCameraAngleX, approach_speed * gpGlobals->frametime );
 	}
 
+	// just like in NFS MW, move camera closer if we don't press accelerate (car is slowing down)
+	if( AbsCarSpeed > 50 )
+	{
+		if( CarSpeed > 50 && !bForward() )
+		{
+			if( bBack() ) // different lerp for brakes
+				CamDistAdjust = lerp( CamDistAdjust, 0.65f, gpGlobals->frametime );
+			else
+				CamDistAdjust = UTIL_Approach( 0.65f, CamDistAdjust, 0.1f * gpGlobals->frametime );
+		}
+		else
+			//	CamDistAdjust = UTIL_Approach( 1.0f, CamDistAdjust, 0.2f * gpGlobals->frametime );
+			CamDistAdjust = lerp( CamDistAdjust, 1.0f, gpGlobals->frametime );
+	}
+
 	TraceResult CamTr;
 
-	if( pTankTower && bAimingView )
+	Vector vTraceStartPos = GetAbsOrigin();
+	if( !TmpMainCameraHeightLerper )
+		TmpMainCameraHeightLerper = vTraceStartPos.z;
+	else
 	{
-		SET_VIEW( hDriver->edict(), pTankTower->edict() );
+		TmpMainCameraHeightLerper = lerp( TmpMainCameraHeightLerper, vTraceStartPos.z, gpGlobals->frametime * 10.0f );
+		vTraceStartPos.z = TmpMainCameraHeightLerper;
 	}
-	else if( (CamUnlocked || bAimingView) && pFreeCam )
+
+	if( CamUnlocked || bAimingView )
 	{
-		SET_VIEW( hDriver->edict(), pFreeCam->edict() );
+		if( bAimingView )
+		{
+			if( LastViewEnt != pTankTower->edict() )
+			{
+				// when we switch to aiming view from the secondary camera, turret position must reflect the direction where we looking at
+				if( pCamera2 && LastViewEnt == pCamera2->edict() )
+					FreeCamRotation = pCamera2->GetAbsAngles();
+
+				SetView( hDriver->edict(), pTankTower->edict() );
+				LastViewEnt = pTankTower->edict();
+			}
+		}
+		else
+		{
+			if( LastViewEnt != pCamera1->edict() )
+			{
+				SetView( hDriver->edict(), pCamera1->edict() );
+				LastViewEnt = pCamera1->edict();
+			}
+		}
+
 		TraceResult CamTr;
 		Vector DriverAngles = hDriver->pev->v_angle;
 		Vector CamOrg;
 
-		if( CamUnlocked && !bAimingView )
+		if( bMouseHasMoved )
 		{
-			if( bMouseHasMoved )
-			{
-				// get player's turn angle, see if it's changed
-				float CurY = hDriver->pev->v_angle.y;
-				float LastY = LastPlayerAngles.y;
-				float CurX = hDriver->pev->v_angle.x;
-				float LastX = LastPlayerAngles.x;
-				// check the direction of the camera movement
-				float deltaYaw = UTIL_AngleDiff( hDriver->pev->v_angle.y, LastPlayerAngles.y );
-				float deltaPitch = UTIL_AngleDiff( hDriver->pev->v_angle.x, LastPlayerAngles.x );
-				FreeCamRotation.x = AngleNormalize( FreeCamRotation.x + deltaPitch );
-				FreeCamRotation.y = AngleNormalize( FreeCamRotation.y + deltaYaw );
-			}
-
-			DriverAngles = FreeCamRotation;
-			// save it so thrid-person camera will respond properly when we let go of the mouse
-			CameraAngles = FreeCamRotation;
-			TmpCameraModeAddDist_Main = TmpCameraModeAddDist_Free;
-			
+			// get player's turn angle, see if it's changed
+			float CurY = hDriver->pev->v_angle.y;
+			float LastY = LastPlayerAngles.y;
+			float CurX = hDriver->pev->v_angle.x;
+			float LastX = LastPlayerAngles.x;
+			// check the direction of the camera movement
+			float deltaYaw = UTIL_AngleDiff( hDriver->pev->v_angle.y, LastPlayerAngles.y );
+			float deltaPitch = UTIL_AngleDiff( hDriver->pev->v_angle.x, LastPlayerAngles.x );
+			FreeCamRotation.x = AngleNormalize( FreeCamRotation.x + deltaPitch );
+			FreeCamRotation.y = AngleNormalize( FreeCamRotation.y + deltaYaw );
 		}
 
+		// save it so third-person camera will respond properly when we let go of the mouse
+		CameraAngles = FreeCamRotation;
+
 		Vector vForward;
-		g_engfuncs.pfnAngleVectors( DriverAngles, vForward, NULL, NULL );
+		g_engfuncs.pfnAngleVectors( CameraAngles, vForward, NULL, NULL );
 		UTIL_TraceLine( 
-			GetAbsOrigin() + gpGlobals->v_up * CameraHeight,
-			GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * (FreeCameraDistance + TmpCameraModeAddDist_Free),
+			vTraceStartPos + gpGlobals->v_up * CameraHeight,
+			vTraceStartPos + gpGlobals->v_up * CameraHeight - vForward * (CameraDistance + TmpCameraModeAddDist) * CamDistAdjust,
 			dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 		CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
-		pFreeCam->SetAbsOrigin( CamOrg );
-		pFreeCam->SetAbsAngles( DriverAngles );
+		pCamera1->SetAbsOrigin( CamOrg );
+		pCamera1->SetAbsAngles( CameraAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );
 	}
 	else
 	{
@@ -3174,15 +3200,55 @@ void CCar::Camera(void)
 
 		if( SecondaryCamera )
 		{
-			SET_VIEW( hDriver->edict(), pCamera2->edict() );
+			if( LastViewEnt != pCamera2->edict() )
+			{
+				// when we switch FROM aiming view from the secondary camera, the position must reflect the direction where we looking at
+				if( pTankTower && LastViewEnt == pTankTower->edict() )
+				{
+					Camera2RotationX = pTankTower->GetAbsAngles().x;
+					// I don't know why this works.
+					float delta = UTIL_AngleDiff( pTankTower->GetAbsAngles().y, GetAbsAngles().y );
+					Camera2RotationY = AngleNormalize( delta );
+				}
+
+				SetView( hDriver->edict(), pCamera2->edict() );
+				LastViewEnt = pCamera2->edict();
+			}
 			CamOrg = Camera2LocalOrigin;
 			BackSway = bound( 0, BackSway, MaxCamera2Sway );
 			CamOrg.x = Camera2LocalOrigin.x - BackSway;
 			CamOrg.y = Camera2LocalOrigin.y + CameraMoving;
+
+			// add "soft seat" effect (usually secondary camera is an interior, but if it's any other (hood, wheel) I guess it's fine too)
+			if( ChassisShake > 0 && AbsCarSpeed > 0 )
+			{
+				if( !fSoftSeatUpdateTime )
+					fSoftSeatUpdateTime = gpGlobals->time;
+
+				if( !fSoftSeatPosZ_cur )
+					fSoftSeatPosZ_cur = fSoftSeatPosZ_prev = fSoftSeatPosZ_new = 0.0f;
+
+				if( gpGlobals->time > fSoftSeatUpdateTime )
+				{
+					fSoftSeatPosZ_prev = fSoftSeatPosZ_cur;
+					fSoftSeatPosZ_new = RANDOM_FLOAT( -ChassisShake, ChassisShake );
+					fSoftSeatUpdateTime = gpGlobals->time + (RANDOM_FLOAT( 0.1f, 0.2f ) - (0.00005f * AbsCarSpeed));
+				}
+
+				fSoftSeatPosZ_cur = lerp( fSoftSeatPosZ_cur, fSoftSeatPosZ_new, gpGlobals->frametime * ChassisShake );
+			}
+			else
+				fSoftSeatPosZ_cur = lerp( fSoftSeatPosZ_cur, 0.0f, gpGlobals->frametime * 0.25f );
+
+			CamOrg.z += fSoftSeatPosZ_cur;
+
+			Camera2RotationY = bound( -100, Camera2RotationY, 100 );
+			Camera2RotationX = bound( -60, Camera2RotationX, 25 );
+
 			pCamera2->SetLocalOrigin( CamOrg );
 			pCamera2->SetLocalAngles( Camera2LocalAngles + Vector( CameraBrakeOffsetX + Camera2RotationX, Camera2RotationY, 0 ) );
 		}
-		else if( pCamera1 )
+		else
 		{
 			// save it so free camera will respond properly when we touch the mouse
 			FreeCamRotation = CameraAngles;
@@ -3190,33 +3256,17 @@ void CCar::Camera(void)
 			Vector vForward;
 			g_engfuncs.pfnAngleVectors( CameraAngles, vForward, NULL, NULL );
 
-			// just like in NFS MW, move camera closer if we don't press accelerate (car is slowing down)
-			if( AbsCarSpeed > 50 )
+			if( LastViewEnt != pCamera1->edict() )
 			{
-				if( CarSpeed > 50 && !bForward() )
-				{
-					if( bBack() ) // different lerp for brakes
-						CamDistAdjust = lerp( CamDistAdjust, 0.65f, gpGlobals->frametime );
-					else
-						CamDistAdjust = UTIL_Approach( 0.65f, CamDistAdjust, 0.1f * gpGlobals->frametime );
-				}
-				else
-				//	CamDistAdjust = UTIL_Approach( 1.0f, CamDistAdjust, 0.2f * gpGlobals->frametime );
-					CamDistAdjust = lerp( CamDistAdjust, 1.0f, gpGlobals->frametime );
+				SetView( hDriver->edict(), pCamera1->edict() );
+				LastViewEnt = pCamera1->edict();
 			}
-			SET_VIEW( hDriver->edict(), pCamera1->edict() );
+
 			UTIL_TraceLine( 
-				GetAbsOrigin() + gpGlobals->v_up * CameraHeight,
-				GetAbsOrigin() + gpGlobals->v_up * CameraHeight - vForward * (CameraDistance + TmpCameraModeAddDist_Main) * CamDistAdjust,
+				vTraceStartPos + gpGlobals->v_up * CameraHeight,
+				vTraceStartPos + gpGlobals->v_up * CameraHeight - vForward * (CameraDistance + TmpCameraModeAddDist) * CamDistAdjust,
 				dont_ignore_monsters, dont_ignore_glass, edict(), &CamTr );
 			CamOrg = CamTr.vecEndPos + CamTr.vecPlaneNormal * 10;
-			if( !TmpMainCameraHeightLerper )
-				TmpMainCameraHeightLerper = CamOrg.z;
-			else
-			{
-				TmpMainCameraHeightLerper = lerp( TmpMainCameraHeightLerper, CamOrg.z, gpGlobals->frametime * 10.0f );
-				CamOrg.z = TmpMainCameraHeightLerper;
-			}
 			pCamera1->SetAbsOrigin( CamOrg );
 			pCamera1->SetAbsAngles( CameraAngles + Vector( CameraBrakeOffsetX, 0, 0 ) );
 		}
@@ -3224,8 +3274,6 @@ void CCar::Camera(void)
 
 	// bring back the car vectors
 	UTIL_MakeVectors( GetAbsAngles() );
-
-	LastPlayerAngles = hDriver->pev->v_angle;
 }
 
 //===============================================================================
@@ -3483,8 +3531,6 @@ void CCar::ClearEffects( void )
 		UTIL_Remove( pCamera1, true );
 	if( pCamera2 )
 		UTIL_Remove( pCamera2, true );
-	if( pFreeCam )
-		UTIL_Remove( pFreeCam, true );
 	if( pCarHurt )
 		UTIL_Remove( pCarHurt, true );
 	if( pDriverMdl )
@@ -3506,7 +3552,6 @@ void CCar::ClearEffects( void )
 	pChassisMdl = NULL;
 	pCamera1 = NULL;
 	pCamera2 = NULL;
-	pFreeCam = NULL;
 	pCarHurt = NULL;
 	pDriverMdl = NULL;
 	pExhaust1 = NULL;

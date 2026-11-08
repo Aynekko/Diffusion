@@ -1622,6 +1622,7 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 		static Vector CarViewAng = g_vecZero;
 		static Vector CarViewOrg = g_vecZero;
 		static float lerptime = 1.0f;
+		static float lerptime2 = 1.0f;
 		if( tmpViewEnt == NULL || view->player )
 			tmpViewEnt = view;
 
@@ -1630,35 +1631,38 @@ void V_CalcCameraRefdef( struct ref_params_s *pparams )
 			if( tmpViewEnt != view )
 			{
 				lerptime = 0.0f;
+				lerptime2 = 0.0f;
 				tmpViewEnt = view;
 			}
 
-			if( view->curstate.iuser3 == -673 ) // this camera indicates that we are lerping to it, otherwise instant view snap
-			{
-				if( CarViewOrg == g_vecZero )
-					CarViewOrg = view->origin;
-				if( CarViewAng == g_vecZero )
-					CarViewAng = view->angles;
+			if( CarViewOrg == g_vecZero )
+				CarViewOrg = view->origin;
+			if( CarViewAng == g_vecZero )
+				CarViewAng = view->angles;
 
-				if( lerptime < 1.0f )
-					lerptime += g_fFrametime * (lerptime + 0.1f + (gHUD.CarSpeed * 0.01));
-				InterpolateOrigin( CarViewOrg, view->origin, CarViewOrg, lerptime );
-				InterpolateAngles( CarViewAng, view->angles, CarViewAng, lerptime );
-				pparams->viewangles = CarViewAng;
-				pparams->vieworg = CarViewOrg;
-			}
-			else
+			if( lerptime < 1.0f )
 			{
-				pparams->vieworg = view->origin;
-				pparams->viewangles = view->angles;
-				CarViewOrg = g_vecZero;
-				CarViewAng = g_vecZero;
+				const float lerpminspeed = (g_fFrametime * 0.5f);
+				float lerpspeed = (g_fFrametime * 0.1f) + (gHUD.CarSpeed * 0.00025f);
+				if( lerpspeed < lerpminspeed ) lerpspeed = lerpminspeed;
+				lerptime += lerpspeed;
 			}
+
+			InterpolateOrigin( CarViewOrg, view->origin, CarViewOrg, lerptime );
+
+			if( lerptime2 < 1.0f )
+				lerptime2 += g_fFrametime * 0.5f;
+
+			InterpolateAngles( CarViewAng, view->angles, CarViewAng, lerptime2 );
+				
+			pparams->viewangles = CarViewAng;
+			pparams->vieworg = CarViewOrg;
 		}
 		else
 		{
 			tmpViewEnt = NULL;
 			lerptime = 1.0f;
+			lerptime2 = 1.0f;
 			pparams->vieworg = view->origin;
 			pparams->viewangles = view->angles;
 			CarViewOrg = g_vecZero;

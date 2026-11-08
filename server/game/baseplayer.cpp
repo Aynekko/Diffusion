@@ -5971,14 +5971,15 @@ void CBasePlayer::SelectLastItem( void )
 	{
 		if( pCar )
 		{
-		//	if( pCar->CamUnlocked )
-		//	{
-				pCar->fMouseTouchedOFF = CAR_CAMERA_MOUSE_WAIT_OFF;
-				pCar->fMouseTouchedON = 0.0f;
-				pCar->CamUnlocked = false;
-		//	}
-		//	else
-				pCar->SecondaryCamera = !pCar->SecondaryCamera;
+			pCar->fMouseTouchedOFF = CAR_CAMERA_MOUSE_WAIT_OFF;
+			pCar->fMouseTouchedON = 0.0f;
+			pCar->CamUnlocked = false;
+			pCar->SecondaryCamera = !pCar->SecondaryCamera;
+
+			// reset both cameras' angles
+			pCar->CameraAngles = pCar->GetAbsAngles();
+			pCar->Camera2RotationX = 0;
+			pCar->Camera2RotationY = 0;
 		}
 
 		return;

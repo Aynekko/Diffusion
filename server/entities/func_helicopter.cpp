@@ -40,7 +40,6 @@ BEGIN_DATADESC( CHelicopter )
 	DEFINE_FIELD( pBlade2, FIELD_EHANDLE ),
 	DEFINE_FIELD( pCamera1, FIELD_EHANDLE ),
 	DEFINE_FIELD( pCamera2, FIELD_EHANDLE ),
-	DEFINE_FIELD( pFreeCam, FIELD_EHANDLE ),
 	DEFINE_FIELD( pCarHurt, FIELD_EHANDLE ),
 	DEFINE_FIELD( pDriverMdl, FIELD_EHANDLE ),
 	DEFINE_FIELD( pChassisMdl, FIELD_EHANDLE ),
@@ -56,7 +55,6 @@ BEGIN_DATADESC( CHelicopter )
 	DEFINE_FIELD( BladeSpeed, FIELD_FLOAT ),
 	DEFINE_KEYFIELD( CameraHeight, FIELD_INTEGER, "camheight" ),
 	DEFINE_KEYFIELD( CameraDistance, FIELD_INTEGER, "camdistance" ),
-	DEFINE_KEYFIELD( FreeCameraDistance, FIELD_INTEGER, "freecamdistance" ),
 	DEFINE_FIELD( IsHeli, FIELD_BOOLEAN ),
 END_DATADESC()
 
@@ -131,6 +129,8 @@ void CHelicopter::Precache( void )
 	PRECACHE_SOUND( "drone/drone_hit3.wav" );
 	PRECACHE_SOUND( "drone/drone_hit4.wav" );
 	PRECACHE_SOUND( "drone/drone_hit5.wav" );
+
+	LastViewEnt = NULL;
 }
 
 void CHelicopter::Spawn( void )
@@ -282,6 +282,7 @@ void CHelicopter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 
 		pPlayer->pCar = this;
 		pPlayer->m_flFOV = CAR_FOV;
+		LastViewEnt = NULL;
 
 		if( hDriver == NULL )
 		{
@@ -319,11 +320,14 @@ void CHelicopter::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE u
 			UTIL_FireTargets( pev->target, pPlayer, this, USE_TOGGLE, 0 );
 			time = gpGlobals->time;
 			DriverMdlSequence = -1;
+			CameraBrakeOffsetX = 0;
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
 			NewCameraAngleY = CameraAngles.y;
 			NewCameraAngleX = 0;
-			CameraModeAddDist_Free = 100.0f;
-			CameraModeAddDist_Main = 50.0f;
+			AccelAddX = 0;
+			BrakeAddX = 0;
+			EnteringShake = 2.0f;
+			CameraModeAddDist = 100.0f;
 			LastPlayerAngles = hDriver->pev->v_angle;
 			Camera2RotationX = 0;
 			Camera2RotationY = 0;
@@ -358,6 +362,13 @@ void CHelicopter::Setup( void )
 	pDoorHandle1 = UTIL_FindEntityByTargetname( NULL, STRING( door_handle ) );
 	pDoorHandle2 = UTIL_FindEntityByTargetname( NULL, STRING( door_handle2 ) );
 
+	if( !pCamera1 )
+	{
+		ALERT( at_error, "func_helicopter WITH NO MAIN CAMERA! This is fatal, vehicle deleted.\n" );
+		UTIL_Remove( this );
+		return;
+	}
+
 	if( pChassisMdl )
 	{
 		pChassisMdl->pev->owner = edict();
@@ -383,24 +394,21 @@ void CHelicopter::Setup( void )
 			CameraDistance = 250;
 	}
 
-	if( pCamera1 )
+	pCamera1->SetNullModel();
+	pCamera1->pev->effects |= EF_SKIPPVS;
+	pCamera1->pev->iuser3 = -673;
+	if( !CameraHeight )
 	{
-		pCamera1->SetNullModel();
-		pCamera1->pev->effects |= EF_SKIPPVS;
-		pCamera1->pev->iuser3 = -673;
-		if( !CameraHeight )
+		if( pChassisMdl )
 		{
-			if( pChassisMdl )
-			{
-				// get camera distance according to model bounds
-				Vector mins = g_vecZero;
-				Vector maxs = g_vecZero;
-				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-				CameraHeight = (int)(fabs( mins.z - maxs.z ) * pChassisMdl->pev->scale);
-			}
-			else
-				CameraHeight = 150;
+			// get camera distance according to model bounds
+			Vector mins = g_vecZero;
+			Vector maxs = g_vecZero;
+			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+			CameraHeight = (int)(fabs( mins.z - maxs.z ) * pChassisMdl->pev->scale);
 		}
+		else
+			CameraHeight = 150;
 	}
 
 	if( pCamera2 )
@@ -449,28 +457,6 @@ void CHelicopter::Setup( void )
 		pDriverMdl->pev->effects |= EF_NODRAW;
 	}
 
-	pFreeCam = CBaseEntity::Create( "info_target", GetAbsOrigin(), GetAbsAngles(), edict() );
-	if( pFreeCam )
-	{
-		pFreeCam->SetNullModel();
-		pFreeCam->SetParent( this );
-		if( FreeCameraDistance <= 0 )
-		{
-			if( pChassisMdl )
-			{
-				// get camera distance according to model bounds
-				Vector mins = g_vecZero;
-				Vector maxs = g_vecZero;
-				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-				FreeCameraDistance = (int)((mins - maxs).Length() * pChassisMdl->pev->scale);
-			}
-			else
-				FreeCameraDistance = CameraDistance;
-		}
-		pFreeCam->pev->effects |= EF_SKIPPVS;
-		pFreeCam->pev->iuser3 = -673;
-	}
-
 	if( pDoorHandle1 )
 	{
 		// reset USE flag, car can be USE-pressed through handle only
@@ -495,6 +481,9 @@ void CHelicopter::Setup( void )
 
 	if( pTankTower )
 	{
+		if( !pTankTower->pev->model )
+			pTankTower->SetNullModel();
+
 		if( pChassisMdl )
 			pTankTower->SetParent( (CBaseEntity *)pChassisMdl );
 		else if( pChassis )
@@ -524,6 +513,12 @@ void CHelicopter::Drive( void )
 		SetNextThink( 0 );
 		return;
 	}
+
+	if( !LastPlayerAngles )
+		LastPlayerAngles = hDriver->pev->v_angle;
+
+	bLastPlayerAnglesUpdated = false;
+	bMouseHasMoved = (hDriver->pev->v_angle != LastPlayerAngles);
 	
 	// reset all velocity from previous frame
 	pev->velocity = g_vecZero;
@@ -1013,21 +1008,33 @@ void CHelicopter::Drive( void )
 		}
 	}
 
+	//----------------------------
+	// shoot!
+	//----------------------------
 	const bool bAimingView = (hDriver->pev->button & IN_ATTACK2);
 	if( pTankTower && bAimingView )
 	{
-		Camera2RotationX = 0;
-		Camera2RotationY = 0;
-
 		// rotate tower
 		Vector TowerAngles = ChassisAng;
 		if( pChassisMdl )
 			TowerAngles = pChassisMdl->GetLocalAngles();
 
-		// turret moves almost freely because we use it as a camera
-		TowerAngles = hDriver->pev->v_angle;
-		TowerAngles.x *= 0.4f; // let's not get carried away...
 		if( bAimingView || CamUnlocked )
+		{
+			// turret moves almost freely because we use it as a camera
+			TowerAngles = pCamera1->GetAbsAngles();
+			TowerAngles.x *= 0.35f; // let's not get carried away...
+			Camera2RotationX = 0;
+			Camera2RotationY = 0;
+		}
+		else
+		{
+			TowerAngles.y += TankTowerRotationOffset;
+			TowerAngles.y += Camera2RotationY;
+			TowerAngles.x += Camera2RotationX;
+		}
+
+		if( CamUnlocked )
 			pTankTower->SetAbsAngles( TowerAngles );
 		else
 			pTankTower->SetLocalAngles( TowerAngles );
@@ -1039,9 +1046,17 @@ void CHelicopter::Drive( void )
 			Vector RocketOrg = pTankTower->GetAbsOrigin() + gpGlobals->v_forward * 50;
 			Vector RocketAng = TowerAngles;
 
-			hDriver->FireBullets( 1, pTankTower->GetAbsOrigin(), gpGlobals->v_forward, VECTOR_CONE_3DEGREES, 16384, BULLET_MONSTER_12MM, 1, 30.0f, hDriver->pev );
 			PlayClientSound( pTankTower, 247 );
 			UTIL_ScreenShakeLocal( hDriver, pTankTower->GetAbsOrigin(), 1.5f, 100, 0.2, 300, true );
+
+			hDriver->FireBullets( 1, pTankTower->GetAbsOrigin(), gpGlobals->v_forward, VECTOR_CONE_3DEGREES, 16384, BULLET_MONSTER_12MM, 1, 30.0f, hDriver->pev );
+			
+			// can kill yourself with bullets...facepalm.
+			// FireBullets -> TakeDamage -> Killed -> hDriver becomes NULL because he leaves the vehicle -> CRASH
+			// Maybe I need to disable this damage, but whatever, let's leave it for now
+			if( hDriver == NULL )
+				return;
+			
 			LastShootTime = gpGlobals->time;
 
 			// bring back the car vectors
@@ -1097,12 +1112,21 @@ void CHelicopter::Drive( void )
 	if( Collided )
 		CarSpeed *= -0.15 / ColDotProduct;
 
+	if( !bLastPlayerAnglesUpdated ) // could be updated in the middle of the run for any reasons
+		LastPlayerAngles = hDriver->pev->v_angle;
+
+	//-----------------------------------------------------
+	// !!! hDriver can become NULL after this, by taking damage and dying, game will crash.
+	//-----------------------------------------------------
+
 	if( TookDamage && DriverDamage > 10 )
 	{
-		hDriver->TakeDamage( pev, pev, DriverDamage, DMG_CRUSH );
 		UTIL_ScreenShakeLocal( hDriver, GetAbsOrigin(), AbsCarSpeed * 0.01, 100, 1, 300, true );
+		hDriver->TakeDamage( pev, pev, DriverDamage, DMG_CRUSH ); // hDriver can become NULL after this, if player dies
 	}
-	// !!! hDriver can become NULL after this, by taking damage and dying, game will crash.
+
+	if( hDriver == NULL )
+		return;
 
 	SetNextThink( 0 );
 }
@@ -1669,12 +1693,18 @@ void CHelicopter::ClearEffects( void )
 		UTIL_Remove( pCamera1, true );
 	if( pCamera2 )
 		UTIL_Remove( pCamera2, true );
-	if( pFreeCam )
-		UTIL_Remove( pFreeCam, true );
 	if( pCarHurt )
 		UTIL_Remove( pCarHurt, true );
 	if( pDriverMdl )
 		UTIL_Remove( pDriverMdl, true );
 	if( pBlade )
 		UTIL_Remove( pBlade, true );
+
+	pChassis = NULL;
+	pChassisMdl = NULL;
+	pCamera1 = NULL;
+	pCamera2 = NULL;
+	pCarHurt = NULL;
+	pDriverMdl = NULL;
+	pBlade = NULL;
 }

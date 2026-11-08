@@ -35,7 +35,6 @@ BEGIN_DATADESC( CBoat )
 	DEFINE_KEYFIELD( DamageMult, FIELD_FLOAT, "damagemult" ),
 	DEFINE_KEYFIELD( CameraHeight, FIELD_INTEGER, "camheight" ),
 	DEFINE_KEYFIELD( CameraDistance, FIELD_INTEGER, "camdistance" ),
-	DEFINE_KEYFIELD( FreeCameraDistance, FIELD_INTEGER, "freecamdistance" ),
 	DEFINE_FIELD( hDriver, FIELD_EHANDLE ),
 	DEFINE_FUNCTION( Setup ),
 	DEFINE_FUNCTION( Drive ),
@@ -43,7 +42,6 @@ BEGIN_DATADESC( CBoat )
 	DEFINE_FIELD( pChassis, FIELD_EHANDLE ),
 	DEFINE_FIELD( pCamera1, FIELD_EHANDLE ),
 	DEFINE_FIELD( pCamera2, FIELD_EHANDLE ),
-	DEFINE_FIELD( pFreeCam, FIELD_EHANDLE ),
 	DEFINE_FIELD( pCarHurt, FIELD_EHANDLE ),
 	DEFINE_FIELD( pDriverMdl, FIELD_EHANDLE ),
 	DEFINE_FIELD( pChassisMdl, FIELD_EHANDLE ),
@@ -121,6 +119,8 @@ void CBoat::Precache( void )
 	m_iSpriteTexture = PRECACHE_MODEL( "sprites/white.spr" );
 	m_iExplode = PRECACHE_MODEL( "sprites/fexplo.spr" );
 	PRECACHE_SOUND( "weapons/mortarhit.wav" );
+
+	LastViewEnt = NULL;
 }
 
 void CBoat::Spawn( void )
@@ -289,6 +289,7 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 
 		pPlayer->pCar = this;
 		pPlayer->m_flFOV = CAR_FOV;
+		LastViewEnt = NULL;
 
 		if( hDriver == NULL )
 		{
@@ -321,10 +322,13 @@ void CBoat::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType
 			time = gpGlobals->time;
 			DriverMdlSequence = -1;
 			CameraAngles = GetAbsAngles(); // make sure camera is angled properly when we enter the vehicle
+			CameraBrakeOffsetX = 0;
 			NewCameraAngleY = CameraAngles.y;
 			NewCameraAngleX = 0;
-			CameraModeAddDist_Free = 100.0f;
-			CameraModeAddDist_Main = 50.0f;
+			AccelAddX = 0;
+			BrakeAddX = 0;
+			EnteringShake = 2.0f;
+			CameraModeAddDist = 100.0f;
 			LastPlayerAngles = hDriver->pev->v_angle;
 			Camera2RotationX = 0;
 			Camera2RotationY = 0;
@@ -387,24 +391,28 @@ void CBoat::Setup( void )
 			CameraDistance = 230;
 	}
 
-	if( pCamera1 )
+	if( !pCamera1 )
 	{
-		pCamera1->SetNullModel();
-		pCamera1->pev->effects |= EF_SKIPPVS;
-		pCamera1->pev->iuser3 = -673;
-		if( !CameraHeight )
+		ALERT( at_error, "func_boat WITH NO MAIN CAMERA! This is fatal, vehicle deleted.\n" );
+		UTIL_Remove( this );
+		return;
+	}
+
+	pCamera1->SetNullModel();
+	pCamera1->pev->effects |= EF_SKIPPVS;
+	pCamera1->pev->iuser3 = -673;
+	if( !CameraHeight )
+	{
+		if( pChassisMdl )
 		{
-			if( pChassisMdl )
-			{
-				// get camera distance according to model bounds
-				Vector mins = g_vecZero;
-				Vector maxs = g_vecZero;
-				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-				CameraHeight = (int)(fabs( mins.z - maxs.z ) * pChassisMdl->pev->scale);
-			}
-			else
-				CameraHeight = 80;
+			// get camera distance according to model bounds
+			Vector mins = g_vecZero;
+			Vector maxs = g_vecZero;
+			UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
+			CameraHeight = (int)(fabs( mins.z - maxs.z ) * pChassisMdl->pev->scale);
 		}
+		else
+			CameraHeight = 80;
 	}
 
 	if( pCamera2 )
@@ -429,28 +437,6 @@ void CBoat::Setup( void )
 		else
 			pDriverMdl->SetParent( this );
 		pDriverMdl->pev->effects |= EF_NODRAW;
-	}
-
-	pFreeCam = CBaseEntity::Create( "info_target", GetAbsOrigin(), GetAbsAngles(), edict() );
-	if( pFreeCam )
-	{
-		pFreeCam->SetNullModel();
-		pFreeCam->SetParent( this );
-		if( FreeCameraDistance <= 0 )
-		{
-			if( pChassisMdl )
-			{
-				// get camera distance according to model bounds
-				Vector mins = g_vecZero;
-				Vector maxs = g_vecZero;
-				UTIL_GetModelBounds( pChassisMdl->pev->modelindex, mins, maxs );
-				FreeCameraDistance = (int)((mins - maxs).Length() * 0.75f * pChassisMdl->pev->scale);
-			}
-			else
-				FreeCameraDistance = CameraDistance;
-		}
-		pFreeCam->pev->effects |= EF_SKIPPVS;
-		pFreeCam->pev->iuser3 = -673;
 	}
 
 	if( pev->iuser1 ) // rotate boat
@@ -603,6 +589,12 @@ void CBoat::Drive( void )
 		SetNextThink( 0 );
 		return;
 	}
+
+	if( !LastPlayerAngles )
+		LastPlayerAngles = hDriver->pev->v_angle;
+
+	bLastPlayerAnglesUpdated = false;
+	bMouseHasMoved = (hDriver->pev->v_angle != LastPlayerAngles);
 
 	// reset all velocity from previous frame
 	pev->velocity = g_vecZero;
@@ -1082,14 +1074,20 @@ void CBoat::Drive( void )
 
 	SafeSpawnPosition();
 
+	if( !bLastPlayerAnglesUpdated ) // could be updated in the middle of the run for any reasons
+		LastPlayerAngles = hDriver->pev->v_angle;
+
+	//-----------------------------------------------------
+	// !!! hDriver can become NULL after this, by taking damage and dying, game will crash.
+	//-----------------------------------------------------
+
 	if( TookDamage && DriverDamage > 7.5f )
 	{
-		TakeDamage( pev, pev, DriverDamage, DMG_CRUSH );
 		UTIL_ScreenShakeLocal( hDriver, GetAbsOrigin(), AbsCarSpeed * 0.01, 100, 1, 300, true );
-		if( DriverDamage > 15.0f ) // fall off scooter :)
+		TakeDamage( pev, pev, DriverDamage, DMG_CRUSH ); // hDriver can become NULL after this, if player dies
+		if( hDriver && DriverDamage > 15.0f ) // fall off scooter :)
 			Use( this, this, USE_OFF, 0 );
 	}
-	// !!! hDriver can become NULL after this, by taking damage and dying, game will crash.
 
 	if( hDriver == NULL )
 		return;
@@ -1487,12 +1485,17 @@ void CBoat::ClearEffects( void )
 		UTIL_Remove( pCamera1, true );
 	if( pCamera2 )
 		UTIL_Remove( pCamera2, true );
-	if( pFreeCam )
-		UTIL_Remove( pFreeCam, true );
 	if( pCarHurt )
 		UTIL_Remove( pCarHurt, true );
 	if( pDriverMdl )
 		UTIL_Remove( pDriverMdl, true );
+
+	pChassis = NULL;
+	pChassisMdl = NULL;
+	pCamera1 = NULL;
+	pCamera2 = NULL;
+	pCarHurt = NULL;
+	pDriverMdl = NULL;
 }
 
 bool CBoat::ExitCar( CBaseEntity *pPlayer )

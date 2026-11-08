@@ -80,7 +80,6 @@ public:
 	EHANDLE pChassis;
 	EHANDLE pCamera1;
 	EHANDLE pCamera2;
-	EHANDLE pFreeCam;
 	EHANDLE pCarHurt;
 	EHANDLE pDriverMdl;
 	EHANDLE pChassisMdl;
@@ -125,6 +124,11 @@ public:
 	bool CamUnlocked;
 	bool CarInAir;
 	float EnteringShake; // shake the car when driver enters it (not saved)
+	float ChassisShake; // not saved - sets up in Drive() and also used in Camera() later down
+	float fSoftSeatUpdateTime; // not saved - used in Camera(), and secondary camera only
+	float fSoftSeatPosZ_cur; // not saved
+	float fSoftSeatPosZ_prev; // not saved
+	float fSoftSeatPosZ_new; // not saved
 	Vector Camera2LocalOrigin;
 	Vector Camera2LocalAngles;
 	Vector CameraAngles;
@@ -137,11 +141,8 @@ public:
 	// default camera view
 	int CameraHeight;
 	int CameraDistance;
-	int FreeCameraDistance;
-	float CameraModeAddDist_Main;
-	float TmpCameraModeAddDist_Main; // used for lerping
-	float CameraModeAddDist_Free;
-	float TmpCameraModeAddDist_Free; // used for lerping
+	float CameraModeAddDist;
+	float TmpCameraModeAddDist; // used for lerping
 	float TmpMainCameraHeightLerper; // not saved, for smoothing out camera height change
 	float NewCameraAngleY;
 	float NewCameraAngleX;
@@ -216,8 +217,12 @@ public:
 	float fMouseTouchedON;
 	float fMouseTouchedOFF;
 	Vector LastPlayerAngles;
+	bool bMouseHasMoved; // not saved
+	bool bLastPlayerAnglesUpdated; // not saved (sets after every write to LastPlayerAngles)
 
 	float fCarResetHolding; // not saved
+
+	edict_t *LastViewEnt;
 
 	DECLARE_DATADESC();
 };
