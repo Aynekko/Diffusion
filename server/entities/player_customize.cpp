@@ -248,6 +248,8 @@ void CPlayerCustomize::Affect( CBasePlayer *pPlayer )
 	if( !pPlayer )
 		return;
 
+	int iBlastTimer = pPlayer->NextRechargeTime - gpGlobals->time;
+
 	switch( RegenActive )
 	{
 	case 1: pPlayer->CanRegenerateHealth = !pPlayer->CanRegenerateHealth; break; // toggle
@@ -347,6 +349,7 @@ void CPlayerCustomize::Affect( CBasePlayer *pPlayer )
 		WRITE_BYTE( pPlayer->BlastAbilityLVL );
 		WRITE_BYTE( pPlayer->BlastChargesReady );
 		WRITE_BYTE( pPlayer->CanElectroBlast );
+		WRITE_BYTE( Q_max( iBlastTimer, -1 ) + 1 );
 		MESSAGE_END();
 		pPlayer->m_iClientBlastAbilityLVL = pPlayer->BlastAbilityLVL;
 		break; // don't allow to use ability (if present)
@@ -356,6 +359,7 @@ void CPlayerCustomize::Affect( CBasePlayer *pPlayer )
 		WRITE_BYTE( pPlayer->BlastAbilityLVL );
 		WRITE_BYTE( pPlayer->BlastChargesReady );
 		WRITE_BYTE( pPlayer->CanElectroBlast );
+		WRITE_BYTE( Q_max( iBlastTimer, -1 ) + 1 );
 		MESSAGE_END();
 		pPlayer->m_iClientBlastAbilityLVL = pPlayer->BlastAbilityLVL;
 		break; // allow to use (if present)
@@ -383,6 +387,7 @@ void CPlayerCustomize::Affect( CBasePlayer *pPlayer )
 		WRITE_BYTE( pPlayer->BlastAbilityLVL );
 		WRITE_BYTE( pPlayer->BlastChargesReady );
 		WRITE_BYTE( pPlayer->CanElectroBlast );
+		WRITE_BYTE( Q_max( iBlastTimer, -1 ) + 1 );
 		MESSAGE_END();
 		pPlayer->m_iClientBlastAbilityLVL = pPlayer->BlastAbilityLVL;
 		break; // toggle
