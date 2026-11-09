@@ -106,7 +106,7 @@ void CBreakable::KeyValue( KeyValueData* pkvd )
 		int object = Q_atoi( pkvd->szValue );
 		if ( object > 0 && object < SIZEOFARRAY(pSpawnObjects) )
 			m_iszSpawnObject = MAKE_STRING( pSpawnObjects[object] );
-		else if( pkvd->szValue[0] != '0' )// diffusion - it can be a string
+		else if( !isdigit( (unsigned char)pkvd->szValue[0] ) )// diffusion - it can be a string
 			m_iszSpawnObject = ALLOC_STRING( pkvd->szValue );
 
 		pkvd->fHandled = TRUE;
@@ -316,10 +316,13 @@ void CBreakable::MaterialSoundRandom( edict_t *pEdict, Materials soundMaterial, 
 
 void CBreakable::Precache( void )
 {
-	const char *pGibName;
+	const char *pGibName = NULL;
 
 	switch (m_Material) 
 	{
+	default:
+	case matNone:
+		break;
 	case matWood:
 		pGibName = "models/woodgibs.mdl";
 		
@@ -334,6 +337,7 @@ void CBreakable::Precache( void )
 		PRECACHE_SOUND("debris/bustflesh2.wav");
 		break;
 	case matComputer:
+		MaterialSoundPrecache( matMetal );
 		PRECACHE_SOUND("buttons/spark1.wav");
 		PRECACHE_SOUND("buttons/spark2.wav");
 		pGibName = "models/computergibs.mdl";
@@ -373,11 +377,13 @@ void CBreakable::Precache( void )
 		PRECACHE_SOUND ("debris/bustceiling.wav");  
 		break;
 	}
-	MaterialSoundPrecache( m_Material );
-	if ( m_iszGibModel )
-		pGibName = STRING(m_iszGibModel);
 
-	m_idShard = PRECACHE_MODEL( (char *)pGibName );
+	MaterialSoundPrecache( m_Material );
+
+	if( !FStringNull( m_iszGibModel ) )
+		pGibName = STRING( m_iszGibModel );
+
+	m_idShard = pGibName ? PRECACHE_MODEL( (char *)pGibName ) : 0;
 
 	// Precache the spawn item's data
 	if ( !FStringNull(m_iszSpawnObject) )
@@ -396,7 +402,7 @@ void CBreakable::DamageSound( void )
 	int pitch;
 	float fvol;
 	const char *rgpsz[6];
-	int i;
+	int i = 0;
 	int material = m_Material;
 
 	if (RANDOM_LONG(0,2))
@@ -431,7 +437,7 @@ void CBreakable::DamageSound( void )
 		rgpsz[0] = "debris/metal1.wav";
 		rgpsz[1] = "debris/metal3.wav";
 		rgpsz[2] = "debris/metal2.wav";
-		i = 2;
+		i = 3;
 		break;
 
 	case matFlesh:
@@ -466,36 +472,44 @@ void CBreakable::DamageSound( void )
 void CBreakable::BreakTouch( CBaseEntity *pOther )
 {
 	float flDamage;
-	entvars_t*	pevToucher = pOther->pev;
-	
+	entvars_t *pevToucher = pOther->pev;
+
 	// only players can break these right now
-	if ( !pOther->IsPlayer() || !IsBreakable() )
+	if( !pOther->IsPlayer() || !IsBreakable() )
 		return;
 
-	if ( FBitSet ( pev->spawnflags, SF_BREAK_TOUCH ) )
-	{// can be broken when run into 
+	if( FBitSet( pev->spawnflags, SF_BREAK_TOUCH ) )
+	{// can be broken when run into
 		flDamage = pevToucher->velocity.Length() * 0.01;
 
-		if (flDamage >= pev->health)
+		if( flDamage >= pev->health )
 		{
 			SetTouch( NULL );
-			TakeDamage(pevToucher, pevToucher, flDamage, DMG_CRUSH);
+			TakeDamage( pevToucher, pevToucher, flDamage, DMG_CRUSH );
 
-			// do a little damage to player if we broke glass or computer
-			pOther->TakeDamage( pev, pev, flDamage/4, DMG_SLASH );
+			if( pev->deadflag == DEAD_DEAD )
+			{
+				// do a little damage to player if we broke glass or computer
+				pOther->TakeDamage( pev, pev, flDamage / 4, DMG_SLASH );
+				return; // already broken, don't also run the pressure branch
+			}
+
+			// damage was rejected, keep the touch
+			SetTouch( &CBreakable::BreakTouch );
 		}
 	}
 
-	if ( FBitSet ( pev->spawnflags, SF_BREAK_PRESSURE ) && pevToucher->absmin.z >= pev->maxs.z - 2 )
+	if( FBitSet( pev->spawnflags, SF_BREAK_PRESSURE ) && pevToucher->absmin.z >= pev->absmax.z - 2 )
 	{// can be broken when stood upon
-		
+
 		// play creaking sound here.
+		m_iLastHitDamageType = 0;
 		DamageSound();
 
-		SetThink (&CBreakable::Die );
+		SetThink( &CBreakable::Die );
 		SetTouch( NULL );
-		
-		if ( m_flDelay == 0 )
+
+		if( m_flDelay == 0 )
 		{// !!!BUGBUG - why doesn't zero delay work?
 			m_flDelay = 0.1;
 		}
@@ -511,23 +525,24 @@ void CBreakable::BreakTouch( CBaseEntity *pOther )
 // Break when triggered
 void CBreakable::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if ( IsBreakable() )
+	if( !IsBreakable() )
+		return;
+	
+	if( pev->deadflag == DEAD_DEAD )
 	{
 		// diffusion - respawn the breakable by trigger
-		if( RespawnTime == -1 && (pev->effects & EF_NODRAW))
-		{
+		if( RespawnTime == -1 && (pev->effects & EF_NODRAW) )
 			BreakRespawn();
-			return;
-		}
-		
-		Vector angles = GetLocalAngles();
-		angles.y = m_angle;
-		SetLocalAngles( angles );
-		UTIL_MakeVectors( GetLocalAngles( ));
-		g_vecAttackDir = gpGlobals->v_forward;
 
-		Die();
+		return;
 	}
+		
+	Vector angles = g_vecZero;
+	angles.y = m_angle;
+	UTIL_MakeVectors( angles ); // don't touch the entity's own angles
+	g_vecAttackDir = gpGlobals->v_forward;
+
+	Die( pActivator );
 }
 
 
@@ -585,32 +600,38 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 	m_iLastHitDamageType = bitsDamageType;
 	
-	Vector vecTemp;
+	Vector vecTemp = g_vecZero;
 	CBaseEntity *pAttacker = NULL;
-	CBasePlayer *pPlayer = NULL;
 
 	if( pevAttacker )
+	{
 		pAttacker = CBaseEntity::Instance( pevAttacker );
-	if( pAttacker )
-		pPlayer = (CBasePlayer *)pAttacker;
-	if( pPlayer && pPlayer->BlastDMGOverride && HasSpawnFlags( SF_BREAK_NOELECTROBLAST ) )
-		return 0;
+		CBasePlayer *pPlayer = NULL;
+
+		if( pAttacker && pAttacker->IsPlayer() )
+			pPlayer = (CBasePlayer *)pAttacker;
+		if( pPlayer && pPlayer->BlastDMGOverride && HasSpawnFlags( SF_BREAK_NOELECTROBLAST ) )
+			return 0;
+	}
 
 	// if Attacker == Inflictor, the attack was a melee or other instant-hit attack.
 	// (that is, no actual entity projectile was involved in the attack so use the shooter's origin). 
-	if( pevAttacker == pevInflictor )
+	if( pevAttacker && pevInflictor )
 	{
-		vecTemp = pevInflictor->origin - (pev->absmin + (pev->size * 0.5));
+		if( pevAttacker == pevInflictor )
+		{
+			vecTemp = pevInflictor->origin - (pev->absmin + (pev->size * 0.5));
 
-		// if a client hit the breakable with a crowbar, and breakable is crowbar-sensitive, break it now.
-		if( FBitSet( pevAttacker->flags, FL_CLIENT ) &&
-			FBitSet( pev->spawnflags, SF_BREAK_CROWBAR ) && (bitsDamageType & DMG_CLUB) )
-			flDamage = pev->health;
-	}
-	else
-		// an actual missile was involved.
-	{
-		vecTemp = pevInflictor->origin - (pev->absmin + (pev->size * 0.5));
+			// if a client hit the breakable with a crowbar, and breakable is crowbar-sensitive, break it now.
+			if( FBitSet( pevAttacker->flags, FL_CLIENT ) &&
+				FBitSet( pev->spawnflags, SF_BREAK_CROWBAR ) && (bitsDamageType & DMG_CLUB) )
+				flDamage = pev->health;
+		}
+		else
+			// an actual missile was involved.
+		{
+			vecTemp = pevInflictor->origin - (pev->absmin + (pev->size * 0.5));
+		}
 	}
 
 	if( !IsBreakable() )
@@ -623,7 +644,7 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 	pev->health -= flDamage;
 	if( pev->health <= 0 )
 	{
-		Die();
+		Die( pAttacker );
 		return 0;
 	}
 
@@ -632,7 +653,7 @@ int CBreakable::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 
 	DamageSound();
 
-	if( HasSpawnFlags( SF_BREAK_NOGIBS ) )
+	if( HasSpawnFlags( SF_BREAK_NOGIBS ) || !m_idShard )
 		return 1;
 
 	// diffusion - make a gib as well
@@ -706,7 +727,6 @@ void CBreakable::Die( CBaseEntity *pActivator )
 {
 	Vector vecSpot;// shard origin
 	Vector vecVelocity;// shard velocity
-	CBaseEntity *pEntity = NULL;
 	char cFlag = 0;
 	int pitch;
 	float fvol;
@@ -812,7 +832,7 @@ void CBreakable::Die( CBaseEntity *pActivator )
 
 	vecSpot = GetAbsOrigin() + (pev->mins + pev->maxs) * 0.5f;
 
-	if( !HasSpawnFlags( SF_BREAK_NOGIBS ) )
+	if( !HasSpawnFlags( SF_BREAK_NOGIBS ) && m_idShard )
 	{
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );
 			WRITE_BYTE( TE_BREAKMODEL );
@@ -848,12 +868,6 @@ void CBreakable::Die( CBaseEntity *pActivator )
 			WRITE_BYTE( cFlag );
 		MESSAGE_END();
 	}
-
-	float size = pev->size.x;
-	if ( size < pev->size.y )
-		size = pev->size.y;
-	if ( size < pev->size.z )
-		size = pev->size.z;
 
 	// !!! HACK  This should work!
 	// Build a box above the entity that looks like an 8 pixel high sheet
@@ -919,7 +933,10 @@ void CBreakable::BreakRespawn(void)
 	if( HasSpawnFlags( SF_BREAK_TRIGGER_ONLY ) )
 		pev->takedamage = DAMAGE_NO;
 	else
+	{
 		pev->takedamage = DAMAGE_YES;
+		SetTouch( &CBreakable::BreakTouch );
+	}
 
 	pev->solid = SOLID_BSP;
 	pev->movetype = MOVETYPE_PUSH;
@@ -929,6 +946,8 @@ void CBreakable::BreakRespawn(void)
 
 	if( m_iszFireOnRespawn )
 		UTIL_FireTargets( m_iszFireOnRespawn, this, this, USE_TOGGLE, 0 );
+
+	UTIL_SetOrigin( this, GetAbsOrigin() );
 }
 
 BOOL CBreakable :: IsBreakable( void ) 

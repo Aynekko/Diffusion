@@ -57,7 +57,6 @@ public:
 	void TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 
 	BOOL IsBreakable( void );
-	BOOL SparkWhenHit( void );
 
 	int DamageDecal( int bitsDamageType );
 
