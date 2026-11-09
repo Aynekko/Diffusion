@@ -319,7 +319,7 @@ public:
 
 	const char*	GetDebugName()
 	{
-		if( this == NULL || pev == NULL )
+		if( pev == NULL )
 			return "null";
 
 		if( pev->targetname != NULL_STRING ) 
@@ -337,7 +337,6 @@ public:
 	// Set the movement parent. Your local origin and angles will become relative to this parent.
 	// If iAttachment is a valid attachment on the parent, then your local origin and angles 
 	// are relative to the attachment on this entity.
-	void		SetParent( const CBaseEntity* pNewParent, int iAttachment = 0 );
 	void		SetParent ( int m_iNewParent, int m_iAttachment = 0 );
 	void		SetParent ( CBaseEntity* pParent, int m_iAttachment = 0 );
 	BOOL		HasAttachment( void );

@@ -178,7 +178,7 @@ void CBaseEntity::SetAbsAngles( const Vector& absAngles )
 	else
 	{
 		// moveparent case: transform the abs transform into local space
-		matrix4x4 iparentSpace = pParent->EntityToWorldTransform().Invert();
+		matrix4x4 iparentSpace = GetParentToWorldTransform().Invert();
 		matrix4x4 local = iparentSpace.ConcatTransforms( m_local );
 		local.GetAngles( vecNewAngles );
 	}
@@ -535,7 +535,7 @@ void CBaseEntity::TouchLinks( edict_t *ent, const Vector &entmins, const Vector 
 				ALERT( at_error, "bad entity in trigger list!\n" );
 				SetBits( touch->v.flags, FL_KILLME ); // let the engine kill invalid entity
 			}
-			break;
+			continue;
 		}
 
 		if( pTouch == pEnt || pTouch->pev->solid != SOLID_TRIGGER ) // disabled ?
@@ -623,7 +623,7 @@ void CBaseEntity::ClipLinks( edict_t *ent, const Vector &entmins, const Vector &
 		clip = EDICT_FROM_AREA( l );
 		pClip = CBaseEntity::Instance( clip );
 
-		if( pClip == pEnt || pClip->pev->solid == SOLID_NOT ) // disabled ?
+		if( !pClip || pClip == pEnt || pClip->pev->solid == SOLID_NOT ) // disabled ?
 			continue;
 
 		if( pClip->pev->groupinfo && pEnt->pev->groupinfo )
@@ -695,7 +695,7 @@ void CBaseEntity :: SleepPortals( edict_t *ent, const Vector &entmins, const Vec
 		touch = EDICT_FROM_AREA( l );
 		pTouch = CBaseEntity::Instance( touch );
 
-		if( !pTouch->IsPortal( ))
+		if( !pTouch || !pTouch->IsPortal() )
 			continue;
 
 		if( !BoundsIntersect( entmins, entmaxs, touch->v.absmin, touch->v.absmax ))
@@ -794,7 +794,13 @@ void CBaseEntity::RelinkEntity( BOOL touch_triggers, const Vector *pPrevOrigin, 
 void CBaseEntity :: SetModel( const char *model )
 {
 	int modelIndex = MODEL_INDEX( model );
-	if( modelIndex == 0 ) return;
+	if( modelIndex == 0 )
+	{
+		if( model && model[0] )
+			ALERT( at_error, "SetModel: \"%s\" isn't precached (%s [%i])\n", model, GetClassname(), entindex() );
+
+		return;
+	}
 
 	pev->model = MAKE_STRING( model );
 	pev->modelindex = modelIndex;
@@ -952,7 +958,7 @@ void CBaseEntity :: SetParent( int m_iNewParent, int m_iAttachment )
 		// unlink entity from chain
 		UnlinkFromParent();
 		return;
-          }
+	}
 
 	CBaseEntity *pParent;
 
@@ -988,16 +994,36 @@ void CBaseEntity :: SetParent( int m_iNewParent, int m_iAttachment )
 //=======================================================================
 void CBaseEntity :: SetParent( CBaseEntity *pParent, int m_iAttachment )
 {
-	if( pParent != NULL && ( pParent == m_hParent ) || m_fPicked )
+	if( (pParent != NULL && pParent == m_hParent) || m_fPicked )
 		return; // new parent is already set or object is picked
 
 	if( pParent == g_pWorld )
-		return; // newer use world as parent
+		return; // never use world as parent
 
 	if( m_iActorType == ACTOR_STATIC )
 	{
 		ALERT( at_error, "SetParent: static actor %s can't have parent\n", GetClassname( ));
 		return;
+	}
+
+	// validate the new parent before touching the current one
+	if( pParent == this )
+	{
+		if( pev->targetname )
+			ALERT( at_error, "%s with name %s has illegal parent\n", STRING( pev->classname ), STRING( pev->targetname ) );
+		else ALERT( at_error, "%s has illegal parent\n", STRING( pev->classname ) );
+		return;
+	}
+
+	// refuse hierarchy loops: 'this' must not be anywhere above the new parent
+	for( CBaseEntity *pCheck = pParent; pCheck != NULL; pCheck = pCheck->m_hParent )
+	{
+		if( pCheck == this )
+		{
+			ALERT( at_error, "SetParent: %s [%i] can't be parented to its own child %s [%i]\n",
+				GetClassname(), entindex(), pParent->GetClassname(), pParent->entindex() );
+			return;
+		}
 	}
 
 	UnlinkFromParent();
@@ -1007,15 +1033,6 @@ void CBaseEntity :: SetParent( CBaseEntity *pParent, int m_iAttachment )
 		if( pev->targetname )
 			ALERT( at_warning, "Not found parent for %s with name %s\n", STRING( pev->classname ), STRING( pev->targetname ));
 		else ALERT( at_warning, "Not found parent for %s\n", STRING( pev->classname ));
-		return;
-	}
-
-	// check for himself parent
-	if( pParent == this ) 
-	{
-		if( pev->targetname )
-			ALERT( at_error, "%s with name %s has illegal parent\n", STRING( pev->classname ), STRING( pev->targetname ));
-		else ALERT( at_error, "%s has illegal parent\n", STRING( pev->classname ));
 		return;
 	}
 
@@ -1230,43 +1247,40 @@ int CBaseEntity :: TakeArmor( float flArmor, int suit )
 
 // inflict damage on this entity.  bitsDamageType indicates type of damage inflicted, ie: DMG_CRUSH
 
-int CBaseEntity :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType )
+int CBaseEntity::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType )
 {
-	Vector	vecTemp;
-
-	if (!pev->takedamage)
+	if( !pev->takedamage )
 		return 0;
 
-	// UNDONE: some entity types may be immune or resistant to some bitsDamageType
-	
-	// if Attacker == Inflictor, the attack was a melee or other instant-hit attack.
-	// (that is, no actual entity projectile was involved in the attack so use the shooter's origin). 
-	if ( pevAttacker == pevInflictor )	
-		vecTemp = pevInflictor->origin - ( VecBModelOrigin(pev) );
-	else // an actual missile was involved.
-		vecTemp = pevInflictor->origin - ( VecBModelOrigin(pev) );
+	// direction from the victim towards the inflictor
+	Vector vecTemp = g_vecZero;
+	if( !FNullEnt( pevInflictor ) )
+		vecTemp = pevInflictor->origin - VecBModelOrigin( pev );
 
 	// this global is still used for glass and other non-monster killables, along with decals.
 	g_vecAttackDir = vecTemp.Normalize();
-		
-	// save damage based on the target's armor level
 
 	// figure momentum add (don't let hurt brushes or other triggers move player)
-	if ((!FNullEnt(pevInflictor)) && (pev->movetype == MOVETYPE_WALK || pev->movetype == MOVETYPE_STEP) && (pevAttacker->solid != SOLID_TRIGGER) )
+	if( !FNullEnt( pevInflictor ) && (pev->movetype == MOVETYPE_WALK || pev->movetype == MOVETYPE_STEP)
+		&& (pevAttacker == NULL || pevAttacker->solid != SOLID_TRIGGER) )
 	{
-		Vector vecDir = GetAbsOrigin() - (pevInflictor->absmin + pevInflictor->absmax) * 0.5;
-		vecDir = vecDir.Normalize();
+		float volume = pev->size.x * pev->size.y * pev->size.z;
 
-		float flForce = flDamage * ((32 * 32 * 72.0) / (pev->size.x * pev->size.y * pev->size.z)) * 5;
-		
-		if (flForce > 500.0f ) 
-			flForce = 500.0f;
-		SetAbsVelocity( GetAbsVelocity() + vecDir * flForce );
+		if( volume > 0.0f )
+		{
+			Vector vecDir = GetAbsOrigin() - (pevInflictor->absmin + pevInflictor->absmax) * 0.5;
+			vecDir = vecDir.Normalize();
+
+			float flForce = flDamage * ((32 * 32 * 72.0) / volume) * 5;
+			if( flForce > 500.0f )
+				flForce = 500.0f;
+			SetAbsVelocity( GetAbsVelocity() + vecDir * flForce );
+		}
 	}
 
 	// do the damage
 	pev->health -= flDamage;
-	if (pev->health <= 0)
+	if( pev->health <= 0 )
 	{
 		Killed( pevAttacker, GIB_NORMAL );
 		return 0;
@@ -1346,7 +1360,7 @@ static void BuildTeleportList_r( CBaseEntity *pTeleport, CUtlArray<TeleportListE
 		pList = pList->m_hNextChild;
 	}
 }
-
+/*
 static void BuildTeleportListTouch( CBaseEntity *pTeleport, CUtlArray<TeleportListEntry_t> &teleportList )
 {
 	edict_t *pEdict = INDEXENT( 1 );
@@ -1371,7 +1385,7 @@ static void BuildTeleportListTouch( CBaseEntity *pTeleport, CUtlArray<TeleportLi
 			teleportList.AddToTail( entry );
 		}
 	}
-}
+}*/
 
 void CBaseEntity :: Teleport( const Vector *newPosition, const Vector *newAngles, const Vector *newVelocity )
 {
@@ -1384,10 +1398,12 @@ void CBaseEntity :: Teleport( const Vector *newPosition, const Vector *newAngles
 	BuildTeleportList_r( this, teleportList );
 
 	// also teleport all ents that stay on train
+	/*
 	if( FClassnameIs( this, "func_tracktrain" ))
 	{
-//		BuildTeleportListTouch( this, teleportList );
+		BuildTeleportListTouch( this, teleportList );
 	}
+	*/
 
 	for( int i = 0; i < teleportList.Count(); i++ )
 		UTIL_Teleport( this, teleportList[i], newPosition, newAngles, newVelocity );
@@ -1472,6 +1488,7 @@ int CBaseEntity::Save( CSave &save )
 	// we can't leave the transform bits set because the loader can't cope with it.
 	CalcAbsolutePosition();
 	CalcAbsoluteVelocity();
+	CalcAbsoluteAvelocity();
 
 	if( m_iActorType != ACTOR_INVALID )
 		WorldPhysic->SaveBody( this );
@@ -1693,39 +1710,26 @@ int CBaseEntity :: IsDormant( void )
 
 BOOL CBaseEntity :: IsInWorld( BOOL checkVelocity )
 {
-	Vector absOrigin = GetAbsOrigin();
-	int WorldBounds = 262000; // FIXME
+	const Vector absOrigin = GetAbsOrigin();
+	const float WorldBounds = 262000.0f; // FIXME
 
 	// position 
-	if( absOrigin.x >= WorldBounds ) return FALSE;
-	if( absOrigin.y >= WorldBounds ) return FALSE;
-	if( absOrigin.z >= WorldBounds ) return FALSE;
-	if( absOrigin.x <= -WorldBounds ) return FALSE;
-	if( absOrigin.y <= -WorldBounds ) return FALSE;
-	if( absOrigin.z <= -WorldBounds ) return FALSE;
+	if( !(fabs( absOrigin.x ) < WorldBounds && fabs( absOrigin.y ) < WorldBounds && fabs( absOrigin.z ) < WorldBounds) )
+		return FALSE;
 
 	if( !checkVelocity )
 		return TRUE;
 
-/*	Vector absVelocity = GetAbsVelocity();
+	static cvar_t *pMaxVelocity = NULL;
+	if( !pMaxVelocity )
+		pMaxVelocity = CVAR_GET_POINTER( "sv_maxvelocity" );
 
-	// speed
-	if( absVelocity.x >= 2000 ) return FALSE;
-	if( absVelocity.y >= 2000 ) return FALSE;
-	if( absVelocity.z >= 2000 ) return FALSE;
-	if( absVelocity.x <= -2000 ) return FALSE;
-	if( absVelocity.y <= -2000 ) return FALSE;
-	if( absVelocity.z <= -2000 ) return FALSE;
-*/ 
+	float limitVelocity = pMaxVelocity ? pMaxVelocity->value : 0.0f;
+	if( limitVelocity == 0.0f )
+		limitVelocity = 10000.0f;
 
-	float absVelocity = GetAbsVelocity().Length();
-	float limitVelocity = CVAR_GET_FLOAT( "sv_maxvelocity" );
-	if( limitVelocity == 0 )
-		limitVelocity = 10000;
-	if( fabs(absVelocity) > limitVelocity )
-		return FALSE;
+	return (GetAbsVelocity().Length() <= limitVelocity) ? TRUE : FALSE;
 
-	return TRUE;
 }
 
 int CBaseEntity::ShouldToggle( USE_TYPE useType, BOOL currentState )
