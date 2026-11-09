@@ -1449,8 +1449,8 @@ int CAlice :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )
 		return 0;
 	
-	if (pevAttacker->flags & FL_CLIENT) // player can't hurt Alice!
-		return 0;
+	if( pevAttacker && pevAttacker->flags & FL_CLIENT ) // player can't hurt Alice!
+		return;
 
 	if( bitsDamageType & DMG_BLAST )
 	{

@@ -150,7 +150,7 @@ typedef int BOOL;
 	extern edict_t *DBG_EntOfVars(const entvars_t *pev);
 	inline edict_t *ENT(const entvars_t *pev)	{ return DBG_EntOfVars(pev); }
 #else
-	inline edict_t *ENT(const entvars_t *pev)	{ return pev->pContainingEntity; }
+	inline edict_t *ENT(const entvars_t *pev)	{ return pev ? pev->pContainingEntity : NULL; }
 #endif
 edict_t *ENT( CBaseEntity *pEnt );
 inline edict_t *ENT(edict_t *pent)			{ return pent; }

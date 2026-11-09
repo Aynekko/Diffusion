@@ -1164,7 +1164,7 @@ void CBaseTurret::TraceAttack( entvars_t *pevAttacker, float flDamage, Vector ve
 
 	if( pev->owner )
 	{
-		if( (pevAttacker->flags & FL_CLIENT) && (VARS(pev->owner) == pevAttacker) )
+		if( pevAttacker && (pevAttacker->flags & FL_CLIENT) && (VARS( pev->owner ) == pevAttacker) )
 			return;
 	}
 
@@ -1525,7 +1525,7 @@ int CSentry::TakeDamage(entvars_t *pevInflictor, entvars_t *pevAttacker, float f
 
 	if( pev->owner )
 	{
-		if( (pevAttacker->flags & FL_CLIENT) && (VARS( pev->owner ) == pevAttacker) ) // diffusion - weapon_sentry
+		if( pevAttacker && (pevAttacker->flags & FL_CLIENT) && (VARS( pev->owner ) == pevAttacker) ) // diffusion - weapon_sentry
 			return 0;
 	}
 

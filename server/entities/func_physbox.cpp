@@ -299,35 +299,38 @@ void CPhysEntity :: Touch( CBaseEntity *pOther )
 
 int CPhysEntity :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType )
 {
-	Vector	vecTemp;
+	Vector	vecTemp = g_vecZero;
 
 	// if Attacker == Inflictor, the attack was a melee or other instant-hit attack.
 	// (that is, no actual entity projectile was involved in the attack so use the shooter's origin). 
-	if ( pevAttacker == pevInflictor )	
+	if( pevAttacker && pevInflictor )
 	{
-		vecTemp = pevInflictor->origin - ( pev->absmin + ( pev->size * 0.5 ) );
-		
-		// if a client hit the breakable with a crowbar, and breakable is crowbar-sensitive, break it now.
-		if ( FBitSet ( pevAttacker->flags, FL_CLIENT ) &&
-				 FBitSet ( pev->spawnflags, SF_PHYS_CROWBAR ) && (bitsDamageType & DMG_CLUB))
-			flDamage = pev->health;
-	}
-	else
-	// an actual missile was involved.
-	{
-		vecTemp = pevInflictor->origin - ( pev->absmin + ( pev->size * 0.5 ) );
+		if( pevAttacker == pevInflictor )
+		{
+			vecTemp = pevInflictor->origin - (pev->absmin + (pev->size * 0.5));
+
+			// if a client hit the breakable with a crowbar, and breakable is crowbar-sensitive, break it now.
+			if( FBitSet( pevAttacker->flags, FL_CLIENT ) &&
+				FBitSet( pev->spawnflags, SF_PHYS_CROWBAR ) && (bitsDamageType & DMG_CLUB) )
+				flDamage = pev->health;
+		}
+		else
+			// an actual missile was involved.
+		{
+			vecTemp = pevInflictor->origin - (pev->absmin + (pev->size * 0.5));
+		}
 	}
 	
-	if (!IsBreakable())
+	if( !IsBreakable() )
 		return 0;
 
 	// Breakables take double damage from the crowbar
 	if ( bitsDamageType & DMG_CLUB )
-		flDamage *= 2;
+		flDamage *= 2.0f;
 
 	// Boxes / glass / etc. don't take much poison damage, just the impact of the dart - consider that 10%
 	if ( bitsDamageType & DMG_POISON )
-		flDamage *= 0.1;
+		flDamage *= 0.1f;
 
 // this global is still used for glass and other non-monster killables, along with decals.
 	g_vecAttackDir = vecTemp.Normalize();

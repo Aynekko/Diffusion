@@ -705,7 +705,7 @@ int CGargantua::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, flo
 {
 //	ALERT( at_aiconsole, "CGargantua::TakeDamage\n");
 
-	if (pevInflictor->owner == edict())
+	if( pevInflictor && pevInflictor->owner == edict() )
 		return 0;
 
 	if( bitsDamageType & DMG_SLASH ) // knife xD

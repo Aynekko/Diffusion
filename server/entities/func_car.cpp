@@ -2576,7 +2576,7 @@ void CCar::Drive( void )
 	}
 
 	//----------------------------
-	// camera handing
+	// camera handling
 	//----------------------------
 
 	Camera();
@@ -3145,7 +3145,7 @@ void CCar::Camera(void)
 		{
 			if( LastViewEnt != pTankTower->edict() )
 			{
-				// when we switch to aiming view from the secondary camera, turret position must reflect the direction where we looking at
+				// when we switch to the aiming view from the secondary camera, turret position must reflect the direction where we looking in
 				if( pCamera2 && LastViewEnt == pCamera2->edict() )
 					FreeCamRotation = pCamera2->GetAbsAngles();
 
@@ -3202,7 +3202,7 @@ void CCar::Camera(void)
 		{
 			if( LastViewEnt != pCamera2->edict() )
 			{
-				// when we switch FROM aiming view from the secondary camera, the position must reflect the direction where we looking at
+				// when we switch FROM the aiming view to the secondary camera, the position must reflect the direction we were looking in
 				if( pTankTower && LastViewEnt == pTankTower->edict() )
 				{
 					Camera2RotationX = pTankTower->GetAbsAngles().x;

@@ -82,7 +82,7 @@ typedef struct dynpitchvol
 
 // presets for runtime pitch and vol modulation of ambient sounds
 
-dynpitchvol_t rgdpvpreset[CDPVPRESETMAX] = 
+static const dynpitchvol_t rgdpvpreset[CDPVPRESETMAX] = 
 {
 // pitch	pstart	spinup	spindwn	volrun	volstrt	fadein	fadeout	lfotype	lforate	modptch modvol	cspnup		
 {1,	255,	 75,	95,		95,		10,		1,		50,		95, 	0,		0,		0,		0,		0,		0,0,0,0,0,0,0,0,0,0}, 

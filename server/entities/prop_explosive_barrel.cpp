@@ -206,7 +206,7 @@ int CExplosiveBarrel::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacke
 	if( !IsOnFire )
 	{
 		// blast from afar and big damage. set hp to 10 and ignite
-		if( ((pevInflictor->origin - GetAbsOrigin()).Length() > 100) && (flDamage > 25) )
+		if( pevInflictor && ((pevInflictor->origin - GetAbsOrigin()).Length() > 100) && (flDamage > 25) )
 			pev->health = 10;
 		else
 		{

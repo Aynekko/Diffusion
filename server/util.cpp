@@ -316,8 +316,12 @@ UTIL_GroupTrace::~UTIL_GroupTrace( void )
 #ifdef	DEBUG
 edict_t *DBG_EntOfVars( const entvars_t *pev )
 {
-	if (pev->pContainingEntity != NULL)
+	if( !pev )
+		return NULL;
+
+	if( pev->pContainingEntity != NULL )
 		return pev->pContainingEntity;
+
 	ALERT(at_console, "entvars_t pContainingEntity is NULL, calling into engine");
 	edict_t* pent = (*g_engfuncs.pfnFindEntityByVars)((entvars_t*)pev);
 	if (pent == NULL)
@@ -2315,6 +2319,9 @@ BOOL UTIL_TeamsMatch( const char *pTeamName1, const char *pTeamName2 )
 //LRC - moved here from barney.cpp
 BOOL UTIL_IsFacing( entvars_t *pevTest, const Vector &reference )
 {
+	if( !pevTest )
+		return FALSE;
+
 	Vector vecDir = (reference - pevTest->origin);
 	vecDir.z = 0;
 	vecDir = vecDir.Normalize();

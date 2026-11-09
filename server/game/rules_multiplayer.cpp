@@ -1228,10 +1228,13 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 	}
 	else
 	{
-		killer_weapon_name = STRING( pevInflictor->classname );
-		if( FStrEq( killer_weapon_name, "_playersentry") && (pevInflictor->owner != NULL) )
+		if( pevInflictor )
 		{
-			killer_index = ENTINDEX( pevInflictor->owner );
+			killer_weapon_name = STRING( pevInflictor->classname );
+			if( FStrEq( killer_weapon_name, "_playersentry" ) && (pevInflictor->owner != NULL) )
+			{
+				killer_index = ENTINDEX( pevInflictor->owner );
+			}
 		}
 	}
 

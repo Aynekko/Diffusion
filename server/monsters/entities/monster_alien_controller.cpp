@@ -238,9 +238,12 @@ int CController :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 
 	if( m_hEnemy == NULL )
 	{
-		MakeIdealYaw( pevAttacker->origin );
-	//	ChangeYaw( pev->yaw_speed );
-		SetTurnActivity();
+		if( pevAttacker )
+		{
+			MakeIdealYaw( pevAttacker->origin );
+		//	ChangeYaw( pev->yaw_speed );
+			SetTurnActivity();
+		}
 	}
 
 	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
@@ -3064,9 +3067,12 @@ int CDrone :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float
 //------------------------------------------------
 	if( (m_hEnemy == NULL) && !HasFlag(F_PLAYER_CONTROL) )
 	{
-		MakeIdealYaw( pevAttacker->origin );
+		if( pevAttacker )
+		{
+			MakeIdealYaw( pevAttacker->origin );
 		//	ChangeYaw( pev->yaw_speed );
-		SetTurnActivity();
+			SetTurnActivity();
+		}
 	}
 
 	int ret = CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
@@ -3709,9 +3715,12 @@ int CDroneAlien :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 
 	if( m_hEnemy == NULL )
 	{
-		MakeIdealYaw( pevAttacker->origin );
+		if( pevAttacker )
+		{
+			MakeIdealYaw( pevAttacker->origin );
 		//	ChangeYaw( pev->yaw_speed );
-		SetTurnActivity();
+			SetTurnActivity();
+		}
 	}
 
 	return CBaseMonster::TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );

@@ -838,68 +838,67 @@ void CBot::Spawn( )
 
 
 int CBot::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker,
-					  float flDamage, int bitsDamageType )
+	float flDamage, int bitsDamageType )
 {
-   
-	CBaseEntity *pAttacker = CBaseEntity::Instance(pevAttacker);
-   char sound[40];
-   int ret_damage;
 
-   // do the damage first...
-   ret_damage = CBasePlayer::TakeDamage( pevInflictor, pevAttacker, flDamage,
-										 bitsDamageType );
+	CBaseEntity *pAttacker = CBaseEntity::Instance( pevAttacker );
+	char sound[40];
+	int ret_damage;
 
-   // if the bot doesn't have an enemy and someone is shooting at it then
-   // turn in the attacker's direction...
-   if (pBotEnemy == NULL)
-   {
-	  // face the attacker...
-	  Vector v_enemy = pAttacker->GetAbsOrigin() - GetAbsOrigin();
-	  Vector bot_angles = UTIL_VecToAngles( v_enemy );
+	// do the damage first...
+	ret_damage = CBasePlayer::TakeDamage( pevInflictor, pevAttacker, flDamage,
+		bitsDamageType );
 
-	  pev->ideal_yaw = bot_angles.y;
+	// if the bot doesn't have an enemy and someone is shooting at it then
+	// turn in the attacker's direction...
+	if( pAttacker && pBotEnemy == NULL )
+	{
+		// face the attacker...
+		Vector v_enemy = pAttacker->GetAbsOrigin() - GetAbsOrigin();
+		Vector bot_angles = UTIL_VecToAngles( v_enemy );
 
-	  // check for wrap around of angle...
-	  BotFixIdealYaw();
+		pev->ideal_yaw = bot_angles.y;
 
-	  // stop using health or HEV stations...
-	  b_use_health_station = FALSE;
-	  b_use_HEV_station = FALSE;
-   }
+		// check for wrap around of angle...
+		BotFixIdealYaw();
 
-   // check if bot model is known, attacker is not a bot,
-   // time for pain sound, and bot has some of health left...
+		// stop using health or HEV stations...
+		b_use_health_station = FALSE;
+		b_use_HEV_station = FALSE;
+	}
 
-   if ((bot_model != 0) && (pAttacker->IsNetClient()) &&
-	   (f_pain_time <= gpGlobals->time) && (pev->health > 0) &&
-	   ( !IS_DEDICATED_SERVER() ))
-   {
-	  float distance = (pAttacker->GetAbsOrigin() - GetAbsOrigin()).Length( );
+	// check if bot model is known, attacker is not a bot,
+	// time for pain sound, and bot has some of health left...
+	if( (bot_model != 0) && pAttacker && (pAttacker->IsNetClient()) &&
+		(f_pain_time <= gpGlobals->time) && (pev->health > 0) &&
+		(!IS_DEDICATED_SERVER()) )
+	{
+		float distance = (pAttacker->GetAbsOrigin() - GetAbsOrigin()).Length();
 
-	  // check if the distance to attacker is close enough (otherwise
-	  // the attacker is too far away to hear the pain sounds)
+		// check if the distance to attacker is close enough (otherwise
+		// the attacker is too far away to hear the pain sounds)
 
-	  if (distance <= 400)
-	  {
-		 // speak pain sounds about 50% of the time
-		 if (RANDOM_LONG(1, 100) <= 50)
-		 {
-			f_pain_time = gpGlobals->time + 5.0;
+		if( distance <= 400 )
+		{
+			// speak pain sounds about 50% of the time
+			if( RANDOM_LONG( 1, 100 ) <= 50 )
+			{
+				f_pain_time = gpGlobals->time + 5.0;
 
-			if (bot_model == MODEL_HGRUNT)
-			   Q_strncpy( sound, hgrunt_sounds[RANDOM_LONG(0,4)], sizeof( sound ) );
-			else if (bot_model == MODEL_BARNEY)
-			   Q_strncpy( sound, barney_sounds[RANDOM_LONG(0,4)], sizeof( sound ) );
-			else if (bot_model == MODEL_SCIENTIST)
-			   Q_strncpy( sound, scientist_sounds[RANDOM_LONG(0,4)], sizeof( sound ) );
+				if( bot_model == MODEL_HGRUNT )
+					Q_strncpy( sound, hgrunt_sounds[RANDOM_LONG( 0, 4 )], sizeof( sound ) );
+				else if( bot_model == MODEL_BARNEY )
+					Q_strncpy( sound, barney_sounds[RANDOM_LONG( 0, 4 )], sizeof( sound ) );
+				else if( bot_model == MODEL_SCIENTIST )
+					Q_strncpy( sound, scientist_sounds[RANDOM_LONG( 0, 4 )], sizeof( sound ) );
 
-			EMIT_SOUND(ENT(pevAttacker), CHAN_VOICE, sound,
-					   RANDOM_FLOAT(0.9, 1.0), ATTN_NORM);
-		 }
-	  }
-   }
+				if( pevAttacker )
+					EMIT_SOUND( ENT( pevAttacker ), CHAN_VOICE, sound, RANDOM_FLOAT( 0.9, 1.0 ), ATTN_NORM );
+			}
+		}
+	}
 
-   return ret_damage;
+	return ret_damage;
 }
 
 

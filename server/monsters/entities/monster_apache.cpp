@@ -951,7 +951,7 @@ void CApache :: ShowDamage( void )
 
 int CApache :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float flDamage, int bitsDamageType )
 {
-	if (pevInflictor->owner == edict())
+	if( pevInflictor && pevInflictor->owner == edict() )
 		return 0;
 
 	if( HasSpawnFlags( SF_MONSTER_NODAMAGE ) )

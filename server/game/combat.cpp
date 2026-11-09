@@ -936,7 +936,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			CBasePlayer* pPlayer = (CBasePlayer*)CBaseEntity::Instance(pevAttacker);
 			if ( pPlayer )
 			{
-				if( pevInflictor->owner != edict() && pevAttacker != pev ) // do not count the damage inflicted to yourself
+				if( pevInflictor && pevInflictor->owner != edict() && pevAttacker != pev ) // do not count the damage inflicted to yourself
 					pPlayer->SendAchievementStatToClient( ACH_INFLICTDAMAGE, (int)flDamage, ACHVAL_ADD );
 			}
 		}
@@ -1072,7 +1072,7 @@ int CBaseMonster::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, f
 			CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pevAttacker );
 
 			// single player achievements - attacker is client, and I'm a monster
-			if( !(pev->flags & FL_CLIENT) && !HasFlag(F_NOT_A_MONSTER) )  // destroying the tripmine was counted as if killing the monster
+			if( pevInflictor && !(pev->flags & FL_CLIENT) && !HasFlag(F_NOT_A_MONSTER) )  // destroying the tripmine was counted as if killing the monster
 			{
 				if ( pPlayer )
 				{
@@ -1965,7 +1965,7 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 				}
 
 				// less damage if shot was fired from underwater
-				if( pevAttacker->waterlevel == 3 )
+				if( pevAttacker && pevAttacker->waterlevel == 3 )
 					BulletDamage *= 0.75;
 			}
 

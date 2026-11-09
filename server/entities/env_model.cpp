@@ -271,7 +271,8 @@ int CEnvModel::TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, floa
 		if( pev->owner != NULL )
 		{
 			CBaseEntity *pOwner = CBaseEntity::Instance( pev->owner );
-			pOwner->TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
+			if( pOwner )
+				pOwner->TakeDamage( pevInflictor, pevAttacker, flDamage, bitsDamageType );
 		}
 	}
 
