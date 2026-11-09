@@ -104,22 +104,26 @@ void CHudHealthVisual::DrawAliceHealth( void )
 	DrawQuad( x, y, x + picsizex, y + picsizey );
 	gEngfuncs.pTriAPI->End();
 
+	if( iAliceHealth <= 0 )
+		return;
+
+	pglEnable( GL_MULTISAMPLE_ARB );
+
 	// draw vertical healthbar to the right of the Alice's figure
 	// background bar
 	const float barx = x + picsizex + 15;
 	const float barh = picsizey * 0.75f;
 	const float bary = y + picsizey * 0.25f;
 	const float barw = 15 * gHUD.fScale;
-	FillRoundedRGBA( barx, bary, barw, barh, 5, 0.8f, 0.8f, 0.8f, 0.8f );
+	FillRoundedRGBA( barx, bary, barw, barh, 3.0f, 0.8f, 0.8f, 0.8f, 0.8f );
 
 	// red health
-	if( iAliceHealth <= 0 )
-		return;
-
-	const float redbarh_full = barh * 0.95f;
+	const float redbarh_full = barh - 4;
 	const float redbarh = redbarh_full * (float)(iAliceHealth * 0.01f);
-	const float redbarw = barw * 0.9f;
-	FillRoundedRGBA( barx + (barw - redbarw) * 0.5f, (bary + (barh - redbarh_full) * 0.5f) + (redbarh_full - redbarh), redbarw, redbarh, 5, 1.0f, 0.1f, 0.1f, 0.75f );
+	const float redbarw = barw - 4;
+	FillRoundedRGBA( barx + (barw - redbarw) * 0.5f, (bary + (barh - redbarh_full) * 0.5f) + (redbarh_full - redbarh), redbarw, redbarh, 3.0f, 1.0f, 0.1f, 0.1f, 0.75f );
+
+	pglDisable( GL_MULTISAMPLE_ARB );
 }
 
 int CHudHealthVisual :: Draw(float flTime)
