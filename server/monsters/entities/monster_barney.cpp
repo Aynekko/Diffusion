@@ -1450,7 +1450,7 @@ int CAlice :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, float
 		return 0;
 	
 	if( pevAttacker && pevAttacker->flags & FL_CLIENT ) // player can't hurt Alice!
-		return;
+		return 0;
 
 	if( bitsDamageType & DMG_BLAST )
 	{

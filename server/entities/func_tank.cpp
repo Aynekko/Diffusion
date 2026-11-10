@@ -81,8 +81,8 @@ public:
 	virtual int ObjectCaps( void ) { return (BaseClass :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_HOLD_ANGLES; }
 
 	inline BOOL IsActive( void ) { return (HasSpawnFlags(SF_TANK_ACTIVE)) ? TRUE : FALSE; }
-	inline void TankActivate( void ) { pev->spawnflags |= SF_TANK_ACTIVE; SetNextThink( 0.1f ); m_iState = STATE_ON; m_fireLast = 0; }
-	inline void TankDeactivate( void ) { pev->spawnflags &= ~SF_TANK_ACTIVE; m_fireLast = 0; m_iState = STATE_OFF; StopRotSound(); StopFire(); }
+	inline void TankActivate( void ) { pev->spawnflags |= SF_TANK_ACTIVE; SetNextThink( 0.1f ); m_iState = STATE_ON; m_fireLast = 0; m_lastSightTime = -1.0e9f; }
+	inline void TankDeactivate( void ) { pev->spawnflags &= ~SF_TANK_ACTIVE; m_fireLast = 0; m_lastSightTime = -1.0e9f;  m_iState = STATE_OFF; StopRotSound(); StopFire(); }
 	inline BOOL CanFire( void ) { return (gpGlobals->time - m_lastSightTime) < m_persist; }
 	BOOL InRange( float range );
 
@@ -299,7 +299,7 @@ void CBaseTank :: Spawn( void )
 
 	if ( m_fireRate <= 0 )
 		m_fireRate = 1;
-	if ( m_spread > MAX_FIRING_SPREADS )
+	if( m_spread < 0 || m_spread >= (int)MAX_FIRING_SPREADS )
 		m_spread = 0;
 
 	UTIL_SetOrigin( this, GetLocalOrigin());
@@ -324,6 +324,7 @@ void CBaseTank :: Spawn( void )
 
 	switch( FOV )
 	{
+	default:
 	case 0: m_flFOV = VIEW_FIELD_FULL; break;
 	case 1: m_flFOV = VIEW_FIELD_WIDE; break;
 	case 2: m_flFOV = VIEW_FIELD_NARROW; break;
@@ -335,8 +336,10 @@ void CBaseTank :: Spawn( void )
 	if( !m_flAttenuation )
 		m_flAttenuation = ATTN_NORM; // large radius
 
-	if( m_minRange > m_maxRange )
+	if( m_maxRange > 0 && m_minRange > m_maxRange )
 		m_minRange = m_maxRange;
+
+	m_lastSightTime = -1.0e9f;
 
 	SetNextThink( 1.0 );
 }
@@ -615,10 +618,10 @@ void CBaseTank :: StopControl( CBasePlayer *pController, CFuncTankControls *pCon
 
 void CBaseTank :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	if( pev->spawnflags & SF_TANK_CANCONTROL )
+	if( HasSpawnFlags( SF_TANK_CANCONTROL ) )
 	{
 		// player controlled turret
-		if( (pActivator->Classify() != CLASS_PLAYER) && FStringNull(MonsterName) )
+		if( FStringNull( MonsterName ) && (!pActivator || pActivator->Classify() != CLASS_PLAYER) )
 			return;
 	}
 //	else
@@ -649,6 +652,10 @@ CBaseEntity *CBaseTank :: FindTarget( void )
 	// normal mode: find the client in PVS
 	if( !m_iszFireTarget && !m_iTankClass )
 	{
+		edict_t *pClient = FIND_CLIENT_IN_PVS( edict() );
+		if( FNullEnt( pClient ) )
+			return NULL;
+
 		CBaseEntity *pClientTarget = CBaseEntity::Instance( FIND_CLIENT_IN_PVS( edict() ) );
 		if( m_hParent != NULL ) // OOPS! Parent object can rotate so I can't use spawn angles...
 			return pClientTarget;
@@ -740,7 +747,7 @@ CBaseEntity *CBaseTank :: FindTarget( void )
 	}
 
 	// make sure that the closest entity is in-range
-	if( pReturn != NULL && InRange( flDist ))
+	if( pReturn != NULL && InRange( flNearest ))
 	{
 //		ALERT( at_console, "Found %s\n", pReturn->GetClassname( ));
 		if( m_hParent != NULL ) // OOPS! Parent object can rotate so I can't use spawn angles...
@@ -894,6 +901,8 @@ void CBaseTank::LaserGuide(void)
 	
 	if( !IsActive() )
 		return;
+
+	UTIL_MakeVectors( GetAbsAngles() );
 
 	if( !m_hLaserPoint ) // initialize the beam
 	{
@@ -1079,6 +1088,7 @@ void CBaseTank :: TrackTarget( void )
 
 		if( !pTarget )
 		{
+			m_fireLast = 0;
 			if( IsActive() )
 				SetNextThink( 0.1 ); // at rest
 			m_iState = STATE_ON;
@@ -1092,6 +1102,7 @@ void CBaseTank :: TrackTarget( void )
 		
 		if( !InRange( range ))
 		{
+			m_fireLast = 0;
 			m_iState = STATE_ON;
 			return;
         }
@@ -1101,7 +1112,7 @@ void CBaseTank :: TrackTarget( void )
 
 		// No line of sight, don't track
 		// g-cont. but allow tracking for non-armed tanks because this may be it's projectors or security cameras
-		if( tr.flFraction == 1.0 || tr.pHit == pTarget->edict() || m_bulletType == BULLET_NONE )
+		if( tr.flFraction == 1.0 || tr.pHit == pTarget->edict() || m_bulletType == TANK_BULLET_NONE )
 		{
 			lineOfSight = TRUE;
 
@@ -1237,7 +1248,8 @@ void CBaseTank :: TrackTarget( void )
 			if( (pController->pev->button & IN_RELOAD) && (BulletsFired > 0) )
 			{
 				ReloadStartTime = gpGlobals->time + ReloadingTime;
-				EMIT_SOUND( edict(), CHAN_VOICE, STRING(m_iszReloadSound), 1, 1.4 );
+				if( m_iszReloadSound )
+					EMIT_SOUND( edict(), CHAN_VOICE, STRING( m_iszReloadSound ), 1, 1.4 );
 				if( m_hBeam )
 					m_hBeam->pev->renderamt = 0;
 				BulletsFired = 0;
@@ -1422,7 +1434,10 @@ void CBaseTank :: Fire( const Vector &barrelEnd, const Vector &forward, entvars_
 			pSprite->SetParent( this );
 		}
 
-		EMIT_SOUND( edict(), CHAN_ITEM, STRING(m_iszShootSound), 1, m_flAttenuation );
+		if( m_iszShootSound )
+			EMIT_SOUND( edict(), CHAN_ITEM, STRING( m_iszShootSound ), 1, m_flAttenuation );
+
+		ALERT( at_console, "tank [%i] FIRE t=%.2f last_sight=%.2f\n", entindex(), gpGlobals->time, m_lastSightTime );
 
 		SUB_UseTargets( this, USE_TOGGLE, 0 );
 
@@ -1432,7 +1447,8 @@ void CBaseTank :: Fire( const Vector &barrelEnd, const Vector &forward, entvars_
 			if( BulletsFired >= TankClipSize )
 			{
 				ReloadStartTime = gpGlobals->time + ReloadingTime;
-				EMIT_SOUND( edict(), CHAN_VOICE, STRING(m_iszReloadSound), 1, 1.4 );
+				if( m_iszReloadSound )
+					EMIT_SOUND( edict(), CHAN_VOICE, STRING( m_iszReloadSound ), 1, 1.4 );
 				if( m_hBeam )
 					m_hBeam->pev->renderamt = 0;
 				BulletsFired = 0;
@@ -1495,6 +1511,8 @@ void CBaseTank :: StopRotSound( void )
 
 void CBaseTank :: ClearEffects(void)
 {
+	StopRotSound(); 
+
 	if (m_hBeam)
 	{
 		UTIL_Remove( m_hBeam );
@@ -1733,7 +1751,7 @@ void CFuncTankRocket :: Fire( const Vector &barrelEnd, const Vector &forward, en
 		{
 			for( int i = 0; i < bulletCount; i++ )
 			{
-				if( m_hControls )
+				if( m_hControls && ((CFuncTankControls *)(CBaseEntity *)m_hControls)->m_hController )
 				{
 					CFuncTankControls *pControls = (CFuncTankControls *)(CBaseEntity *)m_hControls;
 					CBaseEntity *pRocket = CBaseEntity::Create( "robo_rocket", barrelEnd, GetAbsAngles(), pControls->m_hController->edict() );
@@ -1786,16 +1804,18 @@ void CFuncTankBall :: Fire( const Vector &barrelEnd, const Vector &forward, entv
 		{
 			for( int i = 0; i < bulletCount; i++ )
 			{
-				if( m_hControls )
+				if( m_hControls && ((CFuncTankControls *)(CBaseEntity *)m_hControls)->m_hController )
 				{
 					CFuncTankControls *pControls = (CFuncTankControls *)(CBaseEntity *)m_hControls;
 					CBaseEntity *pRocket = CBaseEntity::Create( "shootball", barrelEnd, GetAbsAngles(), pControls->m_hController->edict() );
-					pRocket->SetAbsVelocity( forward * 1000 );
+					if( pRocket )
+						pRocket->SetAbsVelocity( forward * 1000 );
 				}
 				else
 				{
 					CBaseEntity *pRocket = CBaseEntity::Create( "shootball", barrelEnd, GetAbsAngles(), edict() );
-					pRocket->SetAbsVelocity( forward * 1000 );
+					if( pRocket )
+						pRocket->SetAbsVelocity( forward * 1000 );
 				}
 				
 			}
@@ -1920,6 +1940,8 @@ void CFuncTankControls :: KeyValue( KeyValueData *pkvd )
 	}
 	else if( m_cTanks < MAX_CONTROLLED_TANKS ) 
 	{
+		BaseClass::KeyValue( pkvd );
+
 		// add this field to the target list
 		// this assumes that additional fields are targetnames and their values are delay values.
 		char tmp[128];
@@ -1996,7 +2018,7 @@ void CFuncTankControls :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 			if( m_hParent != NULL && FClassnameIs( m_hParent->pev, "func_tracktrain" ))
 			{
 				// transform controller pos into local space because parent can be moving
-				m_vecControllerUsePos = pController->EntityToWorldTransform().VectorITransform( pController->GetAbsOrigin() );
+				m_vecControllerUsePos = EntityToWorldTransform().VectorITransform( pController->GetAbsOrigin() );
 			}
 			else
 				m_vecControllerUsePos = pController->GetAbsOrigin();
@@ -2010,6 +2032,8 @@ void CFuncTankControls :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 	}
 	else if( m_hController && useType != USE_ON )
 	{
+		CBasePlayer *pController = (CBasePlayer *)(CBaseEntity *)m_hController;
+
 		// find all specified tanks
 		for( int i = 0; i < m_cTanks; i++ )
 		{
@@ -2019,12 +2043,11 @@ void CFuncTankControls :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, US
 			while( tryTank = UTIL_FindEntityByTargetname( tryTank, STRING( m_iTankName[i] )) )
 			{
 				if( tryTank )
-					HandleTank( pActivator, tryTank, FALSE );
+					HandleTank( pController, tryTank, FALSE );
 			}			
 		}
 		
 		// bring back player's weapons
-		CBasePlayer *pController = (CBasePlayer *)(CBaseEntity *)m_hController;
 		pController->HideWeapons( FALSE );
 		pController->m_pTank = NULL;
 		m_hController = NULL;
