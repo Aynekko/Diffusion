@@ -279,6 +279,9 @@ void R_DrawScissorRectangle( float x, float y, float w, float h )
 
 void DBG_DrawBBox( const Vector &mins, const Vector &maxs, Vector color )
 {	
+	if( FBitSet( RI->params, RP_SHADOWPASS ) )
+		return;
+
 	Vector bbox[8];
 	int i;
 
