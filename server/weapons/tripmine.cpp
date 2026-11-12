@@ -154,6 +154,9 @@ void CTripmineGrenade::DisarmThink(void)
 		SetFlag(F_ENTITY_UNUSEABLE);
 		ClearEffects();
 	//	SetTouch(&CTripmineGrenade::BreakTouch );
+		SetTouch( NULL );
+		pev->solid = SOLID_NOT;
+		RelinkEntity();
 		Disarmed = true;
 		
 		if( pPlayer )
