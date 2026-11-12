@@ -583,6 +583,7 @@ float V_CalcNewBob( struct ref_params_s *pparams )  // diffusion hl2 bob
 void DSP_Automatic( void )
 {
 	static int current_room_type = 0;
+	static int current_trace = 0;
 	
 	if( room_type_auto->value <= 0 )
 	{
@@ -591,6 +592,7 @@ void DSP_Automatic( void )
 		{
 			room_type->value = 0;
 			current_room_type = 0;
+			current_trace = 0;
 		}
 		return;
 	}
@@ -600,7 +602,6 @@ void DSP_Automatic( void )
 	// one trace per frame
 	Vector PlayerOrg = tr.viewparams.vieworg;
 	pmtrace_t LeftTrace, RightTrace, FrontTrace, BackTrace, UpTrace, DownTrace;
-	static int current_trace = 0;
 	static int RoomW = 0;
 	static int RoomL = 0;
 	static int RoomH = 0;
@@ -616,7 +617,6 @@ void DSP_Automatic( void )
 	// new map or DSP reset, check from the beginning
 	if( current_trace == 0 )
 	{
-		current_trace = 0;
 		RoomW = 0;
 		RoomL = 0;
 		RoomH = 0;
@@ -642,7 +642,7 @@ void DSP_Automatic( void )
 	switch( current_trace )
 	{
 	case 0:
-		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, UpTraceOrigin, PM_WORLD_ONLY, -1, &UpTrace );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, UpTraceOrigin, PM_NORMAL, -1, &UpTrace );
 		if( POINT_CONTENTS( UpTrace.endpos ) == CONTENTS_SKY )
 			Outdoors = true;
 		RoomH += (UpTrace.endpos - PlayerOrg).Length();
@@ -655,7 +655,7 @@ void DSP_Automatic( void )
 		break;
 
 	case 1:
-		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, DownTraceOrigin, PM_WORLD_ONLY, -1, &DownTrace );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, DownTraceOrigin, PM_NORMAL, -1, &DownTrace );
 		//	DownContents = POINT_CONTENTS( DownTrace.endpos );
 		RoomH += (DownTrace.endpos - PlayerOrg).Length();
 		if( bDebug )
@@ -667,7 +667,7 @@ void DSP_Automatic( void )
 		break;
 
 	case 2:
-		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, LeftTraceOrigin, PM_WORLD_ONLY, -1, &LeftTrace );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, LeftTraceOrigin, PM_NORMAL, -1, &LeftTrace );
 		//	LeftContents = POINT_CONTENTS( LeftTrace.endpos );
 		RoomW += (LeftTrace.endpos - PlayerOrg).Length();
 		if( bDebug )
@@ -679,7 +679,7 @@ void DSP_Automatic( void )
 		break;
 
 	case 3:
-		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, RightTraceOrigin, PM_WORLD_ONLY, -1, &RightTrace );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, RightTraceOrigin, PM_NORMAL, -1, &RightTrace );
 		//	RightContents = POINT_CONTENTS( RightTrace.endpos );
 		RoomW += (RightTrace.endpos - PlayerOrg).Length();
 		if( bDebug )
@@ -691,7 +691,7 @@ void DSP_Automatic( void )
 		break;
 
 	case 4:
-		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, FrontTraceOrigin, PM_WORLD_ONLY, -1, &FrontTrace );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, FrontTraceOrigin, PM_NORMAL, -1, &FrontTrace );
 		//	FrontContents = POINT_CONTENTS( FrontTrace.endpos );
 		RoomL += (FrontTrace.endpos - PlayerOrg).Length();
 		if( bDebug )
@@ -703,7 +703,7 @@ void DSP_Automatic( void )
 		break;
 
 	case 5:
-		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, BackTraceOrigin, PM_WORLD_ONLY, -1, &BackTrace );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, BackTraceOrigin, PM_NORMAL, -1, &BackTrace );
 		//	BackContents = POINT_CONTENTS( BackTrace.endpos );
 		RoomL += (BackTrace.endpos - PlayerOrg).Length();
 		if( bDebug )
