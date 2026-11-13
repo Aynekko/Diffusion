@@ -474,6 +474,7 @@ typedef struct
 
 	material_t materials[8192]; // MAX_TEXTURES
 	int studio_screen_tex[8192]; // by entindex
+	Vector vEntRotation[8192]; // by entindex
 
 	float ParticleTime[8192];
 

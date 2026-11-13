@@ -1023,6 +1023,7 @@ void R_MuzzleDynLight( const struct cl_entity_s *e, Vector origin, int WeaponID 
 
 //==============================================================
 // diffusion - client-side simple rotating entity (EF_ROTATING)
+// DO NOT WRITE ANYTHING INTO ->baseline, EVER
 //==============================================================
 void FuncRotatingClient( cl_entity_t *e )
 {
@@ -1031,22 +1032,21 @@ void FuncRotatingClient( cl_entity_t *e )
 	iuser1 - on/off state
 	iuser2 - speed
 	*/
+
+	if( !e || e->index >= 8192 )
+		return;
+
+	Vector &vecR = tr.vEntRotation[e->index];
 	
 	if( (tr.time != tr.oldtime) && (e->curstate.iuser1 == 1) && !tr.fGamePaused ) // do not rotate when paused or off
 	{
-		e->baseline.angles.x += e->curstate.iuser2 * g_fFrametime * e->curstate.vuser1.x;
-		e->baseline.angles.y += e->curstate.iuser2 * g_fFrametime * e->curstate.vuser1.y;
-		e->baseline.angles.z += e->curstate.iuser2 * g_fFrametime * e->curstate.vuser1.z;
+		vecR += e->curstate.vuser1 * (e->curstate.iuser2 * g_fFrametime);
+		vecR.x = AngleNormalize( vecR.x );
+		vecR.y = AngleNormalize( vecR.y );
+		vecR.z = AngleNormalize( vecR.z );
 	}
 
-	if( e->baseline.angles.x > 359.99f ) e->baseline.angles.x = 0;
-	if( e->baseline.angles.y > 359.99f ) e->baseline.angles.y = 0;
-	if( e->baseline.angles.z > 359.99f ) e->baseline.angles.z = 0;
-	if( e->baseline.angles.x < -359.99f ) e->baseline.angles.x = 0;
-	if( e->baseline.angles.y < -359.99f ) e->baseline.angles.y = 0;
-	if( e->baseline.angles.z < -359.99f ) e->baseline.angles.z = 0;
-
-	e->curstate.angles = e->baseline.angles;
+	e->curstate.angles = vecR;
 }
 
 /*
@@ -2143,6 +2143,7 @@ void R_NewMap( void )
 
 	memset( tr.cableSwayIntensity, 0.0f, sizeof( tr.cableSwayIntensity ) );
 	memset( tr.cableSwayPhase, 0.0f, sizeof( tr.cableSwayPhase ) );
+	memset( tr.vEntRotation, 0, sizeof( tr.vEntRotation ) );
 
 	gHUD.m_ScreenEffects.SaveIcon_Reset = true;
 	gHUD.m_ScreenEffects.ShouldDrawGameSaved = false;
