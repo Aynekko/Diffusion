@@ -19,6 +19,8 @@
 #include "weapons/weapons.h"
 #include "player.h"
 
+#define DRONE_LOW_HEALTH 50.0f
+
 class CWpnDrone : public CBasePlayerWeapon
 {
 	DECLARE_CLASS( CWpnDrone, CBasePlayerWeapon );
@@ -45,7 +47,7 @@ public:
 	bool CheckForDrone(void);
 	int AddDuplicate( CBasePlayerItem *pOriginal );
 	bool SpawnTest( void );
-
+	void ClearEffects( void );
 //	int ConfirmExplosion;
 //	float ConfirmationTime;
 	bool GotNewDrone;
@@ -75,6 +77,15 @@ int CWpnDrone::SecondaryAmmoIndex( void )
 	return m_iSecondaryAmmoType;
 }
 */
+
+void CWpnDrone::ClearEffects( void )
+{
+	if( m_hTestModel != NULL )
+	{
+		UTIL_Remove( m_hTestModel );
+		m_hTestModel = NULL;
+	}
+}
 
 BOOL CWpnDrone::IsUseable(void)
 {
@@ -120,7 +131,7 @@ BOOL CWpnDrone::IsUseable(void)
 			m_hTestModel->RelinkEntity( FALSE );
 			m_hTestModel->SetAbsAngles( Vector( 0.0f, anglesAim.y, 0.0f ) );
 			
-			if( m_pPlayer->DroneHealth < 50.0f )
+			if( m_pPlayer->DroneHealth < DRONE_LOW_HEALTH )
 			{
 				m_hTestModel->pev->rendercolor = Vector( 5, 5, 5 );
 				if( gpGlobals->time > NextSmokeTime )
@@ -192,7 +203,6 @@ int CWpnDrone::GetItemInfo(ItemInfo *p)
 	p->iMaxClip = WEAPON_NOCLIP;
 	p->iSlot = WPN_SLOT_DRONE;
 	p->iPosition = WPN_POS_DRONE;
-	p->iFlags = 0;
 	p->iId = m_iId = WEAPON_DRONE;
 	p->iWeight = MP5_WEIGHT;
 	p->iFlags = ITEM_FLAG_SELECTONEMPTY;
@@ -220,16 +230,20 @@ bool CWpnDrone::CheckForDrone( void )
 {
 	CBaseEntity *pDrone = NULL;
 
-	if( (pDrone = UTIL_FindEntityByClassname( pDrone, "_playerdrone" )) != NULL )
+	while( (pDrone = UTIL_FindEntityByClassname( pDrone, "_playerdrone" )) != NULL )
 	{
+		if( pDrone->pev->flags & FL_KILLME )
+			continue;
+
+		if( pDrone->pev->owner != m_pPlayer->edict() )
+			continue;
+
 		m_pPlayer->DroneDeployed = true;
 		return true;
 	}
-	else
-	{
-		m_pPlayer->DroneDeployed = false;
-		return false;
-	}
+
+	m_pPlayer->DroneDeployed = false;
+	return false;
 }
 
 //=========================================================
@@ -237,14 +251,9 @@ bool CWpnDrone::CheckForDrone( void )
 //=========================================================
 int CWpnDrone::AddDuplicate( CBasePlayerItem *pOriginal )
 {
-	CWpnDrone *pWpnDrone;
-	pWpnDrone = (CWpnDrone *)pOriginal;
-
-	if( pWpnDrone->DroneDeployed )
-	{
-		// player has a drone deployed. Refuse to add more.
+	// player has a drone deployed. Refuse to add more.
+	if( pOriginal->m_pPlayer && pOriginal->m_pPlayer->DroneDeployed )
 		return FALSE;
-	}
 
 	return CBasePlayerWeapon::AddDuplicate( pOriginal );
 }
@@ -316,7 +325,7 @@ void CWpnDrone::PrimaryAttack( void )
 		float DroneHealth = m_pPlayer->DroneHealth;
 		int DroneAmmo = (int)m_pPlayer->DroneAmmo;
 
-		if( DroneHealth < 50.0f )
+		if( DroneHealth < DRONE_LOW_HEALTH )
 		{
 			UTIL_ShowMessage( "UTIL_DRONEHPLOW", m_pPlayer );
 			m_flNextPrimaryAttack = gpGlobals->time + 0.2;
@@ -372,12 +381,10 @@ void CWpnDrone::PrimaryAttack( void )
 	{
 		if( !m_pPlayer->DroneControl )
 		{
-			CBaseEntity *pTarget = NULL;
-
 			if( m_pPlayer->m_hDrone != NULL )
 			{
 				CBaseMonster *pDrone = m_pPlayer->m_hDrone->MyMonsterPointer();
-				if( pDrone )
+				if( pDrone && pDrone->IsAlive() )
 				{
 					// drone to the rescue !!!
 					EMIT_SOUND_DYN( ENT( m_pPlayer->pev ), CHAN_ITEM, "weapons/drone_call.wav", 0.5, ATTN_NORM, 0, 100 );
@@ -417,6 +424,9 @@ void CWpnDrone::SecondaryAttack( void )
 	CLIENT_COMMAND(m_pPlayer->edict(), "-attack2\n");
 	
 	if( !m_pPlayer->DroneDeployed )
+		return;
+
+	if( !m_pPlayer->DroneControl && m_pPlayer->m_hDrone == NULL )
 		return;
 
 	m_flNextSecondaryAttack = gpGlobals->time + 2;
@@ -467,7 +477,7 @@ bool CWpnDrone::SpawnTest( void )
 
 	TraceResult tracer;
 	Vector anglesAim = m_pPlayer->pev->v_angle;
-	anglesAim.x *= 0.75;
+	anglesAim.x *= 0.8;
 	UTIL_MakeVectors( anglesAim );
 	//	Vector vecSrc = m_pPlayer->GetAbsOrigin();
 	//	Vector vecEnd = vecSrc + gpGlobals->v_forward * 50;
@@ -478,7 +488,7 @@ bool CWpnDrone::SpawnTest( void )
 		return false;
 
 	// don't spawn behind the glass!!!
-	UTIL_TraceLine( m_pPlayer->GetAbsOrigin(), vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &tracer );
+	UTIL_TraceLine( m_pPlayer->GetAbsOrigin(), vecSrc, dont_ignore_monsters, dont_ignore_glass, m_pPlayer->edict(), &tracer );
 	if( (tracer.flFraction < 1.0f) || tracer.fAllSolid )
 		return false;
 

@@ -36,7 +36,7 @@ public:
 	void Holster( void );
 	void WeaponIdle( void );
 	BOOL IsUseable( void );
-
+	void ClearEffects( void );
 	bool SpawnTest( void );
 
 	EHANDLE m_hTestModel;
@@ -130,6 +130,15 @@ void CWpnSentry::Holster(void)
 	BaseClass::Holster();
 }
 
+void CWpnSentry::ClearEffects( void )
+{
+	if( m_hTestModel != NULL )
+	{
+		UTIL_Remove( m_hTestModel );
+		m_hTestModel = NULL;
+	}
+}
+
 bool CWpnSentry::SpawnTest( void )
 {
 	if( m_pPlayer->pev->waterlevel == 3 )
@@ -155,7 +164,7 @@ bool CWpnSentry::SpawnTest( void )
 		return false;
 
 	// don't spawn behind the glass!!!
-	UTIL_TraceLine( m_pPlayer->GetAbsOrigin(), vecSrc, dont_ignore_monsters, dont_ignore_glass, edict(), &tracer );
+	UTIL_TraceLine( m_pPlayer->GetAbsOrigin(), vecSrc, dont_ignore_monsters, dont_ignore_glass, m_pPlayer->edict(), &tracer );
 	if( (tracer.flFraction < 1.0f) || tracer.fAllSolid )
 		return false;
 
@@ -195,13 +204,9 @@ void CWpnSentry::PrimaryAttack()
 
 			if( pTurret->pev->owner == m_pPlayer->edict() )
 				turret_count++;
-
-			if( turret_count >= turret_max )
-			{
-				bAllowSpawnInMP = false;
-				break;
-			}
 		}
+
+		bAllowSpawnInMP = (turret_count < turret_max);
 	}
 
 	// perform spawn check
@@ -219,14 +224,6 @@ void CWpnSentry::PrimaryAttack()
 		return;
 	}
 
-	if( m_hTestModel != NULL )
-		m_hTestModel->pev->effects |= EF_NODRAW;
-
-	// player "shoot" animation
-	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
-
-//	EMIT_SOUND_DYN(ENT(m_pPlayer->pev), CHAN_WEAPON, "weapons/ar2_shoot.wav", 1, ATTN_NORM, 0, RANDOM_LONG(90,110));
-
 	Vector anglesAim = m_pPlayer->pev->v_angle;
 	if( anglesAim.x > 15.0f ) // small hack for more intuitive turret placing at the floor
 		anglesAim.x = 15.0f;
@@ -236,14 +233,20 @@ void CWpnSentry::PrimaryAttack()
 	Vector SpawnPos = m_pPlayer->GetAbsOrigin() + gpGlobals->v_forward * 50 - gpGlobals->v_up * 10;
 	Vector SpawnAng = (m_hTestModel != NULL) ? m_hTestModel->GetAbsAngles() : g_vecZero;
 	CBaseMonster *pSentry = (CBaseMonster*)Create( "_playersentry", SpawnPos, SpawnAng, m_pPlayer->edict() );
-	if( pSentry )
-	{
-		pSentry->m_iClass = CLASS_PLAYER_ALLY;
-		pSentry->pev->targetname = MAKE_STRING( "_playersentry" ); // in case we want to delete them from the map or else
-		pSentry->m_flDistLook = 2000; // increased look distance
-		pSentry->pev->health = g_pGameRules->IsMultiplayer() ? 150 : 300;
-		pSentry->pev->max_health = pSentry->pev->health;
-	}
+	if( !pSentry )
+		return;
+
+	pSentry->m_iClass = CLASS_PLAYER_ALLY;
+	pSentry->pev->targetname = MAKE_STRING( "_playersentry" ); // in case we want to delete them from the map or else
+	pSentry->m_flDistLook = 2000; // increased look distance
+	pSentry->pev->health = g_pGameRules->IsMultiplayer() ? 150 : 300;
+	pSentry->pev->max_health = pSentry->pev->health;
+
+	if( m_hTestModel != NULL )
+		m_hTestModel->pev->effects |= EF_NODRAW;
+
+	// player "shoot" animation
+	m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 
 	m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType]--;
 
