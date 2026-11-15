@@ -20,7 +20,7 @@ GNU General Public License for more details.
 #include "mathlib.h"
 #include "r_world.h"
 
-const Vector env_dir[] =
+static const Vector env_dir[] =
 {
 	Vector( 1.0f,  0.0f,  0.0f ),
 	Vector( -1.0f,  0.0f,  0.0f ),
@@ -39,7 +39,7 @@ unload a given cubemap
 */
 static void Mod_FreeCubemap( mcubemap_t *m )
 {
-	if( m->valid && m->texture && m->texture != tr.whiteCubeTexture )
+	if( m->texture && m->texture != tr.whiteCubeTexture )
 		FREE_TEXTURE( m->texture );
 
 	memset( m, 0, sizeof( *m ) );
@@ -76,9 +76,9 @@ check cubemap sides for valid
 */
 static bool Mod_CheckCubemap( const char *name )
 {
-	const char *suf[6] = { "px", "nx", "py", "ny", "pz", "nz" };
+	static const char *suf[6] = { "px", "nx", "py", "ny", "pz", "nz" };
 	int	valid_sides = 0;
-	char	sidename[64];
+	char sidename[MAX_PATH];
 	int	iCompare;
 
 	// FIXME: potentially unsafe checking: looking for DDS_CUBEMAP bit?
@@ -138,35 +138,34 @@ void Mod_LoadCubemapBoxes( void )
 	world->rebuilding_cubemaps = CMREBUILD_INACTIVE;
 	int count = 0;
 
-	while( (afile = COM_ParseFile( afile, token )) != NULL )
-	{
-		if( !afile )
-			break;
+	char *pfile = afile;
 
+	while( (pfile = COM_ParseFile( pfile, token )) != NULL )
+	{
 		if( count >= MAX_MAP_CUBEMAPS )
 			break;
 
 		if( !Q_stricmp( token, "cmbox" ) ) // box line start
 		{
 			// mins
-			afile = COM_ParseLine( afile, token );
-			if( afile && token[0] > 0 )
+			pfile = COM_ParseLine( pfile, token );
+			if( pfile && token[0] > 0 )
 			{
 				Q_atov( out->mins, token, 3 );
 			}
 			else break;
 
 			// maxs
-			afile = COM_ParseLine( afile, token );
-			if( afile && token[0] > 0 )
+			pfile = COM_ParseLine( pfile, token );
+			if( pfile && token[0] > 0 )
 			{
 				Q_atov( out->maxs, token, 3 );
 			}
 			else break;
 
 			// origin
-			afile = COM_ParseLine( afile, token );
-			if( afile && token[0] > 0 )
+			pfile = COM_ParseLine( pfile, token );
+			if( pfile && token[0] > 0 )
 			{
 				Q_atov( out->origin, token, 3 );
 			}
@@ -174,10 +173,12 @@ void Mod_LoadCubemapBoxes( void )
 
 			// size
 			out->size = DEFAULT_CUBEMAP_SIZE;
-			afile = COM_ParseLine( afile, token );
-			if( afile && token[0] > 0 )
+			pfile = COM_ParseLine( pfile, token );
+			if( pfile && token[0] > 0 )
 			{
 				out->size = Q_atoi( token );
+				if( out->size <= 0 )
+					out->size = DEFAULT_CUBEMAP_SIZE;
 				out->size = NearestPOW( out->size, false );
 				out->size = bound( 1, out->size, 512 );
 			}
@@ -197,6 +198,7 @@ void Mod_LoadCubemapBoxes( void )
 	ConPrintf( "Loaded %i cubemap boxes.\n", count );
 	world->num_cubemaps = count;
 	world->loading_cubemaps = (count > 0) ? true : false;
+	gEngfuncs.COM_FreeFile( afile );
 
 	// makes an default cubemap from skybox
 	if( FBitSet( world->features, WORLD_HAS_SKYBOX ) && (count > 0) )
@@ -287,7 +289,7 @@ void Mod_LoadCubemaps( const byte *base, const dlump_t *l )
 		HOST_ERROR( "Mod_LoadCubemaps: funny lump size\n" );
 	count = l->filelen / sizeof( *in );
 
-	if( count >= MAX_MAP_CUBEMAPS )
+	if( count > MAX_MAP_CUBEMAPS )
 	{
 		ALERT( at_error, "Mod_LoadCubemaps: map contain too many cubemaps. Will handle only first %i items\n", MAX_MAP_CUBEMAPS );
 		count = MAX_MAP_CUBEMAPS;
@@ -408,6 +410,7 @@ void CL_FindNearestCubeMapBox( const Vector &pos, mcubemap_t **result )
 		{
 			*result = check;
 			maxBoxsize = boxsize;
+			maxDist = dist;
 		}
 	}
 
@@ -506,17 +509,19 @@ void CL_FindTwoNearestCubeMap(const Vector& pos, mcubemap_t** result1, mcubemap_
 	float maxDist2 = 99999.0f;
 	*result1 = *result2 = NULL;
 
-	for (int i = 0; i < world->num_cubemaps; i++)
+	for( int i = 0; i < world->num_cubemaps; i++ )
 	{
-		mcubemap_t* check = &world->cubemaps[i];
-		float dist = VectorDistance(check->origin, pos);
+		mcubemap_t *check = &world->cubemaps[i];
+		float dist = VectorDistance( check->origin, pos );
 
-		if (dist < maxDist1)
+		if( dist < maxDist1 )
 		{
+			*result2 = *result1;
+			maxDist2 = maxDist1;
 			*result1 = check;
 			maxDist1 = dist;
 		}
-		else if (dist < maxDist2 && dist > maxDist1)
+		else if( dist < maxDist2 )
 		{
 			*result2 = check;
 			maxDist2 = dist;
@@ -566,14 +571,20 @@ void CL_FindTwoNearestCubeMapForSurface(const Vector& pos, const msurface_t* sur
 	for (int i = 0; i < world->num_cubemaps; i++)
 	{
 		mcubemap_t* check = &world->cubemaps[i];
-		float dist = VectorDistance(check->origin, pos);
 
-		if (dist < maxDist1 && PlaneDiff(check->origin, &plane) >= 0.0f)
+		if( PlaneDiff( check->origin, &plane ) < 0.0f )
+			continue;
+
+		float dist = VectorDistance( check->origin, pos );
+
+		if( dist < maxDist1 )
 		{
+			*result2 = *result1;
+			maxDist2 = maxDist1;
 			*result1 = check;
 			maxDist1 = dist;
 		}
-		else if (dist < maxDist2 && dist > maxDist1)
+		else if( dist < maxDist2 )
 		{
 			*result2 = check;
 			maxDist2 = dist;
@@ -601,31 +612,32 @@ in the scene
 */
 void CL_BuildCubemaps_f( void )
 {
-	mcubemap_t *m = &world->defaultCubemap;
+	mcubemap_t *def = &world->defaultCubemap;
 
-	if( m->texture != tr.whiteCubeTexture )
-		FREE_TEXTURE( m->texture );
-
-	m->valid = m->texture = false;
+	if( def->texture != tr.whiteCubeTexture )
+	{
+		if( def->texture )
+			FREE_TEXTURE( def->texture );
+		def->texture = 0;
+		def->valid = false;
+	}
 
 	for( int i = 0; i < world->num_cubemaps; i++ )
 	{
-		mcubemap_t *m = &world->cubemaps[i];
-		if( m->texture != tr.whiteCubeTexture )
-			FREE_TEXTURE( m->texture );
-		m->valid = m->texture = false;
+		mcubemap_t *cm = &world->cubemaps[i];
+		if( cm->texture && cm->texture != tr.whiteCubeTexture )
+			FREE_TEXTURE( cm->texture );
+		cm->texture = 0;
+		cm->valid = false;
 	}
 
 	world->cubemaps_ready = false;
+	world->cubemap_build_number = 0;
 
 	if( tr.lowmemory )
 		return;
 
-	if( FBitSet( world->features, WORLD_HAS_SKYBOX ) )
-		world->build_default_cubemap = true;
-	else
-		world->build_default_cubemap = false;
-
+	world->build_default_cubemap = FBitSet( world->features, WORLD_HAS_SKYBOX ) ? true : false;
 	world->rebuilding_cubemaps = CMREBUILD_CHECKING;
 	world->loading_cubemaps = true;
 }
@@ -728,9 +740,6 @@ void GL_LoadAndRebuildCubemaps( int refParams )
 		for( i = 0; i < world->num_cubemaps; i++ )
 		{
 			mcubemap_t *cm = &world->cubemaps[i];
-			Vector vecStart, vecEnd;
-			pmtrace_t pmtrace;
-
 			Mod_LoadCubemap( cm );
 		}
 

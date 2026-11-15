@@ -413,7 +413,7 @@ void V_Init( void )
 	r_show_blocklight = CVAR_REGISTER( "r_show_blocklight", "0", 0 );
 
 	r_fade_props = CVAR_REGISTER( "r_fade_props", "1", FCVAR_ARCHIVE );
-	r_show_cubemaps = CVAR_REGISTER( "r_show_cubemaps", "0", FCVAR_ARCHIVE );
+	r_show_cubemaps = CVAR_REGISTER( "r_show_cubemaps", "0", 0 );
 	r_bloom_sprites = CVAR_REGISTER( "r_bloom_sprites", "0", FCVAR_ARCHIVE );
 	r_bloom = CVAR_REGISTER( "r_bloom", "0", FCVAR_ARCHIVE );
 	thirdperson = CVAR_REGISTER( "thirdperson", "0", FCVAR_CHEAT );
