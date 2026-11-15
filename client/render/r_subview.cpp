@@ -27,7 +27,7 @@ GNU General Public License for more details.
 #define MIRROR_PLANE_EPSILON		32.0f	// g-cont. tune this by taste
 
 CAnimatex screen_static;
-int drone_view_tex = 0;
+static int drone_view_tex = 0;
 
 /*
 =============================================================
@@ -201,10 +201,9 @@ int R_SetupPortalView( msurface_t *surf, cl_entity_t *camera, matrix4x4 &viewmat
 	RI->pvsorigin = camera->origin;
 	RI->vieworg = origin;
 
-	plane.dist += ON_EPSILON; // to prevent z-fighting with reflective water
-
 	// set clipping plane
 	SetPlane( &plane, cameraMat.GetForward(), DotProduct( cameraMat.GetForward(), camera->origin ));
+	plane.dist += ON_EPSILON; // to prevent z-fighting with reflective water
 	RI->params = RP_PORTALVIEW|RP_CLIPPLANE;
 	RI->frustum.SetPlane( FRUSTUM_NEAR, plane.normal, plane.dist );
 	RI->clipPlane = plane;
@@ -607,8 +606,11 @@ void R_DrawSubviewPasses( void )
 
 		if( GL_Support( R_FRAMEBUFFER_OBJECT ))
 		{
-			if(( subview = R_AllocateSubviewTexture( viewport, texFlags )) == 0 )
+			if( (subview = R_AllocateSubviewTexture( viewport, texFlags )) == 0 )
+			{
+				R_ResetRefState();
 				continue;
+			}
 			R_CalcSubviewMatrix( subview, viewmatrix, camera );
 		}
 
@@ -763,20 +765,30 @@ void R_FindBmodelSubview( cl_entity_t *e )
 		if( FBitSet( psurf->flags, SURF_PORTAL ) && !CVAR_TO_BOOL( gl_allow_portals ))
 			continue;
 
-		if( FBitSet( psurf->flags, SURF_WATER ))
+		if( FBitSet( psurf->flags, SURF_WATER ) )
 		{
-			if( FBitSet( psurf->flags, SURF_PLANEBACK ))
+			// side faces only matter if the entity asks for them
+			if( psurf->plane->type != PLANE_Z && !FBitSet( e->curstate.effects, EF_WATERSIDES ) )
+				continue;
+
+			if( FBitSet( psurf->flags, SURF_PLANEBACK ) )
 				SetPlane( &plane, -psurf->plane->normal, -psurf->plane->dist );
 			else SetPlane( &plane, psurf->plane->normal, psurf->plane->dist );
 
 			if( e->hCachedMatrix != WORLD_MATRIX )
 				glm->transform.TransformPositivePlane( plane, plane );
 
-			if( psurf->plane->type != PLANE_Z && !FBitSet( e->curstate.effects, EF_WATERSIDES ))
-				continue;
+			// the "is the water surface above the bottom of the bmodel" test
+			// only makes sense for horizontal faces
+			if( psurf->plane->type == PLANE_Z )
+			{
+				// plane.dist is signed along plane.normal (+Z or -Z), so convert it
+				// to an actual world-space height before comparing against absmin[2]
+				float waterheight = plane.normal[2] * plane.dist;
 
-			if( absmin[2] + 1.0 >= plane.dist )
-				continue;
+				if( absmin[2] + 1.0f >= waterheight )
+					continue;
+			}
 		}
 
 		if( R_CullSurface( psurf ))
@@ -848,7 +860,7 @@ static void R_RenderDroneView( void )
 		{
 			TEMPENTITY *pTemp;
 			int modelIndex = gEngfuncs.pEventAPI->EV_FindModelIndex( "sprites/glow01.spr" );
-			if( pTemp = gEngfuncs.pEfxAPI->CL_TempEntAllocHigh( (float *)&tr.pDrone->curstate.origin, IEngineStudio.GetModelByIndex( modelIndex ) ) )
+			if( modelIndex > 0 && (pTemp = gEngfuncs.pEfxAPI->CL_TempEntAllocHigh( (float *)&tr.pDrone->curstate.origin, IEngineStudio.GetModelByIndex( modelIndex ) )) )
 			{
 				int val = bound( 500, dist_to_drone, 1000 );
 				val = RemapVal( val, 500, 1000, 0, 255 );
@@ -897,10 +909,6 @@ static void R_RenderDroneView( void )
 	if( RP_OUTSIDE( RI->viewleaf ) )
 		return;
 
-	R_FindViewLeaf();
-	R_SetupFrustum();
-	R_MarkLeaves();
-
 	RI->currententity = GET_ENTITY( 0 );
 	RI->currentmodel = RI->currententity->model;
 	RI->num_subview_faces = 0;
@@ -943,6 +951,8 @@ static void R_RenderDroneView( void )
 	memcpy( viewport, RI->viewport, sizeof( viewport ) );
 
 	R_FindViewLeaf();
+	R_SetupFrustum();
+	R_MarkLeaves();
 	R_RenderScene();
 
 	if( !drone_view_tex )
@@ -963,7 +973,7 @@ static void R_RenderDroneView( void )
 
 static void R_RenderStudioScreen( cl_entity_t *e )
 {
-	if( !e )
+	if( !e || e->curstate.aiment <= 0 )
 		return;
 	
 	cl_entity_t *camera = GET_ENTITY( e->curstate.aiment );
@@ -980,21 +990,11 @@ static void R_RenderStudioScreen( cl_entity_t *e )
 	
 	Vector origin, angles, forward;
 
-	R_FindViewLeaf();
-	R_SetupFrustum();
-	R_MarkLeaves();
+	R_PushRefState();
 
-	tr.modelorg = RI->vieworg;
 	RI->currententity = GET_ENTITY( 0 );
 	RI->currentmodel = RI->currententity->model;
 	RI->num_subview_faces = 0;
-
-	int viewport[4];
-
-	R_PushRefState();
-
-	matrix4x4 viewmatrix;
-	viewmatrix.Identity();
 
 	origin = camera->origin;
 	angles = camera->angles;
@@ -1009,11 +1009,16 @@ static void R_RenderStudioScreen( cl_entity_t *e )
 	RI->viewangles = angles;
 	RI->pvsorigin = origin;
 	RI->vieworg = origin;
+	tr.modelorg = RI->vieworg;
+
+	int viewport[4];
+	memcpy( viewport, RI->viewport, sizeof( viewport ) );
 
 	RI->params = RP_SCREENVIEW;
 
-	memcpy( viewport, RI->viewport, sizeof( viewport ) );
-
+	R_FindViewLeaf();
+	R_SetupFrustum();
+	R_MarkLeaves();
 	R_RenderScene();
 
 	if( !tr.studio_screen_tex[e->index] )
