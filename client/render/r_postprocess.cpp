@@ -1298,9 +1298,11 @@ void SMAA( void )
 
 	// set up full screen workspace
 	pglMatrixMode( GL_PROJECTION );
+	pglPushMatrix();
 	pglLoadIdentity();
 	pglOrtho( 0, w, h, 0, -99999, 99999 );
 	pglMatrixMode( GL_MODELVIEW );
+	pglPushMatrix();
 	pglLoadIdentity();
 
 	// 1: edge detection
@@ -1352,6 +1354,11 @@ void SMAA( void )
 
 	GL_BindShader( NULL );
 	GL_CleanupAllTextureUnits();
+
+	pglMatrixMode( GL_PROJECTION );
+	pglPopMatrix();
+	pglMatrixMode( GL_MODELVIEW );
+	pglPopMatrix();
 }
 
 void DownScale( void )

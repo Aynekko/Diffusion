@@ -70,7 +70,11 @@ void CFrustum :: InitProjection( const matrix4x4 &view, float flZNear, float flZ
 	SetPlane( FRUSTUM_FAR, -view.GetForward(), DotProduct( -view.GetForward(), ( view.GetOrigin() + view.GetForward() * flZFar )));
 
 	// no need to setup backplane for general view. It's only used for portals and mirrors
-	if( flZNear == 0.0f ) return;
+	if( flZNear == 0.0f )
+	{
+		DisablePlane( FRUSTUM_NEAR );
+		return;
+	}
 
 	// setup near plane
 	SetPlane( FRUSTUM_NEAR, view.GetForward(), DotProduct( view.GetForward(), ( view.GetOrigin() + view.GetForward() * flZNear )));
@@ -186,7 +190,7 @@ void CFrustum :: NormalizePlane( int side )
 	clipFlags |= BIT( side );
 }
 
-void CFrustum :: ComputeFrustumCorners( Vector corners[8] )
+void CFrustum :: ComputeFrustumCorners( Vector corners[8] ) const
 {
 	memset( corners, 0, sizeof( Vector ) * 8 );
 
@@ -209,7 +213,7 @@ void CFrustum :: ComputeFrustumCorners( Vector corners[8] )
 	}
 }
 
-void CFrustum :: ComputeFrustumBounds( Vector &mins, Vector &maxs )
+void CFrustum :: ComputeFrustumBounds( Vector &mins, Vector &maxs ) const
 {
 	Vector	corners[8];
 
@@ -252,7 +256,7 @@ void CFrustum :: DrawFrustumDebug( void )
 	GL_Texture2D( GL_TRUE );
 }
 
-bool CFrustum :: CullBox( const Vector &mins, const Vector &maxs, int userClipFlags )
+bool CFrustum :: CullBox( const Vector &mins, const Vector &maxs, int userClipFlags ) const
 {
 	if( IsBuildingCubemaps() )
 		return false;
@@ -260,11 +264,7 @@ bool CFrustum :: CullBox( const Vector &mins, const Vector &maxs, int userClipFl
 	if( CVAR_TO_BOOL( r_nocull ) )
 		return false;
 
-	int iClipFlags;
-
-	if( userClipFlags != 0 )
-		iClipFlags = userClipFlags;
-	else iClipFlags = clipFlags;
+	const int iClipFlags = (userClipFlags != 0) ? userClipFlags : clipFlags;
 
 	for( int i = 0; i < FRUSTUM_PLANES; i++ )
 	{
@@ -284,16 +284,15 @@ bool CFrustum :: CullBox( const Vector &mins, const Vector &maxs, int userClipFl
 	return false;
 }
 
-bool CFrustum :: CullSphere( const Vector &centre, float radius, int userClipFlags )
+bool CFrustum :: CullSphere( const Vector &centre, float radius, int userClipFlags ) const
 {
-	int iClipFlags;
-	
+	if( IsBuildingCubemaps() )
+		return false;
+
 	if( CVAR_TO_BOOL( r_nocull ) )
 		return false;
 
-	if( userClipFlags != 0 )
-		iClipFlags = userClipFlags;
-	else iClipFlags = clipFlags;
+	const int iClipFlags = (userClipFlags != 0) ? userClipFlags : clipFlags;
 
 	for( int i = 0; i < FRUSTUM_PLANES; i++ )
 	{
@@ -309,69 +308,25 @@ bool CFrustum :: CullSphere( const Vector &centre, float radius, int userClipFla
 	return false;
 }
 
-// Brute force SAT frustum intersection between two frustums
-bool CFrustum::Intersect( CFrustum *otherFrustum )
+static bool AllPointsOutsideAnyPlane( const CFrustum *f, const Vector pts[8] )
 {
-	Vector pPointsA[8];
-	bool bResult = false;
-	ComputeFrustumCorners( pPointsA );
-	const mplane_t *pPlanesA[FRUSTUM_PLANES];
-	int k;
-	for( k = 0; k < FRUSTUM_PLANES; k++ )
-		pPlanesA[k] = GetPlane( k );
-
-	Vector pPointsB[8];
-	otherFrustum->ComputeFrustumCorners( pPointsB );
-	const mplane_t *pPlanesB[FRUSTUM_PLANES];
-	for( k = 0; k < FRUSTUM_PLANES; k++ )
-		pPlanesB[k] = otherFrustum->GetPlane( k );
-
-	// See if all points in B are on one side of any plane in A
-	for( int p = 0; p < 6; ++p )
+	for( int p = 0; p < FRUSTUM_PLANES; p++ )
 	{
-		bool bPointsOnOutside = true;
-		for( int i = 0; i < 8; ++i )
-		{
-			float flDist = DotProduct( pPointsB[i], pPlanesA[p]->normal ) - pPlanesA[p]->dist;
-
-			// If dist is pos, we are not on the outside
-			if( flDist > 0 )
-			{
-				bPointsOnOutside = false;
-				break;
-			}
-		}
-
-		// We never hit a negative case, we have a separating axis
-		if( bPointsOnOutside )
-		{
-			return false;
-		}
+		if( !FBitSet( f->GetClipFlags(), BIT( p ) ) ) continue;
+		const mplane_t *pl = f->GetPlane( p );
+		int i;
+		for( i = 0; i < 8; i++ )
+			if( DotProduct( pts[i], pl->normal ) - pl->dist > 0 ) break;
+		if( i == 8 ) return true; // separating plane
 	}
+	return false;
+}
 
-	// See if all points in A are on one side of any plane in B
-	for( int p = 0; p < 6; ++p )
-	{
-		bool bPointsOnOutside = true;
-		for( int i = 0; i < 8; ++i )
-		{
-			float flDist = DotProduct( pPointsA[i], pPlanesB[p]->normal ) - pPlanesB[p]->dist;
+bool CFrustum::Intersect( const CFrustum *other ) const
+{
+	Vector ptsA[8], ptsB[8];
+	ComputeFrustumCorners( ptsA );
+	other->ComputeFrustumCorners( ptsB );
 
-			// If dist is pos, we are not on the outside
-			if( flDist > 0 )
-			{
-				bPointsOnOutside = false;
-				break;
-			}
-		}
-
-		// We never hit a negative case, we have a separating axis
-		if( bPointsOnOutside )
-		{
-			return false;
-		}
-	}
-
-	// They intersect
-	return true;
+	return !AllPointsOutsideAnyPlane( this, ptsB ) && !AllPointsOutsideAnyPlane( other, ptsA );
 }

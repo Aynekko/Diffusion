@@ -2255,8 +2255,19 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 	// draw main view
 	R_RenderScene();
 
+	R_RenderDebugSurface();
+
+	if( CVAR_TO_BOOL( r_show_renderpass ) )
+		R_DrawRenderPasses( (int)r_show_renderpass->value - 1 );
+
+	if( CVAR_TO_BOOL( r_show_light_scissors ) )
+		R_DrawLightScissors();
+
 	if( CVAR_TO_BOOL( r_show_lightprobes ) )
 		DrawLightProbes();
+
+	GL_DepthTest( GL_FALSE );
+	GL_DepthMask( GL_FALSE );
 
 	SMAA();
 
@@ -2266,14 +2277,6 @@ int HUD_RenderFrame( const ref_viewpass_t *rvp )
 		DownScale();
 
 	R_RestoreGLState();
-
-	R_RenderDebugSurface ();
-
-	if( CVAR_TO_BOOL( r_show_renderpass ))
-		R_DrawRenderPasses( (int)r_show_renderpass->value - 1 );
-
-	if( CVAR_TO_BOOL( r_show_light_scissors ))
-		R_DrawLightScissors();
 
 	R_UnloadFarGrass();
 

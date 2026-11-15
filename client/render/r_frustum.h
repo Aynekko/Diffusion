@@ -29,6 +29,7 @@ GNU General Public License for more details.
 class CFrustum
 {
 public:
+	CFrustum() { ClearFrustum(); }
 	void InitProjection( const matrix4x4 &view, float flZNear, float flZFar, float flFovX, float flFovY );
 	void InitOrthogonal( const matrix4x4 &view, float xLeft, float xRight, float yTop, float yBottom, float flZNear, float flZFar );
 	void InitBoxFrustum( const Vector &org, float radius ); // used for pointlights
@@ -38,15 +39,15 @@ public:
 	void NormalizePlane( int side );
 	const mplane_t *GetPlane( int side ) const { return &planes[side]; }
 	unsigned int GetClipFlags( void ) const { return clipFlags; }
-	void ComputeFrustumBounds( Vector &mins, Vector &maxs );
-	void ComputeFrustumCorners( Vector bbox[8] );
+	void ComputeFrustumBounds( Vector &mins, Vector &maxs ) const;
+	void ComputeFrustumCorners( Vector bbox[8] ) const;
 	void DrawFrustumDebug( void );
 	void ClearFrustum( void );
 
 	// cull methods
-	bool CullBox( const Vector &mins, const Vector &maxs, int userClipFlags = 0 );
-	bool CullSphere( const Vector &centre, float radius, int userClipFlags = 0 );
-	bool Intersect( CFrustum *otherFrustum );
+	bool CullBox( const Vector &mins, const Vector &maxs, int userClipFlags = 0 ) const;
+	bool CullSphere( const Vector &centre, float radius, int userClipFlags = 0 ) const;
+	bool Intersect( const CFrustum *other ) const;
 
 	// plane manipulating
 	void EnablePlane( int side );
