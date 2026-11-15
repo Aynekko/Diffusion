@@ -103,7 +103,7 @@ void CCineMonster :: KeyValue( KeyValueData *pkvd )
 	}
 	else if( FStrEq( pkvd->szKeyName, "ActionModel" ) )
 	{
-		m_actionmodel = ALLOC_STRING( pkvd->szValue );;
+		m_actionmodel = ALLOC_STRING( pkvd->szValue );
 		pkvd->fHandled = TRUE;
 	}
 	else
@@ -134,7 +134,6 @@ BEGIN_DATADESC( CCineMonster )
 END_DATADESC()
 
 LINK_ENTITY_TO_CLASS( scripted_sequence, CCineMonster );
-#define CLASSNAME "scripted_sequence"
 
 LINK_ENTITY_TO_CLASS( aiscripted_sequence, CCineAI );
 
@@ -433,6 +432,9 @@ void CCineAI :: PossessEntity( void )
 		pTarget->m_pCine = this;
 		pTarget->m_hTargetEnt = this;
 
+		if( pTarget->HasSpawnFlags( SF_MONSTER_ASLEEP ) ) // diffusion - wake up monster's AI if we are using him in a script
+			pTarget->pev->spawnflags &= ~SF_MONSTER_ASLEEP;
+
 		m_saved_movetype = pTarget->pev->movetype;
 		m_saved_solid = pTarget->pev->solid;
 		m_saved_effects = pTarget->pev->effects;
@@ -470,11 +472,14 @@ void CCineAI :: PossessEntity( void )
 			pTarget->pev->flags &= ~FL_ONGROUND;
 			break;
 		default:
-			ALERT ( at_aiconsole, "aiscript:  invalid Move To Position value!" );
+			ALERT ( at_aiconsole, "aiscript:  invalid Move To Position value!\n" );
 			break;
 		}
 		
 		ALERT( at_aiconsole, "\"%s\" found and used\n", STRING( pTarget->pev->targetname ) );
+
+		if( HasSpawnFlags( SF_SCRIPT_NOINTERRUPT ) ) // diffusion - must be tested more but should work well
+			pTarget->SetFlag( F_ENTITY_BUSY );
 
 		// save previous state
 		if( pTarget->m_MonsterState != MONSTERSTATE_SCRIPT ) // but not script state: this can happen when sequences are being used one after another
@@ -497,6 +502,9 @@ void CCineAI :: PossessEntity( void )
 			pNewSchedule = pTarget->GetScheduleOfType( SCHED_AISCRIPT );
 			pTarget->ChangeSchedule( pNewSchedule );
 		}
+
+		if( m_iszFireOnPossess )
+			UTIL_FireTargets( m_iszFireOnPossess, this, this, USE_TOGGLE, 0 );
 	}
 }
 
@@ -526,11 +534,12 @@ BOOL CCineMonster :: StartSequence( CBaseMonster *pTarget, int iszSeq, BOOL comp
 		return FALSE;
 	}
 
-	if( iszSeq == m_iszPlay )
+	if( iszSeq == m_iszPlay && m_actionmodel > 0 )
 	{
-		if( m_actionmodel > 0 )
+		// remember old model, set new model for action
+		// don't overwrite the saved model if the action model is already applied
+		if( !FStrEq( STRING( pTarget->pev->model ), STRING( m_actionmodel ) ) )
 		{
-			// remember old model, set new model for action
 			m_originalmodel = pTarget->pev->model;
 			SET_MODEL( pTarget->edict(), STRING( m_actionmodel ) );
 		}
@@ -607,7 +616,7 @@ void CCineMonster :: SequenceDone ( CBaseMonster *pMonster )
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
 
-	if( m_actionmodel > 0 )
+	if( m_actionmodel > 0 && m_originalmodel )
 	{
 		// set original model back
 		SET_MODEL( pMonster->edict(), STRING( m_originalmodel ) );
@@ -724,7 +733,7 @@ int	CCineMonster::IgnoreConditions( void )
 void ScriptEntityCancel( edict_t *pentCine )
 {
 	// make sure they are a scripted_sequence
-	if (FClassnameIs( pentCine, CLASSNAME ))
+	if( FClassnameIs( pentCine, "scripted_sequence" ) )
 	{
 		CCineMonster *pCineTarget = GetClassPtr((CCineMonster *)VARS(pentCine));
 		// make sure they have a monster in mind for the script
@@ -842,7 +851,7 @@ void CCineMonster :: Activate( void )
 		while (!pTarget && !FNullEnt(pentTarget))
 		{
 			pTarget = GetMonsterPointer( pentTarget );
-			pentTarget = FIND_ENTITY_BY_TARGETNAME(pentTarget, STRING(m_iszEntity));
+			pentTarget = FIND_ENTITY_BY_CLASSNAME(pentTarget, STRING(m_iszEntity));
 		}
 	}
 	// Found a compatible entity
@@ -913,10 +922,12 @@ BOOL CBaseMonster :: CineCleanup( void )
 	// If we actually played a sequence
 	if ( pOldCine && pOldCine->m_iszPlay )
 	{
-		if( pOldCine->m_actionmodel > 0 )
+		if( pOldCine->m_actionmodel > 0 && pOldCine->m_originalmodel )
 		{
 			SET_MODEL( edict(), STRING( pOldCine->m_originalmodel ) );
+			pOldCine->m_originalmodel = 0;
 		}
+
 		if ( !(pOldCine->pev->spawnflags & SF_SCRIPT_NOSCRIPTMOVEMENT) )
 		{
 			// reset position
@@ -1215,6 +1226,7 @@ void CScriptedSentence :: FindThink( void )
 			SetThink(&CScriptedSentence::DelayThink );
 			pev->nextthink = gpGlobals->time + m_flDuration + m_flRepeat;
 			m_active = FALSE;
+			SUB_UseTargets( NULL, USE_TOGGLE, 0 );
 		}
 		else
 		{
@@ -1328,7 +1340,7 @@ BOOL CScriptedSentence :: StartSentence( CBaseMonster *pTarget )
 	if ( !pTarget )
 	{
 		ALERT( at_aiconsole, "Not Playing sentence %s\n", STRING(m_iszSentence) );
-		return NULL;
+		return FALSE;
 	}
 
 	BOOL bConcurrent = FALSE;
