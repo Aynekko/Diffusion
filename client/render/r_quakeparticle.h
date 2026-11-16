@@ -103,6 +103,7 @@ public:
 	int	m_iFlags;
 	float newLight;
 	int EntIndex; // pointer to entity which emitted this particle
+	float m_flLastThink;
 
 //	float AlphaDownScale;
 
