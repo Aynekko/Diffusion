@@ -25,9 +25,10 @@ GNU General Public License for more details.
 #include <mathlib.h>
 
 void WaterLandingEffect( cl_drip *drip );
-void ParseRainFile( void );
 
 int RainTexture = 0;
+SpriteHandle hsprSnowTexture = 0;
+const model_s *pSnowTexture = NULL;
 
 struct
 {
@@ -58,6 +59,7 @@ static byte	m_colorarray[MAX_RAIN_VERTICES][4];
 static Vector2D	m_coordsarray[MAX_RAIN_VERTICES];
 static word	m_indexarray[MAX_RAIN_INDICES];
 static int	m_iNumVerts, m_iNumIndex;
+static bool	rain_configLoaded = false;	// .pcs file parsed for this map
 
 /*
 =================================
@@ -77,14 +79,18 @@ void ProcessRain( void )
 	{
 		// fix first frame bug with nextspawntime
 		rain_nextspawntime = rain_curtime;
-		ParseRainFile();
 		return;
 	}
 
-	if(( !Rain.dripsPerSecond && g_dripsArray.IsClear( )) || rain_timedelta > 0.1f )
+	// time went backwards (level change, etc)
+	if( rain_timedelta < 0.0 )
 	{
-		rain_timedelta = Q_min( rain_timedelta, 0.1f );
+		rain_nextspawntime = rain_curtime;
+		return;
+	}
 
+	if( (Rain.dripsPerSecond <= 0 && g_dripsArray.IsClear()) || rain_timedelta > 0.1 )
+	{
 		// keep nextspawntime correct
 		rain_nextspawntime = rain_curtime;
 		return;
@@ -92,7 +98,10 @@ void ProcessRain( void )
 
 	if( rain_timedelta == 0 ) return; // not in pause
 
-	double timeBetweenDrips = 1.0 / (double)Rain.dripsPerSecond;
+	const bool canSpawn = (Rain.dripsPerSecond > 0);
+	const double timeBetweenDrips = canSpawn ? (1.0 / (double)Rain.dripsPerSecond) : 0.0;
+	const float speed = (Rain.weatherMode == MODE_SNOW) ? SNOWSPEED : DRIPSPEED;
+	const float mapBottom = -8192.0f;
 
 	if( !g_dripsArray.StartPass( ))
 	{
@@ -113,12 +122,7 @@ void ProcessRain( void )
 
 	while( curDrip != NULL ) // go through list
 	{
-		if( Rain.weatherMode == MODE_RAIN )
-			curDrip->origin.z -= rain_timedelta * DRIPSPEED;
-		else if( Rain.weatherMode == MODE_SNOW )
-			curDrip->origin.z -= rain_timedelta * SNOWSPEED;
-		else return;
-
+		curDrip->origin.z -= rain_timedelta * speed;
 		curDrip->origin.x += rain_timedelta * curDrip->xDelta;
 		curDrip->origin.y += rain_timedelta * curDrip->yDelta;
 #if 1
@@ -141,7 +145,7 @@ void ProcessRain( void )
 				curDrip->origin.z = curDrip->minHeight;
 				curDrip->xDelta = 0.0f;
 				curDrip->yDelta = 0.0f;
-				curDrip->alpha -= 0.1f * g_fFrametime;
+				curDrip->alpha -= 0.1f * rain_timedelta;
 
 				if( curDrip->alpha <= 0.0f )
 				{
@@ -196,21 +200,13 @@ void ProcessRain( void )
 		curDrip = g_dripsArray.GetCurrent();
 	}
 
-	int maxDelta; // maximum height randomize distance
-	float falltime;
+	float maxDelta = speed * rain_timedelta; // maximum height randomize distance
+	float falltime = (Rain.globalHeight - mapBottom) / speed;
 
-	if( Rain.weatherMode == MODE_RAIN )
-	{
-		maxDelta = DRIPSPEED * rain_timedelta; // for rain
-		falltime = (Rain.globalHeight + 4096) / DRIPSPEED;
-	}
-	else
-	{
-		maxDelta = SNOWSPEED * rain_timedelta; // for snow
-		falltime = (Rain.globalHeight + 4096) / SNOWSPEED;
-	}
+	if( !canSpawn )
+		rain_nextspawntime = rain_curtime;
 
-	while( rain_nextspawntime < rain_curtime )
+	while( canSpawn && rain_nextspawntime < rain_curtime )
 	{
 		rain_nextspawntime += timeBetweenDrips;		
 
@@ -233,7 +229,7 @@ void ProcessRain( void )
 			// find a point at bottom of map
 			vecEnd[0] = falltime * xDelta;
 			vecEnd[1] = falltime * yDelta;
-			vecEnd[2] = -8192;
+			vecEnd[2] = mapBottom - Rain.globalHeight;
 
 			pmtrace_t pmtrace;
 			int contents = CONTENTS_EMPTY;
@@ -322,6 +318,7 @@ void ProcessRain( void )
 		else
 		{
 			ALERT( at_error, "rain: Drip limit overflow!\n" );
+			rain_nextspawntime = rain_curtime; // don't burst-spawn
 			return;
 		}
 	}
@@ -440,6 +437,7 @@ void R_InitWeather( void )
 	rain_nextspawntime = 0;
 	rain_oldtime = 0;
 	rain_curtime = 0;
+	rain_configLoaded = false;
 
 	gHUD.ScreenDrips_Visible = false;
 	gHUD.ScreenDrips_CurVisibility = 0.0f;
@@ -448,6 +446,8 @@ void R_InitWeather( void )
 	gHUD.Weather_Intensity = 0.0f;
 
 	RainTexture = LOAD_TEXTURE( "gfx/particles/raindrop", NULL, 0, 0 );
+	hsprSnowTexture = LoadSprite( "sprites/snowflake.spr" ); // load snow sprite
+	pSnowTexture = gEngfuncs.GetSpritePointer( hsprSnowTexture );
 }
 
 /*
@@ -471,8 +471,8 @@ void ParseRainFile( void )
 		return;	// already specified?
 
 	char mapname[64];
-	char token[64];
-	char *afile, *pfile;
+	char token[64], value[64];
+	char *afile, *pfile, *next;
 
 	Q_strncpy( mapname, gEngfuncs.pfnGetLevelName(), sizeof( mapname ) );
 	if( !Q_strlen( mapname ))
@@ -495,50 +495,32 @@ void ParseRainFile( void )
 		pfile = COM_ParseFile( pfile, token );
 		if( !pfile ) break;
 
-		if( !Q_stricmp( token, "drips" )) // dripsPerSecond
+		next = COM_ParseFile( pfile, value );
+		if( !next )
 		{
-			pfile = COM_ParseFile( pfile, token );
-			Rain.dripsPerSecond = Q_atoi( token );
+			ALERT( at_error, "rain: missing value for %s in file %s\n", token, mapname );
+			break;
 		}
-		else if( !Q_stricmp( token, "distance" )) // distFromPlayer
-		{
-			pfile = COM_ParseFile( pfile, token );
-			Rain.distFromPlayer = Q_atof( token );
-		}
-		else if( !Q_stricmp( token, "windx" )) // windX
-		{
-			pfile = COM_ParseFile( pfile, token );
-			Rain.windX = Q_atof( token );
-		}
-		else if( !Q_stricmp( token, "windy" )) // windY
-		{
-			pfile = COM_ParseFile( pfile, token );
-			Rain.windY = Q_atof( token );		
-		}
-		else if( !Q_stricmp( token, "randx" )) // randX
-		{
-			pfile = COM_ParseFile( pfile, token );
-			Rain.randX = Q_atof( token );
-		}
-		else if( !Q_stricmp( token, "randy" )) // randY
-		{
-			pfile = COM_ParseFile(pfile, token);
-			Rain.randY = Q_atof(token);
-		}
-		else if( !Q_stricmp( token, "mode" )) // weatherMode
-		{
-			pfile = COM_ParseFile( pfile, token );
-			Rain.weatherMode = Q_atoi( token );
-		}
-		else if( !Q_stricmp( token, "height" )) // globalHeight
-		{
-			pfile = COM_ParseFile( pfile, token );
-			Rain.globalHeight = Q_atof( token );
-		}
+		pfile = next;
+
+		if( !Q_stricmp( token, "drips" ) )
+			Rain.dripsPerSecond = Q_max( 0, Q_atoi( value ) );
+		else if( !Q_stricmp( token, "distance" ) )
+			Rain.distFromPlayer = Q_atof( value );
+		else if( !Q_stricmp( token, "windx" ) )
+			Rain.windX = Q_atof( value );
+		else if( !Q_stricmp( token, "windy" ) )
+			Rain.windY = Q_atof( value );
+		else if( !Q_stricmp( token, "randx" ) )
+			Rain.randX = Q_atof( value );
+		else if( !Q_stricmp( token, "randy" ) )
+			Rain.randY = Q_atof( value );
+		else if( !Q_stricmp( token, "mode" ) )
+			Rain.weatherMode = bound( MODE_RAIN, Q_atoi( value ), MODE_SNOW );
+		else if( !Q_stricmp( token, "height" ) )
+			Rain.globalHeight = Q_atof( value );
 		else
-		{
 			ALERT( at_error, "rain: unknown token %s in file %s\n", token, mapname );
-		}
 	}
 	
 	gEngfuncs.COM_FreeFile( afile );
@@ -552,12 +534,14 @@ R_ParseRainMessage
 void R_ParseRainMessage( void )
 {
 	Rain.dripsPerSecond = READ_SHORT();
+	Rain.dripsPerSecond = Q_max( 0, Rain.dripsPerSecond ); // !! DO NOT put READ_[...] into macro!
 	Rain.distFromPlayer = READ_COORD();
 	Rain.windX = READ_COORD();
 	Rain.windY = READ_COORD();
 	Rain.randX = READ_COORD();
 	Rain.randY = READ_COORD();
 	Rain.weatherMode = READ_SHORT();
+	Rain.weatherMode = bound( MODE_RAIN, Rain.weatherMode, MODE_SNOW );
 	Rain.globalHeight = READ_COORD();
 	Rain.bUseSmoke = READ_BYTE();
 }
@@ -581,16 +565,10 @@ void DrawRain( void )
 	if( cl_debug_rain->value )
 		DBG_DrawBBox( rain_mins, rain_maxs );
 
-	SpriteHandle hsprTexture = 0;
-
 	if( Rain.weatherMode == MODE_RAIN )
 		GL_Bind( GL_TEXTURE0, RainTexture );
 	else if( Rain.weatherMode == MODE_SNOW )
-	{
-		hsprTexture = LoadSprite( "sprites/snowflake.spr" ); // load snow sprite
-		const model_s *pTexture = gEngfuncs.GetSpritePointer( hsprTexture );
-		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pTexture, 0 );
-	}
+		gEngfuncs.pTriAPI->SpriteTexture( (struct model_s *)pSnowTexture, 0 );
 
 	gEngfuncs.pTriAPI->RenderMode( kRenderTransAdd );
 	
@@ -616,7 +594,7 @@ void DrawRain( void )
 		while( Drip != NULL )
 		{
 			// cull invisible drips
-			if( R_CullSphere( Drip->origin, SNOW_SPRITE_HALFSIZE + 1 ))
+			if( R_CullSphere( Drip->origin, DRIP_SPRITE_HALFHEIGHT + 1 ))
 			{
 				g_dripsArray.MoveNext();
 				Drip = g_dripsArray.GetCurrent();
@@ -629,7 +607,7 @@ void DrawRain( void )
 				if( GL_Support( R_DRAW_RANGEELEMENTS_EXT ))
 					pglDrawRangeElementsEXT( GL_TRIANGLES, 0, m_iNumVerts, m_iNumIndex, GL_UNSIGNED_SHORT, m_indexarray );
 				else pglDrawElements( GL_TRIANGLES, m_iNumIndex, GL_UNSIGNED_SHORT, m_indexarray );
-				r_stats.c_total_tris += (m_iNumVerts - 2);
+				r_stats.c_total_tris += (m_iNumVerts / 3);
 				m_iNumVerts = m_iNumIndex = 0;
 				r_stats.dip_count++;
 			}
@@ -684,7 +662,7 @@ void DrawRain( void )
 			if( GL_Support( R_DRAW_RANGEELEMENTS_EXT ))
 				pglDrawRangeElementsEXT( GL_TRIANGLES, 0, m_iNumVerts, m_iNumIndex, GL_UNSIGNED_SHORT, m_indexarray );
 			else pglDrawElements( GL_TRIANGLES, m_iNumIndex, GL_UNSIGNED_SHORT, m_indexarray );
-			r_stats.c_total_tris += (m_iNumVerts - 2);
+			r_stats.c_total_tris += (m_iNumVerts / 3);
 			r_stats.dip_count++;
 		}
 	}
@@ -829,7 +807,7 @@ void DrawFXObjects( void )
 		}
 
 		// cull invisible rings
-		if( R_CullSphere( curFX->origin, MAX_RING_HALFSIZE + 1 ))
+		if( R_CullSphere( curFX->origin, MAX_RING_HALFSIZE * 1.5f ) )
 		{
 			g_fxArray.MoveNext();
 			curFX = g_fxArray.GetCurrent();
@@ -904,6 +882,16 @@ R_DrawWeather
 */
 void R_DrawWeather( void )
 {
+	if( FBitSet( RI->params, RP_SKYPORTALVIEW ) || FBitSet( RI->params, RP_SHADOWPASS ) || IsBuildingCubemaps() )
+		return;
+
+	// load the per-map .pcs once, even if no server message configured the weather
+	if( !rain_configLoaded )
+	{
+		ParseRainFile();
+		rain_configLoaded = true;
+	}
+
 	// a neat global to determine the intensity of a storm if needed
 	gHUD.Weather_Intensity = bound( 0.0f, Rain.dripsPerSecond / 2500.0f, 1.0f );  // this number can be tuned
 
@@ -911,10 +899,8 @@ void R_DrawWeather( void )
 	if( gHUD.ScreenDrips_OverrideTime < tr.time )
 		gHUD.ScreenDrips_DripIntensity = bound( 0.0f, gHUD.Weather_Intensity, 0.5f ); // for water drops shader
 
-	if( Rain.dripsPerSecond <= 0 )
-		return;
-
-	if( FBitSet( RI->params, RP_SKYPORTALVIEW ) || FBitSet( RI->params, RP_SHADOWPASS ) || IsBuildingCubemaps() )
+	// keep simulating until leftover drips and rings are gone
+	if( Rain.dripsPerSecond <= 0 && g_dripsArray.IsClear() && g_fxArray.IsClear() )
 		return;
 
 	RI->currententity = NULL;
@@ -935,7 +921,7 @@ void R_DrawWeather( void )
 		Vector RainOrg = PlayerOrg;
 		RainOrg.z = Rain.globalHeight;
 		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, RainOrg, PM_TRACELINE_PHYSENTSONLY, gEngfuncs.GetLocalPlayer()->index, &trace );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( PlayerOrg, RainOrg, PM_NORMAL, -1, &trace );
 		if( trace.fraction == 1.0f ) // in the open // P.S. maybe check a sky texture instead? or both methods? anyway this works well for now
 			gHUD.ScreenDrips_Visible = true;
 	}

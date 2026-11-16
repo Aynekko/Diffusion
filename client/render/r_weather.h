@@ -22,7 +22,7 @@ GNU General Public License for more details.
 #define SNOWFADEDIST		80
 
 #define MAX_RAIN_VERTICES		65536	// snowflakes and waterrings draw as quads
-#define MAX_RAIN_INDICES		MAX_RAIN_VERTICES * 4
+#define MAX_RAIN_INDICES		MAX_RAIN_VERTICES
 
 // this limits can be blindly increased
 #define MAXDRIPS			40000	// max raindrops
