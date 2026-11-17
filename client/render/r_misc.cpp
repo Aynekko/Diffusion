@@ -1046,7 +1046,7 @@ void FuncRotatingClient( cl_entity_t *e )
 		vecR.z = AngleNormalize( vecR.z );
 	}
 
-	e->curstate.angles = vecR;
+	e->curstate.angles = e->baseline.angles + vecR;
 }
 
 /*
