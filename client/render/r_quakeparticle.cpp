@@ -1926,7 +1926,7 @@ void CQuakePartSystem::DrawGunSmoke( void )
 
 		if( vm && vm->model && (m_flGunSmokeLastSample < 0.0f || now - m_flGunSmokeLastSample > GUNSMOKE_SAMPLE_DT) )
 		{
-			const Vector muzzle( vm->attachment[0][0], vm->attachment[0][1], vm->attachment[0][2] );
+			const Vector muzzle = R_StudioAttachmentOrigin( vm, 0 );
 
 			if( m_iGunSmokeCount < GUNSMOKE_MAX_POINTS )
 			{
