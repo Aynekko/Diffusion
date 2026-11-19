@@ -113,6 +113,19 @@ void PlayClientSound( CBaseEntity *pEntity, int Type, int Mode, int LowAmmoVolum
 	MESSAGE_END();
 }
 
+void AddGunSmoke( const CBaseEntity *pEntity, int iDamage )
+{
+	if( !pEntity || iDamage <= 0 )
+		return;
+
+	iDamage = bound( 0, iDamage, 255 );
+
+	MESSAGE_BEGIN( MSG_ONE, gmsgTempEnt, NULL, pEntity->pev );
+		WRITE_BYTE( TE_WEAPONSMOKE );
+		WRITE_BYTE( iDamage );
+	MESSAGE_END();
+}
+
 
 //=========================================================
 // MaxAmmoCarry - pass in a name and this function will tell

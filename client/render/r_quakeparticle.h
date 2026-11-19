@@ -149,17 +149,43 @@ public:
 	int EntIndex; // pointer to entity which emitted this particle
 };
 
+#define GUNSMOKE_MAX_POINTS	48
+
+struct GunSmokePoint_t
+{
+	Vector pos;
+	float born;
+	float seed;
+	float wid;	// per-point width jitter
+	float dist;	// distance along the ribbon at sampling time (stable texture V)
+	int	run;	// burst id: separate bursts are separate ribbons
+};
+
 class CQuakePartSystem
 {
-	CQuakePart	*m_pFreeParticles;
-	CQuakePart	m_pParticles[MAX_PARTICLES];
+	CQuakePart *m_pFreeParticles;
+	CQuakePart m_pParticles[MAX_PARTICLES];
 
-	CQuakePartInfo	m_pPartInfo[MAX_PARTINFOS];
-	int		m_iNumPartInfo;
+	CQuakePartInfo m_pPartInfo[MAX_PARTINFOS];
+	int m_iNumPartInfo;
 
+	// gun smoke trail state
+	GunSmokePoint_t	m_GunSmoke[GUNSMOKE_MAX_POINTS];
+	int m_iGunSmokeCount;
+	int m_iGunSmokeRun;
+	float m_flGunSmokeHeat; // accumulated per-shot damage
+	float m_flGunSmokeLastShot;
+	float m_flGunSmokeUntil; // the barrel smokes until then
+	float m_flGunSmokeLastSample;
+	float m_flGunSmokeLastTime;	// tr.time of the previous draw (detects time going backwards)
 public:
-			CQuakePartSystem( void );
-	virtual		~CQuakePartSystem( void );
+	CQuakePartSystem( void );
+	virtual ~CQuakePartSystem( void );
+
+	int	m_hGunSmoke;
+	void AddGunSmoke( float damage ); // call on every shot
+	void DrawGunSmoke( void );
+	void ResetGunSmoke( void );
 
 	// textures
 	// for each texture there is an array

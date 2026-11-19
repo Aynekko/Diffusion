@@ -241,6 +241,8 @@ void CShotgun::PrimaryAttack()
 
 		m_pPlayer->FireBullets( 6, vecSrc, vecAiming, VECTOR_CONE_8DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0, DMG_WPN_SHOTGUN );
 
+		AddGunSmoke( m_pPlayer, DMG_WPN_SHOTGUN * 6 );
+
 		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 6, ACHVAL_ADD );
 
 		m_pPlayer->pev->punchangle.x -= 4;
@@ -344,6 +346,8 @@ void CShotgun::SecondaryAttack( void )
 		m_pPlayer->FireBullets( 12, vecSrc, vecAiming, VECTOR_CONE_10DEGREES, 8192, BULLET_PLAYER_BUCKSHOT, 0, DMG_WPN_SHOTGUN );
 
 		m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 12, ACHVAL_ADD );
+
+		AddGunSmoke( m_pPlayer, DMG_WPN_SHOTGUN * 12 );
 
 		m_pPlayer->pev->punchangle.y -= 3.5;
 

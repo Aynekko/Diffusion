@@ -674,6 +674,7 @@
 #define TE_NPCCLIP 145 // npc's reloading clip
 #define TE_RELOAD_CIRCLE 146
 #define TE_PLAYERKILLERIDX 147 // index of the player who killed us
+#define TE_WEAPONSMOKE 148
 
 #define MSG_BROADCAST		0	// unreliable to all
 #define MSG_ONE			1	// reliable to one (msg_entity)

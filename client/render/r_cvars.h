@@ -136,5 +136,6 @@ extern cvar_t *r_decals_ext;
 extern cvar_t *gl_fsr;
 extern cvar_t *fps_max;
 extern cvar_t *gl_texture_nearest;
+extern cvar_t *cl_gunsmoke;
 
 #endif//R_CVARS_H

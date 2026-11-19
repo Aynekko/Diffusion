@@ -24,6 +24,7 @@ void DeactivateSatchels( CBasePlayer *pOwner );
 void PlayPickupSound( CBaseEntity *pPlayer, int Id = 250 );
 void MakeWeaponShake( CBaseEntity *pPlayer, int Weapon, int Mode );
 void PlayClientSound( CBaseEntity *pEntity, int Type, int Mode = 0, int LowAmmoVolume = 0, Vector org = g_vecZero );
+void AddGunSmoke( const CBaseEntity *pEntity, int iDamage );
 
 #define SF_AMMO_DONTFALL BIT(0) // diffusion - this ammo doesn't fall to ground and stays in place
 

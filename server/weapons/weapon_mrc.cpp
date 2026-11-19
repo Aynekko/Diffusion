@@ -200,8 +200,10 @@ void CMRC::PrimaryAttack()
 			Cone = 0.02;
 	}
 
-	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, Vector(Cone,Cone,Cone), 8192, BULLET_PLAYER_MP5, 0, DMG_WPN_MRC ); // 12 dmg
+	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, Vector(Cone,Cone,Cone), 8192, BULLET_PLAYER_MP5, 0, DMG_WPN_MRC );
 	m_iClip--;
+
+	AddGunSmoke( m_pPlayer, DMG_WPN_MRC );
 
 	if( m_iClip <= 15 )
 		LowAmmoMsg( m_pPlayer );

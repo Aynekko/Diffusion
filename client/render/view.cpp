@@ -189,6 +189,7 @@ cvar_t *r_decals_ext;
 cvar_t *gl_fsr;
 cvar_t *fps_max;
 cvar_t *gl_texture_nearest;
+cvar_t *cl_gunsmoke;
 
 cvar_t	v_iyaw_cycle = { "v_iyaw_cycle", "2", 0, 2 };
 cvar_t	v_iroll_cycle = { "v_iroll_cycle", "0.5", 0, 0.5 };
@@ -453,6 +454,7 @@ void V_Init( void )
 	room_type_auto = CVAR_REGISTER( "room_type_auto", "0", FCVAR_ARCHIVE );
 	r_decals_ext = CVAR_REGISTER( "r_decals_ext", "1", FCVAR_ARCHIVE );
 	gl_fsr = CVAR_REGISTER( "gl_fsr", "0", FCVAR_ARCHIVE );
+	cl_gunsmoke = CVAR_REGISTER( "cl_gunsmoke", "1", FCVAR_ARCHIVE );
 
 	// cubemaps
 	gEngfuncs.pfnAddCommand( "buildcubemaps", CL_BuildCubemaps_f );

@@ -167,10 +167,12 @@ void CWpnFiveSeven::FiveSevenFire( float flSpread , float flCycleTime, BOOL fUse
 			Cone = 0.01;
 	}
 
-	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, Vector( flSpread + Cone, flSpread + Cone, flSpread + Cone ), 8192, BULLET_PLAYER_9MM, 0, DMG_WPN_FIVESEVEN ); // 18 dmg
+	m_pPlayer->FireBullets( 1, vecSrc, vecAiming, Vector( flSpread + Cone, flSpread + Cone, flSpread + Cone ), 8192, BULLET_PLAYER_9MM, 0, DMG_WPN_FIVESEVEN );
 	m_flNextPrimaryAttack = m_flNextSecondaryAttack = gpGlobals->time + flCycleTime;
 
 	m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 1, ACHVAL_ADD );
+
+	AddGunSmoke( m_pPlayer, DMG_WPN_FIVESEVEN );
 
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition

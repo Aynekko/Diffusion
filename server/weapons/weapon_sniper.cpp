@@ -224,6 +224,8 @@ void CSniperRifle::PrimaryAttack()
 
 	m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 1, ACHVAL_ADD );
 
+	AddGunSmoke( m_pPlayer, DMG_WPN_SNIPER );
+
 	m_pPlayer->pev->punchangle.x = Cone * RANDOM_LONG( 25,30 ) + AddNonZoomedPunch + RANDOM_FLOAT( 1.5f, 2.0f );
 	m_pPlayer->pev->punchangle.y = -Cone * RANDOM_LONG( 25,30 ) + AddNonZoomedPunch + RANDOM_FLOAT( 0.5f, 1.0f );
 

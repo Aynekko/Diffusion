@@ -212,6 +212,8 @@ void CBeretta::GlockFire( float flSpread , float flCycleTime, BOOL fUseAutoAim )
 
 	m_pPlayer->SendAchievementStatToClient( ACH_BULLETSFIRED, 1, ACHVAL_ADD );
 
+	AddGunSmoke( m_pPlayer, DMG_WPN_PISTOL );
+
 	if (!m_iClip && m_pPlayer->m_rgAmmo[m_iPrimaryAmmoType] <= 0)
 		// HEV suit - indicate out of ammo condition
 		m_pPlayer->SetSuitUpdate("!HEV_AMO0", FALSE, 0);

@@ -58,6 +58,38 @@ MemBlock<CQuakePart>ParticleArray_WaterFall( MAX_PARTICLES ); // TYPE_WATERFALL
 MemBlock<CQuakePart>ParticleArray_Sparkles( MAX_PARTICLES ); // TYPE_SPARKLES
 static int partcounter = 0;
 
+//=============================================================================
+// gun smoke trail
+//=============================================================================
+#define GUNSMOKE_ADDITIVE 0	// 1 = additive (like the sprite version), 0 = alpha-blended grey smoke
+#define GUNSMOKE_SUBDIV 6
+#define GUNSMOKE_DRAW_MAX (GUNSMOKE_MAX_POINTS * GUNSMOKE_SUBDIV)
+
+static const float GUNSMOKE_HEAT = 50.0f;	// heat needed to start the smoke
+static const float GUNSMOKE_COOL_TIME = 0.9f; // a pause this long resets the heat
+static const float GUNSMOKE_BURN_TIME = 1.2f; // base drift-off duration
+static const float GUNSMOKE_BURN_MAX = 4.0f;
+static const float GUNSMOKE_PAUSE = 0.55f; // trigger must be up this long before smoke starts
+static const float GUNSMOKE_HEAT_MULT = 1.0f;
+static const float GUNSMOKE_LIFE = 1.05f; // life of a ribbon point
+static const float GUNSMOKE_RISE = 26.0f; // units/s upward
+static const float GUNSMOKE_WOBBLE = 20.0f; // sideways curl by the end of life
+static const float GUNSMOKE_SAMPLE_DT = 0.035f;
+static const float GUNSMOKE_LINK_DIST = 32.0f; // farther apart than this = separate ribbons
+static const float GUNSMOKE_V_PER_UNIT = 0.1f; // texture tiles per world unit (1 tile per 10 units)
+static const float GUNSMOKE_ALPHA_SCALE = 2.0f; // alpha-blend mode only: brightness -> alpha
+
+struct GunSmokeVertex_t
+{
+	Vector	p;
+	float	w;	// half-width
+	float	a;	// brightness
+	float	v;	// texture V
+	bool	brk;	// start a new strip at this vertex
+};
+
+static GunSmokeVertex_t s_gunSmokeVerts[GUNSMOKE_DRAW_MAX];
+
 //===============================================================================
 // InitializeParticle: set default parameters for a single particle
 //===============================================================================
@@ -1198,6 +1230,8 @@ void CQuakePartSystem :: Clear( void )
 	m_hRainDrop = LOAD_TEXTURE( "gfx/particles/raindrop2", NULL, 0, 0 );
 	m_hSingleDrop = LOAD_TEXTURE( "gfx/particles/singledrop", NULL, 0, 0 );
 	m_hWaterFall = LOAD_TEXTURE( "gfx/particles/splash", NULL, 0, 0 );
+	m_hGunSmoke = LOAD_TEXTURE( "sprites/gunsmoke.dds", NULL, 0, 0 );
+	ResetGunSmoke();
 
 	ParsePartInfos( "data/particles.txt" );
 
@@ -1789,6 +1823,8 @@ void CQuakePartSystem :: Update( void )
 
 	r_stats.c_particles_total = partcounter;
 
+	DrawGunSmoke();
+
 	GL_Blend( GL_FALSE );
 	if( glState.drawTrans )
 		GL_DepthMask( GL_TRUE );
@@ -1797,6 +1833,261 @@ void CQuakePartSystem :: Update( void )
 		GL_BindShader( NULL );
 
 //	ExplosionOrg = g_vecZero;
+}
+
+void CQuakePartSystem::ResetGunSmoke( void )
+{
+	m_iGunSmokeCount = 0;
+	m_iGunSmokeRun = 0;
+	m_flGunSmokeHeat = 0.0f;
+	m_flGunSmokeLastShot = -100.0f;
+	m_flGunSmokeUntil = -1.0f;
+	m_flGunSmokeLastSample = -1.0f;
+	m_flGunSmokeLastTime = 0.0f;
+}
+
+//=============================================================================
+// AddGunSmoke: every shot adds heat. The smoke is what drifts off the barrel AFTER the burst:
+// a shot never starts it, and a shot while it burns cuts it. It starts in DrawGunSmoke once
+// the trigger has been up for GUNSMOKE_PAUSE seconds.
+//=============================================================================
+void CQuakePartSystem::AddGunSmoke( float damage )
+{
+	if( !CVAR_TO_BOOL( cl_gunsmoke ) )
+		return; // don't accept any more smoke but let existing fade out
+
+	const float now = tr.time;
+
+	if( now - m_flGunSmokeLastShot > GUNSMOKE_COOL_TIME )
+		m_flGunSmokeHeat = 0.0f; // a pause: the barrel cooled, a slow tap never builds smoke
+
+	m_flGunSmokeHeat += (damage > 0.0f) ? damage : 1.0f;
+	m_flGunSmokeLastShot = now;
+
+	if( now < m_flGunSmokeUntil )
+		m_flGunSmokeUntil = now;
+}
+
+void CQuakePartSystem::DrawGunSmoke( void )
+{
+	if( !glState.drawTrans || !RP_NORMALPASS() || !m_hGunSmoke )
+		return;
+
+	const float now = tr.time;
+	static int CachedWpnID = WEAPON_NONE;
+	if( CachedWpnID == WEAPON_NONE )
+		CachedWpnID = gHUD.m_Ammo.WeaponID;
+
+	// reset smoke trail if switched weapon
+	if( gHUD.m_Ammo.WeaponID != CachedWpnID )
+	{
+		ResetGunSmoke();
+		CachedWpnID = gHUD.m_Ammo.WeaponID;
+	}
+
+	// saverestore issues
+	if( now < m_flGunSmokeLastTime )
+		ResetGunSmoke();
+
+	m_flGunSmokeLastTime = now;
+
+	// drop the points that have fully faded (the array is oldest-first)
+	int drop = 0;
+	while( drop < m_iGunSmokeCount && (now - m_GunSmoke[drop].born) > GUNSMOKE_LIFE )
+		drop++;
+
+	if( drop > 0 )
+	{
+		const int left = m_iGunSmokeCount - drop;
+		for( int i = 0; i < left; i++ )
+			m_GunSmoke[i] = m_GunSmoke[i + drop];
+		m_iGunSmokeCount = left;
+	}
+
+	// start the smoke once the trigger has been released for GUNSMOKE_PAUSE seconds
+	if( now >= m_flGunSmokeUntil && m_flGunSmokeHeat >= GUNSMOKE_HEAT && (now - m_flGunSmokeLastShot) >= GUNSMOKE_PAUSE )
+	{
+		// more heat than the threshold = a longer drift-off
+		// the heat is SPENT
+		const float over = (m_flGunSmokeHeat - GUNSMOKE_HEAT) / GUNSMOKE_HEAT;
+		float burn = GUNSMOKE_BURN_TIME * (1.0f + over * GUNSMOKE_HEAT_MULT);
+		if( burn > GUNSMOKE_BURN_MAX )
+			burn = GUNSMOKE_BURN_MAX;
+
+		m_flGunSmokeUntil = now + burn;
+		m_flGunSmokeHeat = 0.0f;
+		m_iGunSmokeRun++; // a fresh ribbon
+	}
+
+	// sample the local muzzle while the smoke burns
+	if( now < m_flGunSmokeUntil )
+	{
+		cl_entity_t *vm = gEngfuncs.GetViewModel();
+
+		if( vm && vm->model && (m_flGunSmokeLastSample < 0.0f || now - m_flGunSmokeLastSample > GUNSMOKE_SAMPLE_DT) )
+		{
+			const Vector muzzle( vm->attachment[0][0], vm->attachment[0][1], vm->attachment[0][2] );
+
+			if( m_iGunSmokeCount < GUNSMOKE_MAX_POINTS )
+			{
+				GunSmokePoint_t *pt = &m_GunSmoke[m_iGunSmokeCount];
+				const GunSmokePoint_t *prev = m_iGunSmokeCount ? (pt - 1) : NULL;
+
+				pt->pos = muzzle;
+				pt->born = now;
+				pt->wid = RANDOM_FLOAT( 0.40f, 0.65f );
+				pt->run = m_iGunSmokeRun;
+
+				if( prev )
+				{
+					// the curl direction WALKS smoothly instead of jumping to a new random angle
+					pt->seed = prev->seed + RANDOM_FLOAT( -0.09f, 0.09f );
+					pt->dist = (prev->run == m_iGunSmokeRun) ? (prev->dist + (muzzle - prev->pos).Length()) : 0.0f;
+				}
+				else
+				{
+					pt->seed = RANDOM_FLOAT( 0.0f, 1.0f );
+					pt->dist = 0.0f;
+				}
+
+				m_iGunSmokeCount++;
+			}
+
+			m_flGunSmokeLastSample = now;
+		}
+	}
+
+	if( m_iGunSmokeCount < 2 )
+		return;
+
+	// build the curve: every segment is subdivided, and the rise/curl are evaluated at the
+	// interpolated age and seed, so the column bends smoothly between samples
+	int n = 0;
+	bool prevLinked = false; // is point i linked to point i-1?
+
+	for( int i = 0; i < m_iGunSmokeCount && n < GUNSMOKE_DRAW_MAX - GUNSMOKE_SUBDIV; i++ )
+	{
+		const GunSmokePoint_t &p0 = m_GunSmoke[i];
+		const GunSmokePoint_t *p1 = (i + 1 < m_iGunSmokeCount) ? &m_GunSmoke[i + 1] : NULL;
+		const bool link = p1 && (p1->run == p0.run) && ((p1->pos - p0.pos).Length() < GUNSMOKE_LINK_DIST);
+		const int sub = link ? GUNSMOKE_SUBDIV : 1;
+
+		for( int k = 0; k < sub; k++ )
+		{
+			const float t = (float)k / (float)sub;
+
+			float age = now - p0.born;
+			Vector base = p0.pos;
+			float seed = p0.seed;
+			float wid = p0.wid;
+			float dist = p0.dist;
+
+			if( link )
+			{
+				age += ((now - p1->born) - age) * t;
+				base = p0.pos + (p1->pos - p0.pos) * t;
+				seed = p0.seed + (p1->seed - p0.seed) * t;
+				wid = p0.wid + (p1->wid - p0.wid) * t;
+				dist = p0.dist + (p1->dist - p0.dist) * t;
+			}
+
+			if( age < 0.0f )
+				age = 0.0f;
+
+			const float f = Q_min( age / GUNSMOKE_LIFE, 1.0f );
+			const float fin = (age < 0.12f) ? (age / 0.12f) : 1.0f; // a soft birth: nothing pops in
+
+			Vector q = base;
+			q.z += GUNSMOKE_RISE * age;
+
+			const float ang = seed * 6.2831853f;
+			const float curl = GUNSMOKE_WOBBLE * f * f * f; // young = straight, old = curling
+			q.x += cos( ang ) * curl;
+			q.y += sin( ang ) * curl;
+
+			GunSmokeVertex_t &vert = s_gunSmokeVerts[n++];
+			vert.p = q;
+			vert.w = wid * (0.35f + 1.80f * f) * fin;	// narrow at the muzzle, wider with age
+			vert.a = 0.31f * (1.0f - f) * fin;		// ~80/255 at its brightest
+			vert.v = dist * GUNSMOKE_V_PER_UNIT;
+			vert.brk = (i > 0 && k == 0 && !prevLinked);	// new strip if previous point is not linked to this one
+		}
+
+		prevLinked = link;
+	}
+
+	if( n < 2 )
+		return;
+
+	// depth mask is off and blend is on already
+	GL_Bind( GL_TEXTURE0, m_hGunSmoke );
+	pglTexEnvi( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+	GL_AlphaTest( GL_FALSE );
+	GL_Cull( GL_NONE );
+
+#if GUNSMOKE_ADDITIVE
+	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE );
+	const float tint = 1.0f;
+#else
+	GL_BlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
+
+	// grey smoke, lit by the world around the newest point
+	Vector light;
+	gEngfuncs.pTriAPI->LightAtPoint( s_gunSmokeVerts[n - 1].p, light );
+	const float lit = bound( 0.25f, (light.x + light.y + light.z) / (3.0f * 255.0f), 1.0f );
+	const float tint = 0.8f * lit;
+#endif
+
+	// the ribbon: the side vector is perpendicular to the local tangent and the direction to the
+	// eye, so the width stays constant whichever way the barrel travels
+	bool open = false;
+
+	for( int j = 0; j < n; j++ )
+	{
+		const GunSmokeVertex_t &vert = s_gunSmokeVerts[j];
+
+		if( vert.brk && open )
+		{
+			pglEnd();
+			open = false;
+		}
+
+		if( !open )
+		{
+			pglBegin( GL_TRIANGLE_STRIP );
+			open = true;
+		}
+
+		Vector dir( 0, 0, 0 );
+		if( j > 0 && !vert.brk )
+			dir = vert.p - s_gunSmokeVerts[j - 1].p;
+		if( j + 1 < n && !s_gunSmokeVerts[j + 1].brk )
+			dir = dir + (s_gunSmokeVerts[j + 1].p - vert.p);
+		if( dir.Length() < 0.001f )
+			dir = Vector( 0, 0, 1 );
+		dir = dir.Normalize();
+
+		Vector side = CrossProduct( dir, RI->vieworg - vert.p );
+		if( side.Length() < 0.001f )
+			side = RI->vright;
+		side = side.Normalize();
+
+		const float w = vert.w;
+#if GUNSMOKE_ADDITIVE
+		GL_Color4f( vert.a, vert.a, vert.a, 1.0f );
+#else
+		GL_Color4f( tint, tint, tint, Q_min( vert.a * GUNSMOKE_ALPHA_SCALE, 1.0f ) );
+#endif
+		pglTexCoord2f( 0.0f, vert.v );
+		pglVertex3f( vert.p.x + side.x * w, vert.p.y + side.y * w, vert.p.z + side.z * w );
+		pglTexCoord2f( 1.0f, vert.v );
+		pglVertex3f( vert.p.x - side.x * w, vert.p.y - side.y * w, vert.p.z - side.z * w );
+	}
+
+	if( open )
+		pglEnd();
+
+	GL_Cull( GL_FRONT );
 }
 
 bool CQuakePartSystem :: AddParticle( CQuakePart *src, int texture, int flags )

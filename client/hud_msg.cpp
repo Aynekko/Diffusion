@@ -584,6 +584,13 @@ int CHud::MsgFunc_TempEnt( const char *pszName, int iSize, void *pbuf )
 
 	switch( Message )
 	{
+	case TE_WEAPONSMOKE:
+	{
+		Scale = READ_BYTE();
+		g_pParticles.AddGunSmoke( Scale );
+	}
+	break;
+
 	case TE_CLIENTSOUND:
 	{
 		pos.x = READ_COORD();

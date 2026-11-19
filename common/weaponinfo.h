@@ -241,7 +241,7 @@ const char * const g_WpnAmmo[] =
 //#define DMG_WPN_HKMP5			using BULLET_PLAYER_MP5 damage (15)
 #define DMG_WPN_PISTOL			25
 #define DMG_WPN_SHOTGUN			17
-#define DMG_WEAPON_SHOTGUN_XM	15
+#define DMG_WPN_SHOTGUN_XM		15
 #define DMG_WPN_KNIFE			27
 #define DMG_WPN_SNIPER			150
 #define DMG_WPN_DRONE			8
