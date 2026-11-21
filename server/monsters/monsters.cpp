@@ -3923,6 +3923,11 @@ void CBaseMonster::IdleHeadTurn( CBaseEntity *pTarget )
 	Vector vecFriend = pTarget->GetAbsOrigin() + pTarget->pev->view_ofs;
 	Vector vecMe = GetAbsOrigin() + pev->view_ofs;
 
+	// diffusion - hack: look directly at the screen, not above player's head
+	// there was no such issue in HL because NPCs couldn't move their heads up/down
+	if( pTarget->IsPlayer() )
+		vecFriend.z -= 4.0f;
+
 	float yaw = VecToYaw( vecFriend - vecMe ) - GetAbsAngles().y;
 	float pitch = UTIL_VecToPitch( vecFriend - vecMe );
 

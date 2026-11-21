@@ -62,7 +62,6 @@ playermove_t *pmove = NULL;
 #define STUCK_MOVEDOWN -1
 #define HULL_MIN		-36
 #define HULL_MAX		36
-#define VIEW_HEIGHT			28
 
 #define CTEXTURESMAX		1024			// max number of textures loaded 512
 #define CBTEXTURENAMEMAX	24			// only load first n chars of name 13

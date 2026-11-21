@@ -42,6 +42,9 @@
 #define PM_TRACELINE_PHYSENTSONLY	0
 #define PM_TRACELINE_ANYVISIBLE	1
 
+#define VIEW_HEIGHT 28.0f
+#define VEC_VIEW Vector( 0.0f, 0.0f, VIEW_HEIGHT )
+
 #include "pm_info.h"
 
 // PM_PlayerTrace results.
