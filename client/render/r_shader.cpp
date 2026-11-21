@@ -2330,6 +2330,12 @@ word GL_UberShaderForBmodelDlight( const plight_t *pl, msurface_t *s, bool trans
 	if( RI->currententity && RI->currententity->curstate.rendermode == kRenderTransTexture )
 		GL_AddShaderDirective( options, "BMODEL_KRENDERTRANSTEXTURE" );
 
+	if( FBitSet( s->flags, SURF_SCREEN ) && CVAR_TO_BOOL( gl_allow_screens ) )
+	{
+		if( RI->currententity && FBitSet( RI->currententity->curstate.iuser1, CF_MONOCHROME ) )
+			GL_AddShaderDirective( options, "BMODEL_MONOCHROME" );
+	}
+
 	if( FBitSet( s->flags, SURF_WATER ))
 	{
 		GL_AddShaderDirective( options, "BMODEL_WATER" );

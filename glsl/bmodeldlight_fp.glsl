@@ -155,6 +155,9 @@ void main( void )
 		glossmap = diffuse.rgb;
 	#endif
 	diffuse.rgb *= diffuse.a;
+	#if defined( BMODEL_MONOCHROME )
+		diffuse.rgb = vec3( GetLuminance( diffuse.rgb )); 
+	#endif
 #endif
 
 #if !defined( BMODEL_INTERIOR )
