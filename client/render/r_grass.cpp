@@ -89,6 +89,21 @@ static const Vector R_GetPointForBush( int vertexNum, const Vector &pos, float s
 	return g_vecZero; // error
 }
 
+//======================================================================
+// distance from point to the surface's bbox (0 if inside)
+//======================================================================
+static float R_GrassDistToSurface( const Vector &org, mextrasurf_t *es, const Vector &offset = g_vecZero )
+{
+	const Vector mins = es->mins + offset;
+	const Vector maxs = es->maxs + offset;
+	Vector d;
+
+	for( int i = 0; i < 3; i++ )
+		d[i] = Q_max( Q_max( mins[i] - org[i], 0.0f ), org[i] - maxs[i] );
+
+	return d.Length();
+}
+
 /*
 ================
 R_AdvanceVertex
@@ -1485,7 +1500,8 @@ bool R_AddGrassToChain( msurface_t *surf, CFrustum *frustum, bool lightpass, mwo
 	{
 		float cur_dist;
 
-		cur_dist = ( tr.cached_vieworigin - es->origin ).Length();
+	//	cur_dist = ( tr.cached_vieworigin - es->origin ).Length();
+		cur_dist = R_GrassDistToSurface( tr.cached_vieworigin, es );
 
 		// poly is too far and grass may be construct later
 		// to prevent draw lag
@@ -1510,8 +1526,9 @@ bool R_AddGrassToChain( msurface_t *surf, CFrustum *frustum, bool lightpass, mwo
 
 	if( hdr )
 	{
-		hdr->dist = ( RI->vieworg - es->origin ).Length();
+	//	hdr->dist = ( RI->vieworg - es->origin ).Length();
 		cl_entity_t *e = RI->currententity;
+		hdr->dist = R_GrassDistToSurface( RI->vieworg, es, e->origin );
 		Vector mins, maxs;
 		word hShaderNum;
 
@@ -1656,7 +1673,8 @@ void R_UnloadFarGrass( void )
 		if( !es->grasscount )
 			continue; // surface doesn't contain grass
 
-		float curdist = ( tr.cached_vieworigin - es->origin ).Length();
+	//	float curdist = ( tr.cached_vieworigin - es->origin ).Length();
+		float curdist = R_GrassDistToSurface( tr.cached_vieworigin, es );
 
 		if( curdist > ( draw_dist * 1.2f ) && es->grass )
 			R_RemoveGrassForSurface( es );
