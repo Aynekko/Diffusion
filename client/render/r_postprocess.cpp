@@ -597,6 +597,9 @@ void GaussBlur( void )
 		skyblur = 0;
 	}
 
+	if( IsBuildingCubemaps() )
+		return;
+
 	// this is asked by UI when saving the game, to get unblurred save preview image
 	// it will always reset to 0 at the end of every frame
 	if( CVAR_TO_BOOL( ui_forcenoblur ) )
@@ -1227,6 +1230,9 @@ void ToneMap(void)
 
 void Enhance( void )
 {
+	if( IsBuildingCubemaps() )
+		return;
+
 	// capture screen
 	GL_Bind( GL_TEXTURE0, tr.screen_color );
 	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
@@ -1247,6 +1253,9 @@ void Enhance( void )
 void FSR( void )
 {
 	if( gl_fsr->value <= 0.0f )
+		return;
+
+	if( IsBuildingCubemaps() )
 		return;
 
 	const int w = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 );
