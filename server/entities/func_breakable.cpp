@@ -946,8 +946,6 @@ void CBreakable::BreakRespawn(void)
 
 	if( m_iszFireOnRespawn )
 		UTIL_FireTargets( m_iszFireOnRespawn, this, this, USE_TOGGLE, 0 );
-
-	UTIL_SetOrigin( this, GetAbsOrigin() );
 }
 
 BOOL CBreakable :: IsBreakable( void ) 

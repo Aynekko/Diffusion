@@ -1437,8 +1437,6 @@ void CBaseTank :: Fire( const Vector &barrelEnd, const Vector &forward, entvars_
 		if( m_iszShootSound )
 			EMIT_SOUND( edict(), CHAN_ITEM, STRING( m_iszShootSound ), 1, m_flAttenuation );
 
-		ALERT( at_console, "tank [%i] FIRE t=%.2f last_sight=%.2f\n", entindex(), gpGlobals->time, m_lastSightTime );
-
 		SUB_UseTargets( this, USE_TOGGLE, 0 );
 
 		if( ReloadingFunction == true )
