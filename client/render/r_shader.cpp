@@ -285,8 +285,11 @@ static bool GL_ProcessShader( const char *filename, CVirtualFS *out, bool compat
 	if( !GL_LoadSource( filename, &file ))
 		return false;
 
+	// GL 2.x contexts (macOS legacy profile) stop at GLSL 1.20, the rest comes from gpu_shader4
+	const bool glsl120 = glConfig.version < 3.0f;
+
 	// add internal defines
-	out->Printf( "#version 130\n" );
+	out->Printf( glsl120 ? "#version 120\n" : "#version 130\n" );
 	out->Printf( "#ifndef M_PI\n#define M_PI 3.14159265358979323846\n#endif\n" );
 	out->Printf( "#ifndef M_PI2\n#define M_PI2 6.28318530717958647692\n#endif\n" );
 	if( GL_Support( R_EXT_GPU_SHADER4 ))
@@ -300,6 +303,19 @@ static bool GL_ProcessShader( const char *filename, CVirtualFS *out, bool compat
 	{
 	//	out->Printf( "#extension GL_EXT_texture_array : require\n" ); // support texture arrays
 		out->Printf( "#define GLSL_ALLOW_TEXTURE_ARRAY\n" );
+	}
+	if( glsl120 )
+	{
+		out->Printf( "#extension GL_ARB_shader_texture_lod : enable\n" );
+		// shaders only call these 1.30 builtins on sampler2D
+		out->Printf( "#define texture texture2D\n" );
+		out->Printf( "#define textureLod texture2DLod\n" );
+		out->Printf( "#define textureLodOffset texture2DLodOffset\n" );
+		out->Printf( "#define round(x) floor((x) + 0.5)\n" );
+		// textureSize is also called on texture arrays, so it needs real overloads
+		out->Printf( "ivec2 textureSize( sampler2D s, int lod ) { return textureSize2D( s, lod ); }\n" );
+		if( GL_Support( R_EXT_GPU_SHADER4 ) && GL_Support( R_TEXTURE_ARRAY_EXT ))
+			out->Printf( "ivec3 textureSize( sampler2DArray s, int lod ) { return textureSize2DArray( s, lod ); }\n" );
 	}
 	if( defines ) out->Print( defines );
 
@@ -2935,12 +2951,15 @@ bool GL_PrecompileUberShaders( int &processed, int &total )
 		return true;
 	}
 
+	// macOS has no program binaries, but its GL driver caches compiled shaders itself
+#ifndef __APPLE__
 	if( !GL_Support( R_BINARY_SHADER_EXT ) )
 	{
 		Msg( "^1Couldn't precompile shaders - unsupported by current hardware or drivers.^7\n" );
 		bPrecompiled = true;
 		return true;
 	}
+#endif
 
 	processed = shaders_processed_total;
 	total = iTotalShaders - 1;

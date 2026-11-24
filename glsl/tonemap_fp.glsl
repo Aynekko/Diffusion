@@ -26,7 +26,7 @@ void main( void )
 	float exposure = texture2D( u_HDRExposure, vec2( 0.5 )).r;
 	float brightness = 1.5;
 
-	if( bool( u_GenericCondition == 1.0f ))
+	if( bool( u_GenericCondition == 1.0 ))
 	{
 		vec2 lum = vec2( exposure * 0.5, exposure * 2.0 );   // fixed constant instead of adaptation curve
 		float Lp = ( 8.0 / lum.x ) * max( color.x, min( color.y, color.z ));

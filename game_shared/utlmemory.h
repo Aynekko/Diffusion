@@ -15,7 +15,11 @@
 #endif
 
 #include <string.h>
+#ifdef __APPLE__
+#include <stdlib.h>
+#else
 #include <malloc.h>
+#endif
 #ifdef _MSC_VER
 #include <new.h>
 #else // !_MSC_VER

@@ -49,8 +49,8 @@ public:
 	void Init( void );
 	void VidInit( void );
 	void ResetRenderCache( void );
-	sprite_batch_t SpriteBatchGlow[MAX_SPRITE_BATCHES];
-	sprite_batch_t SpriteBatchAdditive[MAX_SPRITE_BATCHES];
+	sprite_batch_t *SpriteBatchGlow;
+	sprite_batch_t *SpriteBatchAdditive;
 	void RenderSpritesBatch( void );
 
 	virtual void SpriteDrawModel( void );

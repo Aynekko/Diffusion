@@ -16,7 +16,7 @@ void main( void )
 	
 	// saturate
 #if defined( SATURATE )
-	const float Saturation = 0.55f;
+	const float Saturation = 0.55;
 	vec3 col_hsv = RGBtoHSV( color.rgb );
 	col_hsv.y *= ( Saturation * 2.0 );
 	vec3 col_rgb = HSVtoRGB( col_hsv.rgb );

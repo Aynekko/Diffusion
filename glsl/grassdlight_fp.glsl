@@ -92,7 +92,7 @@ void main( void )
 	float Brightness = u_DynLightBrightness;
 
 	// add bump
-	if( bool(u_GenericCondition == 1.0f) )
+	if( bool(u_GenericCondition == 1.0) )
 	{
 		N = normalmap2D( u_NormalMap, var_TexDiffuse );
 		if( bool( gl_FrontFacing )) N = -N;

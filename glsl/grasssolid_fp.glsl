@@ -59,7 +59,7 @@ void main( void )
 	#endif
 
 	// add bump
-	if( bool(u_GenericCondition == 1.0f) )
+	if( bool(u_GenericCondition == 1.0) )
 	{
 		vec3 N = normalmap2D( u_NormalMap, var_TexDiffuse );
 		vec3 L = normalize( var_VertexLight );

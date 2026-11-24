@@ -20,7 +20,7 @@ void main( void )
     float lum = GetLuminance( color.rgb );   
    
     vec3 final;
-    if( bool( u_GenericCondition == 0.0f )) // normal mode
+    if( bool( u_GenericCondition == 0.0 )) // normal mode
 	{
 		if( u_FogParams.w > 0.0 ) // fog on
 		{

@@ -217,9 +217,9 @@ vec3 VectorAngles( vec3 vecSrc )
 
 	vec3 ang;
 
-	ang.z = 0.0f;
+	ang.z = 0.0;
 
-	if( bool( forward.x != 0.0f ) || bool( forward.y != 0.0f ) )
+	if( bool( forward.x != 0.0 ) || bool( forward.y != 0.0 ) )
 	{
 		float tmp;
 
@@ -233,10 +233,10 @@ vec3 VectorAngles( vec3 vecSrc )
 	else
 	{
 		// fast case
-		ang.y = 0.0f;
+		ang.y = 0.0;
 		if( forward.z > 0 )
-			ang.x = 270.0f;
-		else ang.x = 90.0f;
+			ang.x = 270.0;
+		else ang.x = 90.0;
 	}
 
 	return ang;
