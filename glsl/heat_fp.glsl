@@ -33,8 +33,12 @@ void main( void )
 	fSampledDepth = linearizeDepth( 4096, fSampledDepth );
 	fSampledDepth = RemapVal( fSampledDepth, vec4( Z_NEAR, 4096, 0.0, 1.0 ) );
 
+	// write the pixel through instead of discarding it, the target may be a different texture than the source
 	if( fSampledDepth <= 0.5 )
-		discard;
+	{
+		gl_FragColor = vec4( texture2D( u_ColorMap, var_TexCoord ).rgb, 1.0 );
+		return;
+	}
 	
 	vec2 p_m = gl_FragCoord.xy / u_ScreenSize;
 	vec2 dst_offset = vec2(0.0);

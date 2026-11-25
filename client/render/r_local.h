@@ -843,6 +843,9 @@ void R_UpdateCinSound( cl_entity_t *e );
 // r_postprocess.cpp
 //
 void InitPostTextures( void );
+GLuint R_MainFramebuffer( void );
+void R_BeginSceneTarget( void );
+void R_PresentSceneTarget( void );
 void InitPostEffects( void );
 void RenderSunShafts( void );
 void GaussBlur(void);

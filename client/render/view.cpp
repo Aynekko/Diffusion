@@ -187,6 +187,7 @@ cvar_t *hud_fontscale;
 cvar_t *r_pvs_radius;
 cvar_t *r_decals_ext;
 cvar_t *gl_fsr;
+cvar_t *gl_scenefbo;
 cvar_t *fps_max;
 cvar_t *gl_texture_nearest;
 cvar_t *cl_gunsmoke;
@@ -454,6 +455,12 @@ void V_Init( void )
 	room_type_auto = CVAR_REGISTER( "room_type_auto", "0", FCVAR_ARCHIVE );
 	r_decals_ext = CVAR_REGISTER( "r_decals_ext", "1", FCVAR_ARCHIVE );
 	gl_fsr = CVAR_REGISTER( "gl_fsr", "0", FCVAR_ARCHIVE );
+#ifdef __APPLE__
+	// every screen copy flushes the Metal command buffer there, ping-ponging avoids them
+	gl_scenefbo = CVAR_REGISTER( "gl_scenefbo", "1", FCVAR_ARCHIVE );
+#else
+	gl_scenefbo = CVAR_REGISTER( "gl_scenefbo", "0", FCVAR_ARCHIVE );
+#endif
 	cl_gunsmoke = CVAR_REGISTER( "cl_gunsmoke", "1", FCVAR_ARCHIVE );
 
 	// cubemaps
