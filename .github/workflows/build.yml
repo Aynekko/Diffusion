@@ -145,6 +145,8 @@ jobs:
   build-macos-arm64:
     runs-on: macos-latest   # currently arm64 (Apple Silicon)
     continue-on-error: true
+    env:
+      MACOSX_DEPLOYMENT_TARGET: "11.0"
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -179,7 +181,7 @@ jobs:
 
         # Remove unnecessary files from the engine tarball
         cd engine
-        rm -f activities.txt mdldec xash3d libmenu.dylib libmenu_tui.dylib
+        rm -f activities.txt mdldec xash3d libmenu.dylib libmenu_tui.dylib xash-clang-format xrcon-tui
         rm -f *.h
         rm -rf valve
         cd ..
@@ -192,8 +194,6 @@ jobs:
         # Put our launcher in place
         cp out/diffusion_run engine/diffusion_run
         chmod +x engine/diffusion_run
-        cp out/diffusion_run engine/Diffusion
-        chmod +x engine/Diffusion
 
         # Package everything
         cd engine
