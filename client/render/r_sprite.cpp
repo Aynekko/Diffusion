@@ -22,6 +22,10 @@ GNU General Public License for more details.
 #include "event_api.h"
 #include "pm_defs.h"
 
+// kept out of the class so clang can't constant-fold them into __data with the vtable
+static sprite_batch_t s_SpriteBatchGlow[MAX_SPRITE_BATCHES];
+static sprite_batch_t s_SpriteBatchAdditive[MAX_SPRITE_BATCHES];
+
 CSpriteModelRenderer g_SpriteRenderer;
 
 /*
@@ -64,6 +68,8 @@ CSpriteModelRenderer
 */
 CSpriteModelRenderer :: CSpriteModelRenderer( void )
 {
+	SpriteBatchGlow = s_SpriteBatchGlow;
+	SpriteBatchAdditive = s_SpriteBatchAdditive;
 	m_fDoInterp = true;
 	m_pCurrentEntity = NULL;
 	m_pCvarLerping = NULL;

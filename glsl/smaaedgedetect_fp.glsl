@@ -7,7 +7,9 @@
 
 #include "smaa.h"
 
+#if __VERSION__ >= 130
 precision highp float;
+#endif
 
 uniform sampler2D u_ColorMap;
 

@@ -558,7 +558,7 @@ void R_RenderShadowScene( plight_t *pl )
 	R_ShadowPassEndGL();
 
 	if( FBOsupported )
-		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, glState.frameBuffer == -1 ? 0 : glState.frameBuffer );
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, glState.frameBuffer == FBO_MAIN ? R_MainFramebuffer() : glState.frameBuffer );
 	else
 		pl->shadowTexture = R_AllocateShadowTexture();
 }
@@ -612,7 +612,7 @@ void R_RenderShadowCubeSide( plight_t *pl, int side )
 	}
 
 	if( FBOsupported )
-		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, glState.frameBuffer == -1 ? 0 : glState.frameBuffer );
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, glState.frameBuffer == FBO_MAIN ? R_MainFramebuffer() : glState.frameBuffer );
 	else
 		pl->shadowTexture = R_AllocateShadowCubemap( side );
 }
@@ -751,7 +751,7 @@ void R_RenderSunShadow( void )
 
 	R_ShadowPassEndGL();
 
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, glState.frameBuffer == -1 ? 0 : glState.frameBuffer );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, glState.frameBuffer == FBO_MAIN ? R_MainFramebuffer() : glState.frameBuffer );
 
 	// receiver side depth bias, world units mapped onto the ortho depth range
 	if( r_sun_shadow_bias->value != 0.0f )

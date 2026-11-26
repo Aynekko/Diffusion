@@ -57,7 +57,7 @@ void main( void )
     float ival = u_ScreenSize.y / 4.;
     float r = rand(vec2(u_RealTime, gl_FragCoord.y));
     // dirty hack to avoid conditional
-    float on = floor(float(int(gl_FragCoord.y + (u_RealTime * r * 1000.)) % int(ival + (line_intensity * u_OutAmount * 0.5f))) / ival);
+    float on = floor(float(int(gl_FragCoord.y + (u_RealTime * r * 1000.)) % int(ival + (line_intensity * u_OutAmount * 0.5))) / ival);
     float wh = sample_noise(gl_FragCoord.xy) * on;
     color = vec4(min(1., color.r + wh), 
                  min(1., color.g + wh),

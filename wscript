@@ -98,6 +98,11 @@ def configure(conf):
 			'-Werror=vla',
 			'-Werror=write-strings',
 
+			# clang's tautological-compare group is wider than GCC's
+			'-Wno-error=tautological-undefined-compare',
+			'-Wno-error=tautological-constant-out-of-range-compare',
+			'-Wno-error=string-compare',
+
 			# unstable diagnostics, may cause false positives
 			'-Winit-self',
 			'-Wmisleading-indentation',

@@ -343,7 +343,7 @@ int R_AllocFrameBuffer( const int viewport[4] )
 	pglFramebufferRenderbuffer( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, fbo->renderbuffer );
 	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
 	pglReadBuffer( GL_COLOR_ATTACHMENT0_EXT );
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, R_MainFramebuffer() );
 	fbo->init = true;
 
 	return i;
@@ -373,7 +373,7 @@ void GL_BindFrameBuffer( const int buffer, const int texture )
 
 	if( !fbo )
 	{
-		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, R_MainFramebuffer() );
 		glState.frameBuffer = buffer;
 		return;
 	}
@@ -409,7 +409,7 @@ void GL_BindFBO( const GLint buffer )
 
 	if( buffer < 0 )
 	{
-		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, R_MainFramebuffer() );
 		glState.frameBuffer = buffer;
 		return;
 	}

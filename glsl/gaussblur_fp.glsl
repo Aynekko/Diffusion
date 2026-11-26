@@ -25,7 +25,7 @@ void main( void )
 	vec4 sum = texture2D( u_ScreenMap, tx ) * 0.134598;
 	vec2 dx = vec2( 0.0 ); // assume no blur
 
-	if( bool(BlurX > 0.0f ) )
+	if( bool(BlurX > 0.0 ) )
 		dx = vec2( 0.01953, 0.0 ) * u_BlurFactor.x;
 	else
 		dx = vec2( 0.0, 0.01953 ) * u_BlurFactor.y;

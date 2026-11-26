@@ -48,6 +48,183 @@ static GLuint SSAOfbo;
 static GLuint sunshafts_fbo;
 static const float fAOScale = 0.5f;
 
+// the scene renders into these instead of the default framebuffer, so post effects
+// can ping-pong between two textures rather than copying the screen for every pass
+static int pp_color[2];
+static int pp_depth;
+static GLuint pp_scene_fbo[2];	// color + depth, the scene keeps drawing here
+static GLuint pp_post_fbo[2];	// color only, so passes can sample pp_depth
+static GLuint pp_bloom_fbo;
+static GLuint pp_native_fbo;
+static int pp_cur;
+static bool pp_active;
+
+void RenderFSQ( int wide, int tall );
+
+static GLuint PP_CreateFBO( int color, int depth )
+{
+	GLuint fbo;
+
+	pglGenFramebuffers( 1, &fbo );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, fbo );
+	pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, color ), 0 );
+	if( depth )
+		pglFramebufferTexture2D( GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, RENDER_GET_PARM( PARM_TEX_TEXNUM, depth ), 0 );
+	pglDrawBuffer( GL_COLOR_ATTACHMENT0_EXT );
+	pglReadBuffer( GL_COLOR_ATTACHMENT0_EXT );
+	ValidateFBO();
+
+	return fbo;
+}
+
+static void PP_DeleteFBO( GLuint &fbo )
+{
+	if( fbo )
+		pglDeleteFramebuffers( 1, &fbo );
+	fbo = 0;
+}
+
+static void InitSceneTarget( void )
+{
+	for( int i = 0; i < 2; i++ )
+	{
+		PP_DeleteFBO( pp_scene_fbo[i] );
+		PP_DeleteFBO( pp_post_fbo[i] );
+
+		if( pp_color[i] )
+			FREE_TEXTURE( pp_color[i] );
+		pp_color[i] = 0;
+	}
+
+	PP_DeleteFBO( pp_native_fbo );
+
+	if( pp_depth )
+		FREE_TEXTURE( pp_depth );
+	pp_depth = 0;
+
+	pp_active = false;
+
+	if( !GL_Support( R_FRAMEBUFFER_OBJECT ))
+		return;
+
+	pp_depth = CREATE_TEXTURE( "*scenedepth", glState.width, glState.height, NULL, TF_DEPTHBUFFER );
+
+	for( int i = 0; i < 2; i++ )
+	{
+		pp_color[i] = CREATE_TEXTURE( va( "*scenecolor%d", i ), glState.width, glState.height, NULL, TF_COLORBUFFER );
+
+		// same sampling as tr.screen_color, which the effects used to read
+		GL_Bind( GL_TEXTURE0, pp_color[i] );
+		pglTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
+
+		pp_scene_fbo[i] = PP_CreateFBO( pp_color[i], pp_depth );
+		pp_post_fbo[i] = PP_CreateFBO( pp_color[i], 0 );
+	}
+
+	GL_Bind( GL_TEXTURE0, 0 );
+
+	if( tr.screen_color_native )
+		pp_native_fbo = PP_CreateFBO( tr.screen_color_native, 0 );
+
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+}
+
+GLuint R_MainFramebuffer( void )
+{
+	return pp_active ? pp_scene_fbo[pp_cur] : 0;
+}
+
+void R_BeginSceneTarget( void )
+{
+	pp_cur = 0;
+	pp_active = CVAR_TO_BOOL( gl_scenefbo ) && pp_scene_fbo[0] && !IsBuildingCubemaps();
+
+	if( !pp_active )
+		return;
+
+	glState.frameBuffer = FBO_MAIN;
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, pp_scene_fbo[pp_cur] );
+	GL_DepthMask( GL_TRUE );
+	pglClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
+	pglClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
+}
+
+void R_PresentSceneTarget( void )
+{
+	if( !pp_active )
+		return;
+
+	pp_active = false;
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+
+	GL_Setup2D();
+	GL_BindShader( NULL );
+	GL_Bind( GL_TEXTURE0, pp_color[pp_cur] );
+	RenderFSQ( glState.width, glState.height );
+	GL_CleanUpTextureUnits( 0 );
+}
+
+// subviews like mirrors draw into their own framebuffers, those still need the old copies
+static bool PP_Enabled( void )
+{
+	return pp_active && glState.frameBuffer == FBO_MAIN;
+}
+
+static int PP_Capture( int texture, int unit )
+{
+	if( PP_Enabled( ))
+	{
+		GL_Bind( unit, pp_color[pp_cur] );
+		return pp_color[pp_cur];
+	}
+
+	GL_Bind( unit, texture );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	return texture;
+}
+
+static int PP_CaptureDepth( int unit )
+{
+	if( !PP_Enabled( ))
+		return PP_Capture( tr.screen_depth, unit );
+
+	GL_Bind( unit, pp_depth );
+	return pp_depth;
+}
+
+static void PP_CaptureInto( int texture, GLuint fbo, int unit )
+{
+	if( PP_Enabled( ))
+	{
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, fbo );
+		pglViewport( 0, 0, glState.width, glState.height );
+		GL_BindShader( NULL );
+		GL_Bind( GL_TEXTURE0, pp_color[pp_cur] );
+		RenderFSQ( glState.width, glState.height );
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, R_MainFramebuffer( ));
+		GL_Bind( unit, texture );
+		return;
+	}
+
+	GL_Bind( unit, texture );
+	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+}
+
+static void PP_BeginPass( void )
+{
+	if( PP_Enabled( ))
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, pp_post_fbo[pp_cur ^ 1] );
+}
+
+static void PP_EndPass( void )
+{
+	if( !PP_Enabled( ))
+		return;
+
+	pp_cur ^= 1;
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, pp_scene_fbo[pp_cur] );
+}
+
 static void InitAutoExposure(void)
 {
 	// init average luminance
@@ -163,8 +340,9 @@ static void InitSMAA( void )
 		GL_Bind( GL_TEXTURE0, 0 );
 	}
 
-	const int w = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 );
-	const int h = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 );
+	// runs before the upscale, at the rendering resolution
+	const int w = glState.width;
+	const int h = glState.height;
 
 	if( SMAA_AlbedoTex )
 	{
@@ -259,7 +437,12 @@ static void InitBloom( void )
 		ValidateFBO();
 	}
 
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+	PP_DeleteFBO( pp_bloom_fbo );
+	if( GL_Support( R_FRAMEBUFFER_OBJECT ))
+		pp_bloom_fbo = PP_CreateFBO( tr.screen_fbo_texture_color, 0 );
+
+	// may run mid-frame through tr.bDoInitBloom
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, R_MainFramebuffer( ));
 
 	tr.bDoInitBloom = false;
 }
@@ -318,6 +501,8 @@ void InitPostTextures( void )
 	InitAutoExposure();
 
 	InitSMAA();
+
+	InitSceneTarget();
 
 	noise_texture = LOAD_TEXTURE( "gfx/noise.dds", NULL, 0, 0 );
 }
@@ -469,12 +654,10 @@ void RenderSunShafts( void )
 	}
 
 	// request screen color
-	GL_Bind( GL_TEXTURE1, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	const int screenColor = PP_Capture( tr.screen_color, GL_TEXTURE1 );
 
 	// request screen depth
-	GL_Bind( GL_TEXTURE0, tr.screen_depth );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_CaptureDepth( GL_TEXTURE0 );
 
 	// set target viewport
 	pglViewport( 0, 0, TargetSize, TargetSize );
@@ -509,7 +692,7 @@ void RenderSunShafts( void )
 	pglUniform3fARB( RI->currentshader->u_BlurFactor, 0.0f, blur, 0.0f );	// set blur factor Y
 	RenderFSQ( glState.width, glState.height );
 #endif
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, R_MainFramebuffer( ));
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
@@ -523,9 +706,11 @@ void RenderSunShafts( void )
 	sunshafts_params[1] = Vector4D( skyColor.x, skyColor.y, skyColor.z, 0.0f );
 	pglUniform4fvARB( RI->currentshader->u_Sunshafts, 2, &sunshafts_params[0][0] );
 
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	GL_Bind( GL_TEXTURE0, screenColor );
 	GL_Bind( GL_TEXTURE1, target_rgb[0] );
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
@@ -566,8 +751,7 @@ void MotionBlur(void)
 	R_TransformDeviceToScreen( g_vecZero, org ); // FIXME just center of the screen...
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
@@ -576,7 +760,9 @@ void MotionBlur(void)
 
 	pglUniform3fARB( RI->currentshader->u_MotionBlur, org.x / glState.width, org.y / glState.height, Accum );
 
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
@@ -715,8 +901,7 @@ void RenderGaussBlur( float blur1, float blur2 )
 		return;
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
@@ -725,11 +910,16 @@ void RenderGaussBlur( float blur1, float blur2 )
 
 	pglUniform3fARB( RI->currentshader->u_BlurFactor, blur1, 0.0f, 1.0f );	// set blur factor X
 
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_EndPass();
+
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	pglUniform3fARB( RI->currentshader->u_BlurFactor, 0.0f, blur2, 0.0f );	// set blur factor Y
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
@@ -808,8 +998,7 @@ void HorizontalBlur( void )
 		return;
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
@@ -818,7 +1007,9 @@ void HorizontalBlur( void )
 
 	pglUniform1fARB( RI->currentshader->u_Accum, Accum );	// set blur factor
 
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
@@ -841,8 +1032,7 @@ void ScreenWater(void)
 		return;
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
@@ -853,7 +1043,9 @@ void ScreenWater(void)
 
 	GL_Bind( GL_TEXTURE1, ScreenWaterTexture );
 
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
@@ -870,8 +1062,7 @@ void Glitch( void )
 		return;
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
@@ -880,7 +1071,9 @@ void Glitch( void )
 
 	pglUniform4fARB( RI->currentshader->u_Glitch, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height), tr.time, gHUD.GlitchAmount );
 
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
@@ -916,8 +1109,7 @@ void Monochrome( void )
 		return;
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
@@ -926,9 +1118,9 @@ void Monochrome( void )
 
 	pglUniform1fARB( RI->currentshader->u_Accum, CurrentMonochrome );
 
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
@@ -947,12 +1139,10 @@ void SSAO( void )
 	const float zFar = RI->farClip;
 
 	// request screen color
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	const int screenColor = PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	// request screen depth
-	GL_Bind( GL_TEXTURE0, tr.screen_depth );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	const int screenDepth = PP_CaptureDepth( GL_TEXTURE0 );
 
 	// set target viewport
 	const int width = glState.width * fAOScale;
@@ -1009,7 +1199,7 @@ void SSAO( void )
 
 	// blur AO pass X
 	GL_BindShader( glsl.BilateralBlur );
-	GL_Bind( GL_TEXTURE1, tr.screen_depth );
+	GL_Bind( GL_TEXTURE1, screenDepth );
 	ASSERT( RI->currentshader != NULL );
 	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / glState.width, 0.0f ); // screen size inv
 	pglUniform1fARB( RI->currentshader->u_zFar, zFar );
@@ -1023,8 +1213,8 @@ void SSAO( void )
 	RenderFSQ( glState.width, glState.height );
 
 	// back to base FBO
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
-	
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, R_MainFramebuffer( ));
+
 	// do final pass
 	pglViewport( 0, 0, glState.width, glState.height );
 	GL_BindShader( glsl.drawSSAO );
@@ -1037,11 +1227,13 @@ void SSAO( void )
 	pglUniform1fARB( RI->currentshader->u_GenericCondition, Debug );
 	pglUniform1fARB( RI->currentshader->u_zFar, zFar );
 
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	GL_Bind( GL_TEXTURE0, screenColor );
 	GL_Bind( GL_TEXTURE1, ScreenAO1 );
-	GL_Bind( GL_TEXTURE2, tr.screen_depth );
+	GL_Bind( GL_TEXTURE2, screenDepth );
 
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	// unbind shader
 	GL_BindShader( NULL );
@@ -1064,8 +1256,7 @@ void Bloom( void )
 	if( tr.bDoInitBloom ) // forced to restart for whatever reasons
 		InitBloom();
 
-	GL_Bind( GL_TEXTURE0, tr.screen_fbo_texture_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_CaptureInto( tr.screen_fbo_texture_color, pp_bloom_fbo, GL_TEXTURE0 );
 
 	GL_BindShader( glsl.BlurMip );
 	ASSERT( RI->currentshader != NULL );
@@ -1108,7 +1299,7 @@ void Bloom( void )
 
 	// blend screen image & first mip together
 	pglViewport( 0, 0, glState.width, glState.height );
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, R_MainFramebuffer( ));
 	GL_BindShader( NULL );
 	GL_Blend( GL_TRUE );
 	GL_BlendFunc( GL_ONE, GL_ONE );
@@ -1143,7 +1334,7 @@ int RenderExposureStorage(void)
 
 	// restore GL state
 	pglViewport( 0, 0, glState.width, glState.height );
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, R_MainFramebuffer( ));
 	GL_SelectTexture( glConfig.max_texture_units - 1 );
 	GL_CleanUpTextureUnits( 0 );
 
@@ -1164,8 +1355,7 @@ void ToneMap(void)
 	const int mipmap_count = 1 + floor( log2( Q_max( glState.width, glState.height ) ) );
 
 	// render luminance to first mip
-	GL_Bind( GL_TEXTURE0, tr.avg_luminance_texture );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.avg_luminance_texture, GL_TEXTURE0 );
 
 	GL_BindShader( glsl.GenLuminance );
 	ASSERT( RI->currentshader != NULL );
@@ -1205,23 +1395,24 @@ void ToneMap(void)
 	GL_SelectTexture( glConfig.max_texture_units - 1 );
 	GL_CleanUpTextureUnits( 0 );
 	pglViewport( 0, 0, glState.width, glState.height );
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, R_MainFramebuffer( ));
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	const int screenColor = PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	const int ExposureTexture = RenderExposureStorage();
 
 	GL_BindShader( glsl.ToneMap );
 	ASSERT( RI->currentshader != NULL );
 
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
+	GL_Bind( GL_TEXTURE0, screenColor );
 	GL_Bind( GL_TEXTURE1, ExposureTexture ); // u_HDRExposure
 	const float UseTonemap = (gl_tonemap->value > 0) ? 1.0f : 0.0f;
 	pglUniform1fARB( RI->currentshader->u_GenericCondition, UseTonemap );
 
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_SelectTexture( glConfig.max_texture_units - 1 );
@@ -1234,8 +1425,7 @@ void Enhance( void )
 		return;
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
@@ -1244,7 +1434,9 @@ void Enhance( void )
 
 	pglUniform2fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)(glState.width), 1.0f / (float)(glState.height) );
 
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
@@ -1263,9 +1455,16 @@ void FSR( void )
 
 	GL_Setup2D();
 
+	const bool scene = PP_Enabled();
+	int upscaled = tr.screen_color_native;
+	if( gl_renderscale->value >= 1.0f )
+		upscaled = scene ? pp_color[pp_cur ^ 1] : tr.screen_color;
+
 	// get low resolution screen copy
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
+
+	if( scene )
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, gl_renderscale->value < 1.0f ? pp_native_fbo : pp_post_fbo[pp_cur ^ 1] );
 
 	// render through full native viewport
 	pglViewport( 0, 0, w, h );
@@ -1281,9 +1480,15 @@ void FSR( void )
 	RenderFSQ( w, h );
 
 	// get native full screen copy
-	if( gl_renderscale->value < 1.0f ) // switch to native texture only in non-native resolution
-		GL_Bind( GL_TEXTURE0, tr.screen_color_native );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h );
+	GL_Bind( GL_TEXTURE0, upscaled );
+	if( scene )
+	{
+		// sharpening writes the final image straight to the screen
+		pp_active = false;
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+	}
+	else
+		pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h );
 
 	GL_BindShader( glsl.FSR_rcas );
 	ASSERT( RI->currentshader != NULL );
@@ -1302,8 +1507,8 @@ void SMAA( void )
 	if( gl_smaa->value <= 0 )
 		return;
 
-	const int w = RENDER_GET_PARM( PARM_SCREEN_WIDTH, 0 );
-	const int h = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 );
+	const int w = glState.width;
+	const int h = glState.height;
 
 	// set up full screen workspace
 	pglMatrixMode( GL_PROJECTION );
@@ -1316,8 +1521,7 @@ void SMAA( void )
 
 	// 1: edge detection
 
-	GL_Bind( GL_TEXTURE0, SMAA_AlbedoTex );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, w, h );
+	const int albedo = PP_Capture( SMAA_AlbedoTex, GL_TEXTURE0 );
 
 	pglViewport( 0, 0, w, h );
 	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, SMAA_fbo );
@@ -1344,18 +1548,20 @@ void SMAA( void )
 	RenderFSQ( w, h );
 	
 	// back to base FBO
-	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+	pglBindFramebuffer( GL_FRAMEBUFFER_EXT, R_MainFramebuffer( ));
 
 	// 3: neighbor blending
 
 	GL_BindShader( glsl.SMAANeighborBlend );
 	ASSERT( RI->currentshader != NULL );
 
-	GL_Bind( GL_TEXTURE0, SMAA_AlbedoTex );
+	GL_Bind( GL_TEXTURE0, albedo );
 	GL_Bind( GL_TEXTURE1, SMAA_BlendTex );
 
 	pglUniform4fARB( RI->currentshader->u_ScreenSizeInv, 1.0f / (float)w, 1.0f / (float)h, (float)w, (float)h );
+	PP_BeginPass();
 	RenderFSQ( w, h );
+	PP_EndPass();
 
 	// debug
 //	GL_Bind( GL_TEXTURE0, SMAA_BlendTex );
@@ -1381,8 +1587,13 @@ void DownScale( void )
 	const float h = RENDER_GET_PARM( PARM_SCREEN_HEIGHT, 0 );
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
+
+	if( PP_Enabled( ))
+	{
+		pp_active = false;
+		pglBindFramebuffer( GL_FRAMEBUFFER_EXT, 0 );
+	}
 
 	pglViewport( 0, 0, w, h );
 	pglClearColor( 0.0f, 0.0f, 0.0f, 1.0f );
@@ -1535,8 +1746,7 @@ void WaterDrops( void )
 		return;
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
@@ -1550,7 +1760,9 @@ void WaterDrops( void )
 	waterdrops_params[1] = Vector( gHUD.ScreenDrips_CurVisibility, gHUD.ScreenDrips_DripIntensity, 0.0f );
 	pglUniform3fvARB( RI->currentshader->u_WaterDrops, 2, &waterdrops_params[0][0] );
 
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
@@ -1569,8 +1781,7 @@ void DroneScreenShader( void )
 	const float out_amount = 1.5f - (gHUD.m_DroneBars.DroneHealth / (float)DRONE_MAX_HEALTH);
 
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	GL_Bind( GL_TEXTURE1, noise_texture );
 
@@ -1581,7 +1792,9 @@ void DroneScreenShader( void )
 
 	pglUniform4fARB( RI->currentshader->u_DroneScreen, (float)(glState.width), (float)(glState.height), tr.time, out_amount );
 
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );
@@ -1608,12 +1821,10 @@ void HeatDistortionShader( void )
 	const float scale = 1.0f - (angle / 45.0f);
 	
 	// capture screen
-	GL_Bind( GL_TEXTURE0, tr.screen_color );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_Capture( tr.screen_color, GL_TEXTURE0 );
 
 	// request screen depth
-	GL_Bind( GL_TEXTURE1, tr.screen_depth );
-	pglCopyTexSubImage2D( GL_TEXTURE_2D, 0, 0, 0, 0, 0, glState.width, glState.height );
+	PP_CaptureDepth( GL_TEXTURE1 );
 
 	pglViewport( 0, 0, glState.width, glState.height );
 
@@ -1622,7 +1833,9 @@ void HeatDistortionShader( void )
 
 	pglUniform4fARB( RI->currentshader->u_GenericCondition, (float)(glState.width), (float)(glState.height), tr.time, scale );
 
+	PP_BeginPass();
 	RenderFSQ( glState.width, glState.height );
+	PP_EndPass();
 
 	GL_BindShader( NULL );
 	GL_CleanUpTextureUnits( 0 );

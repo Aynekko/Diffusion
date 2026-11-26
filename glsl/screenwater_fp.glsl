@@ -25,7 +25,7 @@ void main( void )
 	// Time varying pixel color
 	vec4 outputColor = texture2D( u_ColorMap, fract( uv ));
 
-	if( bool( u_Speed == 0.5f )) // underwater
+	if( bool( u_Speed == 0.5 )) // underwater
 	{
 		outputColor *= 0.75;
 	}
