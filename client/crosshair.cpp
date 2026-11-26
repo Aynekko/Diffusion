@@ -435,9 +435,11 @@ int CHudCrosshairStatic::DrawCrosshairs( float flTime )
 					const char *buf;
 					width = 0;
 					buf = dmg;
+					TTF_ResetUtf8State();
 					while( *buf )
 					{
-						width += gHUD.m_scrinfo.charWidths[*buf];
+						unsigned char c = *buf; // note: this is important! always use this, don't just put *buf into TextMessageDrawChar, it won't get width correctly!
+						width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 						buf++;
 					}
 
@@ -534,14 +536,16 @@ int CHudCrosshairStatic::DrawCrosshairs( float flTime )
 			const char *buf;
 			float width = 0;
 			buf = c_distance;
+			TTF_ResetUtf8State();
 			while( *buf )
 			{
-				width += gHUD.m_scrinfo.charWidths[*buf];
+				unsigned char c = *buf; // note: this is important! always use this, don't just put *buf into TextMessageDrawChar, it won't get width correctly!
+				width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 				buf++;
 			}
 			float posx = (ScreenWidth - width) * 0.5f;
 			float posy = ScreenHeight * 0.45f;
-			FillRoundedRGBA( posx - 5, posy - 5, width + 10, gHUD.m_scrinfo.iCharHeight + 10, 5, 0.25f, 0.25f, 0.25f, 0.25f );
+			FillRoundedRGBA( posx - 5, posy - 5, width + 10, TTF_GetCharHeight() + 10, 5, 0.25f, 0.25f, 0.25f, 0.25f );
 			DrawString( posx, posy, c_distance, 70, 169, 255 );
 		}
 	}

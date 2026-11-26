@@ -30,12 +30,15 @@
 #include "build.h"
 #include "keydefs.h"
 #include "buildtime.h"
+#include "ttf_text.h"
 
 int developer_level;
 int g_iXashEngineBuildNumber;
 cl_enginefunc_t gEngfuncs;
 render_api_t gRenderfuncs;
 CHud gHUD;
+const char *const g_FontFiles[] = { "fonts/NotoSans-Regular.ttf", "fonts/NotoSansJP-Regular.ttf" /*, fallback faces, e.g. a CJK font */ };
+const int g_NumFonts = sizeof( g_FontFiles ) / sizeof( g_FontFiles[0] );
 
 //==========================================================
 // Initialize: called when the DLL is first loaded.
@@ -136,6 +139,31 @@ void HUD_PlayerMove( struct playermove_s *ppmove, int server )
 	PM_Move( ppmove, server );
 }
 
+static void InitFonts( void )
+{
+#ifdef STB_TRUETYPE_IMPLEMENTATION
+	g_pTTFDefault = TTF_LoadFont( g_FontFiles, g_NumFonts, 26 );   // 26 = line height in px at scale 1.0
+	gEngfuncs.pfnDrawCharacter = TTF_PfnDrawCharacter;
+	gEngfuncs.pfnDrawConsoleString = TTF_PfnDrawConsoleString;
+	gEngfuncs.pfnDrawSetTextColor = TTF_PfnSetTextColor;
+	gEngfuncs.pfnDrawConsoleStringLen = TTF_PfnDrawConsoleStringLen;
+	gEngfuncs.pfnDrawString = TTF_DrawString_Compat;
+	gEngfuncs.pfnDrawStringReverse = TTF_DrawStringReverse_Compat;
+
+	float s = hud_fontscale->value;
+	if( s < 0.1f ) s = 0.1f;
+	if( g_pTTFDefault )
+	{
+		TTF_SetFontScale( g_pTTFDefault, s );
+		TTF_StringLen( g_pTTFDefault, "A", TTF_DRAW_HUD, NULL, &gHUD.iCharHeight );
+	}
+	
+	// NOTE: gHUD.m_scrinfo.charWidths is not overwritten because it's not used.
+	// I measure character widths by drawing them offscreen, using TextMessageDrawChar
+	// they are not queued or drawn in this case
+#endif // STB_TRUETYPE_IMPLEMENTATION
+}
+
 /*
 ==========================
 	HUD_VidInit
@@ -152,6 +180,8 @@ int HUD_VidInit(void)
 	R_VidInit();
 
 	V_VidInit();
+
+	InitFonts();
 
 	return 1;
 }

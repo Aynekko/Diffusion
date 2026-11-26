@@ -206,6 +206,8 @@ void CHudTutorial::MessageDraw( client_textmessage_t *pMessage, int x, int y, bo
 	width = 0;
 	m_parms.totalWidth = 0;
 
+	TTF_ResetUtf8State();
+
 	while( *pText )
 	{
 		if( *pText == '\n' )
@@ -216,15 +218,19 @@ void CHudTutorial::MessageDraw( client_textmessage_t *pMessage, int x, int y, bo
 				m_parms.totalWidth = width;
 			}
 			width = 0;
+			TTF_ResetUtf8State();
 		}
 		else
-			width += gHUD.m_scrinfo.charWidths[*pText];
+		{
+			unsigned char c = *pText; // note: this is important! always use this, don't just put *pText into TextMessageDrawChar, it won't get width correctly!
+			width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
+		}
 		pText++;
 		length++;
 	}
 
 	m_parms.length = length;
-	m_parms.totalHeight = (m_parms.lines * gHUD.m_scrinfo.iCharHeight);
+	m_parms.totalHeight = (m_parms.lines * TTF_GetCharHeight());
 	if( GetSize )
 		Theight = m_parms.totalHeight;
 
@@ -238,11 +244,13 @@ void CHudTutorial::MessageDraw( client_textmessage_t *pMessage, int x, int y, bo
 		m_parms.width = 0;
 		pLineStart = pText;
 
+		TTF_ResetUtf8State();
+
 		while( *pText && *pText != '\n' )
 		{
 			unsigned char c = *pText;
 			//	m_parms.width += gHUD.m_scrinfo.charWidths[c];
-			m_parms.width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // thx to a1batross for idea (not ideal, but it will have to do...)
+			m_parms.width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 ); // thx to a1batross for idea (not ideal, but it will have to do...)
 			m_parms.lineLength++;
 			pText++;
 		}
@@ -254,17 +262,25 @@ void CHudTutorial::MessageDraw( client_textmessage_t *pMessage, int x, int y, bo
 
 		m_parms.x = x;
 
-		for( j = 0; j < m_parms.lineLength; j++ )
-		{
-			m_parms.text = (unsigned char)pLineStart[j];
-			int next = m_parms.x;
+		TTF_ResetUtf8State();
 
-			const int txt_a = alpha * 255;
-			if( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
-				next += TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, txt_a, txt_a, txt_a );
-			m_parms.x = next;
+		if( !GetSize )
+		{
+			for( j = 0; j < m_parms.lineLength; j++ )
+			{
+				m_parms.text = (unsigned char)pLineStart[j];
+				int next = m_parms.x;
+
+				const int txt_a = alpha * 255;
+				if( m_parms.x >= 0 && m_parms.y >= 0 && next <= ScreenWidth )
+					next += TextMessageDrawChar( m_parms.x, m_parms.y, m_parms.text, txt_a, txt_a, txt_a );
+				m_parms.x = next;
+			}
 		}
 
-		m_parms.y += gHUD.m_scrinfo.iCharHeight;
+		m_parms.y += TTF_GetCharHeight();
 	}
+
+	if( !GetSize )
+		TTF_FlushText();
 }

@@ -399,6 +399,7 @@
     <ClCompile Include="subtitle.cpp" />
     <ClCompile Include="text_message.cpp" />
     <ClCompile Include="train.cpp" />
+    <ClCompile Include="ttf_text.cpp" />
     <ClCompile Include="use_icon.cpp" />
     <ClCompile Include="utils.cpp" />
     <ClCompile Include="zoom.cpp" />
@@ -439,6 +440,8 @@
     <ClInclude Include="render\r_weather.h" />
     <ClInclude Include="render\r_world.h" />
     <ClInclude Include="render\tbnfile.h" />
+    <ClInclude Include="ttf_stb.h" />
+    <ClInclude Include="ttf_text.h" />
     <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemDefinitionGroup>

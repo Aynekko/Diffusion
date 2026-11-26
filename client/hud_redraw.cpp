@@ -200,10 +200,11 @@ void CHud::DrawShaderCompilation( void )
 			Q_snprintf( shadermessage, sizeof( shadermessage ), "%s\n", pTitlesMsg );
 		// calculate width to align center...
 		buf = shadermessage;
+		TTF_ResetUtf8State();
 		while( *buf && *buf != '\n' )
 		{
 			unsigned char c = *buf; // note: this is important! always use this, don't just put *buf into TextMessageDrawChar, it won't get width correctly!
-			shadermessage_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+			shadermessage_width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 			buf++;
 		}
 	}
@@ -224,18 +225,22 @@ void CHud::DrawShaderCompilation( void )
 	FillRoundedRGBA( ((ScreenWidth - outline_w) * 0.5f) + border, ypos + border, (outline_w - border - border) * ((float)shaders_processed / (float)shaders_total), outline_h - border - border, 0.0f, r, g, b, 1.0f );
 
 	const float txtpos_x = (ScreenWidth - outline_w) * 0.5f;
-	const float txtpos_y = ypos - gHUD.m_scrinfo.iCharHeight - 5;
+	const float txtpos_y = ypos - TTF_GetCharHeight() - (4.0f * fScale);
 	DrawString( txtpos_x, txtpos_y, shadermessage, 70, 169, 255 );
 
 	static char counter[256];
 	Q_snprintf( counter, sizeof( counter ), "%i / %i\n", shaders_processed, shaders_total );
+
 	// calculate width
 	float counter_width = 0.0f;
 	buf = counter;
+
+	TTF_ResetUtf8State();
+
 	while( *buf && *buf != '\n' )
 	{
 		unsigned char c = *buf;
-		counter_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+		counter_width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 		buf++;
 	}
 
@@ -354,6 +359,8 @@ int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString,
 		// we should count the length?		
 	}
 
+	TTF_ResetUtf8State();
+
 	// iterate throug the string in reverse
 	for( szIt--; szIt != (byte *)(szString - 1); szIt-- )	
 	{
@@ -364,6 +371,9 @@ int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString,
 
 		TextMessageDrawChar( xpos, ypos, *szIt, r, g, b );
 	}
+
+	TTF_FlushText();
+
 	return xpos;
 }
 

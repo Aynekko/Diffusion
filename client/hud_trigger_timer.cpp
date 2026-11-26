@@ -46,14 +46,15 @@ int CHudTriggerTimer::Draw( float flTime )
 	{
 		text_width = 0;
 		pText = message;
+		TTF_ResetUtf8State();
 		while( *pText )
 		{
 			unsigned char c = *pText;
-			text_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+			text_width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 			pText++;
 		}
 		// draw the frame first
-		FillRoundedRGBA( ScreenWidth - text_width - 60, (ScreenHeight * 0.1f) - 5, text_width + 20, gHUD.m_scrinfo.iCharHeight * 3.0f, 5, 0.314f, 0.314f, 0.314f, 0.8f );
+		FillRoundedRGBA( ScreenWidth - text_width - 60, (ScreenHeight * 0.1f) - 5, text_width + 20, TTF_GetCharHeight() * 3.0f, 5, 0.314f, 0.314f, 0.314f, 0.8f );
 		frame_drawn = true;
 		text_pos_x = ScreenWidth - text_width - 50;
 		text_pos_y = ScreenHeight * 0.1f;
@@ -73,21 +74,22 @@ int CHudTriggerTimer::Draw( float flTime )
 	// figure out text width using this hack
 	text_width = 0;
 	pText = timer_text;
+	TTF_ResetUtf8State();
 	while( *pText )
 	{
 		unsigned char c = *pText;
-		text_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+		text_width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 		pText++;
 	}
 
 	// draw the frame if it wasn't yet
 	if( !frame_drawn )
-		FillRoundedRGBA( ScreenWidth - text_width - 60, (ScreenHeight * 0.1f) - 5, text_width + 20, gHUD.m_scrinfo.iCharHeight * 1.5f, 5, 0.314f, 0.314f, 0.314f, 0.8f );
+		FillRoundedRGBA( ScreenWidth - text_width - 60, (ScreenHeight * 0.1f) - 5, text_width + 20, TTF_GetCharHeight() * 1.5f, 5, 0.314f, 0.314f, 0.314f, 0.8f );
 
 	text_pos_x = ScreenWidth - text_width - 50;
 	text_pos_y = ScreenHeight * 0.1f;
 	if( message[0] != '\0' ) // if the message was drawn, draw the timer after it
-		text_pos_y += gHUD.m_scrinfo.iCharHeight * 1.5f;
+		text_pos_y += TTF_GetCharHeight() * 1.5f;
 
 	if( critical ) // less than 20% of time left
 		DrawString( text_pos_x, text_pos_y, timer_text, 255, 0, 0 );

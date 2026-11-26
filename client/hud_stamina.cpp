@@ -66,7 +66,7 @@ int CHudStamina :: Draw(float flTime)
 	if( CVAR_TO_BOOL( ui_is_active ) )
 		return 0;
 
-	float pos_x = (ScreenWidth / 32) - 30;
+	float pos_x = ((ScreenWidth / 32) - 30) * gHUD.fScale;
 	pos_x += gHUD.fCenteredPadding;
 	float pos_y = ScreenHeight - (75 * gHUD.fScale);
 	pos_y += (full_frame_h / 3.0f) + 10; // accounting for health bar
@@ -123,7 +123,7 @@ int CHudStamina :: Draw(float flTime)
 	char number[32];
 	Q_snprintf( number, sizeof( number ), "%3d", (int)stamina_val );
 	int text_pos_x = pos_x + icon_size + full_frame_w;
-	int text_pos_y = pos_y;
+	int text_pos_y = pos_y + ((cell_height - TTF_GetCharHeight()) * 0.5f);
 	DrawString( text_pos_x, text_pos_y, number, 70, 169, 255 );
 
 	// play sound

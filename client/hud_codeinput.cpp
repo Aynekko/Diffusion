@@ -186,16 +186,17 @@ int CHudCodeInput::Draw( float flTime )
 	// calculate width to align center...
 	buf = text;
 	int width = 0;
+	TTF_ResetUtf8State();
 	while( *buf )
 	{
 		unsigned char c = *buf;
-		width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+		width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 		buf++;
 	}
 
 	const float text_x = (ScreenWidth - width) * 0.5f;
 	const float text_y = ScreenHeight * 0.8f;
-	FillRoundedRGBA( text_x - 10, text_y - 10, width + 20, gHUD.m_scrinfo.iCharHeight + 20, 15, 0.2f, 0.2f, 0.2f, 0.8f );
+	FillRoundedRGBA( text_x - 10, text_y - 10, width + 20, TTF_GetCharHeight() + 20, 15, 0.2f, 0.2f, 0.2f, 0.8f );
 	DrawString( text_x, text_y, text, 255, 255, 255 );
 
 	return 1;

@@ -106,7 +106,7 @@ int CHudAchievement::Draw( float flTime )
 	if( pText )
 	{
 		UnpackRGB( r, g, b, 0x00FFFFFF );
-		DrawString( x + fBORDER + fPIC_FRAME_SIZE + fBORDER, y + fBORDER + gHUD.m_scrinfo.iCharHeight + fBORDER, pText->pMessage, r, g, b );
+		DrawString( x + fBORDER + fPIC_FRAME_SIZE + fBORDER, y + fBORDER + TTF_GetCharHeight() + fBORDER, pText->pMessage, r, g, b );
 	}
 
 	return 1;
@@ -136,10 +136,11 @@ void CHudAchievement::EnableAchievement( char *pszIconName )
 	{
 		const char *tmp = pText->pMessage;
 		int tmpwidth = 0;
+		TTF_ResetUtf8State();
 		while( *tmp && *tmp != '\n' )
 		{
 			unsigned char c = *tmp;
-			tmpwidth += TextMessageDrawChar( -1, -1, c, 0, 0, 0 );
+			tmpwidth += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 			tmp++;
 		}
 		text_max_width = tmpwidth;
@@ -148,10 +149,11 @@ void CHudAchievement::EnableAchievement( char *pszIconName )
 	{
 		const char *tmp = pTitle->pMessage;
 		int tmpwidth = 0;
+		TTF_ResetUtf8State();
 		while( *tmp && *tmp != '\n' )
 		{
 			unsigned char c = *tmp;
-			tmpwidth += TextMessageDrawChar( -1, -1, c, 0, 0, 0 );
+			tmpwidth += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 			tmp++;
 		}
 		if( tmpwidth > text_max_width )

@@ -256,23 +256,31 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, i
 	width = 0;
 	m_parms.totalWidth = 0;
 
+	TTF_ResetUtf8State();
 	while( *pText )
 	{
 		if( *pText == '\n' )
 		{
+			TTF_ResetUtf8State();
 			m_parms.lines++;
 			if( width > m_parms.totalWidth )
 				m_parms.totalWidth = width;
 			width = 0;
 		}
 		else
-			width += gHUD.m_scrinfo.charWidths[(unsigned char)*pText];
+		{
+			unsigned char c = *pText;
+			width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
+		}
 		pText++;
 		length++;
 	}
 
+	if( width > m_parms.totalWidth ) // last line
+		m_parms.totalWidth = width;
+
 	m_parms.length = length;
-	m_parms.totalHeight = (m_parms.lines * gHUD.m_scrinfo.iCharHeight);
+	m_parms.totalHeight = (m_parms.lines * TTF_GetCharHeight());
 
 	m_parms.y = YPosition( pMessage->y, m_parms.totalHeight );
 	pText = pTempText[id];
@@ -287,11 +295,13 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, i
 		m_parms.width = 0;
 		pLineStart = pText;
 
+		TTF_ResetUtf8State();
+
 		while( *pText && *pText != '\n' )
 		{
 			unsigned char c = *pText; // note: this is important! always use this, don't just put *pText into TextMessageDrawChar, it won't get width correctly!
 		//	m_parms.width += gHUD.m_scrinfo.charWidths[c];
-			m_parms.width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // thx to a1batross for idea (not ideal, but it will have to do...)
+			m_parms.width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 ); // thx to a1batross for idea (not ideal, but it will have to do...)
 			m_parms.lineLength++;
 			pText++;
 		}
@@ -299,6 +309,8 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, i
 		pText++; // Skip LF
 
 		m_parms.x = XPosition( pMessage->x, m_parms.width, m_parms.totalWidth );
+
+		TTF_ResetUtf8State();
 
 		for( j = 0; j < m_parms.lineLength; j++ )
 		{
@@ -311,7 +323,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time, i
 
 			m_parms.x = next;
 		}
- 		m_parms.y += gHUD.m_scrinfo.iCharHeight;
+ 		m_parms.y += TTF_GetCharHeight();
 	}
 }
 
@@ -420,6 +432,8 @@ int CHudMessage::Draw( float fTime )
 
 	// don't call until we get another message
 	if( !drawn ) m_iFlags &= ~HUD_ACTIVE;
+
+	TTF_FlushText();
 
 	return 1;
 }

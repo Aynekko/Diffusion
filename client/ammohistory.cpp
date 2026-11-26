@@ -39,7 +39,7 @@ struct ITEM_INFO
 };
 
 // titles.txt
-const char AmmoNames[TOTAL_WEAPONS][32] =
+static const char AmmoNames[TOTAL_WEAPONS][32] =
 {
 	"'\0'", // WEAPON_NONE
 	"'\0'", // WEAPON_KNIFE
@@ -68,7 +68,7 @@ const char AmmoNames[TOTAL_WEAPONS][32] =
 	"AMMO_SMOKEGRENADE", // WEAPON_SMOKEGRENADE
 };
 
-const char Ammo2Names[TOTAL_WEAPONS][32] =
+static const char Ammo2Names[TOTAL_WEAPONS][32] =
 {
 	"'\0'", // WEAPON_NONE
 	"'\0'", // WEAPON_KNIFE
@@ -192,7 +192,7 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				const char *ammoname = (ammotype == 1 ? AmmoNames[wpn_id] : Ammo2Names[wpn_id] );
 
 				// get position, lerp to it
-				ypos -= 30 + gHUD.m_scrinfo.iCharHeight;
+				ypos -= 30 + TTF_GetCharHeight();
 				rgAmmoHistory[i].ypos_lerp = lerp( rgAmmoHistory[i].ypos_lerp, ypos, 5 * g_fFrametime );
 				float ypos_new = rgAmmoHistory[i].ypos_lerp;
 
@@ -203,10 +203,13 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 
 				// get text length
 				pText = pMsg ? pMsg->pMessage : ammoname;
+
+				TTF_ResetUtf8State();
+
 				while( *pText && *pText != '\n' )
 				{
 					unsigned char c = *pText;
-					text_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+					text_width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 					pText++;
 				}
 
@@ -219,8 +222,8 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 					// RGB 70 169 255
 					// draw frame and amount
 					float scale = ((rgAmmoHistory[i].DisplayTime - flTime) * 80);
-					FillRoundedRGBA( xpos - text_width - (60 * gHUD.fScale), ypos_new - 10, text_width + (80 * gHUD.fScale), gHUD.m_scrinfo.iCharHeight + 20, 10, 0.25f, 0.25f, 0.25f, 0.002f * scale ); // grey frame background
-					FillRoundedRGBA( xpos - text_width - (10 * gHUD.fScale), ypos_new - 5, text_width + (25 * gHUD.fScale), gHUD.m_scrinfo.iCharHeight + 10, 10, 0.275f, 0.663f, 1.0f, 0.002f * scale ); // blue frame for text
+					FillRoundedRGBA( xpos - text_width - (60 * gHUD.fScale), ypos_new - 10, text_width + (80 * gHUD.fScale), TTF_GetCharHeight() + 20, 10, 0.25f, 0.25f, 0.25f, 0.002f * scale ); // grey frame background
+					FillRoundedRGBA( xpos - text_width - (10 * gHUD.fScale), ypos_new - 5, text_width + (25 * gHUD.fScale), TTF_GetCharHeight() + 10, 10, 0.275f, 0.663f, 1.0f, 0.002f * scale ); // blue frame for text
 					int r, g, b;
 					UnpackRGB( r, g, b, gHUD.m_iHUDColor );
 					ScaleColors( r, g, b, Q_min( scale, 255 ) );

@@ -28,7 +28,7 @@ int CHudSubtitle::VidInit( void )
 	pName[0] = '\0';
 	pText[0] = '\0';
 	draw_time = 0.0f;
-	char_height = gHUD.m_scrinfo.iCharHeight + 5; // add some space between lines
+	char_height = TTF_GetCharHeight() + 5; // add some space between lines
 	alpha = 0.0f;
 	return 1;
 }
@@ -65,6 +65,9 @@ int CHudSubtitle::MsgFunc_Subtitle( const char *pszName, int iSize, void *pbuf )
 	int num_chars = 0;
 	subtitle_height = char_height; // 1 line with the name already added
 	unsigned char c;
+
+	TTF_ResetUtf8State();
+
 	while( *txt )
 	{
 		c = *txt;
@@ -72,10 +75,11 @@ int CHudSubtitle::MsgFunc_Subtitle( const char *pszName, int iSize, void *pbuf )
 		{
 			subtitle_height += char_height; // got 1 line
 			tmp_width = 0;
+			TTF_ResetUtf8State();
 		}
 		else
 		{
-			tmp_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // hack to get actual character width
+			tmp_width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 ); // hack to get actual character width
 			num_chars++;
 			if( tmp_width > subtitle_width )
 				subtitle_width = tmp_width;
@@ -89,10 +93,11 @@ int CHudSubtitle::MsgFunc_Subtitle( const char *pszName, int iSize, void *pbuf )
 	// need to check name width too...it can be longer than actual message
 	txt = pName;
 	tmp_width = 0;
+	TTF_ResetUtf8State();
 	while( *txt )
 	{
 		c = *txt;
-		tmp_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // hack to get actual character width
+		tmp_width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 ); // hack to get actual character width
 		if( tmp_width > subtitle_width )
 			subtitle_width = tmp_width;
 		txt++;
@@ -162,6 +167,7 @@ int CHudSubtitle::Draw( float flTime )
 
 	// draw name
 	tmp_text = pName;
+	TTF_ResetUtf8State();
 	while( *tmp_text )
 	{
 		c = *tmp_text;
@@ -177,7 +183,8 @@ int CHudSubtitle::Draw( float flTime )
 	ScaleColors( r, g, b, alpha * 255.0f );
 	tmp_x = x;
 	tmp_y = y + char_height;
-	tmp_text = pText;	
+	tmp_text = pText;
+	TTF_ResetUtf8State();
 	while( *tmp_text )
 	{
 		c = *tmp_text;
@@ -186,6 +193,7 @@ int CHudSubtitle::Draw( float flTime )
 			// next line, reset
 			tmp_x = x;
 			tmp_y += char_height;
+			TTF_ResetUtf8State();
 		}
 		else
 		{
@@ -193,6 +201,8 @@ int CHudSubtitle::Draw( float flTime )
 		}
 		tmp_text++;
 	}
+
+	TTF_FlushText();
 
 	return 1;
 }

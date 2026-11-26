@@ -5,6 +5,7 @@
 #include "hud.h"
 #include "utils.h"
 #include "r_local.h"
+#include "ttf_text.h"
 
 bool g_bDuckToggled; // diffusion - http://articles.thewavelength.net/378
 
@@ -166,6 +167,16 @@ void CHud::SetupScale( void )
 
 	// keep it automatic
 	hud_fontscale->value = fScale;
+
+#ifdef STB_TRUETYPE_IMPLEMENTATION
+	float s = hud_fontscale->value;
+	if( s < 0.1f ) s = 0.1f;
+	if( g_pTTFDefault )
+	{
+		TTF_SetFontScale( g_pTTFDefault, s );
+		TTF_StringLen( g_pTTFDefault, "A", TTF_DRAW_HUD, NULL, &iCharHeight );
+	}
+#endif // STB_TRUETYPE_IMPLEMENTATION
 }
 
 void CHud :: VidInit( void )

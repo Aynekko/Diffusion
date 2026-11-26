@@ -38,13 +38,15 @@ int CHudHintObjective::VidInit( void )
 {
 	m_iFlags |= HUD_ACTIVE;
 	pHint[0] = '\0';
-	custom_char_height = gHUD.m_scrinfo.iCharHeight + 5; // add some space between lines
+	custom_char_height = TTF_GetCharHeight() + 5; // add some space between lines
 	hint_alpha = 0.0f;
 	HintImage = LOAD_TEXTURE( "sprites/diffusion/hint.dds", NULL, 0, 0 );
 	hint_drawstart_time = 0.0f;
 	obj_alpha = 0.0f;
 	fForcedTimer = 0.0f;
 	obj_ypos = -100;
+	SetupHint();
+	SetupObjectives();
 	
 	return 1;
 }
@@ -73,6 +75,7 @@ void CHudHintObjective::SetupHint( void )
 	hint_height = 0;
 	int tmp_width = HINT_ICON_SIZE + FRAMEBORDER;
 	unsigned char c;
+	TTF_ResetUtf8State();
 	while( *txt )
 	{
 		c = *txt;
@@ -80,10 +83,11 @@ void CHudHintObjective::SetupHint( void )
 		{
 			hint_height += custom_char_height; // got 1 line
 			tmp_width = HINT_ICON_SIZE + FRAMEBORDER;
+			TTF_ResetUtf8State();
 		}
 		else
 		{
-			tmp_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // hack to get actual character width
+			tmp_width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 ); // hack to get actual character width
 			if( tmp_width > hint_width )
 				hint_width = tmp_width;
 		}
@@ -95,14 +99,6 @@ void CHudHintObjective::SetupHint( void )
 		hint_height = HINT_ICON_SIZE;
 	else // add last line height
 		hint_height += custom_char_height;
-
-	// prepare to draw the hint
-	hint_drawstart_time = tr.time;
-	hint_ypos = ScreenHeight + hint_height; // start outside the screen area
-	hint_alpha = 0.0f;
-
-	// play hint sound
-	gEngfuncs.pEventAPI->EV_PlaySound( 0, Vector( 0, 0, 0 ), CHAN_STATIC, "player/hint.wav", 1.0, 0, 0, 100 );
 }
 
 void CHudHintObjective::SetupObjectives( void )
@@ -113,10 +109,10 @@ void CHudHintObjective::SetupObjectives( void )
 	if( DefaultObj )
 		def_obj = DefaultObj->pMessage;
 
-	if( pObjective[0][0] != '\0' )
+	if( pObjectiveTitle[0][0] != '\0' )
 	{
 		// get the primary objective header from titles.txt
-		TitlesMsg = TextMessageGet( pObjective[0] );
+		TitlesMsg = TextMessageGet( pObjectiveTitle[0] );
 		pObjective[0][0] = '\0';
 		if( TitlesMsg )
 			Q_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, TitlesMsg->pMessage );
@@ -126,10 +122,10 @@ void CHudHintObjective::SetupObjectives( void )
 	else
 		Q_snprintf( pObjective[0], sizeof( pObjective[0] ) - 1, def_obj );
 
-	if( pObjective[1][0] != '\0' )
+	if( pObjectiveTitle[1][0] != '\0' )
 	{
 		// get the secondary objective header from titles.txt
-		TitlesMsg = TextMessageGet( pObjective[1] );
+		TitlesMsg = TextMessageGet( pObjectiveTitle[1] );
 		pObjective[1][0] = '\0';
 		if( TitlesMsg )
 			Q_snprintf( pObjective[1], sizeof( pObjective[1] ) - 1, TitlesMsg->pMessage );
@@ -149,6 +145,7 @@ void CHudHintObjective::SetupObjectives( void )
 	int text_width = 0;
 	int num_lines = 0;
 	unsigned char c;
+	TTF_ResetUtf8State();
 	while( *txt )
 	{
 		c = *txt;
@@ -157,17 +154,18 @@ void CHudHintObjective::SetupObjectives( void )
 			obj_primarytext_height += custom_char_height; // got 1 line
 			tmp_width = 0;
 			num_lines++;
+			TTF_ResetUtf8State();
 		}
 		else
 		{
-			tmp_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // hack to get actual character width
+			tmp_width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 ); // hack to get actual character width
 			if( tmp_width > text_width )
 				text_width = tmp_width;
 		}
 		txt++;
 	}
 
-	obj_primarytext_height += gHUD.m_scrinfo.iCharHeight;
+	obj_primarytext_height += TTF_GetCharHeight();
 
 	obj_height += obj_primarytext_height;
 	
@@ -178,6 +176,7 @@ void CHudHintObjective::SetupObjectives( void )
 		obj_height += FRAMEBORDER;
 		txt = pObjective[1];
 		tmp_width = 0;
+		TTF_ResetUtf8State();
 		num_lines = 0;
 		while( *txt )
 		{
@@ -187,17 +186,18 @@ void CHudHintObjective::SetupObjectives( void )
 				obj_secondarytext_height += custom_char_height; // got 1 line
 				tmp_width = 0;
 				num_lines++;
+				TTF_ResetUtf8State();
 			}
 			else
 			{
-				tmp_width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 ); // hack to get actual character width
+				tmp_width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 ); // hack to get actual character width
 				if( tmp_width > text_width )
 					text_width = tmp_width;
 			}
 			txt++;
 		}
 
-		obj_secondarytext_height += gHUD.m_scrinfo.iCharHeight;
+		obj_secondarytext_height += TTF_GetCharHeight();
 
 		obj_height += obj_secondarytext_height;
 	}
@@ -216,10 +216,16 @@ int CHudHintObjective::MsgFunc_Hint( const char *pszName, int iSize, void *pbuf 
 	case 0:
 		Q_snprintf( pHint, 64, READ_STRING() );
 		SetupHint();
+		// prepare to draw the hint
+		hint_drawstart_time = tr.time;
+		hint_ypos = ScreenHeight + hint_height; // start outside the screen area
+		hint_alpha = 0.0f;
+		// play hint sound
+		gEngfuncs.pEventAPI->EV_PlaySound( 0, Vector( 0, 0, 0 ), CHAN_STATIC, "player/hint.wav", 1.0, 0, 0, 100 );
 		break;
 	case 1:
-		Q_snprintf( pObjective[0], 64, READ_STRING() );
-		Q_snprintf( pObjective[1], 64, READ_STRING() );
+		Q_snprintf( pObjectiveTitle[0], 64, READ_STRING() );
+		Q_snprintf( pObjectiveTitle[1], 64, READ_STRING() );
 		SetupObjectives();
 		break;
 	}
@@ -293,6 +299,9 @@ void CHudHintObjective::DrawHintPopUp( void )
 	float tmp_y = hint_ypos + FRAMEBORDER;
 	const char *tmp_text = pHint;
 	unsigned char c;
+
+	TTF_ResetUtf8State();
+
 	while( *tmp_text )
 	{
 		c = *tmp_text;
@@ -301,6 +310,7 @@ void CHudHintObjective::DrawHintPopUp( void )
 			// next line, reset
 			tmp_x = xpos + FRAMEBORDER + HINT_ICON_SIZE + FRAMEBORDER;
 			tmp_y += custom_char_height;
+			TTF_ResetUtf8State();
 		}
 		else
 		{
@@ -308,6 +318,8 @@ void CHudHintObjective::DrawHintPopUp( void )
 		}
 		tmp_text++;
 	}
+
+	TTF_FlushText();
 }
 
 int CHudHintObjective::Draw( float flTime )
@@ -377,6 +389,9 @@ int CHudHintObjective::Draw( float flTime )
 	tmp_y = obj_ypos + FRAMEBORDER;
 	tmp_text = pObjective[0];
 	unsigned char c;
+
+	TTF_ResetUtf8State();
+
 	while( *tmp_text )
 	{
 		c = *tmp_text;
@@ -385,6 +400,7 @@ int CHudHintObjective::Draw( float flTime )
 			// next line, reset
 			tmp_x = xpos + FRAMEBORDER;
 			tmp_y += custom_char_height;
+			TTF_ResetUtf8State();
 		}
 		else
 		{
@@ -404,6 +420,9 @@ int CHudHintObjective::Draw( float flTime )
 		tmp_y = obj_ypos + FRAMEBORDER + obj_primarytext_height + FRAMEBORDER;
 		tmp_text = pObjective[1];
 		unsigned char c;
+
+		TTF_ResetUtf8State();
+
 		while( *tmp_text )
 		{
 			c = *tmp_text;
@@ -412,6 +431,7 @@ int CHudHintObjective::Draw( float flTime )
 				// next line, reset
 				tmp_x = xpos + FRAMEBORDER;
 				tmp_y += custom_char_height;
+				TTF_ResetUtf8State();
 			}
 			else
 			{
@@ -420,6 +440,8 @@ int CHudHintObjective::Draw( float flTime )
 			tmp_text++;
 		}
 	}
+
+	TTF_FlushText();
 
 	// draw timed bar to force show the objective text
 	if( bShowMissionObjectivesTimed )

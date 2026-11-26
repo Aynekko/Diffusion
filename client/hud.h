@@ -27,6 +27,9 @@
 
 #define OBJECTIVE_TIMER 5.0f
 
+// true type fonts are activated with this define.
+#define STB_TRUETYPE_IMPLEMENTATION
+
 #include "wrect.h"
 #ifdef _WIN32
 #include <windows.h>
@@ -45,6 +48,7 @@
 #include "ammo.h"
 #include "achievementdata.h"
 #include "animatex.h"
+#include "ttf_text.h"
 
 typedef struct cvar_s	cvar_t;
 
@@ -807,6 +811,7 @@ public:
 	void SetupHint( void );
 
 	// mission objective stuff
+	char pObjectiveTitle[2][64];
 	char pObjective[2][512];
 	void SetupObjectives( void );
 	int obj_width;
@@ -1182,6 +1187,9 @@ public:
 	int iKillerIndex;
 	Vector vDeathPosition;
 	float fLerpToKiller;
+#ifdef STB_TRUETYPE_IMPLEMENTATION
+	int iCharHeight;
+#endif
 };
 
 extern CHud	gHUD;
@@ -1208,3 +1216,9 @@ extern bool localanim_AllowRpgShoot;
 void V_LocalWeaponAnimations( struct ref_params_s *pparams );
 bool LocalWeaponAnims( void );
 bool CheckForLocalWeaponShootAnimation( int seq );
+
+#ifndef STB_TRUETYPE_IMPLEMENTATION
+void TTF_ResetUtf8State( void );
+void TTF_FlushText( void );
+inline int TTF_GetCharHeight( void ) { return gHUD.m_scrinfo.iCharHeight; };
+#endif

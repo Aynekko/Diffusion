@@ -201,6 +201,7 @@ typedef char GLchar;
 #define GL_RG8				0x822B
 #define GL_BGR				0x80E0
 #define GL_BGRA				0x80E1
+#define GL_ALPHA			0x1906
 #define GL_ALPHA4                         	0x803B
 #define GL_ALPHA8                         	0x803C
 #define GL_ALPHA12                        	0x803D

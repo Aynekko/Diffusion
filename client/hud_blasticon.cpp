@@ -100,7 +100,7 @@ int CHudBlastIcons::Draw( float flTime )
 	//====================
 	if( BlastAbilityLVL > 0 )
 	{
-		x += ((ScreenWidth / 32) + 360) * gHUD.fScale;
+		x += ((ScreenWidth / 32) + 380) * gHUD.fScale;
 
 		bGrey = true;
 		if( CanElectroBlast && BlastChargesReady > 0 )
@@ -142,13 +142,15 @@ int CHudBlastIcons::Draw( float flTime )
 			char num[32];
 			Q_snprintf( num, sizeof( num ), "%i", iRechargeTimer );
 			const char *buf = num;
+			TTF_ResetUtf8State();
 			while( *buf )
 			{
-				width += gHUD.m_scrinfo.charWidths[*buf];
+				unsigned char c = *buf; // note: this is important! always use this, don't just put *buf into TextMessageDrawChar, it won't get width correctly!
+				width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 				buf++;
 			}
 			const float text_x = x + ((icon_size - width) * 0.5f);
-			const float text_y = y + ((icon_size - gHUD.m_scrinfo.iCharHeight) * 0.5f);
+			const float text_y = y + ((icon_size - TTF_GetCharHeight()) * 0.5f);
 			UnpackRGB( r1, g1, b1, RGB_GREY );
 			ScaleColors( r1, g1, b1, AlphaFade1 );
 			DrawString( text_x, text_y, num, r1, g1, b1 );
@@ -206,13 +208,15 @@ int CHudBlastIcons::Draw( float flTime )
 				Q_snprintf( num, sizeof( num ), "--" );
 			const char *buf = num;
 			int width = 0;
+			TTF_ResetUtf8State();
 			while( *buf )
 			{
-				width += gHUD.m_scrinfo.charWidths[*buf];
+				unsigned char c = *buf;
+				width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 				buf++;
 			}
 			const float text_x = x + ((icon_size - width) * 0.5f);
-			const float text_y = y + ((icon_size - gHUD.m_scrinfo.iCharHeight) * 0.5f);
+			const float text_y = y + ((icon_size - TTF_GetCharHeight()) * 0.5f);
 			UnpackRGB( r2, g2, b2, RGB_GREY );
 			ScaleColors( r2, g2, b2, AlphaFade2 );
 			DrawString( text_x, text_y, num, r2, g2, b2 );
@@ -270,13 +274,15 @@ int CHudBlastIcons::Draw( float flTime )
 				Q_snprintf( num, sizeof( num ), "--" );
 			const char *buf = num;
 			int width = 0;
+			TTF_ResetUtf8State();
 			while( *buf )
 			{
-				width += gHUD.m_scrinfo.charWidths[*buf];
+				unsigned char c = *buf;
+				width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 				buf++;
 			}
 			const float text_x = x + ((icon_size - width) * 0.5f);
-			const float text_y = y + ((icon_size - gHUD.m_scrinfo.iCharHeight) * 0.5f);
+			const float text_y = y + ((icon_size - TTF_GetCharHeight()) * 0.5f);
 			UnpackRGB( r3, g3, b3, RGB_GREY );
 			ScaleColors( r3, g3, b3, AlphaFade3 );
 			DrawString( text_x, text_y, num, r3, g3, b3 );

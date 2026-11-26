@@ -204,20 +204,20 @@ const int g_boxpnt[6][4] =
 void DrawQuad( float xmin, float ymin, float xmax, float ymax )
 {
 	// top left
-	gEngfuncs.pTriAPI->TexCoord2f( 0, 0 );
-	gEngfuncs.pTriAPI->Vertex3f( xmin, ymin, 0 ); 
+	pglTexCoord2f( 0, 0 );
+	pglVertex3f( xmin, ymin, 0 );
 
 	// bottom left
-	gEngfuncs.pTriAPI->TexCoord2f( 0, 1 );
-	gEngfuncs.pTriAPI->Vertex3f( xmin, ymax, 0 );
+	pglTexCoord2f( 0, 1 );
+	pglVertex3f( xmin, ymax, 0 );
 
 	// bottom right
-	gEngfuncs.pTriAPI->TexCoord2f( 1, 1 );
-	gEngfuncs.pTriAPI->Vertex3f( xmax, ymax, 0 );
+	pglTexCoord2f( 1, 1 );
+	pglVertex3f( xmax, ymax, 0 );
 
 	// top right
-	gEngfuncs.pTriAPI->TexCoord2f( 1, 0 );
-	gEngfuncs.pTriAPI->Vertex3f( xmax, ymin, 0 );
+	pglTexCoord2f( 1, 0 );
+	pglVertex3f( xmax, ymin, 0 );
 }
 
 /*

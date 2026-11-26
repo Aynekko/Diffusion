@@ -81,8 +81,13 @@ int CHudMOTD :: Draw( float fTime )
 		byte* next_line;
 		int line_length = 0;  // count the length of the current line
 
+		TTF_ResetUtf8State();
+
 		for( next_line = (byte *)ch; *next_line != '\n' && *next_line != 0; next_line++ )
-			line_length += gHUD.m_scrinfo.charWidths[*next_line];
+		{
+			unsigned char c = *next_line; // note: this is important! always use this, don't just put *next_line into TextMessageDrawChar, it won't get width correctly!
+			line_length += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
+		}
 
 		char *top = (char *)next_line;
 		if( *top == '\n' )
@@ -92,7 +97,7 @@ int CHudMOTD :: Draw( float fTime )
 		// find where to start drawing the line
 		int xpos = (ScreenWidth - line_length) / 2;
 
-		gHUD.DrawHudString( xpos, ypos, ScreenWidth, ch, 255, 180, 0 );
+		DrawString( xpos, ypos, ch, 255, 180, 0 );
 
 		ypos += LINE_HEIGHT;
 
@@ -106,6 +111,7 @@ int CHudMOTD :: Draw( float fTime )
 		if( ypos > ( ScreenHeight - 20 ))
 			break;  // don't let it draw too low
 	}
+
 	return 1;
 }
 

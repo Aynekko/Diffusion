@@ -98,6 +98,7 @@ int CPseudoGUI::VidInit( void )
 		// we need to count the length to figure out the coordinates...
 		BtnText = MsgClose->pMessage;
 		BtnTextWidth = 0;
+		TTF_ResetUtf8State();
 		while( *BtnText )
 		{
 			if( *BtnText == '\n' )
@@ -105,7 +106,7 @@ int CPseudoGUI::VidInit( void )
 			else
 			{
 				unsigned char c = *BtnText;
-				BtnTextWidth += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+				BtnTextWidth += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 			}
 
 			BtnText++;
@@ -158,6 +159,8 @@ void CPseudoGUI::Enable( void )
 	int width = 0;
 	int totaltextWidth = 0;
 
+	TTF_ResetUtf8State();
+
 	while( *tmp_text )
 	{
 		if( *tmp_text == '\n' )
@@ -166,11 +169,12 @@ void CPseudoGUI::Enable( void )
 			if( width > totaltextWidth )
 				totaltextWidth = width;
 			width = 0;
+			TTF_ResetUtf8State();
 		}
 		else
 		{
 			unsigned char c = *tmp_text; // note: this is important! always use this, don't just put *tmp_text into TextMessageDrawChar, it won't get width correctly!
-			width += TextMessageDrawChar( -1, -1, c, 0, 0, 0 );
+			width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 		}
 		tmp_text++;
 	}
@@ -206,6 +210,7 @@ void CPseudoGUI::Enable( void )
 			// we need to count the length to figure out the coordinates...
 			BtnText = MsgClose->pMessage;
 			BtnTextWidth = 0;
+			TTF_ResetUtf8State();
 			while( *BtnText )
 			{
 				if( *BtnText == '\n' )
@@ -213,7 +218,7 @@ void CPseudoGUI::Enable( void )
 				else
 				{
 					unsigned char c = *BtnText;
-					BtnTextWidth += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+					BtnTextWidth += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 				}
 
 				BtnText++;
@@ -285,7 +290,7 @@ int CPseudoGUI::Draw( float flTime )
 
 	// draw "close" text
 	if( BtnText )
-		DrawString( rClose.x + (rClose.w / 2) - (BtnTextWidth / 2), rClose.y + (rClose.h / 2) - (gHUD.m_scrinfo.iCharHeight / 2), BtnText, 255, 255, 255 );
+		DrawString( rClose.x + (rClose.w / 2) - (BtnTextWidth / 2), rClose.y + (rClose.h / 2) - (TTF_GetCharHeight() / 2), BtnText, 255, 255, 255 );
 
 	// draw cursor last
 	gHUD.m_Cursor.DrawCursor();
@@ -298,18 +303,18 @@ void CPseudoGUI::MessageDraw( const char *pText, int x, int y )
 {
 	int i, j;
 	const char *pLineStart;
-	const int totalHeight = (num_lines * gHUD.m_scrinfo.iCharHeight);
-	const int text_end_pos = (ScreenHeight / 2) - (rFrame.h / 2) + rFrame.h - (rClose.h * 3) + gHUD.m_scrinfo.iCharHeight;
+	const int totalHeight = (num_lines * TTF_GetCharHeight());
+	const int text_end_pos = (ScreenHeight / 2) - (rFrame.h / 2) + rFrame.h - (rClose.h * 3) + TTF_GetCharHeight();
 	const int text_start_pos = y;
 	// we need to know how many lines went below the allowed drawing position
-	int lines_below = (totalHeight - (text_end_pos - text_start_pos)) / gHUD.m_scrinfo.iCharHeight;
+	int lines_below = 1 + (totalHeight - (text_end_pos - text_start_pos)) / TTF_GetCharHeight();
 	const bool enable_scrollbar = (lines_below - 1 > 0);
 	int tmp_y, tmp_x;
 
 	if( enable_scrollbar )
 	{
 		scrolled_lines = bound( 0, scrolled_lines, lines_below - 1 );
-		tmp_y = y - scrolled_lines * gHUD.m_scrinfo.iCharHeight;
+		tmp_y = y - scrolled_lines * TTF_GetCharHeight();
 	}
 	else
 		tmp_y = y;
@@ -341,9 +346,11 @@ void CPseudoGUI::MessageDraw( const char *pText, int x, int y )
 		// if we scrolled down, we don't draw text lines above the allowed zone - skip
 		if( enable_scrollbar && i < scrolled_lines )
 		{
-			tmp_y += gHUD.m_scrinfo.iCharHeight;
+			tmp_y += TTF_GetCharHeight();
 			continue;
 		}
+
+		TTF_ResetUtf8State();
 
 		for( j = 0; j < lineLength; j++ )
 		{
@@ -354,15 +361,17 @@ void CPseudoGUI::MessageDraw( const char *pText, int x, int y )
 				next += TextMessageDrawChar( tmp_x, tmp_y, text, 255, 255, 255 );
 			tmp_x = next;
 		}
-		tmp_y += gHUD.m_scrinfo.iCharHeight;
+		tmp_y += TTF_GetCharHeight();
 	}
+
+	TTF_FlushText();
 
 	if( enable_scrollbar && lines_below > 0 )
 	{
 		pglEnable( GL_MULTISAMPLE_ARB );
 		const float sbar_w = 20 * gHUD.fScale;
 		const float sbar_x = rFrame.x + rFrame.w - ((border - ( 15 * gHUD.fScale )) * 0.5f) - (sbar_w * 0.5f);
-		const float sbar_h = (text_end_pos - text_start_pos) + gHUD.m_scrinfo.iCharHeight;
+		const float sbar_h = (text_end_pos - text_start_pos) + TTF_GetCharHeight();
 		FillRoundedRGBA( sbar_x, y, sbar_w, sbar_h, 2, 0.1f, 0.1f, 0.1f, 0.8f );
 
 		// scrollbar handle

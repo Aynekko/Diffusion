@@ -275,6 +275,9 @@
     <ClCompile Include="..\public\crclib.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ttf_text.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ammo.h">
@@ -383,6 +386,12 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="render\r_shaderlist.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ttf_text.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ttf_stb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

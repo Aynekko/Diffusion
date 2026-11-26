@@ -135,16 +135,17 @@ void CHealthbars::DrawCentralBar( void )
 	// calculate width to align center...
 	buf = MonsterName;
 	int width = 0;
+	TTF_ResetUtf8State();
 	while( *buf )
 	{
 		unsigned char c = *buf;
-		width += TextMessageDrawChar( ScreenWidth * 2, ScreenHeight * 2, c, 0, 0, 0 );
+		width += TextMessageDrawChar( ScreenWidth + 1, ScreenHeight + 1, c, 0, 0, 0 );
 		buf++;
 	}
 
 	int r = 255, g = 255, b = 255;
 	ScaleColors( r, g, b, alpha * 255 );
-	DrawString( (int)((ScreenWidth - width) * 0.5f), (ScreenHeight * 0.125f) - 15 - (gHUD.m_scrinfo.iCharHeight * 1.25f), MonsterName, r, g, b );
+	DrawString( (int)((ScreenWidth - width) * 0.5f), (ScreenHeight * 0.125f) - 15 - (TTF_GetCharHeight() * 1.25f), MonsterName, r, g, b );
 }
 
 int CHealthbars::Draw( float flTime )

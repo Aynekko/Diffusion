@@ -225,10 +225,13 @@ int CHudScoreboard :: Draw( float fTime )
 	ScaleColors( r, g, b, boardA * 255 );
 
 	// diffusion - server name and map name (with background)
-	FillRoundedRGBA( xpos_rel, ypos - (50.0f * gHUD.fScale) - (15.0f * gHUD.fScale), ScoreBoardWidth, 50.0f * gHUD.fScale, 18, 0, 0, 0, 0.59f * boardA );
+	const float top_bar_height = 50.0f * gHUD.fScale;
+	const float top_bar_indent = 15.0f * gHUD.fScale;
+	const float top_bar_ypos = ypos - top_bar_height - top_bar_indent;
+	FillRoundedRGBA( xpos_rel, top_bar_ypos, ScoreBoardWidth, top_bar_height, 18, 0, 0, 0, 0.59f * boardA );
 	static char srvname[128];
 	Q_snprintf( srvname, sizeof( srvname ), "%s | %s", gHUD.m_szServerName, world->name );
-	DrawString( xpos, ypos - (50 * gHUD.fScale), srvname, r, g, b );
+	DrawString( xpos, top_bar_ypos + ((top_bar_height - TTF_GetCharHeight())* 0.5f), srvname, r, g, b );
 
 	// diffusion - table background
 	FillRoundedRGBA( xpos_rel, ypos - 10, ScoreBoardWidth, ypos_bottom, 18, 0, 0, 0, 0.59f * boardA ); // bottom border
@@ -379,26 +382,26 @@ int CHudScoreboard :: Draw( float fTime )
 		}
 
 		// draw their name (left to right)
-		DrawString( xpos, ypos + TxtYOffset, team_info->name, r, g, b );
+		DrawString( xpos, ypos, team_info->name, r, g, b );
 
 		r = 25, g = 255, b = 25;
 		ScaleColors( r, g, b, boardA * 255 );
 
 		// draw kills (left to right)
-		gHUD.DrawHudNumberString( xpos_rel + KillsRangeMin, ypos + TxtYOffset, 0, team_info->frags, r, g, b, true );
+		gHUD.DrawHudNumberString( xpos_rel + KillsRangeMin, ypos, 0, team_info->frags, r, g, b, true );
 
 		r = 255, g = 25, b = 25;
 		ScaleColors( r, g, b, boardA * 255 );
 
 		// draw deaths
-		gHUD.DrawHudNumberString( xpos_rel + DeathsRangeMin, ypos + TxtYOffset, 0, team_info->deaths, r, g, b, true );
+		gHUD.DrawHudNumberString( xpos_rel + DeathsRangeMin, ypos, 0, team_info->deaths, r, g, b, true );
 
 		// draw ping & packetloss
 		static char buf[64];
 		Q_snprintf( buf, sizeof( buf ), "%d", team_info->ping );
 		UnpackRGB( r, g, b, RGB_YELLOWISH );
 		ScaleColors( r, g, b, boardA * 255 );
-		DrawString( xpos_rel + PingRangeMin, ypos + TxtYOffset, buf, r, g, b );
+		DrawString( xpos_rel + PingRangeMin, ypos, buf, r, g, b );
 #if 0
 		// Packetloss removed on Kelly 'shipping nazi' Bailey's orders
 		Q_snprintf( buf, sizeof( buf ), " %d", team_info->packetloss );
@@ -487,7 +490,7 @@ float CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffs
 		}
 
 		// draw their name (left to right)
-		DrawString( xpos + nameoffset, ypos + TxtYOffset, pl_info->name, r, g, b );
+		DrawString( xpos + nameoffset, ypos, pl_info->name, r, g, b );
 
 		// if they are talking, draw the small icon right before the "kills" column
 		if( g_PlayerExtraInfo[best_player].isTalking || (pl_info->thisplayer && ThisPlayerTalking) )
@@ -506,13 +509,13 @@ float CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffs
 		ScaleColors( r, g, b, boardA * 255 );
 
 		// draw kills (left to right)
-		gHUD.DrawHudNumberString( xpos_rel + KillsRangeMin, ypos + TxtYOffset, 0, g_PlayerExtraInfo[best_player].frags, r, g, b, true );
+		gHUD.DrawHudNumberString( xpos_rel + KillsRangeMin, ypos, 0, g_PlayerExtraInfo[best_player].frags, r, g, b, true );
 
 		r = 255, g = 25, b = 25;
 		ScaleColors( r, g, b, boardA * 255 );
 
 		// draw deaths
-		gHUD.DrawHudNumberString( xpos_rel + DeathsRangeMin, ypos + TxtYOffset, 0, g_PlayerExtraInfo[best_player].deaths, r, g, b, true );
+		gHUD.DrawHudNumberString( xpos_rel + DeathsRangeMin, ypos, 0, g_PlayerExtraInfo[best_player].deaths, r, g, b, true );
 
 		r = 255, g = 255, b = 255;
 		ScaleColors( r, g, b, boardA * 255 );
@@ -525,7 +528,7 @@ float CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffs
 			Q_snprintf( buf, sizeof( buf ), "SPEC" );
 		else
 			Q_snprintf( buf, sizeof( buf ), "%d", g_PlayerInfoList[best_player].ping );
-		DrawString( xpos_rel + PingRangeMin, ypos + TxtYOffset, buf, r, g, b );
+		DrawString( xpos_rel + PingRangeMin, ypos, buf, r, g, b );
 #if 0		
 		// Packetloss removed on Kelly 'shipping nazi' Bailey's orders
 		if( g_PlayerInfoList[best_player].packetloss >= 63 )
