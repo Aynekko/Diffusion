@@ -177,6 +177,12 @@ jobs:
         mkdir -p engine
         tar -xf xash3d-fwgs-apple-arm64.tar.xz -C engine
 
+        # Remove unnecessary files from the engine tarball
+        cd engine
+        rm -f activities.txt mdldec xash3d libmenu.dylib libmenu_tui.dylib
+        rm -f *.h
+        cd ..
+
         # Overlay game libraries + shaders
         mkdir -p engine/diffusion
         cp -a out/diffusion/* engine/diffusion/ 2>/dev/null || true
