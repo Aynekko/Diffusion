@@ -161,30 +161,36 @@ jobs:
           git -C 3rd-party/physx-rs submodule update --init --depth 1 physx-sys/PhysX
         fi
         cp -r 3rd-party/physx-rs/physx-sys/PhysX 3rd-party/physx   # or ln -s if you prefer
-
     - name: Build for macOS arm64
       run: |
         ./waf configure -T release install --destdir=out
-        # Optional: strip
         find out -type f \( -name '*.dylib' -o -name 'diffusion_run' \) -exec strip -x {} \;
         cp -a glsl out/diffusion/
-        # Package game libraries
-        cd out
-        zip -r ../diffusion-macos-arm64.zip diffusion
-
-    - name: Download engine and repackage (optional)
+    - name: Package with engine and launcher
       env:
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
-        gh release download continuous -R FWGS/xash3d-fwgs --pattern 'xash3d-fwgs-apple-arm64.tar.xz' --output engine.tar.xz
+        gh release download continuous -R FWGS/xash3d-fwgs \
+          --pattern 'xash3d-fwgs-apple-arm64.tar.xz' \
+          --output xash3d-fwgs-apple-arm64.tar.xz
+
         mkdir -p engine
-        tar -xJf engine.tar.xz -C engine
-        # Copy your built client/server/menu dylibs into the appropriate place
-        # (typically something like engine/diffusion/cl_dlls or dlls — inspect the tarball)
-        # Example (adjust paths after inspecting):
-        # mkdir -p engine/diffusion/dlls
-        # cp out/diffusion/dlls/* engine/diffusion/dlls/ || true
-        # Then re-tar or zip the result
+        tar -xf xash3d-fwgs-apple-arm64.tar.xz -C engine
+
+        # Overlay game libraries + shaders
+        mkdir -p engine/diffusion
+        cp -a out/diffusion/* engine/diffusion/ 2>/dev/null || true
+        cp -a glsl engine/diffusion/
+
+        # Put our launcher in place
+        cp out/diffusion_run engine/diffusion_run
+        chmod +x engine/diffusion_run
+        cp out/diffusion_run engine/Diffusion
+        chmod +x engine/Diffusion
+
+        # Package everything
+        cd engine
+        zip -r ../diffusion-macos-arm64.zip .
 
     - name: Upload artifacts
       uses: actions/upload-artifact@v4
