@@ -181,6 +181,7 @@ jobs:
         cd engine
         rm -f activities.txt mdldec xash3d libmenu.dylib libmenu_tui.dylib
         rm -f *.h
+        rm -rf valve
         cd ..
 
         # Overlay game libraries + shaders
