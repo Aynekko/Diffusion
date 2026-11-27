@@ -29,6 +29,12 @@ GNU General Public License for more details.
 #define TARGET_SIZE256	256
 #define TARGET_SIZE512	512
 
+#ifdef __APPLE__
+static const bool bSCENE_FBO = true;
+#else
+static const bool bSCENE_FBO = false;
+#endif
+
 bool ApplyGaussBlur = false;
 static int ScreenWaterTexture = 0;
 static int ScreenAO1 = 0;
@@ -136,8 +142,14 @@ GLuint R_MainFramebuffer( void )
 
 void R_BeginSceneTarget( void )
 {
+	if( !bSCENE_FBO )
+	{
+		pp_active = false;
+		return;
+	}
+	
 	pp_cur = 0;
-	pp_active = CVAR_TO_BOOL( gl_scenefbo ) && pp_scene_fbo[0] && !IsBuildingCubemaps();
+	pp_active = pp_scene_fbo[0] && !IsBuildingCubemaps();
 
 	if( !pp_active )
 		return;

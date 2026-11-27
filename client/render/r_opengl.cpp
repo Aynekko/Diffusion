@@ -343,6 +343,7 @@ static const dllfunc_t vaofuncs[] =
 { NULL, NULL }
 };
 
+#ifdef __APPLE__
 // macOS legacy profile only exposes the APPLE flavour, which is interchangeable for our use
 static const dllfunc_t vaofuncs_apple[] =
 {
@@ -352,6 +353,7 @@ static const dllfunc_t vaofuncs_apple[] =
 { "glIsVertexArrayAPPLE"      , (void **)&pglIsVertexArray },
 { NULL, NULL }
 };
+#endif
 
 static const dllfunc_t fbofuncs[] =
 {
@@ -690,8 +692,10 @@ static void GL_InitExtensions( void )
 	}
 
 	GL_CheckExtension( "GL_ARB_vertex_array_object", vaofuncs, "gl_vertex_array_object", R_ARB_VERTEX_ARRAY_OBJECT_EXT );
+#ifdef __APPLE__
 	if( !GL_Support( R_ARB_VERTEX_ARRAY_OBJECT_EXT ))
 		GL_CheckExtension( "GL_APPLE_vertex_array_object", vaofuncs_apple, "gl_vertex_array_object", R_ARB_VERTEX_ARRAY_OBJECT_EXT );
+#endif
 
 	if( !GL_Support( R_ARB_VERTEX_ARRAY_OBJECT_EXT ))
 	{
