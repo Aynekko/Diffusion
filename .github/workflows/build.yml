@@ -195,6 +195,8 @@ jobs:
         cp out/diffusion_run engine/diffusion_run
         chmod +x engine/diffusion_run
 
+        cp scripts/readme-macos.txt engine/readme.txt
+
         # Package everything
         cd engine
         zip -r ../diffusion-macos-arm64.zip .
