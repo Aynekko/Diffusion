@@ -1,11 +1,12 @@
-Diffusion for macOS (Apple Silicon)
+Diffusion for macOS
 (Russian version below)
 
 This archive has the engine and the game libraries for macOS. It does not
 include the game data, which comes from Diffusion 1.3.
 
 Requirements
-- A Mac with Apple Silicon (M1 or newer)
+- A Mac with Apple Silicon (diffusion-macos-arm64.zip) or an Intel
+  processor (diffusion-macos-amd64.zip)
 - macOS 14.8 or newer
 - Diffusion 1.3 from https://aynekko.itch.io/diffusion
 
@@ -15,6 +16,8 @@ Install
 2. Open Terminal and unpack this archive over that folder:
 
      ditto -x -k diffusion-macos-arm64.zip /path/to/Diffusion
+
+   On an Intel Mac, use diffusion-macos-amd64.zip in this command.
 
    Don't copy the files in Finder. It offers to replace the whole "diffusion"
    folder, and you would lose the game data.
@@ -35,13 +38,14 @@ Tip: to type a path, drag the file or folder into the Terminal window.
 
 
 
-Diffusion для macOS (Apple Silicon)
+Diffusion для macOS
 
 В архиве движок и игровые библиотеки для macOS. Данных игры в нём нет, они
 берутся из Diffusion 1.3.
 
 Требования
-- Mac на Apple Silicon (M1 и новее)
+- Mac на Apple Silicon (diffusion-macos-arm64.zip) или с процессором
+  Intel (diffusion-macos-amd64.zip)
 - macOS 14.8 или новее
 - Diffusion 1.3 с https://aynekko.itch.io/diffusion
 
@@ -51,6 +55,8 @@ Diffusion для macOS (Apple Silicon)
 2. Откройте Терминал и распакуйте этот архив поверх неё:
 
      ditto -x -k diffusion-macos-arm64.zip /путь/к/Diffusion
+
+   На Mac с Intel укажите в этой команде diffusion-macos-amd64.zip.
 
    Не копируйте файлы через Finder: он предлагает заменить папку "diffusion"
    целиком, и данные игры пропадут.
