@@ -2,16 +2,16 @@ Diffusion for macOS
 (Russian version below)
 
 This archive has the engine and the game libraries for macOS. It does not
-include the game data, which comes from Diffusion 1.3.
+include the game data, which comes from Diffusion game build.
 
 Requirements
 - A Mac with Apple Silicon (diffusion-macos-arm64.zip) or an Intel
   processor (diffusion-macos-amd64.zip)
 - macOS 14.8 or newer
-- Diffusion 1.3 from https://aynekko.itch.io/diffusion
+- Diffusion game build from https://aynekko.itch.io/diffusion
 
 Install
-1. Download Diffusion 1.3 and unpack it. The result is a "Diffusion" folder
+1. Download Diffusion game build and unpack it. The result is a "Diffusion" folder
    that has a "diffusion" folder inside.
 2. Open Terminal and unpack this archive over that folder:
 
@@ -41,16 +41,16 @@ Tip: to type a path, drag the file or folder into the Terminal window.
 Diffusion для macOS
 
 В архиве движок и игровые библиотеки для macOS. Данных игры в нём нет, они
-берутся из Diffusion 1.3.
+берутся из игровой сборки Diffusion.
 
 Требования
 - Mac на Apple Silicon (diffusion-macos-arm64.zip) или с процессором
   Intel (diffusion-macos-amd64.zip)
 - macOS 14.8 или новее
-- Diffusion 1.3 с https://aynekko.itch.io/diffusion
+- Игровая сборка Diffusion с https://aynekko.itch.io/diffusion
 
 Установка
-1. Скачайте Diffusion 1.3 и распакуйте. Получится папка "Diffusion", внутри
+1. Скачайте Diffusion и распакуйте. Получится папка "Diffusion", внутри
    которой лежит папка "diffusion".
 2. Откройте Терминал и распакуйте этот архив поверх неё:
 
